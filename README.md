@@ -21,3 +21,7 @@ This project contains
 ## Contributing
 
 ## Support
+
+## License
+
+All of the code herein is copyright 2019 [Fragaria s.r.o.](https://fragaria.cz) and released under the terms of the [GNU Affero General Public License, version 3](./LICENSE.txt)
