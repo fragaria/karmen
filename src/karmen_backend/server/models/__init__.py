@@ -1,1 +1,1 @@
-from server.models.octoprintprinter import OctoprintPrinter
+from server.models.octoprint import Octoprint

@@ -6,7 +6,7 @@ import mock
 from server.tasks.discover_printers import get_network_devices, get_avahi_hostname, \
     discover_printers
 
-class GetNetworkDevices(unittest.TestCase):
+class GetNetworkDevicesTest(unittest.TestCase):
     # https://blog.samuel.domains/blog/programming/how-to-mock
     # -stdout-runtime-attribute-of-subprocess-popen-python
     def setUp(self):
@@ -71,7 +71,7 @@ Ending arp-scan 1.9: 256 hosts scanned in 2.443 seconds (104.79 hosts/sec). 17 r
         self.assertEqual(results[1], ('10.192.202.4', 'b8:27:eb:05:5d:d1'))
 
 
-class GetAvahiHostname(unittest.TestCase):
+class GetAvahiHostnameTest(unittest.TestCase):
     # https://blog.samuel.domains/blog/programming/how-to-mock
     # -stdout-runtime-attribute-of-subprocess-popen-python
     def setUp(self):
@@ -110,7 +110,7 @@ Failed to resolve address '10.192.202.200': Timeout reached
         get_avahi_hostname('10.192.202.23')
         mock_popen.assert_called_with(["avahi-resolve-address", "10.192.202.23"], stdout=-1)
 
-class DiscoverPrinters(unittest.TestCase):
+class DiscoverPrintersTest(unittest.TestCase):
 
     @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[])
     @mock.patch('server.database.get_printers', return_value=[

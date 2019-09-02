@@ -1,0 +1,107 @@
+import unittest
+import json
+import mock
+import requests
+
+from server.models.octoprint import Octoprint, get_with_fallback
+
+class GetWithFallbackTest(unittest.TestCase):
+    @mock.patch('requests.get')
+    def test_try_hostname(self, mock_requests):
+        get_with_fallback('/api/version', 'host', '1.2.3.4')
+        mock_requests.assert_called_with('http://host/api/version', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_pass_protocol_timeout(self, mock_requests):
+        get_with_fallback('/api/version', None, '1.2.3.4', 'https', 3)
+        mock_requests.assert_called_with('https://1.2.3.4/api/version', timeout=3)
+
+    @mock.patch('requests.get')
+    def test_try_ip(self, mock_requests):
+        get_with_fallback('/api/version', None, '1.2.3.4')
+        mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_add_leading_slash(self, mock_requests):
+        get_with_fallback('api/version', None, '1.2.3.4')
+        mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_try_nothing(self, mock_requests):
+        request = get_with_fallback('/api/version', None, None)
+        self.assertEqual(mock_requests.call_count, 0)
+        self.assertEqual(request, None)
+
+    @mock.patch('requests.get')
+    def test_fallback_ip(self, mock_requests):
+        def mock_call(uri, **kwargs):
+            if 'host' in uri:
+                raise requests.exceptions.ConnectionError('mocked')
+            return uri
+        mock_requests.side_effect = mock_call
+        request = get_with_fallback('/api/version', 'host', '1.2.3.4')
+        self.assertEqual(request, 'http://1.2.3.4/api/version')
+        self.assertEqual(mock_requests.call_count, 2)
+        mock_requests.assert_has_calls([
+            mock.call('http://host/api/version', timeout=2),
+            mock.call('http://1.2.3.4/api/version', timeout=2)
+        ])
+
+    @mock.patch('requests.get')
+    def test_no_success(self, mock_requests):
+        def mock_call(uri, **kwargs):
+            raise requests.exceptions.ConnectionError('mocked')
+        mock_requests.side_effect = mock_call
+        request = get_with_fallback('/api/version', 'host', '1.2.3.4')
+        self.assertEqual(request, None)
+        self.assertEqual(mock_requests.call_count, 2)
+        mock_requests.assert_has_calls([
+            mock.call('http://host/api/version', timeout=2),
+            mock.call('http://1.2.3.4/api/version', timeout=2)
+        ])
+
+
+class OctoprintTest(unittest.TestCase):
+
+    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
+    def test_deactivate_non_responding_printer(self, mock_get_with_fallback):
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.sniff()
+        self.assertEqual(result, {"active": False, "version": {}})
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_deactivate_non_200_responding_printer(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 400
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.sniff()
+        self.assertEqual(result, {"active": False, "version": {}})
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_deactivate_no_data_responding_printer(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.sniff()
+        self.assertEqual(result, {"active": False, "version": {}})
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_deactivate_bad_data_responding_printer(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {"text": "Fumbleprint"}
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.sniff()
+        self.assertEqual(result, {
+            "active": False,
+            "version": {"text": "Fumbleprint"}
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_activate_responding_printer(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {"text": "OctoPrint"}
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.sniff()
+        self.assertEqual(result, {
+            "active": True,
+            "version": {"text": "OctoPrint"}
+        })

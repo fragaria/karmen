@@ -1,6 +1,6 @@
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
-from server.models import OctoprintPrinter
+from server.models import Octoprint
 from server import app
 from server import database
 
@@ -31,7 +31,7 @@ def printer_detail(mac):
     printer = database.get_printer(mac)
     if printer is None:
         return abort(404)
-    octoprinter = OctoprintPrinter(printer)
+    octoprinter = Octoprint(**printer)
     return jsonify({
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,
