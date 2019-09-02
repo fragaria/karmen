@@ -3,6 +3,11 @@ from flask import Flask
 from flask_cors import CORS
 from celery import Celery
 
+__author__ = "Jirka Chadima"
+__copyright__ = "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
+__license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
+
+
 def setup_celery(flask_app):
     celery_inst = Celery(
         flask_app.import_name,
