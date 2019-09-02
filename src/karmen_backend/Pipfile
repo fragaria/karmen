@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+coverage = "*"
+mock = "*"
+pytest-watch = "*"
+pylint = "*"
+
+[packages]
+flask = "*"
+flask-cors = "*"
+requests = "*"
+celery = "*"
+psycopg2 = "*"
+redis = "*"
+
+[requires]
+python_version = "3.6"
