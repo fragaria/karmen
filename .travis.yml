@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8-dev"
+notifications:
+  email: false
+install:
+  - pip install pipenv
+script:
+  - cd src/karmen_backend
+  - pipenv install
+  - make test
