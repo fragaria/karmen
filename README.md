@@ -1,5 +1,7 @@
 # Karmen
 
+[![Documentation Status](https://readthedocs.org/projects/karmen/badge/?version=latest)](https://karmen.readthedocs.io/en/latest/?badge=latest)
+
 A common interface for multiple 3d printers.
 
 ## Description
