@@ -71,3 +71,22 @@ def get_printer(mac):
         data = cursor.fetchone()
         cursor.close()
         return data
+
+def get_network_devices():
+    with get_connection() as connection:
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute("SELECT ip, mac, is_printer, retry_after FROM network_devices")
+        data = cursor.fetchall()
+        cursor.close()
+        return data
+
+def upsert_network_device(**kwargs):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            "INSERT INTO network_devices (ip, mac, is_printer, retry_after) values (%s, %s, %s, %s) ON CONFLICT ON CONSTRAINT network_devices_pkey DO UPDATE SET ip = %s, is_printer = %s, retry_after = %s",
+            (
+                kwargs["ip"], kwargs["mac"], kwargs["is_printer"], kwargs["retry_after"], kwargs["ip"], kwargs["is_printer"], kwargs["retry_after"]
+            )
+        )
+        cursor.close()

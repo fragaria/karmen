@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 import unittest
 import tempfile
@@ -117,11 +118,12 @@ class DiscoverPrintersTest(unittest.TestCase):
         {"mac": "1", "hostname": "a", "ip": "1234", "active": True},
         {"mac": "2", "hostname": "b", "ip": "1234", "active": False}
     ])
+    @mock.patch('server.database.get_network_devices', return_value=[])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
     @mock.patch('server.tasks.discover_printers.update_printer')
     @mock.patch('server.tasks.discover_printers.sniff_printer.delay')
     def test_deactivate_unfound_printers(self, mock_delay, mock_update_printer, mock_avahi, \
-        mock_get_printers, mock_get_devices):
+        mock_db_devices, mock_get_printers, mock_get_devices):
         discover_printers()
         self.assertEqual(mock_update_printer.call_count, 2)
         mock_update_printer.assert_has_calls([
@@ -136,11 +138,12 @@ class DiscoverPrintersTest(unittest.TestCase):
     @mock.patch('server.database.get_printers', return_value=[
         {"mac": "1:2:3", "hostname": "a", "ip": "1234", "active": True},
     ])
+    @mock.patch('server.database.get_network_devices', return_value=[])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
     @mock.patch('server.tasks.discover_printers.update_printer')
     @mock.patch('server.tasks.discover_printers.sniff_printer.delay')
     def test_complex_case(self, mock_delay, mock_update_printer, mock_avahi, \
-        mock_get_printers, mock_get_devices):
+        mock_db_devices, mock_get_printers, mock_get_devices):
         discover_printers()
         self.assertEqual(mock_delay.call_count, 2)
         self.assertEqual(mock_update_printer.call_count, 1)
@@ -155,4 +158,27 @@ class DiscoverPrintersTest(unittest.TestCase):
                 "ip": "1234",
                 "active": False
             }),
+        ])
+
+    @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[
+        ('172.17.0.2', '06:43:ac:11:00:02'),
+        ('192.168.1.1', '34:97:f6:3f:f1:96'),
+    ])
+    @mock.patch('server.database.get_printers', return_value=[
+        {"mac": "1:2:3", "hostname": "a", "ip": "1234", "active": True},
+    ])
+    @mock.patch('server.database.get_network_devices', return_value=[
+        {"mac": "06:43:ac:11:00:02", "ip": "172.17.0.2", "active": True, "retry_after": datetime.utcnow() + timedelta(hours=1)},
+        {"mac": "34:97:f6:3f:f1:96", "ip": "192.168.1.1", "active": True, "retry_after": datetime.utcnow() + timedelta(hours=-1)},
+    ])
+    @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
+    @mock.patch('server.tasks.discover_printers.update_printer')
+    @mock.patch('server.tasks.discover_printers.sniff_printer.delay')
+    def test_skip_device(self, mock_delay, mock_update_printer, mock_avahi, \
+        mock_db_devices, mock_get_printers, mock_get_devices):
+        discover_printers()
+        self.assertEqual(mock_delay.call_count, 1)
+        self.assertEqual(mock_update_printer.call_count, 1)
+        mock_delay.assert_has_calls([
+            mock.call("router.asus.com", "192.168.1.1", "34:97:f6:3f:f1:96"),
         ])

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from server import app, celery, database
 from server.models.octoprint import Octoprint
 
@@ -14,6 +15,12 @@ def update_printer(**kwargs):
 def sniff_printer(hostname, ip, mac):
     printer = Octoprint(hostname, ip, mac)
     result = printer.sniff()
+    database.upsert_network_device(
+        ip=ip,
+        mac=mac,
+        is_printer=result["active"],
+        retry_after=None if result["active"] else datetime.utcnow() + timedelta(seconds=app.config['NETWORK_RETRY_DEVICE_AFTER'])
+    )
     update_printer(
         name=hostname or ip,
         hostname=hostname,

@@ -5,7 +5,7 @@
 -- Dumped from database version 10.10 (Ubuntu 10.10-1.pgdg18.04+1)
 -- Dumped by pg_dump version 11.5 (Ubuntu 11.5-1.pgdg18.04+1)
 
--- Started on 2019-09-03 12:36:50 CEST
+-- Started on 2019-09-03 13:58:46 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,6 +21,21 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+--
+-- TOC entry 198 (class 1259 OID 16402)
+-- Name: network_devices; Type: TABLE; Schema: public; Owner: print3d
+--
+
+CREATE TABLE public.network_devices (
+    mac character varying(17) NOT NULL,
+    ip character varying(15) NOT NULL,
+    is_printer boolean DEFAULT false NOT NULL,
+    retry_after timestamp without time zone
+);
+
+
+ALTER TABLE public.network_devices OWNER TO print3d;
 
 --
 -- TOC entry 197 (class 1259 OID 16389)
@@ -58,7 +73,7 @@ CREATE SEQUENCE public.printers_id_seq
 ALTER TABLE public.printers_id_seq OWNER TO print3d;
 
 --
--- TOC entry 2920 (class 0 OID 0)
+-- TOC entry 2927 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: printers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: print3d
 --
@@ -67,7 +82,7 @@ ALTER SEQUENCE public.printers_id_seq OWNED BY public.printers.id;
 
 
 --
--- TOC entry 2787 (class 2604 OID 16392)
+-- TOC entry 2791 (class 2604 OID 16392)
 -- Name: printers id; Type: DEFAULT; Schema: public; Owner: print3d
 --
 
@@ -75,7 +90,16 @@ ALTER TABLE ONLY public.printers ALTER COLUMN id SET DEFAULT nextval('public.pri
 
 
 --
--- TOC entry 2791 (class 2606 OID 16397)
+-- TOC entry 2800 (class 2606 OID 16406)
+-- Name: network_devices network_devices_pkey; Type: CONSTRAINT; Schema: public; Owner: print3d
+--
+
+ALTER TABLE ONLY public.network_devices
+    ADD CONSTRAINT network_devices_pkey PRIMARY KEY (mac);
+
+
+--
+-- TOC entry 2796 (class 2606 OID 16397)
 -- Name: printers printers_pkey; Type: CONSTRAINT; Schema: public; Owner: print3d
 --
 
@@ -84,7 +108,7 @@ ALTER TABLE ONLY public.printers
 
 
 --
--- TOC entry 2793 (class 2606 OID 16401)
+-- TOC entry 2798 (class 2606 OID 16401)
 -- Name: printers uq_mac; Type: CONSTRAINT; Schema: public; Owner: print3d
 --
 
@@ -93,14 +117,14 @@ ALTER TABLE ONLY public.printers
 
 
 --
--- TOC entry 2789 (class 1259 OID 16399)
+-- TOC entry 2794 (class 1259 OID 16399)
 -- Name: active_printers; Type: INDEX; Schema: public; Owner: print3d
 --
 
 CREATE INDEX active_printers ON public.printers USING btree (active);
 
 
--- Completed on 2019-09-03 12:36:50 CEST
+-- Completed on 2019-09-03 13:58:46 CEST
 
 --
 -- PostgreSQL database dump complete

@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timedelta
 import mock
 
 from server.tasks.sniff_printer import update_printer, sniff_printer
@@ -38,11 +39,19 @@ class UpdatePrinterTest(unittest.TestCase):
 
 class TouchPrinterTest(unittest.TestCase):
 
+    @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
     @mock.patch('server.tasks.sniff_printer.Octoprint.sniff', return_value={"active": False, "version": {}})
-    def test_deactivate_no_data_responding_printer(self, mock_sniff, mock_update_printer):
+    def test_deactivate_no_data_responding_printer(self, mock_sniff, mock_update_printer, mock_upsert):
+        retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
+        self.assertEqual(mock_upsert.call_count, 1)
+        upsert_kwargs = mock_upsert.call_args.kwargs
+        self.assertEqual(upsert_kwargs["ip"], "192.168.1.15")
+        self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
+        self.assertEqual(upsert_kwargs["is_printer"], False)
+        self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
         mock_update_printer.assert_called_with(**{
             "mac": "34:97:f6:3f:f1:96",
             "hostname": "octopi.local",
@@ -53,11 +62,19 @@ class TouchPrinterTest(unittest.TestCase):
             "client": "octoprint",
         })
 
+    @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
     @mock.patch('server.tasks.sniff_printer.Octoprint.sniff', return_value={"active": False, "version": {"text": "Fumbleprint"}})
-    def test_deactivate_bad_data_responding_printer(self, mock_sniff, mock_update_printer):
+    def test_deactivate_bad_data_responding_printer(self, mock_sniff, mock_update_printer, mock_upsert):
+        retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
+        self.assertEqual(mock_upsert.call_count, 1)
+        upsert_kwargs = mock_upsert.call_args.kwargs
+        self.assertEqual(upsert_kwargs["ip"], "192.168.1.15")
+        self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
+        self.assertEqual(upsert_kwargs["is_printer"], False)
+        self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
         mock_update_printer.assert_called_with(**{
             "mac": "34:97:f6:3f:f1:96",
             "hostname": "octopi.local",
@@ -68,11 +85,19 @@ class TouchPrinterTest(unittest.TestCase):
             "client": "octoprint",
         })
 
+    @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
     @mock.patch('server.tasks.sniff_printer.Octoprint.sniff', return_value={"active": True, "version": {"text": "OctoPrint"}})
-    def test_activate_responding_printer(self, mock_sniff, mock_update_printer):
+    def test_activate_responding_printer(self, mock_sniff, mock_update_printer, mock_upsert):
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
+        self.assertEqual(mock_upsert.call_count, 1)
+        mock_upsert.assert_called_with(**{
+            "ip": "192.168.1.15",
+            "mac": "34:97:f6:3f:f1:96",
+            "is_printer": True,
+            "retry_after": None,
+        })
         mock_update_printer.assert_called_with(**{
             "mac": "34:97:f6:3f:f1:96",
             "hostname": "octopi.local",
