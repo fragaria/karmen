@@ -60,9 +60,7 @@ class GetWithFallbackTest(unittest.TestCase):
             mock.call('http://1.2.3.4/api/version', timeout=2)
         ])
 
-
-class OctoprintTest(unittest.TestCase):
-
+class OctoprintSniffTest(unittest.TestCase):
     @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
     def test_deactivate_non_responding_printer(self, mock_get_with_fallback):
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
@@ -96,6 +94,17 @@ class OctoprintTest(unittest.TestCase):
         })
 
     @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_no_crash_on_different_response(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {"random": "field"}
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.sniff()
+        self.assertEqual(result, {
+            "active": False,
+            "version": {"random": "field"}
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
     def test_activate_responding_printer(self, mock_get_with_fallback):
         mock_get_with_fallback.return_value.status_code = 200
         mock_get_with_fallback.return_value.json.return_value = {"text": "OctoPrint"}
@@ -104,4 +113,73 @@ class OctoprintTest(unittest.TestCase):
         self.assertEqual(result, {
             "active": True,
             "version": {"text": "OctoPrint"}
+        })
+
+class OctoprintStatusTest(unittest.TestCase):
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_status_ok(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {
+            "state": {
+                "text": "Printing"
+            },
+            "temperature": {
+                "bed": {
+                    "actual": 49.8,
+                    "offset": 0,
+                    "target": 50.0
+                },
+                "tool0": {
+                    "actual": 240.4,
+                    "offset": 0,
+                    "target": 240.0
+                },
+            },
+        }
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.status()
+        self.assertEqual(result, {
+            "status": "Printing",
+            "temperature": {
+                "bed": {
+                    "actual": 49.8,
+                    "offset": 0,
+                    "target": 50.0
+                },
+                "tool0": {
+                    "actual": 240.4,
+                    "offset": 0,
+                    "target": 240.0
+                },
+            },
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_status_malformed_json(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.status()
+        self.assertEqual(result, {
+            "status": "Printer is responding with invalid data",
+            "temperature": {},
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_status_conflict(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 409
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.status()
+        self.assertEqual(result, {
+            "status": "Printer is not connected to Octoprint",
+            "temperature": {},
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
+    def test_status_unreachable(self, mock_get_with_fallback):
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.status()
+        self.assertEqual(result, {
+            "status": "Printer is not responding",
+            "temperature": {},
         })

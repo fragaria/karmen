@@ -24,7 +24,7 @@ def get_with_fallback(endpoint, hostname, ip, protocol='http', timeout=2):
                 app.logger.debug("Cannot call %s" % uri)
     return request
 
-class Octoprint(object):
+class Octoprint():
     def __init__(self, hostname, ip, mac, name=None, version=None, active=False):
         self.name = name
         self.hostname = hostname
@@ -43,11 +43,13 @@ class Octoprint(object):
             return {"active": False, "version": {}}
         try:
             data = request.json()
-            # TODO test a different response without text field
+            if "text" not in data:
+                app.logger.debug('%s (%s) is responding with unfamiliar JSON %s on /api/version - probably not octoprint' % (self.hostname, self.ip, data))
+                return {"active": False, "version": data}
         except json.decoder.JSONDecodeError:
             app.logger.debug('%s (%s) is not responding with JSON on /api/version - probably not octoprint' % (self.hostname, self.ip))
             return {"active": False, "version": {}}
-        if re.match(r'^octoprint', data['text'], re.IGNORECASE) is None:
+        if re.match(r'^octoprint', data["text"], re.IGNORECASE) is None:
             app.logger.debug('%s (%s) is responding with %s on /api/version - probably not octoprint' % (self.hostname, self.ip, data["text"]))
             return {
                 "active": False,
@@ -68,8 +70,17 @@ class Octoprint(object):
                     "temperature": data["temperature"],
                 }
             except json.decoder.JSONDecodeError:
-                return None
+                return {
+                    "status": "Printer is responding with invalid data",
+                    "temperature": {},
+                }
         elif request is not None and request.status_code == 409:
             return {
-                "status": "Printer is not operational"
+                "status": "Printer is not connected to Octoprint",
+                "temperature": {},
+            }
+        else:
+            return {
+                "status": "Printer is not responding",
+                "temperature": {},
             }

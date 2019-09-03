@@ -1,7 +1,5 @@
 import unittest
-import json
 import mock
-import requests
 
 from server.tasks.sniff_printer import update_printer, sniff_printer
 

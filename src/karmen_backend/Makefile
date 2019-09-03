@@ -22,7 +22,10 @@ coverage:
 	export FLASK_APP=${FLASK_APP} && export FLASK_DEBUG=${FLASK_DEBUG} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && coverage run --branch --source server -m pytest
 
 coverage-report: coverage
-	export FLASK_APP=${FLASK_APP} && export FLASK_DEBUG=${FLASK_DEBUG} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && coverage report
+	coverage report
+
+coverage-html: coverage
+	coverage html
 
 celery-beat:
 	@-mkdir -p ./tmp/logs

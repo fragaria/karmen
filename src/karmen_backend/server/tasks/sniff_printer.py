@@ -1,7 +1,3 @@
-import re
-import json
-import requests
-
 from server import app, celery, database
 from server.models.octoprint import Octoprint
 
