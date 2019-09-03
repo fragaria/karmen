@@ -15,13 +15,15 @@ def printers_list():
     printers = []
     active = request.args.get('active')
     for printer in database.get_printers(active):
+        octoprinter = Octoprint(**printer)
         printers.append({
-            "name": printer["name"],
-            "hostname": printer["hostname"],
-            "ip": printer["ip"],
-            "mac": printer["mac"],
-            "version": printer["version"],
-            "active": printer["active"],
+            "client": octoprinter.client,
+            "name": octoprinter.name,
+            "hostname": octoprinter.hostname,
+            "ip": octoprinter.ip,
+            "mac": octoprinter.mac,
+            "version": octoprinter.version,
+            "active": octoprinter.active,
         })
     return jsonify(printers)
 
@@ -33,6 +35,7 @@ def printer_detail(mac):
         return abort(404)
     octoprinter = Octoprint(**printer)
     return jsonify({
+        "client": octoprinter.client,
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,
         "ip": octoprinter.ip,

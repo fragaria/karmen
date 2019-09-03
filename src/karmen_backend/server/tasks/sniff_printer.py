@@ -14,4 +14,11 @@ def update_printer(**kwargs):
 def sniff_printer(hostname, ip, mac):
     printer = Octoprint(hostname, ip, mac)
     result = printer.sniff()
-    update_printer(name=hostname or ip, hostname=hostname, ip=ip, mac=mac, active=result["active"], version=result["version"])
+    update_printer(
+        name=hostname or ip,
+        hostname=hostname,
+        ip=ip,
+        mac=mac,
+        active=result["active"],
+        version=result["version"],
+        client=printer.client)

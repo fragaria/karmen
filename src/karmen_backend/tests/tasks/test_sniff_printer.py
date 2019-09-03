@@ -49,7 +49,8 @@ class TouchPrinterTest(unittest.TestCase):
             "ip": "192.168.1.15",
             "name": "octopi.local",
             "active": False,
-            "version": {}
+            "version": {},
+            "client": "octoprint",
         })
 
     @mock.patch('server.tasks.sniff_printer.update_printer')
@@ -63,7 +64,8 @@ class TouchPrinterTest(unittest.TestCase):
             "ip": "192.168.1.15",
             "name": "octopi.local",
             "active": False,
-            "version": {"text": "Fumbleprint"}
+            "version": {"text": "Fumbleprint"},
+            "client": "octoprint",
         })
 
     @mock.patch('server.tasks.sniff_printer.update_printer')
@@ -77,5 +79,6 @@ class TouchPrinterTest(unittest.TestCase):
             "ip": "192.168.1.15",
             "name": "octopi.local",
             "active": True,
-            "version": {"text": "OctoPrint"}
+            "version": {"text": "OctoPrint"},
+            "client": "octoprint",
         })

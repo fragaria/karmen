@@ -33,10 +33,10 @@ def add_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printers (name, hostname, ip, version, active, mac) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO printers (name, hostname, ip, version, active, client, mac) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             (
                 kwargs['name'], kwargs['hostname'], kwargs['ip'],
-                psycopg2.extras.Json(kwargs['version']), kwargs['active'], kwargs['mac']
+                psycopg2.extras.Json(kwargs['version']), kwargs['active'], kwargs['client'], kwargs['mac']
             )
         )
         cursor.close()
@@ -45,10 +45,10 @@ def update_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE printers SET name = %s, hostname = %s, ip = %s, version = %s, active = %s where mac = %s",
+            "UPDATE printers SET name = %s, hostname = %s, ip = %s, version = %s, active = %s, client = %s where mac = %s",
             (
                 kwargs['name'], kwargs['hostname'], kwargs['ip'],
-                psycopg2.extras.Json(kwargs['version']), kwargs['active'], kwargs['mac']
+                psycopg2.extras.Json(kwargs['version']), kwargs['active'], kwargs['client'], kwargs['mac']
             )
         )
         cursor.close()
@@ -57,9 +57,9 @@ def get_printers(active=None):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if active is not None:
-            cursor.execute("SELECT name, hostname, ip, mac, version, active FROM printers where active = %s", (active,))
+            cursor.execute("SELECT name, hostname, ip, mac, version, client, active FROM printers where active = %s", (active,))
         else:
-            cursor.execute("SELECT name, hostname, ip, mac, version, active FROM printers")
+            cursor.execute("SELECT name, hostname, ip, mac, version, client, active FROM printers")
         data = cursor.fetchall()
         cursor.close()
         return data
@@ -67,7 +67,7 @@ def get_printers(active=None):
 def get_printer(mac):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT name, hostname, ip, mac, version, active FROM printers where mac = %s", (mac,))
+        cursor.execute("SELECT name, hostname, ip, mac, version, client, active FROM printers where mac = %s", (mac,))
         data = cursor.fetchone()
         cursor.close()
         return data

@@ -5,7 +5,7 @@
 -- Dumped from database version 10.10 (Ubuntu 10.10-1.pgdg18.04+1)
 -- Dumped by pg_dump version 11.5 (Ubuntu 11.5-1.pgdg18.04+1)
 
--- Started on 2019-08-23 18:39:07 CEST
+-- Started on 2019-09-03 12:36:50 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -34,7 +34,8 @@ CREATE TABLE public.printers (
     ip character varying(15) NOT NULL,
     id integer NOT NULL,
     hostname character varying(255),
-    active boolean DEFAULT false NOT NULL
+    active boolean DEFAULT false NOT NULL,
+    client character varying(64) NOT NULL
 );
 
 
@@ -99,7 +100,7 @@ ALTER TABLE ONLY public.printers
 CREATE INDEX active_printers ON public.printers USING btree (active);
 
 
--- Completed on 2019-08-23 18:39:07 CEST
+-- Completed on 2019-09-03 12:36:50 CEST
 
 --
 -- PostgreSQL database dump complete

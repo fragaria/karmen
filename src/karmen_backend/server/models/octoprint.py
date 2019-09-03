@@ -25,7 +25,8 @@ def get_with_fallback(endpoint, hostname, ip, protocol='http', timeout=2):
     return request
 
 class Octoprint():
-    def __init__(self, hostname, ip, mac, name=None, version=None, active=False):
+    client = 'octoprint'
+    def __init__(self, hostname, ip, mac, name=None, client=None, version=None, active=False):
         self.name = name
         self.hostname = hostname
         self.ip = ip
