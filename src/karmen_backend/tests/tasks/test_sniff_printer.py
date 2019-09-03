@@ -37,7 +37,7 @@ class UpdatePrinterTest(unittest.TestCase):
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 2)
 
-class TouchPrinterTest(unittest.TestCase):
+class SniffPrinterTest(unittest.TestCase):
 
     @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
@@ -47,7 +47,7 @@ class TouchPrinterTest(unittest.TestCase):
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
         self.assertEqual(mock_upsert.call_count, 1)
-        upsert_kwargs = mock_upsert.call_args.kwargs
+        args, upsert_kwargs = mock_upsert.call_args
         self.assertEqual(upsert_kwargs["ip"], "192.168.1.15")
         self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
         self.assertEqual(upsert_kwargs["is_printer"], False)
@@ -70,7 +70,7 @@ class TouchPrinterTest(unittest.TestCase):
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
         self.assertEqual(mock_upsert.call_count, 1)
-        upsert_kwargs = mock_upsert.call_args.kwargs
+        args, upsert_kwargs = mock_upsert.call_args
         self.assertEqual(upsert_kwargs["ip"], "192.168.1.15")
         self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
         self.assertEqual(upsert_kwargs["is_printer"], False)
