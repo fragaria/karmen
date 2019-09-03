@@ -27,6 +27,9 @@ coverage-report: coverage
 coverage-html: coverage
 	coverage html
 
+coveralls:
+	coveralls
+
 celery-beat:
 	@-mkdir -p ./tmp/logs
 	export FLASK_APP=${FLASK_APP} && export FLASK_DEBUG=${FLASK_DEBUG} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && celery -A server.celery beat

@@ -10,4 +10,5 @@ install:
 script:
   - cd src/karmen_backend
   - pipenv install
-  - make test
+  - make coverage
+  - make coveralls

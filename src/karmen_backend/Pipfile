@@ -17,6 +17,7 @@ requests = "*"
 celery = "*"
 psycopg2 = "*"
 redis = "*"
+coveralls = "*"
 
 [requires]
 python_version = "3.6"
