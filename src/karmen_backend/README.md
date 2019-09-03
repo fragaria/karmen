@@ -7,7 +7,7 @@
 
 **This backend automatically scans the network for attached printers. This might be problematic in larger networks.**
 
-```
+```sh
 # clone repo and cd into karmen_backend directory
 $ make install # install python dependencies
 $ make redis # run a dockerized redis on 6379
