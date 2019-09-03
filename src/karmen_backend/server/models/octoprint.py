@@ -62,7 +62,9 @@ class Octoprint():
         }
 
     def status(self):
-        request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
+        request = None
+        if self.active:
+            request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -87,7 +89,9 @@ class Octoprint():
             }
 
     def webcam(self):
-        request = get_with_fallback('/api/settings', self.hostname, self.ip)
+        request = None
+        if self.active:
+            request = get_with_fallback('/api/settings', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -106,7 +110,9 @@ class Octoprint():
             return {}
 
     def job(self):
-        request = get_with_fallback('/api/job', self.hostname, self.ip)
+        request = None
+        if self.active:
+            request = get_with_fallback('/api/job', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()

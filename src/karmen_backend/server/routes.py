@@ -23,8 +23,8 @@ def get_printer(printer, fields):
         "version": octoprinter.version,
         "active": octoprinter.active,
     }
-    if "live" in fields:
-        data["live"] = octoprinter.status()
+    if "status" in fields:
+        data["status"] = octoprinter.status()
     if "webcam" in fields:
         data["webcam"] = octoprinter.webcam()
     if "job" in fields:
