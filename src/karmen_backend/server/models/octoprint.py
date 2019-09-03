@@ -85,3 +85,22 @@ class Octoprint():
                 "status": "Printer is not responding",
                 "temperature": {},
             }
+
+    def webcam(self):
+        request = get_with_fallback('/api/settings', self.hostname, self.ip)
+        if request is not None and request.status_code == 200:
+            try:
+                data = request.json()
+                stream_url = data["webcam"]["streamUrl"]
+                if re.match(r'^https?', stream_url, re.IGNORECASE) is None:
+                    stream_url = 'http://%s%s' % (self.ip, stream_url)
+                return {
+                    "stream": stream_url,
+                    "flipHorizontal": data["webcam"]["flipH"],
+                    "flipVertical": data["webcam"]["flipV"],
+                    "rotate90": data["webcam"]["rotate90"],
+                }
+            except json.decoder.JSONDecodeError:
+                return {}
+        else:
+            return {}

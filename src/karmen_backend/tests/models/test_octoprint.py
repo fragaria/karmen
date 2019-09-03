@@ -183,3 +183,69 @@ class OctoprintStatusTest(unittest.TestCase):
             "status": "Printer is not responding",
             "temperature": {},
         })
+
+class OctoprintWebcamTest(unittest.TestCase):
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_webcam_no_absolute_url(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {
+            "webcam": {
+                "bitrate": "5000k",
+                "ffmpegPath": "/usr/bin/ffmpeg",
+                "ffmpegThreads": 1,
+                "flipH": True,
+                "flipV": True,
+                "rotate90": False,
+                "snapshotSslValidation": True,
+                "snapshotTimeout": 5,
+                "snapshotUrl": "http://127.0.0.1:8080/?action=snapshot",
+                "streamRatio": "4:3",
+                "streamTimeout": 5,
+                "streamUrl": "/webcam/?action=stream",
+                "timelapseEnabled": True,
+                "watermark": True,
+                "webcamEnabled": True
+            }
+        }
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.webcam()
+        self.assertEqual(result, {
+            "stream": "http://192.168.1.15/webcam/?action=stream",
+            "flipHorizontal": True,
+            "flipVertical": True,
+            "rotate90": False,
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_webcam_absolute_url(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {
+            "webcam": {
+                "flipH": True,
+                "flipV": True,
+                "rotate90": False,
+                "streamUrl": "http://1.2.3.4/webcam/?action=stream",
+            }
+        }
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.webcam()
+        self.assertEqual(result, {
+            "stream": "http://1.2.3.4/webcam/?action=stream",
+            "flipHorizontal": True,
+            "flipVertical": True,
+            "rotate90": False,
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_webcam_malformed_json(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.webcam()
+        self.assertEqual(result, {})
+
+    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
+    def test_webcam_no_response(self, mock_get_with_fallback):
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.webcam()
+        self.assertEqual(result, {})
