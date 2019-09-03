@@ -249,3 +249,40 @@ class OctoprintWebcamTest(unittest.TestCase):
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         result = printer.webcam()
         self.assertEqual(result, {})
+
+class OctoprintJobTest(unittest.TestCase):
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_job_ok(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {
+            "job": {
+                "file": {
+                    "display": "test-pouzdro-na-iphone.gcode",
+                },
+            },
+            "progress": {
+                "completion": 12,
+                "printTimeLeft": 35,
+            },
+        }
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.job()
+        self.assertEqual(result, {
+            "name": "test-pouzdro-na-iphone.gcode",
+            "completion": 12,
+            "printTimeLeft": 35,
+        })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_job_malformed_json(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.job()
+        self.assertEqual(result, {})
+
+    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
+    def test_job_no_response(self, mock_get_with_fallback):
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
+        result = printer.job()
+        self.assertEqual(result, {})

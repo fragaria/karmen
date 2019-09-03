@@ -12,38 +12,9 @@ def index():
         'version': __version__
     })
 
-@app.route('/printers', methods=['GET', 'OPTIONS'])
-@cross_origin()
-def printers_list():
-    printers = []
-    active = request.args.get('active')
-    fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    for printer in database.get_printers(active):
-        octoprinter = Octoprint(**printer)
-        data = {
-            "client": octoprinter.client,
-            "name": octoprinter.name,
-            "hostname": octoprinter.hostname,
-            "ip": octoprinter.ip,
-            "mac": octoprinter.mac,
-            "version": octoprinter.version,
-            "active": octoprinter.active,
-        }
-        if "live" in fields:
-            data["live"] = octoprinter.status()
-        if "webcam" in fields:
-            data["webcam"] = octoprinter.webcam()
-        printers.append(data)
-    return jsonify(printers)
-
-@app.route('/printers/<mac>', methods=['GET', 'OPTIONS'])
-@cross_origin()
-def printer_detail(mac):
-    printer = database.get_printer(mac)
-    if printer is None:
-        return abort(404)
+def get_printer(printer, fields):
     octoprinter = Octoprint(**printer)
-    return jsonify({
+    data = {
         "client": octoprinter.client,
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,
@@ -51,6 +22,30 @@ def printer_detail(mac):
         "mac": octoprinter.mac,
         "version": octoprinter.version,
         "active": octoprinter.active,
-        "live": octoprinter.status(),
-        "webcam": octoprinter.webcam(),
-    })
+    }
+    if "live" in fields:
+        data["live"] = octoprinter.status()
+    if "webcam" in fields:
+        data["webcam"] = octoprinter.webcam()
+    if "job" in fields:
+        data["job"] = octoprinter.job()
+    return data
+
+@app.route('/printers', methods=['GET', 'OPTIONS'])
+@cross_origin()
+def printers_list():
+    printers = []
+    active = request.args.get('active')
+    fields = request.args.get('fields').split(',') if request.args.get('fields') else []
+    for printer in database.get_printers(active):
+        printers.append(get_printer(printer, fields))
+    return jsonify(printers)
+
+@app.route('/printers/<mac>', methods=['GET', 'OPTIONS'])
+@cross_origin()
+def printer_detail(mac):
+    fields = request.args.get('fields').split(',') if request.args.get('fields') else []
+    printer = database.get_printer(mac)
+    if printer is None:
+        return abort(404)
+    return jsonify(get_printer(printer, fields))

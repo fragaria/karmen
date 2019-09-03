@@ -104,3 +104,18 @@ class Octoprint():
                 return {}
         else:
             return {}
+
+    def job(self):
+        request = get_with_fallback('/api/job', self.hostname, self.ip)
+        if request is not None and request.status_code == 200:
+            try:
+                data = request.json()
+                return {
+                    "name": data["job"]["file"]["display"],
+                    "completion": data["progress"]["completion"],
+                    "printTimeLeft": data["progress"]["printTimeLeft"],
+                }
+            except json.decoder.JSONDecodeError:
+                return {}
+        else:
+            return {}
