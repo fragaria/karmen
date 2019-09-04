@@ -1,7 +1,6 @@
 {
-  "name": "poc-frontend",
-  "version": "0.1.0",
-  "private": true,
+  "name": "karmen",
+  "version": "0.0.0",
   "dependencies": {
     "node-sass": "^4.12.0",
     "react": "^16.9.0",
@@ -29,5 +28,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^6.3.0"
   }
 }
