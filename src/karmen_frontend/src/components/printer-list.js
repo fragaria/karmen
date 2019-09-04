@@ -14,7 +14,6 @@ class PrinterList extends React.Component {
   }
 
   async loadPrinters() {
-    const { timer } = this.state;
     const printers = await getPrinters(['job', 'status', 'webcam']);
     this.setState({
       printers,

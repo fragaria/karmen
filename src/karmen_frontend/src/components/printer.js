@@ -45,30 +45,32 @@ const Temperature = ({name, actual, target }) => {
 }
 
 const Printer = ({ printer }) => {
-  return <div>
-    <h1>
-      {printer.name}
-    </h1>
+  return (
     <div>
-      <h2>Connection</h2>
-      <ul>
-          <li>Status: {printer.active ? 'Active' : 'Inactive'}</li>
-          <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
-          <li>Client MAC: {printer.mac}</li>
-          <li>Client hostname: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>
-          <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
-      </ul>
-      <hr />
+      <h1>
+        {printer.name}
+      </h1>
+      <div>
+        <h2>Connection</h2>
+        <ul>
+            <li>Status: {printer.active ? 'Active' : 'Inactive'}</li>
+            <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
+            <li>Client MAC: {printer.mac}</li>
+            <li>Client hostname: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>
+            <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
+        </ul>
+        <hr />
+      </div>
+      <div>
+        <h2>Current state</h2>
+        <p>State: <strong>{printer.status.state}</strong></p>
+        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
+        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+        {printer.job.name && <Job {...printer.job} />}
+        {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+      </div>
     </div>
-    <div>
-      <h2>Current state</h2>
-      <p>State: <strong>{printer.status.state}</strong></p>
-      {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
-      {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-      {printer.job.name && <Job {...printer.job} />}
-      {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
-    </div>
-  </div>
+  );
 }
 
 export default Printer;
