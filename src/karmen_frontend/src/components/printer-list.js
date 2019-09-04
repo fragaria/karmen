@@ -3,15 +3,27 @@ import Printer from './printer';
 import { getPrinters } from '../services/karmen-backend';
 
 class PrinterList extends React.Component {
-   state = {
-     printers: null,
-   }
+  state = {
+    printers: null,
+    timer: null,
+  }
 
-  async componentDidMount() {
+  constructor(props) {
+    super(props);
+    this.loadPrinters = this.loadPrinters.bind(this);
+  }
+
+  async loadPrinters() {
+    const { timer } = this.state;
     const printers = await getPrinters(['job', 'status', 'webcam']);
     this.setState({
-      printers
+      printers,
+      timer: setTimeout(this.loadPrinters, 3000),
     });
+  }
+
+  async componentDidMount() {
+    this.loadPrinters();
   }
 
   render () {

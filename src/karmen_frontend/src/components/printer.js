@@ -23,12 +23,14 @@ const WebcamStream = ({ stream, flipHorizontal, flipVertical, rotate90 }) => {
 
 const Job = ({ name, completion, printTime, printTimeLeft }) => {
   let approxPrintTimeLeft = printTimeLeft;
-  if (!approxPrintTimeLeft && printTime) {
+  if (!approxPrintTimeLeft && printTime > 0) {
     approxPrintTimeLeft = (printTime / completion) * 100;
   }
-  let d = new Date(null);
-  d.setSeconds(approxPrintTimeLeft)
-  approxPrintTimeLeft = `${d.toISOString().substr(11, 2)} hours, ${d.toISOString().substr(14, 2)} minutes`;
+  if (approxPrintTimeLeft) {
+    let d = new Date(null);
+    d.setSeconds(approxPrintTimeLeft)
+    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)} hours, ${d.toISOString().substr(14, 2)} minutes`;
+  }
   return (
     <ul>
       <li>Name: {name}</li>
