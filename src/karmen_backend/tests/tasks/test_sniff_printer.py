@@ -52,6 +52,7 @@ class SniffPrinterTest(unittest.TestCase):
         self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
         self.assertEqual(upsert_kwargs["is_printer"], False)
         self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
+        self.assertFalse(upsert_kwargs["disabled"])
         mock_update_printer.assert_called_with(**{
             "mac": "34:97:f6:3f:f1:96",
             "hostname": "octopi.local",
@@ -105,6 +106,7 @@ class SniffPrinterTest(unittest.TestCase):
             "mac": "34:97:f6:3f:f1:96",
             "is_printer": True,
             "retry_after": None,
+            "disabled": False,
         })
         mock_update_printer.assert_called_with(**{
             "mac": "34:97:f6:3f:f1:96",

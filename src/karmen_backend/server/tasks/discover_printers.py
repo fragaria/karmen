@@ -39,11 +39,12 @@ def get_avahi_hostname(ip):
 def discover_printers():
     now = datetime.utcnow()
     to_deactivate = database.get_printers()
-    to_skip = [device["mac"] for device in database.get_network_devices() if device["retry_after"] and device["retry_after"] > now]
+    to_skip_mac = [device["mac"] for device in database.get_network_devices() if (device["retry_after"] and device["retry_after"] > now) or device["disabled"]]
+    to_skip_ip = [device["ip"] for device in database.get_network_devices() if (device["retry_after"] and device["retry_after"] > now) or device["disabled"]]
     for line in get_network_devices(app.config['NETWORK_INTERFACE']):
         (ip, mac) = line
         to_deactivate = [printer for printer in to_deactivate if printer["mac"] != mac]
-        if mac in to_skip:
+        if mac in to_skip_mac or ip in to_skip_ip:
             continue
         hostname = get_avahi_hostname(ip)
         # it's communicating, let's sniff it for a printer

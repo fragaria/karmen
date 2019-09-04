@@ -69,10 +69,19 @@ def get_printer(mac):
         cursor.close()
         return data
 
-def get_network_devices():
+def delete_printer(mac):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM printers where mac = %s", (mac,))
+        cursor.close()
+
+def get_network_devices(mac=None, ip=None):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT ip, mac, is_printer, retry_after FROM network_devices")
+        if mac or ip:
+            cursor.execute("SELECT ip, mac, is_printer, retry_after, disabled FROM network_devices where mac = %s or ip = %s", (mac, ip))
+        else:
+            cursor.execute("SELECT ip, mac, is_printer, retry_after, disabled FROM network_devices")
         data = cursor.fetchall()
         cursor.close()
         return data
@@ -81,9 +90,10 @@ def upsert_network_device(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO network_devices (ip, mac, is_printer, retry_after) values (%s, %s, %s, %s) ON CONFLICT ON CONSTRAINT network_devices_pkey DO UPDATE SET ip = %s, is_printer = %s, retry_after = %s",
+            "INSERT INTO network_devices (ip, mac, is_printer, retry_after, disabled) values (%s, %s, %s, %s, %s) ON CONFLICT ON CONSTRAINT mac_ip_pair DO UPDATE SET ip = %s, is_printer = %s, retry_after = %s, disabled = %s",
             (
-                kwargs["ip"], kwargs["mac"], kwargs["is_printer"], kwargs["retry_after"], kwargs["ip"], kwargs["is_printer"], kwargs["retry_after"]
+                kwargs["ip"], kwargs["mac"], kwargs["is_printer"], kwargs["retry_after"], kwargs["disabled"],
+                kwargs["ip"], kwargs["is_printer"], kwargs["retry_after"], kwargs["disabled"]
             )
         )
         cursor.close()

@@ -50,3 +50,15 @@ def printer_detail(mac):
     if printer is None:
         return abort(404)
     return jsonify(get_printer(printer, fields))
+
+@app.route('/printers/<mac>', methods=['DELETE', 'OPTIONS'])
+@cross_origin()
+def printer_delete(mac):
+    printer = database.get_printer(mac)
+    if printer is None:
+        return abort(404)
+    database.delete_printer(mac)
+    for device in database.get_network_devices(printer["mac"], printer["ip"]):
+        device["disabled"] = True
+        database.upsert_network_device(**device)
+    return '', 204
