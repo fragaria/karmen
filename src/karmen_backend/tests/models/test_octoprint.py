@@ -277,6 +277,7 @@ class OctoprintJobTest(unittest.TestCase):
             "progress": {
                 "completion": 12,
                 "printTimeLeft": 35,
+                "printTime": 10,
             },
             "state": "Printing",
         }
@@ -286,6 +287,7 @@ class OctoprintJobTest(unittest.TestCase):
             "name": "test-pouzdro-na-iphone.gcode",
             "completion": 12,
             "printTimeLeft": 35,
+            "printTime": 10,
         })
 
     @mock.patch('server.models.octoprint.get_with_fallback')
@@ -300,6 +302,7 @@ class OctoprintJobTest(unittest.TestCase):
             "progress": {
                 "completion": 100,
                 "printTimeLeft": 0,
+                "printTime": 10,
             },
             "state": "Operational",
         }
@@ -319,6 +322,7 @@ class OctoprintJobTest(unittest.TestCase):
             "progress": {
                 "completion": 100,
                 "printTimeLeft": 0,
+                "printTime": 10,
             },
             "state": "Offline (Error: Too many consecutive timeouts, printer still connected and alive?)",
         }

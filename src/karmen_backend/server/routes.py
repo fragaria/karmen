@@ -15,12 +15,15 @@ def index():
 def get_printer(printer, fields):
     octoprinter = Octoprint(**printer)
     data = {
-        "client": octoprinter.client,
+        "client": {
+            "name": octoprinter.client,
+            # TODO rename to client_version in DB and model
+            "version": octoprinter.version,
+        },
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,
         "ip": octoprinter.ip,
         "mac": octoprinter.mac,
-        "version": octoprinter.version,
         "active": octoprinter.active,
     }
     if "status" in fields:

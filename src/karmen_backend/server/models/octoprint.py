@@ -122,6 +122,7 @@ class Octoprint():
                     "name": data["job"]["file"]["display"],
                     "completion": data["progress"]["completion"],
                     "printTimeLeft": data["progress"]["printTimeLeft"],
+                    "printTime": data["progress"]["printTime"],
                 }
             except json.decoder.JSONDecodeError:
                 return {}
