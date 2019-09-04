@@ -1,7 +1,24 @@
 import React from 'react';
 
 const WebcamStream = ({ stream, flipHorizontal, flipVertical, rotate90 }) => {
-  return <p><img alt={stream} src={`${stream}?t=${(new Date()).getTime()}`} /></p>;
+  let klass = [];
+  if (flipHorizontal) {
+    klass.push('flip-horizontal');
+  }
+
+  if (flipVertical) {
+    klass.push('flip-vertical');
+  }
+
+  if (rotate90) {
+    klass.push('rotate-90');
+  }
+
+  return <p><img
+    className={klass.join(' ')}
+    alt={stream}
+    src={`${stream}?t=${(new Date()).getTime()}`}
+  /></p>;
 }
 
 const Job = ({ name, completion, printTime, printTimeLeft }) => {

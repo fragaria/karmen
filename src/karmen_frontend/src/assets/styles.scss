@@ -1,0 +1,20 @@
+img.flip-horizontal {
+  transform: scaleX(-1);
+}
+
+img.flip-vertical {
+  transform: scaleY(-1);
+}
+
+img.rotate-90 {
+  transform: rotate(90deg);
+}
+
+img.flip-horizontal.flip-vertical {
+  transform: scaleX(-1) scaleY(-1);
+}
+
+img.flip-horizontal.flip-vertical.rotate-90 {
+  transform: scaleX(-1) scaleY(-1) rotate(90deg);
+}
+
