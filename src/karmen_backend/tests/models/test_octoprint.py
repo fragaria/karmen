@@ -139,7 +139,7 @@ class OctoprintStatusTest(unittest.TestCase):
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
         result = printer.status()
         self.assertEqual(result, {
-            "status": "Printing",
+            "state": "Printing",
             "temperature": {
                 "bed": {
                     "actual": 49.8,
@@ -161,7 +161,7 @@ class OctoprintStatusTest(unittest.TestCase):
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
         result = printer.status()
         self.assertEqual(result, {
-            "status": "Printer is responding with invalid data",
+            "state": "Printer is responding with invalid data",
             "temperature": {},
         })
 
@@ -171,7 +171,7 @@ class OctoprintStatusTest(unittest.TestCase):
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
         result = printer.status()
         self.assertEqual(result, {
-            "status": "Printer is not connected to Octoprint",
+            "state": "Printer is not connected to Octoprint",
             "temperature": {},
         })
 
@@ -180,7 +180,7 @@ class OctoprintStatusTest(unittest.TestCase):
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
         result = printer.status()
         self.assertEqual(result, {
-            "status": "Printer is not responding",
+            "state": "Printer is not responding",
             "temperature": {},
         })
 
@@ -278,6 +278,7 @@ class OctoprintJobTest(unittest.TestCase):
                 "completion": 12,
                 "printTimeLeft": 35,
             },
+            "state": "Printing",
         }
         printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
         result = printer.job()
@@ -286,6 +287,44 @@ class OctoprintJobTest(unittest.TestCase):
             "completion": 12,
             "printTimeLeft": 35,
         })
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_job_done(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {
+            "job": {
+                "file": {
+                    "display": "test-pouzdro-na-iphone.gcode",
+                },
+            },
+            "progress": {
+                "completion": 100,
+                "printTimeLeft": 0,
+            },
+            "state": "Operational",
+        }
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
+        result = printer.job()
+        self.assertEqual(result, {})
+
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_job_offline_printer(self, mock_get_with_fallback):
+        mock_get_with_fallback.return_value.status_code = 200
+        mock_get_with_fallback.return_value.json.return_value = {
+            "job": {
+                "file": {
+                    "display": "test-pouzdro-na-iphone.gcode",
+                },
+            },
+            "progress": {
+                "completion": 100,
+                "printTimeLeft": 0,
+            },
+            "state": "Offline (Error: Too many consecutive timeouts, printer still connected and alive?)",
+        }
+        printer = Octoprint('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96', active=True)
+        result = printer.job()
+        self.assertEqual(result, {})
 
     @mock.patch('server.models.octoprint.get_with_fallback')
     def test_job_malformed_json(self, mock_get_with_fallback):

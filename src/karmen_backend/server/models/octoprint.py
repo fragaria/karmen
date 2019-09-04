@@ -69,22 +69,22 @@ class Octoprint():
             try:
                 data = request.json()
                 return {
-                    "status": data["state"]["text"],
+                    "state": data["state"]["text"],
                     "temperature": data["temperature"],
                 }
             except json.decoder.JSONDecodeError:
                 return {
-                    "status": "Printer is responding with invalid data",
+                    "state": "Printer is responding with invalid data",
                     "temperature": {},
                 }
         elif request is not None and request.status_code == 409:
             return {
-                "status": "Printer is not connected to Octoprint",
+                "state": "Printer is not connected to Octoprint",
                 "temperature": {},
             }
         else:
             return {
-                "status": "Printer is not responding",
+                "state": "Printer is not responding",
                 "temperature": {},
             }
 
@@ -116,6 +116,8 @@ class Octoprint():
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
+                if "state" in data and re.match(r"Operational|Offline", data["state"]):
+                    return {}
                 return {
                     "name": data["job"]["file"]["display"],
                     "completion": data["progress"]["completion"],
