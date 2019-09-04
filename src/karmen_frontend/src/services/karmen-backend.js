@@ -6,6 +6,7 @@ export const getPrinters = (fields = []) => {
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printers: ${response.status}`);
+        return;
       }
       return response.json();
     });
@@ -15,8 +16,22 @@ export const getPrinter = (mac, fields = []) => {
   return fetch(`${BASE_URL}/printers/${mac}?fields=${fields.join(',')}`)
     .then((response) => {
       if (response.status !== 200) {
-        console.error(`Cannot get list of printers: ${response.status}`);
+        console.error(`Cannot get a printer: ${response.status}`);
+        return;
       }
       return response.json();
+    });
+}
+
+export const deletePrinter = (mac) => {
+  return fetch(`${BASE_URL}/printers/${mac}`, {
+    method: 'DELETE',
+  })
+    .then((response) => {
+      if (response.status !== 204) {
+        console.error(`Cannot remove a printer: ${response.status}`);
+        return false;
+      }
+      return true;
     });
 }

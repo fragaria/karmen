@@ -1,4 +1,5 @@
 import React from 'react';
+import { deletePrinter } from '../services/karmen-backend';
 
 const WebcamStream = ({ stream, flipHorizontal, flipVertical, rotate90 }) => {
   let klass = [];
@@ -47,7 +48,9 @@ const Temperature = ({name, actual, target }) => {
 const PrinterActions = ({ mac }) => {
   return (
     <ul>
-      <li>Manually disable</li>
+      <li><button onClick={(e) => {
+        deletePrinter(mac); // TODO make this more reactive and drop the printer from the list
+      }}>Manually disable</button></li>
     </ul>
   );
 }
