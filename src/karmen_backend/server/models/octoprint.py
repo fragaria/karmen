@@ -24,46 +24,56 @@ def get_with_fallback(endpoint, hostname, ip, protocol='http', timeout=2):
                 app.logger.debug("Cannot call %s" % uri)
     return request
 
+class PrinterClient():
+    def __init__(self, version={}, connected=False):
+        self.version = version
+        self.connected = connected
+
 class Octoprint():
-    client = 'octoprint'
-    def __init__(self, hostname, ip, mac, name=None, client=None, version=None, active=False):
+    __client_name__ = 'octoprint'
+
+    def __init__(self, hostname, ip, mac, name=None, client=PrinterClient(), client_props=None):
         self.name = name
         self.hostname = hostname
         self.ip = ip
         self.mac = mac
-        self.version = version
-        self.active = active
+        if not client_props:
+            self.client = client
+        else:
+            self.client = PrinterClient(client_props["version"], client_props["connected"])
+
+    def client_name(self):
+        return self.__client_name__
 
     def sniff(self):
         request = get_with_fallback('/api/version', self.hostname, self.ip)
         if request is None:
             app.logger.debug('%s (%s) is not responding on /api/version - not octoprint' % (self.hostname, self.ip))
-            return {"active": False, "version": {}}
+            self.client = PrinterClient({}, False)
+            return
         if request.status_code != 200:
             app.logger.debug('%s (%s) is responding with %s on /api/version - not octoprint' % (self.hostname, self.ip, request.status_code))
-            return {"active": False, "version": {}}
+            self.client = PrinterClient({}, False)
+            return
         try:
             data = request.json()
             if "text" not in data:
                 app.logger.debug('%s (%s) is responding with unfamiliar JSON %s on /api/version - probably not octoprint' % (self.hostname, self.ip, data))
-                return {"active": False, "version": data}
+                self.client = PrinterClient(data, False)
+                return
         except json.decoder.JSONDecodeError:
             app.logger.debug('%s (%s) is not responding with JSON on /api/version - probably not octoprint' % (self.hostname, self.ip))
-            return {"active": False, "version": {}}
+            self.client = PrinterClient({}, False)
+            return
         if re.match(r'^octoprint', data["text"], re.IGNORECASE) is None:
             app.logger.debug('%s (%s) is responding with %s on /api/version - probably not octoprint' % (self.hostname, self.ip, data["text"]))
-            return {
-                "active": False,
-                "version": data,
-            }
-        return {
-            "active": True,
-            "version": data,
-        }
+            self.client = PrinterClient(data, False)
+            return
+        self.client = PrinterClient(data, True)
 
     def status(self):
         request = None
-        if self.active:
+        if self.client.connected:
             request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
@@ -90,7 +100,7 @@ class Octoprint():
 
     def webcam(self):
         request = None
-        if self.active:
+        if self.client.connected:
             request = get_with_fallback('/api/settings', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
@@ -111,7 +121,7 @@ class Octoprint():
 
     def job(self):
         request = None
-        if self.active:
+        if self.client.connected:
             request = get_with_fallback('/api/job', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:

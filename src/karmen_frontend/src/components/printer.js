@@ -44,6 +44,14 @@ const Temperature = ({name, actual, target }) => {
   return <p>{name}: {actual}/{target} &#176;C</p>
 }
 
+const PrinterActions = ({ mac }) => {
+  return (
+    <ul>
+      <li>Manually disable</li>
+    </ul>
+  );
+}
+
 const Printer = ({ printer }) => {
   return (
     <div>
@@ -53,12 +61,14 @@ const Printer = ({ printer }) => {
       <div>
         <h2>Connection</h2>
         <ul>
-            <li>Status: {printer.active ? 'Active' : 'Inactive'}</li>
+            <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
             <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
             <li>Client MAC: {printer.mac}</li>
             <li>Client hostname: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>
             <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
         </ul>
+        <h3>Actions</h3>
+        <PrinterActions mac={printer.mac} />
         <hr />
       </div>
       <div>

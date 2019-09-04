@@ -16,15 +16,14 @@ def get_printer(printer, fields):
     octoprinter = Octoprint(**printer)
     data = {
         "client": {
-            "name": octoprinter.client,
-            # TODO rename to client_version in DB and model
-            "version": octoprinter.version,
+            "name": octoprinter.client_name(),
+            "version": octoprinter.client.version,
+            "connected": octoprinter.client.connected,
         },
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,
         "ip": octoprinter.ip,
         "mac": octoprinter.mac,
-        "active": octoprinter.active,
     }
     if "status" in fields:
         data["status"] = octoprinter.status()
@@ -38,9 +37,8 @@ def get_printer(printer, fields):
 @cross_origin()
 def printers_list():
     printers = []
-    active = request.args.get('active')
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    for printer in database.get_printers(active):
+    for printer in database.get_printers():
         printers.append(get_printer(printer, fields))
     return jsonify(printers)
 

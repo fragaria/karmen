@@ -115,8 +115,8 @@ class DiscoverPrintersTest(unittest.TestCase):
 
     @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[])
     @mock.patch('server.database.get_printers', return_value=[
-        {"mac": "1", "hostname": "a", "ip": "1234", "active": True},
-        {"mac": "2", "hostname": "b", "ip": "1234", "active": False}
+        {"mac": "1", "hostname": "a", "ip": "1234", "client_props": {"connected": True}},
+        {"mac": "2", "hostname": "b", "ip": "1234", "client_props": {"connected": False}}
     ])
     @mock.patch('server.database.get_network_devices', return_value=[])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
@@ -127,8 +127,8 @@ class DiscoverPrintersTest(unittest.TestCase):
         discover_printers()
         self.assertEqual(mock_update_printer.call_count, 2)
         mock_update_printer.assert_has_calls([
-            mock.call(**{"mac": "1", "hostname": "a", "ip": "1234", "active": False}),
-            mock.call(**{"mac": "2", "hostname": "b", "ip": "1234", "active": False})
+            mock.call(**{"mac": "1", "hostname": "a", "ip": "1234", "client_props": {"connected": False}}),
+            mock.call(**{"mac": "2", "hostname": "b", "ip": "1234", "client_props": {"connected": False}})
         ])
 
     @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[
@@ -136,7 +136,7 @@ class DiscoverPrintersTest(unittest.TestCase):
         ('192.168.1.1', '34:97:f6:3f:f1:96'),
     ])
     @mock.patch('server.database.get_printers', return_value=[
-        {"mac": "1:2:3", "hostname": "a", "ip": "1234", "active": True},
+        {"mac": "1:2:3", "hostname": "a", "ip": "1234", "client_props": {"connected": True}},
     ])
     @mock.patch('server.database.get_network_devices', return_value=[])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
@@ -156,7 +156,7 @@ class DiscoverPrintersTest(unittest.TestCase):
                 "mac": "1:2:3",
                 "hostname": "a",
                 "ip": "1234",
-                "active": False
+                "client_props": {"connected": False}
             }),
         ])
 
@@ -165,11 +165,11 @@ class DiscoverPrintersTest(unittest.TestCase):
         ('192.168.1.1', '34:97:f6:3f:f1:96'),
     ])
     @mock.patch('server.database.get_printers', return_value=[
-        {"mac": "1:2:3", "hostname": "a", "ip": "1234", "active": True},
+        {"mac": "1:2:3", "hostname": "a", "ip": "1234", "client_props": {"connected": True}},
     ])
     @mock.patch('server.database.get_network_devices', return_value=[
-        {"mac": "06:43:ac:11:00:02", "ip": "172.17.0.2", "active": True, "retry_after": datetime.utcnow() + timedelta(hours=1)},
-        {"mac": "34:97:f6:3f:f1:96", "ip": "192.168.1.1", "active": True, "retry_after": datetime.utcnow() + timedelta(hours=-1)},
+        {"mac": "06:43:ac:11:00:02", "ip": "172.17.0.2", "client_props": {"connected": True}, "retry_after": datetime.utcnow() + timedelta(hours=1)},
+        {"mac": "34:97:f6:3f:f1:96", "ip": "192.168.1.1", "client_props": {"connected": True}, "retry_after": datetime.utcnow() + timedelta(hours=-1)},
     ])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
     @mock.patch('server.tasks.discover_printers.update_printer')

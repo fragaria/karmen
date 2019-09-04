@@ -11,7 +11,7 @@ class UpdatePrinterTest(unittest.TestCase):
     @mock.patch('server.database.get_printer', return_value=None)
     def test_not_update_inactive_unknown_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
-        update_printer(mac='aa:bb', active=False)
+        update_printer(mac='aa:bb', client_props={"connected": False})
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 0)
@@ -21,7 +21,7 @@ class UpdatePrinterTest(unittest.TestCase):
     @mock.patch('server.database.get_printer', return_value=None)
     def test_add_active_unknown_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
-        update_printer(mac='aa:bb', active=True)
+        update_printer(mac='aa:bb', client_props={"connected": True})
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 0)
@@ -31,8 +31,8 @@ class UpdatePrinterTest(unittest.TestCase):
     @mock.patch('server.database.get_printer', return_value={"name": "1234", "mac": "aa:bb"})
     def test_update_any_known_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
-        update_printer(mac='aa:bb', active=True)
-        update_printer(mac='aa:bb', active=False)
+        update_printer(mac='aa:bb', client_props={"connected": True})
+        update_printer(mac='aa:bb', client_props={"connected": False})
         self.assertEqual(mock_get_printer.call_count, 2)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 2)
@@ -41,8 +41,8 @@ class SniffPrinterTest(unittest.TestCase):
 
     @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
-    @mock.patch('server.tasks.sniff_printer.Octoprint.sniff', return_value={"active": False, "version": {}})
-    def test_deactivate_no_data_responding_printer(self, mock_sniff, mock_update_printer, mock_upsert):
+    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
+    def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert):
         retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
@@ -57,15 +57,19 @@ class SniffPrinterTest(unittest.TestCase):
             "hostname": "octopi.local",
             "ip": "192.168.1.15",
             "name": "octopi.local",
-            "active": False,
-            "version": {},
             "client": "octoprint",
+            "client_props": {
+                "connected": False,
+                "version": {}
+            },
         })
 
     @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
-    @mock.patch('server.tasks.sniff_printer.Octoprint.sniff', return_value={"active": False, "version": {"text": "Fumbleprint"}})
-    def test_deactivate_bad_data_responding_printer(self, mock_sniff, mock_update_printer, mock_upsert):
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_deactivate_bad_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert):
+        mock_get_data.return_value.status_code = 200
+        mock_get_data.return_value.json.return_value = {"text": "Fumbleprint"}
         retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
@@ -80,15 +84,19 @@ class SniffPrinterTest(unittest.TestCase):
             "hostname": "octopi.local",
             "ip": "192.168.1.15",
             "name": "octopi.local",
-            "active": False,
-            "version": {"text": "Fumbleprint"},
             "client": "octoprint",
+            "client_props": {
+                "connected": False,
+                "version": {"text": "Fumbleprint"}
+            },
         })
 
     @mock.patch('server.tasks.sniff_printer.database.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.update_printer')
-    @mock.patch('server.tasks.sniff_printer.Octoprint.sniff', return_value={"active": True, "version": {"text": "OctoPrint"}})
-    def test_activate_responding_printer(self, mock_sniff, mock_update_printer, mock_upsert):
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_activate_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert):
+        mock_get_data.return_value.status_code = 200
+        mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
         sniff_printer('octopi.local', '192.168.1.15', '34:97:f6:3f:f1:96')
         self.assertEqual(mock_update_printer.call_count, 1)
         self.assertEqual(mock_upsert.call_count, 1)
@@ -103,7 +111,9 @@ class SniffPrinterTest(unittest.TestCase):
             "hostname": "octopi.local",
             "ip": "192.168.1.15",
             "name": "octopi.local",
-            "active": True,
-            "version": {"text": "OctoPrint"},
             "client": "octoprint",
+            "client_props": {
+                "connected": True,
+                "version": {"text": "OctoPrint"}
+            },
         })

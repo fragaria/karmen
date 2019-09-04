@@ -51,5 +51,5 @@ def discover_printers():
 
     for printer in to_deactivate:
         app.logger.debug('%s (%s) (%s) was not encountered on the network, deactivating' % (printer["hostname"], printer["ip"], printer["mac"]))
-        printer['active'] = False
+        printer["client_props"]["connected"] = False
         update_printer(**printer)
