@@ -9,6 +9,9 @@ export const getPrinters = (fields = []) => {
         return;
       }
       return response.json();
+    }).catch((e) => {
+      console.error(`Cannot get list of printers: ${e}`);
+      return;
     });
 }
 
@@ -20,7 +23,10 @@ export const getPrinter = (ip, fields = []) => {
         return;
       }
       return response.json();
-    });
+    }).catch((e) => {
+      console.error(`Cannot get a printer: ${e}`);
+      return;
+    })
 }
 
 export const deletePrinter = (ip) => {
@@ -33,5 +39,8 @@ export const deletePrinter = (ip) => {
         return false;
       }
       return true;
-    });
+    }).catch((e) => {
+      console.error(`Cannot remove a printer: ${e}`);
+      return false;
+    })
 }

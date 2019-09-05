@@ -1,25 +1,51 @@
 import React from 'react';
 import { deletePrinter } from '../services/karmen-backend';
 
-const WebcamStream = ({ stream, flipHorizontal, flipVertical, rotate90 }) => {
-  let klass = [];
-  if (flipHorizontal) {
-    klass.push('flip-horizontal');
+class WebcamStream extends React.Component {
+  state = {
+    isOnline: false,
+  }
+  componentDidMount() {
+    const { stream } = this.props;
+    fetch(stream)
+      .then((r) => {
+        if (r.status === 200) {
+          this.setState({
+            isOnline: true,
+          });
+        }
+      }).catch((e) => {
+        // silent pass
+      });
   }
 
-  if (flipVertical) {
-    klass.push('flip-vertical');
-  }
+  render() {
+    const { isOnline } = this.state;
+    const { stream, flipHorizontal, flipVertical, rotate90 } = this.props;
+    let klass = [];
+    if (flipHorizontal) {
+      klass.push('flip-horizontal');
+    }
 
-  if (rotate90) {
-    klass.push('rotate-90');
-  }
+    if (flipVertical) {
+      klass.push('flip-vertical');
+    }
 
-  return <p><img
-    className={klass.join(' ')}
-    alt={stream}
-    src={`${stream}?t=${(new Date()).getTime()}`}
-  /></p>;
+    if (rotate90) {
+      klass.push('rotate-90');
+    }
+
+    return <p>
+      {isOnline ?
+        <img
+          className={klass.join(' ')}
+          alt={stream}
+          src={`${stream}?t=${(new Date()).getTime()}`}
+        /> :
+        <strong>Stream not accessible</strong>
+      }
+    </p>;
+  }
 }
 
 const Job = ({ name, completion, printTime, printTimeLeft }) => {
