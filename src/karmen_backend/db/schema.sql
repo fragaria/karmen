@@ -30,7 +30,6 @@ SET default_with_oids = false;
 CREATE TABLE public.network_devices (
     mac character varying(17) NOT NULL,
     ip character varying(15) NOT NULL,
-    is_printer boolean DEFAULT false NOT NULL,
     retry_after timestamp without time zone,
     disabled boolean DEFAULT false
 );

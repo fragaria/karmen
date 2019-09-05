@@ -50,7 +50,6 @@ class SniffPrinterTest(unittest.TestCase):
         args, upsert_kwargs = mock_upsert.call_args
         self.assertEqual(upsert_kwargs["ip"], "192.168.1.15")
         self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
-        self.assertEqual(upsert_kwargs["is_printer"], False)
         self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
         self.assertFalse(upsert_kwargs["disabled"])
         mock_update_printer.assert_called_with(**{
@@ -78,7 +77,6 @@ class SniffPrinterTest(unittest.TestCase):
         args, upsert_kwargs = mock_upsert.call_args
         self.assertEqual(upsert_kwargs["ip"], "192.168.1.15")
         self.assertEqual(upsert_kwargs["mac"], "34:97:f6:3f:f1:96")
-        self.assertEqual(upsert_kwargs["is_printer"], False)
         self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
         mock_update_printer.assert_called_with(**{
             "mac": "34:97:f6:3f:f1:96",
@@ -104,7 +102,6 @@ class SniffPrinterTest(unittest.TestCase):
         mock_upsert.assert_called_with(**{
             "ip": "192.168.1.15",
             "mac": "34:97:f6:3f:f1:96",
-            "is_printer": True,
             "retry_after": None,
             "disabled": False,
         })

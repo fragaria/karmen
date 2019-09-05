@@ -18,7 +18,6 @@ def sniff_printer(hostname, ip, mac):
     database.upsert_network_device(
         ip=ip,
         mac=mac,
-        is_printer=printer.client.connected,
         retry_after=None if printer.client.connected else datetime.utcnow() + timedelta(seconds=app.config['NETWORK_RETRY_DEVICE_AFTER']),
         disabled=False
     )
