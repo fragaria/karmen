@@ -1,7 +1,11 @@
+import json
+import re
+
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
-from server.models import Octoprint
 from server import app, database, __version__
+from server.models import Octoprint
+from server.services import network
 
 @app.route('/', methods=['GET', 'OPTIONS'])
 @cross_origin()
@@ -64,3 +68,37 @@ def printer_delete(ip):
         device["disabled"] = True
         database.upsert_network_device(**device)
     return '', 204
+
+@app.route('/printers', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def printer_add():
+    data = request.json
+    ip = data.get("ip", None)
+    name = data.get("name", None)
+    if not ip or \
+        not name or \
+        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip) is None or \
+        len(name) < 1:
+        return abort(400)
+    if database.get_printer(ip) is not None:
+        return abort(409)
+    hostname = network.get_avahi_hostname(ip)
+    printer = Octoprint(hostname, ip, name)
+    printer.sniff()
+    database.upsert_network_device(
+        ip=ip,
+        retry_after=None,
+        disabled=False
+    )
+    database.add_printer(
+        name=name,
+        hostname=hostname,
+        ip=ip,
+        client=printer.client_name(),
+        client_props={
+            "version": printer.client.version,
+            "connected": printer.client.connected,
+            "read_only": printer.client.read_only,
+        }
+    )
+    return '', 201
