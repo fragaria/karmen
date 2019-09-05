@@ -13,14 +13,14 @@ def get_with_fallback(endpoint, hostname, ip, protocol='http', timeout=2):
     try:
         if hostname is not None:
             request = requests.get(uri, timeout=timeout)
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
         app.logger.debug("Cannot call %s, trying on %s" % (uri, ip))
     finally:
         if request is None:
             uri = '%s://%s%s' % (protocol, ip, endpoint)
             try:
                 request = requests.get(uri, timeout=timeout)
-            except requests.exceptions.ConnectionError:
+            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
                 app.logger.debug("Cannot call %s" % uri)
     return request
 
@@ -105,6 +105,8 @@ class Octoprint():
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
+                if not data["webcam"]["webcamEnabled"]:
+                    return {}
                 stream_url = data["webcam"]["streamUrl"]
                 if re.match(r'^https?', stream_url, re.IGNORECASE) is None:
                     stream_url = 'http://%s%s' % (self.ip, stream_url)
