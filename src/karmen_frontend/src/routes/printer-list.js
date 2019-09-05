@@ -1,5 +1,5 @@
 import React from 'react';
-import Printer from './printer';
+import PrinterView from '../components/printer-view';
 import { getPrinters } from '../services/karmen-backend';
 
 class PrinterList extends React.Component {
@@ -25,15 +25,31 @@ class PrinterList extends React.Component {
     this.loadPrinters();
   }
 
+  componentWillUnmount() {
+    const { timer } = this.state;
+    if (timer) {
+      clearTimeout(timer);
+    }
+  }
+
   render () {
     const { printers } = this.state;
     if (printers === null) {
       return <p>Loading printers</p>;
     }
     const printerElements = printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
-      return <Printer key={p.ip} printer={p} />
+      return <PrinterView key={p.ip} printer={p} onPrinterDelete={(ip) => {
+        this.setState({
+          printers: printers.filter((p) => p.ip !== ip),
+        });
+      }} />
     });
-    return (<div>{printerElements}</div>);
+    return (
+      <div>
+        {printerElements.length === 0 && <p>No printers found</p>}
+        {printerElements}
+      </div>
+    );
   }
 }
 

@@ -45,17 +45,19 @@ const Temperature = ({name, actual, target }) => {
   return <p>{name}: {actual}/{target} &#176;C</p>
 }
 
-const PrinterActions = ({ ip }) => {
+const PrinterActions = ({ ip, onPrinterDelete }) => {
   return (
     <ul>
       <li><button onClick={(e) => {
-        deletePrinter(ip); // TODO make this more reactive and drop the printer from the list
+        deletePrinter(ip);
+        onPrinterDelete(ip);
       }}>Remove</button></li>
+      <li>Edit</li>
     </ul>
   );
 }
 
-const Printer = ({ printer }) => {
+const PrinterView = ({ printer, onPrinterDelete }) => {
   return (
     <div>
       <h1>
@@ -70,7 +72,7 @@ const Printer = ({ printer }) => {
             <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
         </ul>
         <h3>Actions</h3>
-        <PrinterActions ip={printer.ip} />
+        <PrinterActions ip={printer.ip} onPrinterDelete={onPrinterDelete} />
         <hr />
       </div>
       <div>
@@ -85,4 +87,4 @@ const Printer = ({ printer }) => {
   );
 }
 
-export default Printer;
+export default PrinterView;
