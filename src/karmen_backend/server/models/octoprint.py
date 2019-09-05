@@ -32,11 +32,10 @@ class PrinterClient():
 class Octoprint():
     __client_name__ = 'octoprint'
 
-    def __init__(self, hostname, ip, mac, name=None, client=PrinterClient(), client_props=None):
+    def __init__(self, hostname, ip, name=None, client=PrinterClient(), client_props=None):
         self.name = name
         self.hostname = hostname
         self.ip = ip
-        self.mac = mac
         if not client_props:
             self.client = client
         else:

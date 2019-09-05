@@ -3,7 +3,7 @@ from server import app, celery, database
 from server.models.octoprint import Octoprint
 
 def update_printer(**kwargs):
-    has_record = database.get_printer(kwargs["mac"])
+    has_record = database.get_printer(kwargs["ip"])
     if has_record is None and not kwargs["client_props"]["connected"]:
         return
     if has_record is None:
@@ -12,12 +12,11 @@ def update_printer(**kwargs):
         database.update_printer(**{**has_record, **kwargs})
 
 @celery.task(name='sniff_printer')
-def sniff_printer(hostname, ip, mac):
-    printer = Octoprint(hostname, ip, mac)
+def sniff_printer(hostname, ip):
+    printer = Octoprint(hostname, ip)
     printer.sniff()
     database.upsert_network_device(
         ip=ip,
-        mac=mac,
         retry_after=None if printer.client.connected else datetime.utcnow() + timedelta(seconds=app.config['NETWORK_RETRY_DEVICE_AFTER']),
         disabled=False
     )
@@ -25,7 +24,6 @@ def sniff_printer(hostname, ip, mac):
         name=hostname or ip,
         hostname=hostname,
         ip=ip,
-        mac=mac,
         client=printer.client_name(),
         client_props={
             "version": printer.client.version,

@@ -12,8 +12,8 @@ export const getPrinters = (fields = []) => {
     });
 }
 
-export const getPrinter = (mac, fields = []) => {
-  return fetch(`${BASE_URL}/printers/${mac}?fields=${fields.join(',')}`)
+export const getPrinter = (ip, fields = []) => {
+  return fetch(`${BASE_URL}/printers/${ip}?fields=${fields.join(',')}`)
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get a printer: ${response.status}`);
@@ -23,8 +23,8 @@ export const getPrinter = (mac, fields = []) => {
     });
 }
 
-export const deletePrinter = (mac) => {
-  return fetch(`${BASE_URL}/printers/${mac}`, {
+export const deletePrinter = (ip) => {
+  return fetch(`${BASE_URL}/printers/${ip}`, {
     method: 'DELETE',
   })
     .then((response) => {

@@ -31,7 +31,7 @@ class PrinterList extends React.Component {
       return <p>Loading printers</p>;
     }
     const printerElements = printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
-      return <Printer key={p.mac} printer={p} />
+      return <Printer key={p.ip} printer={p} />
     });
     return (<div>{printerElements}</div>);
   }

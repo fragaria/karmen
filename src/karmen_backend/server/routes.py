@@ -23,7 +23,6 @@ def get_printer(printer, fields):
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,
         "ip": octoprinter.ip,
-        "mac": octoprinter.mac,
     }
     if "status" in fields:
         data["status"] = octoprinter.status()
@@ -42,23 +41,23 @@ def printers_list():
         printers.append(get_printer(printer, fields))
     return jsonify(printers)
 
-@app.route('/printers/<mac>', methods=['GET', 'OPTIONS'])
+@app.route('/printers/<ip>', methods=['GET', 'OPTIONS'])
 @cross_origin()
-def printer_detail(mac):
+def printer_detail(ip):
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    printer = database.get_printer(mac)
+    printer = database.get_printer(ip)
     if printer is None:
         return abort(404)
     return jsonify(get_printer(printer, fields))
 
-@app.route('/printers/<mac>', methods=['DELETE', 'OPTIONS'])
+@app.route('/printers/<ip>', methods=['DELETE', 'OPTIONS'])
 @cross_origin()
-def printer_delete(mac):
-    printer = database.get_printer(mac)
+def printer_delete(ip):
+    printer = database.get_printer(ip)
     if printer is None:
         return abort(404)
-    database.delete_printer(mac)
-    for device in database.get_network_devices(printer["mac"], printer["ip"]):
+    database.delete_printer(ip)
+    for device in database.get_network_devices(printer["ip"]):
         device["disabled"] = True
         database.upsert_network_device(**device)
     return '', 204
