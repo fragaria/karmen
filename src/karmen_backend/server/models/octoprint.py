@@ -25,10 +25,12 @@ def get_with_fallback(endpoint, hostname, ip, protocol='http', timeout=2):
     return request
 
 class PrinterClient():
-    def __init__(self, version={}, connected=False):
+    def __init__(self, version={}, connected=False, read_only=False):
         self.version = version
         self.connected = connected
+        self.read_only = read_only
 
+# Works with octoprint 1.3.11 without access control
 class Octoprint():
     __client_name__ = 'octoprint'
 
@@ -39,7 +41,7 @@ class Octoprint():
         if not client_props:
             self.client = client
         else:
-            self.client = PrinterClient(client_props["version"], client_props["connected"])
+            self.client = PrinterClient(client_props["version"], client_props["connected"], client_props["read_only"])
 
     def client_name(self):
         return self.__client_name__
@@ -50,8 +52,18 @@ class Octoprint():
             app.logger.debug('%s (%s) is not responding on /api/version - not octoprint' % (self.hostname, self.ip))
             self.client = PrinterClient({}, False)
             return
+        if request.status_code == 403:
+            app.logger.debug('%s (%s) is responding with %s on /api/version - might be access-protected octoprint' % (self.hostname, self.ip, request.status_code))
+            settings_req = get_with_fallback('/api/settings', self.hostname, self.ip)
+            if settings_req and settings_req.status_code == 200:
+                app.logger.debug('%s (%s) is responding with 200 on /api/settings - probably access-protected octoprint' % (self.hostname, self.ip))
+                self.client = PrinterClient({}, True, True)
+            else:
+                app.logger.debug('%s (%s) is responding with %s on /api/settings - probably not octoprint' % (self.hostname, self.ip, settings_req.status_code))
+                self.client = PrinterClient({}, False)
+            return
         if request.status_code != 200:
-            app.logger.debug('%s (%s) is responding with %s on /api/version - not octoprint' % (self.hostname, self.ip, request.status_code))
+            app.logger.debug('%s (%s) is responding with %s on /api/version - not accessible' % (self.hostname, self.ip, request.status_code))
             self.client = PrinterClient({}, False)
             return
         try:

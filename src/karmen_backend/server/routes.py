@@ -19,6 +19,7 @@ def get_printer(printer, fields):
             "name": octoprinter.client_name(),
             "version": octoprinter.client.version,
             "connected": octoprinter.client.connected,
+            "readonly": octoprinter.client.read_only,
         },
         "name": octoprinter.name,
         "hostname": octoprinter.hostname,

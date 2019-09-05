@@ -7,7 +7,7 @@ def update_printer(**kwargs):
     if has_record is None and not kwargs["client_props"]["connected"]:
         return
     if has_record is None:
-        database.add_printer(**{"name": None, "client_props": {"connected": False, "version": {}}, **kwargs})
+        database.add_printer(**{"name": None, "client_props": {"connected": False, "version": {}, "read_only": True}, **kwargs})
     else:
         database.update_printer(**{**has_record, **kwargs})
 
@@ -28,4 +28,5 @@ def sniff_printer(hostname, ip):
         client_props={
             "version": printer.client.version,
             "connected": printer.client.connected,
+            "read_only": printer.client.read_only,
         })

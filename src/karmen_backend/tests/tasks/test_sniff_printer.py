@@ -58,7 +58,8 @@ class SniffPrinterTest(unittest.TestCase):
             "client": "octoprint",
             "client_props": {
                 "connected": False,
-                "version": {}
+                "version": {},
+                "read_only": False,
             },
         })
 
@@ -82,7 +83,8 @@ class SniffPrinterTest(unittest.TestCase):
             "client": "octoprint",
             "client_props": {
                 "connected": False,
-                "version": {"text": "Fumbleprint"}
+                "version": {"text": "Fumbleprint"},
+                "read_only": False,
             },
         })
 
@@ -107,6 +109,7 @@ class SniffPrinterTest(unittest.TestCase):
             "client": "octoprint",
             "client_props": {
                 "connected": True,
-                "version": {"text": "OctoPrint"}
+                "version": {"text": "OctoPrint"},
+                "read_only": False,
             },
         })
