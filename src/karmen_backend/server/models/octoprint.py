@@ -151,3 +151,17 @@ class Octoprint():
                 return {}
         else:
             return {}
+
+    def printerprofile(self):
+        request = None
+        if self.client.connected:
+            request = get_with_fallback('/api/printerprofiles', self.hostname, self.ip)
+        if request is not None and request.status_code == 200:
+            try:
+                data = request.json()
+                current = [profile for profile in data["profiles"].values() if profile["current"]]
+                return current[0] if len(current) else {}
+            except json.decoder.JSONDecodeError:
+                return {}
+        else:
+            return {}
