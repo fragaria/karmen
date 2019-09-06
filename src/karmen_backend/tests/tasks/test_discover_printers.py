@@ -7,11 +7,11 @@ from server.tasks.discover_printers import discover_printers
 class DiscoverPrintersTest(unittest.TestCase):
 
     @mock.patch('server.tasks.discover_printers.do_arp_scan', return_value=[])
-    @mock.patch('server.database.get_printers', return_value=[
+    @mock.patch('server.tasks.discover_printers.get_printers', return_value=[
         {"hostname": "a", "ip": "1234", "client_props": {"connected": True}},
         {"hostname": "b", "ip": "1234", "client_props": {"connected": False}}
     ])
-    @mock.patch('server.database.get_network_devices', return_value=[])
+    @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
     @mock.patch('server.tasks.discover_printers.update_printer')
     @mock.patch('server.tasks.discover_printers.sniff_printer.delay')
@@ -28,10 +28,10 @@ class DiscoverPrintersTest(unittest.TestCase):
         ('172.17.0.2', '06:43:ac:11:00:02'),
         ('192.168.1.1', '34:97:f6:3f:f1:96'),
     ])
-    @mock.patch('server.database.get_printers', return_value=[
+    @mock.patch('server.tasks.discover_printers.get_printers', return_value=[
         {"hostname": "a", "ip": "1234", "client_props": {"connected": True}},
     ])
-    @mock.patch('server.database.get_network_devices', return_value=[])
+    @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[])
     @mock.patch('server.tasks.discover_printers.get_avahi_hostname', return_value='router.asus.com')
     @mock.patch('server.tasks.discover_printers.update_printer')
     @mock.patch('server.tasks.discover_printers.sniff_printer.delay')
@@ -56,10 +56,10 @@ class DiscoverPrintersTest(unittest.TestCase):
         ('172.17.0.2', '06:43:ac:11:00:02'),
         ('192.168.1.1', '34:97:f6:3f:f1:96'),
     ])
-    @mock.patch('server.database.get_printers', return_value=[
+    @mock.patch('server.tasks.discover_printers.get_printers', return_value=[
         {"hostname": "a", "ip": "1234", "client_props": {"connected": True}},
     ])
-    @mock.patch('server.database.get_network_devices', return_value=[
+    @mock.patch('server.tasks.discover_printers.get_network_devices', return_value=[
         {"ip": "172.17.0.2", "client_props": {"connected": True}, "retry_after": datetime.utcnow() + timedelta(hours=1), "disabled": False},
         {"ip": "192.168.1.1", "client_props": {"connected": True}, "retry_after": datetime.utcnow() + timedelta(hours=-1), "disabled": False},
     ])

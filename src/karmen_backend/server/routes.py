@@ -2,7 +2,9 @@ import re
 
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
-from server import app, database, __version__
+from server import app, __version__
+from server.database.printers import get_printer, get_printers, delete_printer, add_printer
+from server.database.network_devices import get_network_devices, upsert_network_device
 from server.models import Octoprint
 from server.services import network
 
@@ -15,7 +17,7 @@ def index():
         'version': __version__
     })
 
-def get_printer(printer, fields):
+def make_printer_response(printer, fields):
     octoprinter = Octoprint(**printer)
     data = {
         "client": {
@@ -43,29 +45,29 @@ def get_printer(printer, fields):
 def printers_list():
     printers = []
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    for printer in database.get_printers():
-        printers.append(get_printer(printer, fields))
+    for printer in get_printers():
+        printers.append(make_printer_response(printer, fields))
     return jsonify(printers)
 
 @app.route('/printers/<ip>', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def printer_detail(ip):
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    printer = database.get_printer(ip)
+    printer = get_printer(ip)
     if printer is None:
         return abort(404)
-    return jsonify(get_printer(printer, fields))
+    return jsonify(make_printer_response(printer, fields))
 
 @app.route('/printers/<ip>', methods=['DELETE', 'OPTIONS'])
 @cross_origin()
 def printer_delete(ip):
-    printer = database.get_printer(ip)
+    printer = get_printer(ip)
     if printer is None:
         return abort(404)
-    database.delete_printer(ip)
-    for device in database.get_network_devices(printer["ip"]):
+    delete_printer(ip)
+    for device in get_network_devices(printer["ip"]):
         device["disabled"] = True
-        database.upsert_network_device(**device)
+        upsert_network_device(**device)
     return '', 204
 
 @app.route('/printers', methods=['POST', 'OPTIONS'])
@@ -80,17 +82,17 @@ def printer_add():
         not name or \
         re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip) is None:
         return abort(400)
-    if database.get_printer(ip) is not None:
+    if get_printer(ip) is not None:
         return abort(409)
     hostname = network.get_avahi_hostname(ip)
     printer = Octoprint(hostname, ip, name)
     printer.sniff()
-    database.upsert_network_device(
+    upsert_network_device(
         ip=ip,
         retry_after=None,
         disabled=False
     )
-    database.add_printer(
+    add_printer(
         name=name,
         hostname=hostname,
         ip=ip,
