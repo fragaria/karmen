@@ -1,9 +1,9 @@
 FLASK_APP:=server
 FLASK_DEBUG:=true
 FLASKR_SETTINGS:=../config.local.cfg
-CELERY_BEAT_PID:=/tmp/vesca-celery-beat-pid
-CELERY_WORKER_PID:=/tmp/vesca-celery-worker-pid
-FLASK_PID:=/tmp/vesca-flask-pid
+CELERY_BEAT_PID:=/tmp/karmen-celery-beat-pid
+CELERY_WORKER_PID:=/tmp/karmen-celery-worker-pid
+FLASK_PID:=/tmp/karmen-flask-pid
 
 install:
 	pipenv install --dev
