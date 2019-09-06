@@ -19,6 +19,12 @@ class WebcamStream extends React.Component {
       });
   }
 
+  componentWillUnmount() {
+    this.setState({
+      isOnline: false,
+    })
+  }
+
   render() {
     const { isOnline } = this.state;
     const { stream, flipHorizontal, flipVertical, rotate90 } = this.props;

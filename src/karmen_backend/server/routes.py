@@ -1,4 +1,3 @@
-import json
 import re
 
 from flask import jsonify, request, abort
@@ -73,12 +72,13 @@ def printer_delete(ip):
 @cross_origin()
 def printer_add():
     data = request.json
+    if not data:
+        return abort(400)
     ip = data.get("ip", None)
     name = data.get("name", None)
     if not ip or \
         not name or \
-        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip) is None or \
-        len(name) < 1:
+        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip) is None:
         return abort(400)
     if database.get_printer(ip) is not None:
         return abort(409)

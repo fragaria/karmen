@@ -11,7 +11,7 @@ export const getPrinters = (fields = []) => {
       return response.json();
     }).catch((e) => {
       console.error(`Cannot get list of printers: ${e}`);
-      return;
+      return [];
     });
 }
 
@@ -25,7 +25,26 @@ export const getPrinter = (ip, fields = []) => {
       return response.json();
     }).catch((e) => {
       console.error(`Cannot get a printer: ${e}`);
-      return;
+      return {};
+    })
+}
+
+export const addPrinter = (ip, name) => {
+  return fetch(`${BASE_URL}/printers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ip, name}),
+  })
+    .then((response) => {
+      if (response.status !== 201) {
+        console.error(`Cannot add a printer: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot add a printer: ${e}`);
+      return 500;
     })
 }
 
@@ -36,11 +55,10 @@ export const deletePrinter = (ip) => {
     .then((response) => {
       if (response.status !== 204) {
         console.error(`Cannot remove a printer: ${response.status}`);
-        return false;
       }
-      return true;
+      return response.status;
     }).catch((e) => {
       console.error(`Cannot remove a printer: ${e}`);
-      return false;
+      return 500;
     })
 }

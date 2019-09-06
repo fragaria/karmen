@@ -83,9 +83,7 @@ class Octoprint():
         self.client = PrinterClient(data, True)
 
     def status(self):
-        request = None
-        if self.client.connected:
-            request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
+        request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -113,6 +111,8 @@ class Octoprint():
         request = None
         if self.client.connected:
             request = get_with_fallback('/api/settings', self.hostname, self.ip)
+            if not request:
+                self.client.connected = False
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -136,6 +136,8 @@ class Octoprint():
         request = None
         if self.client.connected:
             request = get_with_fallback('/api/job', self.hostname, self.ip)
+            if not request:
+                self.client.connected = False
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -156,11 +158,13 @@ class Octoprint():
         request = None
         if self.client.connected:
             request = get_with_fallback('/api/printerprofiles', self.hostname, self.ip)
+            if not request:
+                self.client.connected = False
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
                 current = [profile for profile in data["profiles"].values() if profile["current"]]
-                return current[0] if len(current) else {}
+                return {} if not current else current[0]
             except json.decoder.JSONDecodeError:
                 return {}
         else:

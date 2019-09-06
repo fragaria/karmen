@@ -13,15 +13,16 @@ class PrinterList extends React.Component {
     this.loadPrinters = this.loadPrinters.bind(this);
   }
 
-  async loadPrinters() {
-    const printers = await getPrinters(['job', 'status', 'webcam']);
-    this.setState({
-      printers,
-      timer: setTimeout(this.loadPrinters, 3000),
+  loadPrinters() {
+    getPrinters(['job', 'status', 'webcam']).then((printers) => {
+      this.setState({
+        printers,
+        timer: setTimeout(this.loadPrinters, 3000),
+      });
     });
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.loadPrinters();
   }
 
