@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from server import app, celery
+from server import celery
+from server.database.settings import get_val
 from server.database.printers import get_printer, add_printer, update_printer
 from server.database.network_devices import upsert_network_device
 from server.models.octoprint import Octoprint
@@ -15,11 +16,14 @@ def save_printer_data(**kwargs):
 
 @celery.task(name='sniff_printer')
 def sniff_printer(hostname, ip):
+    if not get_val('network_discovery'):
+        return
+    # TODO not only octoprint
     printer = Octoprint(hostname, ip)
     printer.sniff()
     upsert_network_device(
         ip=ip,
-        retry_after=None if printer.client.connected else datetime.utcnow() + timedelta(seconds=app.config['NETWORK_RETRY_DEVICE_AFTER']),
+        retry_after=None if printer.client.connected else datetime.utcnow() + timedelta(seconds=get_val('network_retry_device_after')),
         disabled=False
     )
     save_printer_data(

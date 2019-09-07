@@ -39,10 +39,16 @@ class SavePrinterDataTest(unittest.TestCase):
 
 class SniffPrinterTest(unittest.TestCase):
 
+    @mock.patch('server.tasks.sniff_printer.get_val')
     @mock.patch('server.tasks.sniff_printer.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
     @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert):
+    def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
+        def mock_call(key):
+            if key == 'network_discovery':
+                return True
+            return 3600
+        mock_get_val.side_effect = mock_call
         retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer('octopi.local', '192.168.1.10')
         self.assertEqual(mock_update_printer.call_count, 1)
@@ -63,10 +69,16 @@ class SniffPrinterTest(unittest.TestCase):
             },
         })
 
+    @mock.patch('server.tasks.sniff_printer.get_val')
     @mock.patch('server.tasks.sniff_printer.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
     @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_deactivate_bad_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert):
+    def test_deactivate_bad_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
+        def mock_call(key):
+            if key == 'network_discovery':
+                return True
+            return 3600
+        mock_get_val.side_effect = mock_call
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "Fumbleprint"}
         retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
@@ -88,10 +100,16 @@ class SniffPrinterTest(unittest.TestCase):
             },
         })
 
+    @mock.patch('server.tasks.sniff_printer.get_val')
     @mock.patch('server.tasks.sniff_printer.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
     @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_activate_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert):
+    def test_activate_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
+        def mock_call(key):
+            if key == 'network_discovery':
+                return True
+            return 3600
+        mock_get_val.side_effect = mock_call
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
         sniff_printer('octopi.local', '192.168.1.12')
@@ -113,3 +131,17 @@ class SniffPrinterTest(unittest.TestCase):
                 "read_only": False,
             },
         })
+
+    @mock.patch('server.tasks.sniff_printer.get_val')
+    @mock.patch('server.tasks.sniff_printer.upsert_network_device')
+    @mock.patch('server.tasks.sniff_printer.save_printer_data')
+    @mock.patch('server.models.octoprint.get_with_fallback')
+    def test_do_nothing_when_discovery_off(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
+        def mock_call(key):
+            if key == 'network_discovery':
+                return False
+            return 3600
+        mock_get_val.side_effect = mock_call
+        self.assertEqual(mock_get_data.call_count, 0)
+        self.assertEqual(mock_update_printer.call_count, 0)
+        self.assertEqual(mock_upsert.call_count, 0)

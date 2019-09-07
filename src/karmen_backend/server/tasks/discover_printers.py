@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from server import app, celery
+from server.database.settings import get_val
 from server.database.printers import get_printers
 from server.database.network_devices import get_network_devices
 from server.services.network import do_arp_scan, get_avahi_hostname
@@ -8,10 +9,13 @@ from server.tasks.sniff_printer import update_printer, sniff_printer
 
 @celery.task(name='discover_printers')
 def discover_printers():
+    if not get_val('network_discovery'):
+        return
+    app.logger.debug('Discovering network printers...')
     now = datetime.utcnow()
     to_deactivate = get_printers()
     to_skip_ip = [device["ip"] for device in get_network_devices() if (device["retry_after"] and device["retry_after"] > now) or device["disabled"]]
-    for line in do_arp_scan(app.config['NETWORK_INTERFACE']):
+    for line in do_arp_scan(get_val('network_interface')):
         (ip, mac) = line
         to_deactivate = [printer for printer in to_deactivate if printer["ip"] != ip]
         if ip in to_skip_ip:
