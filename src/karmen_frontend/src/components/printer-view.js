@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { deletePrinter } from '../services/karmen-backend';
 
-class WebcamStream extends React.Component {
+export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
   }
@@ -54,7 +55,7 @@ class WebcamStream extends React.Component {
   }
 }
 
-const Job = ({ name, completion, printTime, printTimeLeft }) => {
+export const Job = ({ name, completion, printTime, printTimeLeft }) => {
   let approxPrintTimeLeft = printTimeLeft;
   if (!approxPrintTimeLeft && printTime > 0) {
     approxPrintTimeLeft = (printTime / completion) * 100;
@@ -73,23 +74,23 @@ const Job = ({ name, completion, printTime, printTimeLeft }) => {
   );
 }
 
-const Temperature = ({name, actual, target }) => {
+export const Temperature = ({name, actual, target }) => {
   return <p>{name}: {actual}/{target} &#176;C</p>
 }
 
-const PrinterActions = ({ ip, onPrinterDelete }) => {
+export const PrinterActions = ({ ip, onPrinterDelete }) => {
   return (
     <ul>
       <li><button onClick={(e) => {
         deletePrinter(ip);
         onPrinterDelete(ip);
       }}>Remove</button></li>
-      <li>Edit</li>
+      <li><Link to={`/printers/${ip}`}>Edit</Link></li>
     </ul>
   );
 }
 
-const PrinterView = ({ printer, onPrinterDelete }) => {
+export const PrinterView = ({ printer, onPrinterDelete }) => {
   return (
     <div>
       <h1>
