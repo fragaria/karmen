@@ -15,7 +15,7 @@ class PrinterDetail extends React.Component {
 
   loadPrinter() {
     const { match } = this.props;
-    getPrinter(match.params.ip, ['job', 'status', 'webcam', 'printerprofile']).then((printer) => {
+    getPrinter(match.params.ip, ['job', 'status', 'webcam']).then((printer) => {
       this.setState({
         printer,
       });

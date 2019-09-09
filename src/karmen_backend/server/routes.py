@@ -38,8 +38,6 @@ def make_printer_response(printer, fields):
         data["webcam"] = octoprinter.webcam()
     if "job" in fields:
         data["job"] = octoprinter.job()
-    if "printerprofile" in fields:
-        data["printerprofile"] = octoprinter.printerprofile()
     return data
 
 @app.route('/printers', methods=['GET', 'OPTIONS'])
