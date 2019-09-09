@@ -83,7 +83,9 @@ class Octoprint():
         self.client = PrinterClient(data, True)
 
     def status(self):
-        request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
+        request = None
+        if self.client.connected:
+            request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -116,6 +118,7 @@ class Octoprint():
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
+                self.client.connected = True
                 if not data["webcam"]["webcamEnabled"]:
                     return {}
                 stream_url = data["webcam"]["streamUrl"]
@@ -141,6 +144,7 @@ class Octoprint():
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
+                self.client.connected = True
                 if "state" in data and re.match(r"Operational|Offline", data["state"]):
                     return {}
                 return {
@@ -163,6 +167,7 @@ class Octoprint():
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
+                self.client.connected = True
                 current = [profile for profile in data["profiles"].values() if profile["current"]]
                 return {} if not current else current[0]
             except json.decoder.JSONDecodeError:

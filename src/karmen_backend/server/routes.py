@@ -47,6 +47,7 @@ def printers_list():
     printers = []
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
     for printer in get_printers():
+        # TODO this should go in parallel
         printers.append(make_printer_response(printer, fields))
     return jsonify(printers)
 
