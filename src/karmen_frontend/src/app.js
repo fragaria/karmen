@@ -6,6 +6,7 @@ import Footer from './components/footer';
 
 import PrinterList from './routes/printer-list';
 import AddPrinter from './routes/add-printer';
+import Settings from './routes/settings';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Menu />
         <Switch>
           <Route path="/add-printer" exact component={AddPrinter} />
+          <Route path="/settings" exact component={Settings} />
           <Route path="/" exact component={PrinterList} />
         </Switch>
         <Footer />

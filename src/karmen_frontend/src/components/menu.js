@@ -8,6 +8,7 @@ const Menu = () => {
         <ul>
           <li><Link to="/">Printer list</Link></li>
           <li><Link to="/add-printer">Add printer</Link></li>
+          <li><Link to="/settings">Settings</Link></li>
         </ul>
         <hr />
       </nav>
