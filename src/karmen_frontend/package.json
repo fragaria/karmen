@@ -10,7 +10,7 @@
   },
   "scripts": {
     "lint": "eslint src --ext jsx,js",
-    "start": "BROWSER=none react-scripts start",
+    "start": "BROWSER=none REACT_APP_BACKEND_BASE=http://localhost:5000 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

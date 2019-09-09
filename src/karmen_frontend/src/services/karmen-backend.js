@@ -1,5 +1,4 @@
-// TODO populate this from env vars
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = process.env.REACT_APP_BACKEND_BASE;
 
 export const getPrinters = (fields = []) => {
   return fetch(`${BASE_URL}/printers?fields=${fields.join(',')}`)
