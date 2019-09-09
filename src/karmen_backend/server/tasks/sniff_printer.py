@@ -16,8 +16,6 @@ def save_printer_data(**kwargs):
 
 @celery.task(name='sniff_printer')
 def sniff_printer(hostname, ip):
-    if not get_val('network_discovery'):
-        return
     # TODO not only octoprint
     printer = Octoprint(hostname, ip)
     printer.sniff()

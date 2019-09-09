@@ -19,6 +19,7 @@ def index():
     })
 
 def make_printer_response(printer, fields):
+    # TODO not only octoprint
     octoprinter = Octoprint(**printer)
     data = {
         "client": {

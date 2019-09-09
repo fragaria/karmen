@@ -107,6 +107,7 @@ class DiscoverPrintersTest(unittest.TestCase):
                 return False
             return 3600
         mock_get_val.side_effect = mock_call
+        discover_printers()
         self.assertEqual(mock_db_devices.call_count, 0)
         self.assertEqual(mock_get_printers.call_count, 0)
         self.assertEqual(mock_arp_scan.call_count, 0)

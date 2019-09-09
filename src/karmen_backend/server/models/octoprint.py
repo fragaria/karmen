@@ -46,6 +46,16 @@ class Octoprint():
     def client_name(self):
         return self.__client_name__
 
+    def is_alive(self):
+        request = get_with_fallback('/api/version', self.hostname, self.ip)
+        if request is None or request.status_code != 200:
+            self.client.connected = False
+        else:
+            if not self.client.connected:
+                self.sniff()
+                self.client.connected = True
+        return self.client.connected
+
     def sniff(self):
         request = get_with_fallback('/api/version', self.hostname, self.ip)
         if request is None:
@@ -86,6 +96,8 @@ class Octoprint():
         request = None
         if self.client.connected:
             request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
+            if not request:
+                self.client.connected = False
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
