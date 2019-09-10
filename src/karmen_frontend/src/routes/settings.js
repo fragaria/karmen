@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Loader from '../components/loader';
-import FormInputs from '../components/form-utils';
+import { FormInputs } from '../components/form-utils';
 import { getSettings, changeSettings } from '../services/karmen-backend';
 
 class Settings extends React.Component {

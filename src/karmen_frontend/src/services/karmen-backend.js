@@ -47,6 +47,26 @@ export const addPrinter = (ip, name) => {
     })
 }
 
+export const patchPrinter = (ip, data) => {
+  return fetch(`${BASE_URL}/printers/${ip}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => {
+      if (response.status !== 204) {
+        console.error(`Cannot patch a printer: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot patch a printer: ${e}`);
+      return 500;
+    })
+}
+
+
 export const deletePrinter = (ip) => {
   return fetch(`${BASE_URL}/printers/${ip}`, {
     method: 'DELETE',

@@ -70,7 +70,7 @@ class AddPrinter extends React.Component {
             </p>
             <p>
               <label htmlFor="ip">IP address</label>
-              <input type="text" id="ip" name="ip" value={ip}  onChange={(e) => this.setState({ip: e.target.value})} required="required" />
+              <input type="text" id="ip" name="ip" value={ip} onChange={(e) => this.setState({ip: e.target.value})} required="required" />
              </p>
             <p>
               <button type="submit" onClick={this.addPrinter}>Add printer</button>

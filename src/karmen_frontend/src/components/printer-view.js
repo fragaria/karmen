@@ -127,8 +127,8 @@ export const PrinterView = ({ printer, onPrinterDelete }) => {
         {printer.name}
       </h1>
       <div>
-        <PrinterConnection printer={printer} />
         <PrinterActions ip={printer.ip} onPrinterDelete={onPrinterDelete} />
+        <PrinterConnection printer={printer} />
         <PrinterState printer={printer} />
       </div>
       <hr />

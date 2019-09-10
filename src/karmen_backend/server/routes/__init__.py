@@ -1,0 +1,15 @@
+from flask import jsonify, request, abort
+from flask_cors import cross_origin
+from server import app, __version__
+
+@app.route('/', methods=['GET', 'OPTIONS'])
+@cross_origin()
+def index():
+    return jsonify({
+        'app': 'karmen_backend',
+        'docs': 'https://karmen.readthedocs.io',
+        'version': __version__
+    })
+
+import server.routes.printers
+import server.routes.settings
