@@ -1,32 +1,41 @@
 import React from 'react';
 
+import Loader from '../components/loader';
+import FormInputs from '../components/form-utils';
 import { getSettings, changeSettings } from '../services/karmen-backend';
-
 
 class Settings extends React.Component {
   state = {
+    init: true,
+    submitting: false,
     settings: {
-      'network_discovery': {
-        "name": "Discover printers on the network?",
-        "val": true,
-        'type': 'checkbox',
+      network_discovery: {
+        name: "Discover printers on the network?",
+        val: true,
+        type: 'checkbox',
+        required: true,
+        error: null,
       },
-      'network_interface': {
-        "name": "On which network?",
-        "val": '',
-        'type': 'text',
+      network_interface: {
+        name: "On which network?",
+        val: '',
+        type: 'text',
+        required: true,
+        error: null,
       },
-      'network_retry_device_after': {
-        "name": "After how much time should we check again with a non-responding device?",
-        "val": 3600,
-        'type': 'select',
-        'options': [
-          {'name': '1 hour', 'val': 3600},
-          {'name': '10 minutes', 'val': 600},
-        ]
+      network_retry_device_after: {
+        name: "After how much time should we check again with a non-responding device?",
+        val: 3600,
+        type: 'select',
+        options: [
+          {name: '1 hour', val: 3600},
+          {name: '10 minutes', val: 600},
+        ],
+        required: true,
+        error: null,
       }
     },
-    error: null,
+    message: null,
   }
 
   constructor(props) {
@@ -46,6 +55,7 @@ class Settings extends React.Component {
       }
       this.setState({
         settings,
+        init: false,
       });
     });
   }
@@ -56,85 +66,75 @@ class Settings extends React.Component {
 
   changeSettings(e) {
     e.preventDefault();
-    const { settings } = this.state;
     this.setState({
-      error: null,
+      message: null,
+      submitting: true,
     });
-    const changedSettings = Object.keys(settings).map((opt) => {
-      return {
+    const { settings } = this.state;
+    let hasErrors = false;
+    const updatedSettings = Object.assign({}, settings);
+    const changedSettings = [];
+    // eslint-disable-next-line array-callback-return
+    Object.keys(settings).map((opt) => {
+      if (settings[opt].required && settings[opt].type === 'text' && !settings[opt].val) {
+        hasErrors = true;
+        updatedSettings[opt].error = 'This is a required field!';
+      }
+      changedSettings.push({
         key: opt,
         val: settings[opt].val,
-      }
-    })
-    changeSettings(changedSettings)
-      .then((r) => {
-        switch(r) {
-          case 201:
-            this.setState({
-              // TODO not an error
-              error: 'Changes saved successfully',
-            });
-            break;
-          case 400:
-          default:
-            this.setState({
-              error: 'Cannot save your changes, check server logs',
-            });
-        }
       });
+    })
+    this.setState({
+      settings: updatedSettings,
+    });
+    if (!hasErrors) {
+      changeSettings(changedSettings)
+        .then((r) => {
+          switch(r) {
+            case 201:
+              this.setState({
+                message: 'Changes saved successfully',
+                submitting: false,
+              });
+              break;
+            case 400:
+            default:
+              this.setState({
+                message: 'Cannot save your changes, check server logs',
+                submitting: false,
+              });
+          }
+        });
+    } else {
+      this.setState({
+        submitting: false,
+      });
+    }
   }
 
   render () {
-    const { settings, error } = this.state;
-    const optionRows = Object.keys(settings).map((name) => {
-      const updateValue = (name, value) => {
-        const { settings } = this.state;
-        this.setState({
-          settings: Object.assign({}, settings, {
-            [name]: Object.assign({}, settings[name], {val: value})
-          })
-        });
-      }
-      switch(settings[name].type) {
-        case 'text':
-          return (
-            <p key={name}>
-              <label htmlFor={name}>{settings[name].name}</label>
-              <input type="text" id={name} name={name} value={settings[name].val} onChange={(e) => updateValue(name, e.target.value)} required="required" />
-            </p>
-          );
-        case 'checkbox':
-          return (
-            <p key={name}>
-              <label htmlFor={name}>{settings[name].name}</label>
-              <input type="checkbox" id={name} name={name} checked={settings[name].val} onChange={(e) => updateValue(name, e.target.checked)} required="required" />
-            </p>
-          );
-        case 'select':
-          const opts = settings[name].options.map((opt) => {
-            return <option key={opt.val} value={opt.val}>{opt.name}</option>;
-          })
-          return (
-            <p key={name}>
-              <label htmlFor={name}>{settings[name].name}</label>
-              <select id={name} name={name} value={settings[name].val} onChange={(e) => updateValue(name, e.target.value)} required="required">
-                {opts}
-              </select>
-            </p>
-          );
-        default:
-          return null;
-      }
-    });
+    const { init, submitting, settings, message } = this.state;
+    if (init) {
+      return (<div><Loader /></div>);
+    }
+    const updateValue = (name, value) => {
+      const { settings } = this.state;
+      this.setState({
+        settings: Object.assign({}, settings, {
+          [name]: Object.assign({}, settings[name], {val: value, error: null})
+        })
+      });
+    }
     return (
       <div>
         <h1>Change settings</h1>
         <div>
           <form>
-            {error && <p>{error}</p>}
-            {optionRows}
+            {message && <p>{message}</p>}
+            <FormInputs definition={settings} updateValue={updateValue} />
             <p>
-              <button type="submit" onClick={this.changeSettings}>Save settings</button>
+              <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
             </p>
            </form>
         </div>

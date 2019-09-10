@@ -80,13 +80,43 @@ export const Temperature = ({name, actual, target }) => {
 
 export const PrinterActions = ({ ip, onPrinterDelete }) => {
   return (
-    <ul>
-      <li><button onClick={(e) => {
-        deletePrinter(ip);
-        onPrinterDelete(ip);
-      }}>Remove</button></li>
-      <li><Link to={`/printers/${ip}`}>Edit</Link></li>
-    </ul>
+    <div>
+      <h2>Actions</h2>
+      <ul>
+        <li><Link to={`/printers/${ip}`}>Edit</Link></li>
+        <li><button onClick={(e) => {
+          deletePrinter(ip);
+          onPrinterDelete(ip);
+        }}>Remove</button></li>
+      </ul>
+    </div>
+  );
+}
+
+export const PrinterState = ({ printer }) => {
+  return (
+    <div>
+        <h2>Current state</h2>
+        <p>State: <strong>{printer.status.state}</strong></p>
+        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
+        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+        {printer.job.name && <Job {...printer.job} />}
+        {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+      </div>
+  );
+}
+
+export const PrinterConnection = ({ printer }) => {
+  return (
+    <div>
+      <h2>Connection</h2>
+      <ul>
+          <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
+          <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
+          <li>Client hostname: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>
+          <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
+      </ul>
+    </div>
   );
 }
 
@@ -97,25 +127,11 @@ export const PrinterView = ({ printer, onPrinterDelete }) => {
         {printer.name}
       </h1>
       <div>
-        <h2>Connection</h2>
-        <ul>
-            <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
-            <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
-            <li>Client hostname: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>
-            <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
-        </ul>
-        <h3>Actions</h3>
+        <PrinterConnection printer={printer} />
         <PrinterActions ip={printer.ip} onPrinterDelete={onPrinterDelete} />
-        <hr />
+        <PrinterState printer={printer} />
       </div>
-      <div>
-        <h2>Current state</h2>
-        <p>State: <strong>{printer.status.state}</strong></p>
-        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
-        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-        {printer.job.name && <Job {...printer.job} />}
-        {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
-      </div>
+      <hr />
     </div>
   );
 }

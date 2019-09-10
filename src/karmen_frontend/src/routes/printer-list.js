@@ -1,4 +1,6 @@
 import React from 'react';
+
+import Loader from '../components/loader';
 import PrinterView from '../components/printer-view';
 import { getPrinters } from '../services/karmen-backend';
 
@@ -36,7 +38,7 @@ class PrinterList extends React.Component {
   render () {
     const { printers } = this.state;
     if (printers === null) {
-      return <p>Loading printers</p>;
+      return <div><Loader /></div>;
     }
     const printerElements = printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
       return <PrinterView key={p.ip} printer={p} onPrinterDelete={(ip) => {

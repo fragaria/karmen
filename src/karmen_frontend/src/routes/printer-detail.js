@@ -1,7 +1,8 @@
 import React from 'react';
 
+import Loader from '../components/loader';
+import { PrinterConnection, PrinterState } from '../components/printer-view';
 import { getPrinter } from '../services/karmen-backend';
-
 
 class PrinterDetail extends React.Component {
   state = {
@@ -29,13 +30,16 @@ class PrinterDetail extends React.Component {
   render () {
     const { printer } = this.state;
     if (!printer) {
-      return <div></div>;
+      return <div><Loader /></div>;
     }
     return (
       <div>
-        <h1>Printer detail {printer.ip}</h1>
+        <h1>
+          {printer.name}
+        </h1>
         <div>
-          
+          <PrinterConnection printer={printer} />
+          <PrinterState printer={printer} />
         </div>
       </div>
     );
