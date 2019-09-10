@@ -12,7 +12,7 @@ class PrinterDetail extends React.Component {
     message: null,
     form: {
       name: {
-        name: "New printer's name",
+        name: "Printer's new name",
         val: '',
         type: 'text',
         required: true,
