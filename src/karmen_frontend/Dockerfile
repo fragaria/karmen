@@ -10,7 +10,6 @@ RUN npm install
 COPY . .
 
 ARG REACT_APP_GIT_REV
-ARG NODE_ENV
 
 RUN npm run build
 
