@@ -1,14 +1,13 @@
 from server import app, celery
-from server.database.printers import get_printers
-from server.database.printers import update_printer
-from server.models.octoprint import Octoprint
+from server.database.printers import get_printers, update_printer
+from server import models
 
 @celery.task(name='check_printers')
 def check_printers():
     app.logger.debug('Checking known printers...')
     for raw_printer in get_printers():
         # TODO not only octoprint
-        printer = Octoprint(**raw_printer)
+        printer = models.get_printer_instance(raw_printer)
         printer.is_alive()
         update_printer(
             name=printer.name,

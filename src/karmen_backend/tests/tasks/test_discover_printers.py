@@ -21,7 +21,7 @@ class DiscoverPrintersTest(unittest.TestCase):
         def mock_call(key):
             if key == 'network_discovery':
                 return True
-            return 3600
+            return 'wlan0'
         mock_get_val.side_effect = mock_call
         discover_printers()
         self.assertEqual(mock_update_printer.call_count, 2)
@@ -47,7 +47,7 @@ class DiscoverPrintersTest(unittest.TestCase):
         def mock_call(key):
             if key == 'network_discovery':
                 return True
-            return 3600
+            return 'wlan0'
         mock_get_val.side_effect = mock_call
         discover_printers()
         self.assertEqual(mock_delay.call_count, 2)
@@ -84,7 +84,7 @@ class DiscoverPrintersTest(unittest.TestCase):
         def mock_call(key):
             if key == 'network_discovery':
                 return True
-            return 3600
+            return 'wlan0'
         mock_get_val.side_effect = mock_call
         discover_printers()
         self.assertEqual(mock_delay.call_count, 1)
@@ -105,7 +105,7 @@ class DiscoverPrintersTest(unittest.TestCase):
         def mock_call(key):
             if key == 'network_discovery':
                 return False
-            return 3600
+            return 'wlan0'
         mock_get_val.side_effect = mock_call
         discover_printers()
         self.assertEqual(mock_db_devices.call_count, 0)

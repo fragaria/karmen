@@ -48,6 +48,7 @@ class Octoprint():
 
     def is_alive(self):
         request = get_with_fallback('/api/version', self.hostname, self.ip)
+        # TODO test for access-protected octoprint
         if request is None or request.status_code != 200:
             self.client.connected = False
         else:

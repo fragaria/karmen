@@ -4,12 +4,13 @@ from server import app
 from server.database import get_connection
 
 def normalize_val(val):
-    if isinstance(val, str) and val.isdigit():
-        val = int(val)
-    if val in ('true', '1', 'yes'):
-        return True
-    if val in ('false', '0', 'no'):
-        return False
+    if isinstance(val, str):
+        if val.isdigit():
+            return int(val)
+        if val.lower() in ('true', '1', 'yes', 'on'):
+            return True
+        if val.lower() in ('false', '0', 'no', 'off'):
+            return False
     return val
 
 def get_all_settings():

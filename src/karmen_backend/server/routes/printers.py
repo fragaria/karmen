@@ -5,29 +5,28 @@ from flask_cors import cross_origin
 from server import app, __version__
 from server.database.printers import get_printer, get_printers, delete_printer, add_printer, update_printer
 from server.database.network_devices import get_network_devices, upsert_network_device
-from server.models import Octoprint
+from server import models
 from server.services import network
 
 def make_printer_response(printer, fields):
-    # TODO not only octoprint
-    octoprinter = Octoprint(**printer)
+    printer_inst = models.get_printer_instance(printer)
     data = {
         "client": {
-            "name": octoprinter.client_name(),
-            "version": octoprinter.client.version,
-            "connected": octoprinter.client.connected,
-            "readonly": octoprinter.client.read_only,
+            "name": printer_inst.client_name(),
+            "version": printer_inst.client.version,
+            "connected": printer_inst.client.connected,
+            "readonly": printer_inst.client.read_only,
         },
-        "name": octoprinter.name,
-        "hostname": octoprinter.hostname,
-        "ip": octoprinter.ip,
+        "name": printer_inst.name,
+        "hostname": printer_inst.hostname,
+        "ip": printer_inst.ip,
     }
     if "status" in fields:
-        data["status"] = octoprinter.status()
+        data["status"] = printer_inst.status()
     if "webcam" in fields:
-        data["webcam"] = octoprinter.webcam()
+        data["webcam"] = printer_inst.webcam()
     if "job" in fields:
-        data["job"] = octoprinter.job()
+        data["job"] = printer_inst.job()
     return data
 
 @app.route('/printers', methods=['GET', 'OPTIONS'])
@@ -36,7 +35,7 @@ def printers_list():
     printers = []
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
     for printer in get_printers():
-        # TODO this should go in parallel
+        # TODO this should somehow go in parallel
         printers.append(make_printer_response(printer, fields))
     return jsonify(printers)
 
@@ -55,7 +54,12 @@ def printer_create():
     if get_printer(ip) is not None:
         return abort(409)
     hostname = network.get_avahi_hostname(ip)
-    printer = Octoprint(hostname, ip, name)
+    printer = models.get_printer_instance({
+        "hostname": hostname,
+        "ip": ip,
+        "name": name,
+        "client": "octoprint", # TODO make this more generic
+    })
     printer.sniff()
     upsert_network_device(
         ip=ip,
@@ -108,15 +112,16 @@ def printer_patch(ip):
     name = data.get("name", None)
     if not name:
         return abort(400)
+    printer_inst = models.get_printer_instance(printer)
     update_printer(
         name=name,
-        hostname=printer["hostname"],
-        ip=printer["ip"],
-        client=printer["client"],
+        hostname=printer_inst.hostname,
+        ip=printer_inst.ip,
+        client=printer_inst.client_name(),
         client_props={
-            "version": printer["client_props"]["version"],
-            "connected": printer["client_props"]["connected"],
-            "read_only": printer["client_props"]["read_only"],
+            "version": printer_inst.client.version,
+            "connected": printer_inst.client.connected,
+            "read_only": printer_inst.client.read_only,
         }
     )
     return '', 204
