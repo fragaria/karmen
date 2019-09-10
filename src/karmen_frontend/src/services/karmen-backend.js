@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_BACKEND_BASE;
+const BASE_URL = window.env.BACKEND_BASE;
 
 export const getPrinters = (fields = []) => {
   return fetch(`${BASE_URL}/printers?fields=${fields.join(',')}`)

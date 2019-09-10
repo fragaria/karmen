@@ -1,8 +1,13 @@
 {
   "name": "karmen",
+  "description": "A common interface for multiple 3D printers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fragaria/karmen"
+  },
+  "license": "AGPL-3.0-only",
   "version": "0.0.0",
   "dependencies": {
-    "node-sass": "^4.12.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
@@ -10,10 +15,13 @@
   },
   "scripts": {
     "lint": "eslint src --ext jsx,js",
-    "start": "BROWSER=none REACT_APP_BACKEND_BASE=http://localhost:5000 react-scripts start",
-    "build": "react-scripts build",
+    "start": "BROWSER=none REACT_APP_GIT_REV=`git rev-parse --short HEAD` react-scripts start",
+    "build": "REACT_APP_GIT_REV=`git rev-parse --short HEAD` react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-env-file": "node ./scripts/build-env-file.js",
+    "docker-start": "npm run build-env-file && npm run serve",
+    "serve": "./node_modules/.bin/superstatic --debug 1 --port 8080 --host 0.0.0.0 --compression 1 build/"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -31,6 +39,8 @@
     ]
   },
   "devDependencies": {
-    "eslint": "^6.3.0"
+    "eslint": "^6.3.0",
+    "node-sass": "^4.12.0",
+    "superstatic": "^6.0.4"
   }
 }
