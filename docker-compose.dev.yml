@@ -3,21 +3,25 @@ services:
   frontend:
     build:
       context: ./src/karmen_frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       args:
         - REACT_APP_GIT_REV
     environment:
       BACKEND_BASE: http://localhost:5000
     ports:
     - "3000:8080"
-  flask_backend:
+    volumes:
+      - ./src/karmen_frontend/src:/usr/src/app/src
+  backend_flask:
     build:
       context: ./src/karmen_backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     environment:
       FLASKR_SETTINGS: '../config.local.cfg'
     ports:
-    - "5000:80"
+    - "5000:5000"
+    volumes:
+      - ./src/karmen_backend/server:/usr/src/app/server
     links:
     - redis
     - postgres

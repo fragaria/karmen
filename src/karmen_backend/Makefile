@@ -39,7 +39,7 @@ celery-worker:
 	export FLASK_APP=${FLASK_APP} && export FLASK_DEBUG=${FLASK_DEBUG} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && celery -A server.celery worker
 
 flask:
-	export FLASK_APP=${FLASK_APP} && export FLASK_DEBUG=${FLASK_DEBUG} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && flask run
+	export FLASK_APP=${FLASK_APP} && export FLASK_DEBUG=${FLASK_DEBUG} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && flask run --host=0.0.0.0 --port 5000
 
 redis:
 	docker run -d -p 6379:6379 redis

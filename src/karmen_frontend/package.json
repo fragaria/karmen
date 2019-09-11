@@ -15,11 +15,12 @@
   },
   "scripts": {
     "lint": "eslint src --ext jsx,js",
-    "start": "BROWSER=none REACT_APP_GIT_REV=`git rev-parse --short HEAD` react-scripts start",
+    "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build-env-file": "node ./scripts/build-env-file.js",
+    "docker-start-dev": "npm rebuild node-sass && PORT=8080 npm start",
     "docker-start": "npm run build-env-file && npm run serve",
     "serve": "./node_modules/.bin/superstatic --debug 1 --port 8080 --host 0.0.0.0 --compression 1 build/"
   },

@@ -17,6 +17,13 @@ This project contains
 
 ## Usage
 
+For development with live reload (both backend and frontend), start this with the
+following docker-compose command.
+
+```sh
+REACT_APP_GIT_REV=`git rev-parse --short HEAD` docker-compose -f docker-compose.dev.yml up
+```
+
 ## Contributing
 
 ## Support
