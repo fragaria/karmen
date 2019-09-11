@@ -16,8 +16,6 @@ ENV PYTHONPATH=/usr/src/app
 COPY ./scripts/nginx.conf /etc/nginx
 RUN chmod +x ./scripts/start-backend.sh
 
-ARG FLASKR_SETTINGS
-
 CMD ["./scripts/start-backend.sh"]
 
 EXPOSE 80

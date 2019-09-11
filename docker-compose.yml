@@ -1,0 +1,40 @@
+version: "3"
+services:
+  frontend:
+    build:
+      context: ./src/karmen_frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_GIT_REV
+    environment:
+      BACKEND_BASE: http://localhost:5000
+    ports:
+    - "3000:8080"
+  flask_backend:
+    build:
+      context: ./src/karmen_backend
+      dockerfile: Dockerfile
+    environment:
+      FLASKR_SETTINGS: '../config.local.cfg'
+    ports:
+    - "5000:80"
+    links:
+    - redis
+    - postgres
+  redis:
+    image: redis
+  postgres:
+    image: postgres
+    restart: always
+    volumes:
+      - ./tmp/db-data:/var/lib/postgresql/data
+      - ./src/karmen_backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_PASSWORD: print3d
+      POSTGRES_USER: print3d
+      POSTGRES_DB: print3d
+    ports:
+      - 5433:5432
+volumes:
+  db-data:
+    driver: local
