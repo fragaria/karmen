@@ -22,6 +22,8 @@ services:
     - "5000:5000"
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
+      - /var/run/dbus:/var/run/dbus
+    privileged: true
     links:
     - redis
     - postgres
