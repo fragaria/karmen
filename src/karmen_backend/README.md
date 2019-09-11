@@ -29,3 +29,10 @@ Visit `localhost:5000`.
 1. `flask run` and the server will start to accept connections on `http://localhost:5000`
 
 - How to create postgresDB: (https://serverfault.com/a/110155)
+
+# Docker
+
+```sh
+docker build -t karmen/backend .
+docker run -e FLASKR_SETTINGS='../config.local.cfg' -p5000:80 karmen/backend
+```
