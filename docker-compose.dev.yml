@@ -14,13 +14,13 @@ services:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
-    build:
-      context: ./src/karmen_backend
-      dockerfile: Dockerfile.dev
+    build: ./src/karmen_backend
     environment:
+      ENV: develop
+      SERVICE: flask
       FLASKR_SETTINGS: '../config.local.cfg'
     ports:
-    - 127.0.0.1:5000:5000
+    - 127.0.0.1:5000:8080
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus
@@ -42,6 +42,3 @@ services:
       POSTGRES_DB: print3d
     ports:
       - 127.0.0.1:5433:5432
-volumes:
-  db-data:
-    driver: local
