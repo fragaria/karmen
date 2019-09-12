@@ -111,6 +111,6 @@ export const getSettings = (settings) => {
       return response.json();
     }).catch((e) => {
       console.error(`Cannot get settings: ${e}`);
-      return 500;
+      return [];
     })
 }
