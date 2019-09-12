@@ -9,7 +9,7 @@ services:
     environment:
       BACKEND_BASE: http://localhost:5000
     ports:
-    - "3000:8080"
+    - 127.0.0.1:3000:8080
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
   backend_flask:
@@ -19,7 +19,7 @@ services:
     environment:
       FLASKR_SETTINGS: '../config.local.cfg'
     ports:
-    - "5000:5000"
+    - 127.0.0.1:5000:5000
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus
@@ -40,7 +40,7 @@ services:
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
     ports:
-      - 5433:5432
+      - 127.0.0.1:5433:5432
 volumes:
   db-data:
     driver: local
