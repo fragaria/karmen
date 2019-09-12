@@ -13,6 +13,6 @@ ARG REACT_APP_GIT_REV
 
 RUN npm run build
 
-CMD ["npm", "run", "docker-start"]
+CMD ["./scripts/docker-start.sh"]
 
 EXPOSE 8080
