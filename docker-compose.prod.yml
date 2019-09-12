@@ -1,40 +1,26 @@
 version: "3.4"
 services:
-  fake_printer1:
-    build: ./src/karmen_backend
-    environment:
-      ENV: develop
-      SERVICE: fake-printer
-    ports:
-    - 127.0.0.1:5001:8080
-  fake_printer2:
-    build: ./src/karmen_backend
-    environment:
-      ENV: develop
-      SERVICE: fake-printer
-    ports:
-    - 127.0.0.1:5002:8080
   frontend:
     build:
       context: ./src/karmen_frontend
       args:
         - REACT_APP_GIT_REV
     environment:
-      ENV: develop
-      BACKEND_BASE: http://localhost:5000
+      ENV: production
+      BACKEND_BASE: http://10.192.202.58:8080 # TODO set from envvar
     ports:
-    - 127.0.0.1:3000:8080
+    - 80:8080
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
     build: ./src/karmen_backend
     environment:
-      ENV: develop
+      ENV: production
       SERVICE: flask
       FLASKR_SETTINGS: '../config.local.cfg'
     ports:
-    - 127.0.0.1:5000:8080
+    - 8080:8080
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus # for mdns resolution
@@ -47,7 +33,7 @@ services:
       context: ./src/karmen_backend
     # network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
-      ENV: develop
+      ENV: production
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.local.cfg'
     volumes:
@@ -59,7 +45,7 @@ services:
   backend_celery_beat:
     build: ./src/karmen_backend
     environment:
-      ENV: develop
+      ENV: production
       SERVICE: celery-beat
       FLASKR_SETTINGS: '../config.local.cfg'
     volumes:

@@ -10,15 +10,18 @@ A common interface for multiple 3d printers.
 This project contains
 
 - [Backend service](./src/karmen_backend) that discovers and communicates with all the connected printers
+- [Frontend](./src/karmen_frontend) that displays data from the backend
 
 ## Prerequisites
+
+- Docker
 
 ## Installation
 
 ## Usage
 
 For development with live reload (both backend and frontend), start this with the
-following docker-compose command.
+following docker-compose command. The dev mode also contains two fake printers.
 
 ```sh
 REACT_APP_GIT_REV=`git rev-parse --short HEAD` docker-compose -f docker-compose.dev.yml up
