@@ -3,15 +3,16 @@ services:
   frontend:
     build:
       context: ./src/karmen_frontend
-      dockerfile: Dockerfile.dev
       args:
         - REACT_APP_GIT_REV
     environment:
+      ENV: develop
       BACKEND_BASE: http://localhost:5000
     ports:
     - 127.0.0.1:3000:8080
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
+      - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
     build:
       context: ./src/karmen_backend

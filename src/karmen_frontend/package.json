@@ -20,8 +20,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build-env-file": "node ./scripts/build-env-file.js",
-    "docker-start-dev": "npm rebuild node-sass && PORT=8080 npm start",
-    "docker-start": "npm run build-env-file && npm run serve",
+    "docker-start": "./scripts/docker-start.sh",
     "serve": "./node_modules/.bin/superstatic --debug 1 --port 8080 --host 0.0.0.0 --compression 1 build/"
   },
   "eslintConfig": {
