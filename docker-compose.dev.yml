@@ -23,19 +23,22 @@ services:
     - 127.0.0.1:5000:8080
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
-      - /var/run/dbus:/var/run/dbus
-    privileged: true
+      - /var/run/dbus:/var/run/dbus # for mdns resolution
+    privileged: true # for mdns resolution
     links:
     - redis
     - postgres
   backend_celery_worker:
-    build: ./src/karmen_backend
+    build:
+      context: ./src/karmen_backend
+    # network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: develop
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.local.cfg'
     volumes:
       - /var/run/dbus:/var/run/dbus
+    privileged: true # for mdns resolution
     links:
     - redis
     - postgres

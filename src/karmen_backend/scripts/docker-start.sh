@@ -18,5 +18,6 @@ elif [ "$SERVICE" = 'celery-worker' ]; then
   export FLASK_DEBUG=true
   celery -A server.celery worker
 else
+  echo "Unknown service ${SERVICE} encountered. I know of [flask, celery-beat and celery-worker]".
   exit 1
 fi
