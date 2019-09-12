@@ -1,4 +1,4 @@
-version: "3"
+version: "3.4"
 services:
   frontend:
     build:
@@ -25,6 +25,28 @@ services:
       - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus
     privileged: true
+    links:
+    - redis
+    - postgres
+  backend_celery_worker:
+    build: ./src/karmen_backend
+    environment:
+      ENV: develop
+      SERVICE: celery-worker
+      FLASKR_SETTINGS: '../config.local.cfg'
+    volumes:
+      - /var/run/dbus:/var/run/dbus
+    links:
+    - redis
+    - postgres
+  backend_celery_beat:
+    build: ./src/karmen_backend
+    environment:
+      ENV: develop
+      SERVICE: celery-beat
+      FLASKR_SETTINGS: '../config.local.cfg'
+    volumes:
+      - /var/run/dbus:/var/run/dbus
     links:
     - redis
     - postgres

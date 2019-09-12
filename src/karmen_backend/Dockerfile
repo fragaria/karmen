@@ -21,4 +21,4 @@ COPY ./scripts/nginx.conf /etc/nginx
 
 CMD ["./scripts/docker-start.sh"]
 
-EXPOSE 80
+EXPOSE 8080
