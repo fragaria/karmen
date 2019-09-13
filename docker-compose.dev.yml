@@ -24,8 +24,9 @@ services:
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
     networks:
-      - backend
+      - default
       - printers
+      - backend
     links:
       - postgres
       - redis
@@ -53,6 +54,7 @@ services:
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.dev.cfg'
     networks:
+      - default
       - backend
       - printers
   backend_celery_beat:
@@ -63,7 +65,6 @@ services:
       FLASKR_SETTINGS: '../config.dev.cfg'
     networks:
       - backend
-      - printers
   redis:
     image: redis
     networks:
@@ -79,10 +80,11 @@ services:
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
-    networks:
-      - backend
     ports:
       - 127.0.0.1:5433:5432
+    networks:
+      - default
+      - backend
 networks:
   backend:
     ipam:

@@ -1,6 +1,7 @@
 import re
 
-from flask import jsonify, request, abort
+import requests
+from flask import jsonify, request, abort, Response, stream_with_context
 from flask_cors import cross_origin
 from server import app, __version__
 from server.database.printers import get_printer, get_printers, delete_printer, add_printer, update_printer
@@ -25,6 +26,8 @@ def make_printer_response(printer, fields):
         data["status"] = printer_inst.status()
     if "webcam" in fields:
         data["webcam"] = printer_inst.webcam()
+        if "stream" in data["webcam"]:
+            data["webcam"]["proxied"] = "/printers/%s/webcam" % (printer_inst.ip, )
     if "job" in fields:
         data["job"] = printer_inst.job()
     return data
@@ -125,3 +128,17 @@ def printer_patch(ip):
         }
     )
     return '', 204
+
+@app.route('/printers/<ip>/webcam', methods=['GET', 'OPTIONS'])
+@cross_origin()
+def printer_webcam(ip):
+    # This is very inefficient
+    printer = get_printer(ip)
+    if printer is None:
+        return abort(404)
+    printer_inst = models.get_printer_instance(printer)
+    webcam = printer_inst.webcam()
+    if "stream" not in webcam:
+        return abort(404)
+    req = requests.get(webcam["stream"], stream=True)
+    return Response(stream_with_context(req.iter_content()), content_type=req.headers["content-type"])
