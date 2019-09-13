@@ -4,6 +4,7 @@
 # Development
 
 The preferred way is to use the composed docker package as [described in here](https://github.com/fragaria/karmen/blob/master/README.md).
+You don't have to bother with setup of database and other services.
 
 ## Docker
 
@@ -33,6 +34,7 @@ which affects how it is connected to the other containers.
 - Install `arp-scan` (for printer discovery), `avahi-utils` (for bonjour hostname autodiscovery), `libpq-dev` (for psycopg2 build)
 - Setup pgsql database `print3d` and import schema from `db/schema.sql`
 - Setup redis instance
+- Jump into pipenv's virtualenv by running `pipenv install && pipenv shell`
 - Configure `flask` with `export FLASK_APP=server`
 - Optionally enable debug mode with `export FLASK_DEBUG=true`
 - Point `flask` to proper configuration with `export FLASKR_SETTINGS=../config.local.cfg`

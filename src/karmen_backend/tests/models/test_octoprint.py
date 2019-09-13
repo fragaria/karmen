@@ -3,203 +3,192 @@ import json
 import mock
 import requests
 
-from server.models.octoprint import Octoprint, PrinterClient, get_with_fallback
+from server.models.octoprint import Octoprint, PrinterClient, get_uri
 
-class GetWithFallbackTest(unittest.TestCase):
+class GetUriTest(unittest.TestCase):
     @mock.patch('requests.get')
     def test_try_hostname(self, mock_requests):
-        get_with_fallback('/api/version', 'host', '1.2.3.4')
-        mock_requests.assert_called_with('http://host/api/version', timeout=2)
+        get_uri('1.2.3.4', '/api/version')
+        mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
 
     @mock.patch('requests.get')
     def test_pass_protocol_timeout(self, mock_requests):
-        get_with_fallback('/api/version', None, '1.2.3.4', 'https', 3)
+        get_uri('1.2.3.4', '/api/version', protocol='https', timeout=3)
         mock_requests.assert_called_with('https://1.2.3.4/api/version', timeout=3)
 
     @mock.patch('requests.get')
-    def test_try_ip(self, mock_requests):
-        get_with_fallback('/api/version', None, '1.2.3.4')
+    def test_add_leading_slash(self, mock_requests):
+        get_uri('1.2.3.4', 'api/version')
         mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
 
     @mock.patch('requests.get')
-    def test_add_leading_slash(self, mock_requests):
-        get_with_fallback('api/version', None, '1.2.3.4')
-        mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
+    def test_ip_port(self, mock_requests):
+        get_uri('1.2.3.4:5000', 'api/version')
+        mock_requests.assert_called_with('http://1.2.3.4:5000/api/version', timeout=2)
 
     @mock.patch('requests.get')
     def test_try_nothing(self, mock_requests):
-        request = get_with_fallback('/api/version', None, None)
+        request = get_uri(None, '/api/version')
         self.assertEqual(mock_requests.call_count, 0)
         self.assertEqual(request, None)
 
     @mock.patch('requests.get')
-    def test_fallback_ip(self, mock_requests):
-        def mock_call(uri, **kwargs):
-            if 'host' in uri:
-                raise requests.exceptions.ConnectionError('mocked')
-            return uri
-        mock_requests.side_effect = mock_call
-        request = get_with_fallback('/api/version', 'host', '1.2.3.4')
-        self.assertEqual(request, 'http://1.2.3.4/api/version')
-        self.assertEqual(mock_requests.call_count, 2)
-        mock_requests.assert_has_calls([
-            mock.call('http://host/api/version', timeout=2),
-            mock.call('http://1.2.3.4/api/version', timeout=2)
-        ])
+    def test_try_root(self, mock_requests):
+        request = get_uri('1.2.3.4')
+        mock_requests.assert_called_with('http://1.2.3.4/', timeout=2)
 
     @mock.patch('requests.get')
     def test_no_success(self, mock_requests):
         def mock_call(uri, **kwargs):
             raise requests.exceptions.ConnectionError('mocked')
         mock_requests.side_effect = mock_call
-        request = get_with_fallback('/api/version', 'host', '1.2.3.4')
+        request = get_uri('1.2.3.4', '/api/version')
         self.assertEqual(request, None)
-        self.assertEqual(mock_requests.call_count, 2)
+        self.assertEqual(mock_requests.call_count, 1)
         mock_requests.assert_has_calls([
-            mock.call('http://host/api/version', timeout=2),
             mock.call('http://1.2.3.4/api/version', timeout=2)
         ])
 
 class OctoprintConstructor(unittest.TestCase):
     def test_parse_client_props(self):
-        printer = Octoprint('octopi.local', '192.168.1.15', client_props={"connected": True, "read_only": False, "version": {}})
+        printer = Octoprint('192.168.1.15', hostname='octopi.local', client_props={"connected": True, "read_only": False, "version": {}})
         self.assertTrue(printer.client.connected)
 
 class OctoprintIsAliveTest(unittest.TestCase):
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_disconnected_printer(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_disconnected_printer(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15')
         self.assertFalse(printer.client.connected)
         self.assertFalse(printer.is_alive())
         self.assertFalse(printer.client.connected)
-        self.assertEqual(mock_get_with_fallback.call_count, 1)
+        self.assertEqual(mock_get_uri.call_count, 1)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_connected_printer(self, mock_get_with_fallback):
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_connected_printer(self, mock_get_uri):
         class Response():
             def __init__(self, status_code, contents):
                 self.status_code = status_code
                 self.contents = contents
             def json(self):
                 return {"text": "something"}
-        def mock_call(uri, host, ip, **kwargs):
+        def mock_call(uri, **kwargs):
             return Response(200, '')
-        mock_get_with_fallback.side_effect = mock_call
-        printer = Octoprint('octopi.local', '192.168.1.15')
+        mock_get_uri.side_effect = mock_call
+        printer = Octoprint('192.168.1.15')
         self.assertFalse(printer.client.connected)
         self.assertTrue(printer.is_alive())
         self.assertTrue(printer.client.connected)
-        self.assertEqual(mock_get_with_fallback.call_count, 2)
+        self.assertEqual(mock_get_uri.call_count, 2)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_already_connected_printer(self, mock_get_with_fallback):
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_already_connected_printer(self, mock_get_uri):
         class Response():
             def __init__(self, status_code, contents):
                 self.status_code = status_code
                 self.contents = contents
             def json(self):
                 return {"text": "something"}
-        def mock_call(uri, host, ip, **kwargs):
+        def mock_call(uri, **kwargs):
             return Response(200, '')
-        mock_get_with_fallback.side_effect = mock_call
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        mock_get_uri.side_effect = mock_call
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         self.assertTrue(printer.client.connected)
         self.assertTrue(printer.is_alive())
         self.assertTrue(printer.client.connected)
-        self.assertEqual(mock_get_with_fallback.call_count, 1)
+        self.assertEqual(mock_get_uri.call_count, 1)
 
 class OctoprintSniffTest(unittest.TestCase):
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_deactivate_non_responding_printer(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_deactivate_non_responding_printer(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15')
         self.assertFalse(printer.client.connected)
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.version, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_access_protected_octoprint(self, mock_get_with_fallback):
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_access_protected_octoprint(self, mock_get_uri):
         class Response():
             def __init__(self, status_code, contents):
                 self.status_code = status_code
                 self.contents = contents
             def json(self):
                 return {"text": "something"}
-        def mock_call(uri, host, ip, **kwargs):
-            if 'settings' in uri:
+        def mock_call(ip, **kwargs):
+            if 'settings' in kwargs['endpoint']:
                 return Response(200, '')
             return Response(403, '')
-        mock_get_with_fallback.side_effect = mock_call
+        mock_get_uri.side_effect = mock_call
 
-        printer = Octoprint('octopi.local', '192.168.1.15')
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, True)
         self.assertEqual(printer.client.read_only, True)
         self.assertEqual(printer.client.version, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_403_not_octoprint(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 403
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_403_not_octoprint(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 403
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.read_only, False)
         self.assertEqual(printer.client.version, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_deactivate_non_200_responding_printer(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 404
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_deactivate_non_200_responding_printer(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 404
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.version, {})
         self.assertEqual(printer.client.read_only, False)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_deactivate_no_data_responding_printer(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_deactivate_no_data_responding_printer(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.version, {})
         self.assertEqual(printer.client.read_only, False)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_deactivate_bad_data_responding_printer(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {"text": "Fumbleprint"}
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_deactivate_bad_data_responding_printer(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {"text": "Fumbleprint"}
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.version, {"text": "Fumbleprint"})
         self.assertEqual(printer.client.read_only, False)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_no_crash_on_different_response(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {"random": "field"}
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_no_crash_on_different_response(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {"random": "field"}
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.version, {"random": "field"})
         self.assertEqual(printer.client.read_only, False)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_activate_responding_printer(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {"text": "OctoPrint"}
-        printer = Octoprint('octopi.local', '192.168.1.15')
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_activate_responding_printer(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {"text": "OctoPrint"}
+        printer = Octoprint('192.168.1.15')
         printer.sniff()
         self.assertEqual(printer.client.connected, True)
         self.assertEqual(printer.client.version, {"text": "OctoPrint"})
         self.assertEqual(printer.client.read_only, False)
 
 class OctoprintStatusTest(unittest.TestCase):
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_status_ok(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_status_ok(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "state": {
                 "text": "Printing"
             },
@@ -216,7 +205,7 @@ class OctoprintStatusTest(unittest.TestCase):
                 },
             },
         }
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.status()
         self.assertEqual(result, {
             "state": "Printing",
@@ -234,47 +223,47 @@ class OctoprintStatusTest(unittest.TestCase):
             },
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_status_malformed_json(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_status_malformed_json(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.status()
         self.assertEqual(result, {
             "state": "Printer is responding with invalid data",
             "temperature": {},
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_status_conflict(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 409
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_status_conflict(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 409
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.status()
         self.assertEqual(result, {
             "state": "Printer is not connected to Octoprint",
             "temperature": {},
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_status_unreachable(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_status_unreachable(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.status()
         self.assertEqual(result, {
             "state": "Printer is not responding",
             "temperature": {},
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_status_disconnected(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=False))
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_status_disconnected(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=False))
         printer.status()
-        self.assertEqual(mock_get_with_fallback.call_count, 0)
+        self.assertEqual(mock_get_uri.call_count, 0)
 
 class OctoprintWebcamTest(unittest.TestCase):
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_webcam_no_absolute_url(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_webcam_no_absolute_url(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "webcam": {
                 "bitrate": "5000k",
                 "ffmpegPath": "/usr/bin/ffmpeg",
@@ -293,7 +282,7 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": True,
             }
         }
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {
             "stream": "http://192.168.1.15/webcam/?action=stream",
@@ -302,10 +291,10 @@ class OctoprintWebcamTest(unittest.TestCase):
             "rotate90": False,
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_webcam_absolute_url(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_webcam_absolute_url(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "webcam": {
                 "flipH": True,
                 "flipV": True,
@@ -314,7 +303,7 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": True,
             }
         }
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {
             "stream": "http://1.2.3.4/webcam/?action=stream",
@@ -323,23 +312,23 @@ class OctoprintWebcamTest(unittest.TestCase):
             "rotate90": False,
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_webcam_disconnect(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_webcam_disconnect(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         self.assertTrue(printer.client.connected)
         printer.webcam()
         self.assertFalse(printer.client.connected)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_webcam_disconnected(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=False))
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_webcam_disconnected(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=False))
         printer.webcam()
-        self.assertEqual(mock_get_with_fallback.call_count, 0)
+        self.assertEqual(mock_get_uri.call_count, 0)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_webcam_disabled(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_webcam_disabled(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "webcam": {
                 "flipH": True,
                 "flipV": True,
@@ -348,36 +337,36 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": False,
             }
         }
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_webcam_malformed_json(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_webcam_malformed_json(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_webcam_no_response(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_webcam_no_response(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_webcam_inactive_printer(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15')
-        self.assertEqual(mock_get_with_fallback.call_count, 0)
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_webcam_inactive_printer(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15')
+        self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.job()
         self.assertEqual(result, {})
 
 class OctoprintJobTest(unittest.TestCase):
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_job_ok(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_job_ok(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "job": {
                 "file": {
                     "display": "test-pouzdro-na-iphone.gcode",
@@ -390,7 +379,7 @@ class OctoprintJobTest(unittest.TestCase):
             },
             "state": "Printing",
         }
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.job()
         self.assertEqual(result, {
             "name": "test-pouzdro-na-iphone.gcode",
@@ -399,10 +388,10 @@ class OctoprintJobTest(unittest.TestCase):
             "printTime": 10,
         })
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_job_done(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_job_done(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "job": {
                 "file": {
                     "display": "test-pouzdro-na-iphone.gcode",
@@ -415,14 +404,14 @@ class OctoprintJobTest(unittest.TestCase):
             },
             "state": "Operational",
         }
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.job()
         self.assertEqual(result, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_job_offline_printer(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.return_value = {
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_job_offline_printer(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
             "job": {
                 "file": {
                     "display": "test-pouzdro-na-iphone.gcode",
@@ -435,40 +424,40 @@ class OctoprintJobTest(unittest.TestCase):
             },
             "state": "Offline (Error: Too many consecutive timeouts, printer still connected and alive?)",
         }
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
+        result = printer.job()
+        self.assertEqual(result, {})
+
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_job_malformed_json(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
         printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
         result = printer.job()
         self.assertEqual(result, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_job_malformed_json(self, mock_get_with_fallback):
-        mock_get_with_fallback.return_value.status_code = 200
-        mock_get_with_fallback.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
-        result = printer.job()
-        self.assertEqual(result, {})
-
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_job_disconnect(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_job_disconnect(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         self.assertTrue(printer.client.connected)
         printer.job()
         self.assertFalse(printer.client.connected)
 
-    @mock.patch('server.models.octoprint.get_with_fallback')
-    def test_job_disconnected(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=False))
+    @mock.patch('server.models.octoprint.get_uri')
+    def test_job_disconnected(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=False))
         printer.job()
-        self.assertEqual(mock_get_with_fallback.call_count, 0)
+        self.assertEqual(mock_get_uri.call_count, 0)
 
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_job_no_response(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClient(connected=True))
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_job_no_response(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClient(connected=True))
         result = printer.job()
         self.assertEqual(result, {})
 
-    @mock.patch('server.models.octoprint.get_with_fallback', return_value=None)
-    def test_job_inactive_printer(self, mock_get_with_fallback):
-        printer = Octoprint('octopi.local', '192.168.1.15')
-        self.assertEqual(mock_get_with_fallback.call_count, 0)
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_job_inactive_printer(self, mock_get_uri):
+        printer = Octoprint('192.168.1.15')
+        self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.job()
         self.assertEqual(result, {})

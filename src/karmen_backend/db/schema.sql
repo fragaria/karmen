@@ -28,7 +28,7 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE public.network_devices (
-    ip character varying(15) NOT NULL,
+    ip character varying(21) NOT NULL,
     retry_after timestamp without time zone,
     disabled boolean DEFAULT false
 );
@@ -44,7 +44,7 @@ ALTER TABLE public.network_devices OWNER TO print3d;
 CREATE TABLE public.printers (
     client_props json,
     name character varying(255) NOT NULL,
-    ip character varying(15) NOT NULL,
+    ip character varying(21) NOT NULL,
     hostname character varying(255),
     client character varying(64) NOT NULL
 );

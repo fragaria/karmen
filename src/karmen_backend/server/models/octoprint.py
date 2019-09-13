@@ -3,25 +3,17 @@ import re
 import requests
 from server import app
 
-def get_with_fallback(endpoint, hostname, ip, protocol='http', timeout=2):
+def get_uri(ip, endpoint='/', protocol='http', timeout=2):
     request = None
-    if hostname is None and ip is None:
+    if ip is None:
         return request
     if endpoint[0] != '/':
         endpoint = '/%s' % (endpoint, )
-    uri = '%s://%s%s' % (protocol, hostname, endpoint)
+    uri = '%s://%s%s' % (protocol, ip, endpoint)
     try:
-        if hostname is not None:
-            request = requests.get(uri, timeout=timeout)
+        request = requests.get(uri, timeout=timeout)
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
-        app.logger.debug("Cannot call %s, trying on %s" % (uri, ip))
-    finally:
-        if request is None:
-            uri = '%s://%s%s' % (protocol, ip, endpoint)
-            try:
-                request = requests.get(uri, timeout=timeout)
-            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
-                app.logger.debug("Cannot call %s" % uri)
+        app.logger.debug("Cannot call %s" % (uri))
     return request
 
 class PrinterClient():
@@ -34,7 +26,7 @@ class PrinterClient():
 class Octoprint():
     __client_name__ = 'octoprint'
 
-    def __init__(self, hostname, ip, name=None, client=PrinterClient(), client_props=None):
+    def __init__(self, ip, hostname=None, name=None, client=PrinterClient(), client_props=None):
         self.name = name
         self.hostname = hostname
         self.ip = ip
@@ -47,7 +39,7 @@ class Octoprint():
         return self.__client_name__
 
     def is_alive(self):
-        request = get_with_fallback('/api/version', self.hostname, self.ip)
+        request = get_uri(self.ip, endpoint='/api/version')
         # TODO test for access-protected octoprint
         if request is None or request.status_code != 200:
             self.client.connected = False
@@ -58,37 +50,37 @@ class Octoprint():
         return self.client.connected
 
     def sniff(self):
-        request = get_with_fallback('/api/version', self.hostname, self.ip)
+        request = get_uri(self.ip, endpoint='/api/version')
         if request is None:
-            app.logger.debug('%s (%s) is not responding on /api/version - not octoprint' % (self.hostname, self.ip))
+            app.logger.debug('%s is not responding on /api/version - not octoprint' % self.ip)
             self.client = PrinterClient({}, False)
             return
         if request.status_code == 403:
-            app.logger.debug('%s (%s) is responding with %s on /api/version - might be access-protected octoprint' % (self.hostname, self.ip, request.status_code))
-            settings_req = get_with_fallback('/api/settings', self.hostname, self.ip)
+            app.logger.debug('%s is responding with %s on /api/version - might be access-protected octoprint' % (self.ip, request.status_code))
+            settings_req = get_uri(self.ip, endpoint='/api/settings')
             if settings_req and settings_req.status_code == 200:
-                app.logger.debug('%s (%s) is responding with 200 on /api/settings - probably access-protected octoprint' % (self.hostname, self.ip))
+                app.logger.debug('%s is responding with 200 on /api/settings - probably access-protected octoprint' % self.ip)
                 self.client = PrinterClient({}, True, True)
             else:
-                app.logger.debug('%s (%s) is responding with %s on /api/settings - probably not octoprint' % (self.hostname, self.ip, settings_req.status_code))
+                app.logger.debug('%s is responding with %s on /api/settings - probably not octoprint' % (self.ip, settings_req.status_code))
                 self.client = PrinterClient({}, False)
             return
         if request.status_code != 200:
-            app.logger.debug('%s (%s) is responding with %s on /api/version - not accessible' % (self.hostname, self.ip, request.status_code))
+            app.logger.debug('%s is responding with %s on /api/version - not accessible' % (self.ip, request.status_code))
             self.client = PrinterClient({}, False)
             return
         try:
             data = request.json()
             if "text" not in data:
-                app.logger.debug('%s (%s) is responding with unfamiliar JSON %s on /api/version - probably not octoprint' % (self.hostname, self.ip, data))
+                app.logger.debug('%s is responding with unfamiliar JSON %s on /api/version - probably not octoprint' % (self.ip, data))
                 self.client = PrinterClient(data, False)
                 return
         except json.decoder.JSONDecodeError:
-            app.logger.debug('%s (%s) is not responding with JSON on /api/version - probably not octoprint' % (self.hostname, self.ip))
+            app.logger.debug('%s is not responding with JSON on /api/version - probably not octoprint' % self.ip)
             self.client = PrinterClient({}, False)
             return
         if re.match(r'^octoprint', data["text"], re.IGNORECASE) is None:
-            app.logger.debug('%s (%s) is responding with %s on /api/version - probably not octoprint' % (self.hostname, self.ip, data["text"]))
+            app.logger.debug('%s is responding with %s on /api/version - probably not octoprint' % (self.ip, data["text"]))
             self.client = PrinterClient(data, False)
             return
         self.client = PrinterClient(data, True)
@@ -96,7 +88,7 @@ class Octoprint():
     def status(self):
         request = None
         if self.client.connected:
-            request = get_with_fallback('/api/printer?exclude=history', self.hostname, self.ip)
+            request = get_uri(self.ip, endpoint='/api/printer?exclude=history')
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -125,7 +117,7 @@ class Octoprint():
     def webcam(self):
         request = None
         if self.client.connected:
-            request = get_with_fallback('/api/settings', self.hostname, self.ip)
+            request = get_uri(self.ip, endpoint='/api/settings')
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -151,7 +143,7 @@ class Octoprint():
     def job(self):
         request = None
         if self.client.connected:
-            request = get_with_fallback('/api/job', self.hostname, self.ip)
+            request = get_uri(self.ip, endpoint='/api/job')
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:

@@ -45,7 +45,7 @@ class AddPrinter extends React.Component {
       hasErrors = true;
       updatedForm.name.error = 'Name is required';
     }
-    if (!form.ip.val || form.ip.val.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null) {
+    if (!form.ip.val || form.ip.val.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$/) === null) {
       hasErrors = true;
       updatedForm.ip.error = 'IP address is required in a proper format'
     }

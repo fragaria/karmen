@@ -1,5 +1,4 @@
 import unittest
-import mock
 
 from server.database.settings import normalize_val
 

@@ -49,7 +49,7 @@ def printer_create():
     name = data.get("name", None)
     if not ip or \
         not name or \
-        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip) is None:
+        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$', ip) is None:
         return abort(400)
     if get_printer(ip) is not None:
         return abort(409)
