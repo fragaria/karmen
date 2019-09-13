@@ -57,6 +57,9 @@ services:
       - default
       - backend
       - printers
+    links:
+      - postgres
+      - redis
   backend_celery_beat:
     build: ./src/karmen_backend
     environment:
@@ -65,6 +68,8 @@ services:
       FLASKR_SETTINGS: '../config.dev.cfg'
     networks:
       - backend
+    links:
+      - redis
   redis:
     image: redis
     networks:
