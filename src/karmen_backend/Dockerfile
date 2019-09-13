@@ -1,8 +1,7 @@
-FROM python:3.6-buster
+FROM python:3.6-slim
 RUN apt-get update && apt-get upgrade --yes && apt-get install --yes git make g++ libpq-dev avahi-utils avahi-daemon arp-scan nginx build-essential
 RUN pip install --upgrade pip
-RUN pip install pipenv
-RUN pip install uwsgi
+RUN pip install pipenv uwsgi
 
 # enable mdns discovery, this works only when container is run in
 # privileged mode and /var/run/dbus is mounted as a volume
@@ -13,8 +12,7 @@ WORKDIR /usr/src/app
 ENV PYTHONPATH=/usr/src/app
 
 COPY Pipfile* ./
-RUN pipenv lock --requirements > requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pipenv lock --requirements > requirements.txt && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 COPY ./scripts/nginx.conf /etc/nginx

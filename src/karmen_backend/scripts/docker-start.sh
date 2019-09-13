@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if [ "$SERVICE" = 'flask' ]; then
   if [ "$ENV" = 'production' ]; then
