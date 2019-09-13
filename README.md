@@ -18,10 +18,13 @@ This project contains
 
 ## Installation
 
-## Usage
+## Development
 
 For development with live reload (both backend and frontend), start this with the
 following docker-compose command. The dev mode also contains two fake printers.
+
+The network autodiscovery via ARP does not work in the dev mode. The mDNS resolution
+also does not work in the dev mode due to the networking configuration.
 
 ```sh
 REACT_APP_GIT_REV=`git rev-parse --short HEAD` docker-compose -f docker-compose.dev.yml up

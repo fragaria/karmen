@@ -1,19 +1,5 @@
 version: "3.4"
 services:
-  fake_printer1:
-    build: ./src/karmen_backend
-    environment:
-      ENV: develop
-      SERVICE: fake-printer
-    ports:
-    - 127.0.0.1:5001:8080
-  fake_printer2:
-    build: ./src/karmen_backend
-    environment:
-      ENV: develop
-      SERVICE: fake-printer
-    ports:
-    - 127.0.0.1:5002:8080
   frontend:
     build:
       context: ./src/karmen_frontend
@@ -23,7 +9,7 @@ services:
       ENV: develop
       BACKEND_BASE: http://localhost:5000
     ports:
-    - 127.0.0.1:3000:8080
+      - 127.0.0.1:3000:8080
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
@@ -34,50 +20,72 @@ services:
       SERVICE: flask
       FLASKR_SETTINGS: '../config.local.cfg'
     ports:
-    - 127.0.0.1:5000:8080
+      - 127.0.0.1:5000:8080
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
-      - /var/run/dbus:/var/run/dbus # for mdns resolution
-    privileged: true # for mdns resolution
-    links:
-    - redis
-    - postgres
+    networks:
+      - backend
+      - printers
+  fake_printer1:
+    build: ./src/karmen_backend
+    environment:
+      ENV: develop
+      SERVICE: fake-printer
+    networks:
+      printers:
+        ipv4_address: 172.16.236.11
+  fake_printer2:
+    build: ./src/karmen_backend
+    environment:
+      ENV: develop
+      SERVICE: fake-printer
+    networks:
+      printers:
+        ipv4_address: 172.16.236.12
   backend_celery_worker:
     build:
       context: ./src/karmen_backend
-    # network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: develop
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.local.cfg'
-    volumes:
-      - /var/run/dbus:/var/run/dbus
-    privileged: true # for mdns resolution
-    links:
-    - redis
-    - postgres
+    networks:
+      - backend
+      - printers
   backend_celery_beat:
     build: ./src/karmen_backend
     environment:
       ENV: develop
       SERVICE: celery-beat
       FLASKR_SETTINGS: '../config.local.cfg'
-    volumes:
-      - /var/run/dbus:/var/run/dbus
-    links:
-    - redis
-    - postgres
+    networks:
+      - backend
+      - printers
   redis:
     image: redis
+    networks:
+      backend:
+        ipv4_address: 172.16.235.11
   postgres:
     image: postgres
     restart: always
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
-      - ./src/karmen_backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./src/karmen_backend/db/schema.sql:/docker-entrypoint-initdb.d/10-init.sql
+      - ./src/karmen_backend/db/fake-printers.sql:/docker-entrypoint-initdb.d/20-fake-printers.sql
     environment:
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
-    ports:
-      - 127.0.0.1:5433:5432
+    networks:
+      backend:
+        ipv4_address: 172.16.235.10
+networks:
+  backend:
+    ipam:
+      config:
+      - subnet: 172.16.235.0/24
+  printers:
+    ipam:
+      config:
+      - subnet: 172.16.236.0/24

@@ -26,6 +26,7 @@ def version():
 def settings():
     return jsonify({
         'webcam': {
+            'webcamEnabled': True,
             'streamUrl': '/stream',
             'flipH': False,
             'flipV': False,
@@ -60,11 +61,11 @@ def job():
             'file': {
                 'display': 'fake-file-being-printed.gcode',
             },
-            'progress': {
-                'completion': 66.666,
-                'printTimeLeft': 3685,
-                'printTime': 532,
-            }
+        },
+        'progress': {
+            'completion': 66.666,
+            'printTimeLeft': 3685,
+            'printTime': 532,
         }
     })
 
