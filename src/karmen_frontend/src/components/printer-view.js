@@ -2,21 +2,35 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { deletePrinter } from '../services/karmen-backend';
 
+const BACKEND_BASE_URL = window.env.BACKEND_BASE;
+
 export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
   }
   componentDidMount() {
-    const { stream } = this.props;
+    const { stream, proxied } = this.props;
     fetch(stream)
       .then((r) => {
         if (r.status === 200) {
           this.setState({
             isOnline: true,
+            source: stream,
           });
         }
       }).catch((e) => {
-        // silent pass
+        const proxiedStream = `${BACKEND_BASE_URL}${proxied}`;
+        fetch(proxiedStream)
+          .then((r) => {
+            if (r.status === 200) {
+              this.setState({
+                isOnline: true,
+                source: proxiedStream,
+              });
+            }
+          }).catch((e) => {
+            // pass
+          });
       });
   }
 
@@ -27,8 +41,8 @@ export class WebcamStream extends React.Component {
   }
 
   render() {
-    const { isOnline } = this.state;
-    const { stream, flipHorizontal, flipVertical, rotate90 } = this.props;
+    const { flipHorizontal, flipVertical, rotate90 } = this.props;
+    const { isOnline, source } = this.state;
     let klass = [];
     if (flipHorizontal) {
       klass.push('flip-horizontal');
@@ -46,8 +60,8 @@ export class WebcamStream extends React.Component {
       {isOnline ?
         <img
           className={klass.join(' ')}
-          alt={stream}
-          src={`${stream}?t=${(new Date()).getTime()}`}
+          alt={source}
+          src={`${source}?t=${(new Date()).getTime()}`}
         /> :
         <strong>Stream not accessible</strong>
       }
