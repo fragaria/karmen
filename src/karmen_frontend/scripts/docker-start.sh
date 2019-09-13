@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 if [ "$ENV" = 'production' ]; then
   npm run build-env-file
   npm run serve
