@@ -1,5 +1,5 @@
 FLASK_APP:=server
-FLASKR_SETTINGS:=../config.local.cfg
+FLASKR_SETTINGS:=../config.dev.cfg
 
 test:
 	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest

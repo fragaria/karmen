@@ -18,7 +18,7 @@ services:
     environment:
       ENV: develop
       SERVICE: flask
-      FLASKR_SETTINGS: '../config.local.cfg'
+      FLASKR_SETTINGS: '../config.dev.cfg'
     ports:
       - 127.0.0.1:5000:8080
     volumes:
@@ -26,6 +26,9 @@ services:
     networks:
       - backend
       - printers
+    links:
+      - postgres
+      - redis
   fake_printer1:
     build: ./src/karmen_backend
     environment:
@@ -48,7 +51,7 @@ services:
     environment:
       ENV: develop
       SERVICE: celery-worker
-      FLASKR_SETTINGS: '../config.local.cfg'
+      FLASKR_SETTINGS: '../config.dev.cfg'
     networks:
       - backend
       - printers
@@ -57,15 +60,14 @@ services:
     environment:
       ENV: develop
       SERVICE: celery-beat
-      FLASKR_SETTINGS: '../config.local.cfg'
+      FLASKR_SETTINGS: '../config.dev.cfg'
     networks:
       - backend
       - printers
   redis:
     image: redis
     networks:
-      backend:
-        ipv4_address: 172.16.235.11
+      - backend
   postgres:
     image: postgres
     restart: always
@@ -78,8 +80,9 @@ services:
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
     networks:
-      backend:
-        ipv4_address: 172.16.235.10
+      - backend
+    ports:
+      - 127.0.0.1:5433:5432
 networks:
   backend:
     ipam:

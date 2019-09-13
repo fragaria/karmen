@@ -8,13 +8,13 @@ You don't have to bother with setup of database and other services.
 
 ## Docker
 
-You might need to adjust values in `config.local.cfg` to properly connect to Redis and Postgresql.
+You might need to adjust values in `config.dev.cfg` to properly connect to Redis and Postgresql.
 
 ```sh
 docker build -t karmen/backend .
-docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.local.cfg' -p5000:8080 karmen/backend
-docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.local.cfg' karmen/backend
-docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.local.cfg' karmen/backend
+docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:8080 karmen/backend
+docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.dev.cfg' karmen/backend
+docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.dev.cfg' karmen/backend
 ```
 
 **Culprits**
@@ -37,6 +37,6 @@ which affects how it is connected to the other containers.
 - Jump into pipenv's virtualenv by running `pipenv install && pipenv shell`
 - Configure `flask` with `export FLASK_APP=server`
 - Optionally enable debug mode with `export FLASK_DEBUG=true`
-- Point `flask` to proper configuration with `export FLASKR_SETTINGS=../config.local.cfg`
+- Point `flask` to proper configuration with `export FLASKR_SETTINGS=../config.dev.cfg`
 - `flask run` and the server will start to accept connections on `http://localhost:5000`
 - Visit `localhost:5000`
