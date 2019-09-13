@@ -7,59 +7,52 @@ services:
         - REACT_APP_GIT_REV
     environment:
       ENV: production
-      BACKEND_BASE: http://10.192.202.58:8080 # TODO set from envvar
+      BACKEND_BASE: http://${BASE_HOST}:8080
     ports:
-    - 80:8080
+      - 80:8080
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
     build: ./src/karmen_backend
+    network_mode: host
     environment:
       ENV: production
       SERVICE: flask
-      FLASKR_SETTINGS: '../config.local.cfg'
+      FLASKR_SETTINGS: '../config.prod.cfg'
     ports:
-    - 8080:8080
+      - 8080:8080
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
-    links:
-    - redis
-    - postgres
   backend_celery_worker:
     build:
       context: ./src/karmen_backend
-    # network_mode: host # for arp discovery, requires a different config for redis/postgres conection
+    network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: production
       SERVICE: celery-worker
-      FLASKR_SETTINGS: '../config.local.cfg'
+      FLASKR_SETTINGS: '../config.prod.cfg'
     volumes:
       - /var/run/dbus:/var/run/dbus
     privileged: true # for mdns resolution
-    links:
-    - redis
-    - postgres
   backend_celery_beat:
     build: ./src/karmen_backend
+    network_mode: host
     environment:
       ENV: production
       SERVICE: celery-beat
-      FLASKR_SETTINGS: '../config.local.cfg'
-    volumes:
-      - /var/run/dbus:/var/run/dbus
-    links:
-    - redis
-    - postgres
+      FLASKR_SETTINGS: '../config.prod.cfg'
   redis:
     image: redis
+    ports:
+      - 127.0.0.1:6379:6379
   postgres:
     image: postgres
     restart: always
     volumes:
-      - ./tmp/db-data:/var/lib/postgresql/data
+      - ./tmp/db-data-prod:/var/lib/postgresql/data
       - ./src/karmen_backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_PASSWORD: print3d
