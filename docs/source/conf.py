@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Karmen'
-copyright = '2019, Fragaria s.r.o.'
+copyright = '2019, <a href="https://fragaria.cz">Fragaria s.r.o.</a>'
 author = 'Fragaria s.r.o.'
 
 # The full version, including alpha/beta/rc tags
