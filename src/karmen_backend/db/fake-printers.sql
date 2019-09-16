@@ -25,8 +25,8 @@ SET row_security = off;
 --
 
 COPY public.printers (client_props, name, ip, hostname, client) FROM stdin;
-{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": true, "read_only": false}	fake 1	172.16.236.11:8080	\N	octoprint
-{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": true, "read_only": false}	fake 2	172.16.236.12:8080	\N	octoprint
+{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}	fake 1	172.16.236.11:8080	\N	octoprint
+{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}	fake 2	172.16.236.12:8080	\N	octoprint
 \.
 
 

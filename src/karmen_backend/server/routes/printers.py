@@ -132,7 +132,7 @@ def printer_patch(ip):
 @app.route('/printers/<ip>/webcam', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def printer_webcam(ip):
-    # This is very inefficient
+    # TODO This is very inefficient
     printer = get_printer(ip)
     if printer is None:
         return abort(404)

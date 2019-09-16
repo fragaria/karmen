@@ -30,6 +30,12 @@ also does not work in the dev mode due to the networking configuration.
 REACT_APP_GIT_REV=`git rev-parse --short HEAD` docker-compose -f docker-compose.dev.yml up
 ```
 
+## Usage
+
+```sh
+REACT_APP_GIT_REV=`git rev-parse --short HEAD` BASE_HOST=10.192.202.58 docker-compose -f docker-compose.prod.yml up
+```
+
 ## Contributing
 
 ## Support

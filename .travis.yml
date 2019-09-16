@@ -1,5 +1,7 @@
 notifications:
   email: false
+services:
+  - docker
 matrix:
   include:
     - language: python
