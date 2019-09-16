@@ -19,8 +19,8 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("status" not in response.json[1])
             self.assertTrue("job" not in response.json[1])
 
-    # TODO mock the network sniffing here
-    def test_list_fields(self):
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_list_fields(self, mock_get_uri):
         with app.test_client() as c:
             response = c.get('/printers?fields=webcam,status,job')
             self.assertEqual(response.status_code, 200)
@@ -43,8 +43,8 @@ class DetailRoute(unittest.TestCase):
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
 
-    # TODO mock the network sniffing here
-    def test_fields(self):
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_fields(self, mock_get_uri):
         with app.test_client() as c:
             response = c.get('/printers/172.16.236.11:8080?fields=webcam,status,job')
             self.assertEqual(response.status_code, 200)
@@ -60,8 +60,8 @@ class DetailRoute(unittest.TestCase):
 
 class CreateRoute(unittest.TestCase):
     @mock.patch('server.services.network.get_avahi_hostname', return_value=None)
-    # TODO mock the network sniffing here
-    def test_create(self, mock_avahi):
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_create(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
                 response = c.post('/printers', json={
@@ -114,9 +114,9 @@ class CreateRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 409)
 
 class DeleteRoute(unittest.TestCase):
-    # TODO mock the network sniffing here
     @mock.patch('server.services.network.get_avahi_hostname', return_value=None)
-    def test_delete(self, mock_avahi):
+    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    def test_delete(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
             response = c.post('/printers', json={
                 "ip": "172.16.236.200:81",
