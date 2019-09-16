@@ -1,0 +1,22 @@
+@import "fonts.css";
+@import "reset.css";
+
+:root {
+  --base-unit: 8px;
+  --spacing-default: 32px;
+  --color-primary: #000;
+  --color-secondary: #ea272e;
+}
+
+body {
+  text-align: center;
+  padding: var(--spacing-default);
+}
+
+h1, h2, h3 {
+  font-family: "Trivia Grotesk N2"
+}
+
+h1 {
+  font-size: 144px;
+}
