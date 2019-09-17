@@ -4,8 +4,8 @@ import requests
 from flask import jsonify, request, abort, Response, stream_with_context
 from flask_cors import cross_origin
 from server import app, __version__
-from server.database.printers import get_printer, get_printers, delete_printer, add_printer, update_printer
-from server.database.network_devices import get_network_devices, upsert_network_device
+from server.database import printers
+from server.database import network_devices
 from server import drivers
 from server.services import network
 
@@ -35,12 +35,12 @@ def make_printer_response(printer, fields):
 @app.route('/printers', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def printers_list():
-    printers = []
+    device_list = []
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    for printer in get_printers():
+    for printer in printers.get_printers():
         # TODO this should somehow go in parallel
-        printers.append(make_printer_response(printer, fields))
-    return jsonify(printers)
+        device_list.append(make_printer_response(printer, fields))
+    return jsonify(device_list)
 
 @app.route('/printers', methods=['POST', 'OPTIONS'])
 @cross_origin()
@@ -54,7 +54,7 @@ def printer_create():
         not name or \
         re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$', ip) is None:
         return abort(400)
-    if get_printer(ip) is not None:
+    if printers.get_printer(ip) is not None:
         return abort(409)
     hostname = network.get_avahi_hostname(ip)
     printer = drivers.get_printer_instance({
@@ -64,12 +64,12 @@ def printer_create():
         "client": "octoprint", # TODO make this more generic
     })
     printer.sniff()
-    upsert_network_device(
+    network_devices.upsert_network_device(
         ip=ip,
         retry_after=None,
         disabled=False
     )
-    add_printer(
+    printers.add_printer(
         name=name,
         hostname=hostname,
         ip=ip,
@@ -86,7 +86,7 @@ def printer_create():
 @cross_origin()
 def printer_detail(ip):
     fields = request.args.get('fields').split(',') if request.args.get('fields') else []
-    printer = get_printer(ip)
+    printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
     return jsonify(make_printer_response(printer, fields))
@@ -94,19 +94,19 @@ def printer_detail(ip):
 @app.route('/printers/<ip>', methods=['DELETE', 'OPTIONS'])
 @cross_origin()
 def printer_delete(ip):
-    printer = get_printer(ip)
+    printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
-    delete_printer(ip)
-    for device in get_network_devices(printer["ip"]):
+    printers.delete_printer(ip)
+    for device in network_devices.get_network_devices(printer["ip"]):
         device["disabled"] = True
-        upsert_network_device(**device)
+        network_devices.upsert_network_device(**device)
     return '', 204
 
 @app.route('/printers/<ip>', methods=['PATCH', 'OPTIONS'])
 @cross_origin()
 def printer_patch(ip):
-    printer = get_printer(ip)
+    printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
     data = request.json
@@ -116,7 +116,7 @@ def printer_patch(ip):
     if not name:
         return abort(400)
     printer_inst = drivers.get_printer_instance(printer)
-    update_printer(
+    printers.update_printer(
         name=name,
         hostname=printer_inst.hostname,
         ip=printer_inst.ip,
@@ -133,7 +133,7 @@ def printer_patch(ip):
 @cross_origin()
 def printer_webcam(ip):
     # TODO This is very inefficient
-    printer = get_printer(ip)
+    printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
     printer_inst = drivers.get_printer_instance(printer)

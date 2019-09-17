@@ -5,11 +5,11 @@ from server.tasks.check_printers import check_printers
 
 class CheckPrintersTest(unittest.TestCase):
 
-    @mock.patch('server.tasks.check_printers.get_printers', return_value=[
+    @mock.patch('server.database.printers.get_printers', return_value=[
         {"hostname": "a", "ip": "1234", "client_props": {"connected": True, "version": {}, "read_only": False}, "client": "octoprint"},
         {"hostname": "b", "ip": "5678", "client_props": {"connected": True, "version": {}, "read_only": False}, "client": "octoprint"}
     ])
-    @mock.patch('server.tasks.check_printers.update_printer')
+    @mock.patch('server.database.printers.update_printer')
     @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_get_printers):
         check_printers()
@@ -41,11 +41,11 @@ class CheckPrintersTest(unittest.TestCase):
             })
         ])
 
-    @mock.patch('server.tasks.check_printers.get_printers', return_value=[
+    @mock.patch('server.database.printers.get_printers', return_value=[
         {"hostname": "a", "ip": "1234", "client_props": {"connected": False, "version": {}, "read_only": False}, "client": "octoprint"},
         {"hostname": "b", "ip": "5678", "client_props": {"connected": True, "version": {}, "read_only": False}, "client": "octoprint"}
     ])
-    @mock.patch('server.tasks.check_printers.update_printer')
+    @mock.patch('server.database.printers.update_printer')
     @mock.patch('server.drivers.octoprint.get_uri')
     def test_activate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_get_printers):
         class Response():

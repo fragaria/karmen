@@ -6,9 +6,9 @@ from server.tasks.sniff_printer import save_printer_data, sniff_printer
 
 class SavePrinterDataTest(unittest.TestCase):
 
-    @mock.patch('server.tasks.sniff_printer.update_printer')
-    @mock.patch('server.tasks.sniff_printer.add_printer')
-    @mock.patch('server.tasks.sniff_printer.get_printer', return_value=None)
+    @mock.patch('server.database.printers.update_printer')
+    @mock.patch('server.database.printers.add_printer')
+    @mock.patch('server.database.printers.get_printer', return_value=None)
     def test_not_update_inactive_unknown_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
         save_printer_data(ip='1.2.3.4', client_props={"connected": False})
@@ -16,9 +16,9 @@ class SavePrinterDataTest(unittest.TestCase):
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 0)
 
-    @mock.patch('server.tasks.sniff_printer.update_printer')
-    @mock.patch('server.tasks.sniff_printer.add_printer')
-    @mock.patch('server.tasks.sniff_printer.get_printer', return_value=None)
+    @mock.patch('server.database.printers.update_printer')
+    @mock.patch('server.database.printers.add_printer')
+    @mock.patch('server.database.printers.get_printer', return_value=None)
     def test_add_active_unknown_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
         save_printer_data(ip='1.2.3.4', client_props={"connected": True})
@@ -26,9 +26,9 @@ class SavePrinterDataTest(unittest.TestCase):
         self.assertEqual(mock_add_printer.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 0)
 
-    @mock.patch('server.tasks.sniff_printer.update_printer')
-    @mock.patch('server.tasks.sniff_printer.add_printer')
-    @mock.patch('server.tasks.sniff_printer.get_printer', return_value={"name": "1234", "ip": "1.2.3.4."})
+    @mock.patch('server.database.printers.update_printer')
+    @mock.patch('server.database.printers.add_printer')
+    @mock.patch('server.database.printers.get_printer', return_value={"name": "1234", "ip": "1.2.3.4."})
     def test_update_any_known_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
         save_printer_data(ip='1.2.3.4', client_props={"connected": True})
@@ -39,8 +39,8 @@ class SavePrinterDataTest(unittest.TestCase):
 
 class SniffPrinterTest(unittest.TestCase):
 
-    @mock.patch('server.tasks.sniff_printer.get_val')
-    @mock.patch('server.tasks.sniff_printer.upsert_network_device')
+    @mock.patch('server.database.settings.get_val')
+    @mock.patch('server.database.network_devices.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
     @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
@@ -67,8 +67,8 @@ class SniffPrinterTest(unittest.TestCase):
             },
         })
 
-    @mock.patch('server.tasks.sniff_printer.get_val')
-    @mock.patch('server.tasks.sniff_printer.upsert_network_device')
+    @mock.patch('server.database.settings.get_val')
+    @mock.patch('server.database.network_devices.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
     @mock.patch('server.drivers.octoprint.get_uri')
     def test_deactivate_bad_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
@@ -96,8 +96,8 @@ class SniffPrinterTest(unittest.TestCase):
             },
         })
 
-    @mock.patch('server.tasks.sniff_printer.get_val')
-    @mock.patch('server.tasks.sniff_printer.upsert_network_device')
+    @mock.patch('server.database.settings.get_val')
+    @mock.patch('server.database.network_devices.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
     @mock.patch('server.drivers.octoprint.get_uri')
     def test_activate_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
