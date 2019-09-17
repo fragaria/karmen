@@ -114,3 +114,17 @@ export const getSettings = (settings) => {
       return [];
     })
 }
+
+export const heartbeat = () => {
+  return fetch(`${BASE_URL}/`)
+    .then((response) => {
+      if (response.status !== 200) {
+        console.error(`Heartbeat fail: ${response.status}`);
+        return false;
+      }
+      return true;
+    }).catch((e) => {
+      console.error(`Heartbeat fail: ${e}`);
+      return false;
+    })
+}

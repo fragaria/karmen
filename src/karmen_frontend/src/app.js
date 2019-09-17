@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 import Menu from './components/menu';
 import Footer from './components/footer';
+import Heartbeat from './components/heartbeat';
 
 import PrinterList from './routes/printer-list';
 import PrinterDetail from './routes/printer-detail';
@@ -20,6 +21,7 @@ function App() {
           <Route path="/printers/:ip" exact component={PrinterDetail} />
           <Route path="/" exact component={PrinterList} />
         </Switch>
+        <Heartbeat />
         <Footer />
        </BrowserRouter>
     </div>
