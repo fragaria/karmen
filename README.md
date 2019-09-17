@@ -1,11 +1,13 @@
+<p align="center">
+  <img width="223" height="60" src="https://raw.githubusercontent.com/fragaria/karmen/master/web/src/logo.svg?sanitize=true">
+</p>
+
 # Karmen - monitor and manage your 3D printers
 
 [![Documentation Status](https://readthedocs.org/projects/karmen/badge/?version=latest)](https://karmen.readthedocs.io/en/latest/?badge=latest)
 [![Build status](https://api.travis-ci.com/fragaria/karmen.svg?branch=master)](https://travis-ci.com/fragaria/karmen)
+[![Gitter chat](https://badges.gitter.im/fragaria/karmen.png)](https://gitter.im/fragaria/karmen)
 
-<p align="center">
-  <img width="223" height="60" src="https://raw.githubusercontent.com/fragaria/karmen/master/web/src/logo.svg?sanitize=true">
-</p>
 
 **Karmen** aims to give its users a single place for monitoring
 and managing multiple 3D printers. While existing solutions
