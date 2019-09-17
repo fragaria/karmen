@@ -20,5 +20,7 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 watch:
-	cd build/html && python -m http.server  &
 	while inotifywait -e close_write source; do make html; done
+
+server:
+	cd build/html && python3 -m http.server
