@@ -42,7 +42,7 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch('server.tasks.sniff_printer.get_val')
     @mock.patch('server.tasks.sniff_printer.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
-    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
         def mock_call(key):
             return 3600
@@ -70,7 +70,7 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch('server.tasks.sniff_printer.get_val')
     @mock.patch('server.tasks.sniff_printer.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
-    @mock.patch('server.models.octoprint.get_uri')
+    @mock.patch('server.drivers.octoprint.get_uri')
     def test_deactivate_bad_data_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
         def mock_call(key):
             return 3600
@@ -99,7 +99,7 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch('server.tasks.sniff_printer.get_val')
     @mock.patch('server.tasks.sniff_printer.upsert_network_device')
     @mock.patch('server.tasks.sniff_printer.save_printer_data')
-    @mock.patch('server.models.octoprint.get_uri')
+    @mock.patch('server.drivers.octoprint.get_uri')
     def test_activate_responding_printer(self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val):
         def mock_call(key):
             return 3600

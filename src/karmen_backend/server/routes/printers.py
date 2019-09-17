@@ -6,11 +6,11 @@ from flask_cors import cross_origin
 from server import app, __version__
 from server.database.printers import get_printer, get_printers, delete_printer, add_printer, update_printer
 from server.database.network_devices import get_network_devices, upsert_network_device
-from server import models
+from server import drivers
 from server.services import network
 
 def make_printer_response(printer, fields):
-    printer_inst = models.get_printer_instance(printer)
+    printer_inst = drivers.get_printer_instance(printer)
     data = {
         "client": {
             "name": printer_inst.client_name(),
@@ -57,7 +57,7 @@ def printer_create():
     if get_printer(ip) is not None:
         return abort(409)
     hostname = network.get_avahi_hostname(ip)
-    printer = models.get_printer_instance({
+    printer = drivers.get_printer_instance({
         "hostname": hostname,
         "ip": ip,
         "name": name,
@@ -115,7 +115,7 @@ def printer_patch(ip):
     name = data.get("name", None)
     if not name:
         return abort(400)
-    printer_inst = models.get_printer_instance(printer)
+    printer_inst = drivers.get_printer_instance(printer)
     update_printer(
         name=name,
         hostname=printer_inst.hostname,
@@ -136,7 +136,7 @@ def printer_webcam(ip):
     printer = get_printer(ip)
     if printer is None:
         return abort(404)
-    printer_inst = models.get_printer_instance(printer)
+    printer_inst = drivers.get_printer_instance(printer)
     webcam = printer_inst.webcam()
     if "stream" not in webcam:
         return abort(404)

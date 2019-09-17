@@ -10,7 +10,7 @@ class CheckPrintersTest(unittest.TestCase):
         {"hostname": "b", "ip": "5678", "client_props": {"connected": True, "version": {}, "read_only": False}, "client": "octoprint"}
     ])
     @mock.patch('server.tasks.check_printers.update_printer')
-    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_deactivate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_get_printers):
         check_printers()
         self.assertEqual(mock_get_printers.call_count, 1)
@@ -46,7 +46,7 @@ class CheckPrintersTest(unittest.TestCase):
         {"hostname": "b", "ip": "5678", "client_props": {"connected": True, "version": {}, "read_only": False}, "client": "octoprint"}
     ])
     @mock.patch('server.tasks.check_printers.update_printer')
-    @mock.patch('server.models.octoprint.get_uri')
+    @mock.patch('server.drivers.octoprint.get_uri')
     def test_activate_no_data_responding_printer(self, mock_get_data, mock_update_printer, mock_get_printers):
         class Response():
             def __init__(self, status_code, contents):

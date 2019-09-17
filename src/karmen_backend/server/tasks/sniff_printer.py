@@ -3,7 +3,7 @@ from server import celery
 from server.database.settings import get_val
 from server.database.printers import get_printer, add_printer, update_printer
 from server.database.network_devices import upsert_network_device
-from server import models
+from server import drivers
 
 def save_printer_data(**kwargs):
     has_record = get_printer(kwargs["ip"])
@@ -16,7 +16,7 @@ def save_printer_data(**kwargs):
 
 @celery.task(name='sniff_printer')
 def sniff_printer(hostname, ip):
-    printer = models.get_printer_instance({
+    printer = drivers.get_printer_instance({
         "hostname": hostname,
         "ip": ip,
         "client": "octoprint", # TODO not only octoprint

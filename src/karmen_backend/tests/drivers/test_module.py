@@ -1,7 +1,7 @@
 import unittest
 
-from server.models import get_printer_instance
-from server.models.octoprint import Octoprint
+from server.drivers import get_printer_instance
+from server.drivers.octoprint import Octoprint
 
 class GetWithFallbackTest(unittest.TestCase):
     def test_throws_on_missing_client(self):

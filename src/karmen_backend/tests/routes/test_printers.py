@@ -19,7 +19,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("status" not in response.json[1])
             self.assertTrue("job" not in response.json[1])
 
-    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_list_fields(self, mock_get_uri):
         with app.test_client() as c:
             response = c.get('/printers?fields=webcam,status,job')
@@ -43,7 +43,7 @@ class DetailRoute(unittest.TestCase):
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
 
-    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_fields(self, mock_get_uri):
         with app.test_client() as c:
             response = c.get('/printers/172.16.236.11:8080?fields=webcam,status,job')
@@ -60,7 +60,7 @@ class DetailRoute(unittest.TestCase):
 
 class CreateRoute(unittest.TestCase):
     @mock.patch('server.services.network.get_avahi_hostname', return_value=None)
-    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_create(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
@@ -115,7 +115,7 @@ class CreateRoute(unittest.TestCase):
 
 class DeleteRoute(unittest.TestCase):
     @mock.patch('server.services.network.get_avahi_hostname', return_value=None)
-    @mock.patch('server.models.octoprint.get_uri', return_value=None)
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_delete(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
             response = c.post('/printers', json={

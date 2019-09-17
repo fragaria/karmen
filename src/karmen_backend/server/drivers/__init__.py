@@ -1,4 +1,4 @@
-from server.models.octoprint import Octoprint
+from server.drivers.octoprint import Octoprint
 
 def get_printer_instance(printer):
     if not "client" in printer:
