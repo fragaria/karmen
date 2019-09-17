@@ -16,7 +16,7 @@ def discover_printers():
     to_deactivate = get_printers()
     to_skip_ip = [device["ip"] for device in get_network_devices() if (device["retry_after"] and device["retry_after"] > now) or device["disabled"]]
     for line in do_arp_scan(get_val('network_interface')):
-        (ip, mac) = line
+        (ip, ) = line
         to_deactivate = [printer for printer in to_deactivate if printer["ip"] != ip]
         if ip in to_skip_ip:
             continue

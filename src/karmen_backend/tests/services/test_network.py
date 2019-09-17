@@ -2,8 +2,53 @@ import os
 import unittest
 import tempfile
 import mock
+import requests
 
-from server.services.network import do_arp_scan, get_avahi_hostname
+from server.services.network import do_arp_scan, get_avahi_hostname, get_uri
+
+class GetUriTest(unittest.TestCase):
+    @mock.patch('requests.get')
+    def test_try_hostname(self, mock_requests):
+        get_uri('1.2.3.4', '/api/version')
+        mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_pass_protocol_timeout(self, mock_requests):
+        get_uri('1.2.3.4', '/api/version', protocol='https', timeout=3)
+        mock_requests.assert_called_with('https://1.2.3.4/api/version', timeout=3)
+
+    @mock.patch('requests.get')
+    def test_add_leading_slash(self, mock_requests):
+        get_uri('1.2.3.4', 'api/version')
+        mock_requests.assert_called_with('http://1.2.3.4/api/version', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_ip_port(self, mock_requests):
+        get_uri('1.2.3.4:5000', 'api/version')
+        mock_requests.assert_called_with('http://1.2.3.4:5000/api/version', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_try_nothing(self, mock_requests):
+        request = get_uri(None, '/api/version')
+        self.assertEqual(mock_requests.call_count, 0)
+        self.assertEqual(request, None)
+
+    @mock.patch('requests.get')
+    def test_try_root(self, mock_requests):
+        request = get_uri('1.2.3.4')
+        mock_requests.assert_called_with('http://1.2.3.4/', timeout=2)
+
+    @mock.patch('requests.get')
+    def test_no_success(self, mock_requests):
+        def mock_call(uri, **kwargs):
+            raise requests.exceptions.ConnectionError('mocked')
+        mock_requests.side_effect = mock_call
+        request = get_uri('1.2.3.4', '/api/version')
+        self.assertEqual(request, None)
+        self.assertEqual(mock_requests.call_count, 1)
+        mock_requests.assert_has_calls([
+            mock.call('http://1.2.3.4/api/version', timeout=2)
+        ])
 
 class DoArpScanTest(unittest.TestCase):
     # https://blog.samuel.domains/blog/programming/how-to-mock

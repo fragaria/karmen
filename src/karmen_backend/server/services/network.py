@@ -1,5 +1,8 @@
 import subprocess
 import re
+import requests
+
+from server import app
 
 def do_arp_scan(network_interface):
     proc = subprocess.Popen(["arp-scan", "--interface", network_interface, "--localnet", "-q"], stdout=subprocess.PIPE)
@@ -30,3 +33,16 @@ def get_avahi_hostname(ip):
         if not match:
             continue
         return match[0][1]
+
+def get_uri(ip, endpoint='/', protocol='http', timeout=2):
+    request = None
+    if ip is None:
+        return request
+    if endpoint[0] != '/':
+        endpoint = '/%s' % (endpoint, )
+    uri = '%s://%s%s' % (protocol, ip, endpoint)
+    try:
+        request = requests.get(uri, timeout=timeout)
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        app.logger.debug("Cannot call %s" % (uri))
+    return request
