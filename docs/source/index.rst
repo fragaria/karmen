@@ -10,7 +10,7 @@ for a multi-printer setup or even a large scale printer farm.
 
 Our solution is a perfect fit for a shared makerspace, small batch
 part factory or a public school that offers multiple printers to various
-users. We ar etargeting two main use-cases: monitoring and print management.
+users. We are targeting two main use-cases: monitoring and print management.
 
 This project is developed `as free and open source software <https://en.wikipedia.org/wiki/Free_and_open-source_software>`_
 mainly by the people of `Fragaria <https://fragaria.cz>`_ but all contributions

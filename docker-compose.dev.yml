@@ -1,6 +1,7 @@
 version: "3.4"
 services:
   frontend:
+    image: fragaria/karmen-frontend
     build:
       context: ./src/karmen_frontend
       args:
@@ -14,6 +15,7 @@ services:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
+    image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
       ENV: develop
@@ -31,6 +33,7 @@ services:
       - postgres
       - redis
   fake_printer1:
+    image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
       ENV: develop
@@ -39,6 +42,7 @@ services:
       printers:
         ipv4_address: 172.16.236.11
   fake_printer2:
+    image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
       ENV: develop
@@ -47,6 +51,7 @@ services:
       printers:
         ipv4_address: 172.16.236.12
   backend_celery_worker:
+    image: fragaria/karmen-backend
     build:
       context: ./src/karmen_backend
     environment:
@@ -61,6 +66,7 @@ services:
       - postgres
       - redis
   backend_celery_beat:
+    image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
       ENV: develop

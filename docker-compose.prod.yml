@@ -1,6 +1,7 @@
 version: "3.4"
 services:
   frontend:
+    image: fragaria/karmen-frontend
     build:
       context: ./src/karmen_frontend
       args:
@@ -14,36 +15,44 @@ services:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
+    image: fragaria/karmen-backend
     build: ./src/karmen_backend
     network_mode: host
     environment:
       ENV: production
       SERVICE: flask
-      FLASKR_SETTINGS: '../config.prod.cfg'
+      FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     ports:
       - 8080:8080
     volumes:
+      - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
   backend_celery_worker:
+    image: fragaria/karmen-backend
     build:
       context: ./src/karmen_backend
     network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: production
       SERVICE: celery-worker
-      FLASKR_SETTINGS: '../config.prod.cfg'
+      FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
+      - ./config.local.cfg:/usr/src/app/config.local.cfg
       - /var/run/dbus:/var/run/dbus
     privileged: true # for mdns resolution
   backend_celery_beat:
+    image: fragaria/karmen-backend
     build: ./src/karmen_backend
     network_mode: host
     environment:
       ENV: production
       SERVICE: celery-beat
-      FLASKR_SETTINGS: '../config.prod.cfg'
+      FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
+    volumes:
+      - ./config.local.cfg:/usr/src/app/config.local.cfg
+    privileged: true # for mdns resolution
   redis:
     image: redis
     ports:
