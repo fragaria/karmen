@@ -9,6 +9,7 @@ coverage = "*"
 mock = "*"
 pytest-watch = "*"
 pylint = "*"
+coveralls = "*"
 
 [packages]
 flask = "*"
@@ -17,7 +18,7 @@ requests = "*"
 celery = "*"
 psycopg2 = "*"
 redis = "*"
-coveralls = "*"
+watchdog = "*"
 
 [requires]
 python_version = "3.6"

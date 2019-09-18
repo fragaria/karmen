@@ -58,6 +58,8 @@ services:
       ENV: develop
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.dev.cfg'
+    volumes:
+      - ./src/karmen_backend/server:/usr/src/app/server
     networks:
       - default
       - backend
@@ -72,6 +74,8 @@ services:
       ENV: develop
       SERVICE: celery-beat
       FLASKR_SETTINGS: '../config.dev.cfg'
+    volumes:
+      - ./src/karmen_backend/server:/usr/src/app/server
     networks:
       - backend
     links:

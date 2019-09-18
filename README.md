@@ -45,11 +45,7 @@ $ docker-compose up --build --abort-on-container-exit
 # GO VISIT http://localhost:3000/
 ```
 
-Within this setup, live reload for both backend and frontend is active, with a notable exception
-of `celery` containers. They don't support live reload debug mode out of the box. You can load new code
-into celery by rebuilding and restarting the appropriate containers.
-
-Also, the network autodiscovery via ARP does not work at all in the dev mode. The mDNS resolution
+The network autodiscovery via ARP does not work at all in the dev mode. The mDNS resolution
 also does not work in the dev mode due to the networking configuration. (You can enable these two
 features by altering the network settings of the containers, check [`docker-compose.release.yml`](./docker-compose.release.yml) for inspiration).
 
