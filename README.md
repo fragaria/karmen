@@ -29,23 +29,9 @@ more in our [contributing rules](./CONTRIBUTING.md).
 
 If you are interested in a more in-depth documentation, go visit our [docsite](https://karmen.readthedocs.io).
 
-## Usage
+## Installation and usage
 
-The easiest way to run the whole system is via [docker compose](https://docs.docker.com/compose/).
-The whole system is designed to be run on a reasonably powerful standalone microcomputer such as Raspberry Pi 4
-which is connected to the same network as the printers.
-
-```sh
-$ git clone git@github.com:fragaria/karmen.git && cd karmen/ # get the repo
-$ cp ./src/karmen_backend/config.prod.cfg ./config.local.cfg # create a local configuration and change at least the SECRET_KEY
-$ BASE_HOST=random-ip-address docker-compose -f docker-compose.prod.yml up --abort-on-container-exit # start the containers
-# GO VISIT http://localhost/ or http://random-ip-address from the network
-```
-
-`BASE_HOST` is an address or hostname of the machine where this whole thing works and is used to access the Python backend.
-You will also use it to access the Javascript frontend from your browser. The most important step is the configuration
-which happens within `config.local.cfg` file. Read the comments in the original `config.prod.cfg` to make sure that you
-know what are you doing.
+Check our [documentation](https://karmen.readthedocs.io/en/latest/installation.html) for up to date instructions.
 
 ## Development
 
@@ -61,10 +47,11 @@ $ docker-compose -f docker-compose.dev.yml up --build --abort-on-container-exit
 
 Within this setup, live reload for both backend and frontend is active, with a notable exception
 of `celery` containers. They don't support live reload debug mode out of the box. You can load new code
-into celery by rebiulding and restarting the appropriate containers.
+into celery by rebuilding and restarting the appropriate containers.
 
 Also, the network autodiscovery via ARP does not work at all in the dev mode. The mDNS resolution
-also does not work in the dev mode due to the networking configuration.
+also does not work in the dev mode due to the networking configuration. (You can enable these two
+features by altering the network settings of the containers, check [`docker-compose.release.yml`](./docker-compose.release.yml) for inspiration).
 
 On the other hand, two fake virtual printers are automatically added to your envirnoment, so you have a few
 things to play with.

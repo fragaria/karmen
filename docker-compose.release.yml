@@ -1,22 +1,14 @@
 version: "3.4"
 services:
   frontend:
-    image: fragaria/karmen-frontend
-    build:
-      context: ./src/karmen_frontend
-      args:
-        - REACT_APP_GIT_REV
+    image: fragaria/karmen-frontend:0
     environment:
       ENV: production
       BACKEND_BASE: http://${BASE_HOST}:8080
     ports:
       - 80:8080
-    volumes:
-      - ./src/karmen_frontend/src:/usr/src/app/src
-      - ./src/karmen_frontend/public:/usr/src/app/public
   backend_flask:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
+    image: fragaria/karmen-backend:0
     network_mode: host
     environment:
       ENV: production
@@ -26,13 +18,10 @@ services:
       - 8080:8080
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
-      - ./src/karmen_backend/server:/usr/src/app/server
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
   backend_celery_worker:
-    image: fragaria/karmen-backend
-    build:
-      context: ./src/karmen_backend
+    image: fragaria/karmen-backend:0
     network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: production
@@ -40,11 +29,10 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
-      - /var/run/dbus:/var/run/dbus
+      - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
   backend_celery_beat:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
+    image: fragaria/karmen-backend:0
     network_mode: host
     environment:
       ENV: production
@@ -54,15 +42,15 @@ services:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
     privileged: true # for mdns resolution
   redis:
-    image: redis
+    image: redis:5
     ports:
       - 127.0.0.1:6379:6379
   postgres:
-    image: postgres
+    image: postgres:11
     restart: always
     volumes:
-      - ./tmp/db-data-prod:/var/lib/postgresql/data
-      - ./src/karmen_backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d

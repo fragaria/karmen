@@ -19,7 +19,7 @@ are more than welcome, so join us on `GitHub <https://github.com/fragaria/karmen
 The project is released under the `GNU Affero General Public License V3 <http://www.gnu.org/licenses/agpl.html>`_.
 
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
   :hidden:
 
   overview

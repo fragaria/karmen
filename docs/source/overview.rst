@@ -23,7 +23,7 @@ in Javascript accessible from a browser.
 The backend essentially works as a proxy for any configured and connected printer that
 can talk in one of the supported dialects (see below).
 
-To add a new printer, you just tell Karmen the IP address of the that printer
+To add a new printer, you just tell Karmen the IP address of that printer
 and that's it. Everything else is done automatically.
 
   .. warning::
@@ -35,11 +35,15 @@ The printers
 
 Any 3D printer that uses a supported connector can be added to the system. Right now,
 we support only *Octoprint*, but more will come in the future. It is, of course, required
-for the two devices to see each other on the network. You can either set up a dedicated
-isolated network for the printers or you can connect the control hub into your existing one.
+for the two devices to see each other on the network. You have essentially two options for
+that:
 
-**Just make sure that none of the devices are directly accessible from the internet without
-proper security.**
+1. Connect everything into an existing network
+2. Create an isolated network for the printers and expose the control hub's interface
+   to a commonly accessible network
+
+Any of the two will work, **just make sure that none of the devices are directly accessible
+from the internet without proper security.**
 
 .. toctree::
   :maxdepth: 2

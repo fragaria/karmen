@@ -52,8 +52,7 @@ services:
         ipv4_address: 172.16.236.12
   backend_celery_worker:
     image: fragaria/karmen-backend
-    build:
-      context: ./src/karmen_backend
+    build: ./src/karmen_backend
     environment:
       ENV: develop
       SERVICE: celery-worker
@@ -77,11 +76,11 @@ services:
     links:
       - redis
   redis:
-    image: redis
+    image: redis:5
     networks:
       - backend
   postgres:
-    image: postgres
+    image: postgres:11
     restart: always
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
