@@ -62,6 +62,9 @@ Just download the latest one to your Raspberry Pi's home directory and unzip it.
    unzip -d .karmen karmen.zip
    cd .karmen
 
+.. TODO an alternative would be to have a `release` branch, then the update would be a
+   matter of git pull and container restart. wget would get replaced by git clone --branch release
+
 It contains the following files:
 
 - ``docker-compose.yml`` - A bluperint for all necessary services
@@ -81,11 +84,17 @@ run the docker images with the appropriate version of Karmen.
 
 .. code-block:: sh
   
-   BASE_HOST=random-ip-address docker-compose up --abort-on-container-exit # start the containers
+   BASE_HOST=random-ip-address docker-compose up -d --abort-on-container-exit
 
 ``BASE_HOST`` is an address or hostname of the machine where Karmen is running and is used to call
 the Python backend from the frontend UI. You will also use it to access the Javascript frontend
-from your browser.
+from your browser. The frontend is run on standard port 80 and the API is accessible on port 8080.
+
+You can stop everything by running 
+
+.. code-block:: sh
+  
+   docker-compose stop
 
 .. toctree::
   :maxdepth: 2
