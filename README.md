@@ -41,7 +41,7 @@ the most comfortable way is again with docker compose.
 ```sh
 $ git clone git@github.com:fragaria/karmen.git && cd karmen/ # get the repo
 $ cp ./src/karmen_backend/config.prod.cfg ./config.local.cfg # create a local configuration and change at least the SECRET_KEY
-$ docker-compose -f docker-compose.dev.yml up --build --abort-on-container-exit
+$ docker-compose up --build --abort-on-container-exit
 # GO VISIT http://localhost:3000/
 ```
 
