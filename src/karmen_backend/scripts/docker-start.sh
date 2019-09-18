@@ -14,6 +14,14 @@ test_flaskr_settings() {
   fi
 }
 
+clean_pid_file() {
+  pidpath=$1
+  if [ -f $pidpath ]; then
+    kill `cat ${pidpath}` 2> /dev/null
+    rm $pidpath
+  fi
+}
+
 if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
@@ -28,12 +36,14 @@ elif [ "$SERVICE" = 'celery-beat' ]; then
   test_flaskr_settings
   export FLASK_APP=server
   export FLASK_DEBUG=true
-  celery -A server.celery beat
+  clean_pid_file /opt/celerybeatd.pid
+  celery -A server.celery beat --pidfile=/opt/celerybeatd.pid
 elif [ "$SERVICE" = 'celery-worker' ]; then
   test_flaskr_settings
   export FLASK_APP=server
   export FLASK_DEBUG=true
-  celery -A server.celery worker
+  clean_pid_file /opt/celeryworkerd.pid
+  celery -A server.celery worker --pidfile=/opt/celeryworkerd.pid
 elif [ "$SERVICE" = 'fake-printer' ]; then
   export FLASK_APP=fakeprinter
   export FLASK_DEBUG=true
