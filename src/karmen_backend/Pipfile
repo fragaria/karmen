@@ -5,11 +5,9 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-coverage = "*"
 mock = "*"
 pytest-watch = "*"
 pylint = "*"
-coveralls = "*"
 
 [packages]
 flask = "*"
@@ -19,6 +17,8 @@ celery = "*"
 psycopg2 = "*"
 redis = "*"
 watchdog = "*"
+coverage = "*"
+coveralls = "*"
 
 [requires]
 python_version = "3.6"
