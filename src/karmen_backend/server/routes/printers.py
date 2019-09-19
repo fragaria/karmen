@@ -129,10 +129,12 @@ def printer_patch(ip):
     )
     return '', 204
 
-@app.route('/printers/<ip>/webcam', methods=['GET', 'OPTIONS'])
+@app.route('/proxied-webcam/<ip>', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def printer_webcam(ip):
-    # TODO This is very inefficient
+    # This is very inefficient and should not be used in production. Use the nginx
+    # redis based proxy pass instead
+    # TODO maybe we can drop this in the dev env as well
     printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)

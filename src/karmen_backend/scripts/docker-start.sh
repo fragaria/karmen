@@ -1,4 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/bash
+
+set -ue
 
 MYDIR="$(dirname "$(readlink -f "$0")")"
 
@@ -25,7 +27,7 @@ clean_pid_file() {
 if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
-    service nginx start
+    openresty
     uwsgi --ini uwsgi.ini
   else
     export FLASK_APP=server

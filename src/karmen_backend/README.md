@@ -11,10 +11,10 @@ You don't have to bother with setup of database and other services.
 You might need to adjust values in `config.dev.cfg` to properly connect to Redis and Postgresql.
 
 ```sh
-docker build -t karmen/backend .
-docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:8080 karmen/backend
-docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.dev.cfg' karmen/backend
-docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.dev.cfg' karmen/backend
+docker build -t fragaria/karmen-backend .
+docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:8080 fragaira/karmen-backend
+docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
+docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
 ```
 
 **Culprits**
