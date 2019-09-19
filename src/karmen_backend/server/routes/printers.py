@@ -27,7 +27,7 @@ def make_printer_response(printer, fields):
     if "webcam" in fields:
         data["webcam"] = printer_inst.webcam()
         if "stream" in data["webcam"]:
-            data["webcam"]["proxied"] = "/printers/%s/webcam" % (printer_inst.ip, )
+            data["webcam"]["proxied"] = "/proxied-webcam/%s" % (printer_inst.ip, )
     if "job" in fields:
         data["job"] = printer_inst.job()
     return data

@@ -108,10 +108,11 @@ class Octoprint(PrinterDriver):
             try:
                 data = request.json()
                 self.client.connected = True
-                if not data["webcam"]["webcamEnabled"]:
+                if "webcam" not in data or not data["webcam"]["webcamEnabled"]:
                     return {}
                 stream_url = data["webcam"]["streamUrl"]
                 if re.match(r'^https?', stream_url, re.IGNORECASE) is None:
+                    # TODO reflect eventual HTTPS
                     stream_url = 'http://%s%s' % (self.ip, stream_url)
                 return {
                     "stream": stream_url,

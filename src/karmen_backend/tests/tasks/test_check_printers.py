@@ -59,7 +59,7 @@ class CheckPrintersTest(unittest.TestCase):
         mock_get_data.side_effect = mock_call
         check_printers()
         self.assertEqual(mock_get_printers.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 3) # Does an additional sniff request
+        self.assertEqual(mock_get_data.call_count, 5) # Does an additional sniff request + 2 webcam requests
         self.assertEqual(mock_update_printer.call_count, 2)
         mock_update_printer.assert_has_calls([
             mock.call(**{

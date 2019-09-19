@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -ue
-
 MYDIR="$(dirname "$(readlink -f "$0")")"
 
 test_flaskr_settings() {
@@ -20,7 +18,7 @@ clean_pid_file() {
   pidpath=$1
   if [ -f $pidpath ]; then
     kill `cat ${pidpath}` 2> /dev/null
-    rm $pidpath
+    rm -f $pidpath
   fi
 }
 

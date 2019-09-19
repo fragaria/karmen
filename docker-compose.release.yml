@@ -11,6 +11,7 @@ services:
     image: fragaria/karmen-backend:0
     network_mode: host
     environment:
+      REDIS_HOST: 127.0.0.1
       ENV: production
       SERVICE: flask
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
@@ -20,6 +21,9 @@ services:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
+    depends_on:
+      - redis
+      - postgres
   backend_celery_worker:
     image: fragaria/karmen-backend:0
     network_mode: host # for arp discovery, requires a different config for redis/postgres conection
@@ -31,6 +35,9 @@ services:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
+    depends_on:
+      - postgres
+      - redis
   backend_celery_beat:
     image: fragaria/karmen-backend:0
     network_mode: host
@@ -41,6 +48,9 @@ services:
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
     privileged: true # for mdns resolution
+    depends_on:
+      - postgres
+      - redis
   redis:
     image: redis:5
     ports:

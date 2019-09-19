@@ -6,7 +6,7 @@
 The preferred way is to use the composed docker package as [described in here](https://github.com/fragaria/karmen/blob/master/README.md).
 You don't have to bother with setup of database and other services.
 
-## Docker
+### Docker
 
 You might need to adjust values in `config.dev.cfg` to properly connect to Redis and Postgresql.
 
@@ -28,7 +28,7 @@ is mapped as a volume into the container. This is used in `flask` and `celery-wo
 which don't work out of the box in a docker container. To make it work, the container has to run in a `host` network mode
 which affects how it is connected to the other containers.
 
-## Manual mode
+### Manual mode
 
 - Install `pipenv` and make its binary accessible on your PATH
 - Install `arp-scan` (for printer discovery), `avahi-utils` (for bonjour hostname autodiscovery), `libpq-dev` (for psycopg2 build)
@@ -40,3 +40,16 @@ which affects how it is connected to the other containers.
 - Point `flask` to proper configuration with `export FLASKR_SETTINGS=../config.dev.cfg`
 - `flask run` and the server will start to accept connections on `http://localhost:5000`
 - Visit `localhost:5000`
+
+## Webcam proxying
+
+In the dev mode (without nginx), the webcam proxying does not really work due to bad
+performance of the raw Python.
+
+In prod mode (when flask is run through uWSGI and nginx), the webcams are dynamically proxied directly
+through nginx. How does it work? In every call of the `check_printers` task, every responding
+printer is queried for its webcam stream address. If there is one, it is stored in redis cache.
+
+Nginx ([openresty](https://openresty.org/) in particular) is then performing a lookup via lua script
+connected to the redis cache on every request to `/proxied-webcam/<ip>`. If it finds an active record,
+it passes the connection there, if it doesn't, it responds with 404.

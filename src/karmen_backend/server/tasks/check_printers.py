@@ -1,6 +1,9 @@
+import redis
 from server import app, celery
 from server.database import printers
 from server import drivers
+
+redis = redis.Redis(host=app.config['WEBCAM_PROXY_CACHE_HOST'], port=app.config['WEBCAM_PROXY_CACHE_PORT'])
 
 @celery.task(name='check_printers')
 def check_printers():
@@ -9,6 +12,17 @@ def check_printers():
         # TODO not only octoprint
         printer = drivers.get_printer_instance(raw_printer)
         printer.is_alive()
+
+        if printer.client.connected:
+            webcam = printer.webcam()
+            try:
+                if "stream" in webcam:
+                    redis.set("webcam_%s" % (printer.ip, ), webcam["stream"])
+                else:
+                    redis.delete("webcam_%s" % (printer.ip, ))
+            except Exception as e:
+                app.logger.error("Cannot save webcam proxy information into cache: %s", e)
+
         printers.update_printer(
             name=printer.name,
             hostname=printer.hostname,
