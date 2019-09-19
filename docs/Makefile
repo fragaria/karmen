@@ -19,8 +19,5 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-watch:
-	while inotifywait -e close_write source; do make html; done
-
-server:
-	cd build/html && python3 -m http.server
+livehtml:
+	sphinx-autobuild $(SOURCEDIR) $(BUILDDIR)/html $(SPHINXOPTS)
