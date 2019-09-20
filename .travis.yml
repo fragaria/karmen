@@ -1,46 +1,67 @@
 notifications:
   email: false
+sudo: true
+dist: xenial
 services:
-  - docker
+- docker
+addons:
+  apt:
+    packages:
+    - docker-ce
 matrix:
   include:
-    - language: python
-      python: "3.6"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install
-        - make test
-    - language: python
-      python: "3.7"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install
-        - make coverage
-        - make coveralls
-    - language: python
-      python: "3.8-dev"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install
-        - make test
-    - language: node_js
-      node_js: 10
-      cache:
-        directories:
-        - node_modules
-        - "$HOME/.npm"
-      before_script:
-        - cd src/karmen_frontend
-        - npm ci
-      script:
-        - npm run lint
-        - npm run build
+  - stage: test
+    language: python
+    python: '3.6'
+    install:
+    - pip install pipenv
+    before_script:
+    - cd src/karmen_backend
+    script:
+    - pipenv install
+    - make test
+  - language: python
+    python: '3.7'
+    install:
+    - pip install pipenv
+    before_script:
+    - cd src/karmen_backend
+    script:
+    - pipenv install
+    - make coverage
+    - make coveralls
+  - language: python
+    python: 3.8-dev
+    install:
+    - pip install pipenv
+    before_script:
+    - cd src/karmen_backend
+    script:
+    - pipenv install
+    - make test
+  - language: node_js
+    node_js: 10
+    cache:
+      directories:
+      - node_modules
+      - "$HOME/.npm"
+    before_script:
+    - cd src/karmen_frontend
+    - npm ci
+    script:
+    - npm run lint
+    - npm run build
+  - stage: build docker
+    if: branch = feat/multi-build
+    before_install:
+    - sudo docker run --privileged linuxkit/binfmt:v0.6
+    - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
+      --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
+      linux/armhf
+    - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+    - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+    script: bash .travis/build-images.sh
+env:
+  global:
+  - secure: nmO4w42rn+ma3MaXHCvOFSIkCH8lGn6x9/Kh9xkpMo58eJRjW6sLdJR37Cx95nEpbHDEHmWz+ScUy5FHDusRtPyQAc9i3e8YnB7M4oeeZn+Rl6W0voMHTQurF+bm3U07epW0z4LNIvazwEdP36r/oBReFIzXp+8A5NTumdSPHLVeEO+jb79kKsKBvZj0VAlphFledQI2PRKZ8glKh1alRmKIp+Y+3pte+6kfmuBjDIdejgQA+1LVp/DF7DVlkjNaSgAw82UHxw+6TVpqdtQpvdda7CR4ur7v+6+7ZGQztmC9KPpSCVcXLNEY0PXDKK79tAm/qkqhBuhhqANHLw5/S6HE0uonc/TdX1hJJyLBzxnlwZdHq6CV1VQ2chXJqXufe9iINULBWTAiOiJ0QP+M25ah9BLVvbD1dzfoMB93G6YcJNS5ajw7EZq776pNVRAZCZJVdHYm61JD605cNu1XnBjBAVPtWFsLkl24T6c3qpT7IroYkUAoeSxeTEw8QuPIpFgAtFR937njg+G8N2drJkBOCDSfV5d0L8xkhis0qrt8wmoWPJJoTQMgSHoKeFrVhvl0+tnZR8me73DRt5MCVAgwTv+ggb0s8Wc+zmUcW8E2JcdaRmZS9kgXP2T19S2WAOgeQwy5QwJWnIcEI/fTVlnZwahWusRDUfFJHqQJ1hk=
+  - secure: IQedTkcbG/HgvdlhplcTZAcGm2v4efVOSMZbtzFnk4JRvTXiVs/VGhZh3ZLZRyagTboBTCX8u9qfRwDY5Xw5gOXnTS8TaYYlFksyj/cwybr+Jv24LEedMa3lYLFf+HiKb5Qjd1ZythbymrOVu6yEhN3bi1A9YXEXgtMQJupHCHsN80wD2WBcsBu/xy8nVXcaxnstCyOYpM5d0JQybj0yPlT5fC48yJSDBaZFu64NDNmmM8iFDkMqVAHOLYKo2y56Mybcyj7O1/kcVDxqOIPiFrOdpzY6HezaYIIENReJmE6fBnv7Os2VayPIeKIVJNbF/61H0sk+Z0KGE6sDX1W95CGr1qRfYEIBIYyQ6ai0wKokXQFIUnRDV3gjD/8kpkI0fFgxttoihM5wL80Wv/uAN2H164DuRvZYuDDTGF2Fec7xOpzyDypdeTcKhtrgp6wPdhImWeHa+C0OQWb3l4RBU/Zq0MfGlCFnnFJwMhxm9Gs0DaLttisECc117nNigQP/7GeUPIWuG2OeCu0DUqBi+hHQSFugZRzzsU9uGBPsr0y6jWj2AyS57NmdqJ/mfXhruTck+tUak7mcQi5iUkcFXN0cP5VZk5M8QeWhZObpZw9cagB7OKGUTtdaoXNtKf9wVTv6wwmqjHd/0NtpDjx6B+jOYiNGM5b/+UXJ9FSHhWI=
