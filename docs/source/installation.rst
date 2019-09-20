@@ -43,10 +43,8 @@ We recommend to use a clean Raspbian image for installing Karmen.
    sudo apt-get install apt-transport-https ca-certificates software-properties-common -y
    curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
    sudo usermod -aG docker pi
-   sudo curl https://download.docker.com/linux/raspbian/gpg
-   sudo sh -c "echo 'deb https://download.docker.com/linux/raspbian/ stretch stable' > /etc/apt/sources.list.d/docker.list"
-   sudo apt-get update && sudo apt-get upgrade
-   systemctl start docker.service
+   sudo apt install docker-compose
+   sudo reboot
    docker info
 
 The last command should spit out a bunch information about your docker installation.
@@ -59,8 +57,8 @@ Just download the latest one to your Raspberry Pi's home directory and unzip it.
 
    cd
    wget -O karmen.zip https://github.com/fragaria/karmen/releases/latest/download/release.zip
-   unzip -d .karmen karmen.zip
-   cd .karmen
+   unzip -d karmen karmen.zip
+   cd karmen
 
 .. TODO an alternative would be to have a `release` branch, then the update would be a
    matter of git pull and container restart. wget would get replaced by git clone --branch release

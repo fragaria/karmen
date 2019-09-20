@@ -1,4 +1,5 @@
-FROM mhart/alpine-node:10
+FROM node:10-alpine
+RUN apk add python make g++
 
 WORKDIR /usr/src/app
 
