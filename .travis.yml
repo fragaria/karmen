@@ -10,49 +10,51 @@ addons:
     - docker-ce
 matrix:
   include:
-  - stage: test
-    language: python
-    python: '3.6'
-    install:
-    - pip install pipenv
-    before_script:
-    - cd src/karmen_backend
-    script:
-    - pipenv install
-    - make test
-  - language: python
-    python: '3.7'
-    install:
-    - pip install pipenv
-    before_script:
-    - cd src/karmen_backend
-    script:
-    - pipenv install
-    - make coverage
-    - make coveralls
-  - language: python
-    python: 3.8-dev
-    install:
-    - pip install pipenv
-    before_script:
-    - cd src/karmen_backend
-    script:
-    - pipenv install
-    - make test
-  - language: node_js
-    node_js: 10
-    cache:
-      directories:
-      - node_modules
-      - "$HOME/.npm"
-    before_script:
-    - cd src/karmen_frontend
-    - npm ci
-    script:
-    - npm run lint
-    - npm run build
+#  - stage: test
+#    language: python
+#    python: '3.6'
+#    install:
+#    - pip install pipenv
+#    before_script:
+#    - cd src/karmen_backend
+#    script:
+#    - pipenv install
+#    - make test
+#  - language: python
+#    python: '3.7'
+#    install:
+#    - pip install pipenv
+#    before_script:
+#    - cd src/karmen_backend
+#    script:
+#    - pipenv install
+#    - make coverage
+#    - make coveralls
+#  - language: python
+#    python: 3.8-dev
+#    install:
+#    - pip install pipenv
+#    before_script:
+#    - cd src/karmen_backend
+#    script:
+#    - pipenv install
+#    - make test
+#  - language: node_js
+#    stage: test
+#    node_js: 10
+#    cache:
+#      directories:
+#      - node_modules
+#      - "$HOME/.npm"
+#    before_script:
+#    - cd src/karmen_frontend
+#    - npm ci
+#    script:
+#    - npm run lint
+#    - npm run build
   - stage: build docker
     if: branch = feat/multi-build
+    language: generic
     before_install:
     - sudo docker run --privileged linuxkit/binfmt:v0.6
     - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
@@ -60,7 +62,8 @@ matrix:
       linux/armhf
     - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
     - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-    script: bash .travis/build-images.sh
+    install: true
+    script: bash .travis/build-images-backend.sh
 env:
   global:
   - secure: nmO4w42rn+ma3MaXHCvOFSIkCH8lGn6x9/Kh9xkpMo58eJRjW6sLdJR37Cx95nEpbHDEHmWz+ScUy5FHDusRtPyQAc9i3e8YnB7M4oeeZn+Rl6W0voMHTQurF+bm3U07epW0z4LNIvazwEdP36r/oBReFIzXp+8A5NTumdSPHLVeEO+jb79kKsKBvZj0VAlphFledQI2PRKZ8glKh1alRmKIp+Y+3pte+6kfmuBjDIdejgQA+1LVp/DF7DVlkjNaSgAw82UHxw+6TVpqdtQpvdda7CR4ur7v+6+7ZGQztmC9KPpSCVcXLNEY0PXDKK79tAm/qkqhBuhhqANHLw5/S6HE0uonc/TdX1hJJyLBzxnlwZdHq6CV1VQ2chXJqXufe9iINULBWTAiOiJ0QP+M25ah9BLVvbD1dzfoMB93G6YcJNS5ajw7EZq776pNVRAZCZJVdHYm61JD605cNu1XnBjBAVPtWFsLkl24T6c3qpT7IroYkUAoeSxeTEw8QuPIpFgAtFR937njg+G8N2drJkBOCDSfV5d0L8xkhis0qrt8wmoWPJJoTQMgSHoKeFrVhvl0+tnZR8me73DRt5MCVAgwTv+ggb0s8Wc+zmUcW8E2JcdaRmZS9kgXP2T19S2WAOgeQwy5QwJWnIcEI/fTVlnZwahWusRDUfFJHqQJ1hk=
