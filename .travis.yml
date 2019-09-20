@@ -10,50 +10,50 @@ addons:
     - docker-ce
 matrix:
   include:
-#  - stage: test
-#    language: python
-#    python: '3.6'
-#    install:
-#    - pip install pipenv
-#    before_script:
-#    - cd src/karmen_backend
-#    script:
-#    - pipenv install
-#    - make test
-#  - language: python
-#    python: '3.7'
-#    install:
-#    - pip install pipenv
-#    before_script:
-#    - cd src/karmen_backend
-#    script:
-#    - pipenv install
-#    - make coverage
-#    - make coveralls
-#  - language: python
-#    python: 3.8-dev
-#    install:
-#    - pip install pipenv
-#    before_script:
-#    - cd src/karmen_backend
-#    script:
-#    - pipenv install
-#    - make test
-#  - language: node_js
-#    stage: test
-#    node_js: 10
-#    cache:
-#      directories:
-#      - node_modules
-#      - "$HOME/.npm"
-#    before_script:
-#    - cd src/karmen_frontend
-#    - npm ci
-#    script:
-#    - npm run lint
-#    - npm run build
+  # - stage: test
+  #   language: python
+  #   python: '3.6'
+  #   install:
+  #   - pip install pipenv
+  #   before_script:
+  #   - cd src/karmen_backend
+  #   script:
+  #   - pipenv install
+  #   - make test
+  # - language: python
+  #   python: '3.7'
+  #   install:
+  #   - pip install pipenv
+  #   before_script:
+  #   - cd src/karmen_backend
+  #   script:
+  #   - pipenv install
+  #   - make coverage
+  #   - make coveralls
+  # - language: python
+  #   python: 3.8-dev
+  #   install:
+  #   - pip install pipenv
+  #   before_script:
+  #   - cd src/karmen_backend
+  #   script:
+  #   - pipenv install
+  #   - make test
+  # - language: node_js
+  #   stage: test
+  #   node_js: 10
+  #   cache:
+  #     directories:
+  #     - node_modules
+  #     - "$HOME/.npm"
+  #   before_script:
+  #   - cd src/karmen_frontend
+  #   - npm ci
+  #   script:
+  #   - npm run lint
+  #   - npm run build
   - stage: build docker
-    if: branch = feat/multi-build
+    if: branch = feat-multi-build
     language: generic
     before_install:
     - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -63,8 +63,21 @@ matrix:
     - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
     - export BUILDKIT_HOST=tcp://0.0.0.0:1234
     install: true
-    script: bash .travis/build-images-backend.sh
+    script:
+    - bash .travis/build-images-backend.sh
+  - if: branch = feat-multi-build
+    language: generic
+    before_install:
+    - sudo docker run --privileged linuxkit/binfmt:v0.6
+    - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
+      --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
+      linux/armhf
+    - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+    - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+    install: true
+    script:
+    - bash .travis/build-images-frontend.sh
 env:
   global:
-  - secure: nmO4w42rn+ma3MaXHCvOFSIkCH8lGn6x9/Kh9xkpMo58eJRjW6sLdJR37Cx95nEpbHDEHmWz+ScUy5FHDusRtPyQAc9i3e8YnB7M4oeeZn+Rl6W0voMHTQurF+bm3U07epW0z4LNIvazwEdP36r/oBReFIzXp+8A5NTumdSPHLVeEO+jb79kKsKBvZj0VAlphFledQI2PRKZ8glKh1alRmKIp+Y+3pte+6kfmuBjDIdejgQA+1LVp/DF7DVlkjNaSgAw82UHxw+6TVpqdtQpvdda7CR4ur7v+6+7ZGQztmC9KPpSCVcXLNEY0PXDKK79tAm/qkqhBuhhqANHLw5/S6HE0uonc/TdX1hJJyLBzxnlwZdHq6CV1VQ2chXJqXufe9iINULBWTAiOiJ0QP+M25ah9BLVvbD1dzfoMB93G6YcJNS5ajw7EZq776pNVRAZCZJVdHYm61JD605cNu1XnBjBAVPtWFsLkl24T6c3qpT7IroYkUAoeSxeTEw8QuPIpFgAtFR937njg+G8N2drJkBOCDSfV5d0L8xkhis0qrt8wmoWPJJoTQMgSHoKeFrVhvl0+tnZR8me73DRt5MCVAgwTv+ggb0s8Wc+zmUcW8E2JcdaRmZS9kgXP2T19S2WAOgeQwy5QwJWnIcEI/fTVlnZwahWusRDUfFJHqQJ1hk=
-  - secure: IQedTkcbG/HgvdlhplcTZAcGm2v4efVOSMZbtzFnk4JRvTXiVs/VGhZh3ZLZRyagTboBTCX8u9qfRwDY5Xw5gOXnTS8TaYYlFksyj/cwybr+Jv24LEedMa3lYLFf+HiKb5Qjd1ZythbymrOVu6yEhN3bi1A9YXEXgtMQJupHCHsN80wD2WBcsBu/xy8nVXcaxnstCyOYpM5d0JQybj0yPlT5fC48yJSDBaZFu64NDNmmM8iFDkMqVAHOLYKo2y56Mybcyj7O1/kcVDxqOIPiFrOdpzY6HezaYIIENReJmE6fBnv7Os2VayPIeKIVJNbF/61H0sk+Z0KGE6sDX1W95CGr1qRfYEIBIYyQ6ai0wKokXQFIUnRDV3gjD/8kpkI0fFgxttoihM5wL80Wv/uAN2H164DuRvZYuDDTGF2Fec7xOpzyDypdeTcKhtrgp6wPdhImWeHa+C0OQWb3l4RBU/Zq0MfGlCFnnFJwMhxm9Gs0DaLttisECc117nNigQP/7GeUPIWuG2OeCu0DUqBi+hHQSFugZRzzsU9uGBPsr0y6jWj2AyS57NmdqJ/mfXhruTck+tUak7mcQi5iUkcFXN0cP5VZk5M8QeWhZObpZw9cagB7OKGUTtdaoXNtKf9wVTv6wwmqjHd/0NtpDjx6B+jOYiNGM5b/+UXJ9FSHhWI=
+  - secure: OSoA7AOTIf0Ias9w/TkA+Rw55e/z+Gu1whBSsZp/ncwHmBJom3+uyF/Ry7Hu+7rHwkk29t6pXTvgfGar/BUWZ9FfJAiM+1ixrVaKpxkotJqNfcXDCSCBLznRBy5Odmqv+czMHvYAdLSIPL3p6fcsfy79u4ju1XM2ZluRMXQYycqk0xpe/tIw8KhhhKTZgnuWE57YhoC8m02lcuhkTCUylYsCxhabjghbxgUc4wXq76Tk1EDSjaCM9LMdqP4mUGuj0aYhAvX2v4JTOb55dS+UhlOPlmQ4ZahpopJKFz8HfYQCuaRZGP/L9ap9GLx/Q4BhFvz+7S+CjpJ0dS+i9IdJthufBmrRTcLObBTPF6DiTAXsqxRw2psf1W60+8zHLdzvxYAvAlLmTqR86+yCip83DyGNfnWKBWeJI+Jy309n/tJUxZmsxE4eFjv9oU5i4qRjZVZ7t5eO+evxTSKYuYCf8F7ALv1FA0wG0xq8x77ydrPn+pndSVa+xP3tX/ifqlmSMHr+jMivfqYhqptLTZAwxWKBK2mRc7Xh2TSvlcVNoahNiwOawQQjelOC+1v/5IVh925UVY3PiepuUlSlJc0Cf+Ee/oMxsTyAjd2V2baCgKfrtV28Du36QkLIyrEBU8GNd/KfdnfhBwLHXJEn/SoB8UpD3/BxfnZU6FwAUIYbUAI=
+  - secure: e4YXgh+O63zgWYWD12WltX1BSLChLVkRcWh3bmVJjZhALnVZ8z/1ygW5L6/nNiJG+2Iwr09mQhHZWd9jE04RUpvGI08z0uqJb5urTri0+dvYrNAE1mNETJRo6br8GZLbhb68VDrg1HNO/p4/HpGCVQPSZaICFZocnH9PN/Tx87zjabko0Fb5XkQpUhBVVMLHYvET08bgQdkXttrsfNdZSvpUXF+A0I7wQ5TSYMJHklA29aN201ZJa6CWsiom93IOzQ9MpDX6f4v1QcyhB9eir9SnfvDvHyR2O0zhYUrXBtEw3XMO4kbPZ77V/pOpQLk497BHnIG+K5c+Wj2SYnGQ0sTzHsWjQsUPWoS9axn/VYDJFEAI5hnFxfUFSQO4rQFc5+RdWTExkjrkr2PhvPJll1AJfQF45I6NRUBr6kz4F4WJulYCUOAADIVN3xDO1ukMjuAmMIY/DNDMUlVRd1iFvksUkiAMnBR+D3YGKCaLxxvk7/sRDa8CyycoWwglCQ0eaPIwBcDO5vbazyAxiO/pm7gIdQAQRbGus+GKqNzsFGyMtZhodmwu8amdll5hsrLi+YRZ5sSjaLEtlHJprGEkMCw1y/6CV+2OysSOLZMBbIhJyqmlsb+hLjp9xpLrhJl03jDiUvaNGV7isZfUF3jE4eCKRYRHECNQB8k8yjdygOk=

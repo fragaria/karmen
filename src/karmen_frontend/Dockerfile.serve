@@ -1,0 +1,14 @@
+FROM node:10-alpine
+
+WORKDIR /usr/src/app
+
+COPY build .
+COPY scripts . 
+
+ENV ENV production
+
+RUN npm install -g serve
+
+CMD ["./scripts/docker-start.sh"]
+
+EXPOSE 8080
