@@ -1,13 +1,13 @@
 FROM node:10-alpine
 
-WORKDIR /usr/src/app
+RUN apk add nginx
 
-COPY build .
-COPY scripts . 
+WORKDIR /usr/src/app
 
 ENV ENV production
 
-RUN npm install -g serve
+COPY ./scripts/nginx.conf /etc/nginx
+COPY . .
 
 CMD ["./scripts/docker-start.sh"]
 
