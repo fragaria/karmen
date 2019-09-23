@@ -30,6 +30,11 @@ $palette: (
 body {
   text-align: center;
   padding: 0 $spacing-default $spacing-default $spacing-default;
+  font-family: "Andulka Text Pro";
+  font-weight: normal;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern", "onum", "liga";
 }
 
 h1, h2, h3 {
