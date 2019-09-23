@@ -1,4 +1,4 @@
-// @note: make sure you update fonts preload section in head.html when this changes
+/* @note: make sure you update fonts preload section in head.html when this changes */
 @font-face {
     font-family: "Andulka Text Pro";
     src: url("https://res.cloudinary.com/fragaria/raw/upload/v1534234755/fragaria.cz/fonts/AndulkaTextPro.woff") format("woff");
