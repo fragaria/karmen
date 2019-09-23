@@ -1,20 +1,283 @@
-img.flip-horizontal {
-  transform: scaleX(-1);
+@import "fonts.css";
+@import "reset.css";
+@import "./icons/style.css";
+
+$base-unit: 8px;
+$spacing-default: 32px;
+$color-primary: #000;
+$color-secondary: #ea272e;
+$form-elements-height: 45px;
+
+$palette: (
+  black: #000,
+  white: #fff,
+  red: #ea272e,
+  dark-red: #9f1c21,
+  olive-green: #8fa13b,
+  gray-light: #f5f5f5,
+  gray-semilight: #ddd,
+  gray-medium: #ccc,
+  gray-dark: #888,
+  gray-very-dark: #333,
+);
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; 
 }
 
-img.flip-vertical {
-  transform: scaleY(-1);
+body {
+  text-align: center;
+  padding: 0 $spacing-default $spacing-default $spacing-default;
 }
 
-img.rotate-90 {
-  transform: rotate(90deg);
+h1, h2, h3 {
+  font-family: "Trivia Grotesk N2"
 }
 
-img.flip-horizontal.flip-vertical {
-  transform: scaleX(-1) scaleY(-1);
+h1 {
+  font-size: $spacing-default * 2;
 }
 
-img.flip-horizontal.flip-vertical.rotate-90 {
-  transform: scaleX(-1) scaleY(-1) rotate(90deg);
+hr, .hidden {
+  display: none;
 }
 
+a {
+  color: map-get($palette, red);
+
+  &:hover, &:active {
+    color: map-get($palette, dark-red);
+  }
+}
+
+strong {
+  font-weight: 800;
+}
+
+p {
+  line-height: 150%;
+}
+
+@mixin iconlink {
+  color: map-get($palette, gray-dark);
+  text-decoration: none;
+
+  &:hover, &:active {
+    color: map-get($palette, gray-very-dark);
+  }
+}
+
+.icon {
+  &.icon-active {
+    color: map-get($palette, olive-green) !important;
+  }
+
+  &.icon-inactive {
+    color: map-get($palette, dark-red) !important;
+  }
+
+  &.icon-idle {
+    color: map-get($palette, gray-medium) !important;
+  }
+}
+
+.loader {
+  font-family: "Trivia Grotesk N2";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    font-size: $spacing-default * 2;
+    padding-top: $spacing-default * 6;
+    font-size: $spacing-default * 2;
+  }
+}
+
+.back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: $spacing-default;
+  font-size: $spacing-default;
+  a {
+    text-decoration: none;
+  }
+}
+
+button.plain {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+}
+
+.boxed-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: flex-start;
+}
+
+.content-box {
+  flex: 1;
+  min-width: 33%;
+  max-width: 33%;
+  min-height: 480px;
+  border: solid map-get($palette, gray-medium);
+  border-width: 1px;
+  position: relative;
+  margin-top: $spacing-default;
+
+  .box-actions {
+    font-size: $spacing-default;
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    right: 0;
+    height: 100%;
+    padding: $spacing-default / 2;
+    background-color: rgba(255, 255, 255, .7);
+
+    li {
+      margin-bottom: $spacing-default / 4;
+    }
+
+    a, button, .icon {
+      @include iconlink;
+      display: inline-block;
+    }
+  }
+}
+
+.printer-state {
+  text-align: left;
+  margin: $spacing-default / 2;
+  line-height: 150%;
+}
+
+.webcam-stream {
+  .no-stream {
+    height: 280px;
+    width: 100%;
+    background-color: map-get($palette, gray-light);
+    padding-top: $spacing-default * 2;
+    color: map-get($palette, gray-dark);
+    i {
+      display: inline-block;
+      font-size: $spacing-default * 4;
+      margin-bottom: $spacing-default / 2;
+    }
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  img.flip-horizontal {
+    transform: scaleX(-1);
+  }
+
+  img.flip-vertical {
+    transform: scaleY(-1);
+  }
+
+  img.rotate-90 {
+    transform: rotate(90deg);
+  }
+
+  img.flip-horizontal.flip-vertical {
+    transform: scaleX(-1) scaleY(-1);
+  }
+
+  img.flip-horizontal.flip-vertical.rotate-90 {
+    transform: scaleX(-1) scaleY(-1) rotate(90deg);
+  }
+}
+
+nav {
+  img {
+    padding-top: $spacing-default * 6;
+  }
+  p {
+    position: absolute;
+    bottom: $spacing-default;
+    text-align: left;
+    margin-left: $spacing-default;
+  }
+}
+
+.add-printer-box {
+  padding-top: $spacing-default * 6;
+  a {
+    @include iconlink;
+    display: block;
+    font-size: $spacing-default;
+
+    i {
+      display: inline-block;
+      font-size: $spacing-default * 3;
+      margin-bottom: $spacing-default / 2;
+    }
+  }
+}
+
+.standalone-page {
+
+  h1 {
+    margin-top: $spacing-default * 6;
+    margin-bottom: $spacing-default;
+  }
+
+  form {
+    p {
+      line-height: 150%;
+      margin-bottom: $spacing-default / 2;
+
+      label {
+        margin-right: $spacing-default / 4;
+
+        input[type=checkbox] {
+          position: relative;
+          top: $base-unit * 2;
+          left: $base-unit * 2;
+        }
+      }
+
+      input, select {
+        height: $form-elements-height;
+        padding: $base-unit;
+        border: 1px solid map-get($palette, black);
+        border-radius: 0;
+        font-size: 15px;
+      }
+
+      small {
+        color: map-get($palette, dark-red);
+        padding-left: $spacing-default
+      }
+    }
+
+    button[type=submit] {
+      height: $form-elements-height;
+      padding: $base-unit $spacing-default;
+      border: none;
+      outline: none;
+      background: map-get($palette, red);
+      color: #fff;
+    }
+  }
+}
+
+.printer-detail {
+  .printer-info {
+    display: flex;
+
+    > div {
+      flex: 1;
+      max-width: 50%;
+    }
+  }
+}

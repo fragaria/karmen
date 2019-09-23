@@ -56,16 +56,19 @@ export class WebcamStream extends React.Component {
       klass.push('rotate-90');
     }
 
-    return <p>
+    return <div>
       {isOnline ?
         <img
           className={klass.join(' ')}
           alt={source}
           src={`${source}?t=${(new Date()).getTime()}`}
         /> :
-        <strong>Stream not accessible</strong>
+        <p className="no-stream">
+          <i className="icon icon-warning"></i><br />
+          Stream unavailable
+        </p>
       }
-    </p>;
+    </div>;
   }
 }
 
@@ -80,28 +83,40 @@ export const Job = ({ name, completion, printTime, printTimeLeft }) => {
     approxPrintTimeLeft = `${d.toISOString().substr(11, 2)} hours, ${d.toISOString().substr(14, 2)} minutes`;
   }
   return (
-    <ul>
-      <li>Name: {name}</li>
-      <li>Completion: {printTime > 0 ? completion.toFixed(2) : '0'}%</li>
-      <li>Print time left (approx.): {approxPrintTimeLeft || '?'}</li>
-    </ul>
+    <React.Fragment>
+      <p><i className="icon icon-file-text2"></i> <strong>{name || '-'}</strong></p>
+      <p><i className="icon icon-clock"></i>{' '}
+        {printTimeLeft
+          ? <React.Fragment>{approxPrintTimeLeft || '?'} remaining, {printTime > 0 ? completion.toFixed(2) : '0'}% completed</React.Fragment>
+          : <React.Fragment>-</React.Fragment>
+        }
+      </p>
+    </React.Fragment>
   );
 }
 
 export const Temperature = ({name, actual, target }) => {
-  return <p>{name}: {actual}/{target} &#176;C</p>
+  return <p><i className="icon icon-meter"></i> {name}: {actual}/{target} &#176;C</p>
 }
 
-export const PrinterActions = ({ ip, onPrinterDelete }) => {
+export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete }) => {
   return (
     <div>
-      <h2>Actions</h2>
+      <h2 className="hidden">Actions</h2>
       <ul>
-        <li><Link to={`/printers/${ip}`}>Edit</Link></li>
-        <li><button onClick={(e) => {
+        <li>
+          <a href={`http://${ip}`} target="_blank" rel="noopener noreferrer">
+            <i className={`icon icon-display ${connected ? 'icon-active' : 'icon-inactive'}`}></i>
+          </a>
+        </li>
+        <li>
+          <i className={`icon icon-printer ${currentState === 'Printing' ? 'icon-active' : 'icon-idle'}`} title={currentState}></i>
+        </li>
+        <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
+        <li><button className="plain" onClick={(e) => {
           deletePrinter(ip);
           onPrinterDelete(ip);
-        }}>Remove</button></li>
+        }}><i className="icon icon-bin"></i></button></li>
       </ul>
     </div>
   );
@@ -110,12 +125,12 @@ export const PrinterActions = ({ ip, onPrinterDelete }) => {
 export const PrinterState = ({ printer }) => {
   return (
     <div>
-        <h2>Current state</h2>
-        <p>State: <strong>{printer.status.state}</strong></p>
-        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
-        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-        {printer.job.name && <Job {...printer.job} />}
-        {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+        <h2 className="hidden">Current state</h2>
+        <div>
+          {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
+          {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+          <Job {...printer.job} />
+        </div>
       </div>
   );
 }
@@ -123,7 +138,7 @@ export const PrinterState = ({ printer }) => {
 export const PrinterConnection = ({ printer }) => {
   return (
     <div>
-      <h2>Connection</h2>
+      <h2 className="hidden">Connection</h2>
       <ul>
           <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
           <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
@@ -141,9 +156,15 @@ export const PrinterView = ({ printer, onPrinterDelete }) => {
         {printer.name}
       </h1>
       <div>
-        <PrinterActions ip={printer.ip} onPrinterDelete={onPrinterDelete} />
-        <PrinterConnection printer={printer} />
-        <PrinterState printer={printer} />
+        <div className="box-actions">
+          <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={onPrinterDelete} />
+        </div>
+        <div className="printer-state">
+          <PrinterState printer={printer} />
+        </div>
+        <div className="webcam-stream">
+          {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+        </div>
       </div>
       <hr />
     </div>

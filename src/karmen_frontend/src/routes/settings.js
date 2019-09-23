@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Loader from '../components/loader';
+import Back from '../components/back';
 import { FormInputs } from '../components/form-utils';
 import { getSettings, changeSettings } from '../services/karmen-backend';
 
@@ -127,15 +128,18 @@ class Settings extends React.Component {
       });
     }
     return (
-      <div>
+      <div className="settings standalone-page">
+        <Back to="/" />
         <h1>Change settings</h1>
         <div>
           <form>
-            {message && <p>{message}</p>}
-            <FormInputs definition={settings} updateValue={updateValue} />
-            <p>
-              <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
-            </p>
+            <fieldset>
+              {message && <p>{message}</p>}
+              <FormInputs definition={settings} updateValue={updateValue} />
+              <p>
+                <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
+              </p>
+            </fieldset>
            </form>
         </div>
       </div>

@@ -6,7 +6,9 @@ export const FormInputs = ({ definition, updateValue }) => {
       case 'text':
         return (
           <p key={name}>
-            <label htmlFor={name}>{definition[name].name}</label>
+            <label htmlFor={name}>
+              {definition[name].name}
+            </label>
             <input type="text" id={name} name={name} value={definition[name].val} onChange={(e) => updateValue(name, e.target.value)} />
             {definition[name].error && <small>{definition[name].error}</small>}
           </p>
@@ -14,8 +16,10 @@ export const FormInputs = ({ definition, updateValue }) => {
       case 'checkbox':
         return (
           <p key={name}>
-            <label htmlFor={name}>{definition[name].name}</label>
-            <input type="checkbox" id={name} name={name} checked={definition[name].val} onChange={(e) => updateValue(name, e.target.checked)} />
+            <label htmlFor={name}>
+              {definition[name].name}
+              <input type="checkbox" id={name} name={name} checked={definition[name].val} onChange={(e) => updateValue(name, e.target.checked)} />
+            </label>
             {definition[name].error && <small>{definition[name].error}</small>}
           </p>
         );

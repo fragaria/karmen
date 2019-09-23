@@ -1,8 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
-import Menu from './components/menu';
-import Footer from './components/footer';
 import Heartbeat from './components/heartbeat';
 
 import PrinterList from './routes/printer-list';
@@ -12,17 +10,15 @@ import Settings from './routes/settings';
 
 function App() {
   return (
-    <div className="App">
+    <div>
       <BrowserRouter>
-        <Menu />
-        <Switch>
-          <Route path="/add-printer" exact component={AddPrinter} />
-          <Route path="/settings" exact component={Settings} />
-          <Route path="/printers/:ip" exact component={PrinterDetail} />
-          <Route path="/" exact component={PrinterList} />
-        </Switch>
-        <Heartbeat />
-        <Footer />
+          <Switch>
+            <Route path="/add-printer" exact component={AddPrinter} />
+            <Route path="/settings" exact component={Settings} />
+            <Route path="/printers/:ip" exact component={PrinterDetail} />
+            <Route path="/" exact component={PrinterList} />
+          </Switch>
+          <Heartbeat />
        </BrowserRouter>
     </div>
   );

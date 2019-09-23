@@ -1,8 +1,9 @@
 import React from 'react';
 
 import Loader from '../components/loader';
+import Back from '../components/back';
 import { FormInputs } from '../components/form-utils';
-import { PrinterConnection, PrinterState } from '../components/printer-view';
+import { PrinterConnection, PrinterState, WebcamStream } from '../components/printer-view';
 import { getPrinter, patchPrinter } from '../services/karmen-backend';
 
 class PrinterDetail extends React.Component {
@@ -97,23 +98,31 @@ class PrinterDetail extends React.Component {
       });
     }
     return (
-      <div>
+      <div className="printer-detail standalone-page">
+        <Back to="/" />
         <h1>
           {printer.name}
         </h1>
         <div>
           <div>
-          <h2>Change</h2>
+            <h2 class="hidden">Change printer properties</h2>
             <form>
-            {message && <p>{message}</p>}
-            <FormInputs definition={form} updateValue={updateValue} />
-            <p>
-              <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
-            </p>
-           </form>
+              {message && <p>{message}</p>}
+              <FormInputs definition={form} updateValue={updateValue} />
+              <p>
+                <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
+              </p>
+             </form>
           </div>
-          <PrinterConnection printer={printer} />
-          <PrinterState printer={printer} />
+          <div className="printer-info">
+            <div className="printer-state">
+              <PrinterConnection printer={printer} />
+              <PrinterState printer={printer} />
+            </div>
+            <div className="webcam-stream">
+              {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+            </div>
+          </div>
         </div>
       </div>
     );

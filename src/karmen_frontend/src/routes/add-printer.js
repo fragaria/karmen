@@ -1,6 +1,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
+import Back from '../components/back';
 import { FormInputs } from '../components/form-utils';
 import { addPrinter } from '../services/karmen-backend';
 
@@ -89,7 +90,8 @@ class AddPrinter extends React.Component {
       return <Redirect to="/" />
     }
     return (
-      <div>
+      <div class=" standalone-page">
+        <Back to="/" />
         <h1>Add a printer</h1>
         <div>
           <form>

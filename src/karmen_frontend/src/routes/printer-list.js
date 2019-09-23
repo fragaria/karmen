@@ -1,6 +1,7 @@
 import React from 'react';
-
+import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
+import Menu from '../components/menu';
 import PrinterView from '../components/printer-view';
 import { getPrinters } from '../services/karmen-backend';
 
@@ -40,17 +41,25 @@ class PrinterList extends React.Component {
     if (printers === null) {
       return <div><Loader /></div>;
     }
-    const printerElements = printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
-      return <PrinterView key={p.ip} printer={p} onPrinterDelete={(ip) => {
+    const printerElements = printers && printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
+      return <div key={p.ip} className="content-box"><PrinterView printer={p} onPrinterDelete={(ip) => {
         this.setState({
           printers: printers.filter((p) => p.ip !== ip),
         });
-      }} />
+      }} /></div>
     });
     return (
-      <div>
-        {printerElements.length === 0 && <p>No printers found</p>}
+      <div className="printer-list boxed-content">
+        <div className="content-box"><Menu /></div>
         {printerElements}
+        <div className="content-box">
+          <div className="add-printer-box">
+            <Link to="/add-printer">
+              <i className="icon icon-plus"></i><br />
+              Add printer
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
