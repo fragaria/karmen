@@ -7,12 +7,17 @@
   --spacing-default: 32px;
   --color-primary: #000;
   --color-secondary: #ea272e;
+  --form-elements-height: 45px;
+  --font-serif: "Andulka Text Pro", serif;
+  --font-sans-serif: "Trivia Grotesk N2", sans-serif;
 }
+
+* { box-sizing: border-box; }
 
 body {
   text-align: center;
   padding: var(--spacing-default);
-  font-family: "Andulka Text Pro", serif;
+  font-family: var(--font-serif);
   font-weight: normal;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
@@ -20,18 +25,33 @@ body {
 }
 
 h1, h2, h3 {
-  font-family: "Trivia Grotesk N2", sans-serif;
+  font-family: var(--font-sans-serif);
 }
 
 h1 {
-  font-size: 72px;
+  font-size: 52px;
 }
 
 ul {
+  max-width: 450px;
+  margin: 0 auto;
   list-style-type: square;
   text-align: left;
   font-weight: normal;
   font-style: normal;
+  line-height: 1.4;
+}
+
+a {
+  color: var(--color-secondary);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+header {
+  margin: var(--spacing-default) 0;
 }
 
 section {
@@ -40,18 +60,46 @@ section {
   padding: var(--spacing-default) 0;
 }
 
+section .title{
+  margin: var(--spacing-default) 0;
+  font-family: var(--font-serif);
+  font-size: 2rem;
+}
+
+.subscribe input {
+  height: var(--form-elements-height);
+  padding: var(--base-unit);
+  border: 1px solid var(--color-primary);
+  border-radius: 0;
+  font-size: 15px;
+}
+
+.subscribe button {
+  height: var(--form-elements-height);
+  padding: var(--base-unit) var(--spacing-default);
+  border: none;
+  outline: none;
+  background: var(--color-secondary);
+  color: #fff;
+}
+
 .partners img {
   max-width: 200px;
   max-height: 30px;
   margin: 0 var(--base-unit);
 }
 
-footer a {
+.email a {
+  font-size: 1.5rem;
+}
+
+.icons a {
+  padding: 0 var(--base-unit);
   text-decoration: none;
   color: var(--color-primary);
 }
 
-footer a:hover {
+.icons a:hover {
   text-decoration: none;
   color: var(--color-secondary);
 }

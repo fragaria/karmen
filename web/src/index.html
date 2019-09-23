@@ -3,9 +3,21 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="HandheldFriendly" content="true" />
     <title>Karmen</title>
-    <meta name="description" content="Karmen">
-    <meta name="Fragaria s.r.o." content="Multiple 3D printers controller">
+    <meta name="description" content="Multiple 3D printers controller">
+
+    <meta name="author" content="Fragaria s.r.o." />
+    <meta name="robots" content="index,follow" />
+    <!-- TODO add SEO & social media stuff -->
+    <meta name="keywords" content="" />
+    <meta property="og:url"           content="https://karmen.fragaria.cz" />
+    <meta property="og:type"          content="website" />
+    <meta property="og:title"         content="Karmen" />
+    <meta property="og:description"   content="Multiple 3D printers controller" />
+
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
@@ -17,10 +29,12 @@
   </head>
   <body>
     <header>
-      <img src="./logo.svg" alt="">
-      <h1>Multiple 3D printers controller</h1>
+      <section>
+        <img src="./logo.svg" alt="">
+      </section>
     </header>
     <article>
+      <h1>Multiple 3D printers controller</h1>
       <section>
         <ul>
           <li>Control multiple 3D printers from a single interface using your web browser</li>
@@ -31,11 +45,16 @@
         </ul>
       </section>
       <section>
+        <iframe width="100%" height="415" src="https://www.youtube.com/embed/FrmF91uVbNw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </section>
+      <section class="subscribe">
         <form action="https://formcarry.com/s/XvDXjaBoXaG" method="POST" accept-charset="UTF-8" >
-          <label for="email">E-mail:</label>
-          <input type="email" name="email" />
-          <input type="hidden" name="_gotcha" />
-          <input type="submit" value="Subscribe!" />
+          <fieldset>
+            <h2 class="title">Stay up-to-date</h2>
+            <input type="email" name="email" placeholder="E-mail" />
+            <input type="hidden" name="_gotcha" />
+            <button type="submit">Subscribe!</button>
+          </fieldset>
         </form>
       </section>
       <section class="partners">
@@ -45,14 +64,14 @@
       </section>
     </article>
     <footer>
-      <section>
+      <section class="email">
+        <a href="maito:karmen@fragaria.cz">karmen@fragaria.cz</a>
+      </section>
+      <section class="icons">
         <a href="https://twitter.com/Karmen3D" target="_blank"><span class="icon-twitter"></span></a>
         <a href="https://www.youtube.com/channel/UC9kcYa3r0x4MLR47i1flnFw" target="_blank"><span class="icon-youtube"></span></a>
         <a href="https://github.com/fragaria/karmen" target="_blank"><span class="icon-github"></span></a>
         <a href="https://karmen.readthedocs.io/en/latest/" target="_blank"><span class="icon-readthedocs"></span></a>
-      </section>
-      <section>
-        <a href="maito:karmen@fragaria.cz">karmen@fragaria.cz</a>
       </section>
     </footer>
   </body>
