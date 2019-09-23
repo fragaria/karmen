@@ -1,14 +1,14 @@
 version: "3.4"
 services:
   frontend:
-    image: fragaria/karmen-frontend:0
+    image: fragaria/karmen-frontend
     environment:
       ENV: production
       BACKEND_BASE: http://${BASE_HOST}:8080
     ports:
       - 80:8080
   backend_flask:
-    image: fragaria/karmen-backend:0
+    image: fragaria/karmen-backend
     network_mode: host
     environment:
       REDIS_HOST: 127.0.0.1
@@ -25,7 +25,7 @@ services:
       - redis
       - postgres
   backend_celery_worker:
-    image: fragaria/karmen-backend:0
+    image: fragaria/karmen-backend
     network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: production
@@ -39,7 +39,7 @@ services:
       - postgres
       - redis
   backend_celery_beat:
-    image: fragaria/karmen-backend:0
+    image: fragaria/karmen-backend
     network_mode: host
     environment:
       ENV: production
