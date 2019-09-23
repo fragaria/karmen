@@ -1,3 +1,105 @@
+@import "fonts.css";
+@import "reset.css";
+@import "./icons/style.css";
+
+$spacing-default: 32px;
+
+:root {
+  --base-unit: 8px;
+  --spacing-default: 32px;
+  --color-primary: #000;
+  --color-secondary: #ea272e;
+}
+
+$palette: (
+  black: #000,
+  white: #fff,
+  red: #ea272e,
+  dark-red: #9f1c21,
+  olive-green: #8fa13b,
+  gray-light: #f5f5f5,
+  gray-semilight: #ddd,
+  gray-medium: #ccc,
+  gray-dark: #888,
+  gray-very-dark: #333,
+);
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; 
+}
+
+body {
+  text-align: center;
+  padding: 0 var(--spacing-default);
+}
+
+h1, h2, h3 {
+  font-family: "Trivia Grotesk N2"
+}
+
+h1 {
+  font-size: 64px;
+}
+
+hr, .hidden {
+  display: none;
+}
+
+a {
+  color: map-get($palette, red);
+
+  &:hover, &:active {
+    color: map-get($palette, dark-red);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: flex-start;
+}
+
+.content-box {
+  flex: 1;
+  min-width: 480px;
+  max-width: 25%;
+  min-height: 600px;
+  max-height: 600px;
+  padding: 0px 32px;
+  border: solid map-get($palette, gray-medium);
+  border-width: 0 1px 1px 1px;
+  position: relative;
+  margin-top: $spacing-default;
+}
+
+.box-actions {
+  position: absolute;
+  top: 0;
+  right: $spacing-default / 2;
+
+  a {
+    color: map-get($palette, gray-dark);
+    text-decoration: none;
+
+    &:hover, &:active {
+      color: map-get($palette, gray-very-dark);
+    }
+  }
+}
+
+nav {
+  p {
+    position: absolute;
+    bottom: $spacing-default;
+    text-align: left;
+    line-height: 150%;
+  }
+}
+
 img.flip-horizontal {
   transform: scaleX(-1);
 }

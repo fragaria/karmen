@@ -9,8 +9,7 @@ RUN npm ci
 COPY . .
 
 ARG REACT_APP_GIT_REV
-
-RUN npm run build
+ENV ENV dev
 
 CMD ["./scripts/docker-start.sh"]
 
