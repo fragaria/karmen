@@ -11,12 +11,30 @@
 body {
   text-align: center;
   padding: var(--spacing-default);
+  font-family: "Andulka Text Pro", serif;
+  font-weight: normal;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern", "onum", "liga";
 }
 
 h1, h2, h3 {
-  font-family: "Trivia Grotesk N2"
+  font-family: "Trivia Grotesk N2", sans-serif;
 }
 
 h1 {
-  font-size: 144px;
+  font-size: 72px;
+}
+
+ul {
+  list-style-type: square;
+  text-align: left;
+  font-weight: normal;
+  font-style: normal;
+}
+
+header,
+article {
+  max-width: 768px;
+  margin: 0 auto;
 }
