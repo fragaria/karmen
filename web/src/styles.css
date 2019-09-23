@@ -1,5 +1,6 @@
 @import "fonts.css";
 @import "reset.css";
+@import "./icons/style.css";
 
 :root {
   --base-unit: 8px;
@@ -33,8 +34,24 @@ ul {
   font-style: normal;
 }
 
-header,
-article {
+section {
   max-width: 768px;
   margin: 0 auto;
+  padding: var(--spacing-default) 0;
+}
+
+.partners img {
+  max-width: 200px;
+  max-height: 30px;
+  margin: 0 var(--base-unit);
+}
+
+footer a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+footer a:hover {
+  text-decoration: none;
+  color: var(--color-secondary);
 }
