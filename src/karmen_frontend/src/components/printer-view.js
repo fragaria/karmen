@@ -56,7 +56,7 @@ export class WebcamStream extends React.Component {
       klass.push('rotate-90');
     }
 
-    return <p>
+    return <p className="webcam-stream">
       {isOnline ?
         <img
           className={klass.join(' ')}
@@ -92,16 +92,24 @@ export const Temperature = ({name, actual, target }) => {
   return <p>{name}: {actual}/{target} &#176;C</p>
 }
 
-export const PrinterActions = ({ ip, onPrinterDelete }) => {
+export const PrinterActions = ({ ip, connected, isPrinting, onPrinterDelete }) => {
   return (
     <div>
-      <h2>Actions</h2>
+      <h2 className="hidden">Actions</h2>
       <ul>
-        <li><Link to={`/printers/${ip}`}>Edit</Link></li>
-        <li><button onClick={(e) => {
+        <li>
+          <a href={`http://${ip}`} target="_blank" rel="noopener noreferrer">
+            <i className={`icon icon-display ${connected ? 'icon-active' : 'icon-inactive'}`}></i>
+          </a>
+        </li>
+        <li>
+          <i className={`icon icon-printer ${isPrinting ? 'icon-active' : 'icon-idle'}`}></i>
+        </li>
+        <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
+        <li><button className="plain" onClick={(e) => {
           deletePrinter(ip);
           onPrinterDelete(ip);
-        }}>Remove</button></li>
+        }}><i className="icon icon-bin"></i></button></li>
       </ul>
     </div>
   );
@@ -110,11 +118,12 @@ export const PrinterActions = ({ ip, onPrinterDelete }) => {
 export const PrinterState = ({ printer }) => {
   return (
     <div>
-        <h2>Current state</h2>
-        <p>State: <strong>{printer.status.state}</strong></p>
-        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
-        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-        {printer.job.name && <Job {...printer.job} />}
+        <h2 className="hidden">Current state</h2>
+        <div>
+          {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
+          {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+          {printer.job.name && <Job {...printer.job} />}
+        </div>
         {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
       </div>
   );
@@ -141,8 +150,9 @@ export const PrinterView = ({ printer, onPrinterDelete }) => {
         {printer.name}
       </h1>
       <div>
-        <PrinterActions ip={printer.ip} onPrinterDelete={onPrinterDelete} />
-        <PrinterConnection printer={printer} />
+        <div className="box-actions">
+          <PrinterActions ip={printer.ip} connected={printer.client.connected} isPrinting={printer.status.state === 'Printing'} onPrinterDelete={onPrinterDelete} />
+        </div>
         <PrinterState printer={printer} />
       </div>
       <hr />

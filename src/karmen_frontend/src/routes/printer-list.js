@@ -52,7 +52,14 @@ class PrinterList extends React.Component {
       <div className="printer-list content">
         <div className="content-box"><Menu /></div>
         {printerElements}
-        <div className="content-box"><Link to="/add-printer">Add printer</Link></div>
+        <div className="content-box">
+          <div className="add-printer">
+            <Link to="/add-printer">
+              <i className="icon icon-plus"></i><br />
+              Add printer
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

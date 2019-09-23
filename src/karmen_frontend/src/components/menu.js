@@ -9,7 +9,7 @@ const Menu = () => {
           <img alt="Karmen logo" src="/logo.svg" />
         </Link>
         <div className="box-actions">
-          <Link to="/settings"><i class="icon-cog"></i></Link>
+          <Link to="/settings"><i className="icon-cog"></i></Link>
         </div>
         <hr />
         <p>
