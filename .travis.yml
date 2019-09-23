@@ -53,7 +53,7 @@ matrix:
     - npm run lint
     - npm run build
   - stage: build docker
-    if: branch = feat-multi-build
+    if: branch = release
     language: generic
     before_install:
     - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -65,7 +65,7 @@ matrix:
     install: true
     script:
     - bash .travis/build-images-backend.sh
-  - if: branch = feat-multi-build
+  - if: branch = release
     language: generic
     before_install:
     - sudo docker run --privileged linuxkit/binfmt:v0.6
