@@ -98,25 +98,31 @@ class PrinterDetail extends React.Component {
       });
     }
     return (
-      <div className="printer-detail single-page">
+      <div className="printer-detail standalone-page">
         <Back to="/" />
         <h1>
           {printer.name}
         </h1>
         <div>
           <div>
-          <h2>Change</h2>
+            <h2 class="hidden">Change printer properties</h2>
             <form>
-            {message && <p>{message}</p>}
-            <FormInputs definition={form} updateValue={updateValue} />
-            <p>
-              <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
-            </p>
-           </form>
+              {message && <p>{message}</p>}
+              <FormInputs definition={form} updateValue={updateValue} />
+              <p>
+                <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
+              </p>
+             </form>
           </div>
-          <PrinterConnection printer={printer} />
-          <PrinterState printer={printer} />
-          {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+          <div className="printer-info">
+            <div className="printer-state">
+              <PrinterConnection printer={printer} />
+              <PrinterState printer={printer} />
+            </div>
+            <div className="webcam-stream">
+              {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+            </div>
+          </div>
         </div>
       </div>
     );

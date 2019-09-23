@@ -85,10 +85,10 @@ export const Job = ({ name, completion, printTime, printTimeLeft }) => {
   return (
     <React.Fragment>
       <p><i className="icon icon-file-text2"></i> <strong>{name || '-'}</strong></p>
-      <p><i className="icon icon-clock"></i>
+      <p><i className="icon icon-clock"></i>{' '}
         {printTimeLeft
           ? <React.Fragment>{approxPrintTimeLeft || '?'} remaining, {printTime > 0 ? completion.toFixed(2) : '0'}% completed</React.Fragment>
-          : <React.Fragment>{' '}-</React.Fragment>
+          : <React.Fragment>-</React.Fragment>
         }
       </p>
     </React.Fragment>
@@ -138,7 +138,7 @@ export const PrinterState = ({ printer }) => {
 export const PrinterConnection = ({ printer }) => {
   return (
     <div>
-      <h2>Connection</h2>
+      <h2 className="hidden">Connection</h2>
       <ul>
           <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
           <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>

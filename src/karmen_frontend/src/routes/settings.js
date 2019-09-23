@@ -128,16 +128,18 @@ class Settings extends React.Component {
       });
     }
     return (
-      <div className="settings single-page">
+      <div className="settings standalone-page">
         <Back to="/" />
         <h1>Change settings</h1>
         <div>
           <form>
-            {message && <p>{message}</p>}
-            <FormInputs definition={settings} updateValue={updateValue} />
-            <p>
-              <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
-            </p>
+            <fieldset>
+              {message && <p>{message}</p>}
+              <FormInputs definition={settings} updateValue={updateValue} />
+              <p>
+                <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
+              </p>
+            </fieldset>
            </form>
         </div>
       </div>

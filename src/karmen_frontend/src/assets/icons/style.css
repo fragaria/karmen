@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?96ydbi');
-  src:  url('fonts/icomoon.eot?96ydbi#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?96ydbi') format('truetype'),
-    url('fonts/icomoon.woff?96ydbi') format('woff'),
-    url('fonts/icomoon.svg?96ydbi#icomoon') format('svg');
+  src:  url('fonts/icomoon.eot?dv4iuv');
+  src:  url('fonts/icomoon.eot?dv4iuv#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?dv4iuv') format('truetype'),
+    url('fonts/icomoon.woff?dv4iuv') format('woff'),
+    url('fonts/icomoon.svg?dv4iuv#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-arrow-left:before {
+  content: "\e904";
+}
+.icon-warning:before {
+  content: "\e905";
+}
+.icon-sign:before {
+  content: "\e905";
+}
 .icon-file-text2:before {
   content: "\e926";
 }
@@ -46,12 +55,18 @@
 .icon-bin:before {
   content: "\e9ac";
 }
-.icon-warning:before {
-  content: "\ea07";
-}
 .icon-plus:before {
   content: "\ea0a";
 }
-.icon-arrow-left2:before {
-  content: "\ea40";
+.icon-github:before {
+  content: "\e900";
+}
+.icon-twitter:before {
+  content: "\e901";
+}
+.icon-youtube:before {
+  content: "\e902";
+}
+.icon-readthedocs:before {
+  content: "\e903";
 }
