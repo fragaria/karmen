@@ -41,7 +41,7 @@ class PrinterList extends React.Component {
     if (printers === null) {
       return <div><Loader /></div>;
     }
-    const printerElements = printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
+    const printerElements = printers && printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
       return <div key={p.ip} className="content-box"><PrinterView printer={p} onPrinterDelete={(ip) => {
         this.setState({
           printers: printers.filter((p) => p.ip !== ip),
@@ -49,7 +49,7 @@ class PrinterList extends React.Component {
       }} /></div>
     });
     return (
-      <div className="printer-list content">
+      <div className="printer-list boxed-content">
         <div className="content-box"><Menu /></div>
         {printerElements}
         <div className="content-box">

@@ -28,7 +28,7 @@ $palette: (
 
 body {
   text-align: center;
-  padding: 0 $spacing-default;
+  padding: 0 $spacing-default $spacing-default $spacing-default;
 }
 
 h1, h2, h3 {
@@ -51,6 +51,14 @@ a {
   }
 }
 
+strong {
+  font-weight: 800;
+}
+
+p {
+  line-height: 150%;
+}
+
 @mixin iconlink {
   color: map-get($palette, gray-dark);
   text-decoration: none;
@@ -60,7 +68,7 @@ a {
   }
 }
 
-i {
+.icon {
   &.icon-active {
     color: map-get($palette, olive-green) !important;
   }
@@ -74,7 +82,35 @@ i {
   }
 }
 
-.content {
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  h1 {
+    padding-top: $spacing-default * 6;
+    font-size: $spacing-default * 2;
+  }
+}
+
+.back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: $spacing-default;
+  font-size: $spacing-default;
+  a {
+    text-decoration: none;
+  }
+}
+
+button.plain {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+}
+
+.boxed-content {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -82,10 +118,8 @@ i {
   align-content: flex-start;
 }
 
-button.plain {
-  border: none;
-  background-color: transparent;
-  padding: 0;
+.single-page {
+  margin-top: $spacing-default * 2;
 }
 
 .content-box {
@@ -119,7 +153,26 @@ button.plain {
   }
 }
 
+.printer-state {
+  text-align: left;
+  margin: $spacing-default / 2;
+  line-height: 150%;
+}
+
 .webcam-stream {
+  .no-stream {
+    height: 280px;
+    width: 100%;
+    background-color: map-get($palette, gray-light);
+    padding-top: $spacing-default * 2;
+    color: map-get($palette, gray-dark);
+    i {
+      display: inline-block;
+      font-size: $spacing-default * 4;
+      margin-bottom: $spacing-default / 2;
+    }
+  }
+
   img {
     max-width: 100%;
   }
@@ -154,7 +207,6 @@ nav {
     position: absolute;
     bottom: $spacing-default;
     text-align: left;
-    line-height: 150%;
     margin-left: $spacing-default;
   }
 }
