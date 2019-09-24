@@ -153,6 +153,7 @@ button[type=submit] {
   flex-wrap: wrap;
   justify-content: space-between;
   align-content: flex-start;
+  overflow: hidden;
 }
 
 .content-box {
@@ -233,6 +234,7 @@ button[type=submit] {
 
 nav {
   img {
+    max-width: 100%;
     padding-top: $spacing-default * 6;
   }
   p {
@@ -240,6 +242,10 @@ nav {
     bottom: $spacing-default;
     text-align: left;
     margin-left: $spacing-default;
+  }
+
+  .box-actions {
+    background: none !important;
   }
 }
 

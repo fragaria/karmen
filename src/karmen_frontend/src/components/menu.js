@@ -5,7 +5,7 @@ const Menu = () => {
   return (
       <nav>
         <h2 className="hidden">Navigation</h2>
-        <Link to="/">
+        <Link to="/" className="karmen-logo">
           <img alt="Karmen logo" src="/logo.svg" />
         </Link>
         <div className="box-actions">
