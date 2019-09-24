@@ -49,12 +49,18 @@ hr, .hidden {
   display: none;
 }
 
-a {
+a, .link {
   color: map-get($palette, red);
 
   &:hover, &:active {
     color: map-get($palette, dark-red);
   }
+}
+
+code {
+  font-family: monospace;
+  background-color: map-get($palette, gray-light);
+  color: black;
 }
 
 strong {
@@ -118,6 +124,29 @@ button.plain {
   padding: 0;
 }
 
+button[type=submit] {
+  height: $form-elements-height;
+  padding: $base-unit $spacing-default;
+  border: none;
+  outline: none;
+  background: map-get($palette, red);
+  color: #fff;
+}
+
+.boxed-modal {
+  position: static;
+  top: 0;
+  left: 0;
+
+  h1 {
+    padding-top: $spacing-default * 4;
+  }
+
+  p {
+    padding: $spacing-default;
+  }
+}
+
 .boxed-content {
   display: flex;
   flex-direction: row;
@@ -157,7 +186,7 @@ button.plain {
   }
 }
 
-.printer-state {
+.printer-connection, .printer-state {
   text-align: left;
   margin: $spacing-default / 2;
   line-height: 150%;
@@ -230,7 +259,6 @@ nav {
 }
 
 .standalone-page {
-
   h1 {
     margin-top: $spacing-default * 6;
     margin-bottom: $spacing-default;
@@ -263,15 +291,6 @@ nav {
         color: map-get($palette, dark-red);
         padding-left: $spacing-default
       }
-    }
-
-    button[type=submit] {
-      height: $form-elements-height;
-      padding: $base-unit $spacing-default;
-      border: none;
-      outline: none;
-      background: map-get($palette, red);
-      color: #fff;
     }
   }
 }

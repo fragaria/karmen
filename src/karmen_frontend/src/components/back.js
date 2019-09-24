@@ -1,12 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Back = ({ to }) => {
+export const BackLink = ({ to, onClick }) => {
+  onClick = onClick || function () {};
   return (
       <p class="back">
-        <Link to={to}><i class="icon icon-arrow-left"></i></Link>
+        <Link to={to} onClick={onClick}><i class="icon icon-arrow-left"></i></Link>
       </p>
     );
 }
 
-export default Back;
+export const BackButton = ({ onClick }) => {
+  onClick = onClick || function () {};
+  return (
+      <p class="back">
+        <button className="plain link" onClick={onClick}><i class="icon icon-arrow-left"></i></button>
+      </p>
+    );
+}
+
+export default BackLink;

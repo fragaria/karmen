@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import BoxedModal from '../components/boxed-modal';
 import { deletePrinter } from '../services/karmen-backend';
 
 const BACKEND_BASE_URL = window.env.BACKEND_BASE;
@@ -56,7 +57,7 @@ export class WebcamStream extends React.Component {
       klass.push('rotate-90');
     }
 
-    return <div>
+    return <div className="webcam-stream">
       {isOnline ?
         <img
           className={klass.join(' ')}
@@ -100,44 +101,41 @@ export const Temperature = ({name, actual, target }) => {
 }
 
 export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete }) => {
-  return (
-    <div>
-      <h2 className="hidden">Actions</h2>
-      <ul>
-        <li>
-          <a href={`http://${ip}`} target="_blank" rel="noopener noreferrer">
-            <i className={`icon icon-display ${connected ? 'icon-active' : 'icon-inactive'}`}></i>
-          </a>
-        </li>
-        <li>
-          <i className={`icon icon-printer ${currentState === 'Printing' ? 'icon-active' : 'icon-idle'}`} title={currentState}></i>
-        </li>
-        <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
-        <li><button className="plain" onClick={(e) => {
-          deletePrinter(ip);
-          onPrinterDelete(ip);
-        }}><i className="icon icon-bin"></i></button></li>
-      </ul>
-    </div>
-  );
+    return (
+      <div className="box-actions">
+        <h2 className="hidden">Actions</h2>
+        <ul>
+          <li>
+            <a href={`http://${ip}`} target="_blank" rel="noopener noreferrer">
+              <i className={`icon icon-display ${connected ? 'icon-active' : 'icon-inactive'}`}></i>
+            </a>
+          </li>
+          <li>
+            <i className={`icon icon-printer ${currentState === 'Printing' ? 'icon-active' : 'icon-idle'}`} title={currentState}></i>
+          </li>
+          <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
+          <li><button className="plain" onClick={onPrinterDelete}><i className="icon icon-bin"></i></button></li>
+        </ul>
+      </div>
+    );
 }
 
 export const PrinterState = ({ printer }) => {
   return (
-    <div>
-        <h2 className="hidden">Current state</h2>
-        <div>
-          {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
-          {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-          <Job {...printer.job} />
-        </div>
+    <div className="printer-state">
+      <h2 className="hidden">Current state</h2>
+      <div>
+        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
+        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+        <Job {...printer.job} />
       </div>
+    </div>
   );
 }
 
 export const PrinterConnection = ({ printer }) => {
   return (
-    <div>
+    <div className="printer-connection">
       <h2 className="hidden">Connection</h2>
       <ul>
           <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
@@ -149,26 +147,51 @@ export const PrinterConnection = ({ printer }) => {
   );
 }
 
-export const PrinterView = ({ printer, onPrinterDelete }) => {
-  return (
-    <div>
-      <h1>
-        {printer.name}
-      </h1>
+export class PrinterView extends React.Component {
+  state = {
+    showDeleteModal: false,
+  }
+  render() {
+    const { showDeleteModal } = this.state;
+    const { printer, onPrinterDelete } = this.props;
+    if (showDeleteModal) {
+      return (
+        <BoxedModal onBack={() => {
+          this.setState({
+            showDeleteModal: false
+          });
+        }}>
+          <h1>Are you sure?</h1>
+          <div>
+            <p>You can add the printer back later by simply adding <code>{printer.ip}</code> again.</p>
+            <p>
+              <button type="submit" onClick={() => {
+                deletePrinter(printer.ip);
+                onPrinterDelete(printer.ip);
+              }}>Remove printer</button>
+            </p>
+          </div>
+        </BoxedModal>
+        );
+    }
+    return (
       <div>
-        <div className="box-actions">
-          <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={onPrinterDelete} />
-        </div>
-        <div className="printer-state">
+        <h1>
+          {printer.name}
+        </h1>
+        <div>
+          <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
+            this.setState({
+              showDeleteModal: true,
+            })
+          }} />
           <PrinterState printer={printer} />
-        </div>
-        <div className="webcam-stream">
           {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
         </div>
+        <hr />
       </div>
-      <hr />
-    </div>
-  );
+    );
+  }
 }
 
 export default PrinterView;

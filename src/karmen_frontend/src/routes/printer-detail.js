@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Loader from '../components/loader';
-import Back from '../components/back';
+import { BackLink } from '../components/back';
 import { FormInputs } from '../components/form-utils';
 import { PrinterConnection, PrinterState, WebcamStream } from '../components/printer-view';
 import { getPrinter, patchPrinter } from '../services/karmen-backend';
@@ -99,7 +99,7 @@ class PrinterDetail extends React.Component {
     }
     return (
       <div className="printer-detail standalone-page">
-        <Back to="/" />
+        <BackLink to="/" />
         <h1>
           {printer.name}
         </h1>
@@ -115,13 +115,11 @@ class PrinterDetail extends React.Component {
              </form>
           </div>
           <div className="printer-info">
-            <div className="printer-state">
+            <div >
               <PrinterConnection printer={printer} />
               <PrinterState printer={printer} />
             </div>
-            <div className="webcam-stream">
-              {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
-            </div>
+            {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
           </div>
         </div>
       </div>
