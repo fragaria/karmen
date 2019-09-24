@@ -10,6 +10,7 @@ class AddPrinter extends React.Component {
     redirect: false,
     submitting: false,
     message: null,
+    messageOk: false,
     form: {
       name: {
         name: "New printer's name",
@@ -37,6 +38,7 @@ class AddPrinter extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
+      messageOk: false,
       submitting: true,
     });
     const { form } = this.state;
@@ -85,7 +87,7 @@ class AddPrinter extends React.Component {
   }
 
   render () {
-    const { form, message, redirect, submitting } = this.state;
+    const { form, message, messageOk, redirect, submitting } = this.state;
     if (redirect) {
       return <Redirect to="/" />
     }
@@ -95,7 +97,7 @@ class AddPrinter extends React.Component {
         <h1>Add a printer</h1>
         <div>
           <form>
-            {message && <p>{message}</p>}
+            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
             <FormInputs definition={form} updateValue={(name, value) => {
               this.setState({
                 form: Object.assign({}, form, {

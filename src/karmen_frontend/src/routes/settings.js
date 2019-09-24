@@ -37,6 +37,7 @@ class Settings extends React.Component {
       }
     },
     message: null,
+    messageOk: false,
   }
 
   constructor(props) {
@@ -69,6 +70,7 @@ class Settings extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
+      messageOk: false,
       submitting: true,
     });
     const { settings } = this.state;
@@ -96,6 +98,7 @@ class Settings extends React.Component {
             case 201:
               this.setState({
                 message: 'Changes saved successfully',
+                messageOk: true,
                 submitting: false,
               });
               break;
@@ -115,7 +118,7 @@ class Settings extends React.Component {
   }
 
   render () {
-    const { init, submitting, settings, message } = this.state;
+    const { init, submitting, settings, message, messageOk } = this.state;
     if (init) {
       return (<div><Loader /></div>);
     }
@@ -134,7 +137,7 @@ class Settings extends React.Component {
         <div>
           <form>
             <fieldset>
-              {message && <p>{message}</p>}
+              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
               <FormInputs definition={settings} updateValue={updateValue} />
               <p>
                 <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>

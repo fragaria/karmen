@@ -11,6 +11,7 @@ class PrinterDetail extends React.Component {
     printer: null,
     submitting: false,
     message: null,
+    messageOk: false,
     form: {
       name: {
         name: "Printer's new name",
@@ -47,6 +48,8 @@ class PrinterDetail extends React.Component {
     e.preventDefault();
     this.setState({
       submitting: true,
+      messageOk: false,
+      message: null,
     });
     const { printer, form } = this.state;
     if (!form.name.val) {
@@ -67,6 +70,7 @@ class PrinterDetail extends React.Component {
             this.setState({
               printer: Object.assign({}, printer, {name: form.name.val}),
               message: 'Changes saved successfully',
+              messageOk: true,
               submitting: false,
             });
             break;
@@ -85,7 +89,7 @@ class PrinterDetail extends React.Component {
   }
 
   render () {
-    const { printer, message, form, submitting } = this.state;
+    const { printer, message, messageOk, form, submitting } = this.state;
     if (!printer) {
       return <div><Loader /></div>;
     }
@@ -107,7 +111,7 @@ class PrinterDetail extends React.Component {
           <div>
             <h2 class="hidden">Change printer properties</h2>
             <form>
-              {message && <p>{message}</p>}
+              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
               <FormInputs definition={form} updateValue={updateValue} />
               <p>
                 <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>

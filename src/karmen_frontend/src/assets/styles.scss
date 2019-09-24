@@ -282,6 +282,8 @@ nav {
       input, select {
         height: $form-elements-height;
         padding: $base-unit;
+        background-color: map-get($palette, white);
+        color: map-get($palette, black);
         border: 1px solid map-get($palette, black);
         border-radius: 0;
         font-size: 15px;
@@ -290,6 +292,14 @@ nav {
       small {
         color: map-get($palette, dark-red);
         padding-left: $spacing-default
+      }
+
+      &.message-success {
+        color: map-get($palette, olive-green);
+      }
+
+      &.message-error {
+        color: map-get($palette, dark-red);
       }
     }
   }

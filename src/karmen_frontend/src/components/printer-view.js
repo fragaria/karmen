@@ -138,10 +138,10 @@ export const PrinterConnection = ({ printer }) => {
     <div className="printer-connection">
       <h2 className="hidden">Connection</h2>
       <ul>
-          <li>Status: {printer.client.connected ? 'Active' : 'Inactive'}</li>
-          <li>Client: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
-          <li>Client hostname: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>
-          <li>Client IP: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
+          <li><strong>Status</strong>: {printer.client.connected ? 'Active' : 'Inactive'}</li>
+          <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
+          <li><strong>Client IP</strong>: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
+          {printer.hostname && <li><strong>Hostname</strong>: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
       </ul>
     </div>
   );
