@@ -107,11 +107,11 @@ export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete })
         <ul>
           <li>
             <a href={`http://${ip}`} target="_blank" rel="noopener noreferrer">
-              <i className={`icon icon-display ${connected ? 'icon-active' : 'icon-inactive'}`}></i>
+              <i className={`icon icon-display ${connected ? 'icon-state-active' : 'icon-state-inactive'}`}></i>
             </a>
           </li>
           <li>
-            <i className={`icon icon-printer ${currentState === 'Printing' ? 'icon-active' : 'icon-idle'}`} title={currentState}></i>
+            <i className={`icon icon-printer ${currentState === 'Printing' ? 'icon-state-active' : 'icon-state-idle'}`} title={currentState}></i>
           </li>
           <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
           <li><button className="plain" onClick={onPrinterDelete}><i className="icon icon-bin"></i></button></li>

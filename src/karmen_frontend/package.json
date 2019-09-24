@@ -8,6 +8,7 @@
   "license": "AGPL-3.0-only",
   "version": "0.0.0",
   "dependencies": {
+    "dayjs": "^1.8.16",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",

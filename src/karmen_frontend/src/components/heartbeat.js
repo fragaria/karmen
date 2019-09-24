@@ -36,7 +36,7 @@ class Heartbeat extends React.Component {
   render() {
     const { isOnline } = this.state;
     if (!isOnline) {
-      return (<p>Backend is not responding.</p>);
+      return (<p className="heartbeat">Backend is not responding.</p>);
     }
     return null;
   }

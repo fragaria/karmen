@@ -46,6 +46,11 @@ def upload():
             )
             filename = secure_filename(original_filename)
             destination = os.path.join(destination_dir, filename)
+        # TODO detect more parameters
+        # ; filament_type = PLA
+        # M140 S60 ; set bed temp
+        # M104 S215 ; set extruder temp
+        # ; printer_model = MK3
         incoming.save(destination)
         size = os.stat(destination).st_size
         gcodes.add_gcode(

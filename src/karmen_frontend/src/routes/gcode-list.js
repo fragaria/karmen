@@ -1,10 +1,15 @@
 import React from 'react';
+import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
 import { BackLink } from '../components/back';
-import { getGcodes } from '../services/karmen-backend';
+import { getGcodes, deleteGcode, uploadGcode } from '../services/karmen-backend';
 
 class GcodeRow extends React.Component {
+  state = {
+    showDeleteRow: false,
+  }
+
   // props to https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
   formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
@@ -16,14 +21,40 @@ class GcodeRow extends React.Component {
   }
 
   render() {
-    const { display, size, uploaded, url } = this.props;
-    const localTime = new Date(uploaded);
+    const { showDeleteRow } = this.state;
+    const { display, path, size, uploaded, url, onRowDelete } = this.props;
+    if (showDeleteRow) {
+      return (
+        <tr>
+          <td colSpan="3">
+            Do you really want to delete <strong>{path}/{display}</strong>? This cannot be undone.
+          </td>
+          <td className="action-cell">
+            <button className="plain" onClick={() => {
+              this.setState({
+                showDeleteRow: false,
+              })
+            }}><i className="icon icon-cross icon-state-cancel"></i></button>
+            <button className="plain" onClick={() => {
+              onRowDelete();
+            }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+          </td>
+        </tr>
+      );
+    }
     return (
       <tr>
-        <td><a href={`${window.env.BACKEND_BASE}${url}`}>{display}</a></td>
+        <td><a href={`${window.env.BACKEND_BASE}${url}`}>{path}/{display}</a></td>
         <td>{this.formatBytes(size)}</td>
-        <td>{localTime.toString()}</td>
-        <td></td>
+        <td>{dayjs(uploaded).format('HH:mm:ss YYYY-MM-DD')}</td>
+        <td className="action-cell">
+          <button className="plain icon-link" onClick={() => {}}><i className="icon icon-printer"></i></button>
+          <button className="plain icon-link" onClick={() => {
+            this.setState({
+              showDeleteRow: true,
+            })
+          }}><i className="icon icon-bin"></i></button>
+        </td>
       </tr>
     );
   }
@@ -32,9 +63,20 @@ class GcodeRow extends React.Component {
 class GcodeList extends React.Component {
   state = {
     gcodes: null,
+    toUpload: null,
+    path: '',
+    submitting: false,
+    message: null,
+    messageOk: false,
   }
 
-  componentDidMount() {
+  constructor(props) {
+    super(props);
+    this.loadCodes = this.loadCodes.bind(this);
+    this.addCode = this.addCode.bind(this);
+  }
+
+  loadCodes() {
     getGcodes().then((gcodes) => {
       this.setState({
         gcodes,
@@ -42,32 +84,117 @@ class GcodeList extends React.Component {
     });
   }
 
+  addCode(e) {
+    e.preventDefault();
+    const { toUpload, path } = this.state;
+    if (!toUpload) {
+      this.setState({
+        message: 'You need to select a file!',
+      });
+      return;
+    }
+    this.setState({
+      submitting: true,
+      message: null,
+      messageOk: false,
+    });
+    uploadGcode(path, toUpload)
+      .then((r) => {
+          switch(r) {
+            case 201:
+              this.setState({
+                submitting: false,
+                message: 'File uploaded',
+                messageOk: true,
+              });
+              this.loadCodes();
+              break;
+            case 415:
+              this.setState({
+                message: 'This does not seem like a G-Code file.',
+                submitting: false,
+              });
+              break;
+            default:
+              this.setState({
+                message: 'Cannot upload G-Code, check server logs',
+                submitting: false,
+              });
+          }
+        });
+  }
+
+  componentDidMount() {
+    this.loadCodes();
+  }
+
   render () {
-    const { gcodes } = this.state;
+    const { gcodes, message, messageOk, path, submitting } = this.state;
     if (gcodes === null) {
       return <div><Loader /></div>;
     }
     const gcodeRows = gcodes && gcodes.sort((p, r) => p.name > r.name ? 1 : -1).map((g) => {
-      return <GcodeRow key={g.display} display={g.display} id={g.id} size={g.size} uploaded={g.uploaded} url={g.data} />
+      return <GcodeRow
+        key={g.id}
+        {...g}
+        onRowDelete={() => {
+          deleteGcode(g.id)
+            .then(() => {
+              this.loadCodes();
+            });
+        }} />
     });
+
     return (
       <div className="gcode-list standalone-page">
         <BackLink to="/" />
-        <h1>Stored G-Codes</h1>
-        {(!gcodeRows || gcodeRows.length === 0) && <p>No G-codes found!</p>}
-        <table>
-          <thead>
-            <tr>
-              <th>File</th>
-              <th>Size</th>
-              <th>Uploaded at</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {gcodeRows}
-          </tbody>
-          </table>
+        <h1>Available G-Codes</h1>
+        <div>
+          <form>
+            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+            <p>
+              <label htmlFor="file">Select your gcode</label>
+              <input type="file" name="file" onChange={(e) => {
+                this.setState({
+                  toUpload: e.target.files[0]
+                });
+              }} />
+            </p>
+            <p>
+              <label htmlFor="path">Path (optional)</label>
+              <input type="text" id="path" name="path" value={path} onChange={(e) => this.setState({
+                path: e.target.value
+              })} />
+            </p>
+            <p>
+              <button type="submit" onClick={(e) => this.addCode(e)} disabled={submitting}>
+                {submitting
+                  ? 'Uploading...'
+                  : 'Upload G-Code'
+                }
+              </button>
+            </p>
+          </form>
+        </div>
+        <div>
+          {(!gcodeRows || gcodeRows.length === 0)
+          ? <p className="message-error">No G-Codes found!</p>
+          : (
+            <table>
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Size</th>
+                  <th>Uploaded at</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gcodeRows}
+              </tbody>
+            </table>
+          )}
+          </div>
       </div>
     );
   }

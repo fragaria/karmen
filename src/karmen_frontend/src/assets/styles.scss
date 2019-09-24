@@ -85,6 +85,18 @@ table {
     &:first-child {
       border-left: none;
     }
+
+    &.action-cell {
+      width: $spacing-default * 3;
+      text-align: center;
+
+      button {
+        margin-right: $spacing-default / 4;
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
   }
 
   tr {
@@ -104,16 +116,28 @@ table {
   }
 }
 
+.icon-link {
+  @include iconlink;
+}
+
+.message-success {
+  color: map-get($palette, olive-green);
+}
+
+.message-error {
+  color: map-get($palette, dark-red);
+}
+
 .icon {
-  &.icon-active {
+  &.icon-state-active, &.icon-state-confirm {
     color: map-get($palette, olive-green) !important;
   }
 
-  &.icon-inactive {
+  &.icon-state-inactive, &.icon-state-cancel {
     color: map-get($palette, dark-red) !important;
   }
 
-  &.icon-idle {
+  &.icon-state-idle {
     color: map-get($palette, gray-medium) !important;
   }
 }
@@ -155,6 +179,21 @@ button[type=submit] {
   outline: none;
   background: map-get($palette, red);
   color: #fff;
+
+  &[disabled] {
+    background: map-get($palette, gray-medium);
+    color: map-get($palette, red);
+  }
+}
+
+.heartbeat {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  line-height: $spacing-default * 2;
+  background-color: map-get($palette, red);
+  color: map-get($palette, white);
 }
 
 .boxed-modal {
@@ -309,7 +348,7 @@ nav {
         }
       }
 
-      input, select {
+      input[type=text], select {
         height: $form-elements-height;
         padding: $base-unit;
         background-color: map-get($palette, white);
@@ -324,16 +363,10 @@ nav {
         padding-left: $spacing-default
       }
 
-      &.message-success {
-        color: map-get($palette, olive-green);
-      }
-
-      &.message-error {
-        color: map-get($palette, dark-red);
-      }
     }
   }
 }
+
 
 .printer-detail {
   .printer-info {

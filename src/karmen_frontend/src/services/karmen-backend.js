@@ -14,20 +14,6 @@ export const getPrinters = (fields = []) => {
     });
 }
 
-export const getGcodes = () => {
-  return fetch(`${BASE_URL}/gcodes`)
-    .then((response) => {
-      if (response.status !== 200) {
-        console.error(`Cannot get list of gcodes: ${response.status}`);
-        return;
-      }
-      return response.json();
-    }).catch((e) => {
-      console.error(`Cannot get list of gcodes: ${e}`);
-      return [];
-    });
-}
-
 export const getPrinter = (ip, fields = []) => {
   return fetch(`${BASE_URL}/printers/${ip}?fields=${fields.join(',')}`)
     .then((response) => {
@@ -141,4 +127,60 @@ export const heartbeat = () => {
       console.error(`Heartbeat fail: ${e}`);
       return false;
     })
+}
+
+export const getGcodes = () => {
+  return fetch(`${BASE_URL}/gcodes`)
+    .then((response) => {
+      if (response.status !== 200) {
+        console.error(`Cannot get list of gcodes: ${response.status}`);
+        return;
+      }
+      return response.json();
+    }).catch((e) => {
+      console.error(`Cannot get list of gcodes: ${e}`);
+      return [];
+    });
+}
+
+export const deleteGcode = (id) => {
+  return fetch(`${BASE_URL}/gcodes/${id}`, {
+    method: 'DELETE',
+  })
+    .then((response) => {
+      if (response.status !== 204) {
+        console.error(`Cannot remove a gcode: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot remove a gcode: ${e}`);
+      return 500;
+    })
+}
+
+export const uploadGcode = (path, file) => {
+  var data = new FormData();
+  data.append('file', file);
+  data.append('path', path);
+  return fetch(`${BASE_URL}/gcodes`, {
+    method: 'POST',
+    headers: {
+      // 'Content-Type': 'multipart/form-data', // TODO verify that it's not needed
+    },
+    body: data,
+  })
+    .then((response) => {
+      if (response.status !== 201) {
+        console.error(`Cannot add a gcode: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot add a gcode: ${e}`);
+      return 500;
+    })
+}
+
+
+export const printGcode = (id, printer) => {
+  // TODO
 }
