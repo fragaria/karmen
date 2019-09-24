@@ -17,7 +17,7 @@ forget to setup the database with a schema from `db/schema.sql`.
 
 ```sh
 docker build -t fragaria/karmen-backend .
-docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:8080 fragaira/karmen-backend
+docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:8080 fragaria/karmen-backend
 docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
 docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
 ```

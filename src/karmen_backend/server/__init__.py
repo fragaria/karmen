@@ -1,5 +1,4 @@
 from flask import Flask
-# from flask_socketio import SocketIO
 from flask_cors import CORS
 from celery import Celery
 
@@ -30,8 +29,6 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 CORS(app)
 celery = setup_celery(app)
-#socketio = SocketIO(app)
 
 import server.routes
 import server.tasks
-# import server.socketevents

@@ -71,6 +71,30 @@ p {
   line-height: 150%;
 }
 
+table {
+  width: 100%;
+  th {
+    border-bottom: 1px solid map-get($palette, gray-medium);
+    font-weight: 800;
+  }
+
+  td, th {
+    padding: $spacing-default / 3;
+    border-left: 1px solid map-get($palette, gray-medium);
+
+    &:first-child {
+      border-left: none;
+    }
+  }
+
+  tr {
+    border-bottom: 1px solid map-get($palette, gray-light);
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
 @mixin iconlink {
   color: map-get($palette, gray-dark);
   text-decoration: none;

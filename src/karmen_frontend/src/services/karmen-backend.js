@@ -14,6 +14,20 @@ export const getPrinters = (fields = []) => {
     });
 }
 
+export const getGcodes = () => {
+  return fetch(`${BASE_URL}/gcodes`)
+    .then((response) => {
+      if (response.status !== 200) {
+        console.error(`Cannot get list of gcodes: ${response.status}`);
+        return;
+      }
+      return response.json();
+    }).catch((e) => {
+      console.error(`Cannot get list of gcodes: ${e}`);
+      return [];
+    });
+}
+
 export const getPrinter = (ip, fields = []) => {
   return fetch(`${BASE_URL}/printers/${ip}?fields=${fields.join(',')}`)
     .then((response) => {

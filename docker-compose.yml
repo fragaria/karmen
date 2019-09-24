@@ -27,6 +27,7 @@ services:
       - 127.0.0.1:5000:8080
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
+      - ./tmp/karmen-files:/tmp/karmen-files
     networks:
       - default
       - printers

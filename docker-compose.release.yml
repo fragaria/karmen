@@ -19,6 +19,7 @@ services:
       - 8080:8080
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
+      - ./tmp/karmen-files:/tmp/karmen-files
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
     depends_on:
