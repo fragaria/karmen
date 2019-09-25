@@ -26,6 +26,8 @@ def setup_celery(flask_app):
 
 app = Flask(__name__)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+# This is hardcoded for 1GB
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
 
 CORS(app)
 celery = setup_celery(app)
