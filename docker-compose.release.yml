@@ -68,3 +68,10 @@ services:
       POSTGRES_DB: print3d
     ports:
       - 127.0.0.1:5433:5432
+  leds:
+    image: fragaria/rpi-led-control
+    restart: always
+    environment:
+      START_COLOR: 16711680
+    ports:
+      - 127.0.0.1:8082:5000
