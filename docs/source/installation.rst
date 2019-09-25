@@ -57,32 +57,30 @@ Just download the latest one to your Raspberry Pi's home directory and unzip it.
 
    cd
    wget -O karmen.zip https://github.com/fragaria/karmen/releases/latest/download/release.zip
-   unzip -d karmen karmen.zip
+   unzip release.zip
    cd karmen
-
-.. TODO an alternative would be to have a `release` branch, then the update would be a
-   matter of git pull and container restart. wget would get replaced by git clone --branch release
 
 It contains the following files:
 
 - ``docker-compose.yml`` - A bluperint for all necessary services
 - ``config.local.cfg`` - Configuration file that you should edit to your needs
 - ``db/schema.sql`` - Initial database schema
+- ``run-karmen.sh`` - A startup script you can use to launch karmen
 
 Firstly, you should edit all the necessary stuff in ``config.local.cfg``. You can tweak 
 the settings of the network autodiscovery, but you should **absolutely change the** ``SECRET_KEY``
 variable for security reasons.
 
-The ``db/schema.sql`` file is run automatically only upon the first start. The database handling will
-probably change in the future. The datafiles are created on your filesystem, not inside the containers,
-so no data will be lost during downtime.
+The ``db/schema.sql`` file is run automatically only upon the first start. The database handling might
+change in the future. The datafiles are created on your filesystem, not inside the containers,
+so no data will be lost during karmen's downtime.
 
-Finally, you can start all of the services by running the compose file. This will download and
-run the docker images with the appropriate version of Karmen.
+Finally, you can start all of the services. The shorthand script will set up all of the folders with
+appropriate permissions, download and run all of the containers for you.
 
 .. code-block:: sh
-  
-   BASE_HOST=random-ip-address docker-compose up -d --abort-on-container-exit
+
+   BASE_HOST=public-ip-address ./run-karmen.sh
 
 ``BASE_HOST`` is an address or hostname of the machine where Karmen is running and is used to call
 the Python backend from the frontend UI. You will also use it to access the Javascript frontend
@@ -96,3 +94,13 @@ You can stop everything by running
 
 .. toctree::
   :maxdepth: 2
+
+Permanent installation
+----------------------
+
+You probably want to start karmen every time you boot your Raspberry Pi. The easiest way
+is to add the following line at the end of your ``/home/pi/.bashrc`` file:
+
+.. code-block:: sh
+
+   /home/pi/karmen/run-karmen.sh

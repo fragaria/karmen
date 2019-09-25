@@ -1,3 +1,5 @@
 config.local.cfg
 .DS_Store
 tmp
+.travis/karmen
+.travis/*.zip

@@ -19,7 +19,7 @@ services:
       - 8080:8080
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
-      - ./tmp/karmen-files:/tmp/karmen-files
+      - ./karmen-files:/tmp/karmen-files
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
     depends_on:
@@ -70,6 +70,7 @@ services:
       - 127.0.0.1:5433:5432
   leds:
     image: fragaria/rpi-led-control
+    privileged: true
     restart: always
     environment:
       START_COLOR: 16711680
