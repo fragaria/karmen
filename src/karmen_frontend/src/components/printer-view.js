@@ -101,6 +101,12 @@ export const Temperature = ({name, actual, target }) => {
 }
 
 export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete }) => {
+    let printerIconState = 'icon-state-inactive';
+    if (currentState === 'Operational') {
+      printerIconState = 'icon-state-idle';
+    } else if (currentState === 'Printing') {
+      printerIconState = 'icon-state-active';
+    }
     return (
       <div className="box-actions">
         <h2 className="hidden">Actions</h2>
@@ -111,7 +117,7 @@ export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete })
             </a>
           </li>
           <li>
-            <i className={`icon icon-printer ${currentState === 'Printing' ? 'icon-state-active' : 'icon-state-idle'}`} title={currentState}></i>
+            <i className={`icon icon-printer ${printerIconState}`} title={currentState}></i>
           </li>
           <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
           <li><button className="plain" onClick={onPrinterDelete}><i className="icon icon-bin"></i></button></li>
