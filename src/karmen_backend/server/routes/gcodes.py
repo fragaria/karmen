@@ -109,5 +109,9 @@ def gcode_delete(id):
     gcode = gcodes.get_gcode(id)
     if gcode is None:
         return abort(404)
-    gcodes.delete_gcode(id)
+    try:
+        os.remove(gcode["absolute_path"])
+        gcodes.delete_gcode(id)
+    except IOError:
+        return abort(500)
     return '', 204
