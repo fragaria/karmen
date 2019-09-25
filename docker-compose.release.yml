@@ -2,6 +2,7 @@ version: "3.4"
 services:
   frontend:
     image: fragaria/karmen-frontend
+    restart: unless-stopped
     environment:
       ENV: production
       BACKEND_BASE: http://${BASE_HOST}:8080
@@ -9,6 +10,7 @@ services:
       - 80:8080
   backend_flask:
     image: fragaria/karmen-backend
+    restart: unless-stopped
     network_mode: host
     environment:
       REDIS_HOST: 127.0.0.1
@@ -27,6 +29,7 @@ services:
       - postgres
   backend_celery_worker:
     image: fragaria/karmen-backend
+    restart: unless-stopped
     network_mode: host # for arp discovery, requires a different config for redis/postgres conection
     environment:
       ENV: production
@@ -41,6 +44,7 @@ services:
       - redis
   backend_celery_beat:
     image: fragaria/karmen-backend
+    restart: unless-stopped
     network_mode: host
     environment:
       ENV: production
@@ -58,7 +62,7 @@ services:
       - 127.0.0.1:6379:6379
   postgres:
     image: postgres:11
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./db/data:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/init.sql
@@ -71,7 +75,7 @@ services:
   leds:
     image: fragaria/rpi-led-control
     privileged: true
-    restart: always
+    restart: unless-stopped
     environment:
       START_COLOR: 16711680
     ports:
