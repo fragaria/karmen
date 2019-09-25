@@ -53,7 +53,7 @@ matrix:
     - npm run lint
     - npm run build
   - stage: build docker
-    if: branch = release
+    if: tag IS present
     language: generic
     before_install:
     - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -65,7 +65,7 @@ matrix:
     install: true
     script:
     - bash .travis/build-images-backend.sh
-  - if: branch = release
+  - if: tag IS present
     language: generic
     before_install:
     - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -78,7 +78,7 @@ matrix:
     script:
     - bash .travis/build-images-frontend.sh
   - stage: github release
-    if: branch = test-github-release
+    if: tag IS present
     install: true
     script:
     - bash .travis/make-github-release.sh
@@ -91,6 +91,7 @@ matrix:
       draft: true
       on:
         repo: fragaria/karmen
+        tags: true
 
 env:
   global:

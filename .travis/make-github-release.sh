@@ -14,7 +14,7 @@ cp ../src/karmen_backend/db/schema.sql "${DEST}/db"
 cat << EOF > "$DEST/run-karmen.sh"
 #!/bin/bash
 mkdir -p ./db/data
-mkdir -p ./karmen-files
+sudo mkdir -p ./karmen-files
 docker-compose stop
 docker-compose pull
 docker-compose up -d
