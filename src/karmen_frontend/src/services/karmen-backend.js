@@ -164,9 +164,6 @@ export const uploadGcode = (path, file) => {
   data.append('path', path);
   return fetch(`${BASE_URL}/gcodes`, {
     method: 'POST',
-    headers: {
-      // 'Content-Type': 'multipart/form-data', // TODO verify that it's not needed
-    },
     body: data,
   })
     .then((response) => {
@@ -182,5 +179,23 @@ export const uploadGcode = (path, file) => {
 
 
 export const printGcode = (id, printer) => {
-  // TODO
+  return fetch(`${BASE_URL}/printjobs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      gcode: id,
+      printer: printer,
+    }),
+  })
+    .then((response) => {
+      if (response.status !== 201) {
+        console.error(`Cannot start a printjob: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot start a printjob: ${e}`);
+      return 500;
+    })
 }

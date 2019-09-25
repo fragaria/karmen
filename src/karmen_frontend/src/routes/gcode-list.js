@@ -3,11 +3,17 @@ import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
 import { BackLink } from '../components/back';
-import { getGcodes, deleteGcode, uploadGcode } from '../services/karmen-backend';
+import { getPrinters, getGcodes, deleteGcode, uploadGcode, printGcode } from '../services/karmen-backend';
 
 class GcodeRow extends React.Component {
   state = {
     showDeleteRow: false,
+    showPrinterSelectRow: false,
+    showPrintStatusRow: false,
+    message: '',
+    messageOk: false,
+    selectedPrinter: null,
+    availablePrinters: [],
   }
 
   // props to https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
@@ -21,8 +27,25 @@ class GcodeRow extends React.Component {
   }
 
   render() {
-    const { showDeleteRow } = this.state;
-    const { display, path, size, uploaded, url, onRowDelete } = this.props;
+    const { showDeleteRow, showPrinterSelectRow, showPrintStatusRow, availablePrinters, selectedPrinter } = this.state;
+    const { display, path, size, uploaded, url, onRowDelete, id } = this.props;
+    if (showPrintStatusRow) {
+      const { message, messageOk } = this.state;
+      return (
+        <tr>
+          <td colSpan="3">
+            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+          </td>
+          <td className="action-cell">
+            <button className="plain" onClick={() => {
+              this.setState({
+                showPrintStatusRow: false,
+              })
+            }}><i className="icon icon-cross icon-state-cancel"></i></button>
+          </td>
+        </tr>
+      );
+    }
     if (showDeleteRow) {
       return (
         <tr>
@@ -42,13 +65,74 @@ class GcodeRow extends React.Component {
         </tr>
       );
     }
+
+    if (showPrinterSelectRow) {
+      const availablePrinterOpts = availablePrinters.map((p) => {
+        return <option key={p.ip} value={p.ip}>{`${p.name} (${p.ip})`}</option>;
+      })
+      return (
+        <tr>
+          <td colSpan="3">
+            On which printer would you like to print?{' '}
+            <select id="selectedPrinter" name="selectedPrinter" value={selectedPrinter} onChange={(e) => this.setState({
+              selectedPrinter: e.target.value,
+            })}>
+            {availablePrinterOpts}
+            </select>
+          </td>
+          <td className="action-cell">
+            <button className="plain" onClick={() => {
+              this.setState({
+                showPrinterSelectRow: false,
+                selectedPrinter: null,
+              })
+            }}><i className="icon icon-cross icon-state-cancel"></i></button>
+            <button className="plain" onClick={() => {
+              const { selectedPrinter } = this.state;
+              printGcode(id, selectedPrinter)
+                .then((r) => {
+                  switch(r) {
+                    case 201:
+                      this.setState({
+                        showPrinterSelectRow: false,
+                        showPrintStatusRow: true,
+                        message: 'Print was scheduled',
+                        messageOk: true,
+                      });
+                      break;
+                    default:
+                      this.setState({
+                        showPrinterSelectRow: false,
+                        showPrintStatusRow: true,
+                        message: 'Print was not scheduled',
+                        messageOk: false,
+                      });
+                  }
+                });
+            }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+          </td>
+        </tr>
+      );
+    }
+
     return (
       <tr>
         <td><a href={`${window.env.BACKEND_BASE}${url}`}>{path}/{display}</a></td>
         <td>{this.formatBytes(size)}</td>
         <td>{dayjs(uploaded).format('HH:mm:ss YYYY-MM-DD')}</td>
         <td className="action-cell">
-          <button className="plain icon-link" onClick={() => {}}><i className="icon icon-printer"></i></button>
+          <button className="plain icon-link" onClick={() => {
+            getPrinters().then((printers) => {
+              const availablePrinters = printers && printers
+                .sort((p, r) => p.name > r.name ? 1 : -1)
+                .filter((p) => p.client && p.client.connected);
+              this.setState({
+                availablePrinters,
+                selectedPrinter: availablePrinters.length ? availablePrinters[0].ip : null,
+                showPrinterSelectRow: true,
+              });
+            })
+          }}><i className="icon icon-printer"></i></button>
           <button className="plain icon-link" onClick={() => {
             this.setState({
               showDeleteRow: true,
@@ -105,6 +189,7 @@ class GcodeList extends React.Component {
               this.setState({
                 submitting: false,
                 message: 'File uploaded',
+                path: '',
                 messageOk: true,
               });
               this.loadCodes();

@@ -26,3 +26,7 @@ class PrinterDriver(abc.ABC):
     @abc.abstractmethod
     def job(self):
         pass
+
+    @abc.abstractmethod
+    def start_job(self, gcode_path):
+        pass

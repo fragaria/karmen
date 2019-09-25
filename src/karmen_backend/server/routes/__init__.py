@@ -14,4 +14,5 @@ def index():
 import server.routes.printers
 import server.routes.settings
 import server.routes.gcodes
+import server.routes.printjobs
 import server.routes.octoprintemulator

@@ -186,6 +186,16 @@ button[type=submit] {
   }
 }
 
+input[type=text], select {
+  height: $form-elements-height;
+  padding: $base-unit;
+  background-color: map-get($palette, white);
+  color: map-get($palette, black);
+  border: 1px solid map-get($palette, black);
+  border-radius: 0;
+  font-size: 15px;
+}
+
 .heartbeat {
   position: absolute;
   bottom: 0;
@@ -346,16 +356,6 @@ nav {
           top: $base-unit * 2;
           left: $base-unit * 2;
         }
-      }
-
-      input[type=text], select {
-        height: $form-elements-height;
-        padding: $base-unit;
-        background-color: map-get($palette, white);
-        color: map-get($palette, black);
-        border: 1px solid map-get($palette, black);
-        border-radius: 0;
-        font-size: 15px;
       }
 
       small {

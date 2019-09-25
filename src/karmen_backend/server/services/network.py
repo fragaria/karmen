@@ -46,3 +46,17 @@ def get_uri(ip, endpoint='/', protocol='http', timeout=2):
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
         app.logger.debug("Cannot call %s" % (uri))
     return request
+
+# TODO refactor and unify with get_uri, or maybe drop
+def post_uri(ip, endpoint='/', protocol='http', timeout=2, files=None, data=None):
+    request = None
+    if ip is None:
+        return request
+    if endpoint[0] != '/':
+        endpoint = '/%s' % (endpoint, )
+    uri = '%s://%s%s' % (protocol, ip, endpoint)
+    try:
+        request = requests.post(uri, timeout=timeout, files=files, data=data)
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        app.logger.debug("Cannot call %s" % (uri))
+    return request

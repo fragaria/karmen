@@ -2,7 +2,7 @@ import json
 import re
 
 from server import app
-from server.services.network import get_uri
+from server.services.network import get_uri, post_uri
 from server.drivers.utils import PrinterClientInfo, PrinterDriver
 
 # Works with octoprint 1.3.11 without access control
@@ -147,3 +147,22 @@ class Octoprint(PrinterDriver):
                 return {}
         else:
             return {}
+
+    def start_job(self, gcode_path):
+        request = None
+        if self.client.connected:
+            request = post_uri(self.ip, endpoint='/api/files/local', files={
+                "file": open(gcode_path, 'rb')
+            }, data={
+                "path": "karmen",
+                "print": True,
+            })
+        if request is not None and request.status_code == 201:
+            try:
+                self.client.connected = True
+                # TODO improve
+                return True
+            except json.decoder.JSONDecodeError:
+                return False
+        else:
+            return False

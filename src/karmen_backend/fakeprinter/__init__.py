@@ -1,7 +1,9 @@
 import os
+import re
 
 from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
+from werkzeug.utils import secure_filename
 
 __version__ = "0.0.0"
 __author__ = "Jirka Chadima"
@@ -68,6 +70,34 @@ def job():
             'printTime': 532,
         }
     })
+
+@app.route('/api/files/local', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def upload():
+    if "file" not in request.files:
+        return abort(400)
+    incoming = request.files["file"]
+    if incoming.filename == "":
+        return abort(400)
+
+    if not re.search(r'\.gco(de)?$', incoming.filename):
+        return abort(415)
+
+    original_filename = incoming.filename
+    filename = secure_filename(original_filename)
+    path = request.form.get("path", "/")
+    destination_dir = os.path.join("/tmp/uploaded-files/", path)
+    destination = os.path.join(destination_dir, filename)
+    return jsonify({
+        "files": {
+            "local": {
+                "name": filename,
+                "display": original_filename,
+                "path": destination,
+                "origin": "local"
+            }
+        }
+    }), 201
 
 @app.route('/stream', methods=['GET', 'OPTIONS'])
 @cross_origin()
