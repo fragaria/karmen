@@ -11,6 +11,12 @@ export class WebcamStream extends React.Component {
   }
   componentDidMount() {
     const { stream, proxied } = this.props;
+    if (!stream && !proxied) {
+      this.setState({
+        isOnline: false,
+      });
+      return;
+    }
     fetch(stream)
       .then((r) => {
         if (r.status === 200) {
@@ -192,7 +198,7 @@ export class PrinterView extends React.Component {
             })
           }} />
           <PrinterState printer={printer} />
-          {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+          <WebcamStream {...printer.webcam} />
         </div>
         <hr />
       </div>

@@ -123,7 +123,7 @@ class PrinterDetail extends React.Component {
               <PrinterConnection printer={printer} />
               <PrinterState printer={printer} />
             </div>
-            {printer.webcam.stream && <WebcamStream {...printer.webcam} />}
+            <WebcamStream {...printer.webcam} />
           </div>
         </div>
       </div>
