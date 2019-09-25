@@ -79,6 +79,7 @@ matrix:
     - bash .travis/build-images-frontend.sh
   - stage: github release
     if: tag IS present
+    language: generic
     install: true
     script:
     - bash .travis/make-github-release.sh
@@ -88,7 +89,6 @@ matrix:
         secure: fX5tzCz++RH9sPWynZku1RYCTCb+xTDEQb4Pq1dNFezK08hohr/nG9oNsk641xU3U0tNyTU05OlcfkDG6K7sl2Ri2dwFTGPV+ZlEHEvm8uAo01Of0XcHf2E6rX4L2wdWAkNrjReA2NTKORaUvzURuwABj+EVFYu61BfrFhWpe+mks/6FVQAbcc50q1EGcojgLwYqhjB1PwPMI0a9bfL3VGJ6akkjIcGy5h48CDo99T6ht5Wumrz2IukXV7wdxXblXkxcRdeYA1wfLJrmcO/BK1LAU2yrcZ6ySoLT77MR+xC8EXea6mRpQIEa3KuptHHgUssaeOHLC3d4mgad2Qf8Pv8FWp7JBciU40VWBRXbzk4JJPLN+/5OVJnrQ5qlLbepTSEEJZuT7Mup5NUILSq7dpt9oEkfPb4+rhpG5SwiwGye/8l868Pu8uAkxvat0BT6FXnDAIMFl4Lq1dybJesCdWbswZHrlL8YdRG0tg/ZE06TKNGlcRfHk7euZizD/VA/zE8c4iLWxx9F7xcCzml/hj4iRnSY7boBvU20AKXkrtc+c05kdx/W7Ny0hgAEoF+3aLngQgJLVZntm/TgLxpA+vyuqXH5fMZpPKUyncRUzDIdKCiSrd524KAWWaQspPXnEC0FXK9L0GDenhRnp11NFN7z5B5895+kPglC7+/yec8=
       file: ./.travis/release.zip
       skip_cleanup: true
-      draft: true
       on:
         repo: fragaria/karmen
         tags: true
