@@ -1,6 +1,6 @@
 FROM fragaria/python-openresty
 
-RUN apt-get update && apt-get upgrade --yes && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan
+RUN apt-get update && apt-get upgrade --yes && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan build-essential
 
 RUN pip install --upgrade pip
 RUN pip install pipenv uwsgi
