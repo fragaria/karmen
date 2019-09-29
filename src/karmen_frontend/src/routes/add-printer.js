@@ -1,7 +1,6 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { BackLink } from '../components/back';
 import { FormInputs } from '../components/form-utils';
 import { addPrinter } from '../services/karmen-backend';
 
@@ -92,27 +91,26 @@ class AddPrinter extends React.Component {
       return <Redirect to="/" />
     }
     return (
-      <div class=" standalone-page">
-        <BackLink to="/" />
-        <h1>Add a printer</h1>
-        <div>
-          <form>
-            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-            <FormInputs definition={form} updateValue={(name, value) => {
-              this.setState({
-                form: Object.assign({}, form, {
-                  [name]: Object.assign({}, form[name], {
-                    val: value,
-                    error: null,
-                  })
-                }),
-              })
-            }} />
-            <p>
-              <button type="submit" onClick={this.addPrinter} disabled={submitting}>Add printer</button>
-            </p>
-           </form>
-        </div>
+      <div class="standalone-page">
+        <header>
+          <h1 className="title">Add a new printer</h1>
+        </header>
+        <form>
+          {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+          <FormInputs definition={form} updateValue={(name, value) => {
+            this.setState({
+              form: Object.assign({}, form, {
+                [name]: Object.assign({}, form[name], {
+                  val: value,
+                  error: null,
+                })
+              }),
+            })
+          }} />
+          <p>
+            <button type="submit" onClick={this.addPrinter} disabled={submitting}>Add printer</button>
+          </p>
+        </form>
       </div>
     );
   }

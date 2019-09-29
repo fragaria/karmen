@@ -71,7 +71,6 @@ export class WebcamStream extends React.Component {
           src={`${source}?t=${(new Date()).getTime()}`}
         /> :
         <p className="no-stream">
-          <i className="icon icon-warning"></i><br />
           Stream unavailable
         </p>
       }
@@ -87,23 +86,46 @@ export const Job = ({ name, completion, printTime, printTimeLeft }) => {
   if (approxPrintTimeLeft) {
     let d = new Date(null);
     d.setSeconds(approxPrintTimeLeft)
-    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)} hours, ${d.toISOString().substr(14, 2)} minutes`;
+    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
   }
   return (
     <React.Fragment>
-      <p><i className="icon icon-file-text2"></i> <strong>{name || '-'}</strong></p>
-      <p><i className="icon icon-clock"></i>{' '}
-        {printTimeLeft
-          ? <React.Fragment>{approxPrintTimeLeft || '?'} remaining, {printTime > 0 ? completion.toFixed(2) : '0'}% completed</React.Fragment>
-          : <React.Fragment>-</React.Fragment>
-        }
-      </p>
+      <p><strong>{name || '-'}</strong></p>
     </React.Fragment>
   );
 }
 
+export const Progress = ({ completion, printTime, printTimeLeft }) => {
+  let progressBarWidth = {
+    width: (printTime > 0 ? completion.toFixed(2) : '0')+'%',
+  };
+  let approxPrintTimeLeft = printTimeLeft;
+  if (!approxPrintTimeLeft && printTime > 0) {
+    approxPrintTimeLeft = (printTime / completion) * 100;
+  }
+  if (approxPrintTimeLeft) {
+    let d = new Date(null);
+    d.setSeconds(approxPrintTimeLeft)
+    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
+  }
+  return (
+    <React.Fragment>
+      <div className="progress">
+        <div className="progress-detail">
+          {printTimeLeft
+            ? <React.Fragment>{printTime > 0 ? completion.toFixed(2) : '0'}% ({approxPrintTimeLeft || '?'} remaining)</React.Fragment>
+            : <React.Fragment>-</React.Fragment>
+          }
+        </div>
+        <div className="progress-bar" style={progressBarWidth}></div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+
 export const Temperature = ({name, actual, target }) => {
-  return <p><i className="icon icon-meter"></i> {name}: {actual}/{target} &#176;C</p>
+  return <span> {name}: {actual}/{target} &#176;C</span>
 }
 
 export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete }) => {
@@ -116,18 +138,8 @@ export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete })
     return (
       <div className="box-actions">
         <h2 className="hidden">Actions</h2>
-        <ul>
-          <li>
-            <a href={`http://${ip}`} target="_blank" rel="noopener noreferrer">
-              <i className={`icon icon-display ${connected ? 'icon-state-active' : 'icon-state-inactive'}`}></i>
-            </a>
-          </li>
-          <li>
-            <i className={`icon icon-printer ${printerIconState}`} title={currentState}></i>
-          </li>
-          <li><Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link></li>
-          <li><button className="plain" onClick={onPrinterDelete}><i className="icon icon-bin"></i></button></li>
-        </ul>
+        <Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link>
+        <button className="plain" onClick={onPrinterDelete}><i className="icon icon-bin"></i></button>
       </div>
     );
 }
@@ -136,11 +148,13 @@ export const PrinterState = ({ printer }) => {
   return (
     <div className="printer-state">
       <h2 className="hidden">Current state</h2>
-      <div>
-        {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />}
-        {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-        <Job {...printer.job} />
-      </div>
+      <div className="tags">
+        <span className="tag">{printer.connected ? "Connected" : "Disconnected"}</span>
+        <span className="tag">{printer.status.state}</span>
+       </div>
+      {printer.status.temperature && printer.status.temperature.tool0 && <Temperature name="Tool" {...printer.status.temperature.tool0} />},
+      {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+      <Job {...printer.job} />
     </div>
   );
 }
@@ -168,40 +182,39 @@ export class PrinterView extends React.Component {
     const { printer, onPrinterDelete } = this.props;
     if (showDeleteModal) {
       return (
-        <BoxedModal onBack={() => {
+        <BoxedModal inverse onBack={() => {
           this.setState({
             showDeleteModal: false
           });
         }}>
           <h1>Are you sure?</h1>
-          <div>
             <p>You can add the printer back later by simply adding <code>{printer.ip}</code> again.</p>
-            <p>
-              <button type="submit" onClick={() => {
-                deletePrinter(printer.ip);
-                onPrinterDelete(printer.ip);
-              }}>Remove printer</button>
-            </p>
-          </div>
+            <button type="submit" onClick={() => {
+              deletePrinter(printer.ip);
+              onPrinterDelete(printer.ip);
+            }}>Remove printer</button>
         </BoxedModal>
         );
     }
     return (
-      <div>
-        <h1>
-          {printer.name}
-        </h1>
-        <div>
-          <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
-            this.setState({
-              showDeleteModal: true,
-            })
-          }} />
-          <PrinterState printer={printer} />
+      <>
+        <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
+          <Progress {...printer.job} />
         </div>
-        <hr />
-      </div>
+        <div className="title">
+          <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">
+            <strong>{printer.name}</strong>
+          </a>
+        </div>
+
+        <PrinterState printer={printer} />
+        <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
+          this.setState({
+            showDeleteModal: true,
+          })
+        }} />
+      </>
     );
   }
 }

@@ -232,8 +232,7 @@ class GcodeList extends React.Component {
 
     return (
       <div className="gcode-list standalone-page">
-        <BackLink to="/" />
-        <h1>Available G-Codes</h1>
+        <h1>G-Codes</h1>
         <div>
           <form>
             {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}

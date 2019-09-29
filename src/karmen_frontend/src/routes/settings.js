@@ -132,13 +132,15 @@ class Settings extends React.Component {
     }
     return (
       <div className="settings standalone-page">
-        <BackLink to="/" />
-        <h1>Change settings</h1>
+        <header>
+          <h1 className="title">Settings</h1>
+        </header>
         <div>
           <form>
             <fieldset>
               {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
               <FormInputs definition={settings} updateValue={updateValue} />
+              <BackLink to="/" />
               <p>
                 <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
               </p>

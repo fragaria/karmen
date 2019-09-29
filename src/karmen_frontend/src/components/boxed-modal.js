@@ -3,11 +3,11 @@ import { BackButton } from './back';
 
 class BoxedModal extends React.Component {
   render() {
-    const { onBack, children } = this.props;
+    const { onBack, children, inverse } = this.props;
     return (
-      <div className="boxed-modal">
-        <BackButton onClick={onBack} />
+      <div className={inverse ? 'boxed-modal boxed-modal-inverse' : 'boxed-modal'}>
         {children}
+        <BackButton onClick={onBack} />
       </div>
     );
   }

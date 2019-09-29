@@ -1,4 +1,4 @@
-@import "fonts.css";
+// @import "fonts.css";
 @import "reset.css";
 @import "./icons/style.css";
 
@@ -24,25 +24,64 @@ $palette: (
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
-  box-sizing: border-box; 
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
 }
 
 body {
-  text-align: center;
-  padding: 0 $spacing-default $spacing-default $spacing-default;
-  font-family: "Andulka Text Pro";
+  height: 100vh;
+  padding: 0 $spacing-default;
+  font-family: sans-serif;
   font-weight: normal;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "kern", "onum", "liga";
 }
 
-h1, h2, h3 {
-  font-family: "Trivia Grotesk N2"
+#root {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  display: flex;
+  width: 100%;
+  padding: $spacing-default 0;
+  justify-content: space-between;
+
+  a {
+    padding: $base-unit;
+  }
+}
+
+header {
+  margin-bottom: $spacing-default;
+
+  .title {
+    display: inline-block;
+  }
+
+  .action {
+    text-decoration: none;
+    vertical-align: top;
+
+    span:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 h1 {
-  font-size: $spacing-default * 2;
+  font-size: 2.8rem;
 }
 
 hr, .hidden {
@@ -50,10 +89,15 @@ hr, .hidden {
 }
 
 a, .link {
-  color: map-get($palette, red);
+  color: $color-secondary;;
 
   &:hover, &:active {
-    color: map-get($palette, dark-red);
+    color: $color-secondary;
+    text-decoration: none;
+  }
+
+  &:focus {
+    outline: none;
   }
 }
 
@@ -76,6 +120,7 @@ table {
   th {
     border-bottom: 1px solid map-get($palette, gray-medium);
     font-weight: 800;
+    text-align: left;
   }
 
   td, th {
@@ -143,7 +188,6 @@ table {
 }
 
 .loader {
-  font-family: "Trivia Grotesk N2";
   display: flex;
   align-items: center;
   justify-content: center;
@@ -210,74 +254,136 @@ input[type=text], select {
   position: static;
   top: 0;
   left: 0;
+  min-height: 340px;
 
   h1 {
-    padding-top: $spacing-default * 4;
+    padding: $spacing-default;
+    font-size: 2rem;
   }
 
   p {
-    padding: $spacing-default;
+    padding: 0 $spacing-default $spacing-default;
+  }
+
+
+  &.boxed-modal-inverse {
+    background: $color-secondary;
+    color: map-get($palette, white);
+
+    button {
+      height: 48px;
+      padding: $base-unit $base-unit*2;
+      margin: $spacing-default 0 $spacing-default $spacing-default/2;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &.plain {
+        border: 1px solid map-get($palette, white);
+        color: map-get($palette, white);
+
+        &:hover {
+          text-decoration: none;
+          color: $color-secondary;
+          background: map-get($palette, white);
+        }
+      }
+    }
   }
 }
 
 .boxed-content {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-content: flex-start;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  justify-items: start;
+  grid-gap: 20px;
+  width: 100%;
+
+  @media screen and (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media screen and (min-width: 890px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media screen and (min-width: 1280px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  @media screen and (min-width: 1500px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  }
 }
 
 .content-box {
-  flex: 1;
-  min-width: 33%;
-  max-width: 33%;
-  min-height: 480px;
-  border: solid map-get($palette, gray-medium);
-  border-width: 1px;
   position: relative;
-  margin-top: $spacing-default;
+  width: 100%;
+  min-height: 340px;
+  border: 1px solid map-get($palette, gray-medium);
+
+  .title {
+    padding: $base-unit*2 $base-unit*2 $base-unit;
+
+    a {
+      text-decoration: none;
+      color: $color-primary;
+
+      &:hover {
+        color: $color-secondary;
+        text-decoration: underline;
+      }
+    }
+  }
 
   .box-actions {
-    font-size: $spacing-default;
+    display: none;
     position: absolute;
-    z-index: 3;
     top: 0;
     right: 0;
-    height: 100%;
-    padding: $spacing-default / 2;
-    background-color: rgba(255, 255, 255, .7);
+    padding: $base-unit;
+    background: map-get($palette, white);
 
-    li {
-      margin-bottom: $spacing-default / 4;
+    > * {
+      margin: 0 $base-unit/2;
+      text-decoration: none;
     }
 
-    a, button, .icon {
-      @include iconlink;
-      display: inline-block;
+    .icon-bin {
+      color: $color-secondary;
+    }
+
+    a {
+      color: $color-primary;
+    }
+  }
+
+  &:hover {
+    .box-actions {
+      display: flex;
     }
   }
 }
 
 .printer-connection, .printer-state {
   text-align: left;
-  margin: $spacing-default / 2;
-  line-height: 150%;
+  padding: 0 $base-unit*2 $base-unit*2;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .webcam-stream {
+  min-height: 220px;
+
   .no-stream {
-    height: 280px;
     width: 100%;
+    height: 220px;
     background-color: map-get($palette, gray-light);
-    padding-top: $spacing-default * 2;
     color: map-get($palette, gray-dark);
-    i {
-      display: inline-block;
-      font-size: $spacing-default * 4;
-      margin-bottom: $spacing-default / 2;
-    }
+    text-align: center;
+    line-height: 220px;
   }
 
   img {
@@ -306,9 +412,13 @@ input[type=text], select {
 }
 
 nav {
+  display: flex;
+  padding: $spacing-default $base-unit;
+  justify-content: space-between;
+
   img {
     max-width: 100%;
-    padding-top: $spacing-default * 6;
+    height: 25px;
   }
   p {
     position: absolute;
@@ -317,32 +427,26 @@ nav {
     margin-left: $spacing-default;
   }
 
-  .box-actions {
-    background: none !important;
-  }
-}
+  .navigation {
+    display: flex;
+    align-items: center;
 
-.add-printer-box {
-  padding-top: $spacing-default * 6;
-  a {
-    @include iconlink;
-    display: block;
-    font-size: $spacing-default;
-
-    i {
+    a {
       display: inline-block;
-      font-size: $spacing-default * 3;
-      margin-bottom: $spacing-default / 2;
+      padding: 0 0 0 $base-unit*2;
+      color: $color-primary;
+      font-size: 1.2rem;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+        color: $color-secondary;
+      }
     }
   }
 }
 
 .standalone-page {
-  h1 {
-    margin-top: $spacing-default * 6;
-    margin-bottom: $spacing-default;
-  }
-
   form {
     p {
       line-height: 150%;
@@ -375,6 +479,50 @@ nav {
     > div {
       flex: 1;
       max-width: 50%;
+    }
+  }
+}
+
+.tags {
+  margin-bottom: $base-unit/4;
+
+  .tag {
+    display: inline-block;
+    padding: 0 $base-unit;
+    margin-right: $base-unit/2;
+    font-size: .8rem;
+    background: map-get($palette, gray-dark);
+    color: map-get($palette, white);
+  }
+}
+
+.stream-wrapper {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.progress {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: map-get($palette, white);
+  border-top: 1px solid map-get($palette, white);
+
+  .progress-bar {
+    background: $color-secondary;
+    height: $base-unit/1.5;
+  }
+
+  .progress-detail {
+    // display: none;
+    padding: $base-unit $base-unit*2;
+    font-size: 14px;
+  }
+
+  &:hover {
+    .progress-detail {
+      display: block;
     }
   }
 }

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
-import Menu from '../components/menu';
 import PrinterView from '../components/printer-view';
 import { getPrinters } from '../services/karmen-backend';
 
@@ -49,17 +48,17 @@ class PrinterList extends React.Component {
       }} /></div>
     });
     return (
-      <div className="printer-list boxed-content">
-        <div className="content-box"><Menu /></div>
-        {printerElements}
-        <div className="content-box">
-          <div className="add-printer-box">
-            <Link to="/add-printer">
-              <i className="icon icon-plus"></i><br />
-              Add printer
-            </Link>
-          </div>
-        </div>
+      <div className="printer-list">
+        <header>
+          <h1 className="title">Printers</h1>
+          <Link to="/add-printer" className="action">
+            <i className="icon icon-plus"></i>&nbsp;
+            <span>Add a printer</span>
+          </Link>
+        </header>
+        <div className="boxed-content">
+          {printerElements}
+         </div>
       </div>
     );
   }

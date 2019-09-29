@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
+import Menu from './components/menu';
 import Heartbeat from './components/heartbeat';
 
 import PrinterList from './routes/printer-list';
@@ -11,8 +12,10 @@ import Settings from './routes/settings';
 
 function App() {
   return (
-    <div>
+    <>
       <BrowserRouter>
+        <Menu />
+        <main>
           <Switch>
             <Route path="/add-printer" exact component={AddPrinter} />
             <Route path="/settings" exact component={Settings} />
@@ -21,8 +24,19 @@ function App() {
             <Route path="/" exact component={PrinterList} />
           </Switch>
           <Heartbeat />
-       </BrowserRouter>
-    </div>
+        </main>
+      </BrowserRouter>
+      <footer>
+        <section>
+          &copy; 2019
+          <a href="https://fragaria.cz" target="_blank">Fragaria s.r.o.</a>
+        </section>
+        <section>
+          <a href="https://github.com/fragaria/karmen/blob/master/LICENSE.txt" target="_blank" rel="noopener noreferrer">License</a>
+          <a href="https://github.com/fragaria/karmen" target="_blank" rel="noopener noreferrer">Source</a>
+        </section>
+      </footer>
+    </>
   );
 }
 

@@ -1,10 +1,10 @@
 @font-face {
-  font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?xxf8ko');
-  src:  url('fonts/icomoon.eot?xxf8ko#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?xxf8ko') format('truetype'),
-    url('fonts/icomoon.woff?xxf8ko') format('woff'),
-    url('fonts/icomoon.svg?xxf8ko#icomoon') format('svg');
+  font-family: 'karmen-icons';
+  src:  url('fonts/karmen-icons.eot?apblc9');
+  src:  url('fonts/karmen-icons.eot?apblc9#iefix') format('embedded-opentype'),
+    url('fonts/karmen-icons.ttf?apblc9') format('truetype'),
+    url('fonts/karmen-icons.woff?apblc9') format('woff'),
+    url('fonts/karmen-icons.svg?apblc9#karmen-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -12,7 +12,7 @@
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'icomoon' !important;
+  font-family: 'karmen-icons' !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -25,59 +25,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-checkmark:before {
-  content: "\e907";
-}
-.icon-cross:before {
-  content: "\e908";
-}
-.icon-cancel:before {
-  content: "\e908";
-}
-.icon-close1:before {
-  content: "\e908";
-}
-.icon-quit:before {
-  content: "\e908";
-}
-.icon-remove1:before {
-  content: "\e908";
-}
-.icon-list:before {
-  content: "\e906";
-}
-.icon-arrow-left:before {
+.icon-printer:before {
   content: "\e904";
 }
-.icon-warning:before {
+.icon-chronometer:before {
   content: "\e905";
 }
-.icon-sign:before {
+.icon-timer:before {
   content: "\e905";
-}
-.icon-file-text2:before {
-  content: "\e926";
 }
 .icon-clock:before {
-  content: "\e94e";
+  content: "\e905";
 }
-.icon-printer:before {
-  content: "\e954";
-}
-.icon-display:before {
-  content: "\e956";
-}
-.icon-cog:before {
-  content: "\e994";
-}
-.icon-meter:before {
-  content: "\e9a6";
-}
-.icon-bin:before {
-  content: "\e9ac";
-}
-.icon-plus:before {
-  content: "\ea0a";
+.icon-thermometer:before {
+  content: "\e906";
 }
 .icon-github:before {
   content: "\e900";
@@ -90,4 +51,19 @@
 }
 .icon-readthedocs:before {
   content: "\e903";
+}
+.icon-file-text2:before {
+  content: "\e926";
+}
+.icon-display:before {
+  content: "\e956";
+}
+.icon-cog:before {
+  content: "\e994";
+}
+.icon-bin:before {
+  content: "\e9ac";
+}
+.icon-plus:before {
+  content: "\ea0a";
 }
