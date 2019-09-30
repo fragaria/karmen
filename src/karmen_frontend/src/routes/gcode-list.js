@@ -2,7 +2,6 @@ import React from 'react';
 import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
-import { BackLink } from '../components/back';
 import { getPrinters, getGcodes, deleteGcode, uploadGcode, printGcode } from '../services/karmen-backend';
 
 class GcodeRow extends React.Component {

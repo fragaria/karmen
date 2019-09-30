@@ -128,13 +128,7 @@ export const Temperature = ({name, actual, target }) => {
   return <span> {name}: {actual}/{target} &#176;C</span>
 }
 
-export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete }) => {
-    let printerIconState = 'icon-state-inactive';
-    if (currentState === 'Operational') {
-      printerIconState = 'icon-state-idle';
-    } else if (currentState === 'Printing') {
-      printerIconState = 'icon-state-active';
-    }
+export const PrinterActions = ({ ip, onPrinterDelete }) => {
     return (
       <div className="box-actions">
         <h2 className="hidden">Actions</h2>
@@ -209,7 +203,7 @@ export class PrinterView extends React.Component {
         </div>
 
         <PrinterState printer={printer} />
-        <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
+        <PrinterActions ip={printer.ip} onPrinterDelete={() => {
           this.setState({
             showDeleteModal: true,
           })

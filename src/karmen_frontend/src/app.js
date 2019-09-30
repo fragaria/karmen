@@ -29,7 +29,7 @@ function App() {
       <footer>
         <section>
           &copy; 2019
-          <a href="https://fragaria.cz" target="_blank">Fragaria s.r.o.</a>
+          <a href="https://fragaria.cz" target="_blank" rel="noopener noreferrer">Fragaria s.r.o.</a>
         </section>
         <section>
           <a href="https://github.com/fragaria/karmen/blob/master/LICENSE.txt" target="_blank" rel="noopener noreferrer">License</a>

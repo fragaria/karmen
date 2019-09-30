@@ -91,7 +91,7 @@ class AddPrinter extends React.Component {
       return <Redirect to="/" />
     }
     return (
-      <div class="standalone-page">
+      <div className="standalone-page">
         <header>
           <h1 className="title">Add a new printer</h1>
         </header>
