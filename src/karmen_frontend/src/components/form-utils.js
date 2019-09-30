@@ -18,8 +18,8 @@ export const FormInputs = ({ definition, updateValue }) => {
           <p key={name}>
             <label htmlFor={name}>
               {definition[name].name}
-              <input type="checkbox" id={name} name={name} checked={definition[name].val} onChange={(e) => updateValue(name, e.target.checked)} />
             </label>
+             <input type="checkbox" id={name} name={name} checked={definition[name].val} onChange={(e) => updateValue(name, e.target.checked)} />
             {definition[name].error && <small>{definition[name].error}</small>}
           </p>
         );
@@ -42,9 +42,7 @@ export const FormInputs = ({ definition, updateValue }) => {
   });
 
   return (
-    <div>
-      {optionRows}
-    </div>
+    <>{optionRows}</>
   );
 }
 

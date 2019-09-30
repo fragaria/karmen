@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export const BackLink = ({ to, onClick }) => {
   onClick = onClick || function () {};
   return (
-    <Link to={to} onClick={onClick}>Cancel</Link>
+    <Link to={to} onClick={onClick} className="back-link">Cancel</Link>
   );
 }
 

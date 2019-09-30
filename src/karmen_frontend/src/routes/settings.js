@@ -135,18 +135,16 @@ class Settings extends React.Component {
         <header>
           <h1 className="title">Settings</h1>
         </header>
-        <div>
-          <form>
-            <fieldset>
-              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-              <FormInputs definition={settings} updateValue={updateValue} />
+        <form>
+          <fieldset>
+            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+            <FormInputs definition={settings} updateValue={updateValue} />
+            <div className="form-actions">
+              <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
               <BackLink to="/" />
-              <p>
-                <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
-              </p>
-            </fieldset>
-           </form>
-        </div>
+            </div>
+          </fieldset>
+         </form>
       </div>
     );
   }

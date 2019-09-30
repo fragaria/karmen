@@ -205,6 +205,7 @@ table {
   left: 0;
   padding: $spacing-default;
   font-size: $spacing-default;
+
   a {
     text-decoration: none;
   }
@@ -449,11 +450,15 @@ nav {
 .standalone-page {
   form {
     p {
+      display: table-row;
       line-height: 150%;
-      margin-bottom: $spacing-default / 2;
 
       label {
-        margin-right: $spacing-default / 4;
+        display: table-cell;
+        width: 300px;
+        padding: 0 0 $spacing-default / 2;
+        vertical-align: top;
+        height: $form-elements-height+$spacing-default;
 
         input[type=checkbox] {
           position: relative;
@@ -468,6 +473,15 @@ nav {
       }
 
     }
+  }
+}
+
+.form-actions {
+  margin-left: 300px;
+
+  .back-link {
+    display: inline-block;
+    margin: 0 $base-unit*2;
   }
 }
 
