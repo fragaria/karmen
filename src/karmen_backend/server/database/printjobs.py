@@ -34,3 +34,15 @@ def delete_printjob(id):
         cursor = connection.cursor()
         cursor.execute("DELETE FROM printjobs WHERE id = %s", (id,))
         cursor.close()
+
+def delete_printjobs_by_gcode(gcode_id):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM printjobs WHERE gcode_id = %s", (gcode_id,))
+        cursor.close()
+
+def delete_printjobs_by_printer(printer_ip):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM printjobs WHERE printer_ip = %s", (printer_ip,))
+        cursor.close()
