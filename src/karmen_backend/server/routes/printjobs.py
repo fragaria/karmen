@@ -22,7 +22,7 @@ def printjob_create():
         return abort(404)
     printer_inst = drivers.get_printer_instance(printer)
     try:
-        printer_inst.start_job(gcode["absolute_path"])
+        printer_inst.upload_and_start_job(gcode["absolute_path"])
         printjobs.add_printjob(gcode_id=gcode["id"], printer_ip=printer["ip"])
     except Exception as e:
         return abort(500, e)
