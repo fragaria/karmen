@@ -1,9 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
-import { BackLink } from '../components/back';
-import { getPrinters, getGcodes, deleteGcode, uploadGcode, printGcode } from '../services/karmen-backend';
+import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/karmen-backend';
 
 class GcodeRow extends React.Component {
   state = {
@@ -147,17 +147,12 @@ class GcodeRow extends React.Component {
 class GcodeList extends React.Component {
   state = {
     gcodes: null,
-    toUpload: null,
-    path: '',
-    submitting: false,
-    message: null,
-    messageOk: false,
+    message: null
   }
 
   constructor(props) {
     super(props);
     this.loadCodes = this.loadCodes.bind(this);
-    this.addCode = this.addCode.bind(this);
   }
 
   loadCodes() {
@@ -168,53 +163,12 @@ class GcodeList extends React.Component {
     });
   }
 
-  addCode(e) {
-    e.preventDefault();
-    const { toUpload, path } = this.state;
-    if (!toUpload) {
-      this.setState({
-        message: 'You need to select a file!',
-      });
-      return;
-    }
-    this.setState({
-      submitting: true,
-      message: null,
-      messageOk: false,
-    });
-    uploadGcode(path, toUpload)
-      .then((r) => {
-          switch(r) {
-            case 201:
-              this.setState({
-                submitting: false,
-                message: 'File uploaded',
-                path: '',
-                messageOk: true,
-              });
-              this.loadCodes();
-              break;
-            case 415:
-              this.setState({
-                message: 'This does not seem like a G-Code file.',
-                submitting: false,
-              });
-              break;
-            default:
-              this.setState({
-                message: 'Cannot upload G-Code, check server logs',
-                submitting: false,
-              });
-          }
-        });
-  }
-
   componentDidMount() {
     this.loadCodes();
   }
 
   render () {
-    const { gcodes, message, messageOk, path, submitting } = this.state;
+    const { gcodes } = this.state;
     if (gcodes === null) {
       return <div><Loader /></div>;
     }
@@ -232,34 +186,14 @@ class GcodeList extends React.Component {
 
     return (
       <div className="gcode-list standalone-page">
-        <h1>G-Codes</h1>
-        <div>
-          <form>
-            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-            <p>
-              <label htmlFor="file">Select your gcode</label>
-              <input type="file" name="file" onChange={(e) => {
-                this.setState({
-                  toUpload: e.target.files[0]
-                });
-              }} />
-            </p>
-            <p>
-              <label htmlFor="path">Path (optional)</label>
-              <input type="text" id="path" name="path" value={path} onChange={(e) => this.setState({
-                path: e.target.value
-              })} />
-            </p>
-            <p>
-              <button type="submit" onClick={(e) => this.addCode(e)} disabled={submitting}>
-                {submitting
-                  ? 'Uploading...'
-                  : 'Upload G-Code'
-                }
-              </button>
-            </p>
-          </form>
-        </div>
+        <header>
+          <h1 className="title">G-Codes</h1>
+          <Link to="/add-gcode" className="action">
+            <i className="icon icon-plus"></i>&nbsp;
+            <span>Add a g-code</span>
+          </Link>
+        </header>
+
         <div>
           {(!gcodeRows || gcodeRows.length === 0)
           ? <p className="message-error">No G-Codes found!</p>

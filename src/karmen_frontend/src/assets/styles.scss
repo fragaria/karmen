@@ -270,6 +270,11 @@ input[type=text], select {
   &.boxed-modal-inverse {
     background: $color-secondary;
     color: map-get($palette, white);
+    text-align: center;
+
+    h1 {
+      padding-top: $spacing-default*1.5;
+    }
 
     button {
       height: 48px;
@@ -456,15 +461,13 @@ nav {
       label {
         display: table-cell;
         width: 300px;
-        padding: 0 0 $spacing-default / 2;
-        vertical-align: top;
-        height: $form-elements-height+$spacing-default;
+        vertical-align: middle;
+      }
 
-        input[type=checkbox] {
-          position: relative;
-          top: $base-unit * 2;
-          left: $base-unit * 2;
-        }
+      input,
+      select,
+      textarea {
+        margin: $base-unit 0;
       }
 
       small {
@@ -477,7 +480,7 @@ nav {
 }
 
 .form-actions {
-  margin-left: 300px;
+  margin: $base-unit 0 0 300px;
 
   .back-link {
     display: inline-block;

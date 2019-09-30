@@ -109,7 +109,7 @@ class PrinterDetail extends React.Component {
         </h1>
         <div>
           <div>
-            <h2 class="hidden">Change printer properties</h2>
+            <h2 className="hidden">Change printer properties</h2>
             <form>
               {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
               <FormInputs definition={form} updateValue={updateValue} />
