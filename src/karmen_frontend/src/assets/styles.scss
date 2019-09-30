@@ -33,12 +33,16 @@ html, body {
 
 body {
   height: 100vh;
-  padding: 0 $spacing-default;
+  padding: 0 $spacing-default/2;
   font-family: sans-serif;
   font-weight: normal;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "kern", "onum", "liga";
+
+  @media screen and (min-width: 600px) {
+    padding: 0 $spacing-default;
+  }
 }
 
 #root {
@@ -125,7 +129,7 @@ table {
 
   td, th {
     padding: $spacing-default / 3;
-    border-left: 1px solid map-get($palette, gray-medium);
+    border-left: 1px solid map-get($palette, gray-light);
 
     &:first-child {
       border-left: none;
@@ -148,6 +152,16 @@ table {
     border-bottom: 1px solid map-get($palette, gray-light);
     &:last-child {
       border-bottom: none;
+    }
+
+    &.inverse td {
+      background: $color-secondary;
+      color: map-get($palette, white);
+      border-color: $color-secondary;
+
+      button, a {
+        color: #fff;
+      }
     }
   }
 }

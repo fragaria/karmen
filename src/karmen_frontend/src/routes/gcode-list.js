@@ -48,19 +48,19 @@ class GcodeRow extends React.Component {
     }
     if (showDeleteRow) {
       return (
-        <tr>
+        <tr className="inverse">
           <td colSpan="3">
             Do you really want to delete <strong>{path}/{display}</strong>? This cannot be undone.
           </td>
           <td className="action-cell">
-            <button className="plain" onClick={() => {
+            <button className="plain" title="Cancel" onClick={() => {
               this.setState({
                 showDeleteRow: false,
               })
-            }}><i className="icon icon-cross icon-state-cancel"></i></button>
-            <button className="plain" onClick={() => {
+            }}><i className="icon icon-cross"></i></button>
+            <button className="plain" title="Confirm delete" onClick={() => {
               onRowDelete();
-            }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+            }}><i className="icon icon-checkmark"></i></button>
           </td>
         </tr>
       );
