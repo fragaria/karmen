@@ -196,18 +196,19 @@ export class PrinterView extends React.Component {
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
         </div>
-        <div className="title">
-          <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">
-            <strong>{printer.name}</strong>
-          </a>
+        <div class="box-details">
+          <div className="title">
+            <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">
+              <strong>{printer.name}</strong>
+            </a>
+          </div>
+          <PrinterState printer={printer} />
+          <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
+            this.setState({
+              showDeleteModal: true,
+            })
+          }} />
         </div>
-
-        <PrinterState printer={printer} />
-        <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
-          this.setState({
-            showDeleteModal: true,
-          })
-        }} />
       </>
     );
   }

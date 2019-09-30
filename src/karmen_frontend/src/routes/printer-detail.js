@@ -14,7 +14,7 @@ class PrinterDetail extends React.Component {
     messageOk: false,
     form: {
       name: {
-        name: "Printer's new name",
+        name: "Change printer's name",
         val: '',
         type: 'text',
         required: true,
@@ -103,27 +103,29 @@ class PrinterDetail extends React.Component {
     }
     return (
       <div className="printer-detail standalone-page">
-        <BackLink to="/" />
-        <h1>
-          {printer.name}
-        </h1>
+        <header>
+          <h1 className="title">
+            {printer.name}
+          </h1>
+        </header>
         <div>
-          <div>
-            <h2 className="hidden">Change printer properties</h2>
-            <form>
-              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-              <FormInputs definition={form} updateValue={updateValue} />
-              <p>
-                <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
-              </p>
-             </form>
-          </div>
           <div className="printer-info">
             <div >
               <PrinterConnection printer={printer} />
               <PrinterState printer={printer} />
             </div>
             <WebcamStream {...printer.webcam} />
+          </div>
+          <div>
+            <h2 className="hidden">Change printer properties</h2>
+            <form>
+              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+              <FormInputs definition={form} updateValue={updateValue} />
+              <div className="form-actions">
+                <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
+                <BackLink to="/gcodes" />
+              </div>
+             </form>
           </div>
         </div>
       </div>
