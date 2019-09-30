@@ -7,7 +7,7 @@ from flask import jsonify, request, abort, send_file
 from flask_cors import cross_origin
 from werkzeug.utils import secure_filename
 from server import app, __version__
-from server.database import gcodes
+from server.database import gcodes, printjobs
 
 def make_gcode_response(gcode):
     return {
@@ -111,7 +111,9 @@ def gcode_delete(id):
         return abort(404)
     try:
         os.remove(gcode["absolute_path"])
-        gcodes.delete_gcode(id)
     except IOError:
-        return abort(500)
+        pass
+    finally:
+        printjobs.delete_printjobs_by_gcode(id)
+        gcodes.delete_gcode(id)
     return '', 204

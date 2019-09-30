@@ -128,7 +128,7 @@ export const Temperature = ({name, actual, target }) => {
   return <span> {name}: {actual}/{target} &#176;C</span>
 }
 
-export const PrinterActions = ({ ip, connected, currentState, onPrinterDelete }) => {
+export const PrinterActions = ({ ip, onPrinterDelete }) => {
     return (
       <div className="box-actions">
         <h2 className="hidden">Actions</h2>
@@ -201,7 +201,7 @@ export class PrinterView extends React.Component {
             <a><span className="icon-stop"></span></a>
           </div>
         </div>
-        <div class="box-details">
+        <div className="box-details">
           <div className="title">
             <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">
               <strong>{printer.name}</strong>

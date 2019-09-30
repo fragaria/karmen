@@ -55,6 +55,8 @@ def printer():
         }
     })
 
+job_state = 'Printing'
+
 @app.route('/api/job', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def job():
@@ -68,8 +70,40 @@ def job():
             'completion': 66.666,
             'printTimeLeft': 3685,
             'printTime': 532,
-        }
+        },
+        'state': job_state
     })
+
+@app.route('/api/job', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def modify_job():
+    global job_state
+    data = request.json
+    if 'command' not in data:
+        return abort(400)
+    if data['command'] == 'restart' and job_state == 'Paused':
+        return abort(409)
+    if data['command'] == 'start':
+        if job_state == 'Printing':
+            return abort(409)
+        job_state = 'Printing'
+    if data['command'] == 'cancel':
+        if job_state not in ('Paused', 'Printing'):
+            return abort(409)
+        job_state = 'Cancelled'
+    if data['command'] == 'pause':
+        action = data.get('action', 'toggle')
+        if action == 'pause':
+            job_state = 'Paused'
+        if action == 'resume':
+            job_state = 'Printing'
+        if action == 'toggle':
+            if job_state == 'Printing':
+                job_state = 'Paused'
+            else:
+                job_state = 'Printing'
+    return '', 204
+
 
 @app.route('/api/files/local', methods=['POST', 'OPTIONS'])
 @cross_origin()
