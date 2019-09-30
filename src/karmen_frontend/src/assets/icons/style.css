@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'karmen-icons';
-  src:  url('fonts/karmen-icons.eot?fw2sai');
-  src:  url('fonts/karmen-icons.eot?fw2sai#iefix') format('embedded-opentype'),
-    url('fonts/karmen-icons.ttf?fw2sai') format('truetype'),
-    url('fonts/karmen-icons.woff?fw2sai') format('woff'),
-    url('fonts/karmen-icons.svg?fw2sai#karmen-icons') format('svg');
+  src:  url('fonts/karmen-icons.eot?i0g061');
+  src:  url('fonts/karmen-icons.eot?i0g061#iefix') format('embedded-opentype'),
+    url('fonts/karmen-icons.ttf?i0g061') format('truetype'),
+    url('fonts/karmen-icons.woff?i0g061') format('woff'),
+    url('fonts/karmen-icons.svg?i0g061#karmen-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-stop:before {
+  content: "\e909";
+}
+.icon-pause:before {
+  content: "\e90a";
+}
+.icon-play:before {
+  content: "\e90b";
+}
+.icon-file-text2:before {
+  content: "\e926";
+}
+.icon-display:before {
+  content: "\e956";
+}
+.icon-cog:before {
+  content: "\e994";
+}
+.icon-bin:before {
+  content: "\e9ac";
+}
+.icon-plus:before {
+  content: "\ea0a";
+}
 .icon-checkmark:before {
   content: "\e908";
 }
@@ -69,19 +93,4 @@
 }
 .icon-readthedocs:before {
   content: "\e903";
-}
-.icon-file-text2:before {
-  content: "\e926";
-}
-.icon-display:before {
-  content: "\e956";
-}
-.icon-cog:before {
-  content: "\e994";
-}
-.icon-bin:before {
-  content: "\e9ac";
-}
-.icon-plus:before {
-  content: "\ea0a";
 }

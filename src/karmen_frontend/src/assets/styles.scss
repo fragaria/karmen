@@ -269,7 +269,7 @@ input[type=text], select {
   position: static;
   top: 0;
   left: 0;
-  min-height: 340px;
+  min-height: 440px;
 
   h1 {
     padding: $spacing-default;
@@ -388,6 +388,10 @@ input[type=text], select {
     .box-actions {
       display: flex;
     }
+
+    .printer-controls {
+      display: block;
+    }
   }
 }
 
@@ -477,8 +481,9 @@ nav {
 
       label {
         display: table-cell;
-        width: 300px;
+        width: 260px;
         vertical-align: middle;
+        padding-right: $spacing-default;
       }
 
       input,
@@ -497,7 +502,7 @@ nav {
 }
 
 .form-actions {
-  margin: $base-unit 0 0 300px;
+  margin: $base-unit 0 0 260px;
 
   .back-link {
     display: inline-block;
@@ -545,17 +550,25 @@ nav {
 
   .progress-bar {
     background: $color-secondary;
-    height: $base-unit/1.5;
+    height: $base-unit/4;
   }
 
   .progress-detail {
-    // display: none;
     padding: $base-unit $base-unit*2;
   }
+}
 
-  &:hover {
-    .progress-detail {
-      display: block;
-    }
+.printer-controls {
+  display: none;
+  position: absolute;
+  bottom: $base-unit*4;
+  left: 0;
+  padding: 2px;
+  background: map-get($palette, white);
+
+  a {
+    display: inline-block;
+    font-size: 30px;
+    padding: $base-unit;
   }
 }

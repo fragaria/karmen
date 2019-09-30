@@ -195,6 +195,10 @@ export class PrinterView extends React.Component {
         <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
+          <div className="printer-controls">
+            <a><span className="icon-play"></span></a>
+            <a><span className="icon-stop"></span></a>
+          </div>
         </div>
         <div class="box-details">
           <div className="title">
