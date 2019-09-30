@@ -36,12 +36,14 @@ def settings():
         }
     })
 
+job_state = 'Printing'
+
 @app.route('/api/printer', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def printer():
     return jsonify({
         'state': {
-            'text': 'Idle'
+            'text': job_state,
         },
         'temperature': {
             'bed': {
@@ -54,8 +56,6 @@ def printer():
             }
         }
     })
-
-job_state = 'Printing'
 
 @app.route('/api/job', methods=['GET', 'OPTIONS'])
 @cross_origin()

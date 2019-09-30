@@ -66,7 +66,6 @@ export const patchPrinter = (ip, data) => {
     })
 }
 
-
 export const deletePrinter = (ip) => {
   return fetch(`${BASE_URL}/printers/${ip}`, {
     method: 'DELETE',
@@ -80,6 +79,27 @@ export const deletePrinter = (ip) => {
       console.error(`Cannot remove a printer: ${e}`);
       return 500;
     })
+}
+
+export const changeCurrentJob = (ip, action) => {
+  return fetch(`${BASE_URL}/printers/${ip}/current-job`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      action: action,
+    }),
+  })
+    .then((response) => {
+      if (response.status !== 204) {
+        console.error(`Cannot change current job: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot change current job: ${e}`);
+      return 500;
+    });
 }
 
 export const changeSettings = (settings) => {
@@ -155,7 +175,7 @@ export const deleteGcode = (id) => {
     }).catch((e) => {
       console.error(`Cannot remove a gcode: ${e}`);
       return 500;
-    })
+    });
 }
 
 export const uploadGcode = (path, file) => {
@@ -174,7 +194,7 @@ export const uploadGcode = (path, file) => {
     }).catch((e) => {
       console.error(`Cannot add a gcode: ${e}`);
       return 500;
-    })
+    });
 }
 
 
@@ -197,5 +217,5 @@ export const printGcode = (id, printer) => {
     }).catch((e) => {
       console.error(`Cannot start a printjob: ${e}`);
       return 500;
-    })
+    });
 }

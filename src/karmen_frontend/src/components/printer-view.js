@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import BoxedModal from '../components/boxed-modal';
-import { deletePrinter } from '../services/karmen-backend';
+import { deletePrinter, changeCurrentJob } from '../services/karmen-backend';
 
 const BACKEND_BASE_URL = window.env.BACKEND_BASE;
 
@@ -171,15 +171,17 @@ export const PrinterConnection = ({ printer }) => {
 export class PrinterView extends React.Component {
   state = {
     showDeleteModal: false,
+    showCancelModal: false,
   }
   render() {
-    const { showDeleteModal } = this.state;
+    const { showDeleteModal, showCancelModal } = this.state;
     const { printer, onPrinterDelete } = this.props;
     if (showDeleteModal) {
       return (
         <BoxedModal inverse onBack={() => {
           this.setState({
-            showDeleteModal: false
+            showDeleteModal: false,
+            showCancelModal: false,
           });
         }}>
           <h1>Are you sure?</h1>
@@ -191,15 +193,59 @@ export class PrinterView extends React.Component {
         </BoxedModal>
         );
     }
+    if (showCancelModal) {
+      return (
+        <BoxedModal inverse backText="Keep printing" onBack={() => {
+          this.setState({
+            showDeleteModal: false,
+            showCancelModal: false,
+          });
+        }}>
+          <h1>Are you sure?</h1>
+            <p>You are about to cancel the whole print!</p>
+            <button type="submit" onClick={() => {
+              changeCurrentJob(printer.ip, 'cancel')
+                .then(() => {
+                  this.setState({
+                    showDeleteModal: false,
+                    showCancelModal: false,
+                  });
+                })
+            }}>Cancel the print</button>
+        </BoxedModal>
+        );
+    }
     return (
       <>
         <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
-          <div className="printer-controls">
-            <a><span className="icon-play"></span></a>
-            <a><span className="icon-stop"></span></a>
-          </div>
+          connected={printer.client.connected} currentState={printer.status.state}
+          {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && (
+            <div className="printer-controls">
+              {printer.status.state === 'Paused'
+                ? (
+                <button className="plain" onClick={() => {
+                  changeCurrentJob(printer.ip, 'toggle');
+                }}>
+                  <span className="icon-play"></span>
+                </button>)
+                : (
+                <button className="plain" onClick={() => {
+                  changeCurrentJob(printer.ip, 'toggle');
+                }}>
+                  <span className="icon-pause"></span>
+                </button>)
+              }
+                <button className="plain" onClick={() => {
+                  this.setState({
+                    showCancelModal: true,
+                  });
+                }}>
+                <span className="icon-stop"></span>
+              </button>
+            </div>
+          )}
         </div>
         <div className="box-details">
           <div className="title">
@@ -208,7 +254,7 @@ export class PrinterView extends React.Component {
             </a>
           </div>
           <PrinterState printer={printer} />
-          <PrinterActions ip={printer.ip} connected={printer.client.connected} currentState={printer.status.state} onPrinterDelete={() => {
+          <PrinterActions ip={printer.ip} onPrinterDelete={() => {
             this.setState({
               showDeleteModal: true,
             })

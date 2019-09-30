@@ -567,9 +567,14 @@ nav {
   padding: 2px;
   background: map-get($palette, white);
 
-  a {
+  button {
     display: inline-block;
     font-size: 30px;
     padding: $base-unit;
+    color: map-get($palette, red);
+
+    &[disabled] {
+      color: map-get($palette, gray-medium);
+    }
   }
 }
