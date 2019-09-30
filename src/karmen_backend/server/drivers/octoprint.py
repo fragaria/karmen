@@ -148,7 +148,28 @@ class Octoprint(PrinterDriver):
         else:
             return {}
 
-    def start_job(self, gcode_path):
+    def modify_current_job(self, action):
+        if action not in ('cancel', 'start', 'toggle'):
+            raise Exception("Action %s is not allowed" % (action,))
+        request = None
+        if self.client.connected:
+            body = {
+                "command": action
+            }
+            if action == 'toggle':
+                body = {
+                    "command": "pause",
+                    "action": "toggle",
+                }
+            request = post_uri(self.ip, endpoint='/api/job', json=body)
+            if not request:
+                self.client.connected = False
+        if request is not None and request.status_code == 204:
+            return True
+        else:
+            return False
+
+    def upload_and_start_job(self, gcode_path):
         request = None
         if self.client.connected:
             request = post_uri(self.ip, endpoint='/api/files/local', files={

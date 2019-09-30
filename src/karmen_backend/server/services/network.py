@@ -48,7 +48,8 @@ def get_uri(ip, endpoint='/', protocol='http', timeout=2):
     return request
 
 # TODO refactor and unify with get_uri, or maybe drop
-def post_uri(ip, endpoint='/', protocol='http', timeout=2, files=None, data=None):
+def post_uri(ip, endpoint='/', protocol='http', timeout=2, files=None, data=None, json=None):
+    # TODO no data and json at the same time, prevent conflicts
     request = None
     if ip is None:
         return request
@@ -56,7 +57,7 @@ def post_uri(ip, endpoint='/', protocol='http', timeout=2, files=None, data=None
         endpoint = '/%s' % (endpoint, )
     uri = '%s://%s%s' % (protocol, ip, endpoint)
     try:
-        request = requests.post(uri, timeout=timeout, files=files, data=data)
+        request = requests.post(uri, timeout=timeout, files=files, data=data, json=json)
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
         app.logger.debug("Cannot call %s" % (uri))
     return request

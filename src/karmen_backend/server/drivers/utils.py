@@ -28,5 +28,9 @@ class PrinterDriver(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def start_job(self, gcode_path):
+    def modify_current_job(self, action):
+        pass
+
+    @abc.abstractmethod
+    def upload_and_start_job(self, gcode_path):
         pass

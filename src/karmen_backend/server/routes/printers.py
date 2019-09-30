@@ -131,6 +131,27 @@ def printer_patch(ip):
     )
     return '', 204
 
+@app.route('/printers/<ip>/current-job', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def printer_modify_job(ip):
+    printer = printers.get_printer(ip)
+    if printer is None:
+        return abort(404)
+    data = request.json
+    if not data:
+        return abort(400)
+    action = data.get("action", None)
+    if not action:
+        return abort(400)
+    printer_inst = drivers.get_printer_instance(printer)
+    try:
+        if printer_inst.modify_current_job(action):
+            return '', 204
+        else:
+            return '', 409
+    except Exception as e:
+        return abort(400, e)
+
 @app.route('/proxied-webcam/<ip>', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def printer_webcam(ip):
