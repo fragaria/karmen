@@ -143,7 +143,7 @@ export const PrinterState = ({ printer }) => {
     <div className="printer-state">
       <h2 className="hidden">Current state</h2>
       <div className="tags">
-        <span className="tag">{printer.connected ? "Connected" : "Disconnected"}</span>
+        <span className="tag">{printer.client.connected ? "Connected" : "Disconnected"}</span>
         <span className="tag">{printer.status.state}</span>
        </div>
       {(!printer.status.temperature || (!printer.status.temperature.tool0 && !printer.status.temperature.bed)) && <>-</>}
