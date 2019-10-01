@@ -19,6 +19,8 @@ RUN pipenv lock --requirements > requirements.txt && pip install --no-cache-dir 
 ENV REDIS_HOST 127.0.0.1
 ENV REDIS_PORT 6379
 
+USER www-data
+
 COPY . .
 COPY ./scripts/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 

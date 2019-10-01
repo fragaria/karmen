@@ -8,6 +8,12 @@ services:
       BACKEND_BASE: http://${BASE_HOST}:8080
     ports:
       - 80:8080
+  files:
+    image: fragaria/karmen-backend
+    user: root
+    command: chown -R www-data:www-data /tmp/karmen-files
+    volumes:
+      - ./tmp/karmen-files:/tmp/karmen-files
   backend_flask:
     image: fragaria/karmen-backend
     restart: unless-stopped
@@ -25,6 +31,7 @@ services:
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
     depends_on:
+      - files
       - redis
       - postgres
   backend_celery_worker:

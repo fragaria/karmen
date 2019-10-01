@@ -34,21 +34,21 @@ if [ "$SERVICE" = 'flask' ]; then
   fi
 elif [ "$SERVICE" = 'celery-beat' ]; then
   test_flaskr_settings
-  clean_pid_file /opt/celerybeatd.pid
+  clean_pid_file /tmp/celerybeatd.pid
   if [ "$ENV" = 'production' ]; then
-    celery -A server.celery beat --pidfile=/opt/celerybeatd.pid
+    celery -A server.celery beat --pidfile=/tmp/celerybeatd.pid -s /tmp/celerybeat-schedule
   else
     export FLASK_DEBUG=true
-    watchmedo auto-restart --recursive -- celery -A server.celery beat --pidfile=/opt/celerybeatd.pid
+    watchmedo auto-restart --recursive -- celery -A server.celery beat --pidfile=/tmp/celerybeatd.pid -s /tmp/celerybeat-schedule
   fi
 elif [ "$SERVICE" = 'celery-worker' ]; then
   test_flaskr_settings
-  clean_pid_file /opt/celeryworkerd.pid
+  clean_pid_file /tmp/celeryworkerd.pid
   if [ "$ENV" = 'production' ]; then
-    celery -A server.celery worker --pidfile=/opt/celeryworkerd.pid
+    celery -A server.celery worker --pidfile=/tmp/celeryworkerd.pid
   else
     export FLASK_DEBUG=true
-    watchmedo auto-restart --recursive -- celery -A server.celery worker --pidfile=/opt/celeryworkerd.pid
+    watchmedo auto-restart --recursive -- celery -A server.celery worker --pidfile=/tmp/celeryworkerd.pid
   fi
 elif [ "$SERVICE" = 'fake-printer' ]; then
   export FLASK_APP=fakeprinter

@@ -15,6 +15,13 @@ services:
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
+  files:
+    image: fragaria/karmen-backend
+    build: ./src/karmen_backend
+    user: root
+    command: chown -R www-data:www-data /tmp/karmen-files
+    volumes:
+      - ./tmp/karmen-files:/tmp/karmen-files
   backend_flask:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
@@ -32,6 +39,8 @@ services:
       - default
       - printers
       - backend
+    depends_on:
+      - files
     links:
       - postgres
       - redis

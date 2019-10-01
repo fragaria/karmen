@@ -78,19 +78,6 @@ The ``db/schema.sql`` file is run automatically only upon the first start. The d
 change in the future. The datafiles are created on your filesystem, not inside the containers,
 so no data will be lost during karmen's downtime.
 
-Next, you need to create a directory for your uploaded G-Codes. The default location is ``karmen-files``
-in the ``karmen`` directory. You also need to make sure that the application can write files to the directory.
-On the Raspbian distribution, you can achieve that by setting the file permissions as such:
-
-.. code-block:: sh
-  
-   cd ~/karmen
-   mkdir karmen-files
-   sudo chown -R www-data:www-data ./karmen-files
-
-If you are running Karmen on a different system, just make sure that the mounted volume's owner has the same
-UID/GID as the ``www-data`` user in the ``backend_flask`` service.
-
 Finally, you can start all of the services. The shorthand script will download and run all of the containers for you.
 
 .. code-block:: sh
