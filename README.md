@@ -53,6 +53,18 @@ things to play with.
 
 **Note**: If something suddenly breaks within this setup, try to clean docker with `docker system prune`, it might help.
 
+## Versioning and releases
+
+If you are making a new release, you need to tag this repository and Travis does the rest. You also
+want to bump the version numbers in the appropriate places in source code, such as `package.json`, Python
+modules etc. That's exactly what the `make-version.py` script does. So the release procedure would be:
+
+```sh
+$ VERSION=1.2.3
+$ python make-version.py $VERSION
+$ git add src && git commit -m "Version $VERSION" && git tag $VERSION
+```
+
 ## License
 
 All of the code herein is copyright 2019 [Fragaria s.r.o.](https://fragaria.cz) and released

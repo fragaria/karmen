@@ -11,12 +11,17 @@ cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
 cp ../src/karmen_backend/config.release.cfg "${DEST}/config.local.cfg"
 cp ../src/karmen_backend/db/schema.sql "${DEST}/db"
 
+sed -i "s/fragaria\/karmen-frontend/fragaria\/karmen-frontend:${TRAVIS_BRANCH}/g" "${DEST}/docker-compose.yml"
+sed -i "s/fragaria\/karmen-backend/fragaria\/karmen-backend:${TRAVIS_BRANCH}/g" "${DEST}/docker-compose.yml"
+
 cat << EOF > "$DEST/run-karmen.sh"
 #!/bin/bash
 mkdir -p ./db/data
-sudo mkdir -p ./karmen-files
+if [ ! -d "./karmen-files" ]; then
+  echo "Cannot run karmen without the ./karmen-files directory"
+  exit
+fi
 docker-compose stop
-docker-compose pull
 docker-compose up -d
 EOF
 chmod +x "${DEST}/run-karmen.sh"

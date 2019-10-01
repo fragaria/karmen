@@ -99,8 +99,8 @@ Permanent installation
 ----------------------
 
 You probably want to start karmen every time you boot your Raspberry Pi. The easiest way
-is to add the following line at the end of your ``/home/pi/.bashrc`` file:
+is to add the following line at the end of your ``/etc/rc.local`` file:
 
 .. code-block:: sh
 
-   /home/pi/karmen/run-karmen.sh
+   BASE_HOST=public-ip-address /home/pi/karmen/run-karmen.sh
