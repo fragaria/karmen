@@ -2,6 +2,9 @@
 Installation
 ############################################
 
+.. toctree::
+  :maxdepth: 2
+
 Making your printer Karmen-ready
 --------------------------------
 
@@ -34,8 +37,8 @@ Installing Karmen
 
 Karmen should run on any Linux-based distribution, and we recommend to use a standalone
 computer for it. A Raspberry Pi is again a good fit. The only dependency Karmen requires
-is `Docker <https://www.docker.com>`_ easily installed on Raspberry Pi by running the
-following commands as described on `Docker blog <https://blog.docker.com/2019/03/happy-pi-day-docker-raspberry-pi/>`_.
+is `Docker <https://www.docker.com>`_ that can be easily installed on Raspberry Pi by running the
+following commands adapted from this `blogpost <https://blog.docker.com/2019/03/happy-pi-day-docker-raspberry-pi/>`_.
 We recommend to use a clean Raspbian image for installing Karmen.
 
 .. code-block:: sh
@@ -57,7 +60,7 @@ Just download the latest one to your Raspberry Pi's home directory and unzip it.
 
    cd
    wget -O karmen.zip https://github.com/fragaria/karmen/releases/latest/download/release.zip
-   unzip release.zip
+   unzip karmen.zip
    cd karmen
 
 It contains the following files:
@@ -75,8 +78,20 @@ The ``db/schema.sql`` file is run automatically only upon the first start. The d
 change in the future. The datafiles are created on your filesystem, not inside the containers,
 so no data will be lost during karmen's downtime.
 
-Finally, you can start all of the services. The shorthand script will set up all of the folders with
-appropriate permissions, download and run all of the containers for you.
+Next, you need to create a directory for your uploaded G-Codes. The default location is ``karmen-files``
+in the ``karmen`` directory. You also need to make sure that the application can write files to the directory.
+On the Raspbian distribution, you can achieve that by setting the file permissions as such:
+
+.. code-block:: sh
+  
+   cd ~/karmen
+   mkdir karmen-files
+   sudo chown -R www-data:www-data ./karmen-files
+
+If you are running Karmen on a different system, just make sure that the mounted volume's owner has the same
+UID/GID as the ``www-data`` user in the ``backend_flask`` service.
+
+Finally, you can start all of the services. The shorthand script will download and run all of the containers for you.
 
 .. code-block:: sh
 
@@ -86,14 +101,18 @@ appropriate permissions, download and run all of the containers for you.
 the Python backend from the frontend UI. You will also use it to access the Javascript frontend
 from your browser. The frontend is run on standard port 80 and the API is accessible on port 8080.
 
+  .. note::
+    Although the Raspbian and OctoPi images support `mDNS <https://en.wikipedia.org/wiki/Multicast_DNS>`_,
+    you should set BASE_HOST to the IP address as mDNS might not work on all systems (namely Windows)
+    without prior configuration.
+
+
 You can stop everything by running 
 
 .. code-block:: sh
   
    docker-compose stop
 
-.. toctree::
-  :maxdepth: 2
 
 Permanent installation
 ----------------------
@@ -104,3 +123,10 @@ is to add the following line at the end of your ``/etc/rc.local`` file:
 .. code-block:: sh
 
    BASE_HOST=public-ip-address /home/pi/karmen/run-karmen.sh
+
+Upgrading
+---------
+
+If a new Karmen release gets out, you can upgrade by downloading the new release bundle from GitHub and
+overwriting your existing files in ``karmen`` directory. If you then run the ``run-karmen.sh`` script
+again, it will download the updated images and run the newer version of the whole system.

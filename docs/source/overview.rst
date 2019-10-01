@@ -2,6 +2,10 @@
 Overview
 ############################################
 
+.. toctree::
+  :maxdepth: 2
+  :hidden:
+
 First, there was a 3D printer. Then, there was a network connected 3D printer
 with a controlling software like `Octoprint <https://octoprint.org>`_,
 `Astroprint <https://www.astroprint.com/>`_ or `Repetier <https://www.repetier.com/>`_.
@@ -45,6 +49,3 @@ that:
 Any of the two will work, **just make sure that none of the devices are directly accessible
 from the internet without proper security.**
 
-.. toctree::
-  :maxdepth: 2
-  :hidden:

@@ -42,3 +42,14 @@ with open(os.path.join(DIR_PATH, "./src/karmen_backend/fakeprinter/__init__.py")
         output.append(line.rstrip('\n'))
     with open(os.path.join(DIR_PATH, "./src/karmen_backend/fakeprinter/__init__.py"), "w") as file:
         file.write('\n'.join(output) + '\n')
+
+
+# docs
+with open(os.path.join(DIR_PATH, "./docs/source/conf.py"), "r") as file:
+    output = []
+    for line in file:
+        if re.match(r'^release = ', line):
+            line = 'release = "%s"' % (VERSION,)
+        output.append(line.rstrip('\n'))
+    with open(os.path.join(DIR_PATH, "./docs/source/conf.py"), "w") as file:
+        file.write('\n'.join(output) + '\n')
