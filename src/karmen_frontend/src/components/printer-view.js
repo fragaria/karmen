@@ -9,7 +9,13 @@ export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
   }
-  componentDidMount() {
+
+  constructor(props) {
+    super(props);
+    this.testStream = this.testStream.bind(this);
+  }
+
+  testStream() {
     const { stream, proxied } = this.props;
     if (!stream && !proxied) {
       this.setState({
@@ -41,9 +47,21 @@ export class WebcamStream extends React.Component {
       });
   }
 
+  componentDidMount() {
+    this.testStream();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { stream, proxied } = this.props;
+    if (prevProps.stream !== stream || prevProps.proxied !== proxied) {
+      this.testStream();
+    }
+  }
+
   componentWillUnmount() {
     this.setState({
       isOnline: false,
+      source: null,
     })
   }
 
@@ -90,7 +108,7 @@ export const Job = ({ name, completion, printTime, printTimeLeft }) => {
   }
   return (
     <React.Fragment>
-      <p><strong>{name || '-'}</strong></p>
+      <p><strong>{name || '\u00A0'}</strong></p>
     </React.Fragment>
   );
 }
@@ -146,7 +164,7 @@ export const PrinterState = ({ printer }) => {
         <span className="tag">{printer.client.connected ? "Connected" : "Disconnected"}</span>
         <span className="tag">{printer.status.state}</span>
        </div>
-      {(!printer.status.temperature || (!printer.status.temperature.tool0 && !printer.status.temperature.bed)) && <>-</>}
+      {(!printer.status.temperature || (!printer.status.temperature.tool0 && !printer.status.temperature.bed)) && <>&nbsp;</>}
       {printer.status.temperature && printer.status.temperature.tool0 && <><Temperature name="Tool" {...printer.status.temperature.tool0} />,</>}
       {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
       <Job {...printer.job} />

@@ -28,7 +28,7 @@ class GcodeRow extends React.Component {
 
   render() {
     const { showDeleteRow, showPrinterSelectRow, showPrintStatusRow, availablePrinters, selectedPrinter } = this.state;
-    const { display, path, size, uploaded, url, onRowDelete, id } = this.props;
+    const { display, path, size, uploaded, data, onRowDelete, id } = this.props;
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
@@ -117,7 +117,7 @@ class GcodeRow extends React.Component {
 
     return (
       <tr>
-        <td><a href={`${window.env.BACKEND_BASE}${url}`}>{path}/{display}</a></td>
+        <td><a href={`${window.env.BACKEND_BASE}${data}`}>{path}/{display}</a></td>
         <td>{this.formatBytes(size)}</td>
         <td>{dayjs(uploaded).format('HH:mm:ss YYYY-MM-DD')}</td>
         <td className="action-cell">
