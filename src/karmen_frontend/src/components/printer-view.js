@@ -114,7 +114,7 @@ export const Progress = ({ completion, printTime, printTimeLeft }) => {
         <div className="progress-detail">
           {printTimeLeft
             ? <React.Fragment>{printTime > 0 ? completion.toFixed(2) : '0'}% ({approxPrintTimeLeft || '?'} remaining)</React.Fragment>
-            : <React.Fragment>-</React.Fragment>
+            : <React.Fragment></React.Fragment>
           }
         </div>
         <div className="progress-bar" style={progressBarWidth}></div>
