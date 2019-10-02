@@ -2,7 +2,7 @@
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
-DIR=`dirname "$0"`
+DIR=$(dirname $(realpath -s $0))
 
 cd "${DIR}/../src/karmen_frontend"
 

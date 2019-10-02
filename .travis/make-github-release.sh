@@ -1,24 +1,46 @@
 #!/bin/bash
 
-DIR=`dirname "$0"`
+DIR=$(dirname $(realpath -s $0))
 cd $DIR
 DEST="karmen"
 
+# Create release bundle
 rm -r "$DEST" 2> /dev/null
 mkdir -p "${DEST}/db"
 cp ../README.md "${DEST}"
 cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
 cp ../src/karmen_backend/config.release.cfg "${DEST}/config.local.cfg"
 cp ../src/karmen_backend/db/schema.sql "${DEST}/db"
+echo "${TRAVIS_BRANCH-latest}" > "${DEST}/VERSION"
 
+# Hardcode version into docker-compose
 sed -i "s/fragaria\/karmen-frontend/fragaria\/karmen-frontend:${TRAVIS_BRANCH-latest}/g" "${DEST}/docker-compose.yml"
 sed -i "s/fragaria\/karmen-backend/fragaria\/karmen-backend:${TRAVIS_BRANCH-latest}/g" "${DEST}/docker-compose.yml"
 
-cat << EOF > "$DEST/run-karmen.sh"
+# Prepare run script
+cat << "EOF" > "$DEST/run-karmen.sh"
 #!/bin/bash
 mkdir -p ./db/data
 docker-compose stop
 docker-compose up -d
 EOF
 chmod +x "${DEST}/run-karmen.sh"
+
+# Prepare update script
+cat << "EOF" > "$DEST/update.sh"
+#!/bin/bash
+DIR=`dirname "$0"`
+BACKUP_DIR_NAME=backup-`date +"%Y-%m-%d-%H-%M"`
+mkdir -p "${BACKUP_DIR_NAME}" && tar -c --exclude db --exclude "backup*" . | tar -x --directory "${BACKUP_DIR_NAME}"
+wget -O karmen.zip https://github.com/fragaria/karmen/releases/latest/download/release.zip
+unzip karmen.zip
+tar -C "${DIR}/karmen/" -c --exclude db . | tar -x --directory .
+rm -r karmen/
+rm karmen.zip
+docker-compose stop
+docker-compose pull
+cp "${BACKUP_DIR_NAME}/config.local.cfg" config.local.cfg
+EOF
+chmod +x "${DEST}/update.sh"
+
 zip -r release.zip "$DEST"

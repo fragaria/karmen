@@ -117,9 +117,8 @@ is to add the following line at the end of your ``/etc/rc.local`` file:
 
    BASE_HOST=public-ip-address /home/pi/karmen/run-karmen.sh
 
-Upgrading
----------
-
-If a new Karmen release gets out, you can upgrade by downloading the new release bundle from GitHub and
-overwriting your existing files in ``karmen`` directory. If you then run the ``run-karmen.sh`` script
-again, it will download the updated images and run the newer version of the whole system.
+.. Updating
+   TODO improve this
+   If a new Karmen release gets out, you can upgrade by downloading the new release bundle from GitHub and
+   overwriting your existing files in ``karmen`` directory (**except the ** ``config.local.cfg``). If you
+   then run the ``run-karmen.sh`` script again, it will download the updated images and run the newer version of the whole system.
