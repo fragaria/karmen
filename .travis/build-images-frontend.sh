@@ -9,7 +9,7 @@ cd "${DIR}/../src/karmen_frontend"
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
 
-docker build -t fragaria/karmen-frontend:build -f Dockerfile.build .
+docker build --build-arg REACT_APP_GIT_REV="${TRAVIS_BRANCH}" -t fragaria/karmen-frontend:build -f Dockerfile.build .
 
 docker create --name extract fragaria/karmen-frontend:build
 docker cp extract:/usr/src/app/build ./build
