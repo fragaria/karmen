@@ -40,5 +40,5 @@
     "start": "BROWSER=none react-scripts start", 
     "test": "react-scripts test"
   }, 
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
