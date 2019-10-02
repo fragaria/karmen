@@ -62,7 +62,7 @@ modules etc. That's exactly what the `make-version.py` script does. So the relea
 ```sh
 $ VERSION=1.2.3
 $ python make-version.py $VERSION
-$ git add src && git commit -m "Version $VERSION" && git tag $VERSION
+$ git add src docs && git commit -m "Version $VERSION" && git tag $VERSION
 ```
 
 ## License
