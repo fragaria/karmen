@@ -101,6 +101,12 @@ You can stop everything by running
    docker-compose stop
 
 
+  .. note::
+
+    The release also contains an instance of `fragaria/rpi-led-control <https://github.com/fragaria/rpi-led-control>`_
+    that is used to control an LED strip attached to the Raspberry Pi. This is just for show, it is not
+    needed for a successful run of Karmen.
+
 Permanent installation
 ----------------------
 

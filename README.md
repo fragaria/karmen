@@ -40,7 +40,7 @@ the most comfortable way is again with docker compose.
 
 ```sh
 $ git clone git@github.com:fragaria/karmen.git && cd karmen/ # get the repo
-$ docker-compose up --build --abort-on-container-exit
+$ docker-compose up --build
 # GO VISIT http://localhost:3000/
 ```
 
