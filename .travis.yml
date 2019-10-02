@@ -64,7 +64,7 @@ matrix:
     - export BUILDKIT_HOST=tcp://0.0.0.0:1234
     install: true
     script:
-    - bash .travis/build-images-backend.sh
+    - travis_wait bash .travis/build-images-backend.sh
   - if: tag IS present
     language: generic
     before_install:
