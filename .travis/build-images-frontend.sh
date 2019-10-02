@@ -15,20 +15,23 @@ docker create --name extract fragaria/karmen-frontend:build
 docker cp extract:/usr/src/app/build ./build
 docker rm -f extract
 
-# Build for armhf and push
+# Build for amd64 and push
 buildctl build --frontend dockerfile.v0 \
             --local dockerfile=. \
             --local context=. \
             --output type=image,name=docker.io/fragaria/karmen-frontend:$TRAVIS_BRANCH-amd64,push=true \
             --opt platform=linux/amd64 \
+            --opt build-arg:REACT_APP_GIT_REV=$TRAVIS_BRANCH \
             --opt filename=./Dockerfile.serve
 
 
+# Build for armhf and push
 buildctl build --frontend dockerfile.v0 \
             --local dockerfile=. \
             --local context=. \
             --output type=image,name=docker.io/fragaria/karmen-frontend:$TRAVIS_BRANCH-armhf,push=true \
             --opt platform=linux/armhf \
+            --opt build-arg:REACT_APP_GIT_REV=$TRAVIS_BRANCH \
             --opt filename=./Dockerfile.serve
 
 
