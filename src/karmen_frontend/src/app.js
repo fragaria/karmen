@@ -36,6 +36,7 @@ function App() {
         <section>
           <a href="https://github.com/fragaria/karmen/blob/master/LICENSE.txt" target="_blank" rel="noopener noreferrer">License</a>
           <a href="https://github.com/fragaria/karmen" target="_blank" rel="noopener noreferrer">Source</a>
+          <a href={`https://github.com/fragaria/karmen/releases/tag/${process.env.REACT_APP_GIT_REV}`} target="_blank" rel="noopener noreferrer">{process.env.REACT_APP_GIT_REV}</a>
         </section>
       </footer>
     </>

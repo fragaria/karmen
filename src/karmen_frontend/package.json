@@ -37,7 +37,7 @@
     "build-env-file": "node ./scripts/build-env-file.js", 
     "eject": "react-scripts eject", 
     "lint": "eslint src --ext jsx,js", 
-    "start": "BROWSER=none react-scripts start", 
+    "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start", 
     "test": "react-scripts test"
   }, 
   "version": "0.0.4"

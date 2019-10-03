@@ -5,8 +5,6 @@ services:
     image: fragaria/karmen-frontend
     build:
       context: ./src/karmen_frontend
-      args:
-        - REACT_APP_GIT_REV
     environment:
       ENV: develop
       BACKEND_BASE: http://localhost:5000
