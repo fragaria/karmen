@@ -20,6 +20,12 @@ services:
     command: bash -c 'chown -R www-data:www-data /tmp/karmen-files && chmod -R g+sw /tmp/karmen-files'
     volumes:
       - ./tmp/karmen-files:/tmp/karmen-files
+  dbfiles:
+    image: fragaria/karmen-backend
+    user: root
+    command: bash -c 'chown -R 1000:1000 /var/lib/postgresql/data && chmod -R g+sw /var/lib/postgresql/data'
+    volumes:
+      - ./tmp/db-data:/var/lib/postgresql/data
   backend_flask:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
@@ -97,6 +103,7 @@ services:
       - backend
   postgres:
     image: postgres:11
+    user: '1000:1000'
     restart: always
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
@@ -106,6 +113,8 @@ services:
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
+    depends_on:
+      - dbfiles
     ports:
       - 127.0.0.1:5433:5432
     networks:
