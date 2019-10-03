@@ -28,6 +28,7 @@ services:
       - ./tmp/db-data:/var/lib/postgresql/data
   backend_flask:
     image: fragaria/karmen-backend
+    user: www-data
     build: ./src/karmen_backend
     environment:
       REDIS_HOST: redis
