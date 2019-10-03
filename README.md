@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="223" height="60" src="https://raw.githubusercontent.com/fragaria/karmen/tree/e2982bbfb7591a5e322f2e094505d75f7036e0ca/web/src/logo.svg?sanitize=true">
+  <img width="223" height="60" src="https://raw.githubusercontent.com/fragaria/karmen/e2982bbfb7591a5e322f2e094505d75f7036e0ca/web/src/logo.svg?sanitize=true">
 </p>
 
 # Karmen - monitor and manage your 3D printers
