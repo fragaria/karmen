@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="223" height="60" src="https://raw.githubusercontent.com/fragaria/karmen/master/web/src/logo.svg?sanitize=true">
+  <img width="223" height="60" src="https://raw.githubusercontent.com/fragaria/karmen/tree/e2982bbfb7591a5e322f2e094505d75f7036e0ca/web/src/logo.svg?sanitize=true">
 </p>
 
 # Karmen - monitor and manage your 3D printers
@@ -62,7 +62,7 @@ modules etc. That's exactly what the `make-version.py` script does. So the relea
 ```sh
 $ VERSION=1.2.3
 $ python make-version.py $VERSION
-$ git add src docs && git commit -m "Version $VERSION" && git tag "v${VERSION}"
+$ git add src/ docs/ && git commit -m "Version $VERSION" && git tag "v${VERSION}"
 ```
 
 ## License
