@@ -1,3 +1,5 @@
+.. _index:
+
 ############################################
 Karmen - monitor and manage your 3D printers
 ############################################
@@ -24,5 +26,6 @@ The project is released under the `GNU Affero General Public License V3 <http://
 
   overview
   installation
+  updating
   printing
   faq
