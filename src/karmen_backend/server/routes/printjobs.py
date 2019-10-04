@@ -1,4 +1,4 @@
-from flask import request, abort
+from flask import jsonify, request, abort
 from flask_cors import cross_origin
 from server import app, drivers
 from server.database import printjobs, printers, gcodes
@@ -25,4 +25,4 @@ def printjob_create():
     if not uploaded:
         return abort(500, 'Cannot upload the g-code to the printer')
     printjob_id = printjobs.add_printjob(gcode_id=gcode["id"], printer_ip=printer["ip"])
-    return {"id": printjob_id}, 201
+    return jsonify({"id": printjob_id}), 201

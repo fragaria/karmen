@@ -1,6 +1,8 @@
 import os
-import unittest
+import io
 import tempfile
+import unittest
+import mock
 
 from server import app
 from server.database import gcodes, printjobs
@@ -58,45 +60,78 @@ class DetailRoute(unittest.TestCase):
             response = c.get('/gcodes/172.16')
             self.assertEqual(response.status_code, 404)
 
-# class CreateRoute(unittest.TestCase):
-#     @mock.patch('server.services.network.get_avahi_hostname', return_value=None)
-#     @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
-#     def test_create(self, mock_get_uri, mock_avahi):
-#         try:
-#             with app.test_client() as c:
-#                 response = c.post('/gcodes', json={
-#                     "ip": "172.16.236.200:81",
-#                     "name": "random-test-printer-name",
-#                 })
-#                 self.assertEqual(response.status_code, 201)
-#                 response = c.get('/gcodes/172.16.236.200:81')
-#                 self.assertEqual(response.json["ip"], "172.16.236.200:81")
-#                 self.assertEqual(response.json["name"], "random-test-printer-name")
-#                 self.assertEqual(response.json["client"]["name"], "octoprint")
-#         except Exception as e:
-#             raise e
-#         finally:
-#             c.delete('/gcodes/172.16.236.200:81')
+class CreateRoute(unittest.TestCase):
+    @mock.patch("server.routes.gcodes.files.save", return_value={
+        "path": "path",
+        "filename": "filename",
+        "display": "display",
+        "absolute_path": "abspath",
+        "size": 123
+    })
+    def test_upload(self, mocked_save):
+        with app.test_client() as c:
+            data = dict(
+                file=(io.BytesIO(b'my file contents'), "some.gcode"),
+            )
+            response = c.post('/gcodes', data=data, content_type='multipart/form-data')
+            self.assertEqual(response.status_code, 201)
+            args, kwargs = mocked_save.call_args
+            self.assertEqual(args[1], '/')
 
-#     def test_empty_req(self):
-#         with app.test_client() as c:
-#             response = c.post('/gcodes')
-#             self.assertEqual(response.status_code, 400)
+    @mock.patch("server.routes.gcodes.files.save", return_value={
+        "path": "path",
+        "filename": "filename",
+        "display": "display",
+        "absolute_path": "abspath",
+        "size": 123
+    })
+    def test_upload_path(self, mocked_save):
+        with app.test_client() as c:
+            data = dict(
+                file=(io.BytesIO(b'my file contents'), "some.gcode"),
+                path='/a/b'
+            )
+            response = c.post('/gcodes', data=data, content_type='multipart/form-data')
+            self.assertEqual(response.status_code, 201)
+            args, kwargs = mocked_save.call_args
+            self.assertEqual(args[1], '/a/b')
+            self.assertTrue("id" in response.json)
+            self.assertTrue("path" in response.json)
+            self.assertTrue("filename" in response.json)
+            self.assertTrue("display" in response.json)
+            self.assertTrue("absolute_path" in response.json)
+            self.assertTrue("uploaded" in response.json)
+            self.assertTrue("size" in response.json)
 
-#     def test_missing_name(self):
-#         with app.test_client() as c:
-#             response = c.post('/gcodes', json={
-#                 "ip": "172.16.236.200",
-#             })
-#             self.assertEqual(response.status_code, 400)
+    @mock.patch("server.routes.gcodes.files.save")
+    def test_upload_io_error(self, mocked_save):
+        mocked_save.side_effect = IOError('Disk problem')
+        with app.test_client() as c:
+            data = dict(
+                file=(io.BytesIO(b'my file contents'), "some.gcode"),
+            )
+            response = c.post('/gcodes', data=data, content_type='multipart/form-data')
+            self.assertEqual(response.status_code, 500)
 
-#     def test_missing_ip(self):
-#         with app.test_client() as c:
-#             response = c.post('/gcodes', json={
-#                 "name": "172.16.236.200",
-#             })
-#             self.assertEqual(response.status_code, 400)
+    def test_upload_no_file(self):
+        with app.test_client() as c:
+            response = c.post('/gcodes')
+            self.assertEqual(response.status_code, 400)
 
+    def test_upload_empty_file(self):
+        with app.test_client() as c:
+            data = dict(
+                file=(io.BytesIO(b'my file contents'), ""),
+            )
+            response = c.post('/gcodes', data=data, content_type='multipart/form-data')
+            self.assertEqual(response.status_code, 400)
+    def test_upload_not_gcode(self):
+        with app.test_client() as c:
+            data = dict(
+                file=(io.BytesIO(b'my file contents'), "some.txt"),
+            )
+            response = c.post('/gcodes', data=data, content_type='multipart/form-data')
+            self.assertEqual(response.status_code, 415)
 
 class DeleteRoute(unittest.TestCase):
     def test_delete(self):

@@ -1,12 +1,11 @@
-import os
 import re
-from time import time
+import datetime
 
 from flask import jsonify, request, abort, send_file
 from flask_cors import cross_origin
-from werkzeug.utils import secure_filename
 from server import app, __version__
 from server.database import gcodes, printjobs
+from server.services import files
 
 def make_gcode_response(gcode):
     return {
@@ -15,7 +14,7 @@ def make_gcode_response(gcode):
         "filename": gcode["filename"],
         "display": gcode["display"],
         "absolute_path": gcode["absolute_path"],
-        "uploaded": gcode["uploaded"],
+        "uploaded": gcode["uploaded"].isoformat(),
         "size": gcode["size"],
         "data": "/gcodes/%s/data" % (gcode["id"],),
     }
@@ -39,7 +38,6 @@ def gcode_detail(id):
 @app.route('/gcodes', methods=['POST', 'OPTIONS'])
 @cross_origin()
 def gcode_create():
-    # TODO unify with octoprintemulator
     if "file" not in request.files:
         return abort(400)
     incoming = request.files["file"]
@@ -49,49 +47,26 @@ def gcode_create():
     if not re.search(r'\.gco(de)?$', incoming.filename):
         return abort(415)
 
-    original_filename = incoming.filename
-    filename = secure_filename(original_filename)
-    path = request.form.get("path", "/")
-    destination_dir = os.path.join(app.config['UPLOAD_FOLDER'], path)
-    destination = os.path.join(destination_dir, filename)
     try:
-        # fix potentially non-existent paths
-        os.makedirs(destination_dir, exist_ok=True)
-        # name duplicities
-        if os.path.exists(destination):
-            original_filename = re.sub(
-                r'(\.gco(de)?)', r'-' + re.escape(repr(round(time()))) + r'\1',
-                incoming.filename
-            )
-            filename = secure_filename(original_filename)
-            destination = os.path.join(destination_dir, filename)
-        # TODO detect more parameters
-        # ; filament_type = PLA
-        # M140 S60 ; set bed temp
-        # M104 S215 ; set extruder temp
-        # ; printer_model = MK3
-        incoming.save(destination)
-        size = os.stat(destination).st_size
-        gcodes.add_gcode(
-            path=path,
-            filename=filename,
-            display=original_filename,
-            absolute_path=destination,
-            size=size
+        saved = files.save(incoming, request.form.get("path", "/"))
+        gcode_id = gcodes.add_gcode(
+            path=saved["path"],
+            filename=saved["filename"],
+            display=saved["display"],
+            absolute_path=saved["absolute_path"],
+            size=saved["size"]
         )
     except (IOError, OSError) as e:
         return abort(e, 500)
-
-    return jsonify({
-        "files": {
-            "local": {
-                "name": filename,
-                "display": original_filename,
-                "path": destination,
-                "origin": "local"
-            }
-        }
-    }), 201
+    return jsonify(make_gcode_response({
+        "id": gcode_id,
+        "path": saved["path"],
+        "filename": saved["filename"],
+        "display": saved["display"],
+        "absolute_path": saved["absolute_path"],
+        "uploaded": datetime.datetime.now(),
+        "size": saved["size"],
+    })), 201
 
 @app.route('/gcodes/<id>/data', methods=['GET', 'OPTIONS'])
 @cross_origin()
@@ -111,7 +86,7 @@ def gcode_delete(id):
     if gcode is None:
         return abort(404)
     try:
-        os.remove(gcode["absolute_path"])
+        files.remove(gcode["absolute_path"])
     except IOError:
         pass
     finally:

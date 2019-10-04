@@ -1,5 +1,4 @@
 import unittest
-import mock
 
 from server import app
 from server.database import settings
