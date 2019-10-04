@@ -448,8 +448,9 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertTrue(result)
-        self.assertEqual(mock_post_uri.call_args.kwargs["data"], {"path": "karmen", "print": True})
-        self.assertEqual(mock_post_uri.call_args.kwargs["files"]["file"].name, self.file_mock.name)
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(kwargs["data"], {"path": "karmen", "print": True})
+        self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
 
     @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
     def test_upload_job_disconnect(self, mock_post_uri):
@@ -487,7 +488,8 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.modify_current_job("start")
         self.assertTrue(result)
-        self.assertEqual(mock_post_uri.call_args.kwargs["json"], {"command": "start"})
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(kwargs["json"], {"command": "start"})
 
     @mock.patch('server.drivers.octoprint.post_uri')
     def test_modify_job_cancel_ok(self, mock_post_uri):
@@ -495,7 +497,8 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.modify_current_job("cancel")
         self.assertTrue(result)
-        self.assertEqual(mock_post_uri.call_args.kwargs["json"], {"command": "cancel"})
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(kwargs["json"], {"command": "cancel"})
 
     @mock.patch('server.drivers.octoprint.post_uri')
     def test_modify_job_toggle_ok(self, mock_post_uri):
@@ -503,7 +506,8 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.modify_current_job("toggle")
         self.assertTrue(result)
-        self.assertEqual(mock_post_uri.call_args.kwargs["json"], {"command": "pause", "action": "toggle"})
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(kwargs["json"], {"command": "pause", "action": "toggle"})
 
     @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
     def test_modify_job_disconnect(self, mock_post_uri):
