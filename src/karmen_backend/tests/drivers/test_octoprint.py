@@ -1,7 +1,8 @@
+import os
 import unittest
 import json
 import mock
-import requests
+import tempfile
 
 from server.drivers.utils import PrinterClientInfo
 from server.drivers.octoprint import Octoprint
@@ -389,7 +390,7 @@ class OctoprintJobTest(unittest.TestCase):
     def test_job_malformed_json(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
-        printer = Octoprint('octopi.local', '192.168.1.15', client=PrinterClientInfo(connected=True))
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.job()
         self.assertEqual(result, {})
 
@@ -418,3 +419,123 @@ class OctoprintJobTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.job()
         self.assertEqual(result, {})
+
+class OctoprintUploadAndStartJobTest(unittest.TestCase):
+
+    def setUp(self):
+        self.file_mock = tempfile.NamedTemporaryFile(delete=False)
+
+    def tearDown(self):
+        self.file_mock.close()
+        os.remove(self.file_mock.name)
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_upload_job_ok(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 201
+        mock_post_uri.return_value.json.return_value = {
+            "files": {
+                "local": {
+                    "name": "20mm-umlaut-box",
+                    "origin": "local",
+                    "refs": {
+                        "resource": "http://example.com/api/files/local/whistle_v2.gcode",
+                        "download": "http://example.com/downloads/files/local/whistle_v2.gcode"
+                    }
+                }
+            },
+            "done": True,
+        }
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertTrue(result)
+        self.assertEqual(mock_post_uri.call_args.kwargs["data"], {"path": "karmen", "print": True})
+        self.assertEqual(mock_post_uri.call_args.kwargs["files"]["file"].name, self.file_mock.name)
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_upload_job_disconnect(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.client.connected)
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertFalse(result)
+        self.assertFalse(printer.client.connected)
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_upload_job_disconnected(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=False))
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertEqual(mock_post_uri.call_count, 0)
+        self.assertFalse(result)
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_upload_job_no_response(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertFalse(result)
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_upload_job_inactive_printer(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15')
+        self.assertEqual(mock_post_uri.call_count, 0)
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertFalse(result)
+
+class OctoprintModifyCurrentJobTest(unittest.TestCase):
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_modify_job_start_ok(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 204
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.modify_current_job("start")
+        self.assertTrue(result)
+        self.assertEqual(mock_post_uri.call_args.kwargs["json"], {"command": "start"})
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_modify_job_cancel_ok(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 204
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.modify_current_job("cancel")
+        self.assertTrue(result)
+        self.assertEqual(mock_post_uri.call_args.kwargs["json"], {"command": "cancel"})
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_modify_job_toggle_ok(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 204
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.modify_current_job("toggle")
+        self.assertTrue(result)
+        self.assertEqual(mock_post_uri.call_args.kwargs["json"], {"command": "pause", "action": "toggle"})
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_modify_job_disconnect(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.client.connected)
+        result = printer.modify_current_job("toggle")
+        self.assertFalse(result)
+        self.assertFalse(printer.client.connected)
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_modify_job_disconnected(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=False))
+        result = printer.modify_current_job("toggle")
+        self.assertEqual(mock_post_uri.call_count, 0)
+        self.assertFalse(result)
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_modify_job_no_response(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.modify_current_job("toggle")
+        self.assertFalse(result)
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_modify_job_inactive_printer(self, mock_post_uri):
+        printer = Octoprint('192.168.1.15')
+        self.assertEqual(mock_post_uri.call_count, 0)
+        result = printer.modify_current_job("toggle")
+        self.assertFalse(result)
+
+    def test_unknown_actino(self):
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        with self.assertRaises(Exception) as ctx:
+            printer.modify_current_job("random")
+
+        self.assertTrue('random is not allowed' in str(ctx.exception))

@@ -2,7 +2,6 @@ import os
 import re
 from time import time
 
-import requests
 from flask import jsonify, request, abort, send_file
 from flask_cors import cross_origin
 from werkzeug.utils import secure_filename
@@ -28,6 +27,14 @@ def gcodes_list():
     for gcode in gcodes.get_gcodes():
         gcode_list.append(make_gcode_response(gcode))
     return jsonify(gcode_list)
+
+@app.route('/gcodes/<id>', methods=['GET', 'OPTIONS'])
+@cross_origin()
+def gcode_detail(id):
+    gcode = gcodes.get_gcode(id)
+    if gcode is None:
+        return abort(404)
+    return jsonify(make_gcode_response(gcode))
 
 @app.route('/gcodes', methods=['POST', 'OPTIONS'])
 @cross_origin()
@@ -86,22 +93,16 @@ def gcode_create():
         }
     }), 201
 
-@app.route('/gcodes/<id>', methods=['GET', 'OPTIONS'])
-@cross_origin()
-def gcode_detail(id):
-    gcode = gcodes.get_gcode(id)
-    if gcode is None:
-        return abort(404)
-    return jsonify(make_gcode_response(gcode))
-
 @app.route('/gcodes/<id>/data', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def gcode_file(id):
     gcode = gcodes.get_gcode(id)
     if gcode is None:
         return abort(404)
-    print(gcode["filename"])
-    return send_file(gcode["absolute_path"], as_attachment=True, attachment_filename=gcode["filename"])
+    try:
+        return send_file(gcode["absolute_path"], as_attachment=True, attachment_filename=gcode["filename"])
+    except FileNotFoundError:
+        return abort(404)
 
 @app.route('/gcodes/<id>', methods=['DELETE', 'OPTIONS'])
 @cross_origin()

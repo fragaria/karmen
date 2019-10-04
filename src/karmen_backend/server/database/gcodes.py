@@ -11,6 +11,11 @@ def get_gcodes():
         return data
 
 def get_gcode(id):
+    try:
+        if isinstance(id, str):
+            id = int(id, base=10)
+    except ValueError:
+        return None
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute("SELECT id, path, filename, display, absolute_path, uploaded, size from gcodes where id = %s", (id,))
@@ -22,14 +27,21 @@ def add_gcode(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO gcodes (path, filename, display, absolute_path, size) values (%s, %s, %s, %s, %s)",
+            "INSERT INTO gcodes (path, filename, display, absolute_path, size) values (%s, %s, %s, %s, %s) RETURNING id",
             (
                 kwargs["path"], kwargs["filename"], kwargs["display"], kwargs["absolute_path"], kwargs["size"]
             )
         )
+        data = cursor.fetchone()
         cursor.close()
+        return data[0]
 
 def delete_gcode(id):
+    try:
+        if isinstance(id, str):
+            id = int(id, base=10)
+    except ValueError:
+        pass
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute("DELETE FROM gcodes WHERE id = %s", (id,))

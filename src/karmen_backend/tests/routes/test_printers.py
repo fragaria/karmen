@@ -2,6 +2,7 @@ import unittest
 import mock
 
 from server import app
+from server.database import printers
 
 class ListRoute(unittest.TestCase):
     def test_list(self):
@@ -48,6 +49,7 @@ class DetailRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get('/printers/172.16.236.11:8080?fields=webcam,status,job')
             self.assertEqual(response.status_code, 200)
+            print(response.json)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" in response.json)
             self.assertTrue("status" in response.json)
@@ -130,3 +132,111 @@ class DeleteRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.delete('/printers/172.16.236.213')
             self.assertEqual(response.status_code, 404)
+
+class PatchRoute(unittest.TestCase):
+    def setUp(self):
+        printers.delete_printer("1.2.3.4")
+        printers.add_printer(
+            name="name",
+            hostname="hostname",
+            ip="1.2.3.4",
+            client="octoprint",
+            client_props={
+                "version": "123"
+            },
+        )
+
+    def tearDown(self):
+        printers.delete_printer("1.2.3.4")
+
+    def test_patch(self):
+        with app.test_client() as c:
+            response = c.patch('/printers/1.2.3.4', json={
+                "name": "random-test-printer-name",
+            })
+            self.assertEqual(response.status_code, 204)
+
+    def test_patch_unknown(self):
+        with app.test_client() as c:
+            response = c.patch('/printers/random-unknown-printer', json={
+                "name": "random-test-printer-name",
+            })
+            self.assertEqual(response.status_code, 404)
+
+    def test_patch_no_data(self):
+        with app.test_client() as c:
+            response = c.patch('/printers/1.2.3.4')
+            self.assertEqual(response.status_code, 400)
+
+    def test_patch_empty_name(self):
+        with app.test_client() as c:
+            response = c.patch('/printers/1.2.3.4', json={"name": ""})
+            self.assertEqual(response.status_code, 400)
+
+class CurrentJobRoute(unittest.TestCase):
+    def setUp(self):
+        printers.delete_printer("1.2.3.4")
+        printers.add_printer(
+            name="name",
+            hostname="hostname",
+            ip="1.2.3.4",
+            client="octoprint",
+            client_props={
+                "version": "123",
+                "connected": True
+            },
+        )
+
+    def tearDown(self):
+        printers.delete_printer("1.2.3.4")
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_current_job(self, post_uri_mock):
+        post_uri_mock.return_value = True
+        class Response():
+            def __init__(self, status_code, contents, json=None):
+                self.status_code = status_code
+                self.contents = contents
+                self.json_data = json
+            def json(self):
+                return self.json_data or {}
+        def mock_call(ip, **kwargs):
+            return Response(204, '')
+        post_uri_mock.side_effect = mock_call 
+        with app.test_client() as c:
+            response = c.post('/printers/1.2.3.4/current-job', json={
+                "action": "cancel",
+            })
+            self.assertEqual(response.status_code, 204)
+
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_current_job_unable(self, post_uri_mock):
+        with app.test_client() as c:
+            response = c.post('/printers/1.2.3.4/current-job', json={
+                "action": "cancel",
+            })
+            self.assertEqual(response.status_code, 409)
+
+    def test_current_job_bad_action(self):
+        with app.test_client() as c:
+            response = c.post('/printers/1.2.3.4/current-job', json={
+                "action": "random",
+            })
+            self.assertEqual(response.status_code, 400)
+
+    def test_current_job_unknown_printer(self):
+        with app.test_client() as c:
+            response = c.post('/printers/random-unknown-printer/current-job', json={
+                "action": "cancel",
+            })
+            self.assertEqual(response.status_code, 404)
+
+    def test_current_job_no_data(self):
+        with app.test_client() as c:
+            response = c.post('/printers/1.2.3.4/current-job')
+            self.assertEqual(response.status_code, 400)
+
+    def test_current_job_empty_action(self):
+        with app.test_client() as c:
+            response = c.post('/printers/1.2.3.4/current-job', json={"action": ""})
+            self.assertEqual(response.status_code, 400)

@@ -14,9 +14,9 @@ class Octoprint(PrinterDriver):
         self.hostname = hostname
         self.ip = ip
         if not client_props:
-            self.client = client
+            self.client = client if isinstance(client, PrinterClientInfo) else PrinterClientInfo()
         else:
-            self.client = PrinterClientInfo(client_props["version"], client_props["connected"], client_props["read_only"])
+            self.client = PrinterClientInfo(client_props.get("version", None), client_props.get("connected", False), client_props.get("read_only", False))
 
     def client_name(self):
         return self.__client_name__
@@ -148,6 +148,21 @@ class Octoprint(PrinterDriver):
         else:
             return {}
 
+    def upload_and_start_job(self, gcode_path):
+        request = None
+        print(self.client.connected)
+        if self.client.connected:
+            request = post_uri(self.ip, endpoint='/api/files/local', files={
+                "file": open(gcode_path, 'rb')
+            }, data={
+                "path": "karmen",
+                "print": True,
+            })
+            if not request:
+                self.client.connected = False
+        # TODO improve return value
+        return bool(request is not None and request.status_code == 201)
+
     def modify_current_job(self, action):
         if action not in ('cancel', 'start', 'toggle'):
             raise Exception("Action %s is not allowed" % (action,))
@@ -164,26 +179,5 @@ class Octoprint(PrinterDriver):
             request = post_uri(self.ip, endpoint='/api/job', json=body)
             if not request:
                 self.client.connected = False
-        if request is not None and request.status_code == 204:
-            return True
-        else:
-            return False
-
-    def upload_and_start_job(self, gcode_path):
-        request = None
-        if self.client.connected:
-            request = post_uri(self.ip, endpoint='/api/files/local', files={
-                "file": open(gcode_path, 'rb')
-            }, data={
-                "path": "karmen",
-                "print": True,
-            })
-        if request is not None and request.status_code == 201:
-            try:
-                self.client.connected = True
-                # TODO improve
-                return True
-            except json.decoder.JSONDecodeError:
-                return False
-        else:
-            return False
+        # TODO improve return value
+        return bool(request is not None and request.status_code == 204)

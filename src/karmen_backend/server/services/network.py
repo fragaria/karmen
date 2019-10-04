@@ -53,6 +53,9 @@ def post_uri(ip, endpoint='/', protocol='http', timeout=2, files=None, data=None
     request = None
     if ip is None:
         return request
+    if (json and data) or (json and files):
+        raise Exception('Cannot pass json and data/files at the same time')
+
     if endpoint[0] != '/':
         endpoint = '/%s' % (endpoint, )
     uri = '%s://%s%s' % (protocol, ip, endpoint)

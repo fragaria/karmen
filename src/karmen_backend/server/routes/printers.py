@@ -118,6 +118,7 @@ def printer_patch(ip):
     if not name:
         return abort(400)
     printer_inst = drivers.get_printer_instance(printer)
+    print(printer_inst.client)
     printers.update_printer(
         name=name,
         hostname=printer_inst.hostname,
@@ -147,8 +148,7 @@ def printer_modify_job(ip):
     try:
         if printer_inst.modify_current_job(action):
             return '', 204
-        else:
-            return '', 409
+        return '', 409
     except Exception as e:
         return abort(400, e)
 
