@@ -9,7 +9,7 @@ run-docker-postgres:
 		-e POSTGRES_USER=print3d \
 		-e POSTGRES_DB=print3d \
 		-p 5433:5432 \
-		-v "$(shell pwd)/db/schema.sql":/docker-entrypoint-initdb.d/10-init.sql \
+		-v "$(shell pwd)/db/migrations/V0001__initial_schema.sql":/docker-entrypoint-initdb.d/10-init.sql \
 		-v "$(shell pwd)/db/fake-printers.sql":/docker-entrypoint-initdb.d/20-fake-printers.sql \
 		--privileged=true postgres &
 	while ! pg_isready --port 5433 --host localhost > /dev/null 2>&1; do echo 'Waiting for postgres...'; sleep 1; done

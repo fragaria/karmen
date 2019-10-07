@@ -20,6 +20,13 @@ services:
     command: bash -c 'chown -R 1000:1000 /var/lib/postgresql/data && chmod -R g+sw /var/lib/postgresql/data'
     volumes:
       - ./db/data:/var/lib/postgresql/data
+  dbmigrations:
+    image: fragaria/karmen-backend
+    network_mode: host
+    command: scripts/migrate.sh
+    depends_on:
+      - dbfiles
+      - postgres
   backend_flask:
     image: fragaria/karmen-backend
     restart: unless-stopped
@@ -39,7 +46,7 @@ services:
     depends_on:
       - files
       - redis
-      - postgres
+      - dbmigrations
   backend_celery_worker:
     image: fragaria/karmen-backend
     restart: unless-stopped
@@ -53,7 +60,7 @@ services:
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
     depends_on:
-      - postgres
+      - dbmigrations
       - redis
   backend_celery_beat:
     image: fragaria/karmen-backend
@@ -67,7 +74,7 @@ services:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
     privileged: true # for mdns resolution
     depends_on:
-      - postgres
+      - dbmigrations
       - redis
   redis:
     image: redis:5
@@ -79,7 +86,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./db/data:/var/lib/postgresql/data
-      - ./db/schema.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d

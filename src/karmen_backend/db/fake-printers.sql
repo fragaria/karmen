@@ -24,10 +24,10 @@ SET row_security = off;
 -- Data for Name: printers; Type: TABLE DATA; Schema: public; Owner: print3d
 --
 
-COPY public.printers (client_props, name, ip, hostname, client) FROM stdin;
-{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}	fake 1	172.16.236.11:8080	\N	octoprint
-{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}	fake 2	172.16.236.12:8080	\N	octoprint
-\.
+insert into public.printers (client_props, name, ip, hostname, client)
+  values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}', 'fake 1', '172.16.236.11:8080', NULL, 'octoprint');
+insert into public.printers (client_props, name, ip, hostname, client)
+  values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}',	'fake 2',	'172.16.236.12:8080', NULL,	'octoprint');
 
 
 -- Completed on 2019-09-13 11:59:44 CEST

@@ -19,6 +19,7 @@ redis = "*"
 watchdog = "*"
 coverage = "*"
 coveralls = "*"
+yandex-pgmigrate = "*"
 
 [requires]
 python_version = "3.6"

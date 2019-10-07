@@ -3,8 +3,7 @@ version: "3.4"
 services:
   frontend:
     image: fragaria/karmen-frontend
-    build:
-      context: ./src/karmen_frontend
+    build: ./src/karmen_frontend
     environment:
       ENV: develop
       BACKEND_BASE: http://localhost:5000
@@ -22,10 +21,23 @@ services:
       - ./tmp/karmen-files:/tmp/karmen-files
   dbfiles:
     image: fragaria/karmen-backend
+    build: ./src/karmen_backend
     user: root
     command: bash -c 'chown -R 1000:1000 /var/lib/postgresql/data && chmod -R g+sw /var/lib/postgresql/data'
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
+  dbmigrations:
+    image: fragaria/karmen-backend
+    user: 'www-data'
+    build: ./src/karmen_backend
+    command: scripts/migrate.sh
+    depends_on:
+      - dbfiles
+      - postgres
+    networks:
+      - default
+    links:
+      - postgres
   backend_flask:
     image: fragaria/karmen-backend
     user: www-data
@@ -46,6 +58,7 @@ services:
       - backend
     depends_on:
       - files
+      - dbmigrations
     links:
       - postgres
       - redis
@@ -108,8 +121,6 @@ services:
     restart: always
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
-      - ./src/karmen_backend/db/schema.sql:/docker-entrypoint-initdb.d/10-init.sql
-      - ./src/karmen_backend/db/fake-printers.sql:/docker-entrypoint-initdb.d/20-fake-printers.sql
     environment:
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
