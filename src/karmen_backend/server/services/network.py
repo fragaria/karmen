@@ -34,7 +34,8 @@ def get_avahi_hostname(ip):
             continue
         return match[0][1]
 
-def get_uri(ip, endpoint='/', protocol='http', timeout=2):
+def get_uri(ip, endpoint='/', protocol='http', timeout=None):
+    timeout = timeout if timeout else app.config.get('NETWORK_TIMEOUT', 10)
     request = None
     if ip is None:
         return request
@@ -48,8 +49,8 @@ def get_uri(ip, endpoint='/', protocol='http', timeout=2):
     return request
 
 # TODO refactor and unify with get_uri, or maybe drop
-def post_uri(ip, endpoint='/', protocol='http', timeout=2, files=None, data=None, json=None):
-    # TODO no data and json at the same time, prevent conflicts
+def post_uri(ip, endpoint='/', protocol='http', timeout=None, files=None, data=None, json=None):
+    timeout = timeout if timeout else app.config.get('NETWORK_TIMEOUT', 10)
     request = None
     if ip is None:
         return request

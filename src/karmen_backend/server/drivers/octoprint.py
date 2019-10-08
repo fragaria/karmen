@@ -109,21 +109,28 @@ class Octoprint(PrinterDriver):
                 data = request.json()
                 self.client.connected = True
                 if "webcam" not in data or not data["webcam"]["webcamEnabled"]:
-                    return {}
+                    return {
+                        "message": "Stream disabled in octoprint",
+                    }
                 stream_url = data["webcam"]["streamUrl"]
                 if re.match(r'^https?', stream_url, re.IGNORECASE) is None:
                     # TODO reflect eventual HTTPS
                     stream_url = 'http://%s%s' % (self.ip, stream_url)
                 return {
+                    "message": "OK",
                     "stream": stream_url,
                     "flipHorizontal": data["webcam"]["flipH"],
                     "flipVertical": data["webcam"]["flipV"],
                     "rotate90": data["webcam"]["rotate90"],
                 }
             except json.decoder.JSONDecodeError:
-                return {}
+                return {
+                    "message": "Cannot decode JSON",
+                }
         else:
-            return {}
+            return {
+                "message": "Stream not accessible",
+            }
 
     def job(self):
         request = None

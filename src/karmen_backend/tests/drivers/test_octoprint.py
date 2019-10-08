@@ -243,6 +243,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {
+            "message": "OK",
             "stream": "http://192.168.1.15/webcam/?action=stream",
             "flipHorizontal": True,
             "flipVertical": True,
@@ -264,6 +265,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.webcam()
         self.assertEqual(result, {
+            "message": "OK",
             "stream": "http://1.2.3.4/webcam/?action=stream",
             "flipHorizontal": True,
             "flipVertical": True,
@@ -297,7 +299,9 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.webcam()
-        self.assertEqual(result, {})
+        self.assertEqual(result, {
+            "message": "Stream disabled in octoprint",
+        })
 
     @mock.patch('server.drivers.octoprint.get_uri')
     def test_webcam_malformed_json(self, mock_get_uri):
@@ -305,20 +309,26 @@ class OctoprintWebcamTest(unittest.TestCase):
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError('msg', 'aa', 123)
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.webcam()
-        self.assertEqual(result, {})
+        self.assertEqual(result, {
+            "message": "Cannot decode JSON",
+        })
 
     @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_webcam_no_response(self, mock_get_uri):
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.webcam()
-        self.assertEqual(result, {})
+        self.assertEqual(result, {
+            "message": "Stream not accessible",
+        })
 
     @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     def test_webcam_inactive_printer(self, mock_get_uri):
         printer = Octoprint('192.168.1.15')
         self.assertEqual(mock_get_uri.call_count, 0)
-        result = printer.job()
-        self.assertEqual(result, {})
+        result = printer.webcam()
+        self.assertEqual(result, {
+            "message": "Stream not accessible",
+        })
 
 class OctoprintJobTest(unittest.TestCase):
     @mock.patch('server.drivers.octoprint.get_uri')
