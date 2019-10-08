@@ -9,7 +9,6 @@ redis = redis.Redis(host=app.config['WEBCAM_PROXY_CACHE_HOST'], port=app.config[
 def check_printers():
     app.logger.debug('Checking known printers...')
     for raw_printer in printers.get_printers():
-        # TODO not only octoprint
         printer = drivers.get_printer_instance(raw_printer)
         printer.is_alive()
 

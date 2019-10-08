@@ -28,7 +28,7 @@ def sniff_printer(hostname, ip):
         disabled=False
     )
     save_printer_data(
-        name=hostname or ip,
+        name=printer.name or hostname or ip,
         hostname=hostname,
         ip=ip,
         client=printer.client_name(),
