@@ -25,9 +25,11 @@ SET row_security = off;
 --
 
 insert into public.printers (client_props, name, ip, hostname, client)
-  values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}', 'fake 1', '172.16.236.11:8080', NULL, 'octoprint');
+  values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}', 'fake 1', '172.16.236.11:8080', NULL, 'octoprint')
+  on conflict do nothing;
 insert into public.printers (client_props, name, ip, hostname, client)
-  values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}',	'fake 2',	'172.16.236.12:8080', NULL,	'octoprint');
+  values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}',	'fake 2',	'172.16.236.12:8080', NULL,	'octoprint')
+  on conflict do nothing;
 
 
 -- Completed on 2019-09-13 11:59:44 CEST
