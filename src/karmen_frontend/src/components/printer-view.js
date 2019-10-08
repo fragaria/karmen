@@ -238,7 +238,6 @@ export class PrinterView extends React.Component {
         <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
-          connected={printer.client.connected} currentState={printer.status.state}
           {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && (
             <div className="printer-controls">
               {printer.status.state === 'Paused'
