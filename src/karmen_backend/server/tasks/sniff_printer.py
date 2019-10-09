@@ -12,7 +12,7 @@ def save_printer_data(**kwargs):
     if has_record is None:
         printers.add_printer(**{"name": None, "client_props": {"connected": False, "version": {}, "read_only": True}, **kwargs})
     else:
-        printers.update_printer(**{**has_record, **kwargs})
+        printers.update_printer(**{**has_record, **kwargs, **{"name": has_record["name"]}})
 
 @celery.task(name='sniff_printer')
 def sniff_printer(hostname, ip):
@@ -28,7 +28,7 @@ def sniff_printer(hostname, ip):
         disabled=False
     )
     save_printer_data(
-        name=printer.name or hostname or ip,
+        name=hostname or ip,
         hostname=hostname,
         ip=ip,
         client=printer.client_name(),

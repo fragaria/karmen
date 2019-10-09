@@ -31,11 +31,14 @@ class SavePrinterDataTest(unittest.TestCase):
     @mock.patch('server.database.printers.get_printer', return_value={"name": "1234", "ip": "1.2.3.4."})
     def test_update_any_known_printer(self, mock_get_printer, \
         mock_add_printer, mock_update_printer):
-        save_printer_data(ip='1.2.3.4', client_props={"connected": True})
-        save_printer_data(ip='1.2.3.4', client_props={"connected": False})
+        save_printer_data(ip='1.2.3.4', client_props={"connected": True}, name="1.2.3.4")
+        save_printer_data(ip='1.2.3.4', client_props={"connected": False}, name="1.2.3.4")
         self.assertEqual(mock_get_printer.call_count, 2)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 2)
+        args, update_kwargs = mock_update_printer.call_args
+        # Should not overwrite custom editable name
+        self.assertEqual(update_kwargs["name"], "1234")
 
 class SniffPrinterTest(unittest.TestCase):
 
