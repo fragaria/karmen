@@ -10,46 +10,109 @@ from server.database import gcodes, printjobs
 class ListRoute(unittest.TestCase):
     def setUp(self):
         self.gcode_ids = []
-        self.gcode_ids.append(gcodes.add_gcode(
-            path="a/b/c",
-            filename="file1",
-            display="file-display",
-            absolute_path="/ab/a/b/c",
-            size=123
-        ))
-        self.gcode_ids.append(gcodes.add_gcode(
-            path="a/b/dc",
-            filename="file2",
-            display="file-display",
-            absolute_path="/ab/a/b/c",
-            size=123
-        ))
+        for i in range(0, 5):
+            self.gcode_ids.append(gcodes.add_gcode(
+                path="a/b/c",
+                filename="file%s" % i,
+                display="file-display",
+                absolute_path="/ab/a/b/c",
+                size=123
+            ))
 
     def test_list(self):
         with app.test_client() as c:
             response = c.get('/gcodes')
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(len(response.json) >= 2)
-            self.assertTrue("id" in response.json[0])
-            self.assertTrue("path" in response.json[0])
-            self.assertTrue("display" in response.json[0])
-            self.assertTrue("absolute_path" in response.json[0])
-            self.assertTrue("uploaded" in response.json[0])
-            self.assertTrue("size" in response.json[0])
-            self.assertTrue("data" in response.json[0])
+            self.assertTrue("items" in response.json)
+            if len(response.json["items"]) < 200:
+                self.assertTrue("next" not in response.json)
+            self.assertTrue(len(response.json["items"]) >= 2)
+            self.assertTrue("id" in response.json["items"][0])
+            self.assertTrue("path" in response.json["items"][0])
+            self.assertTrue("display" in response.json["items"][0])
+            self.assertTrue("absolute_path" in response.json["items"][0])
+            self.assertTrue("uploaded" in response.json["items"][0])
+            self.assertTrue("size" in response.json["items"][0])
+            self.assertTrue("data" in response.json["items"][0])
 
     def test_order_by(self):
         with app.test_client() as c:
-            response = c.get('/gcodes?order_by=filename,-id')
+            response = c.get('/gcodes?order_by=filename')
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(len(response.json) >= 2)
+            self.assertTrue("items" in response.json)
+            self.assertTrue(len(response.json["items"]) >= 2)
             prev = None
-            for code in response.json:
+            for code in response.json["items"]:
                 if prev:
                     self.assertTrue(code["filename"] >= prev["filename"])
+                    # we are ordering implicitly by id ASC as well
                     if code["filename"] == prev["filename"]:
-                        self.assertTrue(code["id"] <= prev["id"])
+                        self.assertTrue(code["id"] >= prev["id"])
                 prev = code
+
+    def test_limit(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=3&order_by=filename&fields=id,filename')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" in response.json)
+            self.assertTrue(len(response.json["items"]) == 3)
+            self.assertTrue("/gcodes?limit=3&order_by=filename&fields=id,filename&start_with=" in response.json["next"])
+
+    def test_no_multi_order_by(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=3&order_by=id,filename')
+            self.assertEqual(response.status_code, 400)
+
+    def test_start_with(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=3&start_with=2')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" in response.json)
+            self.assertTrue(len(response.json["items"]) == 3)
+            self.assertTrue(response.json["items"][0]["id"] >= 2)
+            self.assertTrue(response.json["items"][1]["id"] > response.json["items"][0]["id"])
+            self.assertTrue(response.json["items"][2]["id"] > response.json["items"][1]["id"])
+            self.assertEqual(response.json["next"], "/gcodes?limit=3&start_with=%s" % str(int(response.json["items"][2]["id"]) + 1))
+
+    def test_start_with_order_by(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=3&start_with=1&order_by=-id')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" not in response.json)
+            self.assertTrue(len(response.json["items"]) == 1)
+            self.assertTrue(response.json["items"][0]["id"] == 1)
+
+            response = c.get('/gcodes?limit=3&start_with=1&order_by=id')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" in response.json)
+            self.assertTrue(len(response.json["items"]) == 3)
+            self.assertTrue(response.json["items"][0]["id"] == 1)
+            self.assertTrue(response.json["items"][1]["id"] > response.json["items"][0]["id"])
+            self.assertTrue(response.json["items"][2]["id"] > response.json["items"][1]["id"])
+
+    def test_survive_start_with_str(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=3&start_with=asdfasdf')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
+    def test_survive_start_with_negative(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=3&start_with=-1')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
+
+    def test_survive_limit_str(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?limit=asdfasdf&start_with=5')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
 
 class DetailRoute(unittest.TestCase):
     def setUp(self):

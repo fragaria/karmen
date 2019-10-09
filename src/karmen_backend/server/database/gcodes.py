@@ -1,16 +1,46 @@
 import psycopg2
 from psycopg2 import sql
 import psycopg2.extras
-from server.database import get_connection, compose_order_by
+from server.database import get_connection
 
-def get_gcodes(order_by=None):
+from server import app
+
+# This intentionally selects limit+1 results in order to properly determine next start_with for pagination
+# Take that into account when processing results
+def get_gcodes(order_by=None, limit=None, start_with=None):
     columns = ["id", "path", "filename", "display", "absolute_path", "uploaded", "size"]
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        where_clause = sql.SQL('')
+        limit_clause = sql.SQL('')
+        order_by_clause = sql.SQL('ORDER BY {}').format(sql.Identifier("id"))
+        order_by_column = "id"
+        order_by_direction = "ASC"
+
+        if order_by:
+            direction = order_by[0:1] if order_by[0:1] in ['+', '-'] else '+'
+            order_by_direction = 'DESC' if direction == '-' else 'ASC'
+            order_by_column = order_by[1:].strip() if order_by[0] == direction else order_by.strip()
+            order_by_clause = sql.SQL('ORDER BY {}, {}').format(sql.SQL(' ').join([sql.Identifier(order_by_column), sql.SQL(order_by_direction)]), sql.Identifier("id"))
+
+        if start_with:
+            if order_by:
+                statement = sql.SQL("SELECT {} FROM gcodes where id = %s").format(sql.SQL(', ').join([sql.Identifier(c) for c in columns]))
+                cursor.execute(statement.as_string(connection) % start_with)
+                data = cursor.fetchone()
+                where_clause = sql.SQL('WHERE {} {} {}').format(sql.Identifier(order_by_column), sql.SQL('<=' if order_by_direction == 'DESC' else '>='), sql.Literal(data[order_by_column]))
+            else:
+                where_clause = sql.SQL('WHERE id >= {}').format(sql.Literal(start_with))
+        if limit:
+            limit_clause = sql.SQL(' ').join([sql.SQL('limit'), sql.Literal(int(limit + 1))])
         statement = sql.SQL(' ').join([
             sql.SQL("SELECT {} FROM gcodes").format(sql.SQL(', ').join([sql.Identifier(c) for c in columns])),
-            compose_order_by(columns, order_by)
+            where_clause,
+            order_by_clause,
+            limit_clause
         ])
+        app.logger.info(statement.as_string(connection))
+
         cursor.execute(statement)
         data = cursor.fetchall()
         cursor.close()

@@ -28,15 +28,3 @@ def get_connection():
         raise
     else:
         CONNECTION.commit()
-
-def compose_order_by(columns, order_by):
-    if not order_by:
-        return sql.SQL('')
-
-    order_bys = []
-    for order in order_by:
-        direction = order[0:1] if order[0:1] in ['+', '-'] else '+'
-        column = order[1:] if order[0] == direction else order
-        if column in columns:
-            order_bys.append(sql.SQL(' ').join([sql.Identifier(column), sql.SQL('DESC' if direction == '-' else 'ASC')]))
-    return sql.SQL("order by {}").format(sql.SQL(', ').join(order_bys))

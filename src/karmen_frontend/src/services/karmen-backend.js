@@ -5,9 +5,11 @@ export const getPrinters = (fields = []) => {
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printers: ${response.status}`);
-        return;
+        return {};
       }
-      return response.json();
+      return response.json()
+    }).then((data) => {
+      return data.items;
     }).catch((e) => {
       console.error(`Cannot get list of printers: ${e}`);
       return [];
@@ -156,7 +158,9 @@ export const getGcodes = () => {
         console.error(`Cannot get list of gcodes: ${response.status}`);
         return;
       }
-      return response.json();
+      return response.json()
+    }).then((data) => {
+      return data.items;
     }).catch((e) => {
       console.error(`Cannot get list of gcodes: ${e}`);
       return [];
