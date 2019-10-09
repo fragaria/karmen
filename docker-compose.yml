@@ -28,14 +28,13 @@ services:
       - ./tmp/db-data:/var/lib/postgresql/data
   dbmigrations:
     image: fragaria/karmen-backend
-    user: 'www-data'
     build: ./src/karmen_backend
     command: scripts/migrate.sh
     environment:
+      ENV: develop
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
     depends_on:
-      - dbfiles
       - postgres
     networks:
       - default

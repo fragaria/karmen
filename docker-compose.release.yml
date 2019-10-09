@@ -25,10 +25,10 @@ services:
     network_mode: host
     command: scripts/migrate.sh
     environment:
+      ENV: production
       POSTGRES_HOST: 127.0.0.1
       POSTGRES_PORT: 5433
     depends_on:
-      - dbfiles
       - postgres
   backend_flask:
     image: fragaria/karmen-backend

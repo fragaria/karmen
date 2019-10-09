@@ -1,4 +1,0 @@
-callbacks:
-    afterAll:
-        - fake-printers.sql
-conn: "host='postgres' port=5432 dbname='print3d' user='print3d' password='print3d'"

@@ -11,7 +11,6 @@ cp ../README.md "${DEST}"
 cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
 cp ../src/karmen_backend/config.release.cfg "${DEST}/config.local.cfg.sample"
 cp -r ../src/karmen_backend/db/* "${DEST}/db"
-mv "${DEST}/db/migrations.release.yml" "${DEST}/db/migrations.yml"
 rm "${DEST}/db/fake-printers.sql"
 echo "${TRAVIS_BRANCH-latest}" > "${DEST}/VERSION"
 
