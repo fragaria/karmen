@@ -151,19 +151,28 @@ export const heartbeat = () => {
     })
 }
 
-export const getGcodes = () => {
-  return fetch(`${BASE_URL}/gcodes`)
+export const getGcodes = (startWith = null, orderBy = null, limit = 15) => {
+  let uri = `${BASE_URL}/gcodes?limit=${limit}`;
+  if (startWith) {
+    uri += `&start_with=${startWith}`;
+  }
+  if (orderBy) {
+    uri += `&order_by=${orderBy}`;
+  }
+  return fetch(uri)
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of gcodes: ${response.status}`);
-        return;
+        return {
+          "items": []
+        };
       }
-      return response.json()
-    }).then((data) => {
-      return data.items;
+      return response.json();
     }).catch((e) => {
       console.error(`Cannot get list of gcodes: ${e}`);
-      return [];
+      return {
+        "items": []
+      };
     });
 }
 

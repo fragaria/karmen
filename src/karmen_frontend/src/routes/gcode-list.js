@@ -5,6 +5,8 @@ import dayjs from 'dayjs';
 import Loader from '../components/loader';
 import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/karmen-backend';
 
+const BASE_URL = window.env.BACKEND_BASE;
+
 class GcodeRow extends React.Component {
   state = {
     showDeleteRow: false,
@@ -147,28 +149,48 @@ class GcodeRow extends React.Component {
 class GcodeList extends React.Component {
   state = {
     gcodes: null,
+    currentPage: 0,
+    pages: [{
+      nextStartWith: null,
+    }],
+    orderBy: null,
     message: null
   }
 
   constructor(props) {
     super(props);
-    this.loadCodes = this.loadCodes.bind(this);
+    this.loadPage = this.loadPage.bind(this);
   }
 
-  loadCodes() {
-    getGcodes().then((gcodes) => {
+  loadPage(page) {
+    let { pages } = this.state;
+    getGcodes(pages[page].startWith).then((gcodes) => {
+      let nextStartWith;
+      if (gcodes.next) {
+        const uri = new URL(gcodes.next.indexOf('http') !== 0 ? `${BASE_URL}${gcodes.next}` : gcodes.next)
+        nextStartWith = uri.searchParams.get('start_with');
+      }
+      if (nextStartWith) {
+        pages.push({
+          startWith: nextStartWith,
+        });
+      } else {
+        pages = [].concat(pages.slice(0, page + 1));
+      }
       this.setState({
-        gcodes,
+        gcodes: gcodes.items,
+        currentPage: page,
+        pages: pages,
       });
     });
   }
 
   componentDidMount() {
-    this.loadCodes();
+    this.loadPage(0);
   }
 
   render () {
-    const { gcodes } = this.state;
+    const { gcodes, currentPage, pages } = this.state;
     if (gcodes === null) {
       return <div><Loader /></div>;
     }
@@ -179,7 +201,7 @@ class GcodeList extends React.Component {
         onRowDelete={() => {
           deleteGcode(g.id)
             .then(() => {
-              this.loadCodes();
+              this.loadPage(currentPage);
             });
         }} />
     });
@@ -198,19 +220,29 @@ class GcodeList extends React.Component {
           {(!gcodeRows || gcodeRows.length === 0)
           ? <p className="message-error">No G-Codes found!</p>
           : (
-            <table>
-              <thead>
-                <tr>
-                  <th>File</th>
-                  <th>Size</th>
-                  <th>Uploaded at</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gcodeRows}
-              </tbody>
-            </table>
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Size</th>
+                    <th>Uploaded at</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gcodeRows}
+                </tbody>
+              </table>
+              <div className="table-pagination">
+                {currentPage > 0
+                  ? <button className="plain" onClick={() => this.loadPage(Math.max(0, currentPage - 1))}>Previous</button>
+                  : <span></span>}
+                {pages[currentPage + 1]
+                  ? <button className="plain" onClick={() => this.loadPage(currentPage + 1)}>Next</button>
+                  : <span></span>}
+              </div>
+            </>
           )}
           </div>
       </div>
