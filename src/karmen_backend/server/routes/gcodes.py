@@ -23,7 +23,9 @@ def make_gcode_response(gcode):
 @cross_origin()
 def gcodes_list():
     gcode_list = []
-    for gcode in gcodes.get_gcodes():
+    for gcode in gcodes.get_gcodes(
+        order_by=[o for o in request.args.get('order_by', '').split(',') if o]
+    ):
         gcode_list.append(make_gcode_response(gcode))
     return jsonify(gcode_list)
 

@@ -1,11 +1,17 @@
 import psycopg2
+from psycopg2 import sql
 import psycopg2.extras
-from server.database import get_connection
+from server.database import get_connection, compose_order_by
 
-def get_gcodes():
+def get_gcodes(order_by=None):
+    columns = ["id", "path", "filename", "display", "absolute_path", "uploaded", "size"]
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT id, path, filename, display, absolute_path, uploaded, size FROM gcodes")
+        statement = sql.SQL(' ').join([
+            sql.SQL("SELECT {} FROM gcodes").format(sql.SQL(', ').join([sql.Identifier(c) for c in columns])),
+            compose_order_by(columns, order_by)
+        ])
+        cursor.execute(statement)
         data = cursor.fetchall()
         cursor.close()
         return data

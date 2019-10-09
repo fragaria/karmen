@@ -38,6 +38,19 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("size" in response.json[0])
             self.assertTrue("data" in response.json[0])
 
+    def test_order_by(self):
+        with app.test_client() as c:
+            response = c.get('/gcodes?order_by=filename,-id')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(len(response.json) >= 2)
+            prev = None
+            for code in response.json:
+                if prev:
+                    self.assertTrue(code["filename"] >= prev["filename"])
+                    if code["filename"] == prev["filename"]:
+                        self.assertTrue(code["id"] <= prev["id"])
+                prev = code
+
 class DetailRoute(unittest.TestCase):
     def setUp(self):
         self.gcode_id = gcodes.add_gcode(

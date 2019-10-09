@@ -37,7 +37,7 @@ def make_printer_response(printer, fields):
 @cross_origin()
 def printers_list():
     device_list = []
-    fields = request.args.get('fields').split(',') if request.args.get('fields') else []
+    fields = [f for f in request.args.get('fields', '').split(',') if f]
     for printer in printers.get_printers():
         # TODO this should somehow go in parallel
         device_list.append(make_printer_response(printer, fields))
