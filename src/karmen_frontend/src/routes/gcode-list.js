@@ -119,7 +119,7 @@ class GcodeRow extends React.Component {
 
     return (
       <tr>
-        <td><a href={`${window.env.BACKEND_BASE}${data}`}>{path}/{display}</a></td>
+        <td><a href={`${window.env.BACKEND_BASE}${data}`}>{path}{path ? '/' : ''}{display}</a></td>
         <td>{this.formatBytes(size)}</td>
         <td>{dayjs(uploaded).format('HH:mm:ss YYYY-MM-DD')}</td>
         <td className="action-cell">
@@ -151,9 +151,11 @@ class GcodeList extends React.Component {
     gcodes: null,
     currentPage: 0,
     pages: [{
-      nextStartWith: null,
+      startWith: null,
     }],
-    orderBy: null,
+    orderBy: '-uploaded',
+    filter: '',
+    willBeFilter: '',
     message: null
   }
 
@@ -162,9 +164,21 @@ class GcodeList extends React.Component {
     this.loadPage = this.loadPage.bind(this);
   }
 
-  loadPage(page) {
-    let { pages } = this.state;
-    getGcodes(pages[page].startWith).then((gcodes) => {
+  loadPage(page, newOrderBy, newFilter) {
+    let { pages, orderBy, filter } = this.state;
+    // reset pages if orderBy has changed
+    if (newOrderBy !== orderBy || newFilter !== filter) {
+      pages = [{
+        startWith: null,
+      }];
+      page = 0;
+    }
+    getGcodes(pages[page].startWith, newOrderBy, newFilter).then((gcodes) => {
+      // Handles deleting of the last row on a non-zero page
+      if (!gcodes.next && gcodes.items.length === 0 && page - 1 >= 0) {
+        this.loadPage(page - 1, newOrderBy);
+        return;
+      }
       let nextStartWith;
       if (gcodes.next) {
         const uri = new URL(gcodes.next.indexOf('http') !== 0 ? `${BASE_URL}${gcodes.next}` : gcodes.next)
@@ -181,27 +195,30 @@ class GcodeList extends React.Component {
         gcodes: gcodes.items,
         currentPage: page,
         pages: pages,
+        orderBy: newOrderBy,
+        filter: newFilter,
       });
     });
   }
 
   componentDidMount() {
-    this.loadPage(0);
+    const { orderBy } = this.state;
+    this.loadPage(0, orderBy);
   }
 
   render () {
-    const { gcodes, currentPage, pages } = this.state;
+    const { gcodes, currentPage, pages, orderBy, filter, willBeFilter } = this.state;
     if (gcodes === null) {
       return <div><Loader /></div>;
     }
-    const gcodeRows = gcodes && gcodes.sort((p, r) => p.name > r.name ? 1 : -1).map((g) => {
+    const gcodeRows = gcodes && gcodes.map((g) => {
       return <GcodeRow
         key={g.id}
         {...g}
         onRowDelete={() => {
           deleteGcode(g.id)
             .then(() => {
-              this.loadPage(currentPage);
+              this.loadPage(currentPage, orderBy);
             });
         }} />
     });
@@ -221,10 +238,30 @@ class GcodeList extends React.Component {
           ? <p className="message-error">No G-Codes found!</p>
           : (
             <>
+              <form className="table-filter">
+                <label htmlFor="filter">Filter by filename</label>
+                <input type="text" name="filter" id="filter" value={willBeFilter} onChange={(e) => {
+                  this.setState({
+                    willBeFilter: e.target.value,
+                  });
+                }} />
+                <button type="submit" onClick={(e) => {
+                  e.preventDefault();
+                  const { willBeFilter } = this.state;
+                  this.loadPage(currentPage, orderBy, willBeFilter);
+                }}>Filter</button>
+                <button type="reset" onClick={(e) => {
+                  e.preventDefault();
+                  this.setState({
+                    willBeFilter: ''
+                  })
+                  this.loadPage(currentPage, orderBy, null);
+                }}>Reset</button>
+              </form>
               <table>
                 <thead>
                   <tr>
-                    <th>File</th>
+                    <th>Filename</th>
                     <th>Size</th>
                     <th>Uploaded at</th>
                     <th>Actions</th>
@@ -236,10 +273,10 @@ class GcodeList extends React.Component {
               </table>
               <div className="table-pagination">
                 {currentPage > 0
-                  ? <button className="plain" onClick={() => this.loadPage(Math.max(0, currentPage - 1))}>Previous</button>
+                  ? <button className="plain" onClick={() => this.loadPage(Math.max(0, currentPage - 1), orderBy, filter)}>Previous</button>
                   : <span></span>}
                 {pages[currentPage + 1]
-                  ? <button className="plain" onClick={() => this.loadPage(currentPage + 1)}>Next</button>
+                  ? <button className="plain" onClick={() => this.loadPage(currentPage + 1, orderBy, filter)}>Next</button>
                   : <span></span>}
               </div>
             </>

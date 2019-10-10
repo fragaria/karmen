@@ -587,15 +587,48 @@ nav {
   justify-content: space-between;
   align-items: stretch;
   align-content: stretch;
+  margin-top: $base-unit * 3;
 
   button {
     display: inline-block;
     padding: $base-unit;
     background-color: map-get($palette, red);
     color: map-get($palette, white);
+    border: none;
 
     &[disabled] {
       color: map-get($palette, gray-medium);
+    }
+  }
+}
+
+.table-filter {
+  display: block;
+  width: 100%;
+  input {
+    margin-left: $base-unit;
+  }
+  button {
+    position: relative;
+    top: -1px;
+    margin-left: $base-unit;
+  }
+
+  button[type=reset] {
+    height: $form-elements-height;
+    border: none;
+    outline: none;
+    text-decoration: underline;
+    background: #fff;
+    color: map-get($palette, red);
+
+    &:hover, &:active {
+      text-decoration: none;
+    }
+
+    &[disabled] {
+      background: map-get($palette, gray-medium);
+      color: map-get($palette, red);
     }
   }
 }
