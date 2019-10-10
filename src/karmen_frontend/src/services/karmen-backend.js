@@ -5,9 +5,11 @@ export const getPrinters = (fields = []) => {
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printers: ${response.status}`);
-        return;
+        return {};
       }
-      return response.json();
+      return response.json()
+    }).then((data) => {
+      return data.items;
     }).catch((e) => {
       console.error(`Cannot get list of printers: ${e}`);
       return [];
@@ -149,17 +151,31 @@ export const heartbeat = () => {
     })
 }
 
-export const getGcodes = () => {
-  return fetch(`${BASE_URL}/gcodes`)
+export const getGcodes = (startWith = null, orderBy = null, filenameFilter = null, limit = 15) => {
+  let uri = `${BASE_URL}/gcodes?limit=${limit}`;
+  if (startWith) {
+    uri += `&start_with=${startWith}`;
+  }
+  if (orderBy) {
+    uri += `&order_by=${orderBy}`;
+  }
+  if (filenameFilter) {
+    uri += `&filter=filename:${filenameFilter}`;
+  }
+  return fetch(uri)
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of gcodes: ${response.status}`);
-        return;
+        return {
+          "items": []
+        };
       }
       return response.json();
     }).catch((e) => {
       console.error(`Cannot get list of gcodes: ${e}`);
-      return [];
+      return {
+        "items": []
+      };
     });
 }
 

@@ -126,6 +126,14 @@ table {
     border-bottom: 1px solid map-get($palette, gray-medium);
     font-weight: 800;
     text-align: left;
+
+    .sorting-button {
+      font-weight: 800;
+
+      &.active {
+        font-style: italic;
+      }
+    }
   }
 
   td, th {
@@ -186,6 +194,11 @@ table {
 
 .message-error {
   color: map-get($palette, dark-red);
+}
+
+.message-block {
+  width: 100%;
+  text-align: center;
 }
 
 .icon {
@@ -576,6 +589,61 @@ nav {
 
     &[disabled] {
       color: map-get($palette, gray-medium);
+    }
+  }
+}
+
+.table-pagination {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: stretch;
+  align-content: stretch;
+  margin-top: $base-unit * 3;
+
+  button {
+    display: inline-block;
+    padding: $base-unit;
+    background-color: map-get($palette, red);
+    color: map-get($palette, white);
+    border: none;
+
+    &[disabled] {
+      color: map-get($palette, gray-medium);
+    }
+  }
+}
+
+.table-filter {
+  display: block;
+  width: 100%;
+  margin-bottom: $spacing-default;
+
+  input {
+    margin-left: $base-unit;
+  }
+  button {
+    position: relative;
+    top: -1px;
+    margin-left: $base-unit;
+  }
+
+  button[type=reset] {
+    height: $form-elements-height;
+    border: none;
+    outline: none;
+    text-decoration: underline;
+    background: #fff;
+    color: map-get($palette, red);
+
+    &:hover, &:active {
+      text-decoration: none;
+    }
+
+    &[disabled] {
+      background: map-get($palette, gray-medium);
+      color: map-get($palette, red);
     }
   }
 }

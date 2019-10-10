@@ -37,11 +37,11 @@ def make_printer_response(printer, fields):
 @cross_origin()
 def printers_list():
     device_list = []
-    fields = request.args.get('fields').split(',') if request.args.get('fields') else []
+    fields = [f for f in request.args.get('fields', '').split(',') if f]
     for printer in printers.get_printers():
         # TODO this should somehow go in parallel
         device_list.append(make_printer_response(printer, fields))
-    return jsonify(device_list)
+    return jsonify({"items": device_list})
 
 @app.route('/printers', methods=['POST', 'OPTIONS'])
 @cross_origin()
@@ -118,7 +118,6 @@ def printer_patch(ip):
     if not name:
         return abort(400)
     printer_inst = drivers.get_printer_instance(printer)
-    print(printer_inst.client)
     printers.update_printer(
         name=name,
         hostname=printer_inst.hostname,

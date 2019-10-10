@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import psycopg2
+from psycopg2 import sql
 import psycopg2.extensions
 from server import app
 
