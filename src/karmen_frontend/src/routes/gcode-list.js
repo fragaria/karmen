@@ -261,9 +261,37 @@ class GcodeList extends React.Component {
               <table>
                 <thead>
                   <tr>
-                    <th>Filename</th>
-                    <th>Size</th>
-                    <th>Uploaded at</th>
+                    <th>
+                      <button className={`plain sorting-button ${orderBy.indexOf('filename') > -1 ? 'active' : ''}`} onClick={() => {
+                        let order = '+filename';
+                        if (orderBy === '+filename') {
+                          order = '-filename';
+                        } else if (orderBy === '-filename') {
+                          order = '-uploaded';
+                        }
+                        this.loadPage(currentPage, order, filter);
+                      }}>Filename</button>
+                    </th>
+                    <th>
+                      <button className={`plain sorting-button ${orderBy.indexOf('size') > -1 ? 'active' : ''}`} onClick={() => {
+                        let order = '+size';
+                        if (orderBy === '+size') {
+                          order = '-size';
+                        } else if (orderBy === '-size') {
+                          order = '-uploaded';
+                        }
+                        this.loadPage(currentPage, order, filter);
+                      }}>Size</button>
+                    </th>
+                    <th>
+                      <button className={`plain sorting-button ${orderBy.indexOf('uploaded') > -1 ? 'active' : ''}`} onClick={() => {
+                        let order = '+uploaded';
+                        if (orderBy === '+uploaded') {
+                          order = '-uploaded';
+                        }
+                        this.loadPage(currentPage, order, filter);
+                      }}>Uploaded at</button>
+                    </th>
                     <th>Actions</th>
                   </tr>
                 </thead>

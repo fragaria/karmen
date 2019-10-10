@@ -126,6 +126,14 @@ table {
     border-bottom: 1px solid map-get($palette, gray-medium);
     font-weight: 800;
     text-align: left;
+
+    .sorting-button {
+      font-weight: 800;
+
+      &.active {
+        font-style: italic;
+      }
+    }
   }
 
   td, th {
