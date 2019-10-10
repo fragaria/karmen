@@ -7,7 +7,7 @@ from server import app
 
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
-def get_gcodes(order_by=None, limit=None, start_with=None):
+def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
     columns = ["id", "path", "filename", "display", "absolute_path", "uploaded", "size"]
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -28,11 +28,30 @@ def get_gcodes(order_by=None, limit=None, start_with=None):
                 statement = sql.SQL("SELECT {} FROM gcodes where id = %s").format(sql.SQL(', ').join([sql.Identifier(c) for c in columns]))
                 cursor.execute(statement.as_string(connection) % start_with)
                 data = cursor.fetchone()
-                where_clause = sql.SQL('WHERE {} {} {}').format(sql.Identifier(order_by_column), sql.SQL('<=' if order_by_direction == 'DESC' else '>='), sql.Literal(data[order_by_column]))
+                if data:
+                    where_clause = sql.SQL('WHERE {} {} {}').format(sql.Identifier(order_by_column), sql.SQL('<=' if order_by_direction == 'DESC' else '>='), sql.Literal(data[order_by_column]))
+                else:
+                    where_clause = sql.SQL('WHERE id {} {}').format(sql.SQL('<=' if order_by_direction == 'DESC' else '>='), sql.Literal(start_with))
             else:
                 where_clause = sql.SQL('WHERE id >= {}').format(sql.Literal(start_with))
+
+        if filter:
+            filter_splitted = filter.split(':')
+            if len(filter_splitted) == 2 and filter_splitted[0] in columns:
+                if start_with:
+                    where_clause = sql.SQL(' ').join([
+                        where_clause,
+                        sql.SQL('AND {} ~* {}').format(sql.Identifier(filter_splitted[0]), sql.Literal(filter_splitted[1]))
+                    ])
+                else:
+                    where_clause = sql.SQL(' ').join([
+                        where_clause,
+                        sql.SQL('WHERE {} ~* {}').format(sql.Identifier(filter_splitted[0]), sql.Literal(filter_splitted[1]))
+                    ])
+
         if limit:
             limit_clause = sql.SQL(' ').join([sql.SQL('limit'), sql.Literal(int(limit + 1))])
+
         statement = sql.SQL(' ').join([
             sql.SQL("SELECT {} FROM gcodes").format(sql.SQL(', ').join([sql.Identifier(c) for c in columns])),
             where_clause,

@@ -234,30 +234,30 @@ class GcodeList extends React.Component {
         </header>
 
         <div>
+          <form className="table-filter">
+            <label htmlFor="filter">Filter by filename</label>
+            <input type="text" name="filter" id="filter" value={willBeFilter} onChange={(e) => {
+              this.setState({
+                willBeFilter: e.target.value,
+              });
+            }} />
+            <button type="submit" onClick={(e) => {
+              e.preventDefault();
+              const { willBeFilter } = this.state;
+              this.loadPage(currentPage, orderBy, willBeFilter);
+            }}>Filter</button>
+            <button type="reset" onClick={(e) => {
+              e.preventDefault();
+              this.setState({
+                willBeFilter: ''
+              })
+              this.loadPage(currentPage, orderBy, null);
+            }}>Reset</button>
+          </form>
           {(!gcodeRows || gcodeRows.length === 0)
-          ? <p className="message-error">No G-Codes found!</p>
+          ? <p className="message-error message-block">No G-Codes found!</p>
           : (
             <>
-              <form className="table-filter">
-                <label htmlFor="filter">Filter by filename</label>
-                <input type="text" name="filter" id="filter" value={willBeFilter} onChange={(e) => {
-                  this.setState({
-                    willBeFilter: e.target.value,
-                  });
-                }} />
-                <button type="submit" onClick={(e) => {
-                  e.preventDefault();
-                  const { willBeFilter } = this.state;
-                  this.loadPage(currentPage, orderBy, willBeFilter);
-                }}>Filter</button>
-                <button type="reset" onClick={(e) => {
-                  e.preventDefault();
-                  this.setState({
-                    willBeFilter: ''
-                  })
-                  this.loadPage(currentPage, orderBy, null);
-                }}>Reset</button>
-              </form>
               <table>
                 <thead>
                   <tr>

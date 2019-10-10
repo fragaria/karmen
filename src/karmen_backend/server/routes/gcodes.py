@@ -30,6 +30,8 @@ def gcodes_list():
         return abort(400)
     try:
         limit = int(request.args.get('limit', 200))
+        if limit and limit < 0:
+            limit = 200
     except ValueError:
         limit = 200
     try:
@@ -39,10 +41,12 @@ def gcodes_list():
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get('fields', '').split(',') if f]
+    filter_crit = request.args.get('filter', None) # TODO test html decoding
     gcodes_record_set = gcodes.get_gcodes(
         order_by=order_by,
         limit=limit,
-        start_with=start_with
+        start_with=start_with,
+        filter=filter_crit
     )
     response = {
         "items": gcode_list,
@@ -60,6 +64,8 @@ def gcodes_list():
         parts.append("order_by=%s" % order_by)
     if fields:
         parts.append("fields=%s" % ','.join(fields))
+    if filter_crit:
+        parts.append("filter=%s" % filter_crit)
     if next_record:
         parts.append("start_with=%s" % next_record["id"])
         response["next"] = "%s?%s" % (next_href, '&'.join(parts)) if parts else next_href

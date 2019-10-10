@@ -151,7 +151,7 @@ export const heartbeat = () => {
     })
 }
 
-export const getGcodes = (startWith = null, orderBy = null, filter = null, limit = 15) => {
+export const getGcodes = (startWith = null, orderBy = null, filenameFilter = null, limit = 15) => {
   let uri = `${BASE_URL}/gcodes?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${startWith}`;
@@ -159,8 +159,8 @@ export const getGcodes = (startWith = null, orderBy = null, filter = null, limit
   if (orderBy) {
     uri += `&order_by=${orderBy}`;
   }
-  if (filter) {
-    uri += `&filter=${filter}`;
+  if (filenameFilter) {
+    uri += `&filter=filename:${filenameFilter}`;
   }
   return fetch(uri)
     .then((response) => {

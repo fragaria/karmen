@@ -188,6 +188,11 @@ table {
   color: map-get($palette, dark-red);
 }
 
+.message-block {
+  width: 100%;
+  text-align: center;
+}
+
 .icon {
   &.icon-state-active, &.icon-state-confirm {
     color: map-get($palette, olive-green) !important;
@@ -605,6 +610,8 @@ nav {
 .table-filter {
   display: block;
   width: 100%;
+  margin-bottom: $spacing-default;
+
   input {
     margin-left: $base-unit;
   }
