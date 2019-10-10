@@ -43,6 +43,9 @@ The only dependency Karmen requires is `Docker <https://www.docker.com>`_ that c
 running a few commands adapted from this `official blogpost <https://blog.docker.com/2019/03/happy-pi-day-docker-raspberry-pi/>`_.
 We recommend to use a clean Raspbian image as a base for installing Karmen.
 
+If you use a freshly installed Raspbian image, make sure that you run `sudo apt update && sudo apt upgrade -y && sudo reboot`
+before installing docker. That installs the latest version of all of the system packages and performs a restart.
+
 .. code-block:: sh
 
    sudo apt-get install software-properties-common -y
