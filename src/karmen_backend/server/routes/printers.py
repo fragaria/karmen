@@ -148,7 +148,7 @@ def printer_modify_job(ip):
         if printer_inst.modify_current_job(action):
             return '', 204
         return '', 409
-    except Exception as e:
+    except drivers.utils.PrinterDriverException as e:
         return abort(400, e)
 
 @app.route('/proxied-webcam/<ip>', methods=['GET', 'OPTIONS'])
