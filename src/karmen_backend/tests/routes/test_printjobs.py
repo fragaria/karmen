@@ -215,6 +215,9 @@ class CreateRoute(unittest.TestCase):
             pj = printjobs.get_printjob(pid)
             self.assertEqual(pj["gcode_id"], self.gcode_id)
             self.assertEqual(pj["printer_ip"], "172.16.236.11:8080")
+            c_args, c_kwargs = mock_print_inst.return_value.upload_and_start_job.call_args
+            self.assertEqual(c_args[0], "/ab/a/b/c")
+            self.assertEqual(c_args[1], "a/b/c")
 
     def test_empty_req(self):
         with app.test_client() as c:

@@ -459,7 +459,36 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertTrue(result)
         args, kwargs = mock_post_uri.call_args
-        self.assertEqual(kwargs["data"], {"path": "karmen", "print": True})
+        self.assertEqual(kwargs["data"], {
+            "path": "karmen",
+            "print": True
+        })
+        self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
+
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_upload_job_path_ok(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 201
+        mock_post_uri.return_value.json.return_value = {
+            "files": {
+                "local": {
+                    "name": "20mm-umlaut-box",
+                    "origin": "local",
+                    "refs": {
+                        "resource": "http://example.com/api/files/local/whistle_v2.gcode",
+                        "download": "http://example.com/downloads/files/local/whistle_v2.gcode"
+                    }
+                }
+            },
+            "done": True,
+        }
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.upload_and_start_job(self.file_mock.name, path="sub/path/on/disk")
+        self.assertTrue(result)
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(kwargs["data"], {
+            "path": "karmen/sub/path/on/disk",
+            "print": True
+        })
         self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
 
     @mock.patch('server.drivers.octoprint.post_uri', return_value=None)

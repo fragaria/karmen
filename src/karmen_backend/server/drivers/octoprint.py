@@ -155,14 +155,13 @@ class Octoprint(PrinterDriver):
         else:
             return {}
 
-    def upload_and_start_job(self, gcode_path):
+    def upload_and_start_job(self, gcode_disk_path, path=None):
         request = None
-        print(self.client.connected)
         if self.client.connected:
             request = post_uri(self.ip, endpoint='/api/files/local', files={
-                "file": open(gcode_path, 'rb')
+                "file": open(gcode_disk_path, 'rb')
             }, data={
-                "path": "karmen",
+                "path": "karmen" if not path else "karmen/%s" % path,
                 "print": True,
             })
             if not request:
