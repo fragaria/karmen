@@ -58,7 +58,6 @@ def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
             order_by_clause,
             limit_clause
         ])
-        app.logger.info(statement.as_string(connection))
 
         cursor.execute(statement)
         data = cursor.fetchall()

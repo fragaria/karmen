@@ -41,7 +41,7 @@ def gcodes_list():
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get('fields', '').split(',') if f]
-    filter_crit = request.args.get('filter', None) # TODO test html decoding
+    filter_crit = request.args.get('filter', None)
     gcodes_record_set = gcodes.get_gcodes(
         order_by=order_by,
         limit=limit,
