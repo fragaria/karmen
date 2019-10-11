@@ -182,7 +182,6 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 1)
-            print(response.json["next"])
             response2 = c.get(response.json["next"])
             self.assertTrue("items" in response2.json)
             self.assertTrue(response.json["items"][0]["id"] > response2.json["items"][0]["id"])

@@ -1,11 +1,15 @@
 import psycopg2
 import psycopg2.extras
-from server.database import get_connection
+from server.database import get_connection, prepare_list_statement
 
-def get_printjobs():
+# This intentionally selects limit+1 results in order to properly determine next start_with for pagination
+# Take that into account when processing results
+def get_printjobs(order_by=None, limit=None, start_with=None, filter=None):
+    columns = ["id", "gcode_id", "printer_ip", "started"]
     with get_connection() as connection:
+        statement = prepare_list_statement(connection, "printjobs", columns, order_by=order_by, limit=limit, start_with=start_with, filter=filter)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT id, gcode_id, printer_ip, started FROM printjobs")
+        cursor.execute(statement)
         data = cursor.fetchall()
         cursor.close()
         return data
