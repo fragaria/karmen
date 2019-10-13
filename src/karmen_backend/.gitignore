@@ -33,3 +33,4 @@ celerybeat-schedule
 *.pid
 htmlcov
 tmp/
+db/migrations.yml
