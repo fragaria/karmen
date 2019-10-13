@@ -21,7 +21,6 @@ buildctl build --frontend dockerfile.v0 \
             --local context=. \
             --output type=image,name=docker.io/fragaria/karmen-frontend:$TRAVIS_BRANCH-amd64,push=true \
             --opt platform=linux/amd64 \
-            --opt build-arg:REACT_APP_GIT_REV=$TRAVIS_BRANCH \
             --opt filename=./Dockerfile.serve
 
 
@@ -31,7 +30,6 @@ buildctl build --frontend dockerfile.v0 \
             --local context=. \
             --output type=image,name=docker.io/fragaria/karmen-frontend:$TRAVIS_BRANCH-armhf,push=true \
             --opt platform=linux/armhf \
-            --opt build-arg:REACT_APP_GIT_REV=$TRAVIS_BRANCH \
             --opt filename=./Dockerfile.serve
 
 
