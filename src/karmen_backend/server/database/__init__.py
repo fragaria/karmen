@@ -58,7 +58,7 @@ def prepare_list_statement(connection, tablename, columns, order_by=None, limit=
             where_clause = sql.SQL('WHERE id >= {}').format(sql.Literal(start_with))
 
     if filter:
-        filter_splitted = filter.split(':')
+        filter_splitted = filter.split(':', 1)
         if len(filter_splitted) == 2 and filter_splitted[0] in columns:
             if start_with:
                 where_clause = sql.SQL(' ').join([

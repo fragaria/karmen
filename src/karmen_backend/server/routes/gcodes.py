@@ -135,6 +135,5 @@ def gcode_delete(id):
     except IOError:
         pass
     finally:
-        printjobs.delete_printjobs_by_gcode(id)
         gcodes.delete_gcode(id)
     return '', 204

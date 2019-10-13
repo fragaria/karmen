@@ -300,19 +300,19 @@ class CreateRoute(unittest.TestCase):
 class DeleteRoute(unittest.TestCase):
     def test_delete(self):
         gcode_id = gcodes.add_gcode(
-            path="a/b/c",
-            filename="file1",
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123
         )
-        printjobs.add_printjob(gcode_id=gcode_id, printer_ip="172.16.236.11:8080")
-        printjobs.add_printjob(gcode_id=gcode_id, printer_ip="172.16.236.11:8080")
+        printjobs.add_printjob(gcode_id=gcode_id, gcode_data={"id": gcode_id}, printer_ip="172.16.236.11:8080", printer_data={"ip": "172.16.236.11:8080"})
+        printjobs.add_printjob(gcode_id=gcode_id, gcode_data={"id": gcode_id}, printer_ip="172.16.236.11:8080", printer_data={"ip": "172.16.236.11:8080"})
         with app.test_client() as c:
             response = c.delete('/gcodes/%s' % gcode_id)
             self.assertEqual(response.status_code, 204)
         self.assertEqual(gcodes.get_gcode(gcode_id), None)
-        self.assertEqual([r for r in printjobs.get_printjobs() if r["gcode_id"] == gcode_id], [])
+        self.assertEqual(len([r for r in printjobs.get_printjobs() if r["gcode_id"] == gcode_id]), 2)
 
     def test_delete_unknown(self):
         with app.test_client() as c:

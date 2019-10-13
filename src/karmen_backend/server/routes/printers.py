@@ -98,7 +98,6 @@ def printer_delete(ip):
     printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
-    printjobs.delete_printjobs_by_printer(ip)
     printers.delete_printer(ip)
     for device in network_devices.get_network_devices(printer["ip"]):
         device["disabled"] = True

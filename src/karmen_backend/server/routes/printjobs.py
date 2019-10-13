@@ -4,7 +4,7 @@ from server import app, drivers
 from server.database import printjobs, printers, gcodes
 
 def make_printjob_response(printjob, fields=None):
-    flist = ["id", "gcode_id", "printer_ip", "started"]
+    flist = ["id", "started", "gcode_data", "printer_data"]
     fields = fields if fields else flist
     response = {}
     for field in flist:
@@ -36,7 +36,20 @@ def printjob_create():
         uploaded = printer_inst.upload_and_start_job(gcode["absolute_path"], gcode["path"])
         if not uploaded:
             return abort(500, 'Cannot upload the g-code to the printer')
-        printjob_id = printjobs.add_printjob(gcode_id=gcode["id"], printer_ip=printer["ip"])
+        printjob_id = printjobs.add_printjob(
+            gcode_id=gcode["id"],
+            printer_ip=printer["ip"],
+            gcode_data={
+                "id": gcode["id"],
+                "filename": gcode["filename"],
+                "size": gcode["size"],
+            },
+            printer_data={
+                "ip": printer["ip"],
+                "name": printer["name"],
+                "client": printer["client"],
+            },
+        )
         return jsonify({"id": printjob_id}), 201
     except drivers.utils.PrinterDriverException:
         return abort(409)
@@ -48,6 +61,8 @@ def printjobs_list():
     order_by = request.args.get('order_by', '')
     if ',' in order_by:
         return abort(400)
+    if order_by in ["gcode_data", "printer_data"]:
+        order_by = ''
     try:
         limit = int(request.args.get('limit', 200))
         if limit and limit < 0:
