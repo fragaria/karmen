@@ -4,23 +4,6 @@ import BoxedModal from './boxed-modal';
 import { WebcamStream } from './webcam-stream';
 import { deletePrinter, changeCurrentJob } from '../services/karmen-backend';
 
-export const Job = ({ name, completion, printTime, printTimeLeft }) => {
-  let approxPrintTimeLeft = printTimeLeft;
-  if (!approxPrintTimeLeft && printTime > 0) {
-    approxPrintTimeLeft = (printTime / completion) * 100;
-  }
-  if (approxPrintTimeLeft) {
-    let d = new Date(null);
-    d.setSeconds(approxPrintTimeLeft)
-    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
-  }
-  return (
-    <React.Fragment>
-      <p><strong>{name || '\u00A0'}</strong></p>
-    </React.Fragment>
-  );
-}
-
 export const Progress = ({ completion, printTime, printTimeLeft }) => {
   let progressBarWidth = {
     width: (printTime > 0 ? completion.toFixed(2) : '0')+'%',
@@ -30,6 +13,7 @@ export const Progress = ({ completion, printTime, printTimeLeft }) => {
     approxPrintTimeLeft = (printTime / completion) * 100;
   }
   if (approxPrintTimeLeft) {
+    // TODO use dayjs
     let d = new Date(null);
     d.setSeconds(approxPrintTimeLeft)
     approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
@@ -75,7 +59,7 @@ export const PrinterState = ({ printer }) => {
       {(!printer.status.temperature || (!printer.status.temperature.tool0 && !printer.status.temperature.bed)) && <>&nbsp;</>}
       {printer.status.temperature && printer.status.temperature.tool0 && <><Temperature name="Tool" {...printer.status.temperature.tool0} />,</>}
       {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-      <Job {...printer.job} />
+      <p><strong>{(printer.job && printer.job.name) || '\u00A0'}</strong></p>
     </div>
   );
 }

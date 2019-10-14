@@ -1,19 +1,45 @@
 import React from 'react';
+import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
 import { PrinterConnection, PrinterState } from '../components/printer-view';
 import { WebcamStream } from '../components/webcam-stream';
 import { PrinterEditForm } from '../components/printer-edit-form';
-import { getPrinter, patchPrinter } from '../services/karmen-backend';
+import { getPrinter, patchPrinter, getPrinterJobs } from '../services/karmen-backend';
+import formatters from '../services/formatters';
+
+const BASE_URL = window.env.BACKEND_BASE;
+
+class PrintJobRow extends React.Component {
+  render() {
+    const { gcode_data, started } = this.props;
+    return (
+      <tr>
+        <td>{gcode_data.filename}</td>
+        <td>{formatters.bytes(gcode_data.size)}</td>
+        <td>{dayjs(started).format('HH:mm:ss YYYY-MM-DD')}</td>
+      </tr>
+    );
+  }
+}
 
 class PrinterDetail extends React.Component {
   state = {
     printer: null,
+    jobs: [],
+    jobsTable: {
+      currentPage: 0,
+      pages: [{
+        startWith: null,
+      }],
+      orderBy: '-started',
+    }
   }
 
   constructor(props) {
     super(props);
     this.loadPrinter = this.loadPrinter.bind(this);
+    this.loadJobsPage = this.loadJobsPage.bind(this);
     this.changePrinter = this.changePrinter.bind(this);
   }
 
@@ -21,7 +47,45 @@ class PrinterDetail extends React.Component {
     const { match } = this.props;
     getPrinter(match.params.ip, ['job', 'status', 'webcam']).then((printer) => {
       this.setState({
-        printer
+        printer,
+      });
+    });
+  }
+
+  loadJobsPage(page, newOrderBy) {
+    const { match } = this.props;
+    const { jobsTable } = this.state;
+    // reset pages if orderBy has changed
+    if (newOrderBy !== jobsTable.orderBy) {
+      jobsTable.pages = [{
+        startWith: null,
+      }];
+      page = 0;
+    }
+    getPrinterJobs(jobsTable.pages[page].startWith, newOrderBy, match.params.ip).then((jobs) => {
+      if (!jobs.next && jobs.items.length === 0 && page - 1 >= 0) {
+        this.loadJobsPage(page - 1, newOrderBy);
+        return;
+      }
+      let nextStartWith;
+      if (jobs.next) {
+        const uri = new URL(jobs.next.indexOf('http') !== 0 ? `${BASE_URL}${jobs.next}` : jobs.next)
+        nextStartWith = uri.searchParams.get('start_with');
+      }
+      if (nextStartWith) {
+        jobsTable.pages.push({
+          startWith: nextStartWith,
+        });
+      } else {
+        jobsTable.pages = [].concat(jobsTable.pages.slice(0, page + 1));
+      }
+
+      this.setState({
+        jobs: jobs.items,
+        jobsTable: Object.assign({}, jobsTable, {
+          currentPage: page,
+          orderBy: newOrderBy,
+        })
       });
     });
   }
@@ -51,13 +115,21 @@ class PrinterDetail extends React.Component {
 
   componentDidMount() {
     this.loadPrinter();
+    const { jobsTable } = this.state
+    this.loadJobsPage(0, jobsTable.orderBy);
   }
 
   render () {
-    const { printer } = this.state;
+    const { printer, jobs, jobsTable } = this.state;
     if (!printer) {
       return <div><Loader /></div>;
     }
+    const jobsRows = jobs && jobs.map((j) => {
+      return <PrintJobRow
+        key={j.id}
+        {...j}
+        />
+    });
     return (
       <div className="printer-detail standalone-page">
         <header>
@@ -79,6 +151,43 @@ class PrinterDetail extends React.Component {
                     this.props.history.push('/');
                   }}
                 />
+              </div>
+              <div>
+                <h2>Printing history</h2>
+                {(!jobsRows || jobsRows.length === 0)
+                  ? <p className="message-error message-block">No print jobs found!</p>
+                  : (
+                    <>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Filename</th>
+                            <th>Size</th>
+                            <th>
+                              <button className={`plain sorting-button ${jobsTable.orderBy.indexOf('started') > -1 ? 'active' : ''}`} onClick={() => {
+                                let order = '+started';
+                                if (jobsTable.orderBy === '+started') {
+                                  order = '-started';
+                                }
+                                this.loadJobsPage(jobsTable.currentPage, order);
+                              }}>Started</button>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {jobsRows}
+                        </tbody>
+                      </table>
+                      <div className="table-pagination">
+                        {jobsTable.currentPage > 0
+                          ? <button className="plain" onClick={() => this.loadJobsPage(Math.max(0, jobsTable.currentPage - 1), jobsTable.orderBy)}>Previous</button>
+                          : <span></span>}
+                        {jobsTable.pages[jobsTable.currentPage + 1]
+                          ? <button className="plain" onClick={() => this.loadJobsPage(jobsTable.currentPage + 1, jobsTable.orderBy)}>Next</button>
+                          : <span></span>}
+                      </div>
+                    </>
+                  )}
               </div>
             </div>
             <WebcamStream {...printer.webcam} />
