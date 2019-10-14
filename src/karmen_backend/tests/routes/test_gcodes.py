@@ -312,7 +312,10 @@ class DeleteRoute(unittest.TestCase):
             response = c.delete('/gcodes/%s' % gcode_id)
             self.assertEqual(response.status_code, 204)
         self.assertEqual(gcodes.get_gcode(gcode_id), None)
-        self.assertEqual(len([r for r in printjobs.get_printjobs() if r["gcode_id"] == gcode_id]), 2)
+        pjs = [pj for pj in printjobs.get_printjobs() if pj["gcode_id"] == gcode_id]
+        self.assertEqual(len(pjs), 2)
+        for pj in pjs:
+            self.assertFalse(pj["gcode_data"]["available"])
 
     def test_delete_unknown(self):
         with app.test_client() as c:

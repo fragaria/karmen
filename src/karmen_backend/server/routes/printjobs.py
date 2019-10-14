@@ -43,6 +43,7 @@ def printjob_create():
                 "id": gcode["id"],
                 "filename": gcode["filename"],
                 "size": gcode["size"],
+                "available": True,
             },
             printer_data={
                 "ip": printer["ip"],

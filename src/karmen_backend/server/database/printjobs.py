@@ -52,3 +52,14 @@ def delete_printjob(id):
         cursor = connection.cursor()
         cursor.execute("DELETE FROM printjobs WHERE id = %s", (id,))
         cursor.close()
+
+def update_gcode_data(gcode_id, gcode_data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            "UPDATE printjobs SET gcode_data = %s where gcode_id = %s",
+            (
+                psycopg2.extras.Json(gcode_data), gcode_id
+            )
+        )
+        cursor.close()

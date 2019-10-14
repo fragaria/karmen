@@ -20,7 +20,7 @@ ALTER TABLE public.printjobs
 
 -- Populate data of the existing records
 update public.printjobs pj set gcode_data = (
-  select row_to_json(tmp) from (select id, filename, size from public.gcodes gc where gc.id = pj.gcode_id) tmp
+  select row_to_json(tmp) from (select id, filename, size, true as available from public.gcodes gc where gc.id = pj.gcode_id) tmp
 ) where gcode_data is null;
 update public.printjobs pj set printer_data = (
   select row_to_json(tmp) from (select ip, name, client from public.printers p where p.ip = pj.printer_ip) tmp

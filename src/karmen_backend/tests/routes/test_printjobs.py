@@ -159,6 +159,11 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("items" in response.json)
             for printer in response.json["items"]:
                 self.assertTrue(printer["printer_data"]["ip"], "172.16.236.12:8080")
+            response = c.get('/printjobs?filter=gcode_id:3:8080&order_by=id')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            for printer in response.json["items"]:
+                self.assertTrue(printer["gcode_data"]["id"], "3")
 
     def test_filter_next(self):
         with app.test_client() as c:
@@ -247,6 +252,8 @@ class CreateRoute(unittest.TestCase):
             self.assertFalse(pj["gcode_data"] is None)
             self.assertTrue("name" in pj["printer_data"])
             self.assertTrue("filename" in pj["gcode_data"])
+            self.assertTrue("available" in pj["gcode_data"])
+            self.assertTrue(pj["gcode_data"]["available"])
             c_args, c_kwargs = mock_print_inst.return_value.upload_and_start_job.call_args
             self.assertEqual(c_args[0], "/ab/a/b/c")
             self.assertEqual(c_args[1], "a/b/c")

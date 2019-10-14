@@ -61,14 +61,15 @@ def prepare_list_statement(connection, tablename, columns, order_by=None, limit=
         filter_splitted = filter.split(':', 1)
         if len(filter_splitted) == 2 and filter_splitted[0] in columns:
             if start_with:
+            # TODO filter can work only with strings, the cast is slow
                 where_clause = sql.SQL(' ').join([
                     where_clause,
-                    sql.SQL('AND {} ~* {}').format(sql.Identifier(filter_splitted[0]), sql.Literal(filter_splitted[1]))
+                    sql.SQL('AND cast({} as varchar) ~* cast({} as varchar)').format(sql.Identifier(filter_splitted[0]), sql.Literal(filter_splitted[1]))
                 ])
             else:
                 where_clause = sql.SQL(' ').join([
                     where_clause,
-                    sql.SQL('WHERE {} ~* {}').format(sql.Identifier(filter_splitted[0]), sql.Literal(filter_splitted[1]))
+                    sql.SQL('WHERE cast({} as varchar) ~* cast({} as varchar)').format(sql.Identifier(filter_splitted[0]), sql.Literal(filter_splitted[1]))
                 ])
 
     if limit:

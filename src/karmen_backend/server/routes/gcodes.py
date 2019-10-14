@@ -136,4 +136,10 @@ def gcode_delete(id):
         pass
     finally:
         gcodes.delete_gcode(id)
+        printjobs.update_gcode_data(gcode["id"], {
+            "id": gcode["id"],
+            "filename": gcode["filename"],
+            "size": gcode["size"],
+            "available": False,
+        })
     return '', 204
