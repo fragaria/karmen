@@ -259,6 +259,25 @@ button[type=submit] {
   }
 }
 
+button[type=reset] {
+  height: $form-elements-height;
+  border: none;
+  outline: none;
+  text-decoration: underline;
+  background: #fff;
+  color: map-get($palette, red);
+  margin-left: $base-unit;
+
+  &:hover, &:active {
+    text-decoration: none;
+  }
+
+  &[disabled] {
+    background: map-get($palette, gray-medium);
+    color: map-get($palette, red);
+  }
+}
+
 input[type=text], select {
   height: $form-elements-height;
   padding: $base-unit;
@@ -627,23 +646,5 @@ nav {
     position: relative;
     top: -1px;
     margin-left: $base-unit;
-  }
-
-  button[type=reset] {
-    height: $form-elements-height;
-    border: none;
-    outline: none;
-    text-decoration: underline;
-    background: #fff;
-    color: map-get($palette, red);
-
-    &:hover, &:active {
-      text-decoration: none;
-    }
-
-    &[disabled] {
-      background: map-get($palette, gray-medium);
-      color: map-get($palette, red);
-    }
   }
 }

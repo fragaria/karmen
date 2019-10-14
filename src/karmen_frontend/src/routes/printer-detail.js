@@ -1,85 +1,50 @@
 import React from 'react';
 
 import Loader from '../components/loader';
-import { BackLink } from '../components/back';
-import { FormInputs } from '../components/form-utils';
-import { PrinterConnection, PrinterState, WebcamStream } from '../components/printer-view';
+import { PrinterConnection, PrinterState } from '../components/printer-view';
+import { WebcamStream } from '../components/webcam-stream';
+import { PrinterEditForm } from '../components/printer-edit-form';
 import { getPrinter, patchPrinter } from '../services/karmen-backend';
 
 class PrinterDetail extends React.Component {
   state = {
     printer: null,
-    submitting: false,
-    message: null,
-    messageOk: false,
-    form: {
-      name: {
-        name: "Change printer's name",
-        val: '',
-        type: 'text',
-        required: true,
-        error: null,
-      }
-    }
   }
 
   constructor(props) {
     super(props);
     this.loadPrinter = this.loadPrinter.bind(this);
-    this.changeName = this.changeName.bind(this);
+    this.changePrinter = this.changePrinter.bind(this);
   }
 
   loadPrinter() {
     const { match } = this.props;
-    const { form } = this.state;
     getPrinter(match.params.ip, ['job', 'status', 'webcam']).then((printer) => {
       this.setState({
-        printer,
-        form: Object.assign({}, form, {
-          name: Object.assign({}, form.name, {
-            val: printer.name,
-          })
-        })
+        printer
       });
     });
   }
 
-  changeName(e) {
-    e.preventDefault();
-    this.setState({
-      submitting: true,
-      messageOk: false,
-      message: null,
-    });
-    const { printer, form } = this.state;
-    if (!form.name.val) {
-      this.setState({
-        submitting: false,
-        form: Object.assign({}, form, {
-          name: Object.assign({}, form.name, {
-            error: 'Name cannot be empty',
-          })
-        })
-      });
-      return;
-    }
-    patchPrinter(printer.ip, {name: form.name.val})
+  changePrinter(newParameters) {
+    const { printer } = this.state;
+    return patchPrinter(printer.ip, newParameters)
       .then((r) => {
         switch(r) {
           case 204:
             this.setState({
-              printer: Object.assign({}, printer, {name: form.name.val}),
-              message: 'Changes saved successfully',
-              messageOk: true,
-              submitting: false,
+              printer: Object.assign({}, printer, newParameters),
             });
-            break;
+            return {
+              ok: true,
+              message: 'Changes saved successfully'
+            };
           case 400:
           default:
-            this.setState({
+            return {
+              ok: false,
               message: 'Cannot save your changes, check server logs',
-              submitting: false,
-            });
+            };
         }
       });
   }
@@ -89,17 +54,9 @@ class PrinterDetail extends React.Component {
   }
 
   render () {
-    const { printer, message, messageOk, form, submitting } = this.state;
+    const { printer } = this.state;
     if (!printer) {
       return <div><Loader /></div>;
-    }
-    const updateValue = (name, value) => {
-      const { form } = this.state;
-      this.setState({
-        form: Object.assign({}, form, {
-          [name]: Object.assign({}, form[name], {val: value, error: null})
-        })
-      });
     }
     return (
       <div className="printer-detail standalone-page">
@@ -113,19 +70,18 @@ class PrinterDetail extends React.Component {
             <div >
               <PrinterConnection printer={printer} />
               <PrinterState printer={printer} />
+              <div>
+                <h2 className="hidden">Change printer properties</h2>
+                <PrinterEditForm
+                  defaults={{name: printer.name}}
+                  onSubmit={this.changePrinter}
+                  onCancel={() => {
+                    this.props.history.push('/');
+                  }}
+                />
+              </div>
             </div>
             <WebcamStream {...printer.webcam} />
-          </div>
-          <div>
-            <h2 className="hidden">Change printer properties</h2>
-            <form>
-              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-              <FormInputs definition={form} updateValue={updateValue} />
-              <div className="form-actions">
-                <button type="submit" onClick={this.changeName} disabled={submitting}>Save</button>
-                <BackLink to="/gcodes" />
-              </div>
-             </form>
           </div>
         </div>
       </div>
