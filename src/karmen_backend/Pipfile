@@ -8,6 +8,7 @@ pytest = "*"
 mock = "*"
 pytest-watch = "*"
 pylint = "*"
+black = "==19.*"
 
 [packages]
 flask = "*"
@@ -23,3 +24,6 @@ yandex-pgmigrate = "*"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true

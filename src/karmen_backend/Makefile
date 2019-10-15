@@ -18,6 +18,9 @@ test: run-docker-postgres
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 
+format:
+	black server/ tests/
+
 lint:
 	pylint server/ tests/
 
