@@ -4,14 +4,18 @@ import requests
 
 from server import app
 
+
 def do_arp_scan(network_interface):
-    proc = subprocess.Popen(["arp-scan", "--interface", network_interface, "--localnet", "-q"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        ["arp-scan", "--interface", network_interface, "--localnet", "-q"],
+        stdout=subprocess.PIPE,
+    )
     devices = []
     while True:
         rawline = proc.stdout.readline()
         if not rawline:
             break
-        line = rawline.rstrip().decode('utf-8')
+        line = rawline.rstrip().decode("utf-8")
         if not line:
             continue
         match = re.findall(r"^([0-9\.]+)[ \t]+([a-z0-9\:]+)$", line)
@@ -20,13 +24,14 @@ def do_arp_scan(network_interface):
         devices.append(match[0])
     return devices
 
+
 def get_avahi_hostname(ip):
     proc = subprocess.Popen(["avahi-resolve-address", ip], stdout=subprocess.PIPE)
     while True:
         rawline = proc.stdout.readline()
         if not rawline:
             break
-        line = rawline.rstrip().decode('utf-8')
+        line = rawline.rstrip().decode("utf-8")
         if not line:
             continue
         match = re.findall(r"^([0-9\.]+)[ \t]+(.+)", line)
@@ -34,32 +39,36 @@ def get_avahi_hostname(ip):
             continue
         return match[0][1]
 
-def get_uri(ip, endpoint='/', protocol='http', timeout=None):
-    timeout = timeout if timeout else app.config.get('NETWORK_TIMEOUT', 10)
+
+def get_uri(ip, endpoint="/", protocol="http", timeout=None):
+    timeout = timeout if timeout else app.config.get("NETWORK_TIMEOUT", 10)
     request = None
     if ip is None:
         return request
-    if endpoint[0] != '/':
-        endpoint = '/%s' % (endpoint, )
-    uri = '%s://%s%s' % (protocol, ip, endpoint)
+    if endpoint[0] != "/":
+        endpoint = "/%s" % (endpoint,)
+    uri = "%s://%s%s" % (protocol, ip, endpoint)
     try:
         request = requests.get(uri, timeout=timeout)
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
         app.logger.debug("Cannot call %s" % (uri))
     return request
 
+
 # TODO refactor and unify with get_uri, or maybe drop
-def post_uri(ip, endpoint='/', protocol='http', timeout=None, files=None, data=None, json=None):
-    timeout = timeout if timeout else app.config.get('NETWORK_TIMEOUT', 10)
+def post_uri(
+    ip, endpoint="/", protocol="http", timeout=None, files=None, data=None, json=None
+):
+    timeout = timeout if timeout else app.config.get("NETWORK_TIMEOUT", 10)
     request = None
     if ip is None:
         return request
     if (json and data) or (json and files):
-        raise Exception('Cannot pass json and data/files at the same time')
+        raise Exception("Cannot pass json and data/files at the same time")
 
-    if endpoint[0] != '/':
-        endpoint = '/%s' % (endpoint, )
-    uri = '%s://%s%s' % (protocol, ip, endpoint)
+    if endpoint[0] != "/":
+        endpoint = "/%s" % (endpoint,)
+    uri = "%s://%s%s" % (protocol, ip, endpoint)
     try:
         request = requests.post(uri, timeout=timeout, files=files, data=data, json=json)
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):

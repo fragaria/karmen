@@ -1,10 +1,12 @@
 import abc
 
+
 class PrinterClientInfo:
     def __init__(self, version={}, connected=False, read_only=False):
         self.version = version
         self.connected = connected
         self.read_only = read_only
+
 
 class PrinterDriver(abc.ABC):
     @abc.abstractmethod
@@ -34,6 +36,7 @@ class PrinterDriver(abc.ABC):
     @abc.abstractmethod
     def upload_and_start_job(self, gcode_path):
         pass
+
 
 class PrinterDriverException(Exception):
     pass

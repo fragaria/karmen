@@ -10,6 +10,7 @@ from server.database import printjobs
 from server import drivers
 from server.services import network
 
+
 def make_printer_response(printer, fields):
     printer_inst = drivers.get_printer_instance(printer)
     data = {
@@ -28,22 +29,24 @@ def make_printer_response(printer, fields):
     if "webcam" in fields:
         data["webcam"] = printer_inst.webcam()
         if "stream" in data["webcam"]:
-            data["webcam"]["proxied"] = "/proxied-webcam/%s" % (printer_inst.ip, )
+            data["webcam"]["proxied"] = "/proxied-webcam/%s" % (printer_inst.ip,)
     if "job" in fields:
         data["job"] = printer_inst.job()
     return data
 
-@app.route('/printers', methods=['GET', 'OPTIONS'])
+
+@app.route("/printers", methods=["GET", "OPTIONS"])
 @cross_origin()
 def printers_list():
     device_list = []
-    fields = [f for f in request.args.get('fields', '').split(',') if f]
+    fields = [f for f in request.args.get("fields", "").split(",") if f]
     for printer in printers.get_printers():
         # TODO this should somehow go in parallel
         device_list.append(make_printer_response(printer, fields))
     return jsonify({"items": device_list})
 
-@app.route('/printers', methods=['POST', 'OPTIONS'])
+
+@app.route("/printers", methods=["POST", "OPTIONS"])
 @cross_origin()
 def printer_create():
     data = request.json
@@ -51,25 +54,25 @@ def printer_create():
         return abort(400)
     ip = data.get("ip", None)
     name = data.get("name", None)
-    if not ip or \
-        not name or \
-        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$', ip) is None:
+    if (
+        not ip
+        or not name
+        or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", ip) is None
+    ):
         return abort(400)
     if printers.get_printer(ip) is not None:
         return abort(409)
     hostname = network.get_avahi_hostname(ip)
-    printer = drivers.get_printer_instance({
-        "hostname": hostname,
-        "ip": ip,
-        "name": name,
-        "client": "octoprint", # TODO make this more generic
-    })
-    printer.sniff()
-    network_devices.upsert_network_device(
-        ip=ip,
-        retry_after=None,
-        disabled=False
+    printer = drivers.get_printer_instance(
+        {
+            "hostname": hostname,
+            "ip": ip,
+            "name": name,
+            "client": "octoprint",  # TODO make this more generic
+        }
     )
+    printer.sniff()
+    network_devices.upsert_network_device(ip=ip, retry_after=None, disabled=False)
     printers.add_printer(
         name=name,
         hostname=hostname,
@@ -79,20 +82,22 @@ def printer_create():
             "version": printer.client.version,
             "connected": printer.client.connected,
             "read_only": printer.client.read_only,
-        }
+        },
     )
-    return '', 201
+    return "", 201
 
-@app.route('/printers/<ip>', methods=['GET', 'OPTIONS'])
+
+@app.route("/printers/<ip>", methods=["GET", "OPTIONS"])
 @cross_origin()
 def printer_detail(ip):
-    fields = request.args.get('fields').split(',') if request.args.get('fields') else []
+    fields = request.args.get("fields").split(",") if request.args.get("fields") else []
     printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
     return jsonify(make_printer_response(printer, fields))
 
-@app.route('/printers/<ip>', methods=['DELETE', 'OPTIONS'])
+
+@app.route("/printers/<ip>", methods=["DELETE", "OPTIONS"])
 @cross_origin()
 def printer_delete(ip):
     printer = printers.get_printer(ip)
@@ -102,9 +107,10 @@ def printer_delete(ip):
     for device in network_devices.get_network_devices(printer["ip"]):
         device["disabled"] = True
         network_devices.upsert_network_device(**device)
-    return '', 204
+    return "", 204
 
-@app.route('/printers/<ip>', methods=['PATCH', 'OPTIONS'])
+
+@app.route("/printers/<ip>", methods=["PATCH", "OPTIONS"])
 @cross_origin()
 def printer_patch(ip):
     printer = printers.get_printer(ip)
@@ -126,11 +132,12 @@ def printer_patch(ip):
             "version": printer_inst.client.version,
             "connected": printer_inst.client.connected,
             "read_only": printer_inst.client.read_only,
-        }
+        },
     )
-    return '', 204
+    return "", 204
 
-@app.route('/printers/<ip>/current-job', methods=['POST', 'OPTIONS'])
+
+@app.route("/printers/<ip>/current-job", methods=["POST", "OPTIONS"])
 @cross_origin()
 def printer_modify_job(ip):
     printer = printers.get_printer(ip)
@@ -145,12 +152,13 @@ def printer_modify_job(ip):
     printer_inst = drivers.get_printer_instance(printer)
     try:
         if printer_inst.modify_current_job(action):
-            return '', 204
-        return '', 409
+            return "", 204
+        return "", 409
     except drivers.utils.PrinterDriverException as e:
         return abort(400, e)
 
-@app.route('/proxied-webcam/<ip>', methods=['GET', 'OPTIONS'])
+
+@app.route("/proxied-webcam/<ip>", methods=["GET", "OPTIONS"])
 @cross_origin()
 def printer_webcam(ip):
     # This is very inefficient and should not be used in production. Use the nginx
@@ -164,4 +172,7 @@ def printer_webcam(ip):
     if "stream" not in webcam:
         return abort(404)
     req = requests.get(webcam["stream"], stream=True)
-    return Response(stream_with_context(req.iter_content()), content_type=req.headers["content-type"])
+    return Response(
+        stream_with_context(req.iter_content()),
+        content_type=req.headers["content-type"],
+    )
