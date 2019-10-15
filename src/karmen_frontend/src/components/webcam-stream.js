@@ -5,6 +5,7 @@ const BACKEND_BASE_URL = window.env.BACKEND_BASE;
 export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
+    isMaximized: false,
   }
 
   constructor(props) {
@@ -64,7 +65,7 @@ export class WebcamStream extends React.Component {
 
   render() {
     const { flipHorizontal, flipVertical, rotate90 } = this.props;
-    const { isOnline, source } = this.state;
+    const { isOnline, isMaximized, source } = this.state;
     let klass = [];
     if (flipHorizontal) {
       klass.push('flip-horizontal');
@@ -78,17 +79,26 @@ export class WebcamStream extends React.Component {
       klass.push('rotate-90');
     }
 
-    return <div className="webcam-stream">
-      {isOnline ?
-        <img
-          className={klass.join(' ')}
-          alt={source}
-          src={`${source}?t=${(new Date()).getTime()}`}
-        /> :
-        <p className="no-stream">
-          Stream unavailable
-        </p>
-      }
+    return <div
+      className={`webcam-stream ${isMaximized ? 'maximized' : ''}`}
+    >
+      <button className="plain" onClick={() => {
+        const { isMaximized } = this.state;
+        this.setState({
+          isMaximized: !isMaximized
+        })
+      }}>
+        {isOnline ?
+          <img
+            className={klass.join(' ')}
+            alt={source}
+            src={`${source}?t=${(new Date()).getTime()}`}
+          /> :
+          <p className="no-stream">
+            Stream unavailable
+          </p>
+        }
+      </button>
     </div>;
   }
 }
