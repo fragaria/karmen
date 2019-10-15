@@ -13,9 +13,18 @@ const BASE_URL = window.env.BACKEND_BASE;
 class PrintJobRow extends React.Component {
   render() {
     const { gcode_data, started } = this.props;
+    if (!gcode_data) {
+      return (<tr></tr>);
+    }
     return (
       <tr>
-        <td>{gcode_data.filename}</td>
+        <td>
+          {/* TODO replace this with a link to gcode detail on frontend*/}
+          {gcode_data && gcode_data.available
+            ? (<a href={`${BASE_URL}/gcodes/${gcode_data.id}/data`}>{gcode_data.filename}</a>)
+            : (<span>{gcode_data.filename}</span>)
+          }
+        </td>
         <td>{formatters.bytes(gcode_data.size)}</td>
         <td>{dayjs(started).format('HH:mm:ss YYYY-MM-DD')}</td>
       </tr>
