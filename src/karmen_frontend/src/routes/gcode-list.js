@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
 import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/karmen-backend';
+import formatters from '../services/formatters';
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -16,16 +17,6 @@ class GcodeRow extends React.Component {
     messageOk: false,
     selectedPrinter: null,
     availablePrinters: [],
-  }
-
-  // props to https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
-  formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
   render() {
@@ -120,7 +111,7 @@ class GcodeRow extends React.Component {
     return (
       <tr>
         <td><a href={`${window.env.BACKEND_BASE}${data}`}>{path}{path ? '/' : ''}{display}</a></td>
-        <td>{this.formatBytes(size)}</td>
+        <td>{formatters.bytes(size)}</td>
         <td>{dayjs(uploaded).format('HH:mm:ss YYYY-MM-DD')}</td>
         <td className="action-cell">
           <button className="plain icon-link" onClick={() => {

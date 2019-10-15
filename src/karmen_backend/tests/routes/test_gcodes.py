@@ -182,7 +182,6 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 1)
-            print(response.json["next"])
             response2 = c.get(response.json["next"])
             self.assertTrue("items" in response2.json)
             self.assertTrue(response.json["items"][0]["id"] > response2.json["items"][0]["id"])
@@ -301,19 +300,22 @@ class CreateRoute(unittest.TestCase):
 class DeleteRoute(unittest.TestCase):
     def test_delete(self):
         gcode_id = gcodes.add_gcode(
-            path="a/b/c",
-            filename="file1",
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123
         )
-        printjobs.add_printjob(gcode_id=gcode_id, printer_ip="172.16.236.11:8080")
-        printjobs.add_printjob(gcode_id=gcode_id, printer_ip="172.16.236.11:8080")
+        printjobs.add_printjob(gcode_id=gcode_id, gcode_data={"id": gcode_id}, printer_ip="172.16.236.11:8080", printer_data={"ip": "172.16.236.11:8080"})
+        printjobs.add_printjob(gcode_id=gcode_id, gcode_data={"id": gcode_id}, printer_ip="172.16.236.11:8080", printer_data={"ip": "172.16.236.11:8080"})
         with app.test_client() as c:
             response = c.delete('/gcodes/%s' % gcode_id)
             self.assertEqual(response.status_code, 204)
         self.assertEqual(gcodes.get_gcode(gcode_id), None)
-        self.assertEqual([r for r in printjobs.get_printjobs() if r["gcode_id"] == gcode_id], [])
+        pjs = [pj for pj in printjobs.get_printjobs() if pj["gcode_id"] == gcode_id]
+        self.assertEqual(len(pjs), 2)
+        for pj in pjs:
+            self.assertFalse(pj["gcode_data"]["available"])
 
     def test_delete_unknown(self):
         with app.test_client() as c:

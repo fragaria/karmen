@@ -3,7 +3,7 @@ import re
 
 from server import app
 from server.services.network import get_uri, post_uri
-from server.drivers.utils import PrinterClientInfo, PrinterDriver
+from server.drivers.utils import PrinterClientInfo, PrinterDriver, PrinterDriverException
 
 # Works with octoprint 1.3.11 without access control
 class Octoprint(PrinterDriver):
@@ -155,14 +155,16 @@ class Octoprint(PrinterDriver):
         else:
             return {}
 
-    def upload_and_start_job(self, gcode_path):
+    def upload_and_start_job(self, gcode_disk_path, path=None):
         request = None
-        print(self.client.connected)
         if self.client.connected:
+            status = self.status()
+            if status["state"] != "Operational":
+                raise PrinterDriverException("Printer is printing, cannot start another print")
             request = post_uri(self.ip, endpoint='/api/files/local', files={
-                "file": open(gcode_path, 'rb')
+                "file": open(gcode_disk_path, 'rb')
             }, data={
-                "path": "karmen",
+                "path": "karmen" if not path else "karmen/%s" % path,
                 "print": True,
             })
             if not request:
@@ -172,7 +174,7 @@ class Octoprint(PrinterDriver):
 
     def modify_current_job(self, action):
         if action not in ('cancel', 'start', 'toggle'):
-            raise Exception("Action %s is not allowed" % (action,))
+            raise PrinterDriverException("Action %s is not allowed" % (action,))
         request = None
         if self.client.connected:
             body = {

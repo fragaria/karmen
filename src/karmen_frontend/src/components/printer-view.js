@@ -1,117 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import BoxedModal from '../components/boxed-modal';
+import BoxedModal from './boxed-modal';
+import { WebcamStream } from './webcam-stream';
 import { deletePrinter, changeCurrentJob } from '../services/karmen-backend';
-
-const BACKEND_BASE_URL = window.env.BACKEND_BASE;
-
-export class WebcamStream extends React.Component {
-  state = {
-    isOnline: false,
-  }
-
-  constructor(props) {
-    super(props);
-    this.testStream = this.testStream.bind(this);
-  }
-
-  testStream() {
-    const { stream, proxied } = this.props;
-    if (!stream && !proxied) {
-      this.setState({
-        isOnline: false,
-      });
-      return;
-    }
-    fetch(stream)
-      .then((r) => {
-        if (r.status === 200) {
-          this.setState({
-            isOnline: true,
-            source: stream,
-          });
-        }
-      }).catch((e) => {
-        const proxiedStream = `${BACKEND_BASE_URL}${proxied}`;
-        fetch(proxiedStream)
-          .then((r) => {
-            if (r.status === 200) {
-              this.setState({
-                isOnline: true,
-                source: proxiedStream,
-              });
-            }
-          }).catch((e) => {
-            // pass
-          });
-      });
-  }
-
-  componentDidMount() {
-    this.testStream();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { stream, proxied } = this.props;
-    if (prevProps.stream !== stream || prevProps.proxied !== proxied) {
-      this.testStream();
-    }
-  }
-
-  componentWillUnmount() {
-    this.setState({
-      isOnline: false,
-      source: null,
-    })
-  }
-
-  render() {
-    const { flipHorizontal, flipVertical, rotate90 } = this.props;
-    const { isOnline, source } = this.state;
-    let klass = [];
-    if (flipHorizontal) {
-      klass.push('flip-horizontal');
-    }
-
-    if (flipVertical) {
-      klass.push('flip-vertical');
-    }
-
-    if (rotate90) {
-      klass.push('rotate-90');
-    }
-
-    return <div className="webcam-stream">
-      {isOnline ?
-        <img
-          className={klass.join(' ')}
-          alt={source}
-          src={`${source}?t=${(new Date()).getTime()}`}
-        /> :
-        <p className="no-stream">
-          Stream unavailable
-        </p>
-      }
-    </div>;
-  }
-}
-
-export const Job = ({ name, completion, printTime, printTimeLeft }) => {
-  let approxPrintTimeLeft = printTimeLeft;
-  if (!approxPrintTimeLeft && printTime > 0) {
-    approxPrintTimeLeft = (printTime / completion) * 100;
-  }
-  if (approxPrintTimeLeft) {
-    let d = new Date(null);
-    d.setSeconds(approxPrintTimeLeft)
-    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
-  }
-  return (
-    <React.Fragment>
-      <p><strong>{name || '\u00A0'}</strong></p>
-    </React.Fragment>
-  );
-}
 
 export const Progress = ({ completion, printTime, printTimeLeft }) => {
   let progressBarWidth = {
@@ -122,6 +13,7 @@ export const Progress = ({ completion, printTime, printTimeLeft }) => {
     approxPrintTimeLeft = (printTime / completion) * 100;
   }
   if (approxPrintTimeLeft) {
+    // TODO use dayjs
     let d = new Date(null);
     d.setSeconds(approxPrintTimeLeft)
     approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
@@ -167,7 +59,7 @@ export const PrinterState = ({ printer }) => {
       {(!printer.status.temperature || (!printer.status.temperature.tool0 && !printer.status.temperature.bed)) && <>&nbsp;</>}
       {printer.status.temperature && printer.status.temperature.tool0 && <><Temperature name="Tool" {...printer.status.temperature.tool0} />,</>}
       {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
-      <Job {...printer.job} />
+      <p><strong>{(printer.job && printer.job.name) || '\u00A0'}</strong></p>
     </div>
   );
 }

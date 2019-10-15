@@ -3,7 +3,6 @@ import unittest
 import mock
 
 from server import app
-from server.database import gcodes
 
 class VersionRoute(unittest.TestCase):
     def test_version(self):

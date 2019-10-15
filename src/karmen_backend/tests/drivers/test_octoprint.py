@@ -4,7 +4,7 @@ import json
 import mock
 import tempfile
 
-from server.drivers.utils import PrinterClientInfo
+from server.drivers.utils import PrinterClientInfo, PrinterDriverException
 from server.drivers.octoprint import Octoprint
 
 class OctoprintConstructor(unittest.TestCase):
@@ -439,8 +439,16 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.file_mock.close()
         os.remove(self.file_mock.name)
 
+    @mock.patch('server.drivers.octoprint.get_uri')
     @mock.patch('server.drivers.octoprint.post_uri')
-    def test_upload_job_ok(self, mock_post_uri):
+    def test_upload_job_ok(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {
+                "text": "Operational"
+            },
+            "temperature": {}
+        }
         mock_post_uri.return_value.status_code = 201
         mock_post_uri.return_value.json.return_value = {
             "files": {
@@ -459,32 +467,109 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertTrue(result)
         args, kwargs = mock_post_uri.call_args
-        self.assertEqual(kwargs["data"], {"path": "karmen", "print": True})
+        self.assertEqual(kwargs["data"], {
+            "path": "karmen",
+            "print": True
+        })
         self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
 
+    @mock.patch('server.drivers.octoprint.get_uri')
+    @mock.patch('server.drivers.octoprint.post_uri')
+    def test_upload_job_path_ok(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {
+                "text": "Operational"
+            },
+            "temperature": {}
+        }
+        mock_post_uri.return_value.status_code = 201
+        mock_post_uri.return_value.json.return_value = {
+            "files": {
+                "local": {
+                    "name": "20mm-umlaut-box",
+                    "origin": "local",
+                    "refs": {
+                        "resource": "http://example.com/api/files/local/whistle_v2.gcode",
+                        "download": "http://example.com/downloads/files/local/whistle_v2.gcode"
+                    }
+                }
+            },
+            "done": True,
+        }
+        printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+        result = printer.upload_and_start_job(self.file_mock.name, path="sub/path/on/disk")
+        self.assertTrue(result)
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(kwargs["data"], {
+            "path": "karmen/sub/path/on/disk",
+            "print": True
+        })
+        self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
+
+    @mock.patch('server.drivers.octoprint.get_uri')
     @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
-    def test_upload_job_disconnect(self, mock_post_uri):
+    def test_upload_job_printing(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {
+                "text": "Printing"
+            },
+            "temperature": {}
+        }
+        with self.assertRaises(PrinterDriverException) as context:
+            printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
+            printer.upload_and_start_job(self.file_mock.name)
+        self.assertTrue('Printer is printing' in str(context.exception))
+
+    @mock.patch('server.drivers.octoprint.get_uri')
+    @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
+    def test_upload_job_disconnect(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {
+                "text": "Operational"
+            },
+            "temperature": {}
+        }
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         self.assertTrue(printer.client.connected)
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertFalse(result)
         self.assertFalse(printer.client.connected)
 
+    @mock.patch('server.drivers.octoprint.get_uri')
     @mock.patch('server.drivers.octoprint.post_uri')
-    def test_upload_job_disconnected(self, mock_post_uri):
+    def test_upload_job_disconnected(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {
+                "text": "Operational"
+            },
+            "temperature": {}
+        }
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=False))
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertEqual(mock_post_uri.call_count, 0)
         self.assertFalse(result)
 
+    @mock.patch('server.drivers.octoprint.get_uri')
     @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
-    def test_upload_job_no_response(self, mock_post_uri):
+    def test_upload_job_no_response(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {
+                "text": "Operational"
+            },
+            "temperature": {}
+        }
         printer = Octoprint('192.168.1.15', client=PrinterClientInfo(connected=True))
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertFalse(result)
-
+    
+    @mock.patch('server.drivers.octoprint.get_uri', return_value=None)
     @mock.patch('server.drivers.octoprint.post_uri', return_value=None)
-    def test_upload_job_inactive_printer(self, mock_post_uri):
+    def test_upload_job_inactive_printer(self, mock_post_uri, mock_get_uri):
         printer = Octoprint('192.168.1.15')
         self.assertEqual(mock_post_uri.call_count, 0)
         result = printer.upload_and_start_job(self.file_mock.name)

@@ -89,6 +89,10 @@ h1 {
   font-size: 2.8rem;
 }
 
+h2 {
+  font-size: 2rem;
+}
+
 hr, .hidden {
   display: none;
 }
@@ -252,6 +256,25 @@ button[type=submit] {
   outline: none;
   background: map-get($palette, red);
   color: #fff;
+
+  &[disabled] {
+    background: map-get($palette, gray-medium);
+    color: map-get($palette, red);
+  }
+}
+
+button[type=reset] {
+  height: $form-elements-height;
+  border: none;
+  outline: none;
+  text-decoration: underline;
+  background: #fff;
+  color: map-get($palette, red);
+  margin-left: $base-unit;
+
+  &:hover, &:active {
+    text-decoration: none;
+  }
 
   &[disabled] {
     background: map-get($palette, gray-medium);
@@ -533,6 +556,24 @@ nav {
     > div {
       flex: 1;
       max-width: 50%;
+      padding: $spacing-default $spacing-default / 2;
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        padding-right: 0;
+      }
+
+      &.webcam-stream {
+        text-align: center;
+      }
+
+      h2 {
+        margin: $spacing-default 0;
+      }
+
     }
   }
 }
@@ -627,23 +668,5 @@ nav {
     position: relative;
     top: -1px;
     margin-left: $base-unit;
-  }
-
-  button[type=reset] {
-    height: $form-elements-height;
-    border: none;
-    outline: none;
-    text-decoration: underline;
-    background: #fff;
-    color: map-get($palette, red);
-
-    &:hover, &:active {
-      text-decoration: none;
-    }
-
-    &[disabled] {
-      background: map-get($palette, gray-medium);
-      color: map-get($palette, red);
-    }
   }
 }

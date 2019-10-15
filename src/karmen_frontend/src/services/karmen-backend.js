@@ -235,3 +235,31 @@ export const printGcode = (id, printer) => {
       return 500;
     });
 }
+
+export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter = null, limit = 10) => {
+    let uri = `${BASE_URL}/printjobs?limit=${limit}`;
+  if (startWith) {
+    uri += `&start_with=${startWith}`;
+  }
+  if (orderBy) {
+    uri += `&order_by=${orderBy}`;
+  }
+  if (printerFilter) {
+    uri += `&filter=printer_ip:${printerFilter}`;
+  }
+  return fetch(uri)
+    .then((response) => {
+      if (response.status !== 200) {
+        console.error(`Cannot get list of printjobs: ${response.status}`);
+        return {
+          "items": []
+        };
+      }
+      return response.json();
+    }).catch((e) => {
+      console.error(`Cannot get list of printjobs: ${e}`);
+      return {
+        "items": []
+      };
+    });
+}

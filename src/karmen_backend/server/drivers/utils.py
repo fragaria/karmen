@@ -34,3 +34,6 @@ class PrinterDriver(abc.ABC):
     @abc.abstractmethod
     def upload_and_start_job(self, gcode_path):
         pass
+
+class PrinterDriverException(Exception):
+    pass
