@@ -6,6 +6,7 @@ from flask_cors import cross_origin
 from server import app, __version__
 from server.database import gcodes, printjobs
 from server.services import files
+from server.tasks.analyze_gcode import analyze_gcode
 
 
 def make_gcode_response(gcode, fields=None):
@@ -115,6 +116,7 @@ def gcode_create():
             absolute_path=saved["absolute_path"],
             size=saved["size"],
         )
+        analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
         return abort(e, 500)
     return (

@@ -60,6 +60,7 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
+      - ./karmen-files:/tmp/karmen-files
       - /var/run/dbus:/var/run/dbus # for mdns resolution
     privileged: true # for mdns resolution
     depends_on:
