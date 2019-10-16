@@ -19,6 +19,7 @@ def make_gcode_response(gcode, fields=None):
         "uploaded",
         "size",
         "data",
+        "analysis_result",
     ]
     fields = fields if fields else flist
     response = {}
@@ -27,7 +28,7 @@ def make_gcode_response(gcode, fields=None):
             if field == "data":
                 response["data"] = "/gcodes/%s/data" % (gcode["id"],)
                 continue
-            response[field] = gcode[field]
+            response[field] = gcode.get(field, None)
     if "uploaded" in response:
         response["uploaded"] = response["uploaded"].isoformat()
     return response

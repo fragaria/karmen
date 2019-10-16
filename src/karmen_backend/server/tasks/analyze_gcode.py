@@ -48,7 +48,14 @@ def get_filament_used_length(line):
         m = re.match(r"\s*;\s*Filament used\s*:\s*([0-9.]+)\s*m\s*", gcode_line)
         return float(m.group(1)) * 1000 if m else None
 
-    for fn in [prusaslicer, cura]:
+    def slic3r(gcode_line):
+        m = re.match(
+            r"\s*;\s*filament used\s*=\s*([0-9.]+)\s*mm\s*\(([0-9.]+)cm3\)\s*",
+            gcode_line,
+        )
+        return float(m.group(1)) if m else None
+
+    for fn in [prusaslicer, cura, slic3r]:
         result = fn(line)
         if result:
             return result
@@ -60,7 +67,14 @@ def get_filament_used_volume(line):
         m = re.match(r"\s*;\s*filament used\s* \[cm3\]\s*=\s*([0-9.]+)\s*", gcode_line)
         return float(m.group(1)) if m else None
 
-    for fn in [prusaslicer]:
+    def slic3r(gcode_line):
+        m = re.match(
+            r"\s*;\s*filament used\s*=\s*([0-9.]+)\s*mm\s*\(([0-9.]+)cm3\)\s*",
+            gcode_line,
+        )
+        return float(m.group(2)) if m else None
+
+    for fn in [prusaslicer, slic3r]:
         result = fn(line)
         if result:
             return result
