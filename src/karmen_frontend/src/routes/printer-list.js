@@ -37,7 +37,7 @@ class PrinterList extends React.Component {
 
   render () {
     const { printers } = this.state;
-    if (printers === null) {
+    if (printers === null || printers === undefined) {
       return <div><Loader /></div>;
     }
     const printerElements = printers && printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
