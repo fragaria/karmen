@@ -30,7 +30,7 @@ if [ "$SERVICE" = 'flask' ]; then
   else
     export FLASK_APP=server
     export FLASK_DEBUG=true
-    flask run --host=0.0.0.0 --port 8080
+    flask run --host=0.0.0.0 --port 9764
   fi
 elif [ "$SERVICE" = 'celery-beat' ]; then
   test_flaskr_settings
