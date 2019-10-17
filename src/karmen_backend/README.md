@@ -41,7 +41,7 @@ which affects how it is connected to the other containers (database, redis).
 - Install `pipenv` and make its binary accessible on your PATH
 - Install `arp-scan` (for printer discovery), `avahi-utils` (for bonjour hostname autodiscovery), `libpq-dev` (for psycopg2 build)
 - Setup redis instance
-- Jump into pipenv's virtualenv by running `pipenv install && pipenv shell`
+- Jump into pipenv's virtualenv by running `pipenv install --dev && pipenv shell`
 - Setup pgsql database and hydrate it by running `scripts/migrate.sh` with properly set `POSTGRES_HOST`, `POSTGRES_PORT` and `ENV` environment variables
 - Configure `flask` with `export FLASK_APP=server`
 - Optionally enable debug mode with `export FLASK_DEBUG=true`
