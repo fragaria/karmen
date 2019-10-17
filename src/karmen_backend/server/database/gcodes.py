@@ -13,7 +13,7 @@ def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
         "absolute_path",
         "uploaded",
         "size",
-        "analysis_result",
+        "analysis",
     ]
     with get_connection() as connection:
         statement = prepare_list_statement(
@@ -41,7 +41,7 @@ def get_gcode(id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis_result from gcodes where id = %s",
+            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis from gcodes where id = %s",
             (id,),
         )
         data = cursor.fetchone()
@@ -53,14 +53,14 @@ def add_gcode(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis_result) values (%s, %s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis) values (%s, %s, %s, %s, %s, %s) RETURNING id",
             (
                 kwargs["path"],
                 kwargs["filename"],
                 kwargs["display"],
                 kwargs["absolute_path"],
                 kwargs["size"],
-                psycopg2.extras.Json(kwargs.get("analysis_result", {})),
+                psycopg2.extras.Json(kwargs.get("analysis", {})),
             ),
         )
         data = cursor.fetchone()
@@ -80,11 +80,11 @@ def delete_gcode(id):
         cursor.close()
 
 
-def set_analysis_result(gcode_id, analysis_result):
+def set_analysis(gcode_id, analysis):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE gcodes SET analysis_result = %s where id = %s",
-            (psycopg2.extras.Json(analysis_result), gcode_id),
+            "UPDATE gcodes SET analysis = %s where id = %s",
+            (psycopg2.extras.Json(analysis), gcode_id),
         )
         cursor.close()

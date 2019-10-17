@@ -19,7 +19,7 @@ def make_gcode_response(gcode, fields=None):
         "uploaded",
         "size",
         "data",
-        "analysis_result",
+        "analysis",
     ]
     fields = fields if fields else flist
     response = {}

@@ -23,7 +23,7 @@ class AnalyzeGcodeTest(unittest.TestCase):
         self.assertTrue(mock_logger.call_count, 1)
         mock_logger.called_with("Gcode file not found")
 
-    @mock.patch("server.database.gcodes.set_analysis_result")
+    @mock.patch("server.database.gcodes.set_analysis")
     @mock.patch(
         "server.database.gcodes.get_gcode",
         return_value={"absolute_path": "/a/karmen-random-file"},
@@ -87,7 +87,7 @@ G1 X133.924 Y111.355 E0.01085
                 },
             )
 
-    @mock.patch("server.database.gcodes.set_analysis_result")
+    @mock.patch("server.database.gcodes.set_analysis")
     @mock.patch(
         "server.database.gcodes.get_gcode",
         return_value={"absolute_path": "/a/karmen-random-file"},
@@ -162,7 +162,7 @@ M104 S0
                 },
             )
 
-    @mock.patch("server.database.gcodes.set_analysis_result")
+    @mock.patch("server.database.gcodes.set_analysis")
     @mock.patch(
         "server.database.gcodes.get_gcode",
         return_value={"absolute_path": "/a/karmen-random-file"},

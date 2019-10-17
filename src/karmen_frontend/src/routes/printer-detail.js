@@ -1,5 +1,6 @@
 import React from 'react';
 import dayjs from 'dayjs';
+import { Link } from 'react-router-dom';
 
 import Loader from '../components/loader';
 import { PrinterConnection, PrinterState } from '../components/printer-view';
@@ -21,7 +22,7 @@ class PrintJobRow extends React.Component {
         <td>
           {/* TODO replace this with a link to gcode detail on frontend*/}
           {gcode_data && gcode_data.available
-            ? (<a href={`${BASE_URL}/gcodes/${gcode_data.id}/data`}>{gcode_data.filename}</a>)
+            ? (<Link to={`/gcodes/${gcode_data.id}`}>{gcode_data.filename}</Link>)
             : (<span>{gcode_data.filename}</span>)
           }
         </td>

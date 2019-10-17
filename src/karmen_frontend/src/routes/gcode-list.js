@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import dayjs from 'dayjs';
 
 import Loader from '../components/loader';
 import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/karmen-backend';
@@ -21,7 +20,7 @@ class GcodeRow extends React.Component {
 
   render() {
     const { showDeleteRow, showPrinterSelectRow, showPrintStatusRow, availablePrinters, selectedPrinter } = this.state;
-    const { display, path, size, uploaded, data, onRowDelete, id } = this.props;
+    const { display, path, size, uploaded, onRowDelete, id } = this.props;
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
@@ -43,7 +42,7 @@ class GcodeRow extends React.Component {
       return (
         <tr className="inverse">
           <td colSpan="3">
-            Do you really want to delete <strong>{path}/{display}</strong>? This cannot be undone.
+            Do you really want to delete <strong>{path}{path ? '/' : ''}{display}</strong>? This cannot be undone.
           </td>
           <td className="action-cell">
             <button className="plain" title="Cancel" onClick={() => {
@@ -110,9 +109,9 @@ class GcodeRow extends React.Component {
 
     return (
       <tr>
-        <td><a href={`${window.env.BACKEND_BASE}${data}`}>{path}{path ? '/' : ''}{display}</a></td>
+        <td><Link to={`/gcodes/${id}`}>{path}{path ? '/' : ''}{display}</Link></td>
         <td>{formatters.bytes(size)}</td>
-        <td>{dayjs(uploaded).format('HH:mm:ss YYYY-MM-DD')}</td>
+        <td>{formatters.datetime(uploaded)}</td>
         <td className="action-cell">
           <button className="plain icon-link" onClick={() => {
             getPrinters().then((printers) => {
@@ -164,7 +163,7 @@ class GcodeList extends React.Component {
       }];
       page = 0;
     }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter).then((gcodes) => {
+    getGcodes(pages[page].startWith, newOrderBy, newFilter, 15, ['id', 'display', 'filename', 'path', 'size', 'uploaded']).then((gcodes) => {
       // Handles deleting of the last row on a non-zero page
       if (!gcodes.next && gcodes.items.length === 0 && page - 1 >= 0) {
         this.loadPage(page - 1, newOrderBy);
@@ -206,6 +205,7 @@ class GcodeList extends React.Component {
       return <GcodeRow
         key={g.id}
         {...g}
+        history={this.props.history}
         onRowDelete={() => {
           deleteGcode(g.id)
             .then(() => {

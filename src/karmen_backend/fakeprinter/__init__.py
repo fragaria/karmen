@@ -68,7 +68,7 @@ def job():
         },
         'progress': {
             'completion': 66.666,
-            'printTimeLeft': 3685,
+            'printTimeLeft': 7685,
             'printTime': 532,
         },
         'state': job_state

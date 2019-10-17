@@ -204,7 +204,7 @@ def analyze_gcode(gcode_id):
                 for fprop, evaluator in time_props:
                     if not result["time"].get(fprop, None):
                         result["time"][fprop] = evaluator(line)
-        gcodes.set_analysis_result(gcode_id, result)
+        gcodes.set_analysis(gcode_id, result)
     except FileNotFoundError:
         app.logger.error("Gcode file not found")
         return

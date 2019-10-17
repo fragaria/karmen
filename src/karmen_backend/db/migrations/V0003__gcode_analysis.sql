@@ -12,4 +12,4 @@ SET row_security = off;
 SET default_tablespace = '';
 
 ALTER TABLE public.gcodes
-    ADD COLUMN IF NOT EXISTS analysis_result json;
+    ADD COLUMN IF NOT EXISTS analysis json;
