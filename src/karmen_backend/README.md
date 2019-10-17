@@ -18,7 +18,7 @@ with properly set `POSTGRES_HOST`, `POSTGRES_PORT` and `ENV` environment variabl
 
 ```sh
 docker build -t fragaria/karmen-backend .
-docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:8080 fragaria/karmen-backend
+docker run -e ENV=develop -e SERVICE=flask -e FLASKR_SETTINGS='../config.dev.cfg' -p5000:9764 fragaria/karmen-backend
 docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
 docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
 ```

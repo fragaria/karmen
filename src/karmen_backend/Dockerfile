@@ -20,9 +20,7 @@ ENV REDIS_HOST 127.0.0.1
 ENV REDIS_PORT 6379
 ENV SERVICE_PORT 9764
 
+COPY ./scripts/nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf.template
 COPY . .
-COPY ./scripts/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 
 CMD ["./scripts/docker-start.sh"]
-
-EXPOSE ${SERVICE_PORT}

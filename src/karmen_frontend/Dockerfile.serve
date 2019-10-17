@@ -5,10 +5,9 @@ RUN apk add nginx
 WORKDIR /usr/src/app
 
 ENV ENV production
+ENV SERVICE_PORT 9765
 
-COPY ./scripts/nginx.conf /etc/nginx
+COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY . .
 
 CMD ["./scripts/docker-start.sh"]
-
-EXPOSE 8080

@@ -96,6 +96,15 @@ containers from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&t
 the Python backend from the frontend UI. You will also use it to access the Javascript frontend
 from your browser. The frontend is run on standard port 80 and the API is accessible on port 8080.
 
+It is possible to modify the default ports with the following environment variables:
+
+.. code-block:: sh
+
+   BASE_PORT=3777 BASE_API_PORT=3778 BASE_HOST=<public-ip-address> ./run-karmen.sh
+
+This will run the frontend on port 3777 and the API on port 3778. You then don't have to worry about
+the port change during the Karmen update.
+
   .. note::
     Although the Raspbian and OctoPi images support `mDNS <https://en.wikipedia.org/wiki/Multicast_DNS>`_,
     you should set BASE_HOST to the IP address as mDNS might not work on all systems (namely Windows)

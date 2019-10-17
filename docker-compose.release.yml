@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     environment:
       ENV: production
-      BACKEND_BASE: http://${BASE_HOST}:8080
+      BACKEND_BASE: http://${BASE_HOST}:${BASE_API_PORT:-8080}
     ports:
-      - 80:8080
+      - ${BASE_PORT:-80}:9765
   files:
     image: fragaria/karmen-backend
     user: root
@@ -38,9 +38,8 @@ services:
       REDIS_HOST: 127.0.0.1
       ENV: production
       SERVICE: flask
+      SERVICE_PORT: ${BASE_API_PORT:-8080}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
-    ports:
-      - 8080:8080
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ./karmen-files:/tmp/karmen-files

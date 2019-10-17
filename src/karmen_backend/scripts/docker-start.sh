@@ -25,12 +25,14 @@ clean_pid_file() {
 if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
+    sed -i "s/~~SERVICE_PORT~~/${SERVICE_PORT:-9764}/g" /usr/local/openresty/nginx/conf/nginx.conf.template
+    cp /usr/local/openresty/nginx/conf/nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf
     openresty
     uwsgi --ini uwsgi.ini
   else
     export FLASK_APP=server
     export FLASK_DEBUG=true
-    flask run --host=0.0.0.0 --port 9764
+    flask run --host=0.0.0.0 --port ${SERVICE_PORT:-9764}
   fi
 elif [ "$SERVICE" = 'celery-beat' ]; then
   test_flaskr_settings
@@ -53,7 +55,7 @@ elif [ "$SERVICE" = 'celery-worker' ]; then
 elif [ "$SERVICE" = 'fake-printer' ]; then
   export FLASK_APP=fakeprinter
   export FLASK_DEBUG=true
-  flask run --host=0.0.0.0 --port 8080
+  flask run --host=0.0.0.0 --port ${SERVICE_PORT:-8080}
 else
   echo "Unknown service ${SERVICE} encountered. I know of [flask, celery-beat and celery-worker, fake-printer]"
   exit 1
