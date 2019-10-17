@@ -76,6 +76,7 @@ G1 X133.924 Y111.355 E0.01085
             mock_analysis_set.assert_called_once_with(
                 123,
                 {
+                    "slicer": "PrusaSlicer 2.0.0+linux64",
                     "filament": {"length_mm": 94.7, "volume_cm3": 0.2, "type": "PLA"},
                     "temperatures": {
                         "bed": 60.0,
@@ -147,6 +148,7 @@ M104 S0
             mock_analysis_set.assert_called_once_with(
                 123,
                 {
+                    "slicer": "Cura_SteamEngine 4.3.0",
                     "filament": {
                         "length_mm": 203.432,
                         "volume_cm3": None,
@@ -241,6 +243,7 @@ M140 S0 ; set bed temperature
             mock_analysis_set.assert_called_once_with(
                 123,
                 {
+                    "slicer": "Slic3r 1.3.0",
                     "filament": {"length_mm": 972.9, "volume_cm3": 6.9, "type": None},
                     "temperatures": {
                         "bed": 20.0,
