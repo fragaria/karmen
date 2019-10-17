@@ -5,7 +5,16 @@ from server.database import get_connection, prepare_list_statement
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
 def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
-    columns = ["id", "path", "filename", "display", "absolute_path", "uploaded", "size"]
+    columns = [
+        "id",
+        "path",
+        "filename",
+        "display",
+        "absolute_path",
+        "uploaded",
+        "size",
+        "analysis",
+    ]
     with get_connection() as connection:
         statement = prepare_list_statement(
             connection,
@@ -32,7 +41,7 @@ def get_gcode(id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, path, filename, display, absolute_path, uploaded, size from gcodes where id = %s",
+            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis from gcodes where id = %s",
             (id,),
         )
         data = cursor.fetchone()
@@ -44,13 +53,14 @@ def add_gcode(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO gcodes (path, filename, display, absolute_path, size) values (%s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis) values (%s, %s, %s, %s, %s, %s) RETURNING id",
             (
                 kwargs["path"],
                 kwargs["filename"],
                 kwargs["display"],
                 kwargs["absolute_path"],
                 kwargs["size"],
+                psycopg2.extras.Json(kwargs.get("analysis", {})),
             ),
         )
         data = cursor.fetchone()
@@ -67,4 +77,14 @@ def delete_gcode(id):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute("DELETE FROM gcodes WHERE id = %s", (id,))
+        cursor.close()
+
+
+def set_analysis(gcode_id, analysis):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            "UPDATE gcodes SET analysis = %s where id = %s",
+            (psycopg2.extras.Json(analysis), gcode_id),
+        )
         cursor.close()

@@ -6,6 +6,7 @@ from flask_cors import cross_origin
 from server import app, __version__
 from server.database import gcodes, printjobs
 from server.services import files
+from server.tasks.analyze_gcode import analyze_gcode
 
 
 def make_gcode_response(gcode, fields=None):
@@ -18,6 +19,7 @@ def make_gcode_response(gcode, fields=None):
         "uploaded",
         "size",
         "data",
+        "analysis",
     ]
     fields = fields if fields else flist
     response = {}
@@ -26,7 +28,7 @@ def make_gcode_response(gcode, fields=None):
             if field == "data":
                 response["data"] = "/gcodes/%s/data" % (gcode["id"],)
                 continue
-            response[field] = gcode[field]
+            response[field] = gcode.get(field, None)
     if "uploaded" in response:
         response["uploaded"] = response["uploaded"].isoformat()
     return response
@@ -115,6 +117,7 @@ def gcode_create():
             absolute_path=saved["absolute_path"],
             size=saved["size"],
         )
+        analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
         return abort(e, 500)
     return (

@@ -45,6 +45,11 @@ body {
   }
 }
 
+sup {
+  vertical-align: super;
+  font-size: smaller;
+}
+
 #root {
   display: flex;
   flex-direction: column;

@@ -92,6 +92,7 @@ services:
       FLASKR_SETTINGS: '../config.dev.cfg'
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
+      - ./tmp/karmen-files:/tmp/karmen-files
     networks:
       - default
       - backend

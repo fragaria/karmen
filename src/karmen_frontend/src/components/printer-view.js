@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import BoxedModal from './boxed-modal';
 import { WebcamStream } from './webcam-stream';
 import { deletePrinter, changeCurrentJob } from '../services/karmen-backend';
+import formatters from '../services/formatters';
 
 export const Progress = ({ completion, printTime, printTimeLeft }) => {
   let progressBarWidth = {
@@ -13,10 +14,7 @@ export const Progress = ({ completion, printTime, printTimeLeft }) => {
     approxPrintTimeLeft = (printTime / completion) * 100;
   }
   if (approxPrintTimeLeft) {
-    // TODO use dayjs
-    let d = new Date(null);
-    d.setSeconds(approxPrintTimeLeft)
-    approxPrintTimeLeft = `${d.toISOString().substr(11, 2)}h ${d.toISOString().substr(14, 2)}m`;
+    approxPrintTimeLeft = formatters.timespan(approxPrintTimeLeft);
   }
   return (
     <React.Fragment>

@@ -1,7 +1,11 @@
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getPrinters = (fields = []) => {
-  return fetch(`${BASE_URL}/printers?fields=${fields.join(',')}`)
+  let uri = `${BASE_URL}/printers`;
+  if (fields && fields.length) {
+    uri += `?fields=${fields.join(',')}`;
+  }
+  return fetch(uri)
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printers: ${response.status}`);
@@ -17,7 +21,11 @@ export const getPrinters = (fields = []) => {
 }
 
 export const getPrinter = (ip, fields = []) => {
-  return fetch(`${BASE_URL}/printers/${ip}?fields=${fields.join(',')}`)
+  let uri = `${BASE_URL}/printers/${ip}`;
+  if (fields && fields.length) {
+    uri += `?fields=${fields.join(',')}`;
+  }
+  return fetch(uri)
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get a printer: ${response.status}`);
@@ -151,8 +159,11 @@ export const heartbeat = () => {
     })
 }
 
-export const getGcodes = (startWith = null, orderBy = null, displayFilter = null, limit = 15) => {
+export const getGcodes = (startWith = null, orderBy = null, displayFilter = null, limit = 15, fields = []) => {
   let uri = `${BASE_URL}/gcodes?limit=${limit}`;
+  if (fields) {
+    uri += `&fields=${fields.join(',')}`;
+  }
   if (startWith) {
     uri += `&start_with=${startWith}`;
   }
@@ -177,6 +188,24 @@ export const getGcodes = (startWith = null, orderBy = null, displayFilter = null
         "items": []
       };
     });
+}
+
+export const getGcode = (id, fields = []) => {
+  let uri = `${BASE_URL}/gcodes/${id}`;
+  if (fields && fields.length) {
+    uri += `?fields=${fields.join(',')}`;
+  }
+  return fetch(uri)
+    .then((response) => {
+      if (response.status !== 200) {
+        console.error(`Cannot get a gcode: ${response.status}`);
+        return;
+      }
+      return response.json();
+    }).catch((e) => {
+      console.error(`Cannot get a gcode: ${e}`);
+      return {};
+    })
 }
 
 export const deleteGcode = (id) => {

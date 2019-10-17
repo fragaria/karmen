@@ -6,6 +6,7 @@ import Heartbeat from './components/heartbeat';
 
 import PrinterList from './routes/printer-list';
 import GcodeList from './routes/gcode-list'
+import GcodeDetail from './routes/gcode-detail';
 import PrinterDetail from './routes/printer-detail';
 import AddPrinter from './routes/add-printer';
 import AddGcode from './routes/add-gcode';
@@ -22,6 +23,7 @@ function App() {
             <Route path="/add-gcode" exact component={AddGcode} />
             <Route path="/settings" exact component={Settings} />
             <Route path="/gcodes" exact component={GcodeList} />
+            <Route path="/gcodes/:id" exact component={GcodeDetail} />
             <Route path="/printers/:ip" exact component={PrinterDetail} />
             <Route path="/" exact component={PrinterList} />
           </Switch>
