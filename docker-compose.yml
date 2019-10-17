@@ -50,7 +50,7 @@ services:
       SERVICE: flask
       FLASKR_SETTINGS: '../config.dev.cfg'
     ports:
-      - 127.0.0.1:5000:8080
+      - 127.0.0.1:5000:9764
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
@@ -70,6 +70,7 @@ services:
     environment:
       ENV: develop
       SERVICE: fake-printer
+      SERVICE_PORT: 8080
     networks:
       printers:
         ipv4_address: 172.16.236.11
@@ -79,6 +80,7 @@ services:
     environment:
       ENV: develop
       SERVICE: fake-printer
+      SERVICE_PORT: 8080
     networks:
       printers:
         ipv4_address: 172.16.236.12
