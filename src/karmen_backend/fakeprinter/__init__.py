@@ -37,6 +37,7 @@ def settings():
     })
 
 job_state = 'Printing'
+job_name = 'fake-file-being-printed.gcode'
 
 @app.route('/api/printer', methods=['GET', 'OPTIONS'])
 @cross_origin()
@@ -60,10 +61,11 @@ def printer():
 @app.route('/api/job', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def job():
+    global job_name
     return jsonify({
         'job': {
             'file': {
-                'display': 'fake-file-being-printed.gcode',
+                'display': job_name,
             },
         },
         'progress': {
@@ -91,6 +93,7 @@ def modify_job():
         if job_state not in ('Paused', 'Printing'):
             return abort(409)
         job_state = 'Cancelled'
+        job_state = 'Operational'
     if data['command'] == 'pause':
         action = data.get('action', 'toggle')
         if action == 'pause':
@@ -108,6 +111,7 @@ def modify_job():
 @app.route('/api/files/local', methods=['POST', 'OPTIONS'])
 @cross_origin()
 def upload():
+    global job_state, job_name
     if "file" not in request.files:
         return abort(400)
     incoming = request.files["file"]
@@ -122,6 +126,8 @@ def upload():
     path = request.form.get("path", "/")
     destination_dir = os.path.join("/tmp/uploaded-files/", path)
     destination = os.path.join(destination_dir, filename)
+    job_state = 'Printing'
+    job_name = filename
     return jsonify({
         "files": {
             "local": {
