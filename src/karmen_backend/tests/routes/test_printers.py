@@ -147,6 +147,7 @@ class PatchRoute(unittest.TestCase):
             ip="1.2.3.4",
             client="octoprint",
             client_props={"version": "123"},
+            printer_props={"filament_type": "PLA"},
         )
 
     def tearDown(self):
@@ -158,6 +159,25 @@ class PatchRoute(unittest.TestCase):
                 "/printers/1.2.3.4", json={"name": "random-test-printer-name"}
             )
             self.assertEqual(response.status_code, 204)
+
+    def test_patch_printer_props(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/printers/1.2.3.4",
+                json={
+                    "name": "random-test-printer-name",
+                    "printer_props": {
+                        "filament_type": "PETG",
+                        "filament_color": "žluťoučká",
+                        "random": "key",
+                    },
+                },
+            )
+            self.assertEqual(response.status_code, 204)
+            p = printers.get_printer("1.2.3.4")
+            self.assertEqual(p["printer_props"]["filament_type"], "PETG")
+            self.assertEqual(p["printer_props"]["filament_color"], "žluťoučká")
+            self.assertTrue("random" not in p["printer_props"])
 
     def test_patch_unknown(self):
         with app.test_client() as c:

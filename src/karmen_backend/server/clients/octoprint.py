@@ -20,10 +20,12 @@ class Octoprint(PrinterClient):
         name=None,
         client=PrinterClientInfo(),
         client_props=None,
+        printer_props=None,
     ):
         self.name = name
         self.hostname = hostname
         self.ip = ip
+        self.printer_props = printer_props
         if not client_props:
             self.client = (
                 client if isinstance(client, PrinterClientInfo) else PrinterClientInfo()
@@ -34,6 +36,9 @@ class Octoprint(PrinterClient):
                 client_props.get("connected", False),
                 client_props.get("read_only", False),
             )
+
+    def get_printer_props(self):
+        return self.printer_props
 
     def client_name(self):
         return self.__client_name__

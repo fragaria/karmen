@@ -14,6 +14,10 @@ class PrinterClient(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def get_printer_props(self):
+        pass
+
+    @abc.abstractmethod
     def is_alive(self):
         pass
 

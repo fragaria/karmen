@@ -13,6 +13,7 @@ class CheckPrintersTest(unittest.TestCase):
                 "ip": "1234",
                 "client_props": {"connected": True, "version": {}, "read_only": False},
                 "client": "octoprint",
+                "printer_props": {"filament_type": "PETG"},
             },
             {
                 "hostname": "b",
@@ -44,6 +45,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                         },
+                        "printer_props": {"filament_type": "PETG"},
                     }
                 ),
                 mock.call(
@@ -57,6 +59,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                         },
+                        "printer_props": None,
                     }
                 ),
             ]
@@ -135,6 +138,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                         },
+                        "printer_props": None,
                     }
                 ),
                 mock.call(
@@ -148,6 +152,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                         },
+                        "printer_props": None,
                     }
                 ),
             ]
@@ -241,6 +246,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                         },
+                        "printer_props": None,
                     }
                 ),
                 mock.call(
@@ -254,6 +260,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                         },
+                        "printer_props": None,
                     }
                 ),
             ]

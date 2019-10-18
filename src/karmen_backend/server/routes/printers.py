@@ -19,6 +19,7 @@ def make_printer_response(printer, fields):
             "connected": printer_inst.client.connected,
             "readonly": printer_inst.client.read_only,
         },
+        "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
         "hostname": printer_inst.hostname,
         "ip": printer_inst.ip,
@@ -122,6 +123,20 @@ def printer_patch(ip):
     if not name:
         return abort(400)
     printer_inst = clients.get_printer_instance(printer)
+    printer_props = data.get("printer_props", {})
+    if printer_props:
+        printer_inst.get_printer_props().update(
+            {
+                k: printer_props[k]
+                for k in [
+                    "filament_type",
+                    "filament_color",
+                    "bed_type",
+                    "tool0_diameter",
+                ]
+                if k in printer_props
+            }
+        )
     printers.update_printer(
         name=name,
         hostname=printer_inst.hostname,
@@ -132,6 +147,7 @@ def printer_patch(ip):
             "connected": printer_inst.client.connected,
             "read_only": printer_inst.client.read_only,
         },
+        printer_props=printer_inst.get_printer_props(),
     )
     return "", 204
 

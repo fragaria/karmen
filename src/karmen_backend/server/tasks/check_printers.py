@@ -38,4 +38,5 @@ def check_printers():
                 "connected": printer.client.connected,
                 "read_only": printer.client.read_only,
             },
+            printer_props=printer.get_printer_props(),
         )
