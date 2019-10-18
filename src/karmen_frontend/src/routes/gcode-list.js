@@ -252,7 +252,7 @@ class GcodeList extends React.Component {
               <table>
                 <thead>
                   <tr>
-                    <th>
+                    <th style={{"width": "50%"}}>
                       <button className={`plain sorting-button ${orderBy.indexOf('filename') > -1 ? 'active' : ''}`} onClick={() => {
                         let order = '+filename';
                         if (orderBy === '+filename') {

@@ -20,7 +20,6 @@ class PrintJobRow extends React.Component {
     return (
       <tr>
         <td>
-          {/* TODO replace this with a link to gcode detail on frontend*/}
           {gcode_data && gcode_data.available
             ? (<Link to={`/gcodes/${gcode_data.id}`}>{gcode_data.filename}</Link>)
             : (<span>{gcode_data.filename}</span>)
@@ -171,7 +170,7 @@ class PrinterDetail extends React.Component {
                       <table>
                         <thead>
                           <tr>
-                            <th>Filename</th>
+                            <th style={{"width": "50%"}}>Filename</th>
                             <th>Size</th>
                             <th>
                               <button className={`plain sorting-button ${jobsTable.orderBy.indexOf('started') > -1 ? 'active' : ''}`} onClick={() => {
