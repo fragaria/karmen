@@ -446,10 +446,7 @@ input[type=text], select {
 
 .webcam-stream {
   min-height: 320px;
-
-  button {
-    width: 100%;
-  }
+  cursor: pointer;
 
   .no-stream {
     width: 100%;

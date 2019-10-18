@@ -81,24 +81,23 @@ export class WebcamStream extends React.Component {
 
     return <div
       className={`webcam-stream ${isMaximized ? 'maximized' : ''}`}
-    >
-      <button className="plain" onClick={() => {
+       onClick={() => {
         const { isMaximized } = this.state;
         this.setState({
           isMaximized: !isMaximized
         })
-      }}>
-        {isOnline ?
-          <img
-            className={klass.join(' ')}
-            alt={source}
-            src={`${source}?t=${(new Date()).getTime()}`}
-          /> :
-          <p className="no-stream">
-            Stream unavailable
-          </p>
-        }
-      </button>
+      }}
+    >
+      {isOnline ?
+        <img
+          className={klass.join(' ')}
+          alt={source}
+          src={`${source}?t=${(new Date()).getTime()}`}
+        /> :
+        <p className="no-stream">
+          Stream unavailable
+        </p>
+      }
     </div>;
   }
 }
