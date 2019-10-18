@@ -32,7 +32,7 @@ function App() {
       </BrowserRouter>
       <footer>
         <section>
-          &copy; 2019
+          &copy; {(new Date()).getFullYear()}
           <a href="https://fragaria.cz" target="_blank" rel="noopener noreferrer">Fragaria s.r.o.</a>
         </section>
         <section>
