@@ -8,7 +8,7 @@ class PrinterClientInfo:
         self.read_only = read_only
 
 
-class PrinterDriver(abc.ABC):
+class PrinterClient(abc.ABC):
     @abc.abstractmethod
     def client_name(self):
         pass
@@ -38,5 +38,5 @@ class PrinterDriver(abc.ABC):
         pass
 
 
-class PrinterDriverException(Exception):
+class PrinterClientException(Exception):
     pass

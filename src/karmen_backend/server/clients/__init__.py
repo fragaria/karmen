@@ -1,4 +1,4 @@
-from server.drivers.octoprint import Octoprint
+from server.clients.octoprint import Octoprint
 
 
 def get_printer_instance(printer):

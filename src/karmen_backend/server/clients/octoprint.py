@@ -3,14 +3,14 @@ import re
 
 from server import app
 from server.services.network import get_uri, post_uri
-from server.drivers.utils import (
+from server.clients.utils import (
     PrinterClientInfo,
-    PrinterDriver,
-    PrinterDriverException,
+    PrinterClient,
+    PrinterClientException,
 )
 
 # Works with octoprint 1.3.11 without access control
-class Octoprint(PrinterDriver):
+class Octoprint(PrinterClient):
     __client_name__ = "octoprint"
 
     def __init__(
@@ -49,7 +49,7 @@ class Octoprint(PrinterDriver):
                 self.client.connected = True
         return self.client.connected
 
-    # TODO move this code outside of this driver, the sniffing code should discover a variety of drivers
+    # TODO move this code outside of this client, the sniffing code should discover a variety of clients
     def sniff(self):
         request = get_uri(self.ip, endpoint="/api/version")
         if request is None:
@@ -188,7 +188,7 @@ class Octoprint(PrinterDriver):
         if self.client.connected:
             status = self.status()
             if status["state"] != "Operational":
-                raise PrinterDriverException(
+                raise PrinterClientException(
                     "Printer is printing, cannot start another print"
                 )
             request = post_uri(
@@ -207,7 +207,7 @@ class Octoprint(PrinterDriver):
 
     def modify_current_job(self, action):
         if action not in ("cancel", "start", "toggle"):
-            raise PrinterDriverException("Action %s is not allowed" % (action,))
+            raise PrinterClientException("Action %s is not allowed" % (action,))
         request = None
         if self.client.connected:
             body = {"command": action}

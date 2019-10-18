@@ -1,7 +1,7 @@
 import unittest
 
-from server.drivers import get_printer_instance
-from server.drivers.octoprint import Octoprint
+from server.clients import get_printer_instance
+from server.clients.octoprint import Octoprint
 
 
 class GetWithFallbackTest(unittest.TestCase):

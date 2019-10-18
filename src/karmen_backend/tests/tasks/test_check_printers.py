@@ -23,7 +23,7 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
-    @mock.patch("server.drivers.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
     def test_deactivate_no_data_responding_printer(
         self, mock_get_data, mock_update_printer, mock_get_printers
     ):
@@ -80,7 +80,7 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
-    @mock.patch("server.drivers.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.get_uri")
     @mock.patch("server.tasks.check_printers.redis")
     def test_activate_responding_printer(
         self, mock_redis, mock_get_data, mock_update_printer, mock_get_printers
@@ -178,7 +178,7 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
-    @mock.patch("server.drivers.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.get_uri")
     @mock.patch("server.tasks.check_printers.redis")
     @mock.patch("server.tasks.check_printers.app.logger")
     def test_no_fail_on_broken_redis(

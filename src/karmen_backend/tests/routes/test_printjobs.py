@@ -3,7 +3,7 @@ import mock
 
 from server import app
 from server.database import gcodes, printjobs
-from server.drivers.utils import PrinterDriverException
+from server.clients.utils import PrinterClientException
 
 
 class ListRoute(unittest.TestCase):
@@ -248,7 +248,7 @@ class CreateRoute(unittest.TestCase):
             size=123,
         )
 
-    @mock.patch("server.routes.printjobs.drivers.get_printer_instance")
+    @mock.patch("server.routes.printjobs.clients.get_printer_instance")
     def test_create(self, mock_print_inst):
         mock_print_inst.return_value.upload_and_start_job.return_value = True
         with app.test_client() as c:
@@ -273,9 +273,9 @@ class CreateRoute(unittest.TestCase):
             self.assertEqual(c_args[0], "/ab/a/b/c")
             self.assertEqual(c_args[1], "a/b/c")
 
-    @mock.patch("server.routes.printjobs.drivers.get_printer_instance")
+    @mock.patch("server.routes.printjobs.clients.get_printer_instance")
     def test_create_already_printing(self, mock_print_inst):
-        mock_print_inst.return_value.upload_and_start_job.side_effect = PrinterDriverException(
+        mock_print_inst.return_value.upload_and_start_job.side_effect = PrinterClientException(
             "Printer is printing"
         )
         with app.test_client() as c:

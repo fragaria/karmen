@@ -6,13 +6,12 @@ from flask_cors import cross_origin
 from server import app, __version__
 from server.database import printers
 from server.database import network_devices
-from server.database import printjobs
-from server import drivers
+from server import clients
 from server.services import network
 
 
 def make_printer_response(printer, fields):
-    printer_inst = drivers.get_printer_instance(printer)
+    printer_inst = clients.get_printer_instance(printer)
     data = {
         "client": {
             "name": printer_inst.client_name(),
@@ -63,7 +62,7 @@ def printer_create():
     if printers.get_printer(ip) is not None:
         return abort(409)
     hostname = network.get_avahi_hostname(ip)
-    printer = drivers.get_printer_instance(
+    printer = clients.get_printer_instance(
         {
             "hostname": hostname,
             "ip": ip,
@@ -122,7 +121,7 @@ def printer_patch(ip):
     name = data.get("name", None)
     if not name:
         return abort(400)
-    printer_inst = drivers.get_printer_instance(printer)
+    printer_inst = clients.get_printer_instance(printer)
     printers.update_printer(
         name=name,
         hostname=printer_inst.hostname,
@@ -149,12 +148,12 @@ def printer_modify_job(ip):
     action = data.get("action", None)
     if not action:
         return abort(400)
-    printer_inst = drivers.get_printer_instance(printer)
+    printer_inst = clients.get_printer_instance(printer)
     try:
         if printer_inst.modify_current_job(action):
             return "", 204
         return "", 409
-    except drivers.utils.PrinterDriverException as e:
+    except clients.utils.PrinterClientException as e:
         return abort(400, e)
 
 
@@ -167,7 +166,7 @@ def printer_webcam(ip):
     printer = printers.get_printer(ip)
     if printer is None:
         return abort(404)
-    printer_inst = drivers.get_printer_instance(printer)
+    printer_inst = clients.get_printer_instance(printer)
     webcam = printer_inst.webcam()
     if "stream" not in webcam:
         return abort(404)

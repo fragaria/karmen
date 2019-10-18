@@ -3,7 +3,7 @@ from server import celery
 from server.database import settings
 from server.database import printers
 from server.database import network_devices
-from server import drivers
+from server import clients
 
 
 def save_printer_data(**kwargs):
@@ -26,7 +26,7 @@ def save_printer_data(**kwargs):
 
 @celery.task(name="sniff_printer")
 def sniff_printer(hostname, ip):
-    printer = drivers.get_printer_instance(
+    printer = clients.get_printer_instance(
         {
             "hostname": hostname,
             "ip": ip,

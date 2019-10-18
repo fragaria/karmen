@@ -1,7 +1,7 @@
 import redis
 from server import app, celery
 from server.database import printers
-from server import drivers
+from server import clients
 
 redis = redis.Redis(
     host=app.config["WEBCAM_PROXY_CACHE_HOST"],
@@ -13,7 +13,7 @@ redis = redis.Redis(
 def check_printers():
     app.logger.debug("Checking known printers...")
     for raw_printer in printers.get_printers():
-        printer = drivers.get_printer_instance(raw_printer)
+        printer = clients.get_printer_instance(raw_printer)
         printer.is_alive()
 
         if printer.client.connected:
