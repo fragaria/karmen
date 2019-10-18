@@ -15,8 +15,8 @@ You can use your slicer with Karmen as well, as long as your slicer can integrat
 `Octoprint <https://octoprint.org>`_.
 
 Karmen is partially mimicking Octoprint's API that the slicers are calling. By setting up the address
-of the printer in the slicer to something like ``http://<karmen IP address>:8080/octoprint-emulator``,
-you can emulate Octoprint and send your G-Codes directly to Karmen. 
+of the printer in the slicer to something like ``http://<karmen IP address>:<karmen API port>/octoprint-emulator``,
+you can send your G-Codes directly to Karmen that is emulating Octoprint. 
 In Karmen you can then easily choose on which printer it should get printed.
 
 .. warning::
