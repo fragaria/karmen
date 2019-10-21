@@ -5,7 +5,7 @@ import { WebcamStream } from './webcam-stream';
 import { deletePrinter, changeCurrentJob } from '../services/karmen-backend';
 import formatters from '../services/formatters';
 
-export const Progress = ({ completion, printTime, printTimeLeft }) => {
+export const Progress = ({ completion, printTime, printTimeLeft, withProgressBar = true }) => {
   let progressBarWidth = {
     width: (printTime > 0 ? completion.toFixed(2) : '0')+'%',
   };
@@ -17,17 +17,15 @@ export const Progress = ({ completion, printTime, printTimeLeft }) => {
     approxPrintTimeLeft = formatters.timespan(approxPrintTimeLeft);
   }
   return (
-    <React.Fragment>
-      <div className="progress">
-        <div className="progress-detail">
-          {printTimeLeft
-            ? <React.Fragment>{printTime > 0 ? completion.toFixed(2) : '0'}% ({approxPrintTimeLeft || '?'} remaining)</React.Fragment>
-            : <React.Fragment></React.Fragment>
-          }
-        </div>
-        <div className="progress-bar" style={progressBarWidth}></div>
+    <div className="progress">
+      <div className="progress-detail">
+        {printTimeLeft
+          ? <React.Fragment>{printTime > 0 ? completion.toFixed(2) : '0'}% ({approxPrintTimeLeft || '?'} remaining)</React.Fragment>
+          : <React.Fragment></React.Fragment>
+        }
       </div>
-    </React.Fragment>
+      {withProgressBar && <div className="progress-bar" style={progressBarWidth}></div>}
+    </div>
   );
 }
 
@@ -46,17 +44,28 @@ export const PrinterActions = ({ ip, onPrinterDelete }) => {
     );
 }
 
+export const PrinterTags = ({ printer }) => (
+  <div className="tags">
+    <span className="tag">{printer.client.connected ? "Connected" : "Disconnected"}</span>
+    <span className="tag">{printer.status.state}</span>
+  </div>
+);
+
+export const PrinterTemperatures = ({ temperature }) => {
+  return (
+    <>
+      {temperature.tool0 && <><Temperature name="Tool" {...temperature.tool0} />,</>}
+      {temperature.bed && <Temperature name="Bed" {...temperature.bed} />}
+    </>
+  );
+}
+
 export const PrinterState = ({ printer }) => {
   return (
     <div className="printer-state">
       <h2 className="hidden">Current state</h2>
-      <div className="tags">
-        <span className="tag">{printer.client.connected ? "Connected" : "Disconnected"}</span>
-        <span className="tag">{printer.status.state}</span>
-       </div>
-      {(!printer.status.temperature || (!printer.status.temperature.tool0 && !printer.status.temperature.bed)) && <>&nbsp;</>}
-      {printer.status.temperature && printer.status.temperature.tool0 && <><Temperature name="Tool" {...printer.status.temperature.tool0} />,</>}
-      {printer.status.temperature && printer.status.temperature.bed && <Temperature name="Bed" {...printer.status.temperature.bed} />}
+      <PrinterTags printer={printer} />
+      {printer.status.temperature ? <PrinterTemperatures temperature={printer.status.temperature} /> : <>&nbsp;</>}
       <p><strong>{(printer.job && printer.job.name) || '\u00A0'}</strong></p>
     </div>
   );
@@ -83,7 +92,7 @@ export class PrinterView extends React.Component {
   }
   render() {
     const { showDeleteModal, showCancelModal } = this.state;
-    const { printer, onPrinterDelete } = this.props;
+    const { printer, onPrinterDelete, onCurrentJobStateChange, hideActions } = this.props;
     if (showDeleteModal) {
       return (
         <BoxedModal inverse onBack={() => {
@@ -118,6 +127,7 @@ export class PrinterView extends React.Component {
                     showDeleteModal: false,
                     showCancelModal: false,
                   });
+                  onCurrentJobStateChange && onCurrentJobStateChange('cancel');
                 })
             }}>Cancel the print</button>
         </BoxedModal>
@@ -134,12 +144,14 @@ export class PrinterView extends React.Component {
                 ? (
                 <button className="plain" onClick={() => {
                   changeCurrentJob(printer.ip, 'toggle');
+                  onCurrentJobStateChange && onCurrentJobStateChange('play');
                 }}>
                   <span className="icon-play"></span>
                 </button>)
                 : (
                 <button className="plain" onClick={() => {
                   changeCurrentJob(printer.ip, 'toggle');
+                  onCurrentJobStateChange && onCurrentJobStateChange('pause');
                 }}>
                   <span className="icon-pause"></span>
                 </button>)
@@ -161,11 +173,11 @@ export class PrinterView extends React.Component {
             </a>
           </div>
           <PrinterState printer={printer} />
-          <PrinterActions ip={printer.ip} onPrinterDelete={() => {
+          {!hideActions && <PrinterActions ip={printer.ip} onPrinterDelete={() => {
             this.setState({
               showDeleteModal: true,
             })
-          }} />
+          }} />}
         </div>
       </>
     );

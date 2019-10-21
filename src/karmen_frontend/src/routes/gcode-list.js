@@ -225,7 +225,7 @@ class GcodeList extends React.Component {
         </header>
 
         <div>
-          <form className="table-filter">
+          <form className="inline-form">
             <label htmlFor="filter">Filter by filename</label>
             <input type="text" name="filter" id="filter" value={willBeFilter} onChange={(e) => {
               this.setState({

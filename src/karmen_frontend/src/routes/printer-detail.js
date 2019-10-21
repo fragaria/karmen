@@ -3,8 +3,7 @@ import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
 
 import Loader from '../components/loader';
-import { PrinterConnection, PrinterState } from '../components/printer-view';
-import { WebcamStream } from '../components/webcam-stream';
+import { PrinterView, PrinterConnection } from '../components/printer-view';
 import { PrinterEditForm } from '../components/printer-edit-form';
 import { getPrinter, patchPrinter, getPrinterJobs } from '../services/karmen-backend';
 import formatters from '../services/formatters';
@@ -133,6 +132,16 @@ class PrinterDetail extends React.Component {
     if (!printer) {
       return <div><Loader /></div>;
     }
+    const { completion, printTime, printTimeLeft } = printer.job;
+    let approxPrintTimeLeft = printTimeLeft;
+    if (printTimeLeft) {
+      if (!approxPrintTimeLeft && printTime > 0) {
+        approxPrintTimeLeft = (printTime / completion) * 100;
+      }
+      if (approxPrintTimeLeft) {
+        approxPrintTimeLeft = formatters.timespan(approxPrintTimeLeft);
+      }
+    }
     const jobsRows = jobs && jobs.map((j) => {
       return <PrintJobRow
         key={j.id}
@@ -150,7 +159,6 @@ class PrinterDetail extends React.Component {
           <div className="printer-info">
             <div >
               <PrinterConnection printer={printer} />
-              <PrinterState printer={printer} />
               <div>
                 <h2 className="hidden">Change printer properties</h2>
                 <PrinterEditForm
@@ -168,11 +176,11 @@ class PrinterDetail extends React.Component {
                 />
               </div>
               <div>
-                <h2>Printing history</h2>
                 {(!jobsRows || jobsRows.length === 0)
-                  ? <p className="message-error message-block">No print jobs found!</p>
+                  ? <></>
                   : (
                     <>
+                      <h2>Printing history</h2>
                       <table>
                         <thead>
                           <tr>
@@ -205,7 +213,13 @@ class PrinterDetail extends React.Component {
                   )}
               </div>
             </div>
-            <WebcamStream {...printer.webcam} />
+            <div className="content-box">
+              <PrinterView
+                printer={printer}
+                hideActions={true}
+                onCurrentJobStateChange={this.loadPrinter()}
+              />
+            </div>
           </div>
         </div>
       </div>

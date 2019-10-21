@@ -34,7 +34,7 @@ export const timespan = (seconds) => {
     }
   }
   if (!hours) {
-    result += `${secs} ${makePlural(seconds, 'second')}`;
+    result += `${secs} ${makePlural(secs, 'second')}`;
   }
   return result;
 }

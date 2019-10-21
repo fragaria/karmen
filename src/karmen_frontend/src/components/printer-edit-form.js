@@ -30,7 +30,7 @@ export class PrinterEditForm extends React.Component {
         type: 'text',
       },
       tool0_diameter: {
-        name: "Nozzle diameter",
+        name: "Tool 0 diameter",
         val: '',
         type: 'text',
       },
@@ -74,6 +74,17 @@ export class PrinterEditForm extends React.Component {
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
             error: 'Name cannot be empty',
+          })
+        })
+      });
+      return;
+    }
+    if (form.tool0_diameter.val && isNaN(parseFloat(form.tool0_diameter.val))) {
+      this.setState({
+        submitting: false,
+        form: Object.assign({}, form, {
+          tool0_diameter: Object.assign({}, form.tool0_diameter, {
+            error: 'Tool 0 diameter has to be a decimal number',
           })
         })
       });
