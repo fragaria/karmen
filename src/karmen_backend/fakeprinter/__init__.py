@@ -92,7 +92,6 @@ def modify_job():
     if data['command'] == 'cancel':
         if job_state not in ('Paused', 'Printing'):
             return abort(409)
-        job_state = 'Cancelled'
         job_state = 'Operational'
     if data['command'] == 'pause':
         action = data.get('action', 'toggle')
