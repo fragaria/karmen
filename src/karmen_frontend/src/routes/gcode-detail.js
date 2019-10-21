@@ -54,7 +54,7 @@ class GcodeDetail extends React.Component {
                   <h2>G-Code analysis</h2>
                   <ul>
                     <li><strong>Sliced with</strong>: {gcode.analysis.slicer ? gcode.analysis.slicer : 'N/A'}</li>
-                    {gcode.analysis.time && <li><strong>Estimated print time</strong>: {formatters.timespan(gcode.analysis.time.estimate_s)}</li>}
+                    {gcode.analysis.time && gcode.analysis.time.estimate_s && <li><strong>Estimated print time</strong>: {formatters.timespan(gcode.analysis.time.estimate_s)}</li>}
                     {gcode.analysis.filament && (
                       <>
                         {gcode.analysis.filament.type && <li><strong>Filament type</strong>: {gcode.analysis.filament.type}</li>}
