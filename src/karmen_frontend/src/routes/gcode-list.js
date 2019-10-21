@@ -12,6 +12,7 @@ class GcodeRow extends React.Component {
     showDeleteRow: false,
     showPrinterSelectRow: false,
     showPrintStatusRow: false,
+    canCancelPrintStatusRow: true,
     message: '',
     messageOk: false,
     selectedPrinter: null,
@@ -19,7 +20,7 @@ class GcodeRow extends React.Component {
   }
 
   render() {
-    const { showDeleteRow, showPrinterSelectRow, showPrintStatusRow, availablePrinters, selectedPrinter } = this.state;
+    const { showDeleteRow, showPrinterSelectRow, canCancelPrintStatusRow, showPrintStatusRow, availablePrinters, selectedPrinter } = this.state;
     const { display, path, size, uploaded, onRowDelete, id } = this.props;
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
@@ -29,11 +30,11 @@ class GcodeRow extends React.Component {
             {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
           </td>
           <td className="action-cell">
-            <button className="plain" onClick={() => {
+            {canCancelPrintStatusRow && <button className="plain" onClick={() => {
               this.setState({
                 showPrintStatusRow: false,
               })
-            }}><i className="icon icon-cross icon-state-cancel"></i></button>
+            }}><i className="icon icon-cross icon-state-cancel"></i></button>}
           </td>
         </tr>
       );
@@ -65,12 +66,16 @@ class GcodeRow extends React.Component {
       return (
         <tr>
           <td colSpan="3">
-            On which printer would you like to print?{' '}
+          {!!availablePrinters.length
+            ? <>On which printer would you like to print?{' '}
             <select id="selectedPrinter" name="selectedPrinter" value={selectedPrinter} onChange={(e) => this.setState({
               selectedPrinter: e.target.value,
             })}>
-            {availablePrinterOpts}
+              {availablePrinterOpts}
             </select>
+            </>
+            : <p>No available printers found.</p>
+          }
           </td>
           <td className="action-cell">
             <button className="plain" onClick={() => {
@@ -79,29 +84,40 @@ class GcodeRow extends React.Component {
                 selectedPrinter: null,
               })
             }}><i className="icon icon-cross icon-state-cancel"></i></button>
-            <button className="plain" onClick={() => {
-              const { selectedPrinter } = this.state;
-              printGcode(id, selectedPrinter)
-                .then((r) => {
-                  switch(r) {
-                    case 201:
-                      this.setState({
-                        showPrinterSelectRow: false,
-                        showPrintStatusRow: true,
-                        message: 'Print was scheduled',
-                        messageOk: true,
-                      });
-                      break;
-                    default:
-                      this.setState({
-                        showPrinterSelectRow: false,
-                        showPrintStatusRow: true,
-                        message: 'Print was not scheduled',
-                        messageOk: false,
-                      });
-                  }
+            {!!availablePrinters.length &&
+              <button className="plain" onClick={() => {
+                const { selectedPrinter } = this.state;
+                this.setState({
+                  showPrinterSelectRow: false,
+                  canCancelPrintStatusRow: false,
+                  showPrintStatusRow: true,
+                  message: 'Scheduling a print',
+                  messageOk: true,
                 });
-            }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+                printGcode(id, selectedPrinter)
+                  .then((r) => {
+                    switch(r) {
+                      case 201:
+                        this.setState({
+                          showPrinterSelectRow: false,
+                          canCancelPrintStatusRow: true,
+                          showPrintStatusRow: true,
+                          message: 'Print was scheduled',
+                          messageOk: true,
+                        });
+                        break;
+                      default:
+                        this.setState({
+                          showPrinterSelectRow: false,
+                          canCancelPrintStatusRow: true,
+                          showPrintStatusRow: true,
+                          message: 'Print was not scheduled',
+                          messageOk: false,
+                        });
+                    }
+                  });
+              }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+            }
           </td>
         </tr>
       );
@@ -114,9 +130,10 @@ class GcodeRow extends React.Component {
         <td>{formatters.datetime(uploaded)}</td>
         <td className="action-cell">
           <button className="plain icon-link" onClick={() => {
-            getPrinters().then((printers) => {
+            getPrinters(["status"]).then((printers) => {
               const availablePrinters = printers && printers
                 .sort((p, r) => p.name > r.name ? 1 : -1)
+                .filter((p) => p.status && p.status.state === 'Operational')
                 .filter((p) => p.client && p.client.connected);
               this.setState({
                 availablePrinters,

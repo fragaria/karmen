@@ -682,7 +682,7 @@ nav {
 .inline-form {
   display: block;
   width: 100%;
-  margin-bottom: $spacing-default;
+  margin: $spacing-default 0;
 
   input {
     margin-left: $base-unit;

@@ -9,6 +9,7 @@ class GcodeDetail extends React.Component {
     gcode: null,
     selectedPrinter: null,
     availablePrinters: [],
+    submitting: false,
     message: null,
     messageOk: true,
   }
@@ -29,9 +30,10 @@ class GcodeDetail extends React.Component {
   }
 
   loadPrinters() {
-    getPrinters().then((printers) => {
+    getPrinters(["status"]).then((printers) => {
       const availablePrinters = printers && printers
         .sort((p, r) => p.name > r.name ? 1 : -1)
+        .filter((p) => p.status && p.status.state === 'Operational')
         .filter((p) => p.client && p.client.connected);
       this.setState({
         availablePrinters,
@@ -46,7 +48,7 @@ class GcodeDetail extends React.Component {
   }
 
   render() {
-    const { gcode, availablePrinters, selectedPrinter, message, messageOk } = this.state;
+    const { gcode, availablePrinters, selectedPrinter, message, messageOk, submitting } = this.state;
     if (!gcode) {
       return <div><Loader /></div>;
     }
@@ -93,7 +95,7 @@ class GcodeDetail extends React.Component {
                   </ul>
                 </>)}
               <div>
-                {availablePrinters.length && 
+                {!!availablePrinters.length &&
                   <form className="inline-form">
                     <div>
                       On which printer would you like to print?{' '}
@@ -104,24 +106,30 @@ class GcodeDetail extends React.Component {
                       </select>
                       <button className="plain" type="submit" onClick={(e) => {
                         e.preventDefault();
+                        this.setState({
+                          submitting: true,
+                        });
                         const { selectedPrinter } = this.state;
                         printGcode(gcode.id, selectedPrinter)
                           .then((r) => {
                             switch(r) {
                               case 201:
                                 this.setState({
+                                  submitting: false,
                                   message: 'Print was scheduled',
                                   messageOk: true,
                                 });
                                 break;
                               default:
                                 this.setState({
+                                  submitting: false,
                                   message: 'Print was not scheduled',
                                   messageOk: false,
                                 });
                             }
                           });
-                      }}>Print</button>
+                      }}
+                      disabled={submitting}>{submitting ? "Uploading..." : "Print"}</button>
                     </div>
                     {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
                   </form>
