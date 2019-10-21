@@ -9,12 +9,31 @@ export class PrinterEditForm extends React.Component {
     messageOk: false,
     form: {
       name: {
-        name: "Change printer's name",
+        name: "Printer's name",
         val: '',
         type: 'text',
         required: true,
-        error: null,
-      }
+      },
+      filament_type: {
+        name: "Loaded filament type (PLA, PETG, ABS...)",
+        val: '',
+        type: 'text',
+      },
+      filament_color: {
+        name: "Loaded filament color",
+        val: '',
+        type: 'text',
+      },
+      bed_type: {
+        name: "Bed type",
+        val: '',
+        type: 'text',
+      },
+      tool0_diameter: {
+        name: "Nozzle diameter",
+        val: '',
+        type: 'text',
+      },
     }
   }
 
@@ -30,7 +49,11 @@ export class PrinterEditForm extends React.Component {
       this.setState({
         initialized: true,
         form: Object.assign({}, form, {
-          name: Object.assign({}, form.name, {val: defaults.name, error: null})
+          name: Object.assign({}, form.name, {val: defaults.name, error: null}),
+          filament_type: Object.assign({}, form.filament_type, {val: defaults.filament_type, error: null}),
+          filament_color: Object.assign({}, form.filament_color, {val: defaults.filament_color, error: null}),
+          bed_type: Object.assign({}, form.bed_type, {val: defaults.bed_type, error: null}),
+          tool0_diameter: Object.assign({}, form.tool0_diameter, {val: defaults.tool0_diameter, error: null}),
         })
       })
     }
@@ -57,7 +80,13 @@ export class PrinterEditForm extends React.Component {
       return;
     }
     onSubmit({
-      name: form.name.val
+      name: form.name.val,
+      printer_props: {
+        filament_type: form.filament_type.val,
+        filament_color: form.filament_color.val,
+        bed_type: form.bed_type.val,
+        tool0_diameter: form.tool0_diameter.val,
+      }
     }).then((result) => {
       this.setState({
         message: result.message,

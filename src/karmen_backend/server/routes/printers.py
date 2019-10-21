@@ -125,6 +125,8 @@ def printer_patch(ip):
     printer_inst = clients.get_printer_instance(printer)
     printer_props = data.get("printer_props", {})
     if printer_props:
+        if not printer_inst.get_printer_props():
+            printer_inst.printer_props = {}
         printer_inst.get_printer_props().update(
             {
                 k: printer_props[k]
