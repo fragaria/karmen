@@ -102,3 +102,29 @@ class AnalyzeGcodeTest(unittest.TestCase):
                 "time": {"estimate_s": None},
             },
         )
+
+    @mock.patch("server.database.gcodes.set_analysis")
+    @mock.patch(
+        "server.database.gcodes.get_gcode",
+        return_value={
+            "absolute_path": path.abspath(
+                path.dirname(__file__) + "/../_fixtures/simplify3d.gcode"
+            )
+        },
+    )
+    def test_file_simplify3d(self, mock_gcode_get, mock_analysis_set):
+        analyze_gcode(123)
+        mock_analysis_set.assert_called_once_with(
+            123,
+            {
+                "slicer": "Simplify3D(R) Version 4.1.2",
+                "filament": {"length_mm": 90037.5, "volume_cm3": 216.57, "type": "PLA"},
+                "temperatures": {
+                    "bed": None,
+                    "bed_first": None,
+                    "tool0": None,
+                    "tool0_first": None,
+                },
+                "time": {"estimate_s": 27420},
+            },
+        )
