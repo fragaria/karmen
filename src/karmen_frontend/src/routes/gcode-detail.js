@@ -12,12 +12,16 @@ class GcodeDetail extends React.Component {
     submitting: false,
     message: null,
     messageOk: true,
+    showFilamentTypeWarningMessage: false,
+    printerFilamentType: '',
+    gcodeFilamentType: '',
   }
 
   constructor(props) {
     super(props);
     this.loadGcode = this.loadGcode.bind(this);
     this.loadPrinters = this.loadPrinters.bind(this);
+    this.schedulePrint = this.schedulePrint.bind(this);
   }
 
   loadGcode() {
@@ -42,13 +46,39 @@ class GcodeDetail extends React.Component {
     })
   }
 
+  schedulePrint(gcodeId, printerIp) {
+    printGcode(gcodeId, printerIp)
+      .then((r) => {
+        switch(r) {
+          case 201:
+            this.setState({
+              submitting: false,
+              message: 'Print was scheduled',
+              messageOk: true,
+              showFilamentTypeWarningMessage: false,
+            });
+            this.loadPrinters();
+            break;
+          default:
+            this.setState({
+              submitting: false,
+              message: 'Print was not scheduled',
+              messageOk: false,
+              showFilamentTypeWarningMessage: false,
+            });
+        }
+      });
+  }
+
   componentDidMount() {
     this.loadGcode();
     this.loadPrinters();
   }
 
   render() {
-    const { gcode, availablePrinters, selectedPrinter, message, messageOk, submitting } = this.state;
+    const { gcode, availablePrinters, selectedPrinter, message, messageOk, submitting,
+      showFilamentTypeWarningMessage, printerFilamentType, gcodeFilamentType
+    } = this.state;
     if (!gcode) {
       return <div><Loader /></div>;
     }
@@ -97,41 +127,60 @@ class GcodeDetail extends React.Component {
               <div>
                 {!!availablePrinters.length &&
                   <form className="inline-form">
-                    <div>
-                      On which printer would you like to print?{' '}
-                      <select id="selectedPrinter" name="selectedPrinter" value={selectedPrinter} onChange={(e) => this.setState({
-                        selectedPrinter: e.target.value,
-                      })}>
-                        {availablePrinterOpts}
-                      </select>
-                      <button className="plain" type="submit" onClick={(e) => {
-                        e.preventDefault();
-                        this.setState({
-                          submitting: true,
-                        });
-                        const { selectedPrinter } = this.state;
-                        printGcode(gcode.id, selectedPrinter)
-                          .then((r) => {
-                            switch(r) {
-                              case 201:
-                                this.setState({
-                                  submitting: false,
-                                  message: 'Print was scheduled',
-                                  messageOk: true,
-                                });
-                                break;
-                              default:
-                                this.setState({
-                                  submitting: false,
-                                  message: 'Print was not scheduled',
-                                  messageOk: false,
-                                });
-                            }
+                  {showFilamentTypeWarningMessage
+                    ? <div>
+                        <p className="message-warning">
+                          Are you sure? There seems to be a filament mismatch: Printer has <strong>{printerFilamentType}</strong> configured, but this gcode was sliced for <strong>{gcodeFilamentType}</strong>.
+                          <button className="plain" type="submit" onClick={(e) => {
+                            e.preventDefault();
+                            this.setState({
+                              submitting: true,
+                            });
+                            const { selectedPrinter } = this.state;
+                            this.schedulePrint(gcode.id, selectedPrinter);
+                          }}
+                          disabled={submitting}>{submitting ? "Uploading..." : "Yes, print"}</button>
+                          <button type="reset" onClick={(e) => {
+                            e.preventDefault();
+                            this.setState({
+                              submitting: false,
+                              showFilamentTypeWarningMessage: false,
+                            });
+                          }} disabled={submitting}>Cancel</button>
+                        </p>
+                      </div>
+                    : 
+                      <div>
+                        On which printer would you like to print?{' '}
+                        <select id="selectedPrinter" name="selectedPrinter" value={selectedPrinter} onChange={(e) => this.setState({
+                          selectedPrinter: e.target.value,
+                        })}>
+                          {availablePrinterOpts}
+                        </select>
+                        <button className="plain" type="submit" onClick={(e) => {
+                          e.preventDefault();
+                          const { selectedPrinter } = this.state;
+                          const selected = availablePrinters.find((p) => p.ip === selectedPrinter);
+                          if (selected && selected.printer_props && selected.printer_props.filament_type &&
+                              gcode.analysis && gcode.analysis.filament && gcode.analysis.filament.type &&
+                              gcode.analysis.filament.type !== selected.printer_props.filament_type
+                            ) {
+                            this.setState({
+                              showFilamentTypeWarningMessage: true,
+                              printerFilamentType: selected.printer_props.filament_type,
+                              gcodeFilamentType: gcode.analysis.filament.type,
+                            });
+                            return;
+                          }
+                          this.setState({
+                            submitting: true,
                           });
-                      }}
-                      disabled={submitting}>{submitting ? "Uploading..." : "Print"}</button>
-                    </div>
-                    {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+                          this.schedulePrint(gcode.id, selectedPrinter);
+                        }}
+                        disabled={submitting}>{submitting ? "Uploading..." : "Print"}</button>
+                        {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+                      </div>
+                  }
                   </form>
                 }
                 </div>

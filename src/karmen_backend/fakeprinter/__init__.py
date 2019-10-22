@@ -141,6 +141,5 @@ def upload():
 @app.route('/stream', methods=['GET', 'OPTIONS'])
 @cross_origin()
 def stream():
-    # pic from https://www.pexels.com/photo/green-and-black-industrial-machine-1440504/
     dirname = os.path.dirname(__file__)
     return send_file(os.path.join(dirname, './printer.jpg'))

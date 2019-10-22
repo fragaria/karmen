@@ -17,11 +17,44 @@ class GcodeRow extends React.Component {
     messageOk: false,
     selectedPrinter: null,
     availablePrinters: [],
+    showFilamentTypeWarningRow: false,
+    printerFilamentType: '',
+    gcodeFilamentType: '',
+  }
+
+  constructor (props) {
+    super(props);
+    this.schedulePrint = this.schedulePrint.bind(this);
+  }
+
+  schedulePrint(gcodeId, printerIp) {
+    printGcode(gcodeId, printerIp)
+      .then((r) => {
+        switch(r) {
+          case 201:
+            this.setState({
+              showPrinterSelectRow: false,
+              canCancelPrintStatusRow: true,
+              showPrintStatusRow: true,
+              message: 'Print was scheduled',
+              messageOk: true,
+            });
+            break;
+          default:
+            this.setState({
+              showPrinterSelectRow: false,
+              canCancelPrintStatusRow: true,
+              showPrintStatusRow: true,
+              message: 'Print was not scheduled',
+              messageOk: false,
+            });
+        }
+      });
   }
 
   render() {
-    const { showDeleteRow, showPrinterSelectRow, canCancelPrintStatusRow, showPrintStatusRow, availablePrinters, selectedPrinter } = this.state;
-    const { display, path, size, uploaded, onRowDelete, id } = this.props;
+    const { showDeleteRow, showPrinterSelectRow, canCancelPrintStatusRow, showPrintStatusRow, showFilamentTypeWarningRow, availablePrinters, selectedPrinter } = this.state;
+    const { display, path, size, uploaded, onRowDelete, id, analysis } = this.props;
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
@@ -59,6 +92,36 @@ class GcodeRow extends React.Component {
       );
     }
 
+    if (showFilamentTypeWarningRow) {
+      const {printerFilamentType, gcodeFilamentType } = this.state;
+      return (
+        <tr>
+          <td colSpan="3">
+            Are you sure? There seems to be a filament mismatch: Printer has <strong>{printerFilamentType}</strong> configured, but this gcode was sliced for <strong>{gcodeFilamentType}</strong>.
+          </td>
+          <td className="action-cell">
+            <button className="plain" title="Cancel" onClick={() => {
+              this.setState({
+                showFilamentTypeWarningRow: false,
+              })
+            }}><i className="icon icon-cross icon-state-cancel"></i></button>
+            <button className="plain" title="Print" onClick={() => {
+              const { selectedPrinter } = this.state;
+              this.setState({
+                  showPrinterSelectRow: false,
+                  canCancelPrintStatusRow: false,
+                  showFilamentTypeWarningRow: false,
+                  showPrintStatusRow: true,
+                  message: 'Scheduling a print',
+                  messageOk: true,
+                });
+              this.schedulePrint(id, selectedPrinter);
+            }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+          </td>
+        </tr>
+      );
+    }
+
     if (showPrinterSelectRow) {
       const availablePrinterOpts = availablePrinters.map((p) => {
         return <option key={p.ip} value={p.ip}>{`${p.name} (${p.ip})`}</option>;
@@ -85,37 +148,31 @@ class GcodeRow extends React.Component {
               })
             }}><i className="icon icon-cross icon-state-cancel"></i></button>
             {!!availablePrinters.length &&
-              <button className="plain" onClick={() => {
+              <button className="plain" onClick={(e) => {
+                e.preventDefault();
                 const { selectedPrinter } = this.state;
+                const selected = availablePrinters.find((p) => p.ip === selectedPrinter);
+                if (selected && selected.printer_props && selected.printer_props.filament_type &&
+                    analysis && analysis.filament && analysis.filament.type &&
+                    analysis.filament.type !== selected.printer_props.filament_type
+                  ) {
+                  this.setState({
+                    showPrinterSelectRow: false,
+                    showFilamentTypeWarningRow: true,
+                    printerFilamentType: selected.printer_props.filament_type,
+                    gcodeFilamentType: analysis.filament.type,
+                  });
+                  return;
+                }
                 this.setState({
                   showPrinterSelectRow: false,
                   canCancelPrintStatusRow: false,
+                  showFilamentTypeWarningRow: false,
                   showPrintStatusRow: true,
                   message: 'Scheduling a print',
                   messageOk: true,
                 });
-                printGcode(id, selectedPrinter)
-                  .then((r) => {
-                    switch(r) {
-                      case 201:
-                        this.setState({
-                          showPrinterSelectRow: false,
-                          canCancelPrintStatusRow: true,
-                          showPrintStatusRow: true,
-                          message: 'Print was scheduled',
-                          messageOk: true,
-                        });
-                        break;
-                      default:
-                        this.setState({
-                          showPrinterSelectRow: false,
-                          canCancelPrintStatusRow: true,
-                          showPrintStatusRow: true,
-                          message: 'Print was not scheduled',
-                          messageOk: false,
-                        });
-                    }
-                  });
+                this.schedulePrint(id, selectedPrinter);
               }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
             }
           </td>
@@ -180,7 +237,7 @@ class GcodeList extends React.Component {
       }];
       page = 0;
     }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter, 15, ['id', 'display', 'filename', 'path', 'size', 'uploaded']).then((gcodes) => {
+    getGcodes(pages[page].startWith, newOrderBy, newFilter, 15, ['id', 'display', 'filename', 'path', 'size', 'uploaded', 'analysis']).then((gcodes) => {
       // Handles deleting of the last row on a non-zero page
       if (!gcodes.next && gcodes.items.length === 0 && page - 1 >= 0) {
         this.loadPage(page - 1, newOrderBy);

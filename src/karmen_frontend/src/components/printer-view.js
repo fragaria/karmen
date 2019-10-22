@@ -68,7 +68,7 @@ export const PrinterState = ({ printer }) => {
       {printer.status.temperature ? <PrinterTemperatures temperature={printer.status.temperature} /> : <>&nbsp;</>}
       {printer.job && printer.job.name && <p>Printing: <strong>{(printer.job && printer.job.name) || '\u00A0'}</strong></p>}
       {printer.printer_props && <p>
-        Setup: {printer.printer_props.filament_type} ({printer.printer_props.filament_color}){`, `}
+        Setup: {printer.printer_props.filament_type} {printer.printer_props.filament_color && <>({printer.printer_props.filament_color}){`, `}</>}
         {printer.printer_props.bed_type}
         {printer.printer_props.tool0_diameter && (<>, nozzle {printer.printer_props.tool0_diameter} mm</>)}
       </p>}
