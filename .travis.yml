@@ -77,7 +77,7 @@ matrix:
     install: true
     script:
     - bash .travis/build-images-frontend.sh
-  - stage: github prerelease
+  - stage: github release
     if: tag IS present
     language: generic
     install: true
@@ -94,8 +94,7 @@ matrix:
         repo: fragaria/karmen
         tags: true
         condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*-.*$'
-  - stage: github release
-    if: tag IS present
+  - if: tag IS present
     language: generic
     install: true
     script:
