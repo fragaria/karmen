@@ -36,13 +36,12 @@ cat << "EOF" > "$DEST/update.sh"
 DIR=`dirname "$0"`
 BACKUP_DIR_NAME=backup-`date +"%Y-%m-%d-%H-%M"`
 
-echo -ne "Creating backup (without datafiles) in ${BACKUP_DIR_NAME}...\n\n"
-mkdir -p "${BACKUP_DIR_NAME}" && tar -c --exclude 'db/data' --exclude "backup*" . | tar -x --directory "${BACKUP_DIR_NAME}"
+echo -ne "Creating backup (with database datafiles) in ${BACKUP_DIR_NAME}...\n\n"
+mkdir -p "${BACKUP_DIR_NAME}" && tar -c --exclude "backup*" . | tar -x --directory "${BACKUP_DIR_NAME}"
 
 echo -ne "Getting the latest release...\n\n"
 wget -O karmen.zip https://github.com/fragaria/karmen/releases/latest/download/release.zip
 unzip karmen.zip
-# TODO fix this
 tar -C "${DIR}/karmen/" -c --exclude 'db/data' . | tar -x --directory .
 rm -r karmen/
 rm karmen.zip
