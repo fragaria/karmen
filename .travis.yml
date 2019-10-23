@@ -108,7 +108,7 @@ matrix:
       on:
         repo: fragaria/karmen
         tags: true
-        condition: '"$TRAVIS_TAG" =~ ^v[0-9.]$'
+        condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*$'
 
 env:
   global:
