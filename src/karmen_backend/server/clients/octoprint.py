@@ -54,6 +54,40 @@ class Octoprint(PrinterClient):
                 self.client.connected = True
         return self.client.connected
 
+    def connect_printer(self):
+        state_check = self.status()
+        # printer is offline, it should be safe to do a connect attempt
+        if state_check and state_check["state"] in ["Offline", "Closed"]:
+            request = post_uri(
+                self.ip, endpoint="/api/connection", json={"command": "connect"}
+            )
+            # TODO improve return value
+            return bool(request is not None and request.status_code == 204)
+        # printer is probably connected and operational/printing/etc.
+        elif state_check and state_check["state"] not in [
+            "Printer is not connected to Octoprint",
+            "Printer is not responding",
+        ]:
+            return True
+        return False
+
+    def disconnect_printer(self):
+        state_check = self.status()
+        # printer is offline, it should be safe to do a connect attempt
+        if state_check and state_check["state"] not in [
+            "Offline",
+            "Closed",
+            "Printer is not connected to Octoprint",
+            "Printer is not responding",
+        ]:
+            request = post_uri(
+                self.ip, endpoint="/api/connection", json={"command": "disconnect"}
+            )
+            # TODO improve return value
+            return bool(request is not None and request.status_code == 204)
+        # printer is probably connected and operational/printing/etc.
+        return True
+
     # TODO move this code outside of this client, the sniffing code should discover a variety of clients
     def sniff(self):
         request = get_uri(self.ip, endpoint="/api/version")
@@ -125,7 +159,7 @@ class Octoprint(PrinterClient):
                 data = request.json()
                 return {
                     "state": data["state"]["text"],
-                    "temperature": data["temperature"],
+                    "temperature": data.get("temperature", {}),
                 }
             except json.decoder.JSONDecodeError:
                 return {
