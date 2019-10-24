@@ -76,20 +76,6 @@ export const PrinterState = ({ printer }) => {
   );
 }
 
-export const PrinterConnection = ({ printer }) => {
-  return (
-    <div className="printer-connection">
-      <h2 className="hidden">Connection</h2>
-      <ul>
-          <li><strong>Status</strong>: {printer.client.connected ? 'Active' : 'Inactive'}</li>
-          <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
-          <li><strong>Client IP</strong>: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
-          {printer.hostname && <li><strong>Hostname</strong>: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
-      </ul>
-    </div>
-  );
-}
-
 export class PrinterView extends React.Component {
   state = {
     showDeleteModal: false,
@@ -132,7 +118,9 @@ export class PrinterView extends React.Component {
                     showDeleteModal: false,
                     showCancelModal: false,
                   });
-                  onCurrentJobStateChange && onCurrentJobStateChange('cancel');
+                  if (onCurrentJobStateChange) {
+                    onCurrentJobStateChange('cancel');
+                  }
                 })
             }}>Cancel the print</button>
         </BoxedModal>
@@ -148,15 +136,23 @@ export class PrinterView extends React.Component {
               {printer.status.state === 'Paused'
                 ? (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.ip, 'toggle');
-                  onCurrentJobStateChange && onCurrentJobStateChange('play');
+                  changeCurrentJob(printer.ip, 'toggle')
+                    .then(() => {
+                      if (onCurrentJobStateChange) {
+                        onCurrentJobStateChange('play');
+                      }
+                    })
                 }}>
                   <span className="icon-play"></span>
                 </button>)
                 : (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.ip, 'toggle');
-                  onCurrentJobStateChange && onCurrentJobStateChange('pause');
+                  changeCurrentJob(printer.ip, 'toggle')
+                    .then(() => {
+                      if (onCurrentJobStateChange) {
+                        onCurrentJobStateChange('pause');
+                      }
+                    })
                 }}>
                   <span className="icon-pause"></span>
                 </button>)

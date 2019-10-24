@@ -154,6 +154,36 @@ def printer_patch(ip):
     return "", 204
 
 
+@app.route("/printers/<ip>/connection", methods=["POST", "OPTIONS"])
+@cross_origin()
+def printer_change_connection(ip):
+    printer = printers.get_printer(ip)
+    if printer is None:
+        return abort(404)
+    data = request.json
+    if not data:
+        return abort(400)
+    state = data.get("state", None)
+    printer_inst = clients.get_printer_instance(printer)
+    if state == "online":
+        r = printer_inst.connect_printer()
+        return (
+            ("", 204)
+            if r
+            else ("Cannot change printer's connection state to online", 500)
+        )
+    elif state == "offline":
+        r = printer_inst.disconnect_printer()
+        return (
+            ("", 204)
+            if r
+            else ("Cannot change printer's connection state to offline", 500)
+        )
+    else:
+        return abort(400)
+    return "", 204
+
+
 @app.route("/printers/<ip>/current-job", methods=["POST", "OPTIONS"])
 @cross_origin()
 def printer_modify_job(ip):

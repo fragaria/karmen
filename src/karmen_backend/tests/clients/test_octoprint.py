@@ -8,6 +8,15 @@ from server.clients.utils import PrinterClientInfo, PrinterClientException
 from server.clients.octoprint import Octoprint
 
 
+class Response:
+    def __init__(self, status_code, contents=""):
+        self.status_code = status_code
+        self.contents = contents
+
+    def json(self):
+        return self.contents
+
+
 class OctoprintConstructor(unittest.TestCase):
     def test_parse_client_props(self):
         printer = Octoprint(
@@ -27,45 +36,118 @@ class OctoprintIsAliveTest(unittest.TestCase):
         self.assertFalse(printer.client.connected)
         self.assertEqual(mock_get_uri.call_count, 1)
 
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.get_uri", return_value=Response(200))
     def test_connected_printer(self, mock_get_uri):
-        class Response:
-            def __init__(self, status_code, contents):
-                self.status_code = status_code
-                self.contents = contents
-
-            def json(self):
-                return {"text": "something"}
-
-        def mock_call(uri, **kwargs):
-            return Response(200, "")
-
-        mock_get_uri.side_effect = mock_call
         printer = Octoprint("192.168.1.15")
         self.assertFalse(printer.client.connected)
         self.assertTrue(printer.is_alive())
         self.assertTrue(printer.client.connected)
         self.assertEqual(mock_get_uri.call_count, 2)
 
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.get_uri", return_value=Response(200))
     def test_already_connected_printer(self, mock_get_uri):
-        class Response:
-            def __init__(self, status_code, contents):
-                self.status_code = status_code
-                self.contents = contents
-
-            def json(self):
-                return {"text": "something"}
-
-        def mock_call(uri, **kwargs):
-            return Response(200, "")
-
-        mock_get_uri.side_effect = mock_call
         printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
         self.assertTrue(printer.client.connected)
         self.assertTrue(printer.is_alive())
         self.assertTrue(printer.client.connected)
         self.assertEqual(mock_get_uri.call_count, 1)
+
+
+class OctoprintConnectPrinterTest(unittest.TestCase):
+    @mock.patch("server.clients.octoprint.post_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15")
+        self.assertFalse(printer.connect_printer())
+        self.assertEqual(mock_get_uri.call_count, 0)
+        self.assertEqual(mock_post_uri.call_count, 0)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Closed"}}),
+    )
+    def test_reachable_disconnected_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.connect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 1)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=None)
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Offline"}}),
+    )
+    def test_reachable_offline_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertFalse(printer.connect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 1)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Operational"}}),
+    )
+    def test_already_connected_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.connect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 0)
+
+
+class OctoprintDisconnectPrinterTest(unittest.TestCase):
+    @mock.patch("server.clients.octoprint.post_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15")
+        self.assertTrue(printer.disconnect_printer())
+        self.assertEqual(mock_get_uri.call_count, 0)
+        self.assertEqual(mock_post_uri.call_count, 0)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Closed"}}),
+    )
+    def test_reachable_disconnected_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.disconnect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 0)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=None)
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Offline"}}),
+    )
+    def test_reachable_offline_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.disconnect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 0)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Operational"}}),
+    )
+    def test_connected_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertTrue(printer.disconnect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 1)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(500))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Operational"}}),
+    )
+    def test_not_disconnectable_printer(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint("192.168.1.15", client=PrinterClientInfo(connected=True))
+        self.assertFalse(printer.disconnect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 1)
 
 
 class OctoprintSniffTest(unittest.TestCase):
@@ -79,18 +161,10 @@ class OctoprintSniffTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.get_uri")
     def test_access_protected_octoprint(self, mock_get_uri):
-        class Response:
-            def __init__(self, status_code, contents):
-                self.status_code = status_code
-                self.contents = contents
-
-            def json(self):
-                return {"text": "something"}
-
         def mock_call(ip, **kwargs):
             if "settings" in kwargs["endpoint"]:
-                return Response(200, "")
-            return Response(403, "")
+                return Response(200)
+            return Response(403)
 
         mock_get_uri.side_effect = mock_call
 

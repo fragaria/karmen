@@ -76,6 +76,25 @@ export const patchPrinter = (ip, data) => {
     })
 }
 
+export const setPrinterConnection = (ip, state) => {
+  return fetch(`${BASE_URL}/printers/${ip}/connection`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({"state": state}),
+  })
+    .then((response) => {
+      if (response.status !== 204) {
+        console.error(`Cannot connect a printer: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot connect a printer: ${e}`);
+      return 500;
+    })
+}
+
 export const deletePrinter = (ip) => {
   return fetch(`${BASE_URL}/printers/${ip}`, {
     method: 'DELETE',

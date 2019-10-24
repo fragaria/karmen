@@ -14,15 +14,19 @@ class PrinterClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_printer_props(self):
-        pass
-
-    @abc.abstractmethod
     def is_alive(self):
         pass
 
     @abc.abstractmethod
     def status(self):
+        pass
+
+    @abc.abstractmethod
+    def connect_printer(self):
+        pass
+
+    @abc.abstractmethod
+    def disconnect_printer(self):
         pass
 
     @abc.abstractmethod
@@ -39,6 +43,10 @@ class PrinterClient(abc.ABC):
 
     @abc.abstractmethod
     def upload_and_start_job(self, gcode_path):
+        pass
+
+    @abc.abstractmethod
+    def get_printer_props(self):
         pass
 
 

@@ -5,6 +5,15 @@ from server import app
 from server.database import printers
 
 
+class Response:
+    def __init__(self, status_code, contents={}):
+        self.status_code = status_code
+        self.contents = contents
+
+    def json(self):
+        return self.contents
+
+
 class ListRoute(unittest.TestCase):
     def test_list(self):
         with app.test_client() as c:
@@ -212,23 +221,8 @@ class CurrentJobRoute(unittest.TestCase):
     def tearDown(self):
         printers.delete_printer("1.2.3.4")
 
-    @mock.patch("server.clients.octoprint.post_uri")
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
     def test_current_job(self, post_uri_mock):
-        post_uri_mock.return_value = True
-
-        class Response:
-            def __init__(self, status_code, contents, json=None):
-                self.status_code = status_code
-                self.contents = contents
-                self.json_data = json
-
-            def json(self):
-                return self.json_data or {}
-
-        def mock_call(ip, **kwargs):
-            return Response(204, "")
-
-        post_uri_mock.side_effect = mock_call
         with app.test_client() as c:
             response = c.post(
                 "/printers/1.2.3.4/current-job", json={"action": "cancel"}
@@ -266,4 +260,83 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_empty_action(self):
         with app.test_client() as c:
             response = c.post("/printers/1.2.3.4/current-job", json={"action": ""})
+            self.assertEqual(response.status_code, 400)
+
+
+class PrinterConnectionRoute(unittest.TestCase):
+    def setUp(self):
+        printers.delete_printer("1.2.3.4")
+        printers.add_printer(
+            name="name",
+            hostname="hostname",
+            ip="1.2.3.4",
+            client="octoprint",
+            client_props={"version": "123", "connected": True},
+        )
+
+    def tearDown(self):
+        printers.delete_printer("1.2.3.4")
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Offline"}}),
+    )
+    def test_change_connection_to_online(self, mock_get_uri, mock_post_uri):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
+            self.assertEqual(response.status_code, 204)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Printing"}}),
+    )
+    def test_change_connection_to_online_already_on(self, mock_get_uri, mock_post_uri):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
+            self.assertEqual(response.status_code, 204)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Offline"}}),
+    )
+    def test_change_connection_to_offline_already_off(
+        self, mock_get_uri, mock_post_uri
+    ):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": "offline"})
+            self.assertEqual(response.status_code, 204)
+
+    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.get_uri",
+        return_value=Response(200, {"state": {"text": "Operational"}}),
+    )
+    def test_change_connection_to_offline(self, mock_get_uri, mock_post_uri):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": "offline"})
+            self.assertEqual(response.status_code, 204)
+
+    def test_change_connection_bad_state(self):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": "random"})
+            self.assertEqual(response.status_code, 400)
+
+    def test_change_connection_unknown_printer(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers/random-unknown-printer/connection", json={"action": "cancel"}
+            )
+            self.assertEqual(response.status_code, 404)
+
+    def test_change_connection_no_data(self):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection")
+            self.assertEqual(response.status_code, 400)
+
+    def test_change_connection_empty_state(self):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": ""})
             self.assertEqual(response.status_code, 400)

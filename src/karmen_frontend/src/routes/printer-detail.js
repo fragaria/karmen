@@ -3,12 +3,105 @@ import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
 
 import Loader from '../components/loader';
-import { PrinterView, PrinterConnection } from '../components/printer-view';
+import { PrinterView } from '../components/printer-view';
 import { PrinterEditForm } from '../components/printer-edit-form';
-import { getPrinter, patchPrinter, getPrinterJobs } from '../services/karmen-backend';
+import { getPrinter, patchPrinter, getPrinterJobs, setPrinterConnection } from '../services/karmen-backend';
 import formatters from '../services/formatters';
 
 const BASE_URL = window.env.BACKEND_BASE;
+
+class PrinterConnection extends React.Component {
+  state = {
+    showConnectionWarningRow: false,
+    targetState: null,
+    submitting: false,
+  }
+
+  constructor(props) {
+    super(props);
+    this.changePrinterConnection = this.changePrinterConnection.bind(this);
+  }
+
+  changePrinterConnection() {
+    const { targetState } = this.state;
+    const { printer, onPrinterConnectionChanged } = this.props;
+    setPrinterConnection(printer.ip, targetState)
+      .then((r) => {
+        this.setState({
+          submitting: false,
+          showConnectionWarningRow: false,
+          targetState: null,
+        });
+        if (onPrinterConnectionChanged) {
+          onPrinterConnectionChanged(targetState);
+        }
+      });
+  }
+
+  render() {
+    const { printer } = this.props;
+    const { showConnectionWarningRow, submitting } = this.state;
+    return (
+      <div className="printer-connection">
+        <h2 className="hidden">Connection</h2>
+        <ul>
+            <li><strong>Client status</strong>: {printer.client.connected ? 'Connected' : 'Disconnected'}</li>
+            <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
+            <li><strong>Client IP</strong>: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
+            {printer.hostname && <li><strong>Hostname</strong>: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
+            <li>
+              <form className="inline-form">
+                {showConnectionWarningRow
+                ? <div>
+                    <p className="message-warning">
+                      Are you sure? This might affect any current printer operation.
+                      <button className="plain" type="submit" onClick={(e) => {
+                        e.preventDefault();
+                        this.setState({
+                          submitting: true,
+                        });
+                        this.changePrinterConnection();
+                      }}
+                      disabled={submitting}>{submitting ? "Working..." : "Yes, please"}</button>
+                      <button type="reset" onClick={(e) => {
+                        e.preventDefault();
+                        this.setState({
+                          submitting: false,
+                          showConnectionWarningRow: false,
+                          targetState: null,
+                        });
+                      }} disabled={submitting}>Cancel</button>
+                    </p>
+                  </div>
+                : <>
+                    <strong>Printer status</strong>: {printer.status.state}
+                    {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
+                      <button className="plain" type="submit" onClick={(e) => {
+                        e.preventDefault();
+                        this.setState({
+                          showConnectionWarningRow: true,
+                          targetState: "online",
+                        });
+                      }}>Connect</button>
+                    }
+                    {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1) && !printer.status.state.match(/printer is not connected/i) &&
+                      <button className="plain" type="submit" onClick={(e) => {
+                        e.preventDefault();
+                        this.setState({
+                          showConnectionWarningRow: true,
+                          targetState: "offline",
+                        });
+                      }}>Disconnect</button>
+                    }
+                  </>
+                }
+              </form>
+            </li>
+        </ul>
+      </div>
+    )
+  }
+}
 
 class PrintJobRow extends React.Component {
   render() {
@@ -122,8 +215,8 @@ class PrinterDetail extends React.Component {
   }
 
   componentDidMount() {
-    this.loadPrinter();
     const { jobsTable } = this.state
+    this.loadPrinter();
     this.loadJobsPage(0, jobsTable.orderBy);
   }
 
@@ -158,7 +251,14 @@ class PrinterDetail extends React.Component {
         <div>
           <div className="printer-info">
             <div >
-              <PrinterConnection printer={printer} />
+              <PrinterConnection
+                printer={printer}
+                onPrinterConnectionChanged={() => {
+                  setTimeout(() => {
+                    this.loadPrinter();
+                  }, 3000);
+                }}
+              />
               <div>
                 <h2 className="hidden">Change printer properties</h2>
                 <PrinterEditForm
