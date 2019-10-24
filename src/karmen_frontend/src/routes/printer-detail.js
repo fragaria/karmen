@@ -217,7 +217,7 @@ class PrinterDetail extends React.Component {
               <PrinterView
                 printer={printer}
                 hideActions={true}
-                onCurrentJobStateChange={this.loadPrinter()}
+                onCurrentJobStateChange={this.loadPrinter}
               />
             </div>
           </div>
