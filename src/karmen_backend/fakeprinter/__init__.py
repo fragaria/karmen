@@ -45,7 +45,6 @@ def settings():
 @app.route("/api/connection", methods=["GET", "OPTIONS"])
 @cross_origin()
 def connection():
-    global connection_state
     return jsonify(
         {
             "current": {

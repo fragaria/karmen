@@ -118,7 +118,9 @@ export class PrinterView extends React.Component {
                     showDeleteModal: false,
                     showCancelModal: false,
                   });
-                  onCurrentJobStateChange && onCurrentJobStateChange('cancel');
+                  if (onCurrentJobStateChange) {
+                    onCurrentJobStateChange('cancel');
+                  }
                 })
             }}>Cancel the print</button>
         </BoxedModal>
@@ -134,15 +136,23 @@ export class PrinterView extends React.Component {
               {printer.status.state === 'Paused'
                 ? (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.ip, 'toggle');
-                  onCurrentJobStateChange && onCurrentJobStateChange('play');
+                  changeCurrentJob(printer.ip, 'toggle')
+                    .then(() => {
+                      if (onCurrentJobStateChange) {
+                        onCurrentJobStateChange('play');
+                      }
+                    })
                 }}>
                   <span className="icon-play"></span>
                 </button>)
                 : (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.ip, 'toggle');
-                  onCurrentJobStateChange && onCurrentJobStateChange('pause');
+                  changeCurrentJob(printer.ip, 'toggle')
+                    .then(() => {
+                      if (onCurrentJobStateChange) {
+                        onCurrentJobStateChange('pause');
+                      }
+                    })
                 }}>
                   <span className="icon-pause"></span>
                 </button>)

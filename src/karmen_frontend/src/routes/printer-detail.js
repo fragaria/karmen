@@ -24,7 +24,7 @@ class PrinterConnection extends React.Component {
 
   changePrinterConnection() {
     const { targetState } = this.state;
-    const { printer } = this.props;
+    const { printer, onPrinterConnectionChanged } = this.props;
     setPrinterConnection(printer.ip, targetState)
       .then((r) => {
         this.setState({
@@ -32,6 +32,9 @@ class PrinterConnection extends React.Component {
           showConnectionWarningRow: false,
           targetState: null,
         });
+        if (onPrinterConnectionChanged) {
+          onPrinterConnectionChanged(targetState);
+        }
       });
   }
 
@@ -72,7 +75,7 @@ class PrinterConnection extends React.Component {
                   </div>
                 : <>
                     <strong>Printer status</strong>: {printer.status.state}
-                    {["Offline", "Closed"].indexOf(printer.status.state) > -1 &&
+                    {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
                       <button className="plain" type="submit" onClick={(e) => {
                         e.preventDefault();
                         this.setState({
@@ -81,7 +84,7 @@ class PrinterConnection extends React.Component {
                         });
                       }}>Connect</button>
                     }
-                    {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1 || printer.status.state.match(/printer is not connected/i)) &&
+                    {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1) && !printer.status.state.match(/printer is not connected/i) &&
                       <button className="plain" type="submit" onClick={(e) => {
                         e.preventDefault();
                         this.setState({
@@ -212,8 +215,8 @@ class PrinterDetail extends React.Component {
   }
 
   componentDidMount() {
-    this.loadPrinter();
     const { jobsTable } = this.state
+    this.loadPrinter();
     this.loadJobsPage(0, jobsTable.orderBy);
   }
 
@@ -248,7 +251,14 @@ class PrinterDetail extends React.Component {
         <div>
           <div className="printer-info">
             <div >
-              <PrinterConnection printer={printer} />
+              <PrinterConnection
+                printer={printer}
+                onPrinterConnectionChanged={() => {
+                  setTimeout(() => {
+                    this.loadPrinter();
+                  }, 3000);
+                }}
+              />
               <div>
                 <h2 className="hidden">Change printer properties</h2>
                 <PrinterEditForm
@@ -307,7 +317,7 @@ class PrinterDetail extends React.Component {
               <PrinterView
                 printer={printer}
                 hideActions={true}
-                onCurrentJobStateChange={this.loadPrinter()}
+                onCurrentJobStateChange={this.loadPrinter}
               />
             </div>
           </div>

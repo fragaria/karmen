@@ -57,7 +57,11 @@ class Octoprint(PrinterClient):
     def connect_printer(self):
         state_check = self.status()
         # printer is offline, it should be safe to do a connect attempt
-        if state_check and state_check["state"] in ["Offline", "Closed"]:
+        if state_check and state_check["state"] in [
+            "Offline",
+            "Closed",
+            "Printer is not connected to Octoprint",
+        ]:
             request = post_uri(
                 self.ip, endpoint="/api/connection", json={"command": "connect"}
             )
@@ -65,6 +69,8 @@ class Octoprint(PrinterClient):
             return bool(request is not None and request.status_code == 204)
         # printer is probably connected and operational/printing/etc.
         elif state_check and state_check["state"] not in [
+            "Offline",
+            "Closed",
             "Printer is not connected to Octoprint",
             "Printer is not responding",
         ]:
@@ -77,8 +83,8 @@ class Octoprint(PrinterClient):
         if state_check and state_check["state"] not in [
             "Offline",
             "Closed",
-            "Printer is not connected to Octoprint",
             "Printer is not responding",
+            "Printer is not connected to Octoprint",
         ]:
             request = post_uri(
                 self.ip, endpoint="/api/connection", json={"command": "disconnect"}
