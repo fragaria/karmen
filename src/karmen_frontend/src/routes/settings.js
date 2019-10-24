@@ -10,31 +10,13 @@ class Settings extends React.Component {
     init: true,
     submitting: false,
     settings: {
-      network_discovery: {
-        name: "Discover printers on the network?",
-        val: true,
-        type: 'checkbox',
-        required: true,
-        error: null,
-      },
       network_interface: {
-        name: "On which network?",
+        name: "On which network interface should we be looking for printers?",
         val: '',
         type: 'text',
         required: true,
         error: null,
       },
-      network_retry_device_after: {
-        name: "After how much time should we check again with a non-responding device?",
-        val: 3600,
-        type: 'select',
-        options: [
-          {name: '1 hour', val: 3600},
-          {name: '10 minutes', val: 600},
-        ],
-        required: true,
-        error: null,
-      }
     },
     message: null,
     messageOk: false,

@@ -1,6 +1,6 @@
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
-from server import app, __version__
+from server import app
 from server.database import settings
 
 

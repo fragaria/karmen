@@ -31,10 +31,10 @@ class SettingsRoute(unittest.TestCase):
 
     def test_set_data(self):
         with app.test_client() as c:
-            orig = settings.get_val("network_discovery")
+            orig = settings.get_val("network_interface")
             response = c.post(
-                "/settings", json=[{"key": "network_discovery", "val": not orig}]
+                "/settings", json=[{"key": "network_interface", "val": not orig}]
             )
-            self.assertEqual(settings.get_val("network_discovery"), not orig)
+            self.assertEqual(settings.get_val("network_interface"), not orig)
             self.assertEqual(response.status_code, 201)
-            settings.upsert_val("network_discovery", orig)
+            settings.upsert_val("network_interface", orig)

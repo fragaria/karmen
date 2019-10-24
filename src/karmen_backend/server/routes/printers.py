@@ -5,7 +5,6 @@ from flask import jsonify, request, abort, Response, stream_with_context
 from flask_cors import cross_origin
 from server import app, __version__
 from server.database import printers
-from server.database import network_devices
 from server import clients
 from server.services import network
 
@@ -72,7 +71,6 @@ def printer_create():
         }
     )
     printer.sniff()
-    network_devices.upsert_network_device(ip=ip, retry_after=None, disabled=False)
     printers.add_printer(
         name=name,
         hostname=hostname,
@@ -104,9 +102,6 @@ def printer_delete(ip):
     if printer is None:
         return abort(404)
     printers.delete_printer(ip)
-    for device in network_devices.get_network_devices(printer["ip"]):
-        device["disabled"] = True
-        network_devices.upsert_network_device(**device)
     return "", 204
 
 

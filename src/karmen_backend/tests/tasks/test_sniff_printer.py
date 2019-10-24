@@ -53,11 +53,10 @@ class SavePrinterDataTest(unittest.TestCase):
 
 class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.database.settings.get_val")
-    @mock.patch("server.database.network_devices.upsert_network_device")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.get_uri", return_value=None)
     def test_deactivate_no_data_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val
+        self, mock_get_data, mock_update_printer, mock_get_val
     ):
         def mock_call(key):
             return 3600
@@ -66,11 +65,6 @@ class SniffPrinterTest(unittest.TestCase):
         retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer("octopi.local", "192.168.1.10")
         self.assertEqual(mock_update_printer.call_count, 1)
-        self.assertEqual(mock_upsert.call_count, 1)
-        args, upsert_kwargs = mock_upsert.call_args
-        self.assertEqual(upsert_kwargs["ip"], "192.168.1.10")
-        self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
-        self.assertFalse(upsert_kwargs["disabled"])
         mock_update_printer.assert_called_with(
             **{
                 "hostname": "octopi.local",
@@ -83,11 +77,10 @@ class SniffPrinterTest(unittest.TestCase):
         )
 
     @mock.patch("server.database.settings.get_val")
-    @mock.patch("server.database.network_devices.upsert_network_device")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.get_uri")
     def test_deactivate_bad_data_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val
+        self, mock_get_data, mock_update_printer, mock_get_val
     ):
         def mock_call(key):
             return 3600
@@ -98,10 +91,6 @@ class SniffPrinterTest(unittest.TestCase):
         retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer("octopi.local", "192.168.1.11")
         self.assertEqual(mock_update_printer.call_count, 1)
-        self.assertEqual(mock_upsert.call_count, 1)
-        args, upsert_kwargs = mock_upsert.call_args
-        self.assertEqual(upsert_kwargs["ip"], "192.168.1.11")
-        self.assertTrue(upsert_kwargs["retry_after"] > retry_after_at_least)
         mock_update_printer.assert_called_with(
             **{
                 "hostname": "octopi.local",
@@ -118,11 +107,10 @@ class SniffPrinterTest(unittest.TestCase):
         )
 
     @mock.patch("server.database.settings.get_val")
-    @mock.patch("server.database.network_devices.upsert_network_device")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.get_uri")
     def test_activate_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_upsert, mock_get_val
+        self, mock_get_data, mock_update_printer, mock_get_val
     ):
         def mock_call(key):
             return 3600
@@ -132,10 +120,6 @@ class SniffPrinterTest(unittest.TestCase):
         mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
         sniff_printer("octopi.local", "192.168.1.12")
         self.assertEqual(mock_update_printer.call_count, 1)
-        self.assertEqual(mock_upsert.call_count, 1)
-        mock_upsert.assert_called_with(
-            **{"ip": "192.168.1.12", "retry_after": None, "disabled": False}
-        )
         mock_update_printer.assert_called_with(
             **{
                 "hostname": "octopi.local",
