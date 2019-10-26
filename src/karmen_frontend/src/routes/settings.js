@@ -1,9 +1,8 @@
 import React from 'react';
 
 import Loader from '../components/loader';
-import { BackLink } from '../components/back';
 import { FormInputs } from '../components/form-utils';
-import { getSettings, changeSettings } from '../services/karmen-backend';
+import { getSettings, changeSettings, enqueueTask } from '../services/karmen-backend';
 
 class Settings extends React.Component {
   state = {
@@ -24,7 +23,7 @@ class Settings extends React.Component {
 
   constructor(props) {
     super(props);
-    this.changeSettings = this.changeSettings.bind(this);
+    this.startNetworkScan = this.startNetworkScan.bind(this);
     this.loadSettings = this.loadSettings.bind(this);
   }
 
@@ -48,7 +47,7 @@ class Settings extends React.Component {
     this.loadSettings();
   }
 
-  changeSettings(e) {
+  startNetworkScan(e) {
     e.preventDefault();
     this.setState({
       message: null,
@@ -78,16 +77,29 @@ class Settings extends React.Component {
         .then((r) => {
           switch(r) {
             case 201:
-              this.setState({
-                message: 'Changes saved successfully',
-                messageOk: true,
-                submitting: false,
-              });
+              enqueueTask("scan_network")
+                .then((r) => {
+                  switch(r) {
+                    case 202:
+                      this.setState({
+                        message: 'Network scan initiated, the printers should start popping up at any moment',
+                        messageOk: true,
+                        submitting: false,
+                      });
+                      break;
+                    case 400:
+                    default:
+                      this.setState({
+                        message: 'Cannot scan the network, check server logs',
+                        submitting: false,
+                      });
+                  }
+                });
               break;
             case 400:
             default:
               this.setState({
-                message: 'Cannot save your changes, check server logs',
+                message: 'Cannot scan the network, check server logs',
                 submitting: false,
               });
           }
@@ -122,8 +134,7 @@ class Settings extends React.Component {
             {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
             <FormInputs definition={settings} updateValue={updateValue} />
             <div className="form-actions">
-              <button type="submit" onClick={this.changeSettings} disabled={submitting}>Save settings</button>
-              <BackLink to="/" />
+              <button type="submit" onClick={this.startNetworkScan} disabled={submitting}>Scan the network for printers</button>
             </div>
           </fieldset>
          </form>

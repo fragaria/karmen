@@ -311,3 +311,24 @@ export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter =
       };
     });
 }
+
+export const enqueueTask = (task) => {
+  return fetch(`${BASE_URL}/tasks`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      task: task,
+    }),
+  })
+    .then((response) => {
+      if (response.status !== 202) {
+        console.error(`Cannot enqueue a task: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot enqueue a task: ${e}`);
+      return 500;
+    }); 
+}
