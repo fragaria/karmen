@@ -2,8 +2,8 @@ import os
 import io
 import tempfile
 import unittest
-import mock
 from time import time
+import mock
 
 from server import app
 from server.database import gcodes, printjobs

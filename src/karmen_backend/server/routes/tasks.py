@@ -1,4 +1,4 @@
-from flask import jsonify, request, abort
+from flask import request, abort
 from flask_cors import cross_origin
 from server import app
 from server.tasks.scan_network import scan_network

@@ -42,7 +42,7 @@ class PrinterClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def upload_and_start_job(self, gcode_path):
+    def upload_and_start_job(self, gcode_disk_path, path=None):
         pass
 
     @abc.abstractmethod
