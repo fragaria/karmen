@@ -44,12 +44,22 @@ export const PrinterActions = ({ ip, onPrinterDelete }) => {
     );
 }
 
-export const PrinterTags = ({ printer }) => (
-  <div className="tags">
-    <span className="tag">{printer.client.connected ? "Connected" : "Disconnected"}</span>
-    <span className="tag">{printer.status.state}</span>
-  </div>
-);
+export const PrinterTags = ({ printer }) => {
+  let printerStatusClass = '';
+  if (["Operational", "Online"].indexOf(printer.status.state) > -1) {
+    printerStatusClass = "state-active";
+  } else if (["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/^Printer is not/)) {
+    printerStatusClass = "state-inactive";
+  }
+  return (
+    <div className="tags">
+      <span className={`tag ${printer.client.connected ? "state-active" : "state-inactive"}`}>
+        {printer.client.connected ? `${printer.client.name} connected` : `${printer.client.name} disconnected`}
+      </span>
+      <span className={`tag ${printerStatusClass}`}>{printer.status.state}</span>
+    </div>
+  );
+};
 
 export const PrinterTemperatures = ({ temperature }) => {
   return (

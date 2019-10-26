@@ -608,6 +608,14 @@ nav {
     font-size: .8rem;
     background: map-get($palette, gray-dark);
     color: map-get($palette, white);
+
+    &.state-active {
+      background-color: map-get($palette, olive-green);
+    }
+
+    &.state-inactive {
+      background-color: map-get($palette, dark-red);
+    }
   }
 }
 
