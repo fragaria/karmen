@@ -2,6 +2,7 @@ import unittest
 
 from server import app
 from server.database import settings
+from server.routes.settings import CONFIGURABLE_SETTINGS
 
 
 class SettingsRoute(unittest.TestCase):
@@ -9,9 +10,7 @@ class SettingsRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get("/settings")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(
-                len(response.json), len(app.config["CONFIGURABLE_SETTINGS"])
-            )
+            self.assertEqual(len(response.json), len(CONFIGURABLE_SETTINGS))
 
     def test_set_bad_data(self):
         with app.test_client() as c:

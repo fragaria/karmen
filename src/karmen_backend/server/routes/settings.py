@@ -3,11 +3,13 @@ from flask_cors import cross_origin
 from server import app
 from server.database import settings
 
+CONFIGURABLE_SETTINGS = ["NETWORK_INTERFACE"]
+
 
 @app.route("/settings", methods=["GET", "OPTIONS"])
 @cross_origin()
 def settings_list():
-    props = {n.lower(): app.config[n] for n in app.config["CONFIGURABLE_SETTINGS"]}
+    props = {n.lower(): app.config[n] for n in CONFIGURABLE_SETTINGS}
     for option in settings.get_all_settings():
         if option["key"] in props:
             props[option["key"]] = option["val"]
@@ -24,7 +26,7 @@ def settings_change():
     if not data:
         return abort(400)
     # Doing this in two passes ensures no partial updates happen
-    props = {n.lower(): app.config[n] for n in app.config["CONFIGURABLE_SETTINGS"]}
+    props = {n.lower(): app.config[n] for n in CONFIGURABLE_SETTINGS}
     for row in data:
         if not "key" in row or not "val" in row or row["key"] not in props:
             return abort(400)
