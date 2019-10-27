@@ -21,10 +21,12 @@ class Octoprint(PrinterClient):
         client=PrinterClientInfo(),
         client_props=None,
         printer_props=None,
+        protocol="http",
     ):
         self.name = name
         self.hostname = hostname
         self.ip = ip
+        self.protocol = protocol
         self.printer_props = printer_props
         if not client_props:
             self.client = (

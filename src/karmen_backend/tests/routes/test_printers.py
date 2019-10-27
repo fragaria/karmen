@@ -85,11 +85,36 @@ class CreateRoute(unittest.TestCase):
                     json={
                         "ip": "172.16.236.200:81",
                         "name": "random-test-printer-name",
+                        "protocol": "https",
                     },
                 )
                 self.assertEqual(response.status_code, 201)
                 response = c.get("/printers/172.16.236.200:81")
                 self.assertEqual(response.json["ip"], "172.16.236.200:81")
+                self.assertEqual(response.json["protocol"], "https")
+                self.assertEqual(response.json["name"], "random-test-printer-name")
+                self.assertEqual(response.json["client"]["name"], "octoprint")
+        except Exception as e:
+            raise e
+        finally:
+            c.delete("/printers/172.16.236.200:81")
+
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    def test_create_default_protocol(self, mock_get_uri, mock_avahi):
+        try:
+            with app.test_client() as c:
+                response = c.post(
+                    "/printers",
+                    json={
+                        "ip": "172.16.236.200:81",
+                        "name": "random-test-printer-name",
+                    },
+                )
+                self.assertEqual(response.status_code, 201)
+                response = c.get("/printers/172.16.236.200:81")
+                self.assertEqual(response.json["ip"], "172.16.236.200:81")
+                self.assertEqual(response.json["protocol"], "http")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
         except Exception as e:
@@ -100,6 +125,14 @@ class CreateRoute(unittest.TestCase):
     def test_empty_req(self):
         with app.test_client() as c:
             response = c.post("/printers")
+            self.assertEqual(response.status_code, 400)
+
+    def test_bad_protocol(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers",
+                json={"ip": "172.16.236.200", "name": "something", "protocol": "ftp"},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_name(self):
@@ -165,9 +198,13 @@ class PatchRoute(unittest.TestCase):
     def test_patch(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4", json={"name": "random-test-printer-name"}
+                "/printers/1.2.3.4",
+                json={"name": "random-test-printer-name", "protocol": "https"},
             )
             self.assertEqual(response.status_code, 204)
+            p = printers.get_printer("1.2.3.4")
+            self.assertEqual(p["name"], "random-test-printer-name")
+            self.assertEqual(p["protocol"], "https")
 
     def test_patch_printer_props(self):
         with app.test_client() as c:
@@ -204,6 +241,13 @@ class PatchRoute(unittest.TestCase):
     def test_patch_empty_name(self):
         with app.test_client() as c:
             response = c.patch("/printers/1.2.3.4", json={"name": ""})
+            self.assertEqual(response.status_code, 400)
+
+    def test_patch_empty_bad_protocol(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/printers/1.2.3.4", json={"name": "some", "protocol": "ftp"}
+            )
             self.assertEqual(response.status_code, 400)
 
 

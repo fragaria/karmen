@@ -7,7 +7,7 @@ def add_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printers (name, hostname, ip, client, client_props, printer_props) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO printers (name, hostname, ip, client, client_props, printer_props, protocol) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             (
                 kwargs["name"],
                 kwargs["hostname"],
@@ -15,6 +15,7 @@ def add_printer(**kwargs):
                 kwargs["client"],
                 psycopg2.extras.Json(kwargs["client_props"]),
                 psycopg2.extras.Json(kwargs.get("printer_props", None)),
+                kwargs.get("protocol", "http"),
             ),
         )
         cursor.close()
@@ -24,7 +25,7 @@ def update_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE printers SET name = %s, hostname = %s, ip = %s, client = %s, client_props = %s, printer_props = %s where ip = %s",
+            "UPDATE printers SET name = %s, hostname = %s, ip = %s, client = %s, client_props = %s, printer_props = %s, protocol = %s where ip = %s",
             (
                 kwargs["name"],
                 kwargs["hostname"],
@@ -32,6 +33,7 @@ def update_printer(**kwargs):
                 kwargs["client"],
                 psycopg2.extras.Json(kwargs["client_props"]),
                 psycopg2.extras.Json(kwargs["printer_props"]),
+                kwargs["protocol"],
                 kwargs["ip"],
             ),
         )
@@ -42,7 +44,7 @@ def get_printers():
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT name, hostname, ip, client, client_props, printer_props FROM printers"
+            "SELECT name, hostname, ip, client, client_props, printer_props, protocol FROM printers"
         )
         data = cursor.fetchall()
         cursor.close()
@@ -53,7 +55,7 @@ def get_printer(ip):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT name, hostname, ip, client, client_props, printer_props FROM printers where ip = %s",
+            "SELECT name, hostname, ip, client, client_props, printer_props, protocol FROM printers where ip = %s",
             (ip,),
         )
         data = cursor.fetchone()

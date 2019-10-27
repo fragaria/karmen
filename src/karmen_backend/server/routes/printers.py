@@ -22,6 +22,7 @@ def make_printer_response(printer, fields):
         "name": printer_inst.name,
         "hostname": printer_inst.hostname,
         "ip": printer_inst.ip,
+        "protocol": printer_inst.protocol,
     }
     if "status" in fields:
         data["status"] = printer_inst.status()
@@ -53,9 +54,11 @@ def printer_create():
         return abort(400)
     ip = data.get("ip", None)
     name = data.get("name", None)
+    protocol = data.get("protocol", "http")
     if (
         not ip
         or not name
+        or protocol not in ["http", "https"]
         or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", ip) is None
     ):
         return abort(400)
@@ -67,6 +70,7 @@ def printer_create():
             "hostname": hostname,
             "ip": ip,
             "name": name,
+            "protocol": protocol,
             "client": "octoprint",  # TODO make this more generic
         }
     )
@@ -75,6 +79,7 @@ def printer_create():
         name=name,
         hostname=hostname,
         ip=ip,
+        protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
             "version": printer.client.version,
@@ -115,7 +120,8 @@ def printer_patch(ip):
     if not data:
         return abort(400)
     name = data.get("name", None)
-    if not name:
+    protocol = data.get("protocol", printer["protocol"])
+    if not name or protocol not in ["http", "https"]:
         return abort(400)
     printer_inst = clients.get_printer_instance(printer)
     printer_props = data.get("printer_props", {})
@@ -138,6 +144,7 @@ def printer_patch(ip):
         name=name,
         hostname=printer_inst.hostname,
         ip=printer_inst.ip,
+        protocol=protocol,
         client=printer_inst.client_name(),
         client_props={
             "version": printer_inst.client.version,
