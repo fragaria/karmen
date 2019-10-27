@@ -19,8 +19,8 @@ class AddPrinter extends React.Component {
         required: true,
         error: null,
       },
-      ip: {
-        name: "IP address",
+      address: {
+        name: "Printer address",
         val: '',
         type: 'text',
         required: true,
@@ -48,15 +48,22 @@ class AddPrinter extends React.Component {
       hasErrors = true;
       updatedForm.name.error = 'Name is required';
     }
-    if (!form.ip.val || form.ip.val.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$/) === null) {
+    if (!form.address.val || form.address.val.match(/^(https?:\/\/)?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$/) === null) {
       hasErrors = true;
-      updatedForm.ip.error = 'IP address is required in a proper format'
+      updatedForm.address.error = 'Printer address is required in a proper format (like http://1.2.3.4:81)'
     }
     this.setState({
       form: updatedForm,
     });
     if (!hasErrors) {
-      addPrinter(form.ip.val, form.name.val)
+      let protocol = "http";
+      let ip = form.address.val;
+      if (form.address.val.indexOf('//') > -1) {
+        const url = new URL(form.address.val);
+        protocol = url.protocol.replace(':', '');
+        ip = url.host;
+      }
+      addPrinter(protocol, ip, form.name.val)
         .then((r) => {
           switch(r) {
             case 201:
@@ -67,7 +74,7 @@ class AddPrinter extends React.Component {
               break;
             case 409:
               this.setState({
-                message: 'Printer on this IP address is already registered',
+                message: 'Printer on this address is already registered',
                 submitting: false,
               });
               break;

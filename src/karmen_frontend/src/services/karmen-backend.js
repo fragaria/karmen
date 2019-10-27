@@ -38,13 +38,13 @@ export const getPrinter = (ip, fields = []) => {
     })
 }
 
-export const addPrinter = (ip, name) => {
+export const addPrinter = (protocol, ip, name) => {
   return fetch(`${BASE_URL}/printers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ip, name}),
+    body: JSON.stringify({protocol, ip, name}),
   })
     .then((response) => {
       if (response.status !== 201) {
