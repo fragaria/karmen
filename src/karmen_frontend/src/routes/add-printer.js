@@ -57,13 +57,13 @@ class AddPrinter extends React.Component {
     });
     if (!hasErrors) {
       let protocol = "http";
-      let ip = form.address.val;
+      let host = form.address.val;
       if (form.address.val.indexOf('//') > -1) {
         const url = new URL(form.address.val);
         protocol = url.protocol.replace(':', '');
-        ip = url.host;
+        host = url.host;
       }
-      addPrinter(protocol, ip, form.name.val)
+      addPrinter(protocol, host, form.name.val)
         .then((r) => {
           switch(r) {
             case 201:

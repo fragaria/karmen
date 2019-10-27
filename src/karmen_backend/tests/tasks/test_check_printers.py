@@ -10,7 +10,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "hostname": "a",
-                "ip": "1234",
+                "host": "1234",
                 "client_props": {"connected": True, "version": {}, "read_only": False},
                 "client": "octoprint",
                 "protocol": "https",
@@ -18,7 +18,7 @@ class CheckPrintersTest(unittest.TestCase):
             },
             {
                 "hostname": "b",
-                "ip": "5678",
+                "host": "5678",
                 "client_props": {"connected": True, "version": {}, "read_only": False},
                 "client": "octoprint",
             },
@@ -38,7 +38,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "hostname": "a",
-                        "ip": "1234",
+                        "host": "1234",
                         "name": None,
                         "client": "octoprint",
                         "protocol": "https",
@@ -53,7 +53,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "hostname": "b",
-                        "ip": "5678",
+                        "host": "5678",
                         "protocol": "http",
                         "name": None,
                         "client": "octoprint",
@@ -73,14 +73,14 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "hostname": "a",
-                "ip": "1234",
+                "host": "1234",
                 "client_props": {"connected": False, "version": {}, "read_only": False},
                 "client": "octoprint",
                 "protocol": "https",
             },
             {
                 "hostname": "b",
-                "ip": "5678",
+                "host": "5678",
                 "client_props": {"connected": True, "version": {}, "read_only": False},
                 "client": "octoprint",
             },
@@ -101,9 +101,9 @@ class CheckPrintersTest(unittest.TestCase):
             def json(self):
                 return self.json_data or {}
 
-        def mock_call(ip, **kwargs):
+        def mock_call(host, **kwargs):
             if (
-                ip == "5678"
+                host == "5678"
                 and "endpoint" in kwargs
                 and kwargs["endpoint"] == "/api/settings"
             ):
@@ -134,7 +134,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "hostname": "a",
-                        "ip": "1234",
+                        "host": "1234",
                         "name": None,
                         "client": "octoprint",
                         "protocol": "https",
@@ -149,7 +149,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "hostname": "b",
-                        "ip": "5678",
+                        "host": "5678",
                         "protocol": "http",
                         "name": None,
                         "client": "octoprint",
@@ -176,14 +176,14 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "hostname": "a",
-                "ip": "1234",
+                "host": "1234",
                 "protocol": "https",
                 "client_props": {"connected": False, "version": {}, "read_only": False},
                 "client": "octoprint",
             },
             {
                 "hostname": "b",
-                "ip": "5678",
+                "host": "5678",
                 "client_props": {"connected": True, "version": {}, "read_only": False},
                 "client": "octoprint",
             },
@@ -210,9 +210,9 @@ class CheckPrintersTest(unittest.TestCase):
             def json(self):
                 return self.json_data or {}
 
-        def mock_call(ip, **kwargs):
+        def mock_call(host, **kwargs):
             if (
-                ip == "5678"
+                host == "5678"
                 and "endpoint" in kwargs
                 and kwargs["endpoint"] == "/api/settings"
             ):
@@ -245,7 +245,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "hostname": "a",
-                        "ip": "1234",
+                        "host": "1234",
                         "name": None,
                         "protocol": "https",
                         "client": "octoprint",
@@ -260,7 +260,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "hostname": "b",
-                        "ip": "5678",
+                        "host": "5678",
                         "name": None,
                         "protocol": "http",
                         "client": "octoprint",

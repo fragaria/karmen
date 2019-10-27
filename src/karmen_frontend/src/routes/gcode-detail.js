@@ -41,13 +41,13 @@ class GcodeDetail extends React.Component {
         .filter((p) => p.client && p.client.connected);
       this.setState({
         availablePrinters,
-        selectedPrinter: availablePrinters.length ? availablePrinters[0].ip : null,
+        selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,
       });
     })
   }
 
-  schedulePrint(gcodeId, printerIp) {
-    printGcode(gcodeId, printerIp)
+  schedulePrint(gcodeId, printerHost) {
+    printGcode(gcodeId, printerHost)
       .then((r) => {
         switch(r) {
           case 201:
@@ -83,7 +83,7 @@ class GcodeDetail extends React.Component {
       return <div><Loader /></div>;
     }
     const availablePrinterOpts = availablePrinters.map((p) => {
-      return <option key={p.ip} value={p.ip}>{`${p.name} (${p.ip})`}</option>;
+      return <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>;
     });
     return (
       <div className="printer-detail standalone-page">
@@ -160,7 +160,7 @@ class GcodeDetail extends React.Component {
                         <button className="plain" type="submit" onClick={(e) => {
                           e.preventDefault();
                           const { selectedPrinter } = this.state;
-                          const selected = availablePrinters.find((p) => p.ip === selectedPrinter);
+                          const selected = availablePrinters.find((p) => p.host === selectedPrinter);
                           if (selected && selected.printer_props && selected.printer_props.filament_type &&
                               gcode.analysis && gcode.analysis.filament && gcode.analysis.filament.type &&
                               gcode.analysis.filament.type !== selected.printer_props.filament_type

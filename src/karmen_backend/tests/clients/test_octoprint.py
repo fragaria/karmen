@@ -161,7 +161,7 @@ class OctoprintSniffTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.get_uri")
     def test_access_protected_octoprint(self, mock_get_uri):
-        def mock_call(ip, **kwargs):
+        def mock_call(host, **kwargs):
             if "settings" in kwargs["endpoint"]:
                 return Response(200)
             return Response(403)

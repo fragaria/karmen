@@ -20,9 +20,9 @@ def check_printers():
             webcam = printer.webcam()
             try:
                 if "stream" in webcam:
-                    redis.set("webcam_%s" % (printer.ip,), webcam["stream"])
+                    redis.set("webcam_%s" % (printer.host,), webcam["stream"])
                 else:
-                    redis.delete("webcam_%s" % (printer.ip,))
+                    redis.delete("webcam_%s" % (printer.host,))
             except Exception as e:
                 app.logger.error(
                     "Cannot save webcam proxy information into cache: %s", e
@@ -30,7 +30,7 @@ def check_printers():
         printers.update_printer(
             name=printer.name,
             hostname=printer.hostname,
-            ip=printer.ip,
+            host=printer.host,
             protocol=printer.protocol,
             client=printer.client_name(),
             client_props={

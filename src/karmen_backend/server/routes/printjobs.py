@@ -23,10 +23,10 @@ def printjob_create():
     if not data:
         return abort(400)
     gcode_id = data.get("gcode", None)
-    printer_ip = data.get("printer", None)
-    if not gcode_id or not printer_ip:
+    printer_host = data.get("printer", None)
+    if not gcode_id or not printer_host:
         return abort(400)
-    printer = printers.get_printer(printer_ip)
+    printer = printers.get_printer(printer_host)
     if printer is None:
         return abort(404)
     gcode = gcodes.get_gcode(gcode_id)
@@ -41,7 +41,7 @@ def printjob_create():
             return abort(500, "Cannot upload the g-code to the printer")
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode["id"],
-            printer_ip=printer["ip"],
+            printer_host=printer["host"],
             gcode_data={
                 "id": gcode["id"],
                 "filename": gcode["filename"],
@@ -49,7 +49,7 @@ def printjob_create():
                 "available": True,
             },
             printer_data={
-                "ip": printer["ip"],
+                "host": printer["host"],
                 "name": printer["name"],
                 "client": printer["client"],
             },

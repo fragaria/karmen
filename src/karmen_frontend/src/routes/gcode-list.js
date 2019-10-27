@@ -27,8 +27,8 @@ class GcodeRow extends React.Component {
     this.schedulePrint = this.schedulePrint.bind(this);
   }
 
-  schedulePrint(gcodeId, printerIp) {
-    printGcode(gcodeId, printerIp)
+  schedulePrint(gcodeId, printerHost) {
+    printGcode(gcodeId, printerHost)
       .then((r) => {
         switch(r) {
           case 201:
@@ -124,7 +124,7 @@ class GcodeRow extends React.Component {
 
     if (showPrinterSelectRow) {
       const availablePrinterOpts = availablePrinters.map((p) => {
-        return <option key={p.ip} value={p.ip}>{`${p.name} (${p.ip})`}</option>;
+        return <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>;
       })
       return (
         <tr>
@@ -151,7 +151,7 @@ class GcodeRow extends React.Component {
               <button className="plain" onClick={(e) => {
                 e.preventDefault();
                 const { selectedPrinter } = this.state;
-                const selected = availablePrinters.find((p) => p.ip === selectedPrinter);
+                const selected = availablePrinters.find((p) => p.host === selectedPrinter);
                 if (selected && selected.printer_props && selected.printer_props.filament_type &&
                     analysis && analysis.filament && analysis.filament.type &&
                     analysis.filament.type !== selected.printer_props.filament_type
@@ -194,7 +194,7 @@ class GcodeRow extends React.Component {
                 .filter((p) => p.client && p.client.connected);
               this.setState({
                 availablePrinters,
-                selectedPrinter: availablePrinters.length ? availablePrinters[0].ip : null,
+                selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,
                 showPrinterSelectRow: true,
               });
             })

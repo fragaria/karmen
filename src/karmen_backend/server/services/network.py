@@ -25,8 +25,10 @@ def do_arp_scan(network_interface):
     return devices
 
 
-def get_avahi_hostname(ip):
-    proc = subprocess.Popen(["avahi-resolve-address", ip], stdout=subprocess.PIPE)
+def get_avahi_hostname(ip_address):
+    proc = subprocess.Popen(
+        ["avahi-resolve-address", ip_address], stdout=subprocess.PIPE
+    )
     while True:
         rawline = proc.stdout.readline()
         if not rawline:
@@ -40,15 +42,15 @@ def get_avahi_hostname(ip):
         return match[0][1]
 
 
-def get_uri(ip, endpoint="/", protocol="http", timeout=None):
+def get_uri(host, endpoint="/", protocol="http", timeout=None):
     timeout = timeout if timeout else app.config.get("NETWORK_TIMEOUT", 10)
     do_cert_verification = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
     request = None
-    if ip is None:
+    if host is None:
         return request
     if endpoint[0] != "/":
         endpoint = "/%s" % (endpoint,)
-    uri = "%s://%s%s" % (protocol, ip, endpoint)
+    uri = "%s://%s%s" % (protocol, host, endpoint)
     try:
         request = requests.get(uri, timeout=timeout, verify=do_cert_verification)
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
@@ -58,19 +60,19 @@ def get_uri(ip, endpoint="/", protocol="http", timeout=None):
 
 # TODO refactor and unify with get_uri, or maybe drop in favour of requests.session
 def post_uri(
-    ip, endpoint="/", protocol="http", timeout=None, files=None, data=None, json=None
+    host, endpoint="/", protocol="http", timeout=None, files=None, data=None, json=None
 ):
     timeout = timeout if timeout else app.config.get("NETWORK_TIMEOUT", 10)
     do_cert_verification = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
     request = None
-    if ip is None:
+    if host is None:
         return request
     if (json and data) or (json and files):
         raise Exception("Cannot pass json and data/files at the same time")
 
     if endpoint[0] != "/":
         endpoint = "/%s" % (endpoint,)
-    uri = "%s://%s%s" % (protocol, ip, endpoint)
+    uri = "%s://%s%s" % (protocol, host, endpoint)
     try:
         request = requests.post(
             uri,

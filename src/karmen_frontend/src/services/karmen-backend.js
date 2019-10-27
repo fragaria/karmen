@@ -20,8 +20,8 @@ export const getPrinters = (fields = []) => {
     });
 }
 
-export const getPrinter = (ip, fields = []) => {
-  let uri = `${BASE_URL}/printers/${ip}`;
+export const getPrinter = (host, fields = []) => {
+  let uri = `${BASE_URL}/printers/${host}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(',')}`;
   }
@@ -38,13 +38,13 @@ export const getPrinter = (ip, fields = []) => {
     })
 }
 
-export const addPrinter = (protocol, ip, name) => {
+export const addPrinter = (protocol, host, name) => {
   return fetch(`${BASE_URL}/printers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({protocol, ip, name}),
+    body: JSON.stringify({protocol, host, name}),
   })
     .then((response) => {
       if (response.status !== 201) {
@@ -57,8 +57,8 @@ export const addPrinter = (protocol, ip, name) => {
     })
 }
 
-export const patchPrinter = (ip, data) => {
-  return fetch(`${BASE_URL}/printers/${ip}`, {
+export const patchPrinter = (host, data) => {
+  return fetch(`${BASE_URL}/printers/${host}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -76,8 +76,8 @@ export const patchPrinter = (ip, data) => {
     })
 }
 
-export const setPrinterConnection = (ip, state) => {
-  return fetch(`${BASE_URL}/printers/${ip}/connection`, {
+export const setPrinterConnection = (host, state) => {
+  return fetch(`${BASE_URL}/printers/${host}/connection`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -95,8 +95,8 @@ export const setPrinterConnection = (ip, state) => {
     })
 }
 
-export const deletePrinter = (ip) => {
-  return fetch(`${BASE_URL}/printers/${ip}`, {
+export const deletePrinter = (host) => {
+  return fetch(`${BASE_URL}/printers/${host}`, {
     method: 'DELETE',
   })
     .then((response) => {
@@ -110,8 +110,8 @@ export const deletePrinter = (ip) => {
     })
 }
 
-export const changeCurrentJob = (ip, action) => {
-  return fetch(`${BASE_URL}/printers/${ip}/current-job`, {
+export const changeCurrentJob = (host, action) => {
+  return fetch(`${BASE_URL}/printers/${host}/current-job`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -293,7 +293,7 @@ export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter =
     uri += `&order_by=${orderBy}`;
   }
   if (printerFilter) {
-    uri += `&filter=printer_ip:${printerFilter}`;
+    uri += `&filter=printer_host:${printerFilter}`;
   }
   return fetch(uri)
     .then((response) => {

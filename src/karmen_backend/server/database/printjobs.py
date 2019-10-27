@@ -5,7 +5,14 @@ from server.database import get_connection, prepare_list_statement
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
 def get_printjobs(order_by=None, limit=None, start_with=None, filter=None):
-    columns = ["id", "gcode_id", "printer_ip", "started", "gcode_data", "printer_data"]
+    columns = [
+        "id",
+        "gcode_id",
+        "printer_host",
+        "started",
+        "gcode_data",
+        "printer_data",
+    ]
     with get_connection() as connection:
         statement = prepare_list_statement(
             connection,
@@ -32,7 +39,7 @@ def get_printjob(id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, gcode_id, printer_ip, started, gcode_data, printer_data from printjobs where id = %s",
+            "SELECT id, gcode_id, printer_host, started, gcode_data, printer_data from printjobs where id = %s",
             (id,),
         )
         data = cursor.fetchone()
@@ -44,10 +51,10 @@ def add_printjob(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printjobs (gcode_id, printer_ip, gcode_data, printer_data) values (%s, %s, %s, %s) RETURNING id",
+            "INSERT INTO printjobs (gcode_id, printer_host, gcode_data, printer_data) values (%s, %s, %s, %s) RETURNING id",
             (
                 kwargs["gcode_id"],
-                kwargs["printer_ip"],
+                kwargs["printer_host"],
                 psycopg2.extras.Json(kwargs.get("gcode_data", None)),
                 psycopg2.extras.Json(kwargs.get("printer_data", None)),
             ),

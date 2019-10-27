@@ -25,7 +25,7 @@ class PrinterConnection extends React.Component {
   changePrinterConnection() {
     const { targetState } = this.state;
     const { printer, onPrinterConnectionChanged } = this.props;
-    setPrinterConnection(printer.ip, targetState)
+    setPrinterConnection(printer.host, targetState)
       .then((r) => {
         this.setState({
           submitting: false,
@@ -47,8 +47,8 @@ class PrinterConnection extends React.Component {
         <ul>
             <li><strong>Client status</strong>: {printer.client.connected ? 'Connected' : 'Disconnected'}</li>
             <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
-            <li><strong>Client IP</strong>: <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">{printer.ip}</a></li>
-            {printer.hostname && <li><strong>Hostname</strong>: <a href={`http://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
+            <li><strong>Client host</strong>: <a href={`${printer.protocol}://${printer.host}`} target="_blank" rel="noopener noreferrer">{printer.host}</a></li>
+            {printer.hostname && <li><strong>Hostname</strong>: <a href={`${printer.protocol}://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
             <li>
               <form className="inline-form">
                 {showConnectionWarningRow
@@ -146,7 +146,7 @@ class PrinterDetail extends React.Component {
 
   loadPrinter() {
     const { match } = this.props;
-    getPrinter(match.params.ip, ['job', 'status', 'webcam']).then((printer) => {
+    getPrinter(match.params.host, ['job', 'status', 'webcam']).then((printer) => {
       this.setState({
         printer,
       });
@@ -163,7 +163,7 @@ class PrinterDetail extends React.Component {
       }];
       page = 0;
     }
-    getPrinterJobs(jobsTable.pages[page].startWith, newOrderBy, match.params.ip).then((jobs) => {
+    getPrinterJobs(jobsTable.pages[page].startWith, newOrderBy, match.params.host).then((jobs) => {
       if (!jobs.next && jobs.items.length === 0 && page - 1 >= 0) {
         this.loadJobsPage(page - 1, newOrderBy);
         return;
@@ -193,7 +193,7 @@ class PrinterDetail extends React.Component {
 
   changePrinter(newParameters) {
     const { printer } = this.state;
-    return patchPrinter(printer.ip, newParameters)
+    return patchPrinter(printer.host, newParameters)
       .then((r) => {
         switch(r) {
           case 204:

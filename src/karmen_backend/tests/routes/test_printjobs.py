@@ -28,8 +28,8 @@ class ListRoute(unittest.TestCase):
                 printjobs.add_printjob(
                     gcode_id=self.gcode_id,
                     gcode_data={"id": self.gcode_id},
-                    printer_ip="172.16.236.11:8080",
-                    printer_data={"ip": "172.16.236.11:8080"},
+                    printer_host="172.16.236.11:8080",
+                    printer_data={"host": "172.16.236.11:8080"},
                 )
             )
         for i in range(0, 3):
@@ -37,8 +37,8 @@ class ListRoute(unittest.TestCase):
                 printjobs.add_printjob(
                     gcode_id=self.gcode_id2,
                     gcode_data={"id": self.gcode_id2},
-                    printer_ip="172.16.236.12:8080",
-                    printer_data={"ip": "172.16.236.12:8080"},
+                    printer_host="172.16.236.12:8080",
+                    printer_data={"host": "172.16.236.12:8080"},
                 )
             )
 
@@ -157,7 +157,7 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_absent(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?filter=printer_ip:completely-absent%printer")
+            response = c.get("/printjobs?filter=printer_host:completely-absent%printer")
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) == 0)
@@ -165,12 +165,12 @@ class ListRoute(unittest.TestCase):
     def test_filter(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_ip:172.16.236.12:8080&order_by=id"
+                "/printjobs?filter=printer_host:172.16.236.12:8080&order_by=id"
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             for printer in response.json["items"]:
-                self.assertTrue(printer["printer_data"]["ip"], "172.16.236.12:8080")
+                self.assertTrue(printer["printer_data"]["host"], "172.16.236.12:8080")
             response = c.get("/printjobs?filter=gcode_id:3:8080&order_by=id")
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -180,7 +180,7 @@ class ListRoute(unittest.TestCase):
     def test_filter_next(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_ip:172.16.236.12:8080&limit=10&order_by=-id"
+                "/printjobs?filter=printer_host:172.16.236.12:8080&limit=10&order_by=-id"
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -219,8 +219,8 @@ class DetailRoute(unittest.TestCase):
         self.printjob_id = printjobs.add_printjob(
             gcode_id=self.gcode_id,
             gcode_data={"id": self.gcode_id},
-            printer_ip="172.16.236.11:8080",
-            printer_data={"ip": "172.16.236.11:8080"},
+            printer_host="172.16.236.11:8080",
+            printer_data={"host": "172.16.236.11:8080"},
         )
 
     def test_detail(self):
@@ -260,7 +260,7 @@ class CreateRoute(unittest.TestCase):
             pid = response.json["id"]
             pj = printjobs.get_printjob(pid)
             self.assertEqual(pj["gcode_id"], self.gcode_id)
-            self.assertEqual(pj["printer_ip"], "172.16.236.11:8080")
+            self.assertEqual(pj["printer_host"], "172.16.236.11:8080")
             self.assertFalse(pj["printer_data"] is None)
             self.assertFalse(pj["gcode_data"] is None)
             self.assertTrue("name" in pj["printer_data"])
@@ -335,8 +335,8 @@ class DeleteRoute(unittest.TestCase):
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_ip="172.16.236.11:8080",
-            printer_data={"ip": "172.16.236.11:8080"},
+            printer_host="172.16.236.11:8080",
+            printer_data={"host": "172.16.236.11:8080"},
         )
         with app.test_client() as c:
             response = c.delete("/printjobs/%s" % printjob_id)

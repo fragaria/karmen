@@ -5,7 +5,7 @@ from server import clients
 
 
 def save_printer_data(**kwargs):
-    has_record = printers.get_printer(kwargs["ip"])
+    has_record = printers.get_printer(kwargs["host"])
     if has_record is None and not kwargs["client_props"]["connected"]:
         return
     if has_record is None:
@@ -23,12 +23,12 @@ def save_printer_data(**kwargs):
 
 
 @celery.task(name="sniff_printer")
-def sniff_printer(hostname, ip):
-    app.logger.info("Sniffing printer on %s (%s) - trying http" % (ip, hostname))
+def sniff_printer(hostname, host):
+    app.logger.info("Sniffing printer on %s (%s) - trying http" % (host, hostname))
     printer = clients.get_printer_instance(
         {
             "hostname": hostname,
-            "ip": ip,
+            "host": host,
             "client": "octoprint",  # TODO not only octoprint
             "protocol": "http",
         }
@@ -38,19 +38,19 @@ def sniff_printer(hostname, ip):
     # Let's try a secured connection
     if not printer.client.connected:
         printer.protocol = "https"
-        app.logger.info("Sniffing printer on %s (%s) - trying https" % (ip, hostname))
+        app.logger.info("Sniffing printer on %s (%s) - trying https" % (host, hostname))
         printer.sniff()
 
     # Not even on https, no reason to do anything
     if not printer.client.connected:
-        app.logger.info("Sniffing printer on %s (%s) - no luck" % (ip, hostname))
+        app.logger.info("Sniffing printer on %s (%s) - no luck" % (host, hostname))
         return
 
-    app.logger.info("Sniffing printer on %s (%s) - success" % (ip, hostname))
+    app.logger.info("Sniffing printer on %s (%s) - success" % (host, hostname))
     save_printer_data(
-        name=hostname or ip,
+        name=hostname or host,
         hostname=hostname,
-        ip=ip,
+        host=host,
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={

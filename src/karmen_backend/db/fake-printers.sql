@@ -24,10 +24,10 @@ SET row_security = off;
 -- Data for Name: printers; Type: TABLE DATA; Schema: public; Owner: print3d
 --
 
-insert into public.printers (client_props, name, ip, hostname, client, printer_props, protocol)
+insert into public.printers (client_props, name, host, hostname, client, printer_props, protocol)
   values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}', 'fake 1', '172.16.236.11:8080', NULL, 'octoprint', '{"filament_type": "PETG", "filament_color": "black", "bed_type": "Powder coated PEI", "tool0_diameter": 0.25}', 'http')
   on conflict do nothing;
-insert into public.printers (client_props, name, ip, hostname, client, printer_props, protocol)
+insert into public.printers (client_props, name, host, hostname, client, printer_props, protocol)
   values ('{"version": {"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"}, "connected": false, "read_only": false}',	'fake 2',	'172.16.236.12:8080', NULL,	'octoprint', '{"filament_type": "PLA", "filament_color": "red", "bed_type": "Flat PEI", "tool0_diameter": 0.4}', 'http')
   on conflict do nothing;
 

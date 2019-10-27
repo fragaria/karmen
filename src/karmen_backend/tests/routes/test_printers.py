@@ -83,14 +83,14 @@ class CreateRoute(unittest.TestCase):
                 response = c.post(
                     "/printers",
                     json={
-                        "ip": "172.16.236.200:81",
+                        "host": "172.16.236.200:81",
                         "name": "random-test-printer-name",
                         "protocol": "https",
                     },
                 )
                 self.assertEqual(response.status_code, 201)
                 response = c.get("/printers/172.16.236.200:81")
-                self.assertEqual(response.json["ip"], "172.16.236.200:81")
+                self.assertEqual(response.json["host"], "172.16.236.200:81")
                 self.assertEqual(response.json["protocol"], "https")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
@@ -107,13 +107,13 @@ class CreateRoute(unittest.TestCase):
                 response = c.post(
                     "/printers",
                     json={
-                        "ip": "172.16.236.200:81",
+                        "host": "172.16.236.200:81",
                         "name": "random-test-printer-name",
                     },
                 )
                 self.assertEqual(response.status_code, 201)
                 response = c.get("/printers/172.16.236.200:81")
-                self.assertEqual(response.json["ip"], "172.16.236.200:81")
+                self.assertEqual(response.json["host"], "172.16.236.200:81")
                 self.assertEqual(response.json["protocol"], "http")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
@@ -131,13 +131,13 @@ class CreateRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers",
-                json={"ip": "172.16.236.200", "name": "something", "protocol": "ftp"},
+                json={"host": "172.16.236.200", "name": "something", "protocol": "ftp"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_name(self):
         with app.test_client() as c:
-            response = c.post("/printers", json={"ip": "172.16.236.200"})
+            response = c.post("/printers", json={"host": "172.16.236.200"})
             self.assertEqual(response.status_code, 400)
 
     def test_missing_ip(self):
@@ -148,7 +148,7 @@ class CreateRoute(unittest.TestCase):
     def test_bad_ip(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers", json={"name": "name...", "ip": "bad-ip-address"}
+                "/printers", json={"name": "name...", "host": "bad-ip-address"}
             )
             self.assertEqual(response.status_code, 400)
 
@@ -156,7 +156,7 @@ class CreateRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers",
-                json={"name": "existing-printer", "ip": "172.16.236.11:8080"},
+                json={"name": "existing-printer", "host": "172.16.236.11:8080"},
             )
             self.assertEqual(response.status_code, 409)
 
@@ -168,7 +168,7 @@ class DeleteRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers",
-                json={"ip": "172.16.236.200:81", "name": "random-test-printer-name"},
+                json={"host": "172.16.236.200:81", "name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 201)
             response = c.delete("/printers/172.16.236.200:81")
@@ -186,7 +186,7 @@ class PatchRoute(unittest.TestCase):
         printers.add_printer(
             name="name",
             hostname="hostname",
-            ip="1.2.3.4",
+            host="1.2.3.4",
             client="octoprint",
             client_props={"version": "123"},
             printer_props={"filament_type": "PLA"},
@@ -257,7 +257,7 @@ class CurrentJobRoute(unittest.TestCase):
         printers.add_printer(
             name="name",
             hostname="hostname",
-            ip="1.2.3.4",
+            host="1.2.3.4",
             client="octoprint",
             client_props={"version": "123", "connected": True},
         )
@@ -313,7 +313,7 @@ class PrinterConnectionRoute(unittest.TestCase):
         printers.add_printer(
             name="name",
             hostname="hostname",
-            ip="1.2.3.4",
+            host="1.2.3.4",
             client="octoprint",
             client_props={"version": "123", "connected": True},
         )

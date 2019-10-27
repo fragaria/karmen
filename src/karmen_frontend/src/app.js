@@ -24,7 +24,7 @@ function App() {
             <Route path="/settings" exact component={Settings} />
             <Route path="/gcodes" exact component={GcodeList} />
             <Route path="/gcodes/:id" exact component={GcodeDetail} />
-            <Route path="/printers/:ip" exact component={PrinterDetail} />
+            <Route path="/printers/:host" exact component={PrinterDetail} />
             <Route path="/" exact component={PrinterList} />
           </Switch>
           <Heartbeat />

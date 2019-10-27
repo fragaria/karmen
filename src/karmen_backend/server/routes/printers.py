@@ -21,7 +21,7 @@ def make_printer_response(printer, fields):
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
         "hostname": printer_inst.hostname,
-        "ip": printer_inst.ip,
+        "host": printer_inst.host,
         "protocol": printer_inst.protocol,
     }
     if "status" in fields:
@@ -29,7 +29,7 @@ def make_printer_response(printer, fields):
     if "webcam" in fields:
         data["webcam"] = printer_inst.webcam()
         if "stream" in data["webcam"]:
-            data["webcam"]["proxied"] = "/proxied-webcam/%s" % (printer_inst.ip,)
+            data["webcam"]["proxied"] = "/proxied-webcam/%s" % (printer_inst.host,)
     if "job" in fields:
         data["job"] = printer_inst.job()
     return data
@@ -52,23 +52,23 @@ def printer_create():
     data = request.json
     if not data:
         return abort(400)
-    ip = data.get("ip", None)
+    host = data.get("host", None)
     name = data.get("name", None)
     protocol = data.get("protocol", "http")
     if (
-        not ip
+        not host
         or not name
         or protocol not in ["http", "https"]
-        or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", ip) is None
+        or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", host) is None
     ):
         return abort(400)
-    if printers.get_printer(ip) is not None:
+    if printers.get_printer(host) is not None:
         return abort(409)
-    hostname = network.get_avahi_hostname(ip)
+    hostname = network.get_avahi_hostname(host)
     printer = clients.get_printer_instance(
         {
             "hostname": hostname,
-            "ip": ip,
+            "host": host,
             "name": name,
             "protocol": protocol,
             "client": "octoprint",  # TODO make this more generic
@@ -78,7 +78,7 @@ def printer_create():
     printers.add_printer(
         name=name,
         hostname=hostname,
-        ip=ip,
+        host=host,
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
@@ -90,30 +90,30 @@ def printer_create():
     return "", 201
 
 
-@app.route("/printers/<ip>", methods=["GET", "OPTIONS"])
+@app.route("/printers/<host>", methods=["GET", "OPTIONS"])
 @cross_origin()
-def printer_detail(ip):
+def printer_detail(host):
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
-    printer = printers.get_printer(ip)
+    printer = printers.get_printer(host)
     if printer is None:
         return abort(404)
     return jsonify(make_printer_response(printer, fields))
 
 
-@app.route("/printers/<ip>", methods=["DELETE", "OPTIONS"])
+@app.route("/printers/<host>", methods=["DELETE", "OPTIONS"])
 @cross_origin()
-def printer_delete(ip):
-    printer = printers.get_printer(ip)
+def printer_delete(host):
+    printer = printers.get_printer(host)
     if printer is None:
         return abort(404)
-    printers.delete_printer(ip)
+    printers.delete_printer(host)
     return "", 204
 
 
-@app.route("/printers/<ip>", methods=["PATCH", "OPTIONS"])
+@app.route("/printers/<host>", methods=["PATCH", "OPTIONS"])
 @cross_origin()
-def printer_patch(ip):
-    printer = printers.get_printer(ip)
+def printer_patch(host):
+    printer = printers.get_printer(host)
     if printer is None:
         return abort(404)
     data = request.json
@@ -143,7 +143,7 @@ def printer_patch(ip):
     printers.update_printer(
         name=name,
         hostname=printer_inst.hostname,
-        ip=printer_inst.ip,
+        host=printer_inst.host,
         protocol=protocol,
         client=printer_inst.client_name(),
         client_props={
@@ -156,10 +156,10 @@ def printer_patch(ip):
     return "", 204
 
 
-@app.route("/printers/<ip>/connection", methods=["POST", "OPTIONS"])
+@app.route("/printers/<host>/connection", methods=["POST", "OPTIONS"])
 @cross_origin()
-def printer_change_connection(ip):
-    printer = printers.get_printer(ip)
+def printer_change_connection(host):
+    printer = printers.get_printer(host)
     if printer is None:
         return abort(404)
     data = request.json
@@ -186,10 +186,10 @@ def printer_change_connection(ip):
     return "", 204
 
 
-@app.route("/printers/<ip>/current-job", methods=["POST", "OPTIONS"])
+@app.route("/printers/<host>/current-job", methods=["POST", "OPTIONS"])
 @cross_origin()
-def printer_modify_job(ip):
-    printer = printers.get_printer(ip)
+def printer_modify_job(host):
+    printer = printers.get_printer(host)
     if printer is None:
         return abort(404)
     data = request.json
@@ -207,13 +207,13 @@ def printer_modify_job(ip):
         return abort(400, e)
 
 
-@app.route("/proxied-webcam/<ip>", methods=["GET", "OPTIONS"])
+@app.route("/proxied-webcam/<host>", methods=["GET", "OPTIONS"])
 @cross_origin()
-def printer_webcam(ip):
+def printer_webcam(host):
     # This is very inefficient and should not be used in production. Use the nginx
     # redis based proxy pass instead
     # TODO maybe we can drop this in the dev env as well
-    printer = printers.get_printer(ip)
+    printer = printers.get_printer(host)
     if printer is None:
         return abort(404)
     printer_inst = clients.get_printer_instance(printer)

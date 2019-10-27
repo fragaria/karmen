@@ -34,11 +34,11 @@ export const Temperature = ({name, actual, target }) => {
   return <span> {name}: {actual}/{target} &#176;C</span>
 }
 
-export const PrinterActions = ({ ip, onPrinterDelete }) => {
+export const PrinterActions = ({ host, onPrinterDelete }) => {
     return (
       <div className="box-actions">
         <h2 className="hidden">Actions</h2>
-        <Link to={`/printers/${ip}`}><i className="icon icon-cog"></i></Link>
+        <Link to={`/printers/${host}`}><i className="icon icon-cog"></i></Link>
         <button className="plain" onClick={onPrinterDelete}><i className="icon icon-bin"></i></button>
       </div>
     );
@@ -103,10 +103,10 @@ export class PrinterView extends React.Component {
           });
         }}>
           <h1>Are you sure?</h1>
-            <p>You can add the printer back later by simply adding <code>{printer.ip}</code> again.</p>
+            <p>You can add the printer back later by simply adding <code>{printer.host}</code> again.</p>
             <button type="submit" onClick={() => {
-              deletePrinter(printer.ip);
-              onPrinterDelete(printer.ip);
+              deletePrinter(printer.host);
+              onPrinterDelete(printer.host);
             }}>Remove printer</button>
         </BoxedModal>
         );
@@ -122,7 +122,7 @@ export class PrinterView extends React.Component {
           <h1>Are you sure?</h1>
             <p>You are about to cancel the whole print!</p>
             <button type="submit" onClick={() => {
-              changeCurrentJob(printer.ip, 'cancel')
+              changeCurrentJob(printer.host, 'cancel')
                 .then(() => {
                   this.setState({
                     showDeleteModal: false,
@@ -146,7 +146,7 @@ export class PrinterView extends React.Component {
               {printer.status.state === 'Paused'
                 ? (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.ip, 'toggle')
+                  changeCurrentJob(printer.host, 'toggle')
                     .then(() => {
                       if (onCurrentJobStateChange) {
                         onCurrentJobStateChange('play');
@@ -157,7 +157,7 @@ export class PrinterView extends React.Component {
                 </button>)
                 : (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.ip, 'toggle')
+                  changeCurrentJob(printer.host, 'toggle')
                     .then(() => {
                       if (onCurrentJobStateChange) {
                         onCurrentJobStateChange('pause');
@@ -179,12 +179,12 @@ export class PrinterView extends React.Component {
         </div>
         <div className="box-details">
           <div className="title">
-            <a href={`http://${printer.ip}`} target="_blank" rel="noopener noreferrer">
+            <a href={`${printer.protocol}://${printer.host}`} target="_blank" rel="noopener noreferrer">
               <strong>{printer.name}</strong>
             </a>
           </div>
           <PrinterState printer={printer} />
-          {!hideActions && <PrinterActions ip={printer.ip} onPrinterDelete={() => {
+          {!hideActions && <PrinterActions host={printer.host} onPrinterDelete={() => {
             this.setState({
               showDeleteModal: true,
             })
