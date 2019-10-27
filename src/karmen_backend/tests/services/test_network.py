@@ -134,22 +134,30 @@ class GetUriTest(unittest.TestCase):
     @mock.patch("requests.get")
     def test_try_hostname(self, mock_requests):
         get_uri("1.2.3.4", "/api/version")
-        mock_requests.assert_called_with("http://1.2.3.4/api/version", timeout=2)
+        mock_requests.assert_called_with(
+            "http://1.2.3.4/api/version", timeout=2, verify=True
+        )
 
     @mock.patch("requests.get")
     def test_pass_protocol_timeout(self, mock_requests):
         get_uri("1.2.3.4", "/api/version", protocol="https", timeout=3)
-        mock_requests.assert_called_with("https://1.2.3.4/api/version", timeout=3)
+        mock_requests.assert_called_with(
+            "https://1.2.3.4/api/version", timeout=3, verify=True
+        )
 
     @mock.patch("requests.get")
     def test_add_leading_slash(self, mock_requests):
         get_uri("1.2.3.4", "api/version")
-        mock_requests.assert_called_with("http://1.2.3.4/api/version", timeout=2)
+        mock_requests.assert_called_with(
+            "http://1.2.3.4/api/version", timeout=2, verify=True
+        )
 
     @mock.patch("requests.get")
     def test_ip_port(self, mock_requests):
         get_uri("1.2.3.4:5000", "api/version")
-        mock_requests.assert_called_with("http://1.2.3.4:5000/api/version", timeout=2)
+        mock_requests.assert_called_with(
+            "http://1.2.3.4:5000/api/version", timeout=2, verify=True
+        )
 
     @mock.patch("requests.get")
     def test_try_nothing(self, mock_requests):
@@ -160,7 +168,7 @@ class GetUriTest(unittest.TestCase):
     @mock.patch("requests.get")
     def test_try_root(self, mock_requests):
         request = get_uri("1.2.3.4")
-        mock_requests.assert_called_with("http://1.2.3.4/", timeout=2)
+        mock_requests.assert_called_with("http://1.2.3.4/", timeout=2, verify=True)
 
     @mock.patch("requests.get")
     def test_no_success(self, mock_requests):
@@ -172,7 +180,7 @@ class GetUriTest(unittest.TestCase):
         self.assertEqual(request, None)
         self.assertEqual(mock_requests.call_count, 1)
         mock_requests.assert_has_calls(
-            [mock.call("http://1.2.3.4/api/version", timeout=2)]
+            [mock.call("http://1.2.3.4/api/version", timeout=2, verify=True)]
         )
 
 
@@ -188,21 +196,36 @@ class PostUriTest(unittest.TestCase):
     def test_try_hostname(self, mock_requests):
         post_uri("1.2.3.4", "/api/version")
         mock_requests.assert_called_with(
-            "http://1.2.3.4/api/version", timeout=2, data=None, files=None, json=None
+            "http://1.2.3.4/api/version",
+            timeout=2,
+            data=None,
+            files=None,
+            json=None,
+            verify=True,
         )
 
     @mock.patch("requests.post")
     def test_pass_protocol_timeout(self, mock_requests):
         post_uri("1.2.3.4", "/api/version", protocol="https", timeout=3)
         mock_requests.assert_called_with(
-            "https://1.2.3.4/api/version", timeout=3, data=None, files=None, json=None
+            "https://1.2.3.4/api/version",
+            timeout=3,
+            data=None,
+            files=None,
+            json=None,
+            verify=True,
         )
 
     @mock.patch("requests.post")
     def test_add_leading_slash(self, mock_requests):
         post_uri("1.2.3.4", "api/version")
         mock_requests.assert_called_with(
-            "http://1.2.3.4/api/version", timeout=2, data=None, files=None, json=None
+            "http://1.2.3.4/api/version",
+            timeout=2,
+            data=None,
+            files=None,
+            json=None,
+            verify=True,
         )
 
     @mock.patch("requests.post")
@@ -214,6 +237,7 @@ class PostUriTest(unittest.TestCase):
             data=None,
             files=None,
             json=None,
+            verify=True,
         )
 
     @mock.patch("requests.post")
@@ -226,7 +250,7 @@ class PostUriTest(unittest.TestCase):
     def test_try_root(self, mock_requests):
         post_uri("1.2.3.4")
         mock_requests.assert_called_with(
-            "http://1.2.3.4/", timeout=2, data=None, files=None, json=None
+            "http://1.2.3.4/", timeout=2, data=None, files=None, json=None, verify=True
         )
 
     @mock.patch("requests.post")
@@ -246,6 +270,7 @@ class PostUriTest(unittest.TestCase):
                     data=None,
                     files=None,
                     json=None,
+                    verify=True,
                 )
             ]
         )
@@ -259,13 +284,19 @@ class PostUriTest(unittest.TestCase):
             data={"some": "data"},
             files=self.file_mock,
             json=None,
+            verify=True,
         )
 
     @mock.patch("requests.post")
     def test_pass_json(self, mock_requests):
         post_uri("1.2.3.4", json={"some": "data"})
         mock_requests.assert_called_with(
-            "http://1.2.3.4/", timeout=2, data=None, files=None, json={"some": "data"}
+            "http://1.2.3.4/",
+            timeout=2,
+            data=None,
+            files=None,
+            json={"some": "data"},
+            verify=True,
         )
 
     @mock.patch("requests.post")

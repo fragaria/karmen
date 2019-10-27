@@ -1,4 +1,4 @@
-from server import celery
+from server import app, celery
 from server.database import settings
 from server.database import printers
 from server import clients
@@ -24,18 +24,34 @@ def save_printer_data(**kwargs):
 
 @celery.task(name="sniff_printer")
 def sniff_printer(hostname, ip):
+    app.logger.info("Sniffing printer on %s (%s) - trying http" % (ip, hostname))
     printer = clients.get_printer_instance(
         {
             "hostname": hostname,
             "ip": ip,
             "client": "octoprint",  # TODO not only octoprint
+            "protocol": "http",
         }
     )
+
     printer.sniff()
+    # Let's try a secured connection
+    if not printer.client.connected:
+        printer.protocol = "https"
+        app.logger.info("Sniffing printer on %s (%s) - trying https" % (ip, hostname))
+        printer.sniff()
+
+    # Not even on https, no reason to do anything
+    if not printer.client.connected:
+        app.logger.info("Sniffing printer on %s (%s) - no luck" % (ip, hostname))
+        return
+
+    app.logger.info("Sniffing printer on %s (%s) - success" % (ip, hostname))
     save_printer_data(
         name=hostname or ip,
         hostname=hostname,
         ip=ip,
+        protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
             "version": printer.client.version,

@@ -13,6 +13,7 @@ class CheckPrintersTest(unittest.TestCase):
                 "ip": "1234",
                 "client_props": {"connected": True, "version": {}, "read_only": False},
                 "client": "octoprint",
+                "protocol": "https",
                 "printer_props": {"filament_type": "PETG"},
             },
             {
@@ -40,6 +41,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "ip": "1234",
                         "name": None,
                         "client": "octoprint",
+                        "protocol": "https",
                         "client_props": {
                             "connected": False,
                             "version": {},
@@ -52,6 +54,7 @@ class CheckPrintersTest(unittest.TestCase):
                     **{
                         "hostname": "b",
                         "ip": "5678",
+                        "protocol": "http",
                         "name": None,
                         "client": "octoprint",
                         "client_props": {
@@ -73,6 +76,7 @@ class CheckPrintersTest(unittest.TestCase):
                 "ip": "1234",
                 "client_props": {"connected": False, "version": {}, "read_only": False},
                 "client": "octoprint",
+                "protocol": "https",
             },
             {
                 "hostname": "b",
@@ -133,6 +137,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "ip": "1234",
                         "name": None,
                         "client": "octoprint",
+                        "protocol": "https",
                         "client_props": {
                             "connected": True,
                             "version": {},
@@ -145,6 +150,7 @@ class CheckPrintersTest(unittest.TestCase):
                     **{
                         "hostname": "b",
                         "ip": "5678",
+                        "protocol": "http",
                         "name": None,
                         "client": "octoprint",
                         "client_props": {
@@ -171,6 +177,7 @@ class CheckPrintersTest(unittest.TestCase):
             {
                 "hostname": "a",
                 "ip": "1234",
+                "protocol": "https",
                 "client_props": {"connected": False, "version": {}, "read_only": False},
                 "client": "octoprint",
             },
@@ -240,6 +247,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "hostname": "a",
                         "ip": "1234",
                         "name": None,
+                        "protocol": "https",
                         "client": "octoprint",
                         "client_props": {
                             "connected": True,
@@ -254,6 +262,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "hostname": "b",
                         "ip": "5678",
                         "name": None,
+                        "protocol": "http",
                         "client": "octoprint",
                         "client_props": {
                             "connected": True,

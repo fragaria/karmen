@@ -46,7 +46,7 @@ class Octoprint(PrinterClient):
         return self.__client_name__
 
     def is_alive(self):
-        request = get_uri(self.ip, endpoint="/api/version")
+        request = get_uri(self.ip, protocol=self.protocol, endpoint="/api/version")
         # TODO test for access-protected octoprint
         if request is None or request.status_code != 200:
             self.client.connected = False
@@ -65,7 +65,10 @@ class Octoprint(PrinterClient):
             "Printer is not connected to Octoprint",
         ]:
             request = post_uri(
-                self.ip, endpoint="/api/connection", json={"command": "connect"}
+                self.ip,
+                protocol=self.protocol,
+                endpoint="/api/connection",
+                json={"command": "connect"},
             )
             # TODO improve return value
             return bool(request is not None and request.status_code == 204)
@@ -89,7 +92,10 @@ class Octoprint(PrinterClient):
             "Printer is not connected to Octoprint",
         ]:
             request = post_uri(
-                self.ip, endpoint="/api/connection", json={"command": "disconnect"}
+                self.ip,
+                protocol=self.protocol,
+                endpoint="/api/connection",
+                json={"command": "disconnect"},
             )
             # TODO improve return value
             return bool(request is not None and request.status_code == 204)
@@ -98,7 +104,7 @@ class Octoprint(PrinterClient):
 
     # TODO move this code outside of this client, the sniffing code should discover a variety of clients
     def sniff(self):
-        request = get_uri(self.ip, endpoint="/api/version")
+        request = get_uri(self.ip, protocol=self.protocol, endpoint="/api/version")
         if request is None:
             app.logger.debug(
                 "%s is not responding on /api/version - not octoprint" % self.ip
@@ -110,7 +116,9 @@ class Octoprint(PrinterClient):
                 "%s is responding with %s on /api/version - might be access-protected octoprint"
                 % (self.ip, request.status_code)
             )
-            settings_req = get_uri(self.ip, endpoint="/api/settings")
+            settings_req = get_uri(
+                self.ip, protocol=self.protocol, endpoint="/api/settings"
+            )
             if settings_req and settings_req.status_code == 200:
                 app.logger.debug(
                     "%s is responding with 200 on /api/settings - probably access-protected octoprint"
@@ -159,7 +167,9 @@ class Octoprint(PrinterClient):
     def status(self):
         request = None
         if self.client.connected:
-            request = get_uri(self.ip, endpoint="/api/printer?exclude=history")
+            request = get_uri(
+                self.ip, protocol=self.protocol, endpoint="/api/printer?exclude=history"
+            )
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -182,7 +192,7 @@ class Octoprint(PrinterClient):
     def webcam(self):
         request = None
         if self.client.connected:
-            request = get_uri(self.ip, endpoint="/api/settings")
+            request = get_uri(self.ip, protocol=self.protocol, endpoint="/api/settings")
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -193,8 +203,7 @@ class Octoprint(PrinterClient):
                     return {"message": "Stream disabled in octoprint"}
                 stream_url = data["webcam"]["streamUrl"]
                 if re.match(r"^https?", stream_url, re.IGNORECASE) is None:
-                    # TODO reflect eventual HTTPS
-                    stream_url = "http://%s%s" % (self.ip, stream_url)
+                    stream_url = "%s://%s%s" % (self.protocol, self.ip, stream_url)
                 return {
                     "message": "OK",
                     "stream": stream_url,
@@ -210,7 +219,7 @@ class Octoprint(PrinterClient):
     def job(self):
         request = None
         if self.client.connected:
-            request = get_uri(self.ip, endpoint="/api/job")
+            request = get_uri(self.ip, protocol=self.protocol, endpoint="/api/job")
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -240,6 +249,7 @@ class Octoprint(PrinterClient):
                 )
             request = post_uri(
                 self.ip,
+                protocol=self.protocol,
                 endpoint="/api/files/local",
                 files={"file": open(gcode_disk_path, "rb")},
                 data={
@@ -260,7 +270,9 @@ class Octoprint(PrinterClient):
             body = {"command": action}
             if action == "toggle":
                 body = {"command": "pause", "action": "toggle"}
-            request = post_uri(self.ip, endpoint="/api/job", json=body)
+            request = post_uri(
+                self.ip, protocol=self.protocol, endpoint="/api/job", json=body
+            )
             if not request:
                 self.client.connected = False
         # TODO improve return value

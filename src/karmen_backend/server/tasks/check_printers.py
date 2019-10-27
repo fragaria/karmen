@@ -27,11 +27,11 @@ def check_printers():
                 app.logger.error(
                     "Cannot save webcam proxy information into cache: %s", e
                 )
-
         printers.update_printer(
             name=printer.name,
             hostname=printer.hostname,
             ip=printer.ip,
+            protocol=printer.protocol,
             client=printer.client_name(),
             client_props={
                 "version": printer.client.version,

@@ -42,6 +42,7 @@ def get_avahi_hostname(ip):
 
 def get_uri(ip, endpoint="/", protocol="http", timeout=None):
     timeout = timeout if timeout else app.config.get("NETWORK_TIMEOUT", 10)
+    do_cert_verification = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
     request = None
     if ip is None:
         return request
@@ -49,17 +50,18 @@ def get_uri(ip, endpoint="/", protocol="http", timeout=None):
         endpoint = "/%s" % (endpoint,)
     uri = "%s://%s%s" % (protocol, ip, endpoint)
     try:
-        request = requests.get(uri, timeout=timeout)
-    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
-        app.logger.debug("Cannot call %s" % (uri))
+        request = requests.get(uri, timeout=timeout, verify=do_cert_verification)
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
+        app.logger.debug("Cannot call %s because %s" % (uri, e))
     return request
 
 
-# TODO refactor and unify with get_uri, or maybe drop
+# TODO refactor and unify with get_uri, or maybe drop in favour of requests.session
 def post_uri(
     ip, endpoint="/", protocol="http", timeout=None, files=None, data=None, json=None
 ):
     timeout = timeout if timeout else app.config.get("NETWORK_TIMEOUT", 10)
+    do_cert_verification = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
     request = None
     if ip is None:
         return request
@@ -70,7 +72,14 @@ def post_uri(
         endpoint = "/%s" % (endpoint,)
     uri = "%s://%s%s" % (protocol, ip, endpoint)
     try:
-        request = requests.post(uri, timeout=timeout, files=files, data=data, json=json)
+        request = requests.post(
+            uri,
+            timeout=timeout,
+            files=files,
+            data=data,
+            json=json,
+            verify=do_cert_verification,
+        )
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
         app.logger.debug("Cannot call %s" % (uri))
     return request

@@ -1,8 +1,16 @@
 import unittest
-from datetime import datetime, timedelta
 import mock
 
 from server.tasks.sniff_printer import save_printer_data, sniff_printer
+
+
+class Response:
+    def __init__(self, status_code, contents=""):
+        self.status_code = status_code
+        self.contents = contents
+
+    def json(self):
+        return self.contents
 
 
 class SavePrinterDataTest(unittest.TestCase):
@@ -52,70 +60,27 @@ class SavePrinterDataTest(unittest.TestCase):
 
 
 class SniffPrinterTest(unittest.TestCase):
-    @mock.patch("server.database.settings.get_val")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.get_uri", return_value=None)
     def test_deactivate_no_data_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_get_val
+        self, mock_get_data, mock_update_printer
     ):
-        def mock_call(key):
-            return 3600
-
-        mock_get_val.side_effect = mock_call
-        retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer("octopi.local", "192.168.1.10")
-        self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_called_with(
-            **{
-                "hostname": "octopi.local",
-                "ip": "192.168.1.10",
-                "name": "octopi.local",
-                "client": "octoprint",
-                "client_props": {"connected": False, "version": {}, "read_only": False},
-                "printer_props": None,
-            }
-        )
+        self.assertEqual(mock_update_printer.call_count, 0)
 
-    @mock.patch("server.database.settings.get_val")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.get_uri")
     def test_deactivate_bad_data_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_get_val
+        self, mock_get_data, mock_update_printer
     ):
-        def mock_call(key):
-            return 3600
-
-        mock_get_val.side_effect = mock_call
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "Fumbleprint"}
-        retry_after_at_least = datetime.utcnow() + timedelta(hours=1)
         sniff_printer("octopi.local", "192.168.1.11")
-        self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_called_with(
-            **{
-                "hostname": "octopi.local",
-                "ip": "192.168.1.11",
-                "name": "octopi.local",
-                "client": "octoprint",
-                "client_props": {
-                    "connected": False,
-                    "version": {"text": "Fumbleprint"},
-                    "read_only": False,
-                },
-                "printer_props": None,
-            }
-        )
+        self.assertEqual(mock_update_printer.call_count, 0)
 
-    @mock.patch("server.database.settings.get_val")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.get_uri")
-    def test_activate_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_get_val
-    ):
-        def mock_call(key):
-            return 3600
-
-        mock_get_val.side_effect = mock_call
+    def test_activate_responding_printer(self, mock_get_data, mock_update_printer):
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
         sniff_printer("octopi.local", "192.168.1.12")
@@ -124,6 +89,36 @@ class SniffPrinterTest(unittest.TestCase):
             **{
                 "hostname": "octopi.local",
                 "ip": "192.168.1.12",
+                "protocol": "http",
+                "name": "octopi.local",
+                "client": "octoprint",
+                "client_props": {
+                    "connected": True,
+                    "version": {"text": "OctoPrint"},
+                    "read_only": False,
+                },
+                "printer_props": None,
+            }
+        )
+
+    @mock.patch("server.tasks.sniff_printer.save_printer_data")
+    @mock.patch("server.clients.octoprint.get_uri")
+    def test_try_http_and_https(self, mock_get_data, mock_update_printer):
+        def mock_call(ip, **kwargs):
+            if kwargs["protocol"] == "https":
+                return Response(200, {"text": "OctoPrint"})
+            return None
+
+        mock_get_data.side_effect = mock_call
+
+        sniff_printer("octopi.local", "192.168.1.12")
+        self.assertEqual(mock_update_printer.call_count, 1)
+        self.assertEqual(mock_get_data.call_count, 2)
+        mock_update_printer.assert_called_with(
+            **{
+                "hostname": "octopi.local",
+                "ip": "192.168.1.12",
+                "protocol": "https",
                 "name": "octopi.local",
                 "client": "octoprint",
                 "client_props": {
