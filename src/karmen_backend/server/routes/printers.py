@@ -18,6 +18,10 @@ def make_printer_response(printer, fields):
             "connected": bool(printer_inst.client_info.connected),
             "readonly": bool(printer_inst.client_info.read_only),
             "protected": bool(printer_inst.client_info.protected),
+            "api_key": printer_inst.client_info.api_key[0:2]
+            + "*" * (len(printer_inst.client_info.api_key) - 2)
+            if printer_inst.client_info.api_key
+            else None,
         },
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
@@ -55,6 +59,7 @@ def printer_create():
         return abort(400)
     host = data.get("host", None)
     name = data.get("name", None)
+    api_key = data.get("api_key", None)
     protocol = data.get("protocol", "http")
     if (
         not host
@@ -75,6 +80,7 @@ def printer_create():
             "client": "octoprint",  # TODO make this more generic
         }
     )
+    printer.add_api_key(api_key)
     printer.sniff()
     printers.add_printer(
         name=name,
@@ -87,6 +93,7 @@ def printer_create():
             "connected": printer.client_info.connected,
             "read_only": printer.client_info.read_only,
             "protected": printer.client_info.protected,
+            "api_key": printer.client_info.api_key,
         },
     )
     return "", 201
@@ -123,9 +130,11 @@ def printer_patch(host):
         return abort(400)
     name = data.get("name", None)
     protocol = data.get("protocol", printer["protocol"])
+    api_key = data.get("api_key", printer["client_props"].get("api_key", None))
     if not name or protocol not in ["http", "https"]:
         return abort(400)
     printer_inst = clients.get_printer_instance(printer)
+    printer_inst.add_api_key(api_key)
     printer_props = data.get("printer_props", {})
     if printer_props:
         if not printer_inst.get_printer_props():
@@ -153,6 +162,7 @@ def printer_patch(host):
             "connected": printer_inst.client_info.connected,
             "read_only": printer_inst.client_info.read_only,
             "protected": printer_inst.client_info.protected,
+            "api_key": printer_inst.client_info.api_key,
         },
         printer_props=printer_inst.get_printer_props(),
     )

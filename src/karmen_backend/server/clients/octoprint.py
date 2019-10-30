@@ -33,21 +33,26 @@ class Octoprint(PrinterClient):
         if not client_props:
             client_props = {}
         self.client_info = PrinterClientInfo(
-            client_props.get("version", None),
-            client_props.get("connected", False),
-            client_props.get("read_only", False),
-            client_props.get("protected", False),
+            version=client_props.get("version", None),
+            connected=client_props.get("connected", False),
+            read_only=client_props.get("read_only", False),
+            protected=client_props.get("protected", False),
+            api_key=client_props.get("api_key", None),
         )
         self.http_session = requests.Session()
         self.http_session.timeout = app.config.get("NETWORK_TIMEOUT", 10)
         self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
-        # if client_props.api_key: self.http_session.headers.update({X-Api-Key: client_props.api_key})
+        if "api_key" in client_props:
+            self.http_session.headers.update({"X-Api-Key": client_props["api_key"]})
 
     def get_printer_props(self):
         return self.printer_props
 
     def client_name(self):
         return self.client
+
+    def add_api_key(self, api_key):
+        self.client_info.api_key = api_key
 
     def _http_get(self, path, force=False):
         if not self.client_info.connected and not force:

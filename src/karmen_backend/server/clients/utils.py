@@ -2,11 +2,19 @@ import abc
 
 
 class PrinterClientInfo:
-    def __init__(self, version={}, connected=False, read_only=False, protected=False):
+    def __init__(
+        self,
+        version={},
+        connected=False,
+        read_only=False,
+        protected=False,
+        api_key=None,
+    ):
         self.version = version
         self.connected = connected
         self.read_only = read_only
         self.protected = protected
+        self.api_key = api_key
 
 
 class PrinterClient(abc.ABC):
@@ -16,6 +24,10 @@ class PrinterClient(abc.ABC):
 
     @abc.abstractmethod
     def is_alive(self):
+        pass
+
+    @abc.abstractmethod
+    def add_api_key(self):
         pass
 
     @abc.abstractmethod

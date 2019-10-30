@@ -56,6 +56,21 @@ class DetailRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
+            self.assertTrue(response.json["client"]["api_key"] is None)
+
+    @mock.patch("server.routes.printers.printers.get_printer")
+    def test_no_api_key_leak(self, mock_get_printer):
+        mock_get_printer.return_value = {
+            "client_props": {"api_key": "123456"},
+            "client": "octoprint",
+            "host": "1.2.3.4",
+        }
+        with app.test_client() as c:
+            response = c.get("/printers/172.16.236.11:8080")
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("client" in response.json)
+            self.assertTrue("webcam" not in response.json)
+            self.assertEqual(response.json["client"]["api_key"], "12****")
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_fields(self, mock_get_uri):
