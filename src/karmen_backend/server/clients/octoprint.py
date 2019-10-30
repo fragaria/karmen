@@ -10,7 +10,7 @@ from server.clients.utils import (
     PrinterClientException,
 )
 
-# Works with octoprint 1.3.11 without access control
+
 class Octoprint(PrinterClient):
     __client_name__ = "octoprint"
 

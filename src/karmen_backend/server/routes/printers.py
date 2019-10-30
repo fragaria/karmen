@@ -1,7 +1,7 @@
 import re
 
 import requests
-from flask import jsonify, request, abort, Response, stream_with_context
+from flask import jsonify, request, abort
 from flask_cors import cross_origin
 from server import app, __version__
 from server.database import printers
@@ -213,18 +213,4 @@ def printer_modify_job(host):
 @app.route("/proxied-webcam/<host>", methods=["GET", "OPTIONS"])
 @cross_origin()
 def printer_webcam(host):
-    # This is very inefficient and should not be used in production. Use the nginx
-    # redis based proxy pass instead
-    # TODO maybe we can drop this in the dev env as well
-    printer = printers.get_printer(host)
-    if printer is None:
-        return abort(404)
-    printer_inst = clients.get_printer_instance(printer)
-    webcam = printer_inst.webcam()
-    if "stream" not in webcam:
-        return abort(404)
-    req = requests.get(webcam["stream"], stream=True)
-    return Response(
-        stream_with_context(req.iter_content()),
-        content_type=req.headers["content-type"],
-    )
+    return abort(503)
