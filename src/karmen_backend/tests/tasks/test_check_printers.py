@@ -4,6 +4,15 @@ import mock
 from server.tasks.check_printers import check_printers
 
 
+class Response:
+    def __init__(self, status_code, contents={}):
+        self.status_code = status_code
+        self.contents = contents
+
+    def json(self):
+        return self.contents
+
+
 class CheckPrintersTest(unittest.TestCase):
     @mock.patch(
         "server.database.printers.get_printers",
@@ -46,6 +55,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "connected": False,
                             "version": {},
                             "read_only": False,
+                            "protected": False,
                         },
                         "printer_props": {"filament_type": "PETG"},
                     }
@@ -61,6 +71,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "connected": False,
                             "version": {},
                             "read_only": False,
+                            "protected": False,
                         },
                         "printer_props": None,
                     }
@@ -92,15 +103,6 @@ class CheckPrintersTest(unittest.TestCase):
     def test_activate_responding_printer(
         self, mock_redis, mock_get_data, mock_update_printer, mock_get_printers
     ):
-        class Response:
-            def __init__(self, status_code, contents, json=None):
-                self.status_code = status_code
-                self.contents = contents
-                self.json_data = json
-
-            def json(self):
-                return self.json_data or {}
-
         def mock_call(host, **kwargs):
             if (
                 host == "5678"
@@ -109,8 +111,7 @@ class CheckPrintersTest(unittest.TestCase):
             ):
                 return Response(
                     200,
-                    "",
-                    json={
+                    {
                         "webcam": {
                             "webcamEnabled": True,
                             "streamUrl": "/webcam/?action=stream",
@@ -120,7 +121,7 @@ class CheckPrintersTest(unittest.TestCase):
                         }
                     },
                 )
-            return Response(200, "")
+            return Response(200)
 
         mock_get_data.side_effect = mock_call
         check_printers()
@@ -142,6 +143,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "connected": True,
                             "version": {},
                             "read_only": False,
+                            "protected": False,
                         },
                         "printer_props": None,
                     }
@@ -157,6 +159,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "connected": True,
                             "version": {},
                             "read_only": False,
+                            "protected": False,
                         },
                         "printer_props": None,
                     }
@@ -201,15 +204,6 @@ class CheckPrintersTest(unittest.TestCase):
         mock_update_printer,
         mock_get_printers,
     ):
-        class Response:
-            def __init__(self, status_code, contents, json=None):
-                self.status_code = status_code
-                self.contents = contents
-                self.json_data = json
-
-            def json(self):
-                return self.json_data or {}
-
         def mock_call(host, **kwargs):
             if (
                 host == "5678"
@@ -218,8 +212,7 @@ class CheckPrintersTest(unittest.TestCase):
             ):
                 return Response(
                     200,
-                    "",
-                    json={
+                    {
                         "webcam": {
                             "webcamEnabled": True,
                             "streamUrl": "/webcam/?action=stream",
@@ -229,7 +222,7 @@ class CheckPrintersTest(unittest.TestCase):
                         }
                     },
                 )
-            return Response(200, "")
+            return Response(200)
 
         mock_get_data.side_effect = mock_call
         mock_redis.delete.side_effect = Exception("Cannot delete in redis")
@@ -253,6 +246,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "connected": True,
                             "version": {},
                             "read_only": False,
+                            "protected": False,
                         },
                         "printer_props": None,
                     }
@@ -268,6 +262,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "connected": True,
                             "version": {},
                             "read_only": False,
+                            "protected": False,
                         },
                         "printer_props": None,
                     }

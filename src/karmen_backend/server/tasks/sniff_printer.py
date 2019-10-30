@@ -12,7 +12,12 @@ def save_printer_data(**kwargs):
         printers.add_printer(
             **{
                 "name": None,
-                "client_props": {"connected": False, "version": {}, "read_only": True},
+                "client_props": {
+                    "connected": False,
+                    "version": {},
+                    "read_only": True,
+                    "protected": True,
+                },
                 **kwargs,
             }
         )

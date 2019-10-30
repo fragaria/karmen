@@ -2,10 +2,11 @@ import abc
 
 
 class PrinterClientInfo:
-    def __init__(self, version={}, connected=False, read_only=False):
+    def __init__(self, version={}, connected=False, read_only=False, protected=False):
         self.version = version
         self.connected = connected
         self.read_only = read_only
+        self.protected = protected
 
 
 class PrinterClient(abc.ABC):

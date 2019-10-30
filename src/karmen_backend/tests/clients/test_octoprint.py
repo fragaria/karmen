@@ -160,7 +160,7 @@ class OctoprintSniffTest(unittest.TestCase):
         self.assertEqual(printer.client.version, {})
 
     @mock.patch("server.clients.octoprint.get_uri")
-    def test_access_protected_octoprint(self, mock_get_uri):
+    def test_access_protected_octoprint_noforcelogin(self, mock_get_uri):
         def mock_call(host, **kwargs):
             if "settings" in kwargs["endpoint"]:
                 return Response(200)
@@ -172,15 +172,33 @@ class OctoprintSniffTest(unittest.TestCase):
         printer.sniff()
         self.assertEqual(printer.client.connected, True)
         self.assertEqual(printer.client.read_only, True)
+        self.assertEqual(printer.client.protected, True)
         self.assertEqual(printer.client.version, {})
 
     @mock.patch("server.clients.octoprint.get_uri")
-    def test_403_not_octoprint(self, mock_get_uri):
-        mock_get_uri.return_value.status_code = 403
+    def test_access_protected_not_octoprint(self, mock_get_uri):
+        def mock_call(host, **kwargs):
+            if "settings" in kwargs["endpoint"]:
+                return Response(404)
+            return Response(403)
+
+        mock_get_uri.side_effect = mock_call
+
         printer = Octoprint("192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client.connected, False)
         self.assertEqual(printer.client.read_only, False)
+        self.assertEqual(printer.client.protected, False)
+        self.assertEqual(printer.client.version, {})
+
+    @mock.patch("server.clients.octoprint.get_uri")
+    def test_access_protected_octoprint_forcelogin(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 403
+        printer = Octoprint("192.168.1.15")
+        printer.sniff()
+        self.assertEqual(printer.client.connected, True)
+        self.assertEqual(printer.client.read_only, False)
+        self.assertEqual(printer.client.protected, True)
         self.assertEqual(printer.client.version, {})
 
     @mock.patch("server.clients.octoprint.get_uri")

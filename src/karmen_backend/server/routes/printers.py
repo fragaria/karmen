@@ -17,6 +17,7 @@ def make_printer_response(printer, fields):
             "version": printer_inst.client.version,
             "connected": printer_inst.client.connected,
             "readonly": printer_inst.client.read_only,
+            "protected": bool(printer_inst.client.protected),
         },
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
@@ -85,6 +86,7 @@ def printer_create():
             "version": printer.client.version,
             "connected": printer.client.connected,
             "read_only": printer.client.read_only,
+            "protected": printer.client.protected,
         },
     )
     return "", 201
@@ -150,6 +152,7 @@ def printer_patch(host):
             "version": printer_inst.client.version,
             "connected": printer_inst.client.connected,
             "read_only": printer_inst.client.read_only,
+            "protected": printer_inst.client.protected,
         },
         printer_props=printer_inst.get_printer_props(),
     )

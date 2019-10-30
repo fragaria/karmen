@@ -37,6 +37,7 @@ class Octoprint(PrinterClient):
                 client_props.get("version", None),
                 client_props.get("connected", False),
                 client_props.get("read_only", False),
+                client_props.get("protected", False),
             )
 
     def get_printer_props(self):
@@ -48,7 +49,7 @@ class Octoprint(PrinterClient):
     def is_alive(self):
         request = get_uri(self.host, protocol=self.protocol, endpoint="/api/version")
         # TODO test for access-protected octoprint
-        if request is None or request.status_code != 200:
+        if request is None or request.status_code not in [200, 403]:
             self.client.connected = False
         else:
             if not self.client.connected:
@@ -102,8 +103,11 @@ class Octoprint(PrinterClient):
         # printer is probably connected and operational/printing/etc.
         return True
 
-    # TODO move this code outside of this client, the sniffing code should discover a variety of clients
     def sniff(self):
+        """
+        This can detect whether octoprint is alive and how it's access control is set up.
+        In the future, this could detect different versions of octoprint as well.
+        """
         request = get_uri(self.host, protocol=self.protocol, endpoint="/api/version")
         if request is None:
             app.logger.debug(
@@ -111,6 +115,7 @@ class Octoprint(PrinterClient):
             )
             self.client = PrinterClientInfo({}, False)
             return
+        # This looks like octoprint with access control enabled
         if request.status_code == 403:
             app.logger.debug(
                 "%s is responding with %s on /api/version - might be access-protected octoprint"
@@ -119,12 +124,19 @@ class Octoprint(PrinterClient):
             settings_req = get_uri(
                 self.host, protocol=self.protocol, endpoint="/api/settings"
             )
-            if settings_req and settings_req.status_code == 200:
+            # This might break with the future versions of octoprint
+            # settings responds 200 when forcelogin plugin is disabled, but 403 when forcelogin is enabled
+            if settings_req is not None and settings_req.status_code in [200, 403]:
                 app.logger.debug(
-                    "%s is responding with 200 on /api/settings - probably access-protected octoprint"
-                    % self.host
+                    "%s is responding with %s on /api/settings - probably access-protected octoprint"
+                    % (self.host, settings_req.status_code)
                 )
-                self.client = PrinterClientInfo({}, True, True)
+                self.client = PrinterClientInfo(
+                    {},
+                    connected=True,
+                    read_only=settings_req.status_code == 200,
+                    protected=True,
+                )
             else:
                 app.logger.debug(
                     "%s is responding with %s on /api/settings - probably not octoprint"
@@ -132,6 +144,7 @@ class Octoprint(PrinterClient):
                 )
                 self.client = PrinterClientInfo({}, False)
             return
+        # /api/version is not responding at all, which is weird
         if request.status_code != 200:
             app.logger.debug(
                 "%s is responding with %s on /api/version - not accessible"
@@ -139,6 +152,7 @@ class Octoprint(PrinterClient):
             )
             self.client = PrinterClientInfo({}, False)
             return
+        # Try to parse /api/version response
         try:
             data = request.json()
             if "text" not in data:
