@@ -14,10 +14,10 @@ def make_printer_response(printer, fields):
     data = {
         "client": {
             "name": printer_inst.client_name(),
-            "version": printer_inst.client.version,
-            "connected": printer_inst.client.connected,
-            "readonly": printer_inst.client.read_only,
-            "protected": bool(printer_inst.client.protected),
+            "version": printer_inst.client_info.version,
+            "connected": bool(printer_inst.client_info.connected),
+            "readonly": bool(printer_inst.client_info.read_only),
+            "protected": bool(printer_inst.client_info.protected),
         },
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
@@ -83,10 +83,10 @@ def printer_create():
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
-            "version": printer.client.version,
-            "connected": printer.client.connected,
-            "read_only": printer.client.read_only,
-            "protected": printer.client.protected,
+            "version": printer.client_info.version,
+            "connected": printer.client_info.connected,
+            "read_only": printer.client_info.read_only,
+            "protected": printer.client_info.protected,
         },
     )
     return "", 201
@@ -149,10 +149,10 @@ def printer_patch(host):
         protocol=protocol,
         client=printer_inst.client_name(),
         client_props={
-            "version": printer_inst.client.version,
-            "connected": printer_inst.client.connected,
-            "read_only": printer_inst.client.read_only,
-            "protected": printer_inst.client.protected,
+            "version": printer_inst.client_info.version,
+            "connected": printer_inst.client_info.connected,
+            "read_only": printer_inst.client_info.read_only,
+            "protected": printer_inst.client_info.protected,
         },
         printer_props=printer_inst.get_printer_props(),
     )

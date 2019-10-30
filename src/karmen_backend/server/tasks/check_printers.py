@@ -16,7 +16,7 @@ def check_printers():
         printer = clients.get_printer_instance(raw_printer)
         printer.is_alive()
 
-        if printer.client.connected:
+        if printer.client_info.connected:
             webcam = printer.webcam()
             try:
                 if "stream" in webcam:
@@ -34,10 +34,10 @@ def check_printers():
             protocol=printer.protocol,
             client=printer.client_name(),
             client_props={
-                "version": printer.client.version,
-                "connected": printer.client.connected,
-                "read_only": printer.client.read_only,
-                "protected": printer.client.protected,
+                "version": printer.client_info.version,
+                "connected": printer.client_info.connected,
+                "read_only": printer.client_info.read_only,
+                "protected": printer.client_info.protected,
             },
             printer_props=printer.get_printer_props(),
         )

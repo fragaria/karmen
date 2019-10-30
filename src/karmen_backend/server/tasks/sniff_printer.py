@@ -41,13 +41,13 @@ def sniff_printer(hostname, host):
 
     printer.sniff()
     # Let's try a secured connection
-    if not printer.client.connected:
+    if not printer.client_info.connected:
         printer.protocol = "https"
         app.logger.info("Sniffing printer on %s (%s) - trying https" % (host, hostname))
         printer.sniff()
 
     # Not even on https, no reason to do anything
-    if not printer.client.connected:
+    if not printer.client_info.connected:
         app.logger.info("Sniffing printer on %s (%s) - no luck" % (host, hostname))
         return
 
@@ -59,9 +59,9 @@ def sniff_printer(hostname, host):
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
-            "version": printer.client.version,
-            "connected": printer.client.connected,
-            "read_only": printer.client.read_only,
+            "version": printer.client_info.version,
+            "connected": printer.client_info.connected,
+            "read_only": printer.client_info.read_only,
         },
         printer_props=printer.get_printer_props(),
     )
