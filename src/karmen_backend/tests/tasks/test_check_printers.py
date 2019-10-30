@@ -34,9 +34,10 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.tasks.check_printers.redis")
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_deactivate_no_data_responding_printer(
-        self, mock_get_data, mock_update_printer, mock_get_printers
+        self, mock_get_data, mock_redis, mock_update_printer, mock_get_printers
     ):
         check_printers()
         self.assertEqual(mock_get_printers.call_count, 1)
