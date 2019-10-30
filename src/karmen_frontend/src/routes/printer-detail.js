@@ -46,6 +46,12 @@ class PrinterConnection extends React.Component {
         <h2 className="hidden">Connection</h2>
         <ul>
             <li><strong>Client status</strong>: {printer.client.connected ? 'Connected' : 'Disconnected'}</li>
+            <li><strong>Client availability</strong>:{' '}
+              {printer.client.protected && !printer.client.readonly
+                ? <>Authorization required</>
+                : <>{printer.client.readonly ? "Read only" : "Full access"}</>
+              }
+            </li>
             <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
             <li><strong>Client host</strong>: <a href={`${printer.protocol}://${printer.host}`} target="_blank" rel="noopener noreferrer">{printer.host}</a></li>
             {printer.hostname && <li><strong>Hostname</strong>: <a href={`${printer.protocol}://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
@@ -75,24 +81,26 @@ class PrinterConnection extends React.Component {
                   </div>
                 : <>
                     <strong>Printer status</strong>: {printer.status.state}
-                    {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
-                      <button className="plain" type="submit" onClick={(e) => {
-                        e.preventDefault();
-                        this.setState({
-                          showConnectionWarningRow: true,
-                          targetState: "online",
-                        });
-                      }}>Connect</button>
-                    }
-                    {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1) && !printer.status.state.match(/printer is not connected/i) &&
-                      <button className="plain" type="submit" onClick={(e) => {
-                        e.preventDefault();
-                        this.setState({
-                          showConnectionWarningRow: true,
-                          targetState: "offline",
-                        });
-                      }}>Disconnect</button>
-                    }
+                    {!printer.client.readonly && <>
+                      {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
+                        <button className="plain" type="submit" onClick={(e) => {
+                          e.preventDefault();
+                          this.setState({
+                            showConnectionWarningRow: true,
+                            targetState: "online",
+                          });
+                        }}>Connect</button>
+                      }
+                      {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1) && !printer.status.state.match(/printer is not connected/i) &&
+                        <button className="plain" type="submit" onClick={(e) => {
+                          e.preventDefault();
+                          this.setState({
+                            showConnectionWarningRow: true,
+                            targetState: "offline",
+                          });
+                        }}>Disconnect</button>
+                      }
+                    </>}
                   </>
                 }
               </form>

@@ -191,7 +191,8 @@ class GcodeRow extends React.Component {
               const availablePrinters = printers && printers
                 .sort((p, r) => p.name > r.name ? 1 : -1)
                 .filter((p) => p.status && p.status.state === 'Operational')
-                .filter((p) => p.client && p.client.connected);
+                .filter((p) => p.client && p.client.connected)
+                .filter((p) => p.client && !p.client.readonly);
               this.setState({
                 availablePrinters,
                 selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,

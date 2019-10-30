@@ -11,7 +11,7 @@ export const Progress = ({ completion, printTime, printTimeLeft, withProgressBar
   };
   let approxPrintTimeLeft = printTimeLeft;
   if (!approxPrintTimeLeft && printTime > 0) {
-    approxPrintTimeLeft = (printTime / completion) * 100;
+    approxPrintTimeLeft = (printTime / completion) * (100 - completion);
   }
   if (approxPrintTimeLeft) {
     approxPrintTimeLeft = formatters.timespan(approxPrintTimeLeft);
@@ -19,7 +19,7 @@ export const Progress = ({ completion, printTime, printTimeLeft, withProgressBar
   return (
     <div className="progress">
       <div className="progress-detail">
-        {printTimeLeft
+        {approxPrintTimeLeft
           ? <React.Fragment>{printTime > 0 ? completion.toFixed(2) : '0'}% ({approxPrintTimeLeft || '?'} remaining)</React.Fragment>
           : <React.Fragment></React.Fragment>
         }
@@ -53,10 +53,17 @@ export const PrinterTags = ({ printer }) => {
   }
   return (
     <div className="tags">
-      <span className={`tag ${printer.client.connected ? "state-active" : "state-inactive"}`}>
-        {printer.client.connected ? `${printer.client.name} connected` : `${printer.client.name} disconnected`}
-      </span>
-      <span className={`tag ${printerStatusClass}`}>{printer.status.state}</span>
+      {printer.client.protected && !printer.client.readonly
+       ? <span className={`tag state-inactive`}>Authorization required</span>
+       : 
+       <>
+         <span className={`tag ${printer.client.connected ? "state-active" : "state-inactive"}`}>
+          {printer.client.connected ? `${printer.client.name} connected` : `${printer.client.name} disconnected`}
+        </span>
+        <span className={`tag ${printerStatusClass}`}>{printer.status.state}</span>
+        {printer.client.readonly && <span className={`tag`}>{"Read only"}</span>}
+       </>
+     }
     </div>
   );
 };
@@ -141,7 +148,7 @@ export class PrinterView extends React.Component {
         <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
-          {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && (
+          {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && !printer.client.readonly && (
             <div className="printer-controls">
               {printer.status.state === 'Paused'
                 ? (
