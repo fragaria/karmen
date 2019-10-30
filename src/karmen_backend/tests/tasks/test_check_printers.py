@@ -34,7 +34,7 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_deactivate_no_data_responding_printer(
         self, mock_get_data, mock_update_printer, mock_get_printers
     ):
@@ -98,17 +98,13 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printers.redis")
     def test_activate_responding_printer(
         self, mock_redis, mock_get_data, mock_update_printer, mock_get_printers
     ):
-        def mock_call(host, **kwargs):
-            if (
-                host == "5678"
-                and "endpoint" in kwargs
-                and kwargs["endpoint"] == "/api/settings"
-            ):
+        def mock_call(uri, **kwargs):
+            if "5678" in uri and "/api/settings" in uri:
                 return Response(
                     200,
                     {
@@ -193,7 +189,7 @@ class CheckPrintersTest(unittest.TestCase):
         ],
     )
     @mock.patch("server.database.printers.update_printer")
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printers.redis")
     @mock.patch("server.tasks.check_printers.app.logger")
     def test_no_fail_on_broken_redis(
@@ -204,12 +200,8 @@ class CheckPrintersTest(unittest.TestCase):
         mock_update_printer,
         mock_get_printers,
     ):
-        def mock_call(host, **kwargs):
-            if (
-                host == "5678"
-                and "endpoint" in kwargs
-                and kwargs["endpoint"] == "/api/settings"
-            ):
+        def mock_call(uri, **kwargs):
+            if "5678" in uri and "/api/settings" in uri:
                 return Response(
                     200,
                     {

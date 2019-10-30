@@ -1,8 +1,9 @@
 import json
 import re
+from urllib import parse as urlparse
+import requests
 
 from server import app
-from server.services.network import get_uri, post_uri
 from server.clients.utils import (
     PrinterClientInfo,
     PrinterClient,
@@ -39,6 +40,10 @@ class Octoprint(PrinterClient):
                 client_props.get("read_only", False),
                 client_props.get("protected", False),
             )
+        self.http_session = requests.Session()
+        self.http_session.timeout = app.config.get("NETWORK_TIMEOUT", 10)
+        self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
+        # if client_props.api_key: self.http_session.headers.update({X-Api-Key: client_props.api_key})
 
     def get_printer_props(self):
         return self.printer_props
@@ -46,9 +51,30 @@ class Octoprint(PrinterClient):
     def client_name(self):
         return self.__client_name__
 
+    def _http_get(self, path):
+        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
+        try:
+            return self.http_session.get(uri)
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.ReadTimeout,
+        ) as e:
+            app.logger.debug("Cannot call %s because %s" % (uri, e))
+            return None
+
+    def _http_post(self, path, data=None, files=None, json=None):
+        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
+        try:
+            return self.http_session.post(uri, data=data, files=files, json=json)
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.ReadTimeout,
+        ) as e:
+            app.logger.debug("Cannot call %s because %s" % (uri, e))
+            return None
+
     def is_alive(self):
-        request = get_uri(self.host, protocol=self.protocol, endpoint="/api/version")
-        # TODO test for access-protected octoprint
+        request = self._http_get("/api/version")
         if request is None or request.status_code not in [200, 403]:
             self.client.connected = False
         else:
@@ -65,12 +91,7 @@ class Octoprint(PrinterClient):
             "Closed",
             "Printer is not connected to Octoprint",
         ]:
-            request = post_uri(
-                self.host,
-                protocol=self.protocol,
-                endpoint="/api/connection",
-                json={"command": "connect"},
-            )
+            request = self._http_post("/api/connection", json={"command": "connect"})
             # TODO improve return value
             return bool(request is not None and request.status_code == 204)
         # printer is probably connected and operational/printing/etc.
@@ -92,12 +113,7 @@ class Octoprint(PrinterClient):
             "Printer is not responding",
             "Printer is not connected to Octoprint",
         ]:
-            request = post_uri(
-                self.host,
-                protocol=self.protocol,
-                endpoint="/api/connection",
-                json={"command": "disconnect"},
-            )
+            request = self._http_post("/api/connection", json={"command": "disconnect"})
             # TODO improve return value
             return bool(request is not None and request.status_code == 204)
         # printer is probably connected and operational/printing/etc.
@@ -108,7 +124,7 @@ class Octoprint(PrinterClient):
         This can detect whether octoprint is alive and how it's access control is set up.
         In the future, this could detect different versions of octoprint as well.
         """
-        request = get_uri(self.host, protocol=self.protocol, endpoint="/api/version")
+        request = self._http_get("/api/version")
         if request is None:
             app.logger.debug(
                 "%s is not responding on /api/version - not octoprint" % self.host
@@ -121,9 +137,7 @@ class Octoprint(PrinterClient):
                 "%s is responding with %s on /api/version - might be access-protected octoprint"
                 % (self.host, request.status_code)
             )
-            settings_req = get_uri(
-                self.host, protocol=self.protocol, endpoint="/api/settings"
-            )
+            settings_req = request = self._http_get("/api/settings")
             # This might break with the future versions of octoprint
             # settings responds 200 when forcelogin plugin is disabled, but 403 when forcelogin is enabled
             if settings_req is not None and settings_req.status_code in [200, 403]:
@@ -181,11 +195,7 @@ class Octoprint(PrinterClient):
     def status(self):
         request = None
         if self.client.connected:
-            request = get_uri(
-                self.host,
-                protocol=self.protocol,
-                endpoint="/api/printer?exclude=history",
-            )
+            request = request = self._http_get("/api/printer?exclude=history")
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -208,9 +218,7 @@ class Octoprint(PrinterClient):
     def webcam(self):
         request = None
         if self.client.connected:
-            request = get_uri(
-                self.host, protocol=self.protocol, endpoint="/api/settings"
-            )
+            request = request = self._http_get("/api/settings")
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -237,7 +245,7 @@ class Octoprint(PrinterClient):
     def job(self):
         request = None
         if self.client.connected:
-            request = get_uri(self.host, protocol=self.protocol, endpoint="/api/job")
+            request = request = self._http_get("/api/job")
             if not request:
                 self.client.connected = False
         if request is not None and request.status_code == 200:
@@ -265,10 +273,8 @@ class Octoprint(PrinterClient):
                 raise PrinterClientException(
                     "Printer is printing, cannot start another print"
                 )
-            request = post_uri(
-                self.host,
-                protocol=self.protocol,
-                endpoint="/api/files/local",
+            request = self._http_post(
+                "/api/files/local",
                 files={"file": open(gcode_disk_path, "rb")},
                 data={
                     "path": "karmen" if not path else "karmen/%s" % path,
@@ -288,9 +294,7 @@ class Octoprint(PrinterClient):
             body = {"command": action}
             if action == "toggle":
                 body = {"command": "pause", "action": "toggle"}
-            request = post_uri(
-                self.host, protocol=self.protocol, endpoint="/api/job", json=body
-            )
+            request = self._http_post("/api/job", json=body)
             if not request:
                 self.client.connected = False
         # TODO improve return value

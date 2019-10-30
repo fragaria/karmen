@@ -31,7 +31,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("status" not in response.json["items"][1])
             self.assertTrue("job" not in response.json["items"][1])
 
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_list_fields(self, mock_get_uri):
         with app.test_client() as c:
             response = c.get("/printers?fields=webcam,status,job")
@@ -57,7 +57,7 @@ class DetailRoute(unittest.TestCase):
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
 
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_fields(self, mock_get_uri):
         with app.test_client() as c:
             response = c.get("/printers/172.16.236.11:8080?fields=webcam,status,job")
@@ -76,7 +76,7 @@ class DetailRoute(unittest.TestCase):
 
 class CreateRoute(unittest.TestCase):
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
@@ -100,7 +100,7 @@ class CreateRoute(unittest.TestCase):
             c.delete("/printers/172.16.236.200:81")
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_default_protocol(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
@@ -163,7 +163,7 @@ class CreateRoute(unittest.TestCase):
 
 class DeleteRoute(unittest.TestCase):
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_delete(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
             response = c.post(
@@ -265,7 +265,9 @@ class CurrentJobRoute(unittest.TestCase):
     def tearDown(self):
         printers.delete_printer("1.2.3.4")
 
-    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
     def test_current_job(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
@@ -273,7 +275,7 @@ class CurrentJobRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 204)
 
-    @mock.patch("server.clients.octoprint.post_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     def test_current_job_unable(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
@@ -321,9 +323,11 @@ class PrinterConnectionRoute(unittest.TestCase):
     def tearDown(self):
         printers.delete_printer("1.2.3.4")
 
-    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
     @mock.patch(
-        "server.clients.octoprint.get_uri",
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Offline"}}),
     )
     def test_change_connection_to_online(self, mock_get_uri, mock_post_uri):
@@ -331,9 +335,11 @@ class PrinterConnectionRoute(unittest.TestCase):
             response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
             self.assertEqual(response.status_code, 204)
 
-    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
     @mock.patch(
-        "server.clients.octoprint.get_uri",
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Printing"}}),
     )
     def test_change_connection_to_online_already_on(self, mock_get_uri, mock_post_uri):
@@ -341,9 +347,11 @@ class PrinterConnectionRoute(unittest.TestCase):
             response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
             self.assertEqual(response.status_code, 204)
 
-    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
     @mock.patch(
-        "server.clients.octoprint.get_uri",
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Offline"}}),
     )
     def test_change_connection_to_offline_already_off(
@@ -353,9 +361,11 @@ class PrinterConnectionRoute(unittest.TestCase):
             response = c.post("/printers/1.2.3.4/connection", json={"state": "offline"})
             self.assertEqual(response.status_code, 204)
 
-    @mock.patch("server.clients.octoprint.post_uri", return_value=Response(204))
     @mock.patch(
-        "server.clients.octoprint.get_uri",
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Operational"}}),
     )
     def test_change_connection_to_offline(self, mock_get_uri, mock_post_uri):

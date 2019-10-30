@@ -61,7 +61,7 @@ class SavePrinterDataTest(unittest.TestCase):
 
 class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
-    @mock.patch("server.clients.octoprint.get_uri", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_deactivate_no_data_responding_printer(
         self, mock_get_data, mock_update_printer
     ):
@@ -69,7 +69,7 @@ class SniffPrinterTest(unittest.TestCase):
         self.assertEqual(mock_update_printer.call_count, 0)
 
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_deactivate_bad_data_responding_printer(
         self, mock_get_data, mock_update_printer
     ):
@@ -79,7 +79,7 @@ class SniffPrinterTest(unittest.TestCase):
         self.assertEqual(mock_update_printer.call_count, 0)
 
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_activate_responding_printer(self, mock_get_data, mock_update_printer):
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
@@ -102,10 +102,10 @@ class SniffPrinterTest(unittest.TestCase):
         )
 
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
-    @mock.patch("server.clients.octoprint.get_uri")
+    @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_try_http_and_https(self, mock_get_data, mock_update_printer):
-        def mock_call(host, **kwargs):
-            if kwargs["protocol"] == "https":
+        def mock_call(uri, **kwargs):
+            if "https" in uri:
                 return Response(200, {"text": "OctoPrint"})
             return None
 
