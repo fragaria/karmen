@@ -57,6 +57,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                             "protected": False,
+                            "api_key": None,
                         },
                         "printer_props": {"filament_type": "PETG"},
                     }
@@ -73,6 +74,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                             "protected": False,
+                            "api_key": None,
                         },
                         "printer_props": None,
                     }
@@ -86,7 +88,12 @@ class CheckPrintersTest(unittest.TestCase):
             {
                 "hostname": "a",
                 "host": "1234",
-                "client_props": {"connected": False, "version": {}, "read_only": False},
+                "client_props": {
+                    "connected": False,
+                    "version": {},
+                    "read_only": False,
+                    "api_key": "1234",
+                },
                 "client": "octoprint",
                 "protocol": "https",
             },
@@ -141,6 +148,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                             "protected": False,
+                            "api_key": "1234",
                         },
                         "printer_props": None,
                     }
@@ -157,6 +165,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                             "protected": False,
+                            "api_key": None,
                         },
                         "printer_props": None,
                     }
@@ -240,6 +249,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                             "protected": False,
+                            "api_key": None,
                         },
                         "printer_props": None,
                     }
@@ -256,6 +266,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "version": {},
                             "read_only": False,
                             "protected": False,
+                            "api_key": None,
                         },
                         "printer_props": None,
                     }

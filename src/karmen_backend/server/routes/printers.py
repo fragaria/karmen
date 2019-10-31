@@ -80,7 +80,7 @@ def printer_create():
             "client": "octoprint",  # TODO make this more generic
         }
     )
-    printer.add_api_key(api_key)
+    printer.add_api_key(api_key)  # this does not work probably
     printer.sniff()
     printers.add_printer(
         name=name,
@@ -128,7 +128,7 @@ def printer_patch(host):
     data = request.json
     if not data:
         return abort(400)
-    name = data.get("name", None)
+    name = data.get("name", printer["name"])
     protocol = data.get("protocol", printer["protocol"])
     api_key = data.get("api_key", printer["client_props"].get("api_key", None))
     if not name or protocol not in ["http", "https"]:

@@ -10,7 +10,7 @@ import formatters from '../services/formatters';
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-class PrinterConnection extends React.Component {
+class PrinterConnectionForm extends React.Component {
   state = {
     showConnectionWarningRow: false,
     targetState: null,
@@ -27,13 +27,21 @@ class PrinterConnection extends React.Component {
     const { printer, onPrinterConnectionChanged } = this.props;
     setPrinterConnection(printer.host, targetState)
       .then((r) => {
-        this.setState({
-          submitting: false,
-          showConnectionWarningRow: false,
-          targetState: null,
-        });
         if (onPrinterConnectionChanged) {
-          onPrinterConnectionChanged(targetState);
+          onPrinterConnectionChanged(targetState)
+            .then(() => {
+              this.setState({
+                submitting: false,
+                showConnectionWarningRow: false,
+                targetState: null,
+              });
+            });
+        } else {
+          this.setState({
+            submitting: false,
+            showConnectionWarningRow: false,
+            targetState: null,
+          });
         }
       });
   }
@@ -42,73 +50,151 @@ class PrinterConnection extends React.Component {
     const { printer } = this.props;
     const { showConnectionWarningRow, submitting } = this.state;
     return (
-      <div className="printer-connection">
-        <h2 className="hidden">Connection</h2>
-        <ul>
-            <li><strong>Client status</strong>: {printer.client.connected ? 'Connected' : 'Disconnected'}</li>
-            <li><strong>Client availability</strong>:{' '}
-              {printer.client.protected && !printer.client.readonly
-                ? <>Authorization required</>
-                : <>{printer.client.readonly ? "Read only" : "Full access"}</>
+      <form className="inline-form">
+        {showConnectionWarningRow
+        ? <div>
+            <p className="message-warning">
+              Are you sure? This might affect any current printer operation.
+              <button className="plain" type="submit" onClick={(e) => {
+                e.preventDefault();
+                this.setState({
+                  submitting: true,
+                });
+                this.changePrinterConnection();
+              }}
+              disabled={submitting}>{submitting ? "Working..." : "Yes, please"}</button>
+              <button type="reset" onClick={(e) => {
+                e.preventDefault();
+                this.setState({
+                  submitting: false,
+                  showConnectionWarningRow: false,
+                  targetState: null,
+                });
+              }} disabled={submitting}>Cancel</button>
+            </p>
+          </div>
+        : <>
+            <strong>Printer status</strong>: {printer.status.state}
+            {!printer.client.readonly && <>
+              {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
+                <button className="plain" type="submit" onClick={(e) => {
+                  e.preventDefault();
+                  this.setState({
+                    showConnectionWarningRow: true,
+                    targetState: "online",
+                  });
+                }} disabled={submitting}>Connect</button>
               }
-            </li>
-            <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
-            <li><strong>Client host</strong>: <a href={`${printer.protocol}://${printer.host}`} target="_blank" rel="noopener noreferrer">{printer.host}</a></li>
-            {printer.hostname && <li><strong>Hostname</strong>: <a href={`${printer.protocol}://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
-            <li>
-              <form className="inline-form">
-                {showConnectionWarningRow
-                ? <div>
-                    <p className="message-warning">
-                      Are you sure? This might affect any current printer operation.
-                      <button className="plain" type="submit" onClick={(e) => {
-                        e.preventDefault();
-                        this.setState({
-                          submitting: true,
-                        });
-                        this.changePrinterConnection();
-                      }}
-                      disabled={submitting}>{submitting ? "Working..." : "Yes, please"}</button>
-                      <button type="reset" onClick={(e) => {
-                        e.preventDefault();
-                        this.setState({
-                          submitting: false,
-                          showConnectionWarningRow: false,
-                          targetState: null,
-                        });
-                      }} disabled={submitting}>Cancel</button>
-                    </p>
-                  </div>
-                : <>
-                    <strong>Printer status</strong>: {printer.status.state}
-                    {!printer.client.readonly && <>
-                      {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
-                        <button className="plain" type="submit" onClick={(e) => {
-                          e.preventDefault();
-                          this.setState({
-                            showConnectionWarningRow: true,
-                            targetState: "online",
-                          });
-                        }}>Connect</button>
-                      }
-                      {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1) && !printer.status.state.match(/printer is not connected/i) &&
-                        <button className="plain" type="submit" onClick={(e) => {
-                          e.preventDefault();
-                          this.setState({
-                            showConnectionWarningRow: true,
-                            targetState: "offline",
-                          });
-                        }}>Disconnect</button>
-                      }
-                    </>}
-                  </>
-                }
-              </form>
-            </li>
-        </ul>
-      </div>
-    )
+              {(["Offline", "Closed", "Printer is not responding"].indexOf(printer.status.state) === -1) && !printer.status.state.match(/printer is not connected/i) &&
+                <button className="plain" type="submit" onClick={(e) => {
+                  e.preventDefault();
+                  this.setState({
+                    showConnectionWarningRow: true,
+                    targetState: "offline",
+                  });
+                }} disabled={submitting}>Disconnect</button>
+              }
+            </>}
+          </>
+        }
+      </form>
+    );
   }
+}
+
+class PrinterAuthorizationForm extends React.Component {
+  state = {
+    apiKey: '',
+    submitting: false,
+  }
+
+  constructor(props) {
+    super(props);
+    this.setApiKey = this.setApiKey.bind(this);
+  }
+
+  setApiKey() {
+    const { apiKey } = this.state;
+    if (!apiKey) {
+      return;
+    }
+    const { printer, onPrinterAuthorizationChanged } = this.props;
+    patchPrinter(printer.host, {
+      api_key: apiKey
+    })
+      .then((r) => {
+        if (onPrinterAuthorizationChanged) {
+          onPrinterAuthorizationChanged(apiKey)
+            .then(() => {
+              this.setState({
+                submitting: false,
+                apiKey: '',
+              });
+            });
+        } else {
+          this.setState({
+            submitting: false,
+            apiKey: '',
+          });
+        }
+      });
+  }
+
+  render() {
+    const { printer } = this.props;
+    const { submitting, apiKey } = this.state;
+    if (!printer.client.protected && !printer.client.readonly) {
+      return <><strong>Client availability</strong>: Full access</>;
+    }
+    return (
+      <form className="inline-form">
+        <strong>Client availability</strong>:{' '}
+          <span>{printer.client.readonly
+            ? "Read only, unlock with API key"
+            : "Authorization required, unlock with API key"
+          }</span>
+          <input type="text" id={apiKey} name={apiKey} value={apiKey || printer.client.api_key || ''} onChange={(e) => {
+            this.setState({
+              apiKey: e.target.value,
+            });
+          }} />
+          <button className="plain" type="submit" onClick={(e) => {
+              e.preventDefault();
+              this.setState({
+                submitting: true,
+              });
+              this.setApiKey();
+            }}
+            disabled={submitting}>{submitting ? "Working..." : "Set"}</button>
+      </form>
+    );
+  }
+}
+
+const PrinterConnectionStatus = ({ printer, onPrinterStateChanged }) => {
+  return (
+    <div className="printer-connection">
+      <h2 className="hidden">Connection</h2>
+      <ul>
+          <li><strong>Client status</strong>: {printer.client.connected ? 'Connected' : 'Disconnected'}</li>
+          <li><strong>Client</strong>: {printer.client.name} (<code>{JSON.stringify(printer.client.version)}</code>)</li>
+          <li><strong>Client host</strong>: <a href={`${printer.protocol}://${printer.host}`} target="_blank" rel="noopener noreferrer">{printer.host}</a></li>
+          {printer.hostname && <li><strong>Hostname</strong>: <a href={`${printer.protocol}://${printer.hostname}`} target="_blank" rel="noopener noreferrer">{printer.hostname}</a></li>}
+          <li>
+            <PrinterConnectionForm
+              printer={printer}
+              onPrinterConnectionChanged={onPrinterStateChanged}
+            />
+          </li>
+          <li>
+            <PrinterAuthorizationForm
+              printer={printer}
+              onPrinterAuthorizationChanged={onPrinterStateChanged}
+            />
+          </li>
+      </ul>
+    </div>
+  );
 }
 
 class PrintJobRow extends React.Component {
@@ -154,7 +240,7 @@ class PrinterDetail extends React.Component {
 
   loadPrinter() {
     const { match } = this.props;
-    getPrinter(match.params.host, ['job', 'status', 'webcam']).then((printer) => {
+    return getPrinter(match.params.host, ['job', 'status', 'webcam']).then((printer) => {
       this.setState({
         printer,
       });
@@ -171,7 +257,7 @@ class PrinterDetail extends React.Component {
       }];
       page = 0;
     }
-    getPrinterJobs(jobsTable.pages[page].startWith, newOrderBy, match.params.host).then((jobs) => {
+    return getPrinterJobs(jobsTable.pages[page].startWith, newOrderBy, match.params.host).then((jobs) => {
       if (!jobs.next && jobs.items.length === 0 && page - 1 >= 0) {
         this.loadJobsPage(page - 1, newOrderBy);
         return;
@@ -233,16 +319,6 @@ class PrinterDetail extends React.Component {
     if (!printer) {
       return <div><Loader /></div>;
     }
-    const { completion, printTime, printTimeLeft } = printer.job;
-    let approxPrintTimeLeft = printTimeLeft;
-    if (printTimeLeft) {
-      if (!approxPrintTimeLeft && printTime > 0) {
-        approxPrintTimeLeft = (printTime / completion) * 100;
-      }
-      if (approxPrintTimeLeft) {
-        approxPrintTimeLeft = formatters.timespan(approxPrintTimeLeft);
-      }
-    }
     const jobsRows = jobs && jobs.map((j) => {
       return <PrintJobRow
         key={j.id}
@@ -259,12 +335,16 @@ class PrinterDetail extends React.Component {
         <div>
           <div className="printer-info">
             <div >
-              <PrinterConnection
+              <PrinterConnectionStatus
                 printer={printer}
-                onPrinterConnectionChanged={() => {
-                  setTimeout(() => {
-                    this.loadPrinter();
-                  }, 3000);
+                onPrinterStateChanged={() => {
+                  return new Promise((resolve, reject) => {
+                    // TODO this is naive, it should wait for an actual state change
+                    setTimeout(() => {
+                      this.loadPrinter()
+                        .then(() => resolve(true))
+                    }, 3000);
+                  })
                 }}
               />
               <div>

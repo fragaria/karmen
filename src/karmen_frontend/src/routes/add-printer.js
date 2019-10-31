@@ -25,6 +25,13 @@ class AddPrinter extends React.Component {
         type: 'text',
         required: true,
         error: null,
+      },
+      apiKey: {
+        name: "API key",
+        val: '',
+        type: 'text',
+        required: false,
+        error: null,
       }
     }
   }
@@ -48,7 +55,7 @@ class AddPrinter extends React.Component {
       hasErrors = true;
       updatedForm.name.error = 'Name is required';
     }
-    if (!form.address.val || form.address.val.match(/^(https?:\/\/)?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$/) === null) {
+    if (!form.address.val || form.address.val.match(/^(https?:\/\/)?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}?\/?$/) === null) {
       hasErrors = true;
       updatedForm.address.error = 'Printer address is required in a proper format (like http://1.2.3.4:81)'
     }
@@ -63,7 +70,7 @@ class AddPrinter extends React.Component {
         protocol = url.protocol.replace(':', '');
         host = url.host;
       }
-      addPrinter(protocol, host, form.name.val)
+      addPrinter(protocol, host, form.name.val, form.apiKey.val)
         .then((r) => {
           switch(r) {
             case 201:

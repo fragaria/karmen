@@ -53,6 +53,7 @@ class Octoprint(PrinterClient):
 
     def add_api_key(self, api_key):
         self.client_info.api_key = api_key
+        self.http_session.headers.update({"X-Api-Key": api_key})
 
     def _http_get(self, path, force=False):
         if not self.client_info.connected and not force:
@@ -144,7 +145,9 @@ class Octoprint(PrinterClient):
             app.logger.debug(
                 "%s is not responding on /api/version - not octoprint" % self.host
             )
-            self.client_info = PrinterClientInfo({}, False)
+            self.client_info = PrinterClientInfo(
+                {}, connected=False, api_key=self.client_info.api_key
+            )
             return
         # This looks like octoprint with access control enabled
         if request.status_code == 403:
@@ -165,13 +168,16 @@ class Octoprint(PrinterClient):
                     connected=True,
                     read_only=settings_req.status_code == 200,
                     protected=True,
+                    api_key=self.client_info.api_key,
                 )
             else:
                 app.logger.debug(
                     "%s is responding with %s on /api/settings - probably not octoprint"
                     % (self.host, settings_req.status_code)
                 )
-                self.client_info = PrinterClientInfo({}, False)
+                self.client_info = PrinterClientInfo(
+                    {}, connected=False, api_key=self.client_info.api_key
+                )
             return
         # /api/version is not responding at all, which is weird
         if request.status_code != 200:
@@ -179,7 +185,9 @@ class Octoprint(PrinterClient):
                 "%s is responding with %s on /api/version - not accessible"
                 % (self.host, request.status_code)
             )
-            self.client_info = PrinterClientInfo({}, False)
+            self.client_info = PrinterClientInfo(
+                {}, connected=False, api_key=self.client_info.api_key
+            )
             return
         # Try to parse /api/version response
         try:
@@ -189,23 +197,34 @@ class Octoprint(PrinterClient):
                     "%s is responding with unfamiliar JSON %s on /api/version - probably not octoprint"
                     % (self.host, data)
                 )
-                self.client_info = PrinterClientInfo(data, False)
+                self.client_info = PrinterClientInfo(
+                    data, connected=False, api_key=self.client_info.api_key
+                )
                 return
         except json.decoder.JSONDecodeError:
             app.logger.debug(
                 "%s is not responding with JSON on /api/version - probably not octoprint"
                 % self.host
             )
-            self.client_info = PrinterClientInfo({}, False)
+            self.client_info = PrinterClientInfo(
+                {}, connected=False, api_key=self.client_info.api_key
+            )
             return
         if re.match(r"^octoprint", data["text"], re.IGNORECASE) is None:
             app.logger.debug(
                 "%s is responding with %s on /api/version - probably not octoprint"
                 % (self.host, data["text"])
             )
-            self.client_info = PrinterClientInfo(data, False)
+            self.client_info = PrinterClientInfo(
+                data, connected=False, api_key=self.client_info.api_key
+            )
             return
-        self.client_info = PrinterClientInfo(data, True)
+        self.client_info = PrinterClientInfo(
+            data,
+            connected=True,
+            api_key=self.client_info.api_key,
+            protected=bool(self.client_info.api_key),
+        )
 
     def status(self):
         request = self._http_get("/api/printer?exclude=history")
@@ -258,7 +277,7 @@ class Octoprint(PrinterClient):
                 if "state" in data and re.match(r"Operational|Offline", data["state"]):
                     return {}
                 return {
-                    "name": data["job"]["file"]["display"],
+                    "name": data["job"]["file"].get("display", None),
                     "completion": data["progress"]["completion"],
                     "printTimeLeft": data["progress"]["printTimeLeft"],
                     "printTime": data["progress"]["printTime"],

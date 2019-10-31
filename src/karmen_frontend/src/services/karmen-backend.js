@@ -38,13 +38,18 @@ export const getPrinter = (host, fields = []) => {
     })
 }
 
-export const addPrinter = (protocol, host, name) => {
+export const addPrinter = (protocol, host, name, apiKey) => {
   return fetch(`${BASE_URL}/printers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({protocol, host, name}),
+    body: JSON.stringify({
+      protocol,
+      host,
+      name,
+      api_key: apiKey
+    }),
   })
     .then((response) => {
       if (response.status !== 201) {

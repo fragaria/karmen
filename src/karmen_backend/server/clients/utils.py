@@ -27,7 +27,7 @@ class PrinterClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def add_api_key(self):
+    def add_api_key(self, api_key):
         pass
 
     @abc.abstractmethod
