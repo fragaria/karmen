@@ -5,6 +5,7 @@ import requests
 
 from server import app
 from server.clients.utils import (
+    PrinterClientAccessLevel,
     PrinterClientInfo,
     PrinterClient,
     PrinterClientException,
@@ -35,15 +36,16 @@ class Octoprint(PrinterClient):
         self.client_info = PrinterClientInfo(
             version=client_props.get("version", None),
             connected=client_props.get("connected", False),
-            read_only=client_props.get("read_only", False),
-            protected=client_props.get("protected", False),
+            access_level=client_props.get(
+                "access_level", PrinterClientAccessLevel.PROTECTED
+            ),
             api_key=client_props.get("api_key", None),
         )
         self.http_session = requests.Session()
         self.http_session.timeout = app.config.get("NETWORK_TIMEOUT", 10)
         self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
-        if "api_key" in client_props:
-            self.http_session.headers.update({"X-Api-Key": client_props["api_key"]})
+        if self.client_info.api_key:
+            self.http_session.headers.update({"X-Api-Key": self.client_info.api_key})
 
     def get_printer_props(self):
         return self.printer_props
@@ -63,6 +65,11 @@ class Octoprint(PrinterClient):
             req = self.http_session.get(uri)
             if req is None:
                 self.client_info.connected = False
+            elif self.client_info.api_key is not None:
+                if req.status_code == 403:
+                    self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
+                if req.status_code == 200:
+                    self.client_info.access_level = PrinterClientAccessLevel.UNLOCKED
             return req
         except (
             requests.exceptions.ConnectionError,
@@ -80,6 +87,11 @@ class Octoprint(PrinterClient):
             req = self.http_session.post(uri, data=data, files=files, json=json)
             if req is None:
                 self.client_info.connected = False
+            elif self.client_info.api_key is not None:
+                if req.status_code == 403:
+                    self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
+                if req.status_code == 200:
+                    self.client_info.access_level = PrinterClientAccessLevel.UNLOCKED
             return req
         except (
             requests.exceptions.ConnectionError,
@@ -166,8 +178,9 @@ class Octoprint(PrinterClient):
                 self.client_info = PrinterClientInfo(
                     {},
                     connected=True,
-                    read_only=settings_req.status_code == 200,
-                    protected=True,
+                    access_level=PrinterClientAccessLevel.READ_ONLY
+                    if settings_req.status_code == 200
+                    else PrinterClientAccessLevel.PROTECTED,
                     api_key=self.client_info.api_key,
                 )
             else:
@@ -176,7 +189,10 @@ class Octoprint(PrinterClient):
                     % (self.host, settings_req.status_code)
                 )
                 self.client_info = PrinterClientInfo(
-                    {}, connected=False, api_key=self.client_info.api_key
+                    {},
+                    connected=False,
+                    api_key=self.client_info.api_key,
+                    access_level=PrinterClientAccessLevel.UNKNOWN,
                 )
             return
         # /api/version is not responding at all, which is weird
@@ -186,7 +202,10 @@ class Octoprint(PrinterClient):
                 % (self.host, request.status_code)
             )
             self.client_info = PrinterClientInfo(
-                {}, connected=False, api_key=self.client_info.api_key
+                {},
+                connected=False,
+                api_key=self.client_info.api_key,
+                access_level=PrinterClientAccessLevel.UNKNOWN,
             )
             return
         # Try to parse /api/version response
@@ -198,7 +217,10 @@ class Octoprint(PrinterClient):
                     % (self.host, data)
                 )
                 self.client_info = PrinterClientInfo(
-                    data, connected=False, api_key=self.client_info.api_key
+                    data,
+                    connected=False,
+                    api_key=self.client_info.api_key,
+                    access_level=PrinterClientAccessLevel.UNKNOWN,
                 )
                 return
         except json.decoder.JSONDecodeError:
@@ -207,7 +229,10 @@ class Octoprint(PrinterClient):
                 % self.host
             )
             self.client_info = PrinterClientInfo(
-                {}, connected=False, api_key=self.client_info.api_key
+                {},
+                connected=False,
+                api_key=self.client_info.api_key,
+                access_level=PrinterClientAccessLevel.UNKNOWN,
             )
             return
         if re.match(r"^octoprint", data["text"], re.IGNORECASE) is None:
@@ -216,14 +241,17 @@ class Octoprint(PrinterClient):
                 % (self.host, data["text"])
             )
             self.client_info = PrinterClientInfo(
-                data, connected=False, api_key=self.client_info.api_key
+                data,
+                connected=False,
+                api_key=self.client_info.api_key,
+                access_level=PrinterClientAccessLevel.UNKNOWN,
             )
             return
         self.client_info = PrinterClientInfo(
             data,
             connected=True,
             api_key=self.client_info.api_key,
-            protected=bool(self.client_info.api_key),
+            access_level=PrinterClientAccessLevel.UNLOCKED,
         )
 
     def status(self):

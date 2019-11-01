@@ -2,6 +2,7 @@ import unittest
 import mock
 
 from server.tasks.check_printers import check_printers
+from server.clients.utils import PrinterClientAccessLevel
 
 
 class Response:
@@ -20,7 +21,11 @@ class CheckPrintersTest(unittest.TestCase):
             {
                 "hostname": "a",
                 "host": "1234",
-                "client_props": {"connected": True, "version": {}, "read_only": False},
+                "client_props": {
+                    "connected": True,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                },
                 "client": "octoprint",
                 "protocol": "https",
                 "printer_props": {"filament_type": "PETG"},
@@ -28,7 +33,11 @@ class CheckPrintersTest(unittest.TestCase):
             {
                 "hostname": "b",
                 "host": "5678",
-                "client_props": {"connected": True, "version": {}, "read_only": False},
+                "client_props": {
+                    "connected": True,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                },
                 "client": "octoprint",
             },
         ],
@@ -55,8 +64,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "client_props": {
                             "connected": False,
                             "version": {},
-                            "read_only": False,
-                            "protected": False,
+                            "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                         },
                         "printer_props": {"filament_type": "PETG"},
@@ -72,8 +80,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "client_props": {
                             "connected": False,
                             "version": {},
-                            "read_only": False,
-                            "protected": False,
+                            "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                         },
                         "printer_props": None,
@@ -91,7 +98,7 @@ class CheckPrintersTest(unittest.TestCase):
                 "client_props": {
                     "connected": False,
                     "version": {},
-                    "read_only": False,
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
                     "api_key": "1234",
                 },
                 "client": "octoprint",
@@ -100,7 +107,11 @@ class CheckPrintersTest(unittest.TestCase):
             {
                 "hostname": "b",
                 "host": "5678",
-                "client_props": {"connected": True, "version": {}, "read_only": False},
+                "client_props": {
+                    "connected": True,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.READ_ONLY,
+                },
                 "client": "octoprint",
             },
         ],
@@ -146,8 +157,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "client_props": {
                             "connected": True,
                             "version": {},
-                            "read_only": False,
-                            "protected": False,
+                            "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": "1234",
                         },
                         "printer_props": None,
@@ -163,8 +173,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "client_props": {
                             "connected": True,
                             "version": {},
-                            "read_only": False,
-                            "protected": False,
+                            "access_level": PrinterClientAccessLevel.READ_ONLY,
                             "api_key": None,
                         },
                         "printer_props": None,
@@ -187,13 +196,21 @@ class CheckPrintersTest(unittest.TestCase):
                 "hostname": "a",
                 "host": "1234",
                 "protocol": "https",
-                "client_props": {"connected": False, "version": {}, "read_only": False},
+                "client_props": {
+                    "connected": False,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                },
                 "client": "octoprint",
             },
             {
                 "hostname": "b",
                 "host": "5678",
-                "client_props": {"connected": True, "version": {}, "read_only": False},
+                "client_props": {
+                    "connected": True,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                },
                 "client": "octoprint",
             },
         ],
@@ -211,7 +228,7 @@ class CheckPrintersTest(unittest.TestCase):
         mock_get_printers,
     ):
         def mock_call(uri, **kwargs):
-            if "5678" in uri and "/api/settings" in uri:
+            if "/api/settings" in uri:
                 return Response(
                     200,
                     {
@@ -247,8 +264,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "client_props": {
                             "connected": True,
                             "version": {},
-                            "read_only": False,
-                            "protected": False,
+                            "access_level": PrinterClientAccessLevel.UNKNOWN,
                             "api_key": None,
                         },
                         "printer_props": None,
@@ -264,8 +280,7 @@ class CheckPrintersTest(unittest.TestCase):
                         "client_props": {
                             "connected": True,
                             "version": {},
-                            "read_only": False,
-                            "protected": False,
+                            "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                         },
                         "printer_props": None,
@@ -274,10 +289,12 @@ class CheckPrintersTest(unittest.TestCase):
             ]
         )
         # 2 webcam requests for redis
-        self.assertEqual(mock_redis.set.call_count, 1)
-        self.assertEqual(mock_redis.delete.call_count, 1)
+        self.assertEqual(mock_redis.set.call_count, 2)
+        self.assertEqual(mock_redis.delete.call_count, 0)
         mock_redis.set.assert_has_calls(
-            [mock.call("webcam_5678", "http://5678/webcam/?action=stream")]
+            [
+                mock.call("webcam_1234", "https://1234/webcam/?action=stream"),
+                mock.call("webcam_5678", "http://5678/webcam/?action=stream"),
+            ]
         )
-        mock_redis.delete.assert_has_calls([mock.call("webcam_1234")])
         self.assertEqual(mock_logger.error.call_count, 2)

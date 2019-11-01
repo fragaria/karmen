@@ -15,8 +15,7 @@ def save_printer_data(**kwargs):
                 "client_props": {
                     "connected": False,
                     "version": {},
-                    "read_only": True,
-                    "protected": True,
+                    "access_level": clients.utils.PrinterClientAccessLevel.PROTECTED,
                 },
                 **kwargs,
             }
@@ -61,7 +60,8 @@ def sniff_printer(hostname, host):
         client_props={
             "version": printer.client_info.version,
             "connected": printer.client_info.connected,
-            "read_only": printer.client_info.read_only,
+            "access_level": printer.client_info.access_level,
+            "api_key": printer.client_info.api_key,
         },
         printer_props=printer.get_printer_props(),
     )

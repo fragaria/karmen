@@ -4,7 +4,7 @@ import json
 import mock
 import tempfile
 
-from server.clients.utils import PrinterClientException
+from server.clients.utils import PrinterClientException, PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint
 
 
@@ -22,9 +22,16 @@ class OctoprintConstructor(unittest.TestCase):
         printer = Octoprint(
             "192.168.1.15",
             hostname="octopi.local",
-            client_props={"connected": True, "read_only": False, "version": {}},
+            client_props={
+                "connected": True,
+                "access_level": PrinterClientAccessLevel.PROTECTED,
+                "version": {},
+            },
         )
         self.assertTrue(printer.client_info.connected)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.PROTECTED
+        )
 
 
 class OctoprintIsAliveTest(unittest.TestCase):
@@ -185,8 +192,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer = Octoprint("192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, True)
-        self.assertEqual(printer.client_info.read_only, True)
-        self.assertEqual(printer.client_info.protected, True)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.READ_ONLY
+        )
         self.assertEqual(printer.client_info.version, {})
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
@@ -201,8 +209,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer = Octoprint("192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
-        self.assertEqual(printer.client_info.read_only, False)
-        self.assertEqual(printer.client_info.protected, False)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNKNOWN
+        )
         self.assertEqual(printer.client_info.version, {})
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
@@ -211,8 +220,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer = Octoprint("192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, True)
-        self.assertEqual(printer.client_info.read_only, False)
-        self.assertEqual(printer.client_info.protected, True)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.PROTECTED
+        )
         self.assertEqual(printer.client_info.version, {})
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
@@ -222,7 +232,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {})
-        self.assertEqual(printer.client_info.read_only, False)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNKNOWN
+        )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_deactivate_no_data_responding_printer(self, mock_get_uri):
@@ -234,7 +246,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {})
-        self.assertEqual(printer.client_info.read_only, False)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNKNOWN
+        )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_deactivate_bad_data_responding_printer(self, mock_get_uri):
@@ -244,7 +258,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {"text": "Fumbleprint"})
-        self.assertEqual(printer.client_info.read_only, False)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNKNOWN
+        )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_no_crash_on_different_response(self, mock_get_uri):
@@ -254,7 +270,9 @@ class OctoprintSniffTest(unittest.TestCase):
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {"random": "field"})
-        self.assertEqual(printer.client_info.read_only, False)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNKNOWN
+        )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_activate_responding_printer(self, mock_get_uri):
@@ -265,7 +283,9 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.assert_called_with("https://192.168.1.15/api/version")
         self.assertEqual(printer.client_info.connected, True)
         self.assertEqual(printer.client_info.version, {"text": "OctoPrint"})
-        self.assertEqual(printer.client_info.read_only, False)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNLOCKED
+        )
 
 
 class OctoprintStatusTest(unittest.TestCase):
@@ -321,6 +341,28 @@ class OctoprintStatusTest(unittest.TestCase):
         result = printer.status()
         self.assertEqual(
             result, {"state": "Printer is not responding", "temperature": {}}
+        )
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    def test_status_protected(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 403
+        printer = Octoprint(
+            "192.168.1.15",
+            client_props={
+                "connected": True,
+                "api_key": "1234",
+                "access_level": PrinterClientAccessLevel.UNLOCKED,
+            },
+        )
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNLOCKED
+        )
+        result = printer.status()
+        self.assertEqual(
+            result, {"state": "Printer is not responding", "temperature": {}}
+        )
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.PROTECTED
         )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
@@ -625,6 +667,31 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.clients.octoprint.requests.Session.post")
+    def test_upload_job_disconnect(self, mock_post_uri, mock_get_uri):
+        mock_post_uri.return_value.status_code = 200
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "state": {"text": "Operational"},
+            "temperature": {},
+        }
+        printer = Octoprint(
+            "192.168.1.15",
+            client_props={
+                "connected": True,
+                "api_key": "1234",
+                "access_level": PrinterClientAccessLevel.PROTECTED,
+            },
+        )
+        self.assertTrue(printer.client_info.connected)
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertFalse(result)
+        self.assertTrue(printer.client_info.connected)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.UNLOCKED
+        )
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    @mock.patch("server.clients.octoprint.requests.Session.post")
     def test_upload_job_disconnected(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -655,6 +722,27 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertEqual(mock_post_uri.call_count, 0)
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertFalse(result)
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    @mock.patch("server.clients.octoprint.requests.Session.post")
+    def test_upload_job_no_api_access(self, mock_post_uri, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {"state": {"text": "Operational"}}
+        mock_post_uri.return_value.status_code = 403
+        printer = Octoprint(
+            "192.168.1.15",
+            client_props={
+                "connected": True,
+                "api_key": "1234",
+                "access_level": PrinterClientAccessLevel.UNLOCKED,
+            },
+        )
+        self.assertEqual(mock_post_uri.call_count, 0)
+        result = printer.upload_and_start_job(self.file_mock.name)
+        self.assertFalse(result)
+        self.assertEqual(
+            printer.client_info.access_level, PrinterClientAccessLevel.PROTECTED
+        )
 
 
 class OctoprintModifyCurrentJobTest(unittest.TestCase):

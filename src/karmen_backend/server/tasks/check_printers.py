@@ -36,8 +36,7 @@ def check_printers():
             client_props={
                 "version": printer.client_info.version,
                 "connected": printer.client_info.connected,
-                "read_only": printer.client_info.read_only,
-                "protected": printer.client_info.protected,
+                "access_level": printer.client_info.access_level,
                 "api_key": printer.client_info.api_key,
             },
             printer_props=printer.get_printer_props(),

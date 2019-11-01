@@ -23,7 +23,7 @@ job_name = "fake-file-being-printed.gcode"
 @app.route("/api/version", methods=["GET", "OPTIONS"])
 @cross_origin()
 def version():
-    return jsonify({"api": "0.1", "server": "0.0.1", "text": "Fake octoprint"})
+    return jsonify({"api": "0.1", "server": "0.0.1", "text": "octoprint fake"})
 
 
 @app.route("/api/settings", methods=["GET", "OPTIONS"])

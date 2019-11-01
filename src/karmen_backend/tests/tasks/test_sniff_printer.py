@@ -2,6 +2,7 @@ import unittest
 import mock
 
 from server.tasks.sniff_printer import save_printer_data, sniff_printer
+from server.clients.utils import PrinterClientAccessLevel
 
 
 class Response:
@@ -95,7 +96,8 @@ class SniffPrinterTest(unittest.TestCase):
                 "client_props": {
                     "connected": True,
                     "version": {"text": "OctoPrint"},
-                    "read_only": False,
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                    "api_key": None,
                 },
                 "printer_props": None,
             }
@@ -124,7 +126,8 @@ class SniffPrinterTest(unittest.TestCase):
                 "client_props": {
                     "connected": True,
                     "version": {"text": "OctoPrint"},
-                    "read_only": False,
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                    "api_key": None,
                 },
                 "printer_props": None,
             }

@@ -1,4 +1,12 @@
 import abc
+from enum import Enum
+
+
+class PrinterClientAccessLevel(str, Enum):
+    UNKNOWN = "uknown"
+    PROTECTED = "protected"
+    READ_ONLY = "read_only"
+    UNLOCKED = "unlocked"
 
 
 class PrinterClientInfo:
@@ -6,14 +14,14 @@ class PrinterClientInfo:
         self,
         version={},
         connected=False,
-        read_only=False,
-        protected=False,
+        access_level=PrinterClientAccessLevel.UNKNOWN,
         api_key=None,
+        # TODO remove this after access_level is implemented
+        **kwargs
     ):
         self.version = version
         self.connected = connected
-        self.read_only = read_only
-        self.protected = protected
+        self.access_level = access_level
         self.api_key = api_key
 
 
