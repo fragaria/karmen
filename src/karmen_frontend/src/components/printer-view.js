@@ -53,7 +53,7 @@ export const PrinterTags = ({ printer }) => {
   }
   return (
     <div className="tags">
-      {printer.client.protected && !printer.client.readonly
+      {printer.client.access_level === 'protected'
        ? <span className={`tag state-inactive`}>Authorization required</span>
        : 
        <>
@@ -61,7 +61,7 @@ export const PrinterTags = ({ printer }) => {
           {printer.client.connected ? `${printer.client.name} connected` : `${printer.client.name} disconnected`}
         </span>
         <span className={`tag ${printerStatusClass}`}>{printer.status.state}</span>
-        {printer.client.readonly && <span className={`tag`}>{"Read only"}</span>}
+        {printer.client.access_level === 'read_only' && <span className={`tag`}>{"Read only"}</span>}
        </>
      }
     </div>
@@ -148,7 +148,7 @@ export class PrinterView extends React.Component {
         <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
-          {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && !printer.client.readonly && (
+          {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && printer.client.access_level === 'unlocked' && (
             <div className="printer-controls">
               {printer.status.state === 'Paused'
                 ? (

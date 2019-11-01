@@ -75,7 +75,7 @@ class PrinterConnectionForm extends React.Component {
           </div>
         : <>
             <strong>Printer status</strong>: {printer.status.state}
-            {!printer.client.readonly && <>
+            {printer.client.access_level === 'unlocked' && <>
               {(["Offline", "Closed"].indexOf(printer.status.state) > -1 || printer.status.state.match(/printer is not connected/i)) &&
                 <button className="plain" type="submit" onClick={(e) => {
                   e.preventDefault();
@@ -116,7 +116,9 @@ class PrinterAuthorizationForm extends React.Component {
   setApiKey() {
     const { apiKey } = this.state;
     if (!apiKey) {
-      return;
+      this.setState({
+        submitting: false,
+      });
     }
     const { printer, onPrinterAuthorizationChanged } = this.props;
     patchPrinter(printer.host, {
@@ -143,29 +145,40 @@ class PrinterAuthorizationForm extends React.Component {
   render() {
     const { printer } = this.props;
     const { submitting, apiKey } = this.state;
-    if (!printer.client.protected && !printer.client.readonly) {
-      return <><strong>Client availability</strong>: Full access</>;
+    const getAccessLevelString = (level) => {
+      switch (level) {
+        case 'read_only':
+          return 'Read only, unlock with API key';
+        case 'protected':
+          return 'Authorization required, unlock with a valid API key';
+        case 'unlocked':
+          return 'Full access';
+        case 'unknown':
+        default:
+          return 'Unknown';
+      }
     }
     return (
       <form className="inline-form">
         <strong>Client availability</strong>:{' '}
-          <span>{printer.client.readonly
-            ? "Read only, unlock with API key"
-            : "Authorization required, unlock with API key"
-          }</span>
-          <input type="text" id={apiKey} name={apiKey} value={apiKey || printer.client.api_key || ''} onChange={(e) => {
-            this.setState({
-              apiKey: e.target.value,
-            });
-          }} />
-          <button className="plain" type="submit" onClick={(e) => {
-              e.preventDefault();
-              this.setState({
-                submitting: true,
-              });
-              this.setApiKey();
-            }}
-            disabled={submitting}>{submitting ? "Working..." : "Set"}</button>
+          <span>{getAccessLevelString(printer.client.access_level)}</span>
+          {['unlocked', 'unknown'].indexOf(printer.client.access_level) === -1 &&
+            <>
+              <input type="text" id={apiKey} name={apiKey} value={apiKey || printer.client.api_key || ''} onChange={(e) => {
+                this.setState({
+                  apiKey: e.target.value,
+                });
+              }} />
+              <button className="plain" type="submit" onClick={(e) => {
+                  e.preventDefault();
+                  this.setState({
+                    submitting: true,
+                  });
+                  this.setApiKey();
+                }}
+                disabled={submitting || (!apiKey && !printer.client.api_key)}>{submitting ? "Working..." : "Set"}</button>
+            </>
+          }
       </form>
     );
   }
