@@ -65,6 +65,8 @@ $ python make-version.py $VERSION
 $ git add src/ docs/ && git commit -m "Version $VERSION" && git tag "v${VERSION}"
 ```
 
+If the VERSION variable contains a `-` (e. g. `1.2.3-rc.1`), it is considered as a prerelease.
+
 ## License
 
 All of the code herein is copyright 2019 [Fragaria s.r.o.](https://fragaria.cz) and released
