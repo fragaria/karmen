@@ -16,8 +16,8 @@ Finding out about the release
 
 All new releases show up in `the releases section <https://github.com/fragaria/karmen/releases>`_
 on our GitHub. You can get notifications if you start watching the repository or you can subscribe
-to an `Atom feed <https://github.com/fragaria/karmen/releases.atom>`_. It will also probably be
-announced on our `twitter <https://twitter.com/karmen3d>`_.
+to an `Atom feed <https://github.com/fragaria/karmen/releases.atom>`_. Any major changes will also
+probably be announced on our `twitter <https://twitter.com/karmen3d>`_.
 
 The easy way
 ------------
@@ -35,14 +35,20 @@ either by restarting your device (if you have set up the startup script), or by 
    BASE_HOST=<public-ip-address> ./run-karmen.sh
 
 
+By default, the update script will update to the latest stable release. If you're feeling adventurous,
+you may update to an unstable release by running ``update.sh --edge``.
+
+The update script also **does not** overwrite your ``config.local.cfg``, which means that if there are
+any configuration changes, you have to project them in your config by hand.
+
 Updating manually
 -----------------
 
 All of the following commands are run from the ``/home/pi/karmen`` directory unless stated otherwise.
 
 1. Stop Karmen with ``docker-compose stop``.
-2. Do a backup of the whole ``karmen`` directory. This will require sudo access for the database datafiles (this will change in the future).
-3. Get the latest ``release.zip`` and unpack its contents into the ``karmen`` directory.
+2. Do a backup of the whole ``karmen`` directory including the PotsgreSQL datafiles.
+3. Get the latest (or specific) ``release.zip`` from github and unpack its contents into the ``karmen`` directory.
 4. Run ``docker-compose pull`` to get the latest versions of docker containers.
 5. Start Karmen again with
 

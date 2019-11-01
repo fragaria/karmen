@@ -26,13 +26,8 @@ might have with a webcam stream or other specifics, are related to Octoprint/Oct
 and not to Karmen. *Karmen is only using Octoprint's API to communicate with the
 printer.*
 
-Also, make sure that the Octoprint instance is accessible over the same network
-on which Karmen will be running.
-
-.. warning::
-  Karmen currently does not support the secured Octoprint installations, it relies
-  on the publicly available API. We are working on it. Do not expose your unsecured
-  printer or Karmen to the internet.
+Also, make sure that the Octoprint instance is accessible over the network
+from a computer on which Karmen will be running.
 
 Installing Karmen
 -----------------
@@ -48,7 +43,7 @@ before installing docker. That installs the latest version of all of the system 
 
 .. code-block:: sh
 
-   sudo apt-get install software-properties-common -y
+   sudo apt install software-properties-common -y
    curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
    sudo usermod -aG docker pi
    sudo apt install docker-compose
@@ -72,18 +67,16 @@ The directory ``karmen`` now contains at least the following files:
 
 - ``docker-compose.yml`` - A blueprint for all necessary services
 - ``config.local.cfg.sample`` - A sample configuration file that you should edit to your needs
-- ``db/schema.sql`` - Initial database schema
 - ``run-karmen.sh`` - A startup script you can use to launch karmen
 - ``update.sh`` - An update script that can bring your installation up to date
 - ``VERSION`` - A file with a version number. Useful for troubleshooting
 
 Firstly, you should copy the ``config.local.cfg.sample`` in ``config.local.cfg`` and edit all the
-necessary stuff. You can for example tweak the settings of the network autodiscovery, but you
+necessary stuff. You can for example tweak the settings of the network discovery, but you
 should **absolutely change the** ``SECRET_KEY`` variable for security reasons.
 
-The database schema is created automatically upon the first start. The datafiles are created on
-your filesystem, not inside the container, so no data will be lost during Karmen's downtime.
-The database handling might change in the future.
+The database schema is created automatically upon the first start and is kept up to date during updates.
+The datafiles are created on your filesystem, not inside the container, so no data will be lost during Karmen's downtime.
 
 Finally, you can start all of the services. The shorthand script will download and run all of the
 containers from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&type=image>`_ for you.
