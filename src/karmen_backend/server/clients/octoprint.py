@@ -65,7 +65,7 @@ class Octoprint(PrinterClient):
             req = self.http_session.get(uri)
             if req is None:
                 self.client_info.connected = False
-            elif self.client_info.api_key is not None:
+            elif bool(self.client_info.api_key):
                 if req.status_code == 403:
                     self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
                 if req.status_code == 200:
@@ -87,7 +87,7 @@ class Octoprint(PrinterClient):
             req = self.http_session.post(uri, data=data, files=files, json=json)
             if req is None:
                 self.client_info.connected = False
-            elif self.client_info.api_key is not None:
+            elif bool(self.client_info.api_key):
                 if req.status_code == 403:
                     self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
                 if req.status_code == 200:
