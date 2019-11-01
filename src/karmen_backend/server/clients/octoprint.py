@@ -104,7 +104,7 @@ class Octoprint(PrinterClient):
     def is_alive(self):
         request = self._http_get("/api/version", force=True)
         if request is not None and request.status_code in [200, 403]:
-            if not self.client_info.connected:
+            if not self.client_info.connected or request.status_code == 403:
                 self.sniff()
             self.client_info.connected = True
         else:
