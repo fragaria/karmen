@@ -133,7 +133,7 @@ def printer_patch(host):
         return abort(400)
     printer_inst = clients.get_printer_instance(printer)
     printer_inst.add_api_key(api_key)
-    if data.get("api_key", "-1") is not "-1" and data.get("api_key", "-1") != printer[
+    if data.get("api_key", "-1") != "-1" and data.get("api_key", "-1") != printer[
         "client_props"
     ].get("api_key", None):
         printer_inst.sniff()  # this can be offloaded to check_printer task
