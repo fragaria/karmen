@@ -17,6 +17,7 @@ class VersionRoute(unittest.TestCase):
 
 
 class FilesLocalRoute(unittest.TestCase):
+    @mock.patch("server.routes.gcodes.analyze_gcode.delay")
     @mock.patch(
         "server.routes.octoprintemulator.files.save",
         return_value={
@@ -27,7 +28,7 @@ class FilesLocalRoute(unittest.TestCase):
             "size": 123,
         },
     )
-    def test_upload(self, mocked_save):
+    def test_upload(self, mocked_save, mocked_delay):
         with app.test_client() as c:
             data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
             response = c.post(
@@ -38,7 +39,9 @@ class FilesLocalRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
             self.assertEqual(args[1], "/")
+            self.assertEqual(mocked_delay.call_count, 1)
 
+    @mock.patch("server.routes.gcodes.analyze_gcode.delay")
     @mock.patch(
         "server.routes.octoprintemulator.files.save",
         return_value={
@@ -49,7 +52,7 @@ class FilesLocalRoute(unittest.TestCase):
             "size": 123,
         },
     )
-    def test_upload_path(self, mocked_save):
+    def test_upload_path(self, mocked_save, mocked_delay):
         with app.test_client() as c:
             data = dict(
                 file=(io.BytesIO(b"my file contents"), "some.gcode"), path="/a/b"

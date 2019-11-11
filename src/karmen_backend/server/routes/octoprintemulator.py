@@ -6,6 +6,7 @@ from flask_cors import cross_origin
 from server import app, __version__
 from server.database import gcodes
 from server.services import files
+from server.tasks.analyze_gcode import analyze_gcode
 
 
 @app.route("/octoprint-emulator/api/version", methods=["GET", "OPTIONS"])
@@ -30,16 +31,16 @@ def upload():
 
     try:
         saved = files.save(incoming, request.form.get("path", "/"))
-        gcodes.add_gcode(
+        gcode_id = gcodes.add_gcode(
             path=saved["path"],
             filename=saved["filename"],
             display=saved["display"],
             absolute_path=saved["absolute_path"],
             size=saved["size"],
         )
+        analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
         return abort(e, 500)
-
     return (
         jsonify(
             {
