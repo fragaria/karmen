@@ -35,8 +35,8 @@ app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
 
 CORS(app)
 app.config["JWT_SECRET_KEY"] = app.config["SECRET_KEY"]
-JWTManager(app)
 
+jwt = JWTManager(app)
 celery = setup_celery(app)
 
 import server.routes

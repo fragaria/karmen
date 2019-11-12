@@ -54,7 +54,11 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertTrue("access_token" in response.json)
             data = get_token_data(response.json["access_token"])
             self.assertEqual(data["fresh"], True)
+            self.assertEqual(data["type"], "access")
             self.assertEqual(data["identity"], "6480fa7d-ce18-4ae2-818b-f1d200050806")
+            self.assertTrue("user_claims" in data)
+            self.assertTrue("role" in data["user_claims"])
+            self.assertTrue("force_pwd_change" in data["user_claims"])
 
     def test_returns_refresh_token(self):
         with app.test_client() as c:
@@ -65,5 +69,6 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("refresh_token" in response.json)
             data = get_token_data(response.json["refresh_token"])
+            self.assertEqual(data["type"], "refresh")
             self.assertTrue("fresh" not in data)
             self.assertEqual(data["identity"], "6480fa7d-ce18-4ae2-818b-f1d200050806")

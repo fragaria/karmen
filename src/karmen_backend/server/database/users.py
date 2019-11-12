@@ -31,16 +31,19 @@ def get_users(order_by=None, limit=None, start_with=None, filter=None):
         return data
 
 
-def get_uuid_by_username(username):
+def get_by_username(username):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT uuid from users where username = %s", (username,))
+        cursor.execute(
+            "SELECT uuid, username, role, providers, providers_data, disabled from users where username = %s",
+            (username,),
+        )
         data = cursor.fetchone()
         cursor.close()
         return data
 
 
-def get_user(uuid):
+def get_by_uuid(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
