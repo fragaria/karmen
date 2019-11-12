@@ -3,15 +3,7 @@ import mock
 
 from server import app
 from server.database import printers
-
-
-class Response:
-    def __init__(self, status_code, contents={}):
-        self.status_code = status_code
-        self.contents = contents
-
-    def json(self):
-        return self.contents
+from ..utils import Response
 
 
 class ListRoute(unittest.TestCase):

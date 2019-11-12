@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from celery import Celery
+from flask_jwt_extended import JWTManager
 
 __version__ = "0.0.13"
 __author__ = "Jirka Chadima"
@@ -33,6 +34,9 @@ app.config.from_envvar("FLASKR_SETTINGS", silent=True)
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
 
 CORS(app)
+app.config["JWT_SECRET_KEY"] = app.config["SECRET_KEY"]
+JWTManager(app)
+
 celery = setup_celery(app)
 
 import server.routes

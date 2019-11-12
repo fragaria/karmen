@@ -3,15 +3,7 @@ import mock
 
 from server.tasks.sniff_printer import save_printer_data, sniff_printer
 from server.clients.utils import PrinterClientAccessLevel
-
-
-class Response:
-    def __init__(self, status_code, contents=""):
-        self.status_code = status_code
-        self.contents = contents
-
-    def json(self):
-        return self.contents
+from ..utils import Response
 
 
 class SavePrinterDataTest(unittest.TestCase):

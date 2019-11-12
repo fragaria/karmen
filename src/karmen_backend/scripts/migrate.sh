@@ -17,6 +17,7 @@ else
 callbacks:
   afterAll:
       - fake-printers.sql
+      - test-users.sql
 conn: "host='${POSTGRES_HOST}' port=${POSTGRES_PORT} dbname='print3d' user='print3d' password='print3d'"
 EOF
 fi

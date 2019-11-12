@@ -21,6 +21,8 @@ watchdog = "*"
 coverage = "*"
 coveralls = "*"
 yandex-pgmigrate = "*"
+bcrypt = "*"
+flask-jwt-extended = "*"
 
 [requires]
 python_version = "3.6"

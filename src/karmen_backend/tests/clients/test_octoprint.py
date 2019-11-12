@@ -6,15 +6,7 @@ import tempfile
 
 from server.clients.utils import PrinterClientException, PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint
-
-
-class Response:
-    def __init__(self, status_code, contents=""):
-        self.status_code = status_code
-        self.contents = contents
-
-    def json(self):
-        return self.contents
+from ..utils import Response
 
 
 class OctoprintConstructor(unittest.TestCase):
