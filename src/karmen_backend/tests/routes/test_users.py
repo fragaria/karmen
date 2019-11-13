@@ -1,10 +1,8 @@
 import base64
 import json
 import unittest
-import mock
 
 from server import app
-from server.database import printers
 
 
 def get_token_data(jwtoken):

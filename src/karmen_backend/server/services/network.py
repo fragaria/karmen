@@ -1,8 +1,5 @@
 import subprocess
 import re
-import requests
-
-from server import app
 
 
 def do_arp_scan(network_interface):

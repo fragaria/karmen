@@ -2,7 +2,6 @@ import os
 import unittest
 import tempfile
 import mock
-import requests
 
 from server.services.network import do_arp_scan, get_avahi_hostname
 

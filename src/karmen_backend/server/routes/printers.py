@@ -1,6 +1,5 @@
 import re
 
-import requests
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
 from server import app, __version__

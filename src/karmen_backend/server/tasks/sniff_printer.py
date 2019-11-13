@@ -1,5 +1,4 @@
 from server import app, celery
-from server.database import settings
 from server.database import printers
 from server import clients
 

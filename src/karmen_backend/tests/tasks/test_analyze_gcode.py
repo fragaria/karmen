@@ -1,7 +1,6 @@
+from os import path
 import unittest
 import mock
-import tempfile
-from os import path
 
 from server.tasks.analyze_gcode import analyze_gcode
 

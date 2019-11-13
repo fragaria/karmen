@@ -7,6 +7,7 @@ from flask_jwt_extended import (
     jwt_required,
     jwt_refresh_token_required,
     get_jwt_identity,
+    fresh_jwt_required,
 )
 from server import app, jwt
 from server.database import users, local_users
@@ -88,6 +89,7 @@ def refresh():
 @app.route("/users/<uuid>", methods=["PATCH", "OPTIONS"])
 @cross_origin()
 @jwt_required
+@fresh_jwt_required
 def change_password(uuid):
     # TODO restrict this only for fresh access_tokens
     data = request.json

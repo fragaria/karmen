@@ -1,8 +1,7 @@
-import bcrypt
 import random
 import string
 import unittest
-import mock
+import bcrypt
 
 from server import app
 from server.database import users, local_users

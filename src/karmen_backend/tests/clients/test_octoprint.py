@@ -1,8 +1,8 @@
 import os
 import unittest
 import json
-import mock
 import tempfile
+import mock
 
 from server.clients.utils import PrinterClientException, PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint

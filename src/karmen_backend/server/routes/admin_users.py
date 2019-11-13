@@ -1,35 +1,17 @@
-import functools
 import uuid
 import bcrypt
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
-from flask_jwt_extended import jwt_required, get_jwt_claims, get_jwt_identity
-from server import app, jwt
+from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
+from server import app
 from server.database import users, local_users
-
-
-def jwt_admin_required(func):
-    @functools.wraps(func)
-    @jwt_required
-    def wrap(*args, **kwargs):
-        claims = get_jwt_claims()
-        role = claims.get("role", None)
-        if not role or role != "admin":
-            return abort(401)
-        # check current situation, the token might be from a role-change or user delete period
-        admin_uuid = get_jwt_identity()
-        user = users.get_by_uuid(admin_uuid)
-        if not user:
-            return abort(401)
-        if user["role"] != "admin":
-            return abort(401)
-        return func(*args, **kwargs)
-
-    return wrap
+from . import jwt_requires_role
 
 
 @app.route("/admin/users", methods=["POST", "OPTIONS"])
-@jwt_admin_required
+@cross_origin()
+@jwt_requires_role("admin")
+@fresh_jwt_required
 def create_user():
     data = request.json
     if not data:
@@ -67,7 +49,9 @@ def create_user():
 
 
 @app.route("/admin/users/<uuid>", methods=["PATCH", "OPTIONS"])
-@jwt_admin_required
+@cross_origin()
+@jwt_requires_role("admin")
+@fresh_jwt_required
 def update_user(uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
@@ -111,7 +95,9 @@ def make_user_response(user):
 
 
 @app.route("/admin/users", methods=["GET", "OPTIONS"])
-@jwt_admin_required
+@cross_origin()
+@jwt_requires_role("admin")
+@fresh_jwt_required
 def list_users():
     user_list = []
     order_by = request.args.get("order_by", "")
