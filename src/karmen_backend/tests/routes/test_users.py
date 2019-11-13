@@ -3,7 +3,12 @@ import json
 import unittest
 
 from server import app
-from ..utils import expired_admin_token
+from ..utils import (
+    TOKEN_ADMIN_EXPIRED,
+    TOKEN_ADMIN_NONFRESH,
+    TOKEN_ADMIN,
+    TOKEN_USER_REFRESH,
+)
 
 
 def get_token_data(jwtoken):
@@ -112,14 +117,6 @@ class AuthenticateFreshRoute(unittest.TestCase):
 
 
 class AuthenticateRefreshRoute(unittest.TestCase):
-    def setUp(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            self.jwt = response.json["refresh_token"]
-
     def test_no_token(self):
         with app.test_client() as c:
             response = c.post("/users/authenticate-refresh")
@@ -142,7 +139,7 @@ class AuthenticateRefreshRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/users/authenticate-refresh",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_USER_REFRESH,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("access_token" in response.json)
@@ -150,28 +147,13 @@ class AuthenticateRefreshRoute(unittest.TestCase):
             data = get_token_data(response.json["access_token"])
             self.assertEqual(data["fresh"], False)
             self.assertEqual(data["type"], "access")
-            self.assertEqual(data["identity"], "6480fa7d-ce18-4ae2-818b-f1d200050806")
+            self.assertEqual(data["identity"], "77315957-8ebb-4a44-976c-758dbf28bb9f")
             self.assertTrue("user_claims" in data)
             self.assertTrue("role" in data["user_claims"])
             self.assertTrue("force_pwd_change" in data["user_claims"])
 
 
 class ChangePasswordRoute(unittest.TestCase):
-    def setUp(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            self.jwt = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate-refresh",
-                headers={
-                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
-                },
-            )
-            self.nonfresh_jwt = response.json["access_token"]
-
     def test_missing_jwt(self):
         with app.test_client() as c:
             response = c.patch(
@@ -188,7 +170,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_NONFRESH,)},
                 json={
                     "password": "random",
                     "new_password_confirmation": "random",
@@ -202,7 +184,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (expired_admin_token,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_EXPIRED,)},
                 json={
                     "password": "admin-password",
                     "new_password_confirmation": "random",
@@ -216,7 +198,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/77315957-8ebb-4a44-976c-758dbf28bb9f",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "password": "user-password",
                     "new_password_confirmation": "random",
@@ -229,7 +211,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -237,7 +219,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"password": "random", "new_password_confirmation": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -246,7 +228,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"password": "random", "new_password": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -255,7 +237,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"new_password_confirmation": "random", "new_password": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -264,7 +246,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",
@@ -289,7 +271,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random-mismatch",
@@ -302,7 +284,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",
@@ -315,7 +297,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             change = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",

@@ -5,7 +5,7 @@ import bcrypt
 
 from server import app
 from server.database import users, local_users
-from ..utils import expired_admin_token
+from ..utils import TOKEN_ADMIN_EXPIRED, TOKEN_ADMIN, TOKEN_ADMIN_NONFRESH, TOKEN_USER
 
 
 def get_random_username():
@@ -14,26 +14,6 @@ def get_random_username():
 
 
 class CreateUserRoute(unittest.TestCase):
-    def setUp(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            self.admin_jwt = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate-refresh",
-                headers={
-                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
-                },
-            )
-            self.nonfresh_jwt = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-user", "password": "user-password"},
-            )
-            self.user_jwt = response.json["access_token"]
-
     def test_no_token(self):
         with app.test_client() as c:
             response = c.post(
@@ -51,7 +31,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (expired_admin_token,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_EXPIRED,)},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -66,7 +46,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.user_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_USER,)},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -80,7 +60,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_NONFRESH,)},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -93,8 +73,7 @@ class CreateUserRoute(unittest.TestCase):
     def test_no_data(self):
         with app.test_client() as c:
             response = c.post(
-                "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                "/admin/users", headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)}
             )
             self.assertEqual(response.status_code, 400)
 
@@ -102,7 +81,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "role": "user",
                     "password": "temp-one",
@@ -115,7 +94,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": "username",
                     "password": "temp-one",
@@ -128,7 +107,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": get_random_username(),
                     "role": "doesnotexist",
@@ -142,7 +121,7 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -157,7 +136,7 @@ class CreateUserRoute(unittest.TestCase):
             username = get_random_username()
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": username,
                     "role": "user",
@@ -188,7 +167,7 @@ class CreateUserRoute(unittest.TestCase):
             username = get_random_username()
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": username,
                     "role": "user",
@@ -199,7 +178,7 @@ class CreateUserRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 201)
             response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": username,
                     "role": "user",
@@ -214,25 +193,8 @@ class UpdateUserRoute(unittest.TestCase):
     def setUp(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            self.admin_jwt = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate-refresh",
-                headers={
-                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
-                },
-            )
-            self.nonfresh_jwt = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-user", "password": "user-password"},
-            )
-            self.user_jwt = response.json["access_token"]
-            response = c.post(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -251,7 +213,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.user_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_USER,)},
                 json={"role": "user"},
             )
             self.assertEqual(response.status_code, 401)
@@ -260,7 +222,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_NONFRESH,)},
                 json={"role": "user"},
             )
             self.assertEqual(response.status_code, 401)
@@ -269,7 +231,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -277,7 +239,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"suspended": True},
             )
             self.assertEqual(response.status_code, 200)
@@ -294,7 +256,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"role": "admin"},
             )
             self.assertEqual(response.status_code, 200)
@@ -311,7 +273,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"role": "doesnotexist"},
             )
             self.assertEqual(response.status_code, 400)
@@ -320,7 +282,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 200)
@@ -337,7 +299,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 409)
@@ -346,7 +308,7 @@ class UpdateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
                 json={"role": "user", "suspended": False},
             )
             self.assertEqual(response.status_code, 404)
@@ -359,19 +321,19 @@ class ListRoute(unittest.TestCase):
                 "/users/authenticate",
                 json={"username": "test-admin", "password": "admin-password"},
             )
-            self.admin_jwt = response.json["access_token"]
+            TOKEN_ADMIN = response.json["access_token"]
             response = c.post(
                 "/users/authenticate-refresh",
                 headers={
                     "Authorization": "Bearer %s" % (response.json["refresh_token"],)
                 },
             )
-            self.nonfresh_jwt = response.json["access_token"]
+            TOKEN_ADMIN_NONFRESH = response.json["access_token"]
             response = c.post(
                 "/users/authenticate",
                 json={"username": "test-user", "password": "user-password"},
             )
-            self.user_jwt = response.json["access_token"]
+            TOKEN_USER = response.json["access_token"]
 
     def test_no_token(self):
         with app.test_client() as c:
@@ -381,8 +343,7 @@ class ListRoute(unittest.TestCase):
     def test_no_admin_token(self):
         with app.test_client() as c:
             response = c.get(
-                "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.user_jwt,)},
+                "/admin/users", headers={"Authorization": "Bearer %s" % (TOKEN_USER,)}
             )
             self.assertEqual(response.status_code, 401)
 
@@ -390,15 +351,14 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_NONFRESH,)},
             )
             self.assertEqual(response.status_code, 401)
 
     def test_list(self):
         with app.test_client() as c:
             response = c.get(
-                "/admin/users",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                "/admin/users", headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -414,7 +374,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?order_by=username",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -432,7 +392,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=1&order_by=username",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -446,7 +406,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=3&order_by=uuid,username",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -454,7 +414,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=2&start_with=77315957-8ebb-4a44-976c-758dbf28bb9f&order_by=-uuid",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -476,7 +436,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=1&start_with=00315957-8ebb-4a44-1234-758dbf28bb9f&order_by=-username",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -486,7 +446,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=3&start_with=asdfasdf",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -495,7 +455,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=-3",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -504,7 +464,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=3&start_with=-1",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -513,7 +473,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?limit=asdfasdf&start_with=5",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -522,7 +482,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?filter=username:unknown-username",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -532,7 +492,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?filter=username:admin&order_by=uuid",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -543,7 +503,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?filter=username:user&limit=2&order_by=-uuid",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -551,7 +511,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(len(response.json["items"]) == 2)
             response2 = c.get(
                 response.json["next"],
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertTrue("items" in response2.json)
             self.assertTrue(
@@ -562,7 +522,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?filter=random:file1",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -572,7 +532,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get(
                 "/admin/users?filter=file1",
-                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
