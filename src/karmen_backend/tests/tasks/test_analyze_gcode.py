@@ -33,7 +33,6 @@ class AnalyzeGcodeTest(unittest.TestCase):
         },
     )
     def test_file_prusaslicer(self, mock_gcode_get, mock_analysis_set):
-        print(path.abspath(path.abspath(__file__) + "../_fixtures/prusaslicer.gcode"))
         analyze_gcode(123)
         mock_analysis_set.assert_called_once_with(
             123,

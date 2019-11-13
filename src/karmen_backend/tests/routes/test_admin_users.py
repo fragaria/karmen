@@ -5,6 +5,7 @@ import bcrypt
 
 from server import app
 from server.database import users, local_users
+from ..utils import expired_admin_token
 
 
 def get_random_username():
@@ -45,6 +46,21 @@ class CreateUserRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(response.status_code, 401)
+
+    def test_expired_jwt(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/admin/users",
+                headers={"Authorization": "Bearer %s" % (expired_admin_token,)},
+                json={
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
+            self.assertTrue("has expired" in response.json["message"])
 
     def test_no_admin_token(self):
         with app.test_client() as c:

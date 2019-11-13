@@ -3,6 +3,7 @@ import json
 import unittest
 
 from server import app
+from ..utils import expired_admin_token
 
 
 def get_token_data(jwtoken):
@@ -196,6 +197,20 @@ class ChangePasswordRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
             self.assertTrue("Fresh token required" in response.json["message"])
+
+    def test_expired_jwt(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
+                headers={"Authorization": "Bearer %s" % (expired_admin_token,)},
+                json={
+                    "password": "admin-password",
+                    "new_password_confirmation": "random",
+                    "new_password": "random",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
+            self.assertTrue("has expired" in response.json["message"])
 
     def test_mismatch_token_uuid(self):
         with app.test_client() as c:

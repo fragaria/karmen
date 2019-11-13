@@ -61,3 +61,22 @@ printer is queried for its webcam stream address. If there is one, it is stored 
 Nginx ([openresty](https://openresty.org/) flavour in particular) is then performing a lookup via lua script
 connected to the redis cache on every request to `/proxied-webcam/<ip>`. If it finds an active record,
 it passes the connection there, if it doesn't, it responds with 404.
+
+## User access model
+
+- `users` - A list of users in the system. Every user has potentially multiple *providers*. These
+are identity providers, such as OAuth services, SAML services. Currently, only a **local** provider is
+available. They are identified by `UUIDv4`.
+- `local_users` - Users from the **local** provider. They have a `bcrypt`-ed password stored in the
+database.
+- There are two roles at the moment: *user* and *admin*.
+- Admins can create new users. Every new user gets a password set by admin. But the password is marked
+to be changed and no interesting endpoints are available for users that are required to change their password.
+- Local users exchange their username and password for a pair `JWT` tokens. An `access_token` is used
+to access the API, a `refresh_token` is used to get a new access token. Access tokens expire in 15 minutes.
+Refresh tokens expire in 30 days.
+- An access token issued after login is marked as *fresh*. Access tokens issued against the refresh
+token are marked as *nonfresh*. Sensitive operations (such as password changes and all admin endpoints) require *fresh* tokens.
+Thus forcing the user to send the username/password pair again. A special endpoint should be used for that
+to prevent issuing unnecessary refresh tokens.
+- User accounts can be suspended by admins. Whole API is then rendered inaccessible for them.

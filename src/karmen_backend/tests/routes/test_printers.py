@@ -69,7 +69,6 @@ class DetailRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.get("/printers/172.16.236.11:8080?fields=webcam,status,job")
             self.assertEqual(response.status_code, 200)
-            print(response.json)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" in response.json)
             self.assertTrue("status" in response.json)
