@@ -163,6 +163,13 @@ class ChangePasswordRoute(unittest.TestCase):
                 json={"username": "test-admin", "password": "admin-password"},
             )
             self.jwt = response.json["access_token"]
+            response = c.post(
+                "/users/authenticate-refresh",
+                headers={
+                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
+                },
+            )
+            self.nonfresh_jwt = response.json["access_token"]
 
     def test_missing_jwt(self):
         with app.test_client() as c:
@@ -175,6 +182,20 @@ class ChangePasswordRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(response.status_code, 401)
+
+    def test_nonfresh_jwt(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
+                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+                json={
+                    "password": "random",
+                    "new_password_confirmation": "random",
+                    "new_password": "random",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
+            self.assertTrue("Fresh token required" in response.json["message"])
 
     def test_mismatch_token_uuid(self):
         with app.test_client() as c:

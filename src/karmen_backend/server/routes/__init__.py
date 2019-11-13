@@ -14,7 +14,9 @@ def jwt_requires_role(required_role):
             claims = get_jwt_claims()
             role = claims.get("role", None)
             if not role or role != required_role:
-                return abort(401)
+                return abort(
+                    401, "Token does not match the required role of %s" % required_role
+                )
             # check current situation, the token might be from a role-change or user delete period
             admin_uuid = get_jwt_identity()
             user = db_users.get_by_uuid(admin_uuid)

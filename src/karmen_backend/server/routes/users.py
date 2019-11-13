@@ -9,21 +9,8 @@ from flask_jwt_extended import (
     get_jwt_identity,
     fresh_jwt_required,
 )
-from server import app, jwt
+from server import app
 from server.database import users, local_users
-
-
-@jwt.user_claims_loader
-def add_claims_to_access_token(user):
-    return {
-        "role": user["role"],
-        "force_pwd_change": user.get("force_pwd_change", False),
-    }
-
-
-@jwt.user_identity_loader
-def user_identity_lookup(user):
-    return user["uuid"]
 
 
 def authenticate_base(include_refresh_token):
@@ -91,7 +78,6 @@ def refresh():
 @jwt_required
 @fresh_jwt_required
 def change_password(uuid):
-    # TODO restrict this only for fresh access_tokens
     data = request.json
     if not data:
         return abort(400)

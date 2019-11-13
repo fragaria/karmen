@@ -16,8 +16,6 @@ class PrinterClientInfo:
         connected=False,
         access_level=PrinterClientAccessLevel.UNKNOWN,
         api_key=None,
-        # TODO remove this after access_level is implemented
-        **kwargs
     ):
         self.version = version
         self.connected = connected
