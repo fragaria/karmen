@@ -69,6 +69,9 @@ def create_user():
 @app.route("/admin/users/<uuid>", methods=["PATCH", "OPTIONS"])
 @jwt_admin_required
 def update_user(uuid):
+    admin_uuid = get_jwt_identity()
+    if admin_uuid == uuid:
+        return abort(409)
     user = users.get_by_uuid(uuid)
     if user is None:
         return abort(404)

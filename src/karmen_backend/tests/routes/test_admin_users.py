@@ -281,6 +281,15 @@ class UpdateUserRoute(unittest.TestCase):
             self.assertEqual(user["role"], "admin")
             self.assertEqual(user["disabled"], True)
 
+    def test_self_lockout(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/admin/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
+                headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
+                json={"role": "admin", "disabled": True},
+            )
+            self.assertEqual(response.status_code, 409)
+
     def test_nonexisting_user(self):
         with app.test_client() as c:
             response = c.patch(
