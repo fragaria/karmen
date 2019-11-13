@@ -23,6 +23,7 @@ def get_users(order_by=None, limit=None, start_with=None, filter=None):
             limit=limit,
             start_with=start_with,
             filter=filter,
+            pk_column="uuid",
         )
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(statement)

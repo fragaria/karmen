@@ -1,3 +1,4 @@
+import uuid
 from contextlib import contextmanager
 import psycopg2
 from psycopg2 import sql
@@ -7,6 +8,13 @@ from server import app
 
 DSN = app.config["DB_DSN"]
 CONNECTION = None
+
+
+def adapt_uuid(uuid):
+    return psycopg2.extensions.adapt(str(uuid))
+
+
+psycopg2.extensions.register_adapter(uuid.UUID, adapt_uuid)
 
 
 def connect():
@@ -59,18 +67,19 @@ def prepare_list_statement(
             sql.SQL(" ").join(
                 [sql.Identifier(order_by_column), sql.SQL(order_by_direction)]
             ),
-            sql.Identifier("id"),
+            sql.Identifier(pk_column),
         )
 
     if start_with:
         if order_by:
             cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            statement = sql.SQL("SELECT {} FROM {} where {} = %s").format(
+            statement = sql.SQL("SELECT {} FROM {} where {} = {}").format(
                 sql.SQL(", ").join([sql.Identifier(c) for c in columns]),
                 sql.Identifier(tablename),
                 sql.Identifier(pk_column),
+                sql.Placeholder(),
             )
-            cursor.execute(statement.as_string(connection) % start_with)
+            cursor.execute(statement.as_string(connection), (start_with,))
             data = cursor.fetchone()
             cursor.close()
             if data:
@@ -80,12 +89,15 @@ def prepare_list_statement(
                     sql.Literal(data[order_by_column]),
                 )
             else:
-                where_clause = sql.SQL("WHERE id {} {}").format(
+                where_clause = sql.SQL("WHERE {} {} {}").format(
+                    sql.Identifier(pk_column),
                     sql.SQL("<=" if order_by_direction == "DESC" else ">="),
                     sql.Literal(start_with),
                 )
         else:
-            where_clause = sql.SQL("WHERE id >= {}").format(sql.Literal(start_with))
+            where_clause = sql.SQL("WHERE {} >= {}").format(
+                sql.Identifier(pk_column), sql.Literal(start_with)
+            )
 
     if filter:
         filter_splitted = filter.split(":", 1)

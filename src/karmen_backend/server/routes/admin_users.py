@@ -49,17 +49,107 @@ def create_user():
 
     pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
     new_uuid = uuid.uuid4()
-    users.add_user(
-        uuid=str(new_uuid), username=username, role=role, providers=["local"]
-    )
+    users.add_user(uuid=new_uuid, username=username, role=role, providers=["local"])
     local_users.add_local_user(
-        uuid=str(new_uuid), pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=True
+        uuid=new_uuid, pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=True
     )
-    return "", 201
+    return (
+        jsonify(
+            {
+                "uuid": str(new_uuid),
+                "username": username,
+                "role": role,
+                "disabled": False,
+            }
+        ),
+        201,
+    )
 
 
-# @app.route("/admin/users", methods=["PUT", "OPTIONS"])
-# set disabled, set role
+@app.route("/admin/users/<uuid>", methods=["PATCH", "OPTIONS"])
+@jwt_admin_required
+def update_user(uuid):
+    user = users.get_by_uuid(uuid)
+    if user is None:
+        return abort(404)
 
-# @app.route("/admin/users", methods=["GET", "OPTIONS"])
-# list users
+    data = request.json
+    if not data:
+        return abort(400)
+
+    role = data.get("role", user["role"])
+    disabled = data.get("disabled", user["disabled"])
+    if role not in ["admin", "user"]:
+        return abort(400)
+
+    user["role"] = role
+    user["disabled"] = disabled
+    users.update_user(**user)
+    return (
+        jsonify(
+            {
+                "uuid": user["uuid"],
+                "username": user["username"],
+                "role": role,
+                "disabled": disabled,
+            }
+        ),
+        200,
+    )
+
+
+def make_user_response(user):
+    return {
+        "uuid": user["uuid"],
+        "username": user["username"],
+        "role": user["role"],
+        "disabled": user["disabled"],
+    }
+
+
+@app.route("/admin/users", methods=["GET", "OPTIONS"])
+@jwt_admin_required
+def list_users():
+    user_list = []
+    order_by = request.args.get("order_by", "")
+    if "," in order_by:
+        return abort(400)
+    try:
+        limit = int(request.args.get("limit", 200))
+        if limit and limit < 0:
+            limit = 200
+    except ValueError:
+        limit = 200
+    try:
+        start_with = (
+            uuid.UUID(request.args.get("start_with"), version=4)
+            if request.args.get("start_with")
+            else None
+        )
+    except ValueError:
+        start_with = None
+    filter_crit = request.args.get("filter", None)
+    users_record_set = users.get_users(
+        order_by=order_by, limit=limit, start_with=start_with, filter=filter_crit
+    )
+    response = {"items": user_list}
+    next_record = None
+    if len(users_record_set) > int(limit):
+        next_record = users_record_set[-1]
+        users_record_set = users_record_set[0:-1]
+    for user in users_record_set:
+        user_list.append(make_user_response(user))
+
+    next_href = "/admin/users"
+    parts = ["limit=%s" % limit]
+    if order_by:
+        parts.append("order_by=%s" % order_by)
+    if filter_crit:
+        parts.append("filter=%s" % filter_crit)
+    if next_record:
+        parts.append("start_with=%s" % next_record["uuid"])
+        response["next"] = (
+            "%s?%s" % (next_href, "&".join(parts)) if parts else next_href
+        )
+
+    return jsonify(response)
