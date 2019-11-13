@@ -11,7 +11,7 @@ def get_users(order_by=None, limit=None, start_with=None, filter=None):
         "role",
         "providers",
         "providers_data",
-        "disabled",
+        "suspended",
         "created",
     ]
     with get_connection() as connection:
@@ -36,7 +36,7 @@ def get_by_username(username):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT uuid, username, role, providers, providers_data, disabled from users where username = %s",
+            "SELECT uuid, username, role, providers, providers_data, suspended from users where username = %s",
             (username,),
         )
         data = cursor.fetchone()
@@ -48,7 +48,7 @@ def get_by_uuid(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT uuid, username, role, providers, providers_data, disabled, created from users where uuid = %s",
+            "SELECT uuid, username, role, providers, providers_data, suspended, created from users where uuid = %s",
             (uuid,),
         )
         data = cursor.fetchone()
@@ -76,14 +76,14 @@ def update_user(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE users SET uuid = %s, username = %s, role = %s, providers = %s, providers_data = %s, disabled = %s where uuid = %s",
+            "UPDATE users SET uuid = %s, username = %s, role = %s, providers = %s, providers_data = %s, suspended = %s where uuid = %s",
             (
                 kwargs["uuid"],
                 kwargs["username"],
                 kwargs["role"],
                 kwargs["providers"],
                 psycopg2.extras.Json(kwargs.get("providers_data", None)),
-                kwargs["disabled"],
+                kwargs["suspended"],
                 kwargs["uuid"],
             ),
         )

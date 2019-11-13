@@ -19,7 +19,7 @@ CREATE TABLE public.users
     username character varying(128) COLLATE pg_catalog."default" NOT NULL,
     providers_data jsonb,
     providers character varying(128)[] COLLATE pg_catalog."default" NOT NULL,
-    disabled boolean NOT NULL DEFAULT FALSE,
+    suspended boolean NOT NULL DEFAULT FALSE,
     role character varying(16) COLLATE pg_catalog."default" NOT NULL DEFAULT USER,
     created timestamp with time zone NOT NULL DEFAULT now(),
     CONSTRAINT users_pkey PRIMARY KEY (uuid),

@@ -7,6 +7,7 @@ from flask_jwt_extended import (
     jwt_required,
     jwt_refresh_token_required,
     get_jwt_identity,
+    get_current_user,
     fresh_jwt_required,
 )
 from server import app
@@ -22,7 +23,6 @@ def authenticate_base(include_refresh_token):
     if not username or not password:
         return abort(400)
 
-    # TODO check for disabled users
     user = users.get_by_username(username)
     if not user:
         return abort(401)
@@ -60,8 +60,7 @@ def authenticate_fresh():
 @app.route("/users/authenticate-refresh", methods=["POST", "OPTIONS"])
 @jwt_refresh_token_required
 def refresh():
-    uuid = get_jwt_identity()
-    user = users.get_by_uuid(uuid)
+    user = get_current_user()
     if not user:
         return abort(401)
 
@@ -95,8 +94,7 @@ def change_password(uuid):
     if get_jwt_identity() != uuid:
         return abort(401)
 
-    # TODO check for disabled users
-    user = users.get_by_uuid(uuid)
+    user = get_current_user()
     if not user:
         return abort(401)
 

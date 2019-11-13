@@ -40,19 +40,5 @@ app.config["JWT_ERROR_MESSAGE_KEY"] = "message"
 jwt = JWTManager(app)
 celery = setup_celery(app)
 
-
-@jwt.user_claims_loader
-def add_claims_to_access_token(user):
-    return {
-        "role": user["role"],
-        "force_pwd_change": user.get("force_pwd_change", False),
-    }
-
-
-@jwt.user_identity_loader
-def user_identity_lookup(user):
-    return user["uuid"]
-
-
 import server.routes
 import server.tasks

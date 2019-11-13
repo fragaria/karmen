@@ -5,13 +5,14 @@ from flask_cors import cross_origin
 from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
 from server import app
 from server.database import users, local_users
-from . import jwt_requires_role
+from . import jwt_requires_role, jwt_force_password_change
 
 
 @app.route("/admin/users", methods=["POST", "OPTIONS"])
 @cross_origin()
 @jwt_requires_role("admin")
 @fresh_jwt_required
+@jwt_force_password_change
 def create_user():
     data = request.json
     if not data:
@@ -41,7 +42,7 @@ def create_user():
                 "uuid": str(new_uuid),
                 "username": username,
                 "role": role,
-                "disabled": False,
+                "suspended": False,
             }
         ),
         201,
@@ -52,6 +53,7 @@ def create_user():
 @cross_origin()
 @jwt_requires_role("admin")
 @fresh_jwt_required
+@jwt_force_password_change
 def update_user(uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
@@ -65,12 +67,12 @@ def update_user(uuid):
         return abort(400)
 
     role = data.get("role", user["role"])
-    disabled = data.get("disabled", user["disabled"])
+    suspended = data.get("suspended", user["suspended"])
     if role not in ["admin", "user"]:
         return abort(400)
 
     user["role"] = role
-    user["disabled"] = disabled
+    user["suspended"] = suspended
     users.update_user(**user)
     return (
         jsonify(
@@ -78,7 +80,7 @@ def update_user(uuid):
                 "uuid": user["uuid"],
                 "username": user["username"],
                 "role": role,
-                "disabled": disabled,
+                "suspended": suspended,
             }
         ),
         200,
@@ -90,7 +92,7 @@ def make_user_response(user):
         "uuid": user["uuid"],
         "username": user["username"],
         "role": user["role"],
-        "disabled": user["disabled"],
+        "suspended": user["suspended"],
     }
 
 
@@ -98,6 +100,7 @@ def make_user_response(user):
 @cross_origin()
 @jwt_requires_role("admin")
 @fresh_jwt_required
+@jwt_force_password_change
 def list_users():
     user_list = []
     order_by = request.args.get("order_by", "")

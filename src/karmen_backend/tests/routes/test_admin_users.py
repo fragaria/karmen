@@ -21,6 +21,13 @@ class CreateUserRoute(unittest.TestCase):
             )
             self.admin_jwt = response.json["access_token"]
             response = c.post(
+                "/users/authenticate-refresh",
+                headers={
+                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
+                },
+            )
+            self.nonfresh_jwt = response.json["access_token"]
+            response = c.post(
                 "/users/authenticate",
                 json={"username": "test-user", "password": "user-password"},
             )
@@ -44,6 +51,20 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/admin/users",
                 headers={"Authorization": "Bearer %s" % (self.user_jwt,)},
+                json={
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_nonfresh_admin_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/admin/users",
+                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -132,7 +153,7 @@ class CreateUserRoute(unittest.TestCase):
             self.assertTrue("uuid" in response.json)
             self.assertTrue("username" in response.json)
             self.assertTrue("role" in response.json)
-            self.assertTrue("disabled" in response.json)
+            self.assertTrue("suspended" in response.json)
             user = users.get_by_username(username)
             self.assertTrue(user is not None)
             self.assertEqual(user["username"], username)
@@ -182,6 +203,13 @@ class UpdateUserRoute(unittest.TestCase):
             )
             self.admin_jwt = response.json["access_token"]
             response = c.post(
+                "/users/authenticate-refresh",
+                headers={
+                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
+                },
+            )
+            self.nonfresh_jwt = response.json["access_token"]
+            response = c.post(
                 "/users/authenticate",
                 json={"username": "test-user", "password": "user-password"},
             )
@@ -212,6 +240,15 @@ class UpdateUserRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
 
+    def test_no_fresh_token(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/admin/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+                json={"role": "user"},
+            )
+            self.assertEqual(response.status_code, 401)
+
     def test_no_data(self):
         with app.test_client() as c:
             response = c.patch(
@@ -225,19 +262,19 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
                 headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
-                json={"disabled": True},
+                json={"suspended": True},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("role" in response.json)
-            self.assertTrue("disabled" in response.json)
+            self.assertTrue("suspended" in response.json)
             self.assertEqual(response.json["role"], "user")
-            self.assertEqual(response.json["disabled"], True)
+            self.assertEqual(response.json["suspended"], True)
             user = users.get_by_uuid(self.uuid)
             self.assertTrue(user is not None)
             self.assertEqual(user["role"], "user")
-            self.assertEqual(user["disabled"], True)
+            self.assertEqual(user["suspended"], True)
 
-    def test_no_disabled(self):
+    def test_no_suspended(self):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
@@ -246,13 +283,13 @@ class UpdateUserRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("role" in response.json)
-            self.assertTrue("disabled" in response.json)
+            self.assertTrue("suspended" in response.json)
             self.assertEqual(response.json["role"], "admin")
-            self.assertEqual(response.json["disabled"], False)
+            self.assertEqual(response.json["suspended"], False)
             user = users.get_by_uuid(self.uuid)
             self.assertTrue(user is not None)
             self.assertEqual(user["role"], "admin")
-            self.assertEqual(user["disabled"], False)
+            self.assertEqual(user["suspended"], False)
 
     def test_unknown_role(self):
         with app.test_client() as c:
@@ -268,24 +305,24 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/admin/users/%s" % self.uuid,
                 headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
-                json={"role": "admin", "disabled": True},
+                json={"role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("role" in response.json)
-            self.assertTrue("disabled" in response.json)
+            self.assertTrue("suspended" in response.json)
             self.assertEqual(response.json["role"], "admin")
-            self.assertEqual(response.json["disabled"], True)
+            self.assertEqual(response.json["suspended"], True)
             user = users.get_by_uuid(self.uuid)
             self.assertTrue(user is not None)
             self.assertEqual(user["role"], "admin")
-            self.assertEqual(user["disabled"], True)
+            self.assertEqual(user["suspended"], True)
 
     def test_self_lockout(self):
         with app.test_client() as c:
             response = c.patch(
                 "/admin/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
                 headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
-                json={"role": "admin", "disabled": True},
+                json={"role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 409)
 
@@ -294,7 +331,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/admin/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
                 headers={"Authorization": "Bearer %s" % (self.admin_jwt,)},
-                json={"role": "user", "disabled": False},
+                json={"role": "user", "suspended": False},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -307,6 +344,13 @@ class ListRoute(unittest.TestCase):
                 json={"username": "test-admin", "password": "admin-password"},
             )
             self.admin_jwt = response.json["access_token"]
+            response = c.post(
+                "/users/authenticate-refresh",
+                headers={
+                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
+                },
+            )
+            self.nonfresh_jwt = response.json["access_token"]
             response = c.post(
                 "/users/authenticate",
                 json={"username": "test-user", "password": "user-password"},
@@ -326,6 +370,14 @@ class ListRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
 
+    def test_nonfresh_token(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/admin/users",
+                headers={"Authorization": "Bearer %s" % (self.nonfresh_jwt,)},
+            )
+            self.assertEqual(response.status_code, 401)
+
     def test_list(self):
         with app.test_client() as c:
             response = c.get(
@@ -340,7 +392,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("uuid" in response.json["items"][0])
             self.assertTrue("username" in response.json["items"][0])
             self.assertTrue("role" in response.json["items"][0])
-            self.assertTrue("disabled" in response.json["items"][0])
+            self.assertTrue("suspended" in response.json["items"][0])
 
     def test_order_by(self):
         with app.test_client() as c:
