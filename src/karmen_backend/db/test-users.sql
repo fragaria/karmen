@@ -26,3 +26,12 @@ insert into public.users (uuid, username, role, providers, providers_data)
 insert into public.local_users (uuid, pwd_hash, force_pwd_change)
   values ('77315957-8ebb-4a44-976c-758dbf28bb9f', '$2y$12$Ps7.CAGKkSRmx9AhDxk33.B9G.W6TI9KwnLeU1qUrXAWiwjCzO76C', false)
   on conflict do nothing;
+
+insert into public.users (uuid, username, role, providers, providers_data)
+  values ('e076b705-a484-4d24-844d-02594ac40b12', 'test-user-2', 'user', '{"local"}', '{}')
+  on conflict do nothing;
+
+-- password is user-password
+insert into public.local_users (uuid, pwd_hash, force_pwd_change)
+  values ('e076b705-a484-4d24-844d-02594ac40b12', '$2y$12$Ps7.CAGKkSRmx9AhDxk33.B9G.W6TI9KwnLeU1qUrXAWiwjCzO76C', false)
+  on conflict do nothing;

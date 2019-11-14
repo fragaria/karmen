@@ -2,11 +2,13 @@ from flask import jsonify, request, abort
 from flask_cors import cross_origin
 from server import app
 from server.database import settings
+from . import jwt_force_password_change, jwt_requires_role
 
 CONFIGURABLE_SETTINGS = ["NETWORK_INTERFACE"]
 
 
 @app.route("/settings", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def settings_list():
     props = {n.lower(): app.config[n] for n in CONFIGURABLE_SETTINGS}
@@ -20,6 +22,8 @@ def settings_list():
 
 
 @app.route("/settings", methods=["POST", "OPTIONS"])
+@jwt_requires_role("admin")
+@jwt_force_password_change
 @cross_origin()
 def settings_change():
     data = request.json

@@ -17,6 +17,8 @@ TOKEN_ADMIN_REFRESH = None
 TOKEN_ADMIN_NONFRESH = None
 TOKEN_USER = None
 TOKEN_USER_REFRESH = None
+TOKEN_USER2 = None
+TOKEN_USER2_REFRESH = None
 
 with app.test_client() as c:
     response = c.post(
@@ -36,3 +38,9 @@ with app.test_client() as c:
     )
     TOKEN_USER = response.json["access_token"]
     TOKEN_USER_REFRESH = response.json["refresh_token"]
+    response = c.post(
+        "/users/authenticate",
+        json={"username": "test-user-2", "password": "user-password"},
+    )
+    TOKEN_USER2 = response.json["access_token"]
+    TOKEN_USER2_REFRESH = response.json["refresh_token"]

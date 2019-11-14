@@ -6,6 +6,7 @@ from server import app, __version__
 from server.database import printers
 from server import clients
 from server.services import network
+from . import jwt_force_password_change, jwt_requires_role
 
 
 def make_printer_response(printer, fields):
@@ -39,6 +40,7 @@ def make_printer_response(printer, fields):
 
 
 @app.route("/printers", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def printers_list():
     device_list = []
@@ -49,7 +51,19 @@ def printers_list():
     return jsonify({"items": device_list})
 
 
+@app.route("/printers/<host>", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
+@cross_origin()
+def printer_detail(host):
+    fields = request.args.get("fields").split(",") if request.args.get("fields") else []
+    printer = printers.get_printer(host)
+    if printer is None:
+        return abort(404)
+    return jsonify(make_printer_response(printer, fields))
+
+
 @app.route("/printers", methods=["POST", "OPTIONS"])
+@jwt_requires_role("admin")
 @cross_origin()
 def printer_create():
     data = request.json
@@ -96,17 +110,8 @@ def printer_create():
     return "", 201
 
 
-@app.route("/printers/<host>", methods=["GET", "OPTIONS"])
-@cross_origin()
-def printer_detail(host):
-    fields = request.args.get("fields").split(",") if request.args.get("fields") else []
-    printer = printers.get_printer(host)
-    if printer is None:
-        return abort(404)
-    return jsonify(make_printer_response(printer, fields))
-
-
 @app.route("/printers/<host>", methods=["DELETE", "OPTIONS"])
+@jwt_requires_role("admin")
 @cross_origin()
 def printer_delete(host):
     printer = printers.get_printer(host)
@@ -117,6 +122,7 @@ def printer_delete(host):
 
 
 @app.route("/printers/<host>", methods=["PATCH", "OPTIONS"])
+@jwt_requires_role("admin")
 @cross_origin()
 def printer_patch(host):
     printer = printers.get_printer(host)
@@ -170,6 +176,7 @@ def printer_patch(host):
 
 
 @app.route("/printers/<host>/connection", methods=["POST", "OPTIONS"])
+@jwt_requires_role("admin")
 @cross_origin()
 def printer_change_connection(host):
     printer = printers.get_printer(host)
@@ -200,8 +207,10 @@ def printer_change_connection(host):
 
 
 @app.route("/printers/<host>/current-job", methods=["POST", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def printer_modify_job(host):
+    # TODO owner or admin only - also change this to use jobid
     printer = printers.get_printer(host)
     if printer is None:
         return abort(404)

@@ -139,7 +139,7 @@ class AuthenticateRefreshRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/users/authenticate-refresh",
-                headers={"Authorization": "Bearer %s" % (TOKEN_USER_REFRESH,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_USER_REFRESH},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("access_token" in response.json)
@@ -170,7 +170,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_NONFRESH,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
                 json={
                     "password": "random",
                     "new_password_confirmation": "random",
@@ -184,7 +184,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_EXPIRED,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_EXPIRED},
                 json={
                     "password": "admin-password",
                     "new_password_confirmation": "random",
@@ -198,7 +198,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/77315957-8ebb-4a44-976c-758dbf28bb9f",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "password": "user-password",
                     "new_password_confirmation": "random",
@@ -211,7 +211,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -219,7 +219,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"password": "random", "new_password_confirmation": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -228,7 +228,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"password": "random", "new_password": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -237,7 +237,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"new_password_confirmation": "random", "new_password": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -246,7 +246,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",
@@ -271,7 +271,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random-mismatch",
@@ -284,7 +284,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",
@@ -297,7 +297,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             change = c.patch(
                 "/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN,)},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",

@@ -38,8 +38,6 @@ def jwt_force_password_change(func):
         force_pwd_change = claims.get("force_pwd_change", None)
         user = get_current_user()
         if "local" in user["providers"] and force_pwd_change:
-            return abort(401, "Password change is enforced on this account!")
-        if "local" in user["providers"]:
             luser = db_local_users.get_local_user(user["uuid"])
             if luser["force_pwd_change"]:
                 return abort(401, "Password change is enforced on this account!")

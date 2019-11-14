@@ -4,12 +4,20 @@ import mock
 from server import app
 from server.database import printers
 from ..utils import Response
+from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2
 
 
 class ListRoute(unittest.TestCase):
-    def test_list(self):
+    def test_list_no_token(self):
         with app.test_client() as c:
             response = c.get("/printers")
+            self.assertEqual(response.status_code, 401)
+
+    def test_list(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printers", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 200)
             # coming from db fixtures
             self.assertTrue("items" in response.json)
@@ -26,7 +34,10 @@ class ListRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_list_fields(self, mock_get_uri):
         with app.test_client() as c:
-            response = c.get("/printers?fields=webcam,status,job")
+            response = c.get(
+                "/printers?fields=webcam,status,job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             # coming from db fixtures
             self.assertTrue("items" in response.json)
@@ -42,9 +53,17 @@ class ListRoute(unittest.TestCase):
 
 
 class DetailRoute(unittest.TestCase):
-    def test_detail(self):
+    def test_list_no_token(self):
         with app.test_client() as c:
             response = c.get("/printers/172.16.236.11:8080")
+            self.assertEqual(response.status_code, 401)
+
+    def test_detail(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printers/172.16.236.11:8080",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
@@ -58,7 +77,10 @@ class DetailRoute(unittest.TestCase):
             "host": "1.2.3.4",
         }
         with app.test_client() as c:
-            response = c.get("/printers/172.16.236.11:8080")
+            response = c.get(
+                "/printers/172.16.236.11:8080",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
@@ -67,7 +89,10 @@ class DetailRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_fields(self, mock_get_uri):
         with app.test_client() as c:
-            response = c.get("/printers/172.16.236.11:8080?fields=webcam,status,job")
+            response = c.get(
+                "/printers/172.16.236.11:8080?fields=webcam,status,job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" in response.json)
@@ -76,7 +101,10 @@ class DetailRoute(unittest.TestCase):
 
     def test_404(self):
         with app.test_client() as c:
-            response = c.get("/printers/172.16.236.35")
+            response = c.get(
+                "/printers/172.16.236.35",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 404)
 
 
@@ -88,6 +116,7 @@ class CreateRoute(unittest.TestCase):
             with app.test_client() as c:
                 response = c.post(
                     "/printers",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                     json={
                         "host": "172.16.236.200:81",
                         "name": "random-test-printer-name",
@@ -95,7 +124,11 @@ class CreateRoute(unittest.TestCase):
                     },
                 )
                 self.assertEqual(response.status_code, 201)
-                response = c.get("/printers/172.16.236.200:81")
+                response = c.get(
+                    "/printers/172.16.236.200:81",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                )
+                self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["host"], "172.16.236.200:81")
                 self.assertEqual(response.json["protocol"], "https")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
@@ -103,7 +136,10 @@ class CreateRoute(unittest.TestCase):
         except Exception as e:
             raise e
         finally:
-            c.delete("/printers/172.16.236.200:81")
+            c.delete(
+                "/printers/172.16.236.200:81",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
@@ -116,9 +152,14 @@ class CreateRoute(unittest.TestCase):
                         "host": "172.16.236.200:81",
                         "name": "random-test-printer-name",
                     },
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 )
                 self.assertEqual(response.status_code, 201)
-                response = c.get("/printers/172.16.236.200:81")
+                response = c.get(
+                    "/printers/172.16.236.200:81",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                )
+                self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["host"], "172.16.236.200:81")
                 self.assertEqual(response.json["protocol"], "http")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
@@ -126,35 +167,76 @@ class CreateRoute(unittest.TestCase):
         except Exception as e:
             raise e
         finally:
-            c.delete("/printers/172.16.236.200:81")
+            c.delete(
+                "/printers/172.16.236.200:81",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+
+    def test_bad_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={
+                    "host": "172.16.236.200:81",
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def tes_no_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers",
+                json={
+                    "host": "172.16.236.200:81",
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
 
     def test_empty_req(self):
         with app.test_client() as c:
-            response = c.post("/printers")
+            response = c.post(
+                "/printers", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_bad_protocol(self):
         with app.test_client() as c:
             response = c.post(
                 "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"host": "172.16.236.200", "name": "something", "protocol": "ftp"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_name(self):
         with app.test_client() as c:
-            response = c.post("/printers", json={"host": "172.16.236.200"})
+            response = c.post(
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"host": "172.16.236.200"},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_ip(self):
         with app.test_client() as c:
-            response = c.post("/printers", json={"name": "172.16.236.200"})
+            response = c.post(
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"name": "172.16.236.200"},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_bad_ip(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers", json={"name": "name...", "host": "bad-ip-address"}
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"name": "name...", "host": "bad-ip-address"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -162,6 +244,7 @@ class CreateRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": "existing-printer", "host": "172.16.236.11:8080"},
             )
             self.assertEqual(response.status_code, 409)
@@ -174,15 +257,35 @@ class DeleteRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"host": "172.16.236.200:81", "name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 201)
-            response = c.delete("/printers/172.16.236.200:81")
+            response = c.delete(
+                "/printers/172.16.236.200:81",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
             self.assertEqual(response.status_code, 204)
+
+    def test_delete_bad_token(self):
+        with app.test_client() as c:
+            response = c.delete(
+                "/printers/172.16.236.213",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.delete("/printers/172.16.236.213")
+            self.assertEqual(response.status_code, 401)
 
     def test_delete_unknown(self):
         with app.test_client() as c:
-            response = c.delete("/printers/172.16.236.213")
+            response = c.delete(
+                "/printers/172.16.236.213",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
             self.assertEqual(response.status_code, 404)
 
 
@@ -205,6 +308,7 @@ class PatchRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/printers/1.2.3.4",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
             self.assertEqual(response.status_code, 204)
@@ -216,6 +320,7 @@ class PatchRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.patch(
                 "/printers/1.2.3.4",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "name": "random-test-printer-name",
                     "printer_props": {
@@ -231,28 +336,55 @@ class PatchRoute(unittest.TestCase):
             self.assertEqual(p["printer_props"]["filament_color"], "žluťoučká")
             self.assertTrue("random" not in p["printer_props"])
 
+    def test_patch_no_token(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/printers/1.2.3.4",
+                json={"name": "random-test-printer-name", "protocol": "https"},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_patch_bad_token(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/printers/1.2.3.4",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"name": "random-test-printer-name", "protocol": "https"},
+            )
+            self.assertEqual(response.status_code, 401)
+
     def test_patch_unknown(self):
         with app.test_client() as c:
             response = c.patch(
                 "/printers/random-unknown-printer",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_patch_no_data(self):
         with app.test_client() as c:
-            response = c.patch("/printers/1.2.3.4")
+            response = c.patch(
+                "/printers/1.2.3.4",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_patch_empty_name(self):
         with app.test_client() as c:
-            response = c.patch("/printers/1.2.3.4", json={"name": ""})
+            response = c.patch(
+                "/printers/1.2.3.4",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"name": ""},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_patch_empty_bad_protocol(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4", json={"name": "some", "protocol": "ftp"}
+                "/printers/1.2.3.4",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"name": "some", "protocol": "ftp"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -271,13 +403,47 @@ class CurrentJobRoute(unittest.TestCase):
     def tearDown(self):
         printers.delete_printer("1.2.3.4")
 
+    def test_current_job_no_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers/1.2.3.4/current-job", json={"action": "cancel"}
+            )
+            self.assertEqual(response.status_code, 401)
+
     @mock.patch(
         "server.clients.octoprint.requests.Session.post", return_value=Response(204)
     )
     def test_current_job(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job", json={"action": "cancel"}
+                "/printers/1.2.3.4/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"action": "cancel"},
+            )
+            self.assertEqual(response.status_code, 204)
+
+    # TODO
+    # @mock.patch(
+    #     "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    # )
+    # def test_current_job_different_user(self, post_uri_mock):
+    #     with app.test_client() as c:
+    #         response = c.post(
+    #             "/printers/1.2.3.4/current-job",
+    #             headers={"Authorization": "Bearer %s" % TOKEN_USER2},
+    #             json={"action": "cancel"},
+    #         )
+    #         self.assertEqual(response.status_code, 401)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
+    def test_current_job_admin(self, post_uri_mock):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers/1.2.3.4/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 204)
 
@@ -285,14 +451,18 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_unable(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job", json={"action": "cancel"}
+                "/printers/1.2.3.4/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 409)
 
     def test_current_job_bad_action(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job", json={"action": "random"}
+                "/printers/1.2.3.4/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"action": "random"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -300,18 +470,26 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/random-unknown-printer/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_current_job_no_data(self):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/current-job")
+            response = c.post(
+                "/printers/1.2.3.4/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_current_job_empty_action(self):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/current-job", json={"action": ""})
+            response = c.post(
+                "/printers/1.2.3.4/current-job",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"action": ""},
+            )
             self.assertEqual(response.status_code, 400)
 
 
@@ -338,7 +516,11 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_to_online(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"state": "online"},
+            )
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
@@ -350,7 +532,11 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_to_online_already_on(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"state": "online"},
+            )
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
@@ -364,7 +550,11 @@ class PrinterConnectionRoute(unittest.TestCase):
         self, mock_get_uri, mock_post_uri
     ):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": "offline"})
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"state": "offline"},
+            )
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
@@ -376,27 +566,58 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_to_offline(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": "offline"})
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"state": "offline"},
+            )
             self.assertEqual(response.status_code, 204)
+
+    def test_change_connection_bad_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"state": "online"},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_change_connection_no_token(self):
+        with app.test_client() as c:
+            response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
+            self.assertEqual(response.status_code, 401)
 
     def test_change_connection_bad_state(self):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": "random"})
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"state": "random"},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_change_connection_unknown_printer(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/random-unknown-printer/connection", json={"action": "cancel"}
+                "/printers/random-unknown-printer/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_change_connection_no_data(self):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection")
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_change_connection_empty_state(self):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": ""})
+            response = c.post(
+                "/printers/1.2.3.4/connection",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"state": ""},
+            )
             self.assertEqual(response.status_code, 400)

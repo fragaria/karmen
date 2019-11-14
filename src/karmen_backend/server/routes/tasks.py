@@ -2,9 +2,12 @@ from flask import request, abort
 from flask_cors import cross_origin
 from server import app
 from server.tasks.scan_network import scan_network
+from . import jwt_force_password_change, jwt_requires_role
 
 
 @app.route("/tasks", methods=["POST", "OPTIONS"])
+@jwt_requires_role("admin")
+@jwt_force_password_change
 @cross_origin()
 def enqueue_task():
     data = request.json
