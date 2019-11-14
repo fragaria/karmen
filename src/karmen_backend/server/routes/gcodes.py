@@ -8,6 +8,7 @@ from server.database import gcodes, printjobs
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
 from . import jwt_force_password_change, jwt_requires_role
+from flask_jwt_extended import get_current_user
 
 
 def make_gcode_response(gcode, fields=None):
@@ -121,6 +122,7 @@ def gcode_create():
             display=saved["display"],
             absolute_path=saved["absolute_path"],
             size=saved["size"],
+            user_uuid=get_current_user()["uuid"],
         )
         analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
@@ -130,7 +132,7 @@ def gcode_create():
             make_gcode_response(
                 {
                     "id": gcode_id,
-                    "user_uuid": None,  # TODO
+                    "user_uuid": get_current_user()["uuid"],
                     "path": saved["path"],
                     "filename": saved["filename"],
                     "display": saved["display"],
@@ -165,10 +167,12 @@ def gcode_file(id):
 @jwt_force_password_change
 @cross_origin()
 def gcode_delete(id):
-    # TODO only owner or admin
     gcode = gcodes.get_gcode(id)
     if gcode is None:
         return abort(404)
+    user = get_current_user()
+    if user["uuid"] != gcode["user_uuid"] and user["role"] not in ["admin"]:
+        return abort(401)
     try:
         files.remove(gcode["absolute_path"])
     except IOError:

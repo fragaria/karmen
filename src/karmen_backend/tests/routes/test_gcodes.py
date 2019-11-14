@@ -7,7 +7,7 @@ import mock
 
 from server import app
 from server.database import gcodes, printjobs
-from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2
+from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2, UUID_USER
 
 
 class ListRoute(unittest.TestCase):
@@ -21,6 +21,7 @@ class ListRoute(unittest.TestCase):
                     display="file-display",
                     absolute_path="/ab/a/b/c",
                     size=123,
+                    user_uuid=UUID_USER,
                 )
             )
 
@@ -35,6 +36,7 @@ class ListRoute(unittest.TestCase):
                 self.assertTrue("next" not in response.json)
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("id" in response.json["items"][0])
+            self.assertTrue("user_uuid" in response.json["items"][0])
             self.assertTrue("path" in response.json["items"][0])
             self.assertTrue("display" in response.json["items"][0])
             self.assertTrue("absolute_path" in response.json["items"][0])
@@ -189,6 +191,7 @@ class ListRoute(unittest.TestCase):
                     display="file-display",
                     absolute_path="/ab/a/b/c",
                     size=123,
+                    user_uuid=UUID_USER,
                 ),
                 gcodes.add_gcode(
                     path="a/b/c",
@@ -196,6 +199,7 @@ class ListRoute(unittest.TestCase):
                     display="file-display",
                     absolute_path="/ab/a/b/c",
                     size=123,
+                    user_uuid=UUID_USER,
                 ),
             ]
             response = c.get(
@@ -227,6 +231,7 @@ class ListRoute(unittest.TestCase):
                     display="file-display",
                     absolute_path="/ab/a/b/c",
                     size=123,
+                    user_uuid=UUID_USER,
                 ),
                 gcodes.add_gcode(
                     path="a/b/c",
@@ -234,6 +239,7 @@ class ListRoute(unittest.TestCase):
                     display="file-display",
                     absolute_path="/ab/a/b/c",
                     size=123,
+                    user_uuid=UUID_USER,
                 ),
             ]
             response = c.get(
@@ -289,6 +295,7 @@ class DetailRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
 
     def test_detail(self):
@@ -300,6 +307,7 @@ class DetailRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("id" in response.json)
             self.assertEqual(response.json["id"], self.gcode_id)
+            self.assertEqual(response.json["user_uuid"], UUID_USER)
 
     def test_no_token(self):
         with app.test_client() as c:
@@ -372,12 +380,16 @@ class CreateRoute(unittest.TestCase):
             args, kwargs = mocked_save.call_args
             self.assertEqual(args[1], "/a/b")
             self.assertTrue("id" in response.json)
+            self.assertTrue("user_uuid" in response.json)
+            self.assertEqual(response.json["user_uuid"], UUID_USER)
             self.assertTrue("path" in response.json)
             self.assertTrue("filename" in response.json)
             self.assertTrue("display" in response.json)
             self.assertTrue("absolute_path" in response.json)
             self.assertTrue("uploaded" in response.json)
             self.assertTrue("size" in response.json)
+            gcode_db_data = gcodes.get_gcode(response.json["id"])
+            self.assertEqual(gcode_db_data["user_uuid"], UUID_USER)
 
     @mock.patch("server.routes.gcodes.files.save")
     def test_upload_io_error(self, mocked_save):
@@ -430,6 +442,7 @@ class DeleteRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
         printjobs.add_printjob(
             gcode_id=gcode_id,
@@ -455,7 +468,50 @@ class DeleteRoute(unittest.TestCase):
         for pj in pjs:
             self.assertFalse(pj["gcode_data"]["available"])
 
-    # TODO test delete_no_token, test_delete_bad_user, test_delete_admin
+    def test_delete_admin(self):
+        gcode_id = gcodes.add_gcode(
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+        )
+        with app.test_client() as c:
+            response = c.delete(
+                "/gcodes/%s" % gcode_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 204)
+
+    def test_delete_bad_user(self):
+        gcode_id = gcodes.add_gcode(
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+        )
+        with app.test_client() as c:
+            response = c.delete(
+                "/gcodes/%s" % gcode_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER2},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_delete_no_token(self):
+        gcode_id = gcodes.add_gcode(
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+        )
+        with app.test_client() as c:
+            response = c.delete("/gcodes/%s" % gcode_id)
+            self.assertEqual(response.status_code, 401)
 
     def test_delete_unknown(self):
         with app.test_client() as c:
@@ -479,6 +535,7 @@ class GetDataRoute(unittest.TestCase):
             display="file-display",
             absolute_path=mock_file.name,
             size=123,
+            user_uuid=UUID_USER,
         )
         with app.test_client() as c:
             response = c.get(
@@ -504,6 +561,7 @@ class GetDataRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
         with app.test_client() as c:
             response = c.get(

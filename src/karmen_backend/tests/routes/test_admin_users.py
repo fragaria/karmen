@@ -5,7 +5,14 @@ import bcrypt
 
 from server import app
 from server.database import users, local_users
-from ..utils import TOKEN_ADMIN_EXPIRED, TOKEN_ADMIN, TOKEN_ADMIN_NONFRESH, TOKEN_USER
+from ..utils import (
+    TOKEN_ADMIN_EXPIRED,
+    TOKEN_ADMIN,
+    TOKEN_ADMIN_NONFRESH,
+    TOKEN_USER,
+    UUID_ADMIN,
+    UUID_USER,
+)
 
 
 def get_random_username():
@@ -298,7 +305,7 @@ class UpdateUserRoute(unittest.TestCase):
     def test_self_lockout(self):
         with app.test_client() as c:
             response = c.patch(
-                "/admin/users/6480fa7d-ce18-4ae2-818b-f1d200050806",
+                "/admin/users/%s" % UUID_ADMIN,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"role": "admin", "suspended": True},
             )
@@ -413,17 +420,14 @@ class ListRoute(unittest.TestCase):
     def test_start_with(self):
         with app.test_client() as c:
             response = c.get(
-                "/admin/users?limit=2&start_with=77315957-8ebb-4a44-976c-758dbf28bb9f&order_by=-uuid",
+                "/admin/users?limit=2&start_with=%s&order_by=-uuid" % UUID_USER,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 2)
-            self.assertTrue(
-                response.json["items"][0]["uuid"]
-                == "77315957-8ebb-4a44-976c-758dbf28bb9f"
-            )
+            self.assertTrue(response.json["items"][0]["uuid"] == UUID_USER)
             self.assertTrue(
                 response.json["items"][1]["uuid"] < response.json["items"][0]["uuid"]
             )
