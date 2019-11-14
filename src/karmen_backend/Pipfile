@@ -5,8 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
+pytest-xdist = "*"
 mock = "*"
-pytest-watch = "*"
 pylint = "*"
 black = "==19.*"
 
