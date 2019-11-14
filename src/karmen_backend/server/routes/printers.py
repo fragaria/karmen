@@ -207,10 +207,12 @@ def printer_change_connection(host):
 
 
 @app.route("/printers/<host>/current-job", methods=["POST", "OPTIONS"])
-@jwt_force_password_change
+@jwt_requires_role("admin")
 @cross_origin()
 def printer_modify_job(host):
-    # TODO owner or admin only - also change this to use jobid
+    # TODO make this the last resort for admins
+    # TODO allow users to pause/cancel only their own prints via printjob_id
+    # but that means creating a new tracking of current jobs on each printer
     printer = printers.get_printer(host)
     if printer is None:
         return abort(404)

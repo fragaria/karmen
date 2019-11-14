@@ -7,7 +7,7 @@ from server import app, __version__
 from server.database import gcodes, printjobs
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
-from . import jwt_force_password_change, jwt_requires_role
+from . import jwt_force_password_change
 from flask_jwt_extended import get_current_user
 
 

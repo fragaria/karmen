@@ -417,23 +417,10 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/1.2.3.4/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 204)
-
-    # TODO
-    # @mock.patch(
-    #     "server.clients.octoprint.requests.Session.post", return_value=Response(204)
-    # )
-    # def test_current_job_different_user(self, post_uri_mock):
-    #     with app.test_client() as c:
-    #         response = c.post(
-    #             "/printers/1.2.3.4/current-job",
-    #             headers={"Authorization": "Bearer %s" % TOKEN_USER2},
-    #             json={"action": "cancel"},
-    #         )
-    #         self.assertEqual(response.status_code, 401)
 
     @mock.patch(
         "server.clients.octoprint.requests.Session.post", return_value=Response(204)
@@ -452,7 +439,7 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/1.2.3.4/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 409)
@@ -461,7 +448,7 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/1.2.3.4/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "random"},
             )
             self.assertEqual(response.status_code, 400)
@@ -470,7 +457,7 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/random-unknown-printer/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 404)
@@ -479,7 +466,7 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/1.2.3.4/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -487,7 +474,7 @@ class CurrentJobRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printers/1.2.3.4/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": ""},
             )
             self.assertEqual(response.status_code, 400)

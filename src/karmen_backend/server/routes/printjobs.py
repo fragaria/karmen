@@ -2,10 +2,12 @@ from flask import jsonify, request, abort
 from flask_cors import cross_origin
 from server import app, clients
 from server.database import printjobs, printers, gcodes
+from . import jwt_force_password_change
+from flask_jwt_extended import get_current_user
 
 
 def make_printjob_response(printjob, fields=None):
-    flist = ["id", "started", "gcode_data", "printer_data"]
+    flist = ["id", "started", "gcode_data", "printer_data", "user_uuid"]
     fields = fields if fields else flist
     response = {}
     for field in flist:
@@ -17,6 +19,7 @@ def make_printjob_response(printjob, fields=None):
 
 
 @app.route("/printjobs", methods=["POST", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def printjob_create():
     data = request.json
@@ -42,6 +45,7 @@ def printjob_create():
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode["id"],
             printer_host=printer["host"],
+            user_uuid=get_current_user()["uuid"],
             gcode_data={
                 "id": gcode["id"],
                 "filename": gcode["filename"],
@@ -54,12 +58,16 @@ def printjob_create():
                 "client": printer["client"],
             },
         )
-        return jsonify({"id": printjob_id}), 201
+        return (
+            jsonify({"id": printjob_id, "user_uuid": get_current_user()["uuid"]}),
+            201,
+        )
     except clients.utils.PrinterClientException:
         return abort(409)
 
 
 @app.route("/printjobs", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def printjobs_list():
     printjob_list = []
@@ -115,6 +123,7 @@ def printjobs_list():
 
 
 @app.route("/printjobs/<id>", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def printjob_detail(id):
     printjob = printjobs.get_printjob(id)
@@ -124,10 +133,14 @@ def printjob_detail(id):
 
 
 @app.route("/printjobs/<id>", methods=["DELETE", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def printjob_delete(id):
     printjob = printjobs.get_printjob(id)
     if printjob is None:
         return abort(404)
+    user = get_current_user()
+    if user["uuid"] != printjob["user_uuid"] and user["role"] not in ["admin"]:
+        return abort(401)
     printjobs.delete_printjob(id)
     return "", 204

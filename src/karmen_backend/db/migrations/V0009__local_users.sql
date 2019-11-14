@@ -68,3 +68,17 @@ ALTER TABLE public.gcodes
 
 CREATE INDEX IF NOT EXISTS fki_gcode_user_uuid_fk
     ON public.gcodes(user_uuid);
+
+ALTER TABLE public.printjobs
+    ADD COLUMN IF NOT EXISTS user_uuid uuid;
+
+ALTER TABLE public.printjobs DROP CONSTRAINT IF EXISTS printjob_user_uuid_fk;
+ALTER TABLE public.printjobs
+    ADD CONSTRAINT printjob_user_uuid_fk FOREIGN KEY (user_uuid)
+    REFERENCES public.users (uuid) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+CREATE INDEX IF NOT EXISTS fki_printjob_user_uuid_fk
+    ON public.printjobs(user_uuid);

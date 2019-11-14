@@ -4,6 +4,7 @@ import mock
 from server import app
 from server.database import gcodes, printjobs
 from server.clients.utils import PrinterClientException
+from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2, UUID_USER
 
 
 class ListRoute(unittest.TestCase):
@@ -14,6 +15,7 @@ class ListRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
         self.gcode_id2 = gcodes.add_gcode(
             path="a/b/c",
@@ -21,6 +23,7 @@ class ListRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
         self.printjob_ids = []
         for i in range(0, 3):
@@ -30,6 +33,7 @@ class ListRoute(unittest.TestCase):
                     gcode_data={"id": self.gcode_id},
                     printer_host="172.16.236.11:8080",
                     printer_data={"host": "172.16.236.11:8080"},
+                    user_uuid=UUID_USER,
                 )
             )
         for i in range(0, 3):
@@ -39,25 +43,37 @@ class ListRoute(unittest.TestCase):
                     gcode_data={"id": self.gcode_id2},
                     printer_host="172.16.236.12:8080",
                     printer_data={"host": "172.16.236.12:8080"},
+                    user_uuid=UUID_USER,
                 )
             )
 
-    def test_list(self):
+    def test_list_no_token(self):
         with app.test_client() as c:
             response = c.get("/printjobs")
+            self.assertEqual(response.status_code, 401)
+
+    def test_list(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printjobs", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             if len(response.json["items"]) < 200:
                 self.assertTrue("next" not in response.json)
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("id" in response.json["items"][0])
+            self.assertTrue("user_uuid" in response.json["items"][0])
             self.assertTrue("gcode_data" in response.json["items"][0])
             self.assertTrue("printer_data" in response.json["items"][0])
             self.assertTrue("started" in response.json["items"][0])
 
     def test_order_by(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?order_by=started")
+            response = c.get(
+                "/printjobs?order_by=started",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) >= 2)
@@ -72,7 +88,10 @@ class ListRoute(unittest.TestCase):
 
     def test_limit(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=3&order_by=started&fields=id,started")
+            response = c.get(
+                "/printjobs?limit=3&order_by=started&fields=id,started",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
@@ -84,12 +103,18 @@ class ListRoute(unittest.TestCase):
 
     def test_no_multi_order_by(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=3&order_by=id,started")
+            response = c.get(
+                "/printjobs?limit=3&order_by=id,started",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_start_with(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=2&start_with=2")
+            response = c.get(
+                "/printjobs?limit=2&start_with=2",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
@@ -106,20 +131,29 @@ class ListRoute(unittest.TestCase):
 
     def test_start_with_non_existent(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=3&start_with=99999&order_by=started")
+            response = c.get(
+                "/printjobs?limit=3&start_with=99999&order_by=started",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) == 0)
 
     def test_start_with_order_by(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=3&start_with=1&order_by=-id")
+            response = c.get(
+                "/printjobs?limit=3&start_with=1&order_by=-id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" not in response.json)
             self.assertTrue(len(response.json["items"]) == 1)
 
-            response = c.get("/printjobs?limit=3&start_with=1&order_by=id")
+            response = c.get(
+                "/printjobs?limit=3&start_with=1&order_by=id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
@@ -133,31 +167,46 @@ class ListRoute(unittest.TestCase):
 
     def test_ignore_start_with_str(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=3&start_with=asdfasdf")
+            response = c.get(
+                "/printjobs?limit=3&start_with=asdfasdf",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_ignore_negative_limit(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=-3")
+            response = c.get(
+                "/printjobs?limit=-3",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_start_with_negative(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=3&start_with=-1")
+            response = c.get(
+                "/printjobs?limit=3&start_with=-1",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_limit_str(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?limit=asdfasdf&start_with=5")
+            response = c.get(
+                "/printjobs?limit=asdfasdf&start_with=5",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_filter_absent(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?filter=printer_host:completely-absent%printer")
+            response = c.get(
+                "/printjobs?filter=printer_host:completely-absent%printer",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) == 0)
@@ -165,13 +214,17 @@ class ListRoute(unittest.TestCase):
     def test_filter(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_host:172.16.236.12:8080&order_by=id"
+                "/printjobs?filter=printer_host:172.16.236.12:8080&order_by=id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             for printer in response.json["items"]:
                 self.assertTrue(printer["printer_data"]["host"], "172.16.236.12:8080")
-            response = c.get("/printjobs?filter=gcode_id:3:8080&order_by=id")
+            response = c.get(
+                "/printjobs?filter=gcode_id:3:8080&order_by=id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             for printer in response.json["items"]:
@@ -180,13 +233,18 @@ class ListRoute(unittest.TestCase):
     def test_filter_next(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_host:172.16.236.12:8080&limit=10&order_by=-id"
+                "/printjobs?filter=printer_host:172.16.236.12:8080&limit=10&order_by=-id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 10)
-            response2 = c.get(response.json["next"])
+            response2 = c.get(
+                response.json["next"],
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response2.status_code, 200)
             self.assertTrue("items" in response2.json)
             self.assertTrue(
                 response.json["items"][0]["id"] > response2.json["items"][0]["id"]
@@ -194,14 +252,20 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_ignore_bad_column(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?filter=random:file1")
+            response = c.get(
+                "/printjobs?filter=random:file1",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) >= 1)
 
     def test_filter_ignore_bad_format(self):
         with app.test_client() as c:
-            response = c.get("/printjobs?filter=file1")
+            response = c.get(
+                "/printjobs?filter=file1",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) >= 1)
@@ -215,17 +279,27 @@ class DetailRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
         self.printjob_id = printjobs.add_printjob(
             gcode_id=self.gcode_id,
             gcode_data={"id": self.gcode_id},
             printer_host="172.16.236.11:8080",
             printer_data={"host": "172.16.236.11:8080"},
+            user_uuid=UUID_USER,
         )
+
+    def test_detail_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/printjobs/%s" % self.printjob_id)
+            self.assertEqual(response.status_code, 401)
 
     def test_detail(self):
         with app.test_client() as c:
-            response = c.get("/printjobs/%s" % self.printjob_id)
+            response = c.get(
+                "/printjobs/%s" % self.printjob_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("id" in response.json)
             self.assertEqual(response.json["id"], self.printjob_id)
@@ -234,7 +308,9 @@ class DetailRoute(unittest.TestCase):
 
     def test_404(self):
         with app.test_client() as c:
-            response = c.get("/printjobs/172.16")
+            response = c.get(
+                "/printjobs/172.16", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 404)
 
 
@@ -246,20 +322,27 @@ class CreateRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
 
-    @mock.patch("server.routes.printjobs.clients.get_printer_instance")
+    @mock.patch(
+        "server.routes.printjobs.clients.get_printer_instance",
+        headers={"Authorization": "Bearer %s" % TOKEN_USER},
+    )
     def test_create(self, mock_print_inst):
         mock_print_inst.return_value.upload_and_start_job.return_value = True
         with app.test_client() as c:
             response = c.post(
                 "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"printer": "172.16.236.11:8080", "gcode": self.gcode_id},
             )
             self.assertEqual(response.status_code, 201)
+            self.assertEqual(response.json["user_uuid"], UUID_USER)
             pid = response.json["id"]
             pj = printjobs.get_printjob(pid)
             self.assertEqual(pj["gcode_id"], self.gcode_id)
+            self.assertEqual(pj["user_uuid"], UUID_USER)
             self.assertEqual(pj["printer_host"], "172.16.236.11:8080")
             self.assertFalse(pj["printer_data"] is None)
             self.assertFalse(pj["gcode_data"] is None)
@@ -282,36 +365,51 @@ class CreateRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"printer": "172.16.236.11:8080", "gcode": self.gcode_id},
             )
             self.assertEqual(response.status_code, 409)
 
     def test_empty_req(self):
         with app.test_client() as c:
-            response = c.post("/printjobs")
+            response = c.post(
+                "/printjobs", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_gcode(self):
         with app.test_client() as c:
-            response = c.post("/printjobs", json={"printer": "172.16.236.11:8080"})
+            response = c.post(
+                "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"printer": "172.16.236.11:8080"},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_printer(self):
         with app.test_client() as c:
-            response = c.post("/printjobs", json={"gcode": self.gcode_id})
+            response = c.post(
+                "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"gcode": self.gcode_id},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_bad_printer(self):
         with app.test_client() as c:
             response = c.post(
-                "/printjobs", json={"gcode": self.gcode_id, "printer": "123"}
+                "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"gcode": self.gcode_id, "printer": "123"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_bad_gcode(self):
         with app.test_client() as c:
             response = c.post(
-                "/printjobs", json={"gcode": -3, "printer": "172.16.236.11:8080"}
+                "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"gcode": -3, "printer": "172.16.236.11:8080"},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -319,12 +417,33 @@ class CreateRoute(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/printjobs",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"gcode": self.gcode_id, "printer": "172.16.236.11:8080"},
             )
             self.assertEqual(response.status_code, 500)
 
 
 class DeleteRoute(unittest.TestCase):
+    def test_delete_no_token(self):
+        gcode_id = gcodes.add_gcode(
+            path="a/b/c",
+            filename="file",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+        )
+        printjob_id = printjobs.add_printjob(
+            gcode_id=gcode_id,
+            gcode_data={"id": gcode_id},
+            printer_host="172.16.236.11:8080",
+            printer_data={"host": "172.16.236.11:8080"},
+            user_uuid=UUID_USER,
+        )
+        with app.test_client() as c:
+            response = c.delete("/printjobs/%s" % printjob_id)
+            self.assertEqual(response.status_code, 401)
+
     def test_delete(self):
         gcode_id = gcodes.add_gcode(
             path="a/b/c",
@@ -332,19 +451,73 @@ class DeleteRoute(unittest.TestCase):
             display="file-display",
             absolute_path="/ab/a/b/c",
             size=123,
+            user_uuid=UUID_USER,
         )
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
             printer_host="172.16.236.11:8080",
             printer_data={"host": "172.16.236.11:8080"},
+            user_uuid=UUID_USER,
         )
         with app.test_client() as c:
-            response = c.delete("/printjobs/%s" % printjob_id)
+            response = c.delete(
+                "/printjobs/%s" % printjob_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 204)
         self.assertEqual(printjobs.get_printjob(printjob_id), None)
 
+    def test_delete_admin(self):
+        gcode_id = gcodes.add_gcode(
+            path="a/b/c",
+            filename="file",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+        )
+        printjob_id = printjobs.add_printjob(
+            gcode_id=gcode_id,
+            gcode_data={"id": gcode_id},
+            printer_host="172.16.236.11:8080",
+            printer_data={"host": "172.16.236.11:8080"},
+            user_uuid=UUID_USER,
+        )
+        with app.test_client() as c:
+            response = c.delete(
+                "/printjobs/%s" % printjob_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 204)
+        self.assertEqual(printjobs.get_printjob(printjob_id), None)
+
+    def test_delete_bad_user(self):
+        gcode_id = gcodes.add_gcode(
+            path="a/b/c",
+            filename="file",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+        )
+        printjob_id = printjobs.add_printjob(
+            gcode_id=gcode_id,
+            gcode_data={"id": gcode_id},
+            printer_host="172.16.236.11:8080",
+            printer_data={"host": "172.16.236.11:8080"},
+            user_uuid=UUID_USER,
+        )
+        with app.test_client() as c:
+            response = c.delete(
+                "/printjobs/%s" % printjob_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER2},
+            )
+            self.assertEqual(response.status_code, 401)
+
     def test_delete_unknown(self):
         with app.test_client() as c:
-            response = c.delete("/printjobs/172.16")
+            response = c.delete(
+                "/printjobs/172.16", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 404)
