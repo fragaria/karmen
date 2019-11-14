@@ -7,6 +7,7 @@ import mock
 
 from server import app
 from server.database import gcodes, printjobs
+from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2
 
 
 class ListRoute(unittest.TestCase):
@@ -25,7 +26,9 @@ class ListRoute(unittest.TestCase):
 
     def test_list(self):
         with app.test_client() as c:
-            response = c.get("/gcodes")
+            response = c.get(
+                "/gcodes", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             if len(response.json["items"]) < 200:
@@ -41,7 +44,10 @@ class ListRoute(unittest.TestCase):
 
     def test_order_by(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?order_by=filename")
+            response = c.get(
+                "/gcodes?order_by=filename",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) >= 2)
@@ -56,7 +62,10 @@ class ListRoute(unittest.TestCase):
 
     def test_limit(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&order_by=filename&fields=id,filename")
+            response = c.get(
+                "/gcodes?limit=3&order_by=filename&fields=id,filename",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
@@ -68,12 +77,18 @@ class ListRoute(unittest.TestCase):
 
     def test_no_multi_order_by(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&order_by=id,filename")
+            response = c.get(
+                "/gcodes?limit=3&order_by=id,filename",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_start_with(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&start_with=2")
+            response = c.get(
+                "/gcodes?limit=3&start_with=2",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
@@ -93,21 +108,30 @@ class ListRoute(unittest.TestCase):
 
     def test_start_with_non_existent(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&start_with=99999&order_by=uploaded")
+            response = c.get(
+                "/gcodes?limit=3&start_with=99999&order_by=uploaded",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) == 0)
 
     def test_start_with_order_by(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&start_with=1&order_by=-id")
+            response = c.get(
+                "/gcodes?limit=3&start_with=1&order_by=-id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" not in response.json)
             self.assertTrue(len(response.json["items"]) == 1)
             self.assertTrue(response.json["items"][0]["id"] == 1)
 
-            response = c.get("/gcodes?limit=3&start_with=1&order_by=id")
+            response = c.get(
+                "/gcodes?limit=3&start_with=1&order_by=id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
@@ -122,25 +146,36 @@ class ListRoute(unittest.TestCase):
 
     def test_ignore_start_with_str(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&start_with=asdfasdf")
+            response = c.get(
+                "/gcodes?limit=3&start_with=asdfasdf",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_ignore_negative_limit(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=-3")
+            response = c.get(
+                "/gcodes?limit=-3", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_start_with_negative(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=3&start_with=-1")
+            response = c.get(
+                "/gcodes?limit=3&start_with=-1",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_limit_str(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?limit=asdfasdf&start_with=5")
+            response = c.get(
+                "/gcodes?limit=asdfasdf&start_with=5",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
@@ -163,7 +198,10 @@ class ListRoute(unittest.TestCase):
                     size=123,
                 ),
             ]
-            response = c.get("/gcodes?filter=filename:%s" % rand)
+            response = c.get(
+                "/gcodes?filter=filename:%s" % rand,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) == 2)
@@ -172,7 +210,10 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_absent(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?filter=filename:completely-absent%20filename")
+            response = c.get(
+                "/gcodes?filter=filename:completely-absent%20filename",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) == 0)
@@ -196,13 +237,17 @@ class ListRoute(unittest.TestCase):
                 ),
             ]
             response = c.get(
-                "/gcodes?filter=filename:unique-FILENAME with space&limit=1&order_by=-id"
+                "/gcodes?filter=filename:unique-FILENAME with space&limit=1&order_by=-id",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 1)
-            response2 = c.get(response.json["next"])
+            response2 = c.get(
+                response.json["next"],
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertTrue("items" in response2.json)
             self.assertTrue(
                 response.json["items"][0]["id"] > response2.json["items"][0]["id"]
@@ -212,17 +257,28 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_ignore_bad_column(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?filter=random:file1")
+            response = c.get(
+                "/gcodes?filter=random:file1",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) >= 1)
 
     def test_filter_ignore_bad_format(self):
         with app.test_client() as c:
-            response = c.get("/gcodes?filter=file1")
+            response = c.get(
+                "/gcodes?filter=file1",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue(len(response.json["items"]) >= 1)
+
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/gcodes")
+            self.assertEqual(response.status_code, 401)
 
 
 class DetailRoute(unittest.TestCase):
@@ -237,18 +293,34 @@ class DetailRoute(unittest.TestCase):
 
     def test_detail(self):
         with app.test_client() as c:
-            response = c.get("/gcodes/%s" % self.gcode_id)
+            response = c.get(
+                "/gcodes/%s" % self.gcode_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("id" in response.json)
             self.assertEqual(response.json["id"], self.gcode_id)
 
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/gcodes/%s" % self.gcode_id)
+            self.assertEqual(response.status_code, 401)
+
     def test_404(self):
         with app.test_client() as c:
-            response = c.get("/gcodes/172.16")
+            response = c.get(
+                "/gcodes/172.16", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 404)
 
 
 class CreateRoute(unittest.TestCase):
+    def test_upload_no_token(self):
+        with app.test_client() as c:
+            data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
+            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            self.assertEqual(response.status_code, 401)
+
     @mock.patch("server.routes.gcodes.analyze_gcode.delay")
     @mock.patch(
         "server.routes.gcodes.files.save",
@@ -263,7 +335,12 @@ class CreateRoute(unittest.TestCase):
     def test_upload(self, mocked_save, mocked_delay):
         with app.test_client() as c:
             data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
-            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            response = c.post(
+                "/gcodes",
+                data=data,
+                content_type="multipart/form-data",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
             self.assertEqual(args[1], "/")
@@ -285,7 +362,12 @@ class CreateRoute(unittest.TestCase):
             data = dict(
                 file=(io.BytesIO(b"my file contents"), "some.gcode"), path="/a/b"
             )
-            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            response = c.post(
+                "/gcodes",
+                data=data,
+                content_type="multipart/form-data",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
             self.assertEqual(args[1], "/a/b")
@@ -302,24 +384,41 @@ class CreateRoute(unittest.TestCase):
         mocked_save.side_effect = IOError("Disk problem")
         with app.test_client() as c:
             data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
-            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            response = c.post(
+                "/gcodes",
+                data=data,
+                content_type="multipart/form-data",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 500)
 
     def test_upload_no_file(self):
         with app.test_client() as c:
-            response = c.post("/gcodes")
+            response = c.post(
+                "/gcodes", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_upload_empty_file(self):
         with app.test_client() as c:
             data = dict(file=(io.BytesIO(b"my file contents"), ""))
-            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            response = c.post(
+                "/gcodes",
+                data=data,
+                content_type="multipart/form-data",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_upload_not_gcode(self):
         with app.test_client() as c:
             data = dict(file=(io.BytesIO(b"my file contents"), "some.txt"))
-            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            response = c.post(
+                "/gcodes",
+                data=data,
+                content_type="multipart/form-data",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 415)
 
 
@@ -345,7 +444,10 @@ class DeleteRoute(unittest.TestCase):
             printer_data={"host": "172.16.236.11:8080"},
         )
         with app.test_client() as c:
-            response = c.delete("/gcodes/%s" % gcode_id)
+            response = c.delete(
+                "/gcodes/%s" % gcode_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 204)
         self.assertEqual(gcodes.get_gcode(gcode_id), None)
         pjs = [pj for pj in printjobs.get_printjobs() if pj["gcode_id"] == gcode_id]
@@ -353,13 +455,22 @@ class DeleteRoute(unittest.TestCase):
         for pj in pjs:
             self.assertFalse(pj["gcode_data"]["available"])
 
+    # TODO test delete_no_token, test_delete_bad_user, test_delete_admin
+
     def test_delete_unknown(self):
         with app.test_client() as c:
-            response = c.delete("/gcodes/172.16")
+            response = c.delete(
+                "/gcodes/172.16", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+            )
             self.assertEqual(response.status_code, 404)
 
 
 class GetDataRoute(unittest.TestCase):
+    def test_download_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/gcodes/12/data")
+            self.assertEqual(response.status_code, 401)
+
     def test_download(self):
         mock_file = tempfile.NamedTemporaryFile(delete=False)
         gcode_id = gcodes.add_gcode(
@@ -370,14 +481,20 @@ class GetDataRoute(unittest.TestCase):
             size=123,
         )
         with app.test_client() as c:
-            response = c.get("/gcodes/%s/data" % gcode_id)
+            response = c.get(
+                "/gcodes/%s/data" % gcode_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 200)
         mock_file.close()
         os.remove(mock_file.name)
 
     def test_get_unknown(self):
         with app.test_client() as c:
-            response = c.get("/gcodes/172.16/data")
+            response = c.get(
+                "/gcodes/172.16/data",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 404)
 
     def test_get_not_on_disk(self):
@@ -389,5 +506,8 @@ class GetDataRoute(unittest.TestCase):
             size=123,
         )
         with app.test_client() as c:
-            response = c.get("/gcodes/%s/data" % gcode_id)
+            response = c.get(
+                "/gcodes/%s/data" % gcode_id,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
             self.assertEqual(response.status_code, 404)

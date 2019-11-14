@@ -7,6 +7,7 @@ from server import app, __version__
 from server.database import gcodes, printjobs
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
+from . import jwt_force_password_change, jwt_requires_role
 
 
 def make_gcode_response(gcode, fields=None):
@@ -20,6 +21,7 @@ def make_gcode_response(gcode, fields=None):
         "size",
         "data",
         "analysis",
+        "user_uuid",
     ]
     fields = fields if fields else flist
     response = {}
@@ -35,6 +37,7 @@ def make_gcode_response(gcode, fields=None):
 
 
 @app.route("/gcodes", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def gcodes_list():
     gcode_list = []
@@ -88,6 +91,7 @@ def gcodes_list():
 
 
 @app.route("/gcodes/<id>", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def gcode_detail(id):
     gcode = gcodes.get_gcode(id)
@@ -97,6 +101,7 @@ def gcode_detail(id):
 
 
 @app.route("/gcodes", methods=["POST", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def gcode_create():
     if "file" not in request.files:
@@ -125,6 +130,7 @@ def gcode_create():
             make_gcode_response(
                 {
                     "id": gcode_id,
+                    "user_uuid": None,  # TODO
                     "path": saved["path"],
                     "filename": saved["filename"],
                     "display": saved["display"],
@@ -139,6 +145,7 @@ def gcode_create():
 
 
 @app.route("/gcodes/<id>/data", methods=["GET", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def gcode_file(id):
     gcode = gcodes.get_gcode(id)
@@ -155,8 +162,10 @@ def gcode_file(id):
 
 
 @app.route("/gcodes/<id>", methods=["DELETE", "OPTIONS"])
+@jwt_force_password_change
 @cross_origin()
 def gcode_delete(id):
+    # TODO only owner or admin
     gcode = gcodes.get_gcode(id)
     if gcode is None:
         return abort(404)
@@ -170,6 +179,7 @@ def gcode_delete(id):
             gcode["id"],
             {
                 "id": gcode["id"],
+                "user_uuid": gcode["user_uuid"],
                 "filename": gcode["filename"],
                 "size": gcode["size"],
                 "available": False,

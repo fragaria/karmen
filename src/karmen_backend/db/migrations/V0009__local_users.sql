@@ -53,3 +53,18 @@ TABLESPACE pg_default;
 
 ALTER TABLE public.local_users
     OWNER to print3d;
+
+
+ALTER TABLE public.gcodes
+    ADD COLUMN IF NOT EXISTS user_uuid uuid;
+
+ALTER TABLE public.gcodes DROP CONSTRAINT IF EXISTS gcode_user_uuid_fk;
+ALTER TABLE public.gcodes
+    ADD CONSTRAINT gcode_user_uuid_fk FOREIGN KEY (user_uuid)
+    REFERENCES public.users (uuid) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+CREATE INDEX IF NOT EXISTS fki_gcode_user_uuid_fk
+    ON public.gcodes(user_uuid);
