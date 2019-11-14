@@ -82,3 +82,21 @@ ALTER TABLE public.printjobs
 
 CREATE INDEX IF NOT EXISTS fki_printjob_user_uuid_fk
     ON public.printjobs(user_uuid);
+
+CREATE TABLE public.api_tokens
+(
+    uuid uuid NOT NULL,
+    jti uuid NOT NULL,
+    name character varying(128) COLLATE pg_catalog."default" NOT NULL,
+    created timestamp with time zone NOT NULL DEFAULT now(),
+    revoked boolean NOT NULL DEFAULT FALSE,
+    CONSTRAINT api_tokens_pkey PRIMARY KEY (jti),
+    CONSTRAINT api_tokens_uuid FOREIGN KEY (uuid)
+        REFERENCES public.users (uuid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;

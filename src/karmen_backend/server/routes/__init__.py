@@ -3,7 +3,7 @@ from flask import jsonify, request, abort
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_current_user
 from server import app, jwt, __version__
-from server.database import users as db_users, local_users as db_local_users
+from server.database import users as db_users, local_users as db_local_users, api_tokens
 
 
 def jwt_requires_role(required_role):
@@ -49,9 +49,20 @@ def jwt_force_password_change(func):
 @jwt.user_claims_loader
 def add_claims_to_access_token(user):
     return {
-        "role": user["role"],
+        "role": user.get("role", "user"),
         "force_pwd_change": user.get("force_pwd_change", False),
     }
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_revoked(decrypted_token):
+    # check only tokens without expiration, this can be extended in
+    # the future in exchange for a decreased performance
+    if "exp" not in decrypted_token:
+        token = api_tokens.get_token(decrypted_token["jti"])
+        if token and token["revoked"]:
+            return True
+    return False
 
 
 @jwt.user_identity_loader

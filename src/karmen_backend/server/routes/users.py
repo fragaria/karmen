@@ -9,9 +9,10 @@ from flask_jwt_extended import (
     jwt_refresh_token_required,
     get_jwt_identity,
     get_current_user,
+    decode_token,
 )
 from server import app
-from server.database import users, local_users
+from server.database import users, local_users, api_tokens
 
 
 def authenticate_base(include_refresh_token):
@@ -111,3 +112,61 @@ def change_password(uuid):
     )
 
     return "", 200
+
+
+@app.route("/users/<uuid>/tokens", methods=["GET", "OPTIONS"])
+@cross_origin()
+@jwt_required
+@fresh_jwt_required
+def create_api_token(uuid):
+    if get_jwt_identity() != uuid:
+        return abort(401)
+    items = []
+    for token in api_tokens.get_tokens_for_uuid(uuid, revoked=False):
+        items.append(
+            {
+                "jti": token["jti"],
+                "name": token["name"],
+                "created": token["created"].isoformat(),
+                "revoked": token["revoked"],
+            }
+        )
+    return jsonify({"items": items}), 200
+
+
+@app.route("/users/<uuid>/tokens", methods=["POST", "OPTIONS"])
+@cross_origin()
+@jwt_required
+@fresh_jwt_required
+def list_api_tokens(uuid):
+    if get_jwt_identity() != uuid:
+        return abort(401)
+    data = request.json
+    if not data:
+        return abort(400)
+    name = data.get("name", None)
+    if not name:
+        return abort(400)
+
+    user = get_current_user()
+    if not user:
+        return abort(401)
+    token = create_access_token(identity=user, expires_delta=False)
+    jti = decode_token(token)["jti"]
+    api_tokens.add_token(uuid=user["uuid"], jti=jti, name=name)
+    response = {"access_token": token, "name": name, "jti": jti}
+    return jsonify(response), 201
+
+
+@app.route("/users/<uuid>/tokens/<jti>", methods=["DELETE", "OPTIONS"])
+@cross_origin()
+@jwt_required
+@fresh_jwt_required
+def revoke_api_token(uuid, jti):
+    if get_jwt_identity() != uuid:
+        return abort(401)
+    token = api_tokens.get_token(jti)
+    if token is None or token["revoked"]:
+        return abort(404)
+    api_tokens.revoke_token(jti)
+    return "", 204

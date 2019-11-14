@@ -36,6 +36,8 @@ app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
 CORS(app)
 app.config["JWT_SECRET_KEY"] = app.config["SECRET_KEY"]
 app.config["JWT_ERROR_MESSAGE_KEY"] = "message"
+app.config["JWT_BLACKLIST_ENABLED"] = True
+app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access"]
 
 jwt = JWTManager(app)
 celery = setup_celery(app)

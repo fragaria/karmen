@@ -7,10 +7,12 @@ from ..utils import (
     TOKEN_ADMIN_EXPIRED,
     TOKEN_ADMIN_NONFRESH,
     TOKEN_ADMIN,
+    TOKEN_USER,
     TOKEN_USER_REFRESH,
     UUID_ADMIN,
     UUID_USER,
 )
+from server.database import api_tokens
 
 
 def get_token_data(jwtoken):
@@ -64,6 +66,7 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertEqual(data["type"], "access")
             self.assertEqual(data["identity"], UUID_ADMIN)
             self.assertTrue("user_claims" in data)
+            self.assertTrue("exp" in data)
             self.assertTrue("role" in data["user_claims"])
             self.assertTrue("force_pwd_change" in data["user_claims"])
 
@@ -322,3 +325,143 @@ class ChangePasswordRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(change_back.status_code, 200)
+
+
+class ListApiTokensRoute(unittest.TestCase):
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/users/%s/tokens" % UUID_USER)
+            self.assertEqual(response.status_code, 401)
+
+    def test_bad_token(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_returns_token_list(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"name": "my-pretty-token"},
+            )
+            response = c.get(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            for token in response.json["items"]:
+                db_token = api_tokens.get_token(token["jti"])
+                self.assertEqual(db_token["uuid"], UUID_USER)
+                self.assertFalse(db_token["revoked"])
+
+
+class CreateApiTokenRoute(unittest.TestCase):
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.post("/users/%s/tokens" % UUID_USER)
+            self.assertEqual(response.status_code, 401)
+
+    def test_bad_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_missing_name(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_returns_eternal_access_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"name": "my-pretty-token"},
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertTrue("access_token" in response.json)
+            self.assertTrue("name" in response.json)
+            self.assertTrue("jti" in response.json)
+            self.assertTrue("refresh_token" not in response.json)
+            data = get_token_data(response.json["access_token"])
+            self.assertEqual(data["fresh"], False)
+            self.assertEqual(data["type"], "access")
+            self.assertEqual(data["identity"], UUID_USER)
+            self.assertTrue("exp" not in data)
+            self.assertTrue("user_claims" in data)
+            self.assertTrue("role" in data["user_claims"])
+            self.assertTrue("force_pwd_change" in data["user_claims"])
+            self.assertEqual(data["user_claims"]["role"], "user")
+            self.assertEqual(data["user_claims"]["force_pwd_change"], False)
+            token = api_tokens.get_token(data["jti"])
+            self.assertTrue(token is not None)
+            self.assertEqual(token["uuid"], UUID_USER)
+
+
+class RevokeApiTokenRoute(unittest.TestCase):
+    def setUp(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/%s/tokens" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"name": "my-pretty-token"},
+            )
+            self.token = response.json["access_token"]
+            self.token_jti = get_token_data(self.token)["jti"]
+
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.delete("/users/%s/tokens/%s" % (UUID_USER, self.token_jti))
+            self.assertEqual(response.status_code, 401)
+
+    def test_bad_token(self):
+        with app.test_client() as c:
+            response = c.delete(
+                "/users/%s/tokens/%s" % (UUID_USER, self.token_jti),
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_bad_jti(self):
+        with app.test_client() as c:
+            response = c.delete(
+                "/users/%s/tokens/%s" % (UUID_USER, UUID_USER),
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    def test_revokes_token_once(self):
+        with app.test_client() as c:
+            db_token = api_tokens.get_token(self.token_jti)
+            self.assertFalse(db_token["revoked"])
+            response = c.get(
+                "/settings", headers={"Authorization": "Bearer %s" % self.token}
+            )
+            self.assertEqual(response.status_code, 200)
+            response = c.delete(
+                "/users/%s/tokens/%s" % (UUID_USER, self.token_jti),
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 204)
+            db_token = api_tokens.get_token(self.token_jti)
+            self.assertTrue(db_token["revoked"])
+            response = c.delete(
+                "/users/%s/tokens/%s" % (UUID_USER, self.token_jti),
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 404)
+            response = c.get(
+                "/settings", headers={"Authorization": "Bearer %s" % self.token}
+            )
+            self.assertEqual(response.status_code, 401)
