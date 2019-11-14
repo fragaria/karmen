@@ -322,26 +322,6 @@ class UpdateUserRoute(unittest.TestCase):
 
 
 class ListRoute(unittest.TestCase):
-    def setUp(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            TOKEN_ADMIN = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate-refresh",
-                headers={
-                    "Authorization": "Bearer %s" % (response.json["refresh_token"],)
-                },
-            )
-            TOKEN_ADMIN_NONFRESH = response.json["access_token"]
-            response = c.post(
-                "/users/authenticate",
-                json={"username": "test-user", "password": "user-password"},
-            )
-            TOKEN_USER = response.json["access_token"]
-
     def test_no_token(self):
         with app.test_client() as c:
             response = c.get("/admin/users")
