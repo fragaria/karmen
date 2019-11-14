@@ -356,7 +356,7 @@ class ListApiTokensRoute(unittest.TestCase):
             self.assertTrue("items" in response.json)
             for token in response.json["items"]:
                 db_token = api_tokens.get_token(token["jti"])
-                self.assertEqual(db_token["uuid"], UUID_USER)
+                self.assertEqual(db_token["user_uuid"], UUID_USER)
                 self.assertFalse(db_token["revoked"])
 
 
@@ -406,7 +406,7 @@ class CreateApiTokenRoute(unittest.TestCase):
             self.assertEqual(data["user_claims"]["force_pwd_change"], False)
             token = api_tokens.get_token(data["jti"])
             self.assertTrue(token is not None)
-            self.assertEqual(token["uuid"], UUID_USER)
+            self.assertEqual(token["user_uuid"], UUID_USER)
 
 
 class RevokeApiTokenRoute(unittest.TestCase):

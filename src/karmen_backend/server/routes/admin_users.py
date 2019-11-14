@@ -34,7 +34,7 @@ def create_user():
     new_uuid = uuid.uuid4()
     users.add_user(uuid=new_uuid, username=username, role=role, providers=["local"])
     local_users.add_local_user(
-        uuid=new_uuid, pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=True
+        user_uuid=new_uuid, pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=True
     )
     return (
         jsonify(

@@ -37,11 +37,11 @@ ALTER TABLE public.users
 
 CREATE TABLE public.local_users
 (
-    uuid uuid NOT NULL,
+    user_uuid uuid NOT NULL,
     pwd_hash character(60) COLLATE pg_catalog."default" NOT NULL,
     force_pwd_change boolean NOT NULL DEFAULT FALSE,
-    CONSTRAINT local_users_pkey PRIMARY KEY (uuid),
-    CONSTRAINT local_user_uuid FOREIGN KEY (uuid)
+    CONSTRAINT local_users_pkey PRIMARY KEY (user_uuid),
+    CONSTRAINT local_user_uuid FOREIGN KEY (user_uuid)
         REFERENCES public.users (uuid) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
@@ -85,13 +85,13 @@ CREATE INDEX IF NOT EXISTS fki_printjob_user_uuid_fk
 
 CREATE TABLE public.api_tokens
 (
-    uuid uuid NOT NULL,
+    user_uuid uuid NOT NULL,
     jti uuid NOT NULL,
     name character varying(128) COLLATE pg_catalog."default" NOT NULL,
     created timestamp with time zone NOT NULL DEFAULT now(),
     revoked boolean NOT NULL DEFAULT FALSE,
     CONSTRAINT api_tokens_pkey PRIMARY KEY (jti),
-    CONSTRAINT api_tokens_uuid FOREIGN KEY (uuid)
+    CONSTRAINT api_tokens_uuid FOREIGN KEY (user_uuid)
         REFERENCES public.users (uuid) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE

@@ -108,7 +108,7 @@ def change_password(uuid):
 
     pwd_hash = bcrypt.hashpw(new_password.encode("utf8"), bcrypt.gensalt())
     local_users.update_local_user(
-        pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=False, uuid=uuid
+        pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=False, user_uuid=uuid
     )
 
     return "", 200
@@ -122,7 +122,7 @@ def create_api_token(uuid):
     if get_jwt_identity() != uuid:
         return abort(401)
     items = []
-    for token in api_tokens.get_tokens_for_uuid(uuid, revoked=False):
+    for token in api_tokens.get_tokens_for_user_uuid(uuid, revoked=False):
         items.append(
             {
                 "jti": token["jti"],
@@ -153,7 +153,7 @@ def list_api_tokens(uuid):
         return abort(401)
     token = create_access_token(identity=user, expires_delta=False)
     jti = decode_token(token)["jti"]
-    api_tokens.add_token(uuid=user["uuid"], jti=jti, name=name)
+    api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)
     response = {"access_token": token, "name": name, "jti": jti}
     return jsonify(response), 201
 

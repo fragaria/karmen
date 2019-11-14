@@ -8,8 +8,8 @@ def add_token(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO api_tokens (uuid, jti, name) values (%s, %s, %s)",
-            (kwargs["uuid"], kwargs["jti"], kwargs["name"]),
+            "INSERT INTO api_tokens (user_uuid, jti, name) values (%s, %s, %s)",
+            (kwargs["user_uuid"], kwargs["jti"], kwargs["name"]),
         )
         cursor.close()
 
@@ -18,7 +18,7 @@ def get_token(jti):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT uuid, jti, created, name, revoked from api_tokens where jti = %s",
+            "SELECT user_uuid, jti, created, name, revoked from api_tokens where jti = %s",
             (jti,),
         )
         data = cursor.fetchone()
@@ -33,17 +33,17 @@ def revoke_token(jti):
         cursor.close()
 
 
-def get_tokens_for_uuid(uuid, revoked=None):
+def get_tokens_for_user_uuid(user_uuid, revoked=None):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         statement = sql.SQL(
-            "SELECT uuid, jti, created, name, revoked from api_tokens where uuid = {}"
+            "SELECT user_uuid, jti, created, name, revoked from api_tokens where user_uuid = {}"
         ).format(sql.Placeholder())
         if revoked is not None:
             statement = sql.SQL(" ").join(
                 [statement, sql.SQL("AND revoked = {}").format(sql.Literal(revoked))]
             )
-        cursor.execute(statement, (uuid,))
+        cursor.execute(statement, (user_uuid,))
         data = cursor.fetchall()
         cursor.close()
         return data
