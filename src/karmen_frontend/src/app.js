@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 import Menu from './components/menu';
 import Heartbeat from './components/heartbeat';
+import LoginGateway from './components/login-gateway';
 
 import PrinterList from './routes/printer-list';
 import GcodeList from './routes/gcode-list'
@@ -18,6 +19,7 @@ function App() {
       <BrowserRouter>
         <Menu />
         <main>
+          <LoginGateway>
           <Switch>
             <Route path="/add-printer" exact component={AddPrinter} />
             <Route path="/add-gcode" exact component={AddGcode} />
@@ -27,6 +29,7 @@ function App() {
             <Route path="/printers/:host" exact component={PrinterDetail} />
             <Route path="/" exact component={PrinterList} />
           </Switch>
+          </LoginGateway>
           <Heartbeat />
         </main>
       </BrowserRouter>

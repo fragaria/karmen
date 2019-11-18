@@ -1,44 +1,45 @@
 {
   "browserslist": {
     "development": [
-      "last 1 chrome version", 
-      "last 1 firefox version", 
+      "last 1 chrome version",
+      "last 1 firefox version",
       "last 1 safari version"
-    ], 
+    ],
     "production": [
-      ">0.2%", 
-      "not dead", 
+      ">0.2%",
+      "not dead",
       "not op_mini all"
     ]
-  }, 
+  },
   "dependencies": {
-    "dayjs": "^1.8.16", 
-    "react": "^16.9.0", 
-    "react-dom": "^16.9.0", 
-    "react-router-dom": "^5.0.1", 
+    "dayjs": "^1.8.16",
+    "jwt-decode": "^2.2.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1"
-  }, 
-  "description": "A common interface for multiple 3D printers", 
+  },
+  "description": "A common interface for multiple 3D printers",
   "devDependencies": {
-    "eslint": "^6.3.0", 
+    "eslint": "^6.3.0",
     "node-sass": "^4.12.0"
-  }, 
+  },
   "eslintConfig": {
     "extends": "react-app"
-  }, 
-  "license": "AGPL-3.0-only", 
-  "name": "karmen", 
+  },
+  "license": "AGPL-3.0-only",
+  "name": "karmen",
   "repository": {
-    "type": "git", 
+    "type": "git",
     "url": "https://github.com/fragaria/karmen"
-  }, 
+  },
   "scripts": {
-    "build": "react-scripts build", 
-    "build-env-file": "node ./scripts/build-env-file.js", 
-    "eject": "react-scripts eject", 
-    "lint": "eslint src --ext jsx,js", 
-    "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start", 
+    "build": "react-scripts build",
+    "build-env-file": "node ./scripts/build-env-file.js",
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext jsx,js",
+    "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start",
     "test": "react-scripts test"
-  }, 
+  },
   "version": "0.0.13"
 }

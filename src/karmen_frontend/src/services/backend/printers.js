@@ -1,3 +1,5 @@
+import { getHeaders } from './utils';
+
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getPrinters = (fields = []) => {
@@ -5,13 +7,15 @@ export const getPrinters = (fields = []) => {
   if (fields && fields.length) {
     uri += `?fields=${fields.join(',')}`;
   }
-  return fetch(uri)
+  return fetch(uri, {
+      headers: getHeaders()
+    })
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printers: ${response.status}`);
         return {};
       }
-      return response.json()
+      return response.json();
     }).then((data) => {
       return data.items;
     }).catch((e) => {
@@ -25,7 +29,9 @@ export const getPrinter = (host, fields = []) => {
   if (fields && fields.length) {
     uri += `?fields=${fields.join(',')}`;
   }
-  return fetch(uri)
+  return fetch(uri, {
+      headers: getHeaders()
+    })
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get a printer: ${response.status}`);
@@ -41,9 +47,7 @@ export const getPrinter = (host, fields = []) => {
 export const addPrinter = (protocol, host, name, apiKey) => {
   return fetch(`${BASE_URL}/printers`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(),
     body: JSON.stringify({
       protocol,
       host,
@@ -65,9 +69,7 @@ export const addPrinter = (protocol, host, name, apiKey) => {
 export const patchPrinter = (host, data) => {
   return fetch(`${BASE_URL}/printers/${host}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(),
     body: JSON.stringify(data),
   })
     .then((response) => {
@@ -84,9 +86,7 @@ export const patchPrinter = (host, data) => {
 export const setPrinterConnection = (host, state) => {
   return fetch(`${BASE_URL}/printers/${host}/connection`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(),
     body: JSON.stringify({"state": state}),
   })
     .then((response) => {
@@ -102,8 +102,9 @@ export const setPrinterConnection = (host, state) => {
 
 export const deletePrinter = (host) => {
   return fetch(`${BASE_URL}/printers/${host}`, {
-    method: 'DELETE',
-  })
+      method: 'DELETE',
+      headers: getHeaders(),
+    })
     .then((response) => {
       if (response.status !== 204) {
         console.error(`Cannot remove a printer: ${response.status}`);
@@ -118,9 +119,7 @@ export const deletePrinter = (host) => {
 export const changeCurrentJob = (host, action) => {
   return fetch(`${BASE_URL}/printers/${host}/current-job`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getHeaders(),
     body: JSON.stringify({
       action: action,
     }),

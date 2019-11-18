@@ -1,11 +1,11 @@
+import { getHeaders } from './utils';
+
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const changeSettings = (settings) => {
   return fetch(`${BASE_URL}/settings`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(),
     body: JSON.stringify(settings),
   })
     .then((response) => {
@@ -16,11 +16,11 @@ export const changeSettings = (settings) => {
     }).catch((e) => {
       console.error(`Cannot change a setting: ${e}`);
       return 500;
-    })
+    });
 }
 
 export const getSettings = (settings) => {
-  return fetch(`${BASE_URL}/settings`)
+  return fetch(`${BASE_URL}/settings`, {headers: getHeaders()})
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get settings: ${response.status}`);

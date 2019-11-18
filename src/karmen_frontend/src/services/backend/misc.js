@@ -1,3 +1,5 @@
+import { getHeaders } from './utils';
+
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter = null, limit = 10) => {
@@ -11,7 +13,9 @@ export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter =
   if (printerFilter) {
     uri += `&filter=printer_host:${printerFilter}`;
   }
-  return fetch(uri)
+  return fetch(uri, {
+    headers: getHeaders()
+  })
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printjobs: ${response.status}`);
@@ -31,9 +35,7 @@ export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter =
 export const enqueueTask = (task) => {
   return fetch(`${BASE_URL}/tasks`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getHeaders(),
     body: JSON.stringify({
       task: task,
     }),
@@ -50,7 +52,9 @@ export const enqueueTask = (task) => {
 }
 
 export const heartbeat = () => {
-  return fetch(`${BASE_URL}/`)
+  return fetch(`${BASE_URL}/`, {
+      headers: getHeaders(),
+    })
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Heartbeat fail: ${response.status}`);

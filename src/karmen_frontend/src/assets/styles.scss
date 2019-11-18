@@ -287,7 +287,7 @@ button[type=reset] {
   }
 }
 
-input[type=text], select {
+input[type=text], input[type=password], select {
   height: $form-elements-height;
   padding: $base-unit;
   background-color: map-get($palette, white);

@@ -1,3 +1,5 @@
+import { getHeaders } from './utils';
+
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getGcodes = (startWith = null, orderBy = null, displayFilter = null, limit = 15, fields = []) => {
@@ -14,7 +16,9 @@ export const getGcodes = (startWith = null, orderBy = null, displayFilter = null
   if (displayFilter) {
     uri += `&filter=display:${displayFilter}`;
   }
-  return fetch(uri)
+  return fetch(uri, {
+      headers: getHeaders()
+    })
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of gcodes: ${response.status}`);
@@ -36,7 +40,9 @@ export const getGcode = (id, fields = []) => {
   if (fields && fields.length) {
     uri += `?fields=${fields.join(',')}`;
   }
-  return fetch(uri)
+  return fetch(uri, {
+      headers: getHeaders(),
+    })
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get a gcode: ${response.status}`);
@@ -51,8 +57,9 @@ export const getGcode = (id, fields = []) => {
 
 export const deleteGcode = (id) => {
   return fetch(`${BASE_URL}/gcodes/${id}`, {
-    method: 'DELETE',
-  })
+      method: 'DELETE',
+      headers: getHeaders(),
+    })
     .then((response) => {
       if (response.status !== 204) {
         console.error(`Cannot remove a gcode: ${response.status}`);
@@ -64,12 +71,15 @@ export const deleteGcode = (id) => {
     });
 }
 
-export const uploadGcode = (path, file) => {
+export const uploadGcode = (path, file) => { 
   var data = new FormData();
   data.append('file', file);
   data.append('path', path);
+  const headers = getHeaders();
+  headers.delete('content-type'); // TODO this might not be necessary
   return fetch(`${BASE_URL}/gcodes`, {
     method: 'POST',
+    headers: headers,
     body: data,
   })
     .then((response) => {
@@ -87,9 +97,7 @@ export const uploadGcode = (path, file) => {
 export const printGcode = (id, printer) => {
   return fetch(`${BASE_URL}/printjobs`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getHeaders(),
     body: JSON.stringify({
       gcode: id,
       printer: printer,

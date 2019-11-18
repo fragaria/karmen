@@ -4,12 +4,13 @@ export const FormInputs = ({ definition, updateValue }) => {
   const optionRows = Object.keys(definition).map((name) => {
     switch(definition[name].type) {
       case 'text':
+      case 'password':
         return (
           <p key={name}>
             <label htmlFor={name}>
               {definition[name].name}
             </label>
-            <input type="text" id={name} name={name} value={definition[name].val} onChange={(e) => updateValue(name, e.target.value)} />
+            <input type={definition[name].type} id={name} name={name} value={definition[name].val} onChange={(e) => updateValue(name, e.target.value)} />
             {definition[name].error && <small>{definition[name].error}</small>}
           </p>
         );
