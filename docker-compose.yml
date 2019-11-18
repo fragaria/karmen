@@ -123,7 +123,7 @@ services:
   postgres:
     image: postgres:11
     user: '1000:1000'
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
     environment:

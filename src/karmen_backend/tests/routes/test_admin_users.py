@@ -419,7 +419,7 @@ class ListRoute(unittest.TestCase):
     def test_start_with_non_existent(self):
         with app.test_client() as c:
             response = c.get(
-                "/admin/users?limit=1&start_with=00315957-8ebb-4a44-1234-758dbf28bb9f&order_by=-username",
+                "/admin/users?limit=1&start_with=00005957-8ebb-4a44-1234-758dbf28bb9f&order_by=-username",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 200)
