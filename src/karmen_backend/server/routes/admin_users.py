@@ -8,7 +8,7 @@ from server.database import users, local_users
 from . import jwt_requires_role, jwt_force_password_change
 
 
-@app.route("/admin/users", methods=["POST", "OPTIONS"])
+@app.route("/admin/users", methods=["POST"])
 @cross_origin()
 @jwt_requires_role("admin")
 @fresh_jwt_required
@@ -49,7 +49,7 @@ def create_user():
     )
 
 
-@app.route("/admin/users/<uuid>", methods=["PATCH", "OPTIONS"])
+@app.route("/admin/users/<uuid>", methods=["PATCH"])
 @cross_origin()
 @jwt_requires_role("admin")
 @fresh_jwt_required
@@ -96,7 +96,7 @@ def make_user_response(user):
     }
 
 
-@app.route("/admin/users", methods=["GET", "OPTIONS"])
+@app.route("/admin/users", methods=["GET"])
 @cross_origin()
 @jwt_requires_role("admin")
 @fresh_jwt_required

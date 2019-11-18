@@ -39,7 +39,7 @@ def make_printer_response(printer, fields):
     return data
 
 
-@app.route("/printers", methods=["GET", "OPTIONS"])
+@app.route("/printers", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def printers_list():
@@ -51,7 +51,7 @@ def printers_list():
     return jsonify({"items": device_list})
 
 
-@app.route("/printers/<host>", methods=["GET", "OPTIONS"])
+@app.route("/printers/<host>", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def printer_detail(host):
@@ -62,7 +62,7 @@ def printer_detail(host):
     return jsonify(make_printer_response(printer, fields))
 
 
-@app.route("/printers", methods=["POST", "OPTIONS"])
+@app.route("/printers", methods=["POST"])
 @jwt_requires_role("admin")
 @cross_origin()
 def printer_create():
@@ -110,7 +110,7 @@ def printer_create():
     return "", 201
 
 
-@app.route("/printers/<host>", methods=["DELETE", "OPTIONS"])
+@app.route("/printers/<host>", methods=["DELETE"])
 @jwt_requires_role("admin")
 @cross_origin()
 def printer_delete(host):
@@ -121,7 +121,7 @@ def printer_delete(host):
     return "", 204
 
 
-@app.route("/printers/<host>", methods=["PATCH", "OPTIONS"])
+@app.route("/printers/<host>", methods=["PATCH"])
 @jwt_requires_role("admin")
 @cross_origin()
 def printer_patch(host):
@@ -175,7 +175,7 @@ def printer_patch(host):
     return "", 204
 
 
-@app.route("/printers/<host>/connection", methods=["POST", "OPTIONS"])
+@app.route("/printers/<host>/connection", methods=["POST"])
 @jwt_requires_role("admin")
 @cross_origin()
 def printer_change_connection(host):
@@ -206,7 +206,7 @@ def printer_change_connection(host):
     return "", 204
 
 
-@app.route("/printers/<host>/current-job", methods=["POST", "OPTIONS"])
+@app.route("/printers/<host>/current-job", methods=["POST"])
 @jwt_requires_role("admin")
 @cross_origin()
 def printer_modify_job(host):
@@ -231,7 +231,7 @@ def printer_modify_job(host):
         return abort(400, e)
 
 
-@app.route("/proxied-webcam/<host>", methods=["GET", "OPTIONS"])
+@app.route("/proxied-webcam/<host>", methods=["GET"])
 @cross_origin()
 def printer_webcam(host):
     return abort(503)

@@ -5,7 +5,7 @@ from server.tasks.scan_network import scan_network
 from . import jwt_force_password_change, jwt_requires_role
 
 
-@app.route("/tasks", methods=["POST", "OPTIONS"])
+@app.route("/tasks", methods=["POST"])
 @jwt_requires_role("admin")
 @jwt_force_password_change
 @cross_origin()

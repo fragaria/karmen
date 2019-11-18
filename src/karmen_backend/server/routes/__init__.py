@@ -11,6 +11,8 @@ def jwt_requires_role(required_role):
         @functools.wraps(func)
         @jwt_required
         def wrap(*args, **kwargs):
+            if request.method == "OPTIONS":
+                return func(*args, **kwargs)
             claims = get_jwt_claims()
             role = claims.get("role", None)
             if not role or role != required_role or role != "admin":
@@ -34,9 +36,13 @@ def jwt_force_password_change(func):
     @functools.wraps(func)
     @jwt_required
     def wrap(*args, **kwargs):
+        if request.method == "OPTIONS":
+            return func(*args, **kwargs)
         claims = get_jwt_claims()
         force_pwd_change = claims.get("force_pwd_change", None)
         user = get_current_user()
+        if not user:
+            return abort(401)
         if "local" in user["providers"] and force_pwd_change:
             luser = db_local_users.get_local_user(user["uuid"])
             if luser["force_pwd_change"]:
@@ -78,7 +84,7 @@ def user_loader_callback(identity):
     return user
 
 
-@app.route("/", methods=["GET", "OPTIONS"])
+@app.route("/", methods=["GET"])
 @cross_origin()
 def index():
     return jsonify(

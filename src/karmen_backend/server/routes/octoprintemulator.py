@@ -10,7 +10,7 @@ from server.tasks.analyze_gcode import analyze_gcode
 from flask_jwt_extended import decode_token
 
 
-@app.route("/octoprint-emulator/api/version", methods=["GET", "OPTIONS"])
+@app.route("/octoprint-emulator/api/version", methods=["GET"])
 @cross_origin()
 def version():
     token = request.headers.get("x-api-key", None)
@@ -25,7 +25,7 @@ def version():
     )
 
 
-@app.route("/octoprint-emulator/api/files/local", methods=["POST", "OPTIONS"])
+@app.route("/octoprint-emulator/api/files/local", methods=["POST"])
 @cross_origin()
 def upload():
     token = request.headers.get("x-api-key", None)

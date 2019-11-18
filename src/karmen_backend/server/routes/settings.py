@@ -7,7 +7,7 @@ from . import jwt_force_password_change, jwt_requires_role
 CONFIGURABLE_SETTINGS = ["NETWORK_INTERFACE"]
 
 
-@app.route("/settings", methods=["GET", "OPTIONS"])
+@app.route("/settings", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def settings_list():
@@ -21,7 +21,7 @@ def settings_list():
     return jsonify(lst)
 
 
-@app.route("/settings", methods=["POST", "OPTIONS"])
+@app.route("/settings", methods=["POST"])
 @jwt_requires_role("admin")
 @jwt_force_password_change
 @cross_origin()

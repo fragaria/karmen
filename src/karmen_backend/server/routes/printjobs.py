@@ -18,7 +18,7 @@ def make_printjob_response(printjob, fields=None):
     return response
 
 
-@app.route("/printjobs", methods=["POST", "OPTIONS"])
+@app.route("/printjobs", methods=["POST"])
 @jwt_force_password_change
 @cross_origin()
 def printjob_create():
@@ -66,7 +66,7 @@ def printjob_create():
         return abort(409)
 
 
-@app.route("/printjobs", methods=["GET", "OPTIONS"])
+@app.route("/printjobs", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def printjobs_list():
@@ -122,7 +122,7 @@ def printjobs_list():
     return jsonify(response)
 
 
-@app.route("/printjobs/<id>", methods=["GET", "OPTIONS"])
+@app.route("/printjobs/<id>", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def printjob_detail(id):
@@ -132,7 +132,7 @@ def printjob_detail(id):
     return jsonify(make_printjob_response(printjob))
 
 
-@app.route("/printjobs/<id>", methods=["DELETE", "OPTIONS"])
+@app.route("/printjobs/<id>", methods=["DELETE"])
 @jwt_force_password_change
 @cross_origin()
 def printjob_delete(id):

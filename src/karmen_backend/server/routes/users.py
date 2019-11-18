@@ -44,21 +44,35 @@ def authenticate_base(include_refresh_token):
 
 # This is intentionally not called login as we might use that for the OAuth process in the future
 # This returns a fresh access token and a refresh token
-@app.route("/users/authenticate", methods=["POST", "OPTIONS"])
+@app.route("/users/authenticate", methods=["POST"])
 @cross_origin()
 def authenticate():
     return authenticate_base(True)
 
 
 # This returns a fresh access token and no refresh token
-@app.route("/users/authenticate-fresh", methods=["POST", "OPTIONS"])
+@app.route("/users/authenticate-fresh", methods=["POST"])
 @cross_origin()
 def authenticate_fresh():
     return authenticate_base(False)
 
 
+@app.route("/users/probe", methods=["GET"])
+@cross_origin()
+@jwt_required
+def probe():
+    user = get_current_user()
+    if not user:
+        return abort(401)
+    if "local" in user["providers"]:
+        luser = local_users.get_local_user(user["uuid"])
+        if luser["force_pwd_change"]:
+            return jsonify({"force_pwd_change": True}), 200
+    return jsonify({"force_pwd_change": False}), 200
+
+
 # This returns a non fresh access token and no refresh token
-@app.route("/users/authenticate-refresh", methods=["POST", "OPTIONS"])
+@app.route("/users/authenticate-refresh", methods=["POST"])
 @jwt_refresh_token_required
 def refresh():
     user = get_current_user()
@@ -73,7 +87,7 @@ def refresh():
     return jsonify({"access_token": create_access_token(identity=userdata)}), 200
 
 
-@app.route("/users/<uuid>", methods=["PATCH", "OPTIONS"])
+@app.route("/users/<uuid>", methods=["PATCH"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -111,10 +125,12 @@ def change_password(uuid):
         pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=False, user_uuid=uuid
     )
 
-    return "", 200
+    userdata = dict(user)
+    userdata.update({"force_pwd_change": False, "user_uuid": uuid})
+    return jsonify({"access_token": create_access_token(identity=userdata)}), 200
 
 
-@app.route("/users/<uuid>/tokens", methods=["GET", "OPTIONS"])
+@app.route("/users/<uuid>/tokens", methods=["GET"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -134,7 +150,7 @@ def create_api_token(uuid):
     return jsonify({"items": items}), 200
 
 
-@app.route("/users/<uuid>/tokens", methods=["POST", "OPTIONS"])
+@app.route("/users/<uuid>/tokens", methods=["POST"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -158,7 +174,7 @@ def list_api_tokens(uuid):
     return jsonify(response), 201
 
 
-@app.route("/users/<uuid>/tokens/<jti>", methods=["DELETE", "OPTIONS"])
+@app.route("/users/<uuid>/tokens/<jti>", methods=["DELETE"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required

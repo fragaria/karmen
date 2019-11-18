@@ -37,7 +37,7 @@ def make_gcode_response(gcode, fields=None):
     return response
 
 
-@app.route("/gcodes", methods=["GET", "OPTIONS"])
+@app.route("/gcodes", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def gcodes_list():
@@ -91,7 +91,7 @@ def gcodes_list():
     return jsonify(response)
 
 
-@app.route("/gcodes/<id>", methods=["GET", "OPTIONS"])
+@app.route("/gcodes/<id>", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def gcode_detail(id):
@@ -101,7 +101,7 @@ def gcode_detail(id):
     return jsonify(make_gcode_response(gcode))
 
 
-@app.route("/gcodes", methods=["POST", "OPTIONS"])
+@app.route("/gcodes", methods=["POST"])
 @jwt_force_password_change
 @cross_origin()
 def gcode_create():
@@ -146,7 +146,7 @@ def gcode_create():
     )
 
 
-@app.route("/gcodes/<id>/data", methods=["GET", "OPTIONS"])
+@app.route("/gcodes/<id>/data", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def gcode_file(id):
@@ -163,7 +163,7 @@ def gcode_file(id):
         return abort(404)
 
 
-@app.route("/gcodes/<id>", methods=["DELETE", "OPTIONS"])
+@app.route("/gcodes/<id>", methods=["DELETE"])
 @jwt_force_password_change
 @cross_origin()
 def gcode_delete(id):
