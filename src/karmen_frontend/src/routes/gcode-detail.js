@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Loader from '../components/loader';
-import { getGcode, getPrinters, printGcode } from '../services/karmen-backend';
+import { getGcode, getPrinters, printGcode } from '../services/backend';
 import formatters from '../services/formatters';
 
 class GcodeDetail extends React.Component {

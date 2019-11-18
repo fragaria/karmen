@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 
 import { BackLink } from '../components/back';
 import { FormInputs } from '../components/form-utils';
-import { addPrinter } from '../services/karmen-backend';
+import { addPrinter } from '../services/backend';
 
 class AddPrinter extends React.Component {
   state = {

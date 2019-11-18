@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
 import PrinterView from '../components/printer-view';
-import { getPrinters } from '../services/karmen-backend';
+import { getPrinters } from '../services/backend';
 
 class PrinterList extends React.Component {
   state = {

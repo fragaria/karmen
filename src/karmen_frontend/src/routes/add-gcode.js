@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { BackLink } from '../components/back';
-import { uploadGcode } from '../services/karmen-backend';
+import { uploadGcode } from '../services/backend';
 
 class AddGcode extends React.Component {
   state = {

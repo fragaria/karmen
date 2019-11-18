@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import BoxedModal from './boxed-modal';
 import { WebcamStream } from './webcam-stream';
-import { deletePrinter, changeCurrentJob } from '../services/karmen-backend';
+import { deletePrinter, changeCurrentJob } from '../services/backend';
 import formatters from '../services/formatters';
 
 export const Progress = ({ completion, printTime, printTimeLeft, withProgressBar = true }) => {

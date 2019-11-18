@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
 import { PrinterView } from '../components/printer-view';
 import { PrinterEditForm } from '../components/printer-edit-form';
-import { getPrinter, patchPrinter, getPrinterJobs, setPrinterConnection } from '../services/karmen-backend';
+import { getPrinter, patchPrinter, getPrinterJobs, setPrinterConnection } from '../services/backend';
 import formatters from '../services/formatters';
 
 const BASE_URL = window.env.BACKEND_BASE;

@@ -2,7 +2,7 @@ import React from 'react';
 
 import Loader from '../components/loader';
 import { FormInputs } from '../components/form-utils';
-import { getSettings, changeSettings, enqueueTask } from '../services/karmen-backend';
+import { getSettings, changeSettings, enqueueTask } from '../services/backend';
 
 class Settings extends React.Component {
   state = {

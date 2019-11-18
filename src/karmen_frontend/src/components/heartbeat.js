@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { heartbeat } from '../services/karmen-backend';
+import { heartbeat } from '../services/backend';
 
 class Heartbeat extends React.Component {
   state = {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Loader from '../components/loader';
-import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/karmen-backend';
+import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/backend';
 import formatters from '../services/formatters';
 
 const BASE_URL = window.env.BACKEND_BASE;
