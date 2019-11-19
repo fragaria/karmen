@@ -1,14 +1,13 @@
 import React from 'react';
-import { checkCurrentLoginState, authenticate, changePassword, registerAccessTokenExpirationHandler, deregisterAccessTokenExpirationHandler } from '../services/backend';
+import { connect } from 'react-redux';
+import { authenticate, changePassword } from '../services/backend';
 import { FormInputs } from '../components/form-utils';
 import Loader from '../components/loader';
 
-export class LoginGateway extends React.Component {
+class LoginGateway extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userState: 'unknown',
-      initialized: false,
       submitting: false,
       message: null,
       messageOk: false,
@@ -47,28 +46,15 @@ export class LoginGateway extends React.Component {
         },
       }
     }
-  }
-
-  async componentDidMount() {
-    const userState = await checkCurrentLoginState();
     this.login = this.login.bind(this);
     this.changePwd = this.changePwd.bind(this);
-    // TODO user state should get populated from global state when any request ends up with 401
-    this.setState({
-      userState,
-      initialized: true,
-    });
-    registerAccessTokenExpirationHandler();
-  }
-
-  componentWillUnmount() {
-    deregisterAccessTokenExpirationHandler();
   }
 
   login(e) {
     e.preventDefault();
     // TODO client side validation
     const { loginForm } = this.state;
+    const { onUserStateChanged } = this.props;
     this.setState({
       submitting: true,
     });
@@ -84,10 +70,10 @@ export class LoginGateway extends React.Component {
             })
           });
         } else {
-          const userState = await checkCurrentLoginState();
-          this.setState({
-            userState,
-            submitting: false,
+          onUserStateChanged().then(() => {
+            this.setState({
+              submitting: false,
+            });
           });
         }
       });
@@ -97,6 +83,7 @@ export class LoginGateway extends React.Component {
     e.preventDefault();
     // TODO client side validation
     const { changePwdForm } = this.state;
+    const { onUserStateChanged } = this.props;
     this.setState({
       submitting: true,
     });
@@ -114,10 +101,10 @@ export class LoginGateway extends React.Component {
             })
           });
         } else {
-          const userState = await checkCurrentLoginState();
-          this.setState({
-            userState,
-            submitting: false,
+          onUserStateChanged().then(() => {
+            this.setState({
+              submitting: false,
+            });
           });
         }
       });
@@ -125,8 +112,9 @@ export class LoginGateway extends React.Component {
 
   render() {
     const { children } = this.props;
-    const { initialized, userState, message, messageOk, submitting, loginForm, changePwdForm } = this.state;
-    if (!initialized) {
+    const { message, messageOk, submitting, loginForm, changePwdForm } = this.state;
+    const { userState } = this.props;
+    if (!userState || userState === 'unknown') {
       return <div><Loader /></div>;
     }
     if (userState === 'logged-in') {
@@ -181,4 +169,8 @@ export class LoginGateway extends React.Component {
   }
 }
 
-export default LoginGateway;
+export default connect(
+  state => ({
+    userState: state.users.currentState,
+  })
+)(LoginGateway);
