@@ -25,7 +25,7 @@ const Menu = ({ userState, username, role, logout }) => {
           )}
           <li>
             <small>
-              <Link to="/user-preferences">{username}</Link>
+              <Link to="/users/me">{username}</Link>
               {' '}
               <button className="plain" title="Logout" onClick={(e) => {
                 e.preventDefault();

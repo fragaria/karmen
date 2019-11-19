@@ -205,3 +205,21 @@ export const checkCurrentLoginState = () => {
   }
   return Promise.resolve('logged-out');
 }
+
+export const loadApiTokens = () => {
+  return fetch(`${BASE_URL}/users/me/tokens`, {
+    method: 'GET',
+    headers: getHeaders(),
+  }).then((response) => {
+    if (response.status !== 200) {
+      console.error(`Cannot get list of api tokens: ${response.status}`);
+      return {};
+    }
+    return response.json();
+  }).then((data) => {
+    return data.items;
+  }).catch((e) => {
+    console.error(`Cannot get list of api tokens: ${e}`);
+    return [];
+  });
+}

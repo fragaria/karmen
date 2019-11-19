@@ -1,8 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { authenticate, changePassword } from '../actions/users';
-import { FormInputs } from '../components/form-utils';
-import Loader from '../components/loader';
+import { authenticate } from '../actions/users';
+import { FormInputs } from './form-utils';
+import ChangePasswordForm from './change-password-form';
+import Loader from './loader';
 
 class LoginGateway extends React.Component {
   constructor(props) {
@@ -25,29 +26,8 @@ class LoginGateway extends React.Component {
           required: true,
         },
       },
-      changePwdForm: {
-        password: {
-          name: "Password",
-          val: '',
-          type: 'password',
-          required: true,
-        },
-        new_password: {
-          name: "New password",
-          val: '',
-          type: 'password',
-          required: true,
-        },
-        new_password_confirmation: {
-          name: "New password confirmation",
-          val: '',
-          type: 'password',
-          required: true,
-        },
-      }
     }
     this.login = this.login.bind(this);
-    this.changePwd = this.changePwd.bind(this);
   }
 
   login(e) {
@@ -100,97 +80,21 @@ class LoginGateway extends React.Component {
       });
   }
 
-  changePwd(e) {
-    e.preventDefault();
-    const { changePwdForm } = this.state;
-    const { onUserStateChanged, doChangePassword } = this.props;
-    let hasError = false;
-    // eslint-disable-next-line no-unused-vars
-    for(let field of Object.values(changePwdForm)) {
-      if (field.required && !field.val) {
-        field.error = `${field.name} is required!`;
-        hasError = true;
-      } else {
-        field.error = "";
-      }
-    }
-    if (changePwdForm.new_password.val) {
-      if (changePwdForm.new_password.val !== changePwdForm.new_password_confirmation.val) {
-        changePwdForm.new_password.error = "New passwords do not match!";
-        hasError = true;
-      } else {
-        changePwdForm.new_password.error = "";
-      }
-    }
-    if (hasError) {
-      this.setState({
-        changePwdForm: Object.assign({}, changePwdForm),
-      })
-      return;
-    }
-    this.setState({
-      submitting: true,
-    });
-    doChangePassword(changePwdForm.password.val, changePwdForm.new_password.val, changePwdForm.new_password_confirmation.val)
-      .then(async (code) => {
-        if (code !== 200) {
-          this.setState({
-            messageOk: false,
-            message: "Password change unsuccessful, try again, please.",
-            submitting: false,
-            changePwdForm: Object.assign({}, changePwdForm, {
-              password: Object.assign({}, changePwdForm.password, { val: '' }),
-              new_password: Object.assign({}, changePwdForm.new_password, { val: '' }),
-              new_password_confirmation: Object.assign({}, changePwdForm.new_password_confirmation, { val: '' }),
-            })
-          });
-        } else {
-          onUserStateChanged().then(() => {
-            this.setState({
-              submitting: false,
-              message: "",
-              messageOk: true,
-              changePwdForm: Object.assign({}, changePwdForm, {
-                password: Object.assign({}, changePwdForm.password, { val: '' }),
-                new_password: Object.assign({}, changePwdForm.new_password, { val: '' }),
-                new_password_confirmation: Object.assign({}, changePwdForm.new_password_confirmation, { val: '' }),
-              })
-            });
-          });
-        }
-      });
-  }
-
   render() {
-    const { children } = this.props;
-    const { message, messageOk, submitting, loginForm, changePwdForm } = this.state;
-    const { userState } = this.props;
+    const { children, userState, onUserStateChanged } = this.props;
+    const { message, messageOk, submitting, loginForm } = this.state;
     if (!userState || userState === 'unknown') {
       return <div><Loader /></div>;
     }
     if (userState === 'logged-in') {
       return <React.Fragment>{children}</React.Fragment>;
-    } else if (userState === 'pwd-change-required') {
-      const updateValue = (name, value) => {
-        const { changePwdForm } = this.state;
-        this.setState({
-          changePwdForm: Object.assign({}, changePwdForm, {
-            [name]: Object.assign({}, changePwdForm[name], {val: value, error: null})
-          })
-        });
-      }
+    } else if (userState === 'pwd-change-required') { /* TODO move this into a separate gateway/process */
       return (
         <div className="standalone-page">
           <header>
             <h1 className="title">Your password needs to be changed</h1>
           </header>
-          <form>
-            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-            <FormInputs definition={changePwdForm} updateValue={updateValue} />
-            <div className="form-actions">
-              <button type="submit" onClick={this.changePwd} disabled={submitting}>Change password</button>
-            </div>
-          </form>
+          <ChangePasswordForm onUserStateChanged={onUserStateChanged} />
         </div>
       );
     } else {
@@ -226,6 +130,5 @@ export default connect(
   }),
   dispatch => ({
     doAuthenticate: (username, password) => dispatch(authenticate(username, password)),
-    doChangePassword: (password, new_password, new_password_confirmation) => dispatch(changePassword(password, new_password, new_password_confirmation))
   })
 )(LoginGateway);

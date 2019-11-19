@@ -140,7 +140,6 @@ def list_api_tokens():
                 "jti": token["jti"],
                 "name": token["name"],
                 "created": token["created"].isoformat(),
-                "revoked": token["revoked"],
             }
         )
     return jsonify({"items": items}), 200

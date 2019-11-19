@@ -2,6 +2,7 @@ import React from 'react';
 
 import Loader from '../components/loader';
 import { FormInputs } from '../components/form-utils';
+import RoleBasedGateway from '../components/role-based-gateway';
 import { getSettings, changeSettings, enqueueTask } from '../services/backend';
 
 class Settings extends React.Component {
@@ -125,20 +126,22 @@ class Settings extends React.Component {
       });
     }
     return (
-      <div className="settings standalone-page">
-        <header>
-          <h1 className="title">Settings</h1>
-        </header>
-        <form>
-          <fieldset>
-            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-            <FormInputs definition={settings} updateValue={updateValue} />
-            <div className="form-actions">
-              <button type="submit" onClick={this.startNetworkScan} disabled={submitting}>Scan the network for printers</button>
-            </div>
-          </fieldset>
-         </form>
-      </div>
+      <RoleBasedGateway requiredRole="admin">
+        <div className="settings standalone-page">
+          <header>
+            <h1 className="title">Settings</h1>
+          </header>
+          <form>
+            <fieldset>
+              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+              <FormInputs definition={settings} updateValue={updateValue} />
+              <div className="form-actions">
+                <button type="submit" onClick={this.startNetworkScan} disabled={submitting}>Scan the network for printers</button>
+              </div>
+            </fieldset>
+           </form>
+        </div>
+      </RoleBasedGateway>
     );
   }
 }

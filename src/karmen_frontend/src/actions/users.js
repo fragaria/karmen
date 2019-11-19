@@ -5,6 +5,10 @@ export const loadUserState = createActionThunk('USER_LOAD_STATE', () => {
   return backend.checkCurrentLoginState();
 });
 
+export const loadUserApiTokens = createActionThunk('USER_LOAD_API_TOKENS', () => {
+  return backend.loadApiTokens();
+});
+
 export const authenticate = createActionThunk('USER_AUTHENTICATE', (username, password) => {
   return backend.authenticate(username, password);
 });

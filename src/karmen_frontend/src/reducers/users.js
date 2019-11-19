@@ -16,6 +16,9 @@ export default (state = {
         username: null,
         role: null,
       });
+    case "USER_LOAD_API_TOKENS_SUCCEEDED":
+      return Object.assign({}, state, {
+      });
     default:
       return state;
   }

@@ -14,6 +14,7 @@ import PrinterDetail from './routes/printer-detail';
 import AddPrinter from './routes/add-printer';
 import AddGcode from './routes/add-gcode';
 import Settings from './routes/settings';
+import UserPreferences from './routes/user-preferences';
 
 import { loadUserState } from './actions/users';
 
@@ -62,6 +63,7 @@ class App extends React.Component {
                 <Route path="/add-printer" exact component={AddPrinter} />
                 <Route path="/add-gcode" exact component={AddGcode} />
                 <Route path="/settings" exact component={Settings} />
+                <Route path="/users/me" exact component={UserPreferences} />
                 <Route path="/gcodes" exact component={GcodeList} />
                 <Route path="/gcodes/:id" exact component={GcodeDetail} />
                 <Route path="/printers/:host" exact component={PrinterDetail} />
