@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { authenticate, changePassword } from '../services/backend';
+import { authenticate, changePassword } from '../actions/users';
 import { FormInputs } from '../components/form-utils';
 import Loader from '../components/loader';
 
@@ -52,13 +52,28 @@ class LoginGateway extends React.Component {
 
   login(e) {
     e.preventDefault();
-    // TODO client side validation
     const { loginForm } = this.state;
-    const { onUserStateChanged } = this.props;
+    const { onUserStateChanged, doAuthenticate } = this.props;
+    let hasError = false;
+    // eslint-disable-next-line no-unused-vars
+    for(let field of Object.values(loginForm)) {
+      if (field.required && !field.val) {
+        field.error = `${field.name} is required!`;
+        hasError = true;
+      } else {
+        field.error = "";
+      }
+    }
+    if (hasError) {
+      this.setState({
+        loginForm: Object.assign({}, loginForm),
+      })
+      return;
+    }
     this.setState({
       submitting: true,
     });
-    authenticate(loginForm.username.val, loginForm.password.val)
+    doAuthenticate(loginForm.username.val, loginForm.password.val)
       .then(async (code) => {
         if (code !== 200) {
           this.setState({
@@ -81,13 +96,36 @@ class LoginGateway extends React.Component {
 
   changePwd(e) {
     e.preventDefault();
-    // TODO client side validation
     const { changePwdForm } = this.state;
-    const { onUserStateChanged } = this.props;
+    const { onUserStateChanged, doChangePassword } = this.props;
+    let hasError = false;
+    // eslint-disable-next-line no-unused-vars
+    for(let field of Object.values(changePwdForm)) {
+      if (field.required && !field.val) {
+        field.error = `${field.name} is required!`;
+        hasError = true;
+      } else {
+        field.error = "";
+      }
+    }
+    if (changePwdForm.new_password.val) {
+      if (changePwdForm.new_password.val !== changePwdForm.new_password_confirmation.val) {
+        changePwdForm.new_password.error = "New passwords do not match!";
+        hasError = true;
+      } else {
+        changePwdForm.new_password.error = "";
+      }
+    }
+    if (hasError) {
+      this.setState({
+        changePwdForm: Object.assign({}, changePwdForm),
+      })
+      return;
+    }
     this.setState({
       submitting: true,
     });
-    changePassword(changePwdForm.password.val, changePwdForm.new_password.val, changePwdForm.new_password_confirmation.val)
+    doChangePassword(changePwdForm.password.val, changePwdForm.new_password.val, changePwdForm.new_password_confirmation.val)
       .then(async (code) => {
         if (code !== 200) {
           this.setState({
@@ -172,5 +210,9 @@ class LoginGateway extends React.Component {
 export default connect(
   state => ({
     userState: state.users.currentState,
+  }),
+  dispatch => ({
+    doAuthenticate: (username, password) => dispatch(authenticate(username, password)),
+    doChangePassword: (password, new_password, new_password_confirmation) => dispatch(changePassword(password, new_password, new_password_confirmation))
   })
 )(LoginGateway);

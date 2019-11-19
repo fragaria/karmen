@@ -1,7 +1,14 @@
 import { createActionThunk } from 'redux-thunk-actions';
-import { checkCurrentLoginState } from '../services/backend';
+import * as backend from '../services/backend';
 
+export const loadUserState = createActionThunk('USER_LOAD_STATE', () => {
+  return backend.checkCurrentLoginState();
+});
 
-export const loadUserState = createActionThunk('LOAD_USER_STATE', () => {
-  return checkCurrentLoginState();
+export const authenticate = createActionThunk('USER_AUTHENTICATE', (username, password) => {
+  return backend.authenticate(username, password);
+});
+
+export const changePassword = createActionThunk('USER_CHANGE_PASSWORD', (password, new_password, new_password_confirmation) => {
+  return backend.changePassword(password, new_password, new_password_confirmation);
 });
