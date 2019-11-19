@@ -20,15 +20,15 @@ function App() {
         <Menu />
         <main>
           <LoginGateway>
-          <Switch>
-            <Route path="/add-printer" exact component={AddPrinter} />
-            <Route path="/add-gcode" exact component={AddGcode} />
-            <Route path="/settings" exact component={Settings} />
-            <Route path="/gcodes" exact component={GcodeList} />
-            <Route path="/gcodes/:id" exact component={GcodeDetail} />
-            <Route path="/printers/:host" exact component={PrinterDetail} />
-            <Route path="/" exact component={PrinterList} />
-          </Switch>
+            <Switch>
+              <Route path="/add-printer" exact component={AddPrinter} />
+              <Route path="/add-gcode" exact component={AddGcode} />
+              <Route path="/settings" exact component={Settings} />
+              <Route path="/gcodes" exact component={GcodeList} />
+              <Route path="/gcodes/:id" exact component={GcodeDetail} />
+              <Route path="/printers/:host" exact component={PrinterDetail} />
+              <Route path="/" exact component={PrinterList} />
+            </Switch>
           </LoginGateway>
           <Heartbeat />
         </main>

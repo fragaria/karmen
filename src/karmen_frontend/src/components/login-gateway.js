@@ -1,5 +1,5 @@
 import React from 'react';
-import { currentLoginState, authenticate, changePassword } from '../services/backend';
+import { checkCurrentLoginState, authenticate, changePassword, registerAccessTokenExpirationHandler, deregisterAccessTokenExpirationHandler } from '../services/backend';
 import { FormInputs } from '../components/form-utils';
 import Loader from '../components/loader';
 
@@ -50,17 +50,24 @@ export class LoginGateway extends React.Component {
   }
 
   async componentDidMount() {
-    const userState = await currentLoginState();
+    const userState = await checkCurrentLoginState();
     this.login = this.login.bind(this);
     this.changePwd = this.changePwd.bind(this);
+    // TODO user state should get populated from global state when any request ends up with 401
     this.setState({
       userState,
       initialized: true,
     });
+    registerAccessTokenExpirationHandler();
+  }
+
+  componentWillUnmount() {
+    deregisterAccessTokenExpirationHandler();
   }
 
   login(e) {
     e.preventDefault();
+    // TODO client side validation
     const { loginForm } = this.state;
     this.setState({
       submitting: true,
@@ -77,7 +84,7 @@ export class LoginGateway extends React.Component {
             })
           });
         } else {
-          const userState = await currentLoginState();
+          const userState = await checkCurrentLoginState();
           this.setState({
             userState,
             submitting: false,
@@ -88,6 +95,7 @@ export class LoginGateway extends React.Component {
 
   changePwd(e) {
     e.preventDefault();
+    // TODO client side validation
     const { changePwdForm } = this.state;
     this.setState({
       submitting: true,
@@ -106,7 +114,7 @@ export class LoginGateway extends React.Component {
             })
           });
         } else {
-          const userState = await currentLoginState();
+          const userState = await checkCurrentLoginState();
           this.setState({
             userState,
             submitting: false,

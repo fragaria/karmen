@@ -57,20 +57,6 @@ def authenticate_fresh():
     return authenticate_base(False)
 
 
-@app.route("/users/probe", methods=["GET"])
-@cross_origin()
-@jwt_required
-def probe():
-    user = get_current_user()
-    if not user:
-        return abort(401)
-    if "local" in user["providers"]:
-        luser = local_users.get_local_user(user["uuid"])
-        if luser["force_pwd_change"]:
-            return jsonify({"force_pwd_change": True}), 200
-    return jsonify({"force_pwd_change": False}), 200
-
-
 # This returns a non fresh access token and no refresh token
 @app.route("/users/authenticate-refresh", methods=["POST"])
 @jwt_refresh_token_required
@@ -87,6 +73,21 @@ def refresh():
     return jsonify({"access_token": create_access_token(identity=userdata)}), 200
 
 
+@app.route("/users/probe", methods=["GET"])
+@cross_origin()
+@jwt_required
+def probe():
+    user = get_current_user()
+    if not user:
+        return abort(401)
+    if "local" in user["providers"]:
+        luser = local_users.get_local_user(user["uuid"])
+        if luser["force_pwd_change"]:
+            return jsonify({"force_pwd_change": True}), 200
+    return jsonify({"force_pwd_change": False}), 200
+
+
+# This returns nonfresh access_token with reset force_pwd_change user claim
 @app.route("/users/<uuid>", methods=["PATCH"])
 @cross_origin()
 @jwt_required

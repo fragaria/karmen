@@ -1,7 +1,5 @@
 import jwt_decode from 'jwt-decode';
 
-const BASE_URL = window.env.BACKEND_BASE;
-
 const _setStorage = (key, value) => {
   if (window.localStorage && window.localStorage.setItem) {
     window.localStorage.setItem(key, value);
@@ -39,35 +37,6 @@ export const getRefreshToken = () => {
 
 export const getUserIdentity = () => {
   return _getStorage("karmen_uuid");
-}
-
-export const currentLoginState = () => {
-  const token = getAccessToken();
-  if (token) {
-    return fetch(`${BASE_URL}/users/probe`, {
-        headers: getHeaders(),
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json()
-            .then((data) => {
-              const decoded = jwt_decode(token);
-              if (
-                (decoded && decoded.user_claims && decoded.user_claims.force_pwd_change) ||
-                (data && data.force_pwd_change)
-              ) {
-                return 'pwd-change-required';
-              }
-              return 'logged-in';
-            });
-        }
-        return 'logged-out';
-      }).catch((e) => {
-        console.error(`Cannot get login state: ${e}`);
-        return 'logged-out';
-      });
-  }
-  return Promise.resolve('logged-out');
 }
 
 export const getHeaders = (withAuth=true) => {
