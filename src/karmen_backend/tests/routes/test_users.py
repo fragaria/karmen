@@ -24,30 +24,31 @@ def get_token_data(jwtoken):
 class AuthenticateRoute(unittest.TestCase):
     def test_no_data(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate")
+            response = c.post("/users/me/authenticate")
             self.assertEqual(response.status_code, 400)
 
     def test_missing_username(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate", json={"password": "random"})
+            response = c.post("/users/me/authenticate", json={"password": "random"})
             self.assertEqual(response.status_code, 400)
 
     def test_missing_password(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate", json={"username": "random"})
+            response = c.post("/users/me/authenticate", json={"username": "random"})
             self.assertEqual(response.status_code, 400)
 
     def test_unknown_user(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate", json={"username": "random", "password": "random"}
+                "/users/me/authenticate",
+                json={"username": "random", "password": "random"},
             )
             self.assertEqual(response.status_code, 401)
 
     def test_bad_password(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate",
+                "/users/me/authenticate",
                 json={"username": "test-admin", "password": "random"},
             )
             self.assertEqual(response.status_code, 401)
@@ -55,7 +56,7 @@ class AuthenticateRoute(unittest.TestCase):
     def test_returns_fresh_access_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate",
+                "/users/me/authenticate",
                 json={"username": "test-admin", "password": "admin-password"},
             )
             self.assertEqual(response.status_code, 200)
@@ -74,23 +75,27 @@ class AuthenticateRoute(unittest.TestCase):
 class AuthenticateFreshRoute(unittest.TestCase):
     def test_no_data(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate-fresh")
+            response = c.post("/users/me/authenticate-fresh")
             self.assertEqual(response.status_code, 400)
 
     def test_missing_username(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate-fresh", json={"password": "random"})
+            response = c.post(
+                "/users/me/authenticate-fresh", json={"password": "random"}
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_password(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate-fresh", json={"username": "random"})
+            response = c.post(
+                "/users/me/authenticate-fresh", json={"username": "random"}
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_unknown_user(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate-fresh",
+                "/users/me/authenticate-fresh",
                 json={"username": "random", "password": "random"},
             )
             self.assertEqual(response.status_code, 401)
@@ -98,7 +103,7 @@ class AuthenticateFreshRoute(unittest.TestCase):
     def test_bad_password(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate-fresh",
+                "/users/me/authenticate-fresh",
                 json={"username": "test-admin", "password": "random"},
             )
             self.assertEqual(response.status_code, 401)
@@ -106,7 +111,7 @@ class AuthenticateFreshRoute(unittest.TestCase):
     def test_returns_fresh_access_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate-fresh",
+                "/users/me/authenticate-fresh",
                 json={"username": "test-admin", "password": "admin-password"},
             )
             self.assertEqual(response.status_code, 200)
@@ -124,13 +129,13 @@ class AuthenticateFreshRoute(unittest.TestCase):
 class AuthenticateRefreshRoute(unittest.TestCase):
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.post("/users/authenticate-refresh")
+            response = c.post("/users/me/authenticate-refresh")
             self.assertEqual(response.status_code, 401)
 
     def test_bad_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate-refresh",
+                "/users/me/authenticate-refresh",
                 headers={
                     "Authorization": "Bearer %s"
                     % (
@@ -143,7 +148,7 @@ class AuthenticateRefreshRoute(unittest.TestCase):
     def test_returns_nonfresh_access_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/authenticate-refresh",
+                "/users/me/authenticate-refresh",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER_REFRESH},
             )
             self.assertEqual(response.status_code, 200)
@@ -162,7 +167,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_missing_jwt(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 json={
                     "password": "random",
                     "new_password_confirmation": "random",
@@ -174,7 +179,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_nonfresh_jwt(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
                 json={
                     "password": "random",
@@ -188,7 +193,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_expired_jwt(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_EXPIRED},
                 json={
                     "password": "admin-password",
@@ -202,7 +207,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_mismatch_token_uuid(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_USER,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "password": "user-password",
@@ -215,15 +220,14 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_no_data(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "users/me", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_new_password(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"password": "random", "new_password_confirmation": "random"},
             )
@@ -232,7 +236,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_missing_new_password_confirmation(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"password": "random", "new_password": "random"},
             )
@@ -241,29 +245,16 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_missing_password(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"new_password_confirmation": "random", "new_password": "random"},
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_unknown_user(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
-                    "password": "admin-password",
-                },
-            )
-            self.assertEqual(response.status_code, 401)
-
     def test_bad_password(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",
@@ -275,7 +266,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_new_pwd_mismatch(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
@@ -288,7 +279,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_bad_pwd(self):
         with app.test_client() as c:
             response = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
@@ -301,7 +292,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_pwd_changed(self):
         with app.test_client() as c:
             change = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "new_password_confirmation": "random",
@@ -311,12 +302,12 @@ class ChangePasswordRoute(unittest.TestCase):
             )
             self.assertEqual(change.status_code, 200)
             auth = c.post(
-                "/users/authenticate",
+                "/users/me/authenticate",
                 json={"username": "test-admin", "password": "random"},
             )
             self.assertEqual(auth.status_code, 200)
             change_back = c.patch(
-                "/users/%s" % UUID_ADMIN,
+                "users/me",
                 headers={"Authorization": "Bearer %s" % (auth.json["access_token"],)},
                 json={
                     "new_password_confirmation": "admin-password",
@@ -330,27 +321,18 @@ class ChangePasswordRoute(unittest.TestCase):
 class ListApiTokensRoute(unittest.TestCase):
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.get("/users/%s/tokens" % UUID_USER)
-            self.assertEqual(response.status_code, 401)
-
-    def test_bad_token(self):
-        with app.test_client() as c:
-            response = c.get(
-                "/users/%s/tokens" % UUID_USER,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-            )
+            response = c.get("users/me/tokens")
             self.assertEqual(response.status_code, 401)
 
     def test_returns_token_list(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/%s/tokens" % UUID_USER,
+                "users/me/tokens",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"name": "my-pretty-token"},
             )
             response = c.get(
-                "/users/%s/tokens" % UUID_USER,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -363,29 +345,20 @@ class ListApiTokensRoute(unittest.TestCase):
 class CreateApiTokenRoute(unittest.TestCase):
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.post("/users/%s/tokens" % UUID_USER)
-            self.assertEqual(response.status_code, 401)
-
-    def test_bad_token(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/%s/tokens" % UUID_USER,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-            )
+            response = c.post("users/me/tokens")
             self.assertEqual(response.status_code, 401)
 
     def test_missing_name(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/%s/tokens" % UUID_USER,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_returns_eternal_access_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/%s/tokens" % UUID_USER,
+                "users/me/tokens",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"name": "my-pretty-token"},
             )
@@ -413,7 +386,7 @@ class RevokeApiTokenRoute(unittest.TestCase):
     def setUp(self):
         with app.test_client() as c:
             response = c.post(
-                "/users/%s/tokens" % UUID_USER,
+                "users/me/tokens",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"name": "my-pretty-token"},
             )
@@ -422,13 +395,13 @@ class RevokeApiTokenRoute(unittest.TestCase):
 
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.delete("/users/%s/tokens/%s" % (UUID_USER, self.token_jti))
+            response = c.delete("/users/me/tokens/%s" % (self.token_jti))
             self.assertEqual(response.status_code, 401)
 
     def test_bad_token(self):
         with app.test_client() as c:
             response = c.delete(
-                "/users/%s/tokens/%s" % (UUID_USER, self.token_jti),
+                "/users/me/tokens/%s" % (self.token_jti),
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 401)
@@ -436,7 +409,7 @@ class RevokeApiTokenRoute(unittest.TestCase):
     def test_bad_jti(self):
         with app.test_client() as c:
             response = c.delete(
-                "/users/%s/tokens/%s" % (UUID_USER, UUID_USER),
+                "/users/me/tokens/%s" % (UUID_USER),
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 404)
@@ -450,14 +423,14 @@ class RevokeApiTokenRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200)
             response = c.delete(
-                "/users/%s/tokens/%s" % (UUID_USER, self.token_jti),
+                "/users/me/tokens/%s" % (self.token_jti),
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 204)
             db_token = api_tokens.get_token(self.token_jti)
             self.assertTrue(db_token["revoked"])
             response = c.delete(
-                "/users/%s/tokens/%s" % (UUID_USER, self.token_jti),
+                "/users/me/tokens/%s" % (self.token_jti),
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 404)

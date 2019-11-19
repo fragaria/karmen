@@ -44,21 +44,21 @@ def authenticate_base(include_refresh_token):
 
 # This is intentionally not called login as we might use that for the OAuth process in the future
 # This returns a fresh access token and a refresh token
-@app.route("/users/authenticate", methods=["POST"])
+@app.route("/users/me/authenticate", methods=["POST"])
 @cross_origin()
 def authenticate():
     return authenticate_base(True)
 
 
 # This returns a fresh access token and no refresh token
-@app.route("/users/authenticate-fresh", methods=["POST"])
+@app.route("/users/me/authenticate-fresh", methods=["POST"])
 @cross_origin()
 def authenticate_fresh():
     return authenticate_base(False)
 
 
 # This returns a non fresh access token and no refresh token
-@app.route("/users/authenticate-refresh", methods=["POST"])
+@app.route("/users/me/authenticate-refresh", methods=["POST"])
 @jwt_refresh_token_required
 def refresh():
     user = get_current_user()
@@ -73,7 +73,7 @@ def refresh():
     return jsonify({"access_token": create_access_token(identity=userdata)}), 200
 
 
-@app.route("/users/probe", methods=["GET"])
+@app.route("/users/me/probe", methods=["GET"])
 @cross_origin()
 @jwt_required
 def probe():
@@ -88,11 +88,11 @@ def probe():
 
 
 # This returns nonfresh access_token with reset force_pwd_change user claim
-@app.route("/users/<uuid>", methods=["PATCH"])
+@app.route("/users/me", methods=["PATCH"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
-def change_password(uuid):
+def change_password():
     data = request.json
     if not data:
         return abort(400)
@@ -107,9 +107,6 @@ def change_password(uuid):
     ):
         return abort(400)
 
-    if get_jwt_identity() != uuid:
-        return abort(401)
-
     user = get_current_user()
     if not user:
         return abort(401)
@@ -123,23 +120,21 @@ def change_password(uuid):
 
     pwd_hash = bcrypt.hashpw(new_password.encode("utf8"), bcrypt.gensalt())
     local_users.update_local_user(
-        pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=False, user_uuid=uuid
+        pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=False, user_uuid=user["uuid"]
     )
 
     userdata = dict(user)
-    userdata.update({"force_pwd_change": False, "user_uuid": uuid})
+    userdata.update({"force_pwd_change": False, "user_uuid": user["uuid"]})
     return jsonify({"access_token": create_access_token(identity=userdata)}), 200
 
 
-@app.route("/users/<uuid>/tokens", methods=["GET"])
+@app.route("/users/me/tokens", methods=["GET"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
-def create_api_token(uuid):
-    if get_jwt_identity() != uuid:
-        return abort(401)
+def list_api_tokens():
     items = []
-    for token in api_tokens.get_tokens_for_user_uuid(uuid, revoked=False):
+    for token in api_tokens.get_tokens_for_user_uuid(get_jwt_identity(), revoked=False):
         items.append(
             {
                 "jti": token["jti"],
@@ -151,13 +146,11 @@ def create_api_token(uuid):
     return jsonify({"items": items}), 200
 
 
-@app.route("/users/<uuid>/tokens", methods=["POST"])
+@app.route("/users/me/tokens", methods=["POST"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
-def list_api_tokens(uuid):
-    if get_jwt_identity() != uuid:
-        return abort(401)
+def create_api_token():
     data = request.json
     if not data:
         return abort(400)
@@ -175,15 +168,15 @@ def list_api_tokens(uuid):
     return jsonify(response), 201
 
 
-@app.route("/users/<uuid>/tokens/<jti>", methods=["DELETE"])
+@app.route("/users/me/tokens/<jti>", methods=["DELETE"])
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
-def revoke_api_token(uuid, jti):
-    if get_jwt_identity() != uuid:
-        return abort(401)
+def revoke_api_token(jti):
     token = api_tokens.get_token(jti)
     if token is None or token["revoked"]:
         return abort(404)
+    if get_jwt_identity() != token["user_uuid"]:
+        return abort(401)
     api_tokens.revoke_token(jti)
     return "", 204

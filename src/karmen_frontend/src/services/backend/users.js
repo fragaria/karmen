@@ -5,7 +5,7 @@ import { setAccessToken, setRefreshToken, getUserIdentity, getHeaders, getRefres
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const authenticate  = (username, password) => {
-    return fetch(`${BASE_URL}/users/authenticate`, {
+    return fetch(`${BASE_URL}/users/me/authenticate`, {
     method: 'POST',
     headers: {
       "content-type": "application/json"
@@ -34,7 +34,7 @@ export const authenticate  = (username, password) => {
 }
 
 export const changePassword  = (password, new_password, new_password_confirmation) => {
-    return fetch(`${BASE_URL}/users/${getUserIdentity()}`, {
+    return fetch(`${BASE_URL}/users/me`, {
     method: 'PATCH',
     headers: getHeaders(),
     body: JSON.stringify({
@@ -69,7 +69,7 @@ export const refreshAccessToken = () => {
   if (decoded.exp && dayjs().isAfter(dayjs(decoded.exp * 1000))) {
     return Promise.resolve(401);
   }
-  return fetch(`${BASE_URL}/users/authenticate-refresh`, {
+  return fetch(`${BASE_URL}/users/me/authenticate-refresh`, {
     method: 'POST',
     headers: {
       "Content-Type": "application/json",
@@ -146,7 +146,7 @@ export const checkCurrentLoginState = () => {
   }
 
   if (accessToken) {
-    return fetch(`${BASE_URL}/users/probe`, {
+    return fetch(`${BASE_URL}/users/me/probe`, {
         headers: getHeaders(),
       })
       .then((response) => {
