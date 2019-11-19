@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'karmen-icons';
-  src:  url('fonts/karmen-icons.eot?i0g061');
-  src:  url('fonts/karmen-icons.eot?i0g061#iefix') format('embedded-opentype'),
-    url('fonts/karmen-icons.ttf?i0g061') format('truetype'),
-    url('fonts/karmen-icons.woff?i0g061') format('woff'),
-    url('fonts/karmen-icons.svg?i0g061#karmen-icons') format('svg');
+  src:  url('fonts/karmen-icons.eot?lv8c8e');
+  src:  url('fonts/karmen-icons.eot?lv8c8e#iefix') format('embedded-opentype'),
+    url('fonts/karmen-icons.ttf?lv8c8e') format('truetype'),
+    url('fonts/karmen-icons.woff?lv8c8e') format('woff'),
+    url('fonts/karmen-icons.svg?lv8c8e#karmen-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-exit:before {
+  content: "\e90c";
+}
 .icon-stop:before {
   content: "\e909";
 }

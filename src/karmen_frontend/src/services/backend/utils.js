@@ -1,6 +1,17 @@
 import jwt_decode from 'jwt-decode';
 
+const _removeStorage = (key) => {
+  if (window.localStorage && window.localStorage.removeItem) {
+    window.localStorage.removeItem(key);
+  } else if (window.sessionStorage && window.sessionStorage.removeItem) {
+    window.sessionStorage.removeItem(key);
+  }
+}
+
 const _setStorage = (key, value) => {
+  if (value === null) {
+    return _removeStorage(key);
+  }
   if (window.localStorage && window.localStorage.setItem) {
     window.localStorage.setItem(key, value);
   } else if (window.sessionStorage && window.sessionStorage.setItem) {
@@ -20,7 +31,13 @@ const _getStorage = (key) => {
 export const setAccessToken = (token) => {
   if (token) {
     const decoded = jwt_decode(token);
-    _setStorage("karmen_uuid", decoded.identity);
+    _setStorage("karmen_user", JSON.stringify({
+      identity: decoded.identity,
+      username: decoded.user_claims && decoded.user_claims.username,
+      role: decoded.user_claims && decoded.user_claims.role,
+    }));
+  } else {
+    _setStorage("karmen_user", null);
   }
   return _setStorage("karmen_accesst", token);
 }
@@ -37,8 +54,8 @@ export const getRefreshToken = () => {
   return _getStorage("karmen_refresht");
 }
 
-export const getUserIdentity = () => {
-  return _getStorage("karmen_uuid");
+export const getUser = () => {
+  return JSON.parse(_getStorage("karmen_user"));
 }
 
 export const getHeaders = (withAuth=true) => {

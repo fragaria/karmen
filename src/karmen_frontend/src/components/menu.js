@@ -1,8 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { clearUserIdentity } from '../actions/users'
 
-const Menu = ({ userState }) => {
+const Menu = ({ userState, username, role, logout }) => {
   return (
     <nav>
       <h2 className="hidden">Navigation</h2>
@@ -17,8 +18,20 @@ const Menu = ({ userState }) => {
           <li>
             <Link to="/gcodes">G-Codes</Link>
           </li>
+          {role === "admin" && (
+            <li>
+              <Link to="/settings">Settings</Link>
+            </li>
+          )}
           <li>
-            <Link to="/settings">Settings</Link>
+            <small>
+              <Link to="/user-preferences">{username}</Link>
+              {' '}
+              <button className="plain" title="Logout" onClick={(e) => {
+                e.preventDefault();
+                logout();
+              }}><i className="icon icon-exit"></i></button>
+            </small>
           </li>
         </ul>
       )}
@@ -26,6 +39,13 @@ const Menu = ({ userState }) => {
   );
 }
 
-export default connect(state => ({
-  userState: state.users.currentState,
-}))(Menu);
+export default connect(
+  state => ({
+    userState: state.users.currentState,
+    username: state.users.username,
+    role: state.users.role,
+  }),
+  dispatch => ({
+    logout: () => dispatch(clearUserIdentity())
+  })
+)(Menu);

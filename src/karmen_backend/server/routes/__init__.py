@@ -56,6 +56,7 @@ def jwt_force_password_change(func):
 def add_claims_to_access_token(user):
     return {
         "role": user.get("role", "user"),
+        "username": user.get("username"),
         "force_pwd_change": user.get("force_pwd_change", False),
     }
 

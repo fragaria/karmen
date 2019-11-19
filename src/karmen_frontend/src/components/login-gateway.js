@@ -88,6 +88,12 @@ class LoginGateway extends React.Component {
           onUserStateChanged().then(() => {
             this.setState({
               submitting: false,
+              message: "",
+              messageOk: true,
+              loginForm: Object.assign({}, loginForm, {
+                password: Object.assign({}, loginForm.password, { val: '' }),
+                username: Object.assign({}, loginForm.username, { val: '' }),
+              })
             });
           });
         }
@@ -142,6 +148,13 @@ class LoginGateway extends React.Component {
           onUserStateChanged().then(() => {
             this.setState({
               submitting: false,
+              message: "",
+              messageOk: true,
+              changePwdForm: Object.assign({}, changePwdForm, {
+                password: Object.assign({}, changePwdForm.password, { val: '' }),
+                new_password: Object.assign({}, changePwdForm.new_password, { val: '' }),
+                new_password_confirmation: Object.assign({}, changePwdForm.new_password_confirmation, { val: '' }),
+              })
             });
           });
         }

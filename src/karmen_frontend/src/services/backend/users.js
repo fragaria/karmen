@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import jwt_decode from 'jwt-decode';
 
-import { setAccessToken, setRefreshToken, getUserIdentity, getHeaders, getRefreshToken, getAccessToken } from './utils';
+import { setAccessToken, setRefreshToken, getUser, getHeaders, getRefreshToken, getAccessToken } from './utils';
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const authenticate  = (username, password) => {
@@ -124,7 +124,7 @@ export const checkCurrentLoginState = () => {
   const refreshToken = getRefreshToken();
   if (!accessToken) {
     return Promise.resolve({
-      identity: null,
+      user: {},
       state: 'logged-out',
     });
   }
@@ -138,7 +138,7 @@ export const checkCurrentLoginState = () => {
         setAccessToken(null);
         setRefreshToken(null);
         return Promise.resolve({
-          identity: null,
+          user: {},
           state: 'logged-out',
         });
       }
@@ -158,12 +158,12 @@ export const checkCurrentLoginState = () => {
                 (data && data.force_pwd_change)
               ) {
                 return {
-                  identity: getUserIdentity(),
+                  user: getUser(),
                   state: 'pwd-change-required'
                 };
               }
               return {
-                identity: getUserIdentity(),
+                user: getUser(),
                 state: 'logged-in',
               };
             });
@@ -175,30 +175,30 @@ export const checkCurrentLoginState = () => {
                   .then((status) => {
                     if (status === 200) {
                       return {
-                        identity: getUserIdentity(),
+                        user: getUser(),
                         state: 'logged-in'
                       }
                     }
                     return {
-                      identity: null,
+                      user: {},
                       state: 'logged-out',
                     };
                   });
               }
               return {
-                identity: null,
+                user: {},
                 state: 'logged-out',
               };
             });
         }
         return {
-          identity: null,
+          user: {},
           state: 'logged-out',
         };
       }).catch((e) => {
         console.error(`Cannot get login state: ${e}`);
         return {
-          identity: null,
+          user: {},
           state: 'logged-out',
         }
       });

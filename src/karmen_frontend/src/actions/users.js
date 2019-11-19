@@ -12,3 +12,8 @@ export const authenticate = createActionThunk('USER_AUTHENTICATE', (username, pa
 export const changePassword = createActionThunk('USER_CHANGE_PASSWORD', (password, new_password, new_password_confirmation) => {
   return backend.changePassword(password, new_password, new_password_confirmation);
 });
+
+export const clearUserIdentity = createActionThunk('USER_CLEAR', () => {
+  backend.setAccessToken(null);
+  backend.setRefreshToken(null);
+});
