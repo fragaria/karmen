@@ -4,7 +4,8 @@ export default (state = {
   switch (action.type) {
     case "USER_LOAD_STATE_SUCCEEDED":
       return Object.assign({}, state, {
-        currentState: action.payload
+        currentState: action.payload.state,
+        identity: action.payload.identity,
       });
     default:
       return state;

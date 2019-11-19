@@ -18,8 +18,10 @@ const _getStorage = (key) => {
 }
 
 export const setAccessToken = (token) => {
-  const decoded = jwt_decode(token);
-  _setStorage("karmen_uuid", decoded.identity);
+  if (token) {
+    const decoded = jwt_decode(token);
+    _setStorage("karmen_uuid", decoded.identity);
+  }
   return _setStorage("karmen_accesst", token);
 }
 
@@ -46,6 +48,5 @@ export const getHeaders = (withAuth=true) => {
   if (token && withAuth) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  // TODO side-effect ask for a fresh access_token if viable
   return headers;
 }
