@@ -82,7 +82,7 @@ class ChangePasswordForm extends React.Component {
           onUserStateChanged().then(() => {
             this.setState({
               submitting: false,
-              message: "",
+              message: "Password changed successfully.",
               messageOk: true,
               changePwdForm: Object.assign({}, changePwdForm, {
                 password: Object.assign({}, changePwdForm.password, { val: '' }),

@@ -5,7 +5,7 @@ import { setAccessToken, setRefreshToken, getUser, getHeaders, getRefreshToken, 
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const authenticate  = (username, password) => {
-    return fetch(`${BASE_URL}/users/me/authenticate`, {
+  return fetch(`${BASE_URL}/users/me/authenticate`, {
     method: 'POST',
     headers: {
       "content-type": "application/json"
@@ -24,23 +24,24 @@ export const authenticate  = (username, password) => {
             return response.status;
           });
       } else {
-        console.error(`Cannot log in: ${response.status}`);
+        console.error(`Cannot authenticate: ${response.status}`);
       }
       return response.status;
     }).catch((e) => {
-      console.error(`Cannot log in: ${e}`);
+      console.error(`Cannot authenticate: ${e}`);
       return 500;
     });
 }
 
-export const changePassword  = (password, new_password, new_password_confirmation) => {
-    return fetch(`${BASE_URL}/users/me`, {
-    method: 'PATCH',
-    headers: getHeaders(),
+export const authenticateFresh = (username, password) => {
+  return fetch(`${BASE_URL}/users/me/authenticate-fresh`, {
+    method: 'POST',
+    headers: {
+      "content-type": "application/json"
+    },
     body: JSON.stringify({
+      username,
       password,
-      new_password,
-      new_password_confirmation,
     }),
   })
     .then((response) => {
@@ -51,13 +52,64 @@ export const changePassword  = (password, new_password, new_password_confirmatio
             return response.status;
           });
       } else {
-        console.error(`Cannot change password: ${response.status}`);
+        console.error(`Cannot authenticate for a fresh token: ${response.status}`);
       }
       return response.status;
     }).catch((e) => {
-      console.error(`Cannot change password: ${e}`);
+      console.error(`Cannot authenticate for a fresh token: ${e}`);
       return 500;
     });
+}
+
+export const changePassword  = (password, new_password, new_password_confirmation) => {
+  // pwd change always needs a fresh token - since we know password here, we can always get one
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    return Promise.resolve(401);
+  }
+  const decoded = jwt_decode(accessToken);
+  const user = getUser();
+  let beforePwdChange = Promise.resolve();
+  if (decoded.fresh === false && user.username) {
+    beforePwdChange = authenticateFresh(user.username, password)
+      .then((result) => {
+        if (result !== 200) {
+          return Promise.reject("Cannot get a fresh token");
+        }
+      });
+  }
+  
+  return beforePwdChange
+    .catch((e) => {
+      console.error(`Cannot change password: ${e}`);
+      return 500;
+    })
+    .then(() => {
+      return fetch(`${BASE_URL}/users/me`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          password,
+          new_password,
+          new_password_confirmation,
+        }),
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json()
+            .then((data) => {
+              setAccessToken(data.access_token);
+              return response.status;
+            });
+        } else {
+          console.error(`Cannot change password: ${response.status}`);
+        }
+        return response.status;
+      }).catch((e) => {
+        console.error(`Cannot change password: ${e}`);
+        return 500;
+      });
+  });
 }
 
 export const refreshAccessToken = () => {
@@ -76,33 +128,44 @@ export const refreshAccessToken = () => {
       "Authorization": `Bearer ${refreshToken}`,
     },
   }).then((response) => {
-    return response.json()
-      .then((data) => {
-        setAccessToken(data.access_token);
-        return response.status;
-      });
-  });
+    if (response.status === 200) {
+      return response.json()
+        .then((data) => {
+          setAccessToken(data.access_token);
+          return response.status;
+        });
+    } else {
+        console.error(`Cannot refresh access token: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot refresh access token: ${e}`);
+      return 500;
+    });
 }
 
 let accessTokenExpirationHandler = null;
 
-export const registerAccessTokenExpirationHandler = (timeout=60000) => {
+export const registerAccessTokenExpirationHandler = (timeout=60000, onRefresh=() => {}) => {
   const accessTokenCheck = () => {
     const accessToken = getAccessToken();
     if (!accessToken) {
-      return Promise.resolve(true);
+      return Promise.resolve();
     }
     const decoded = jwt_decode(accessToken);
     // Probably an eternal token
     if (!decoded.exp) {
-      return Promise.resolve(true);
+      return Promise.resolve();
     }
     let expiresAt = dayjs(decoded.exp * 1000);
     expiresAt = expiresAt.subtract(3 * timeout / 1000, 'seconds');
     if (dayjs().isAfter(expiresAt)) {
-      return refreshAccessToken();
+      return refreshAccessToken()
+        .then((status) => {
+          onRefresh && onRefresh(status === 200 ? getUser() : {});
+        });
     }
-    return Promise.resolve(true);
+    return Promise.resolve();
   };
   const periodicAccessTokenCheck = () => {
     accessTokenCheck()
@@ -144,7 +207,7 @@ export const checkCurrentLoginState = () => {
       }
     }
   }
-
+  // TODO make this more efficient and do not probe if token had been obtained recently
   if (accessToken) {
     return fetch(`${BASE_URL}/users/me/probe`, {
         headers: getHeaders(),

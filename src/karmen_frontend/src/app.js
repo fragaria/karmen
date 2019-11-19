@@ -5,6 +5,7 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Menu from './components/menu';
 import Heartbeat from './components/heartbeat';
 import LoginGateway from './components/login-gateway';
+import ForcePwdChangeGateway from './components/force-pwd-change-gateway';
 import Loader from './components/loader';
 
 import PrinterList from './routes/printer-list';
@@ -16,7 +17,7 @@ import AddGcode from './routes/add-gcode';
 import Settings from './routes/settings';
 import UserPreferences from './routes/user-preferences';
 
-import { loadUserState } from './actions/users';
+import { loadUserState, setTokenFreshness } from './actions/users';
 
 import { registerAccessTokenExpirationHandler, deregisterAccessTokenExpirationHandler } from './services/backend';
 
@@ -30,7 +31,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    const { loadUser } = this.props;
+    const { loadUser, setAccessTokenFreshness } = this.props;
     const { initialized } = this.state;
     if (!initialized) {
       loadUser()
@@ -39,7 +40,9 @@ class App extends React.Component {
             initialized: true,
           });
         });
-      registerAccessTokenExpirationHandler();
+      registerAccessTokenExpirationHandler(60 * 1000, (r) => {
+        setAccessTokenFreshness(r.hasFreshToken)
+      });
     }
   }
 
@@ -59,16 +62,18 @@ class App extends React.Component {
           <Menu />
           <main>
             <LoginGateway onUserStateChanged={loadUser}>
-              <Switch>
-                <Route path="/add-printer" exact component={AddPrinter} />
-                <Route path="/add-gcode" exact component={AddGcode} />
-                <Route path="/settings" exact component={Settings} />
-                <Route path="/users/me" exact component={UserPreferences} />
-                <Route path="/gcodes" exact component={GcodeList} />
-                <Route path="/gcodes/:id" exact component={GcodeDetail} />
-                <Route path="/printers/:host" exact component={PrinterDetail} />
-                <Route path="/" exact component={PrinterList} />
-              </Switch>
+              <ForcePwdChangeGateway onUserStateChanged={loadUser}>
+                <Switch>
+                  <Route path="/add-printer" exact component={AddPrinter} />
+                  <Route path="/add-gcode" exact component={AddGcode} />
+                  <Route path="/settings" exact component={Settings} />
+                  <Route path="/users/me" exact component={UserPreferences} />
+                  <Route path="/gcodes" exact component={GcodeList} />
+                  <Route path="/gcodes/:id" exact component={GcodeDetail} />
+                  <Route path="/printers/:host" exact component={PrinterDetail} />
+                  <Route path="/" exact component={PrinterList} />
+                </Switch>
+              </ForcePwdChangeGateway>
             </LoginGateway>
             <Heartbeat />
           </main>
@@ -92,6 +97,7 @@ class App extends React.Component {
 export default connect(
   null,
   dispatch => ({
-    loadUser: () => (dispatch(loadUserState()))
+    loadUser: () => (dispatch(loadUserState())),
+    setAccessTokenFreshness: (isFresh) => dispatch(setTokenFreshness(isFresh)),
   })
 )(App);

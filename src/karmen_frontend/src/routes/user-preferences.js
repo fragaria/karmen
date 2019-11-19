@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { loadUserState, loadUserApiTokens } from '../actions/users';
+import { loadUserState, loadUserApiTokens, freshTokenRequired } from '../actions/users';
 import ChangePasswordForm from '../components/change-password-form';
 
 class UserPreferences extends React.Component {
@@ -14,7 +14,8 @@ class UserPreferences extends React.Component {
 
   componentDidMount() {
     const { tokensLoaded } = this.state;
-    const { loadApiTokens } = this.props;
+    const { loadApiTokens, setFreshTokenRequired } = this.props;
+    setFreshTokenRequired(); // TODO move to a standalone component, improve copy in loginform-gateway
     if (!tokensLoaded) {
       loadApiTokens()
         .then(() => {
@@ -87,6 +88,7 @@ export default connect(
   null,
   dispatch => ({
     loadApiTokens: () => (dispatch(loadUserApiTokens())),
-    loadUser: () => (dispatch(loadUserState()))
+    loadUser: () => (dispatch(loadUserState())),
+    setFreshTokenRequired: () => dispatch(freshTokenRequired),
   })
 )(UserPreferences);

@@ -21,3 +21,18 @@ export const clearUserIdentity = createActionThunk('USER_CLEAR', () => {
   backend.setAccessToken(null);
   backend.setRefreshToken(null);
 });
+
+export const freshTokenRequired = (dispatch) => {
+  const user = backend.getUser();
+  if (!user.hasFreshToken) {
+    dispatch({
+      type: "USER_FRESH_TOKEN_REQUIRED",
+    });
+  }
+}
+
+export const setTokenFreshness = createActionThunk('USER_SET_TOKEN_FRESHNESS', (isFresh) => {
+  return {
+    isFresh
+  };
+});

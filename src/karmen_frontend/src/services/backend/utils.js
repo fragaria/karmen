@@ -9,6 +9,7 @@ const _removeStorage = (key) => {
 }
 
 const _setStorage = (key, value) => {
+  // TODO surround with try-catch block
   if (value === null) {
     return _removeStorage(key);
   }
@@ -20,6 +21,7 @@ const _setStorage = (key, value) => {
 }
 
 const _getStorage = (key) => {
+  // TODO surround with try-catch block
   if (window.localStorage && window.localStorage.getItem) {
     return window.localStorage.getItem(key);
   } else if (window.sessionStorage && window.sessionStorage.getItem) {
@@ -35,6 +37,7 @@ export const setAccessToken = (token) => {
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
       role: decoded.user_claims && decoded.user_claims.role,
+      hasFreshToken: decoded.fresh,
     }));
   } else {
     _setStorage("karmen_user", null);
@@ -55,7 +58,11 @@ export const getRefreshToken = () => {
 }
 
 export const getUser = () => {
-  return JSON.parse(_getStorage("karmen_user"));
+  const data = _getStorage("karmen_user");
+  if (data) {
+    return JSON.parse(data);
+  }
+  return {};
 }
 
 export const getHeaders = (withAuth=true) => {

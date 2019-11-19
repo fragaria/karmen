@@ -8,6 +8,11 @@ export default (state = {
         identity: action.payload.user.identity,
         username: action.payload.user.username,
         role: action.payload.user.role,
+        hasFreshToken: action.payload.user.hasFreshToken,
+      });
+    case "USER_SET_TOKEN_FRESHNESS_SUCCEEDED":
+      return Object.assign({}, state, {
+        hasFreshToken: action.payload.isFresh,
       });
     case "USER_CLEAR_SUCCEEDED":
       return Object.assign({}, state, {
@@ -16,8 +21,12 @@ export default (state = {
         username: null,
         role: null,
       });
-    case "USER_LOAD_API_TOKENS_SUCCEEDED":
+    case "USER_LOAD_API_TOKENS_SUCCEEDED": // TODO
       return Object.assign({}, state, {
+      });
+    case "USER_FRESH_TOKEN_REQUIRED":
+      return Object.assign({}, state, {
+        currentState: "fresh-token-required",
       });
     default:
       return state;

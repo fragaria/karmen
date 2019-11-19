@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { authenticate } from '../actions/users';
 import { FormInputs } from './form-utils';
-import ChangePasswordForm from './change-password-form';
 import Loader from './loader';
 
 class LoginGateway extends React.Component {
@@ -15,7 +14,7 @@ class LoginGateway extends React.Component {
       loginForm: {
         username: {
           name: "Username",
-          val: '',
+          val: props.username,
           type: 'text',
           required: true,
         },
@@ -81,23 +80,12 @@ class LoginGateway extends React.Component {
   }
 
   render() {
-    const { children, userState, onUserStateChanged } = this.props;
+    const { children, userState } = this.props;
     const { message, messageOk, submitting, loginForm } = this.state;
     if (!userState || userState === 'unknown') {
       return <div><Loader /></div>;
     }
-    if (userState === 'logged-in') {
-      return <React.Fragment>{children}</React.Fragment>;
-    } else if (userState === 'pwd-change-required') { /* TODO move this into a separate gateway/process */
-      return (
-        <div className="standalone-page">
-          <header>
-            <h1 className="title">Your password needs to be changed</h1>
-          </header>
-          <ChangePasswordForm onUserStateChanged={onUserStateChanged} />
-        </div>
-      );
-    } else {
+    if (userState === "logged-out" || userState === "fresh-token-required") {
       const updateValue = (name, value) => {
         const { loginForm } = this.state;
         this.setState({
@@ -120,6 +108,8 @@ class LoginGateway extends React.Component {
           </form>
          </div>
       );
+    } else {
+      return <React.Fragment>{children}</React.Fragment>;
     }
   }
 }
@@ -127,6 +117,7 @@ class LoginGateway extends React.Component {
 export default connect(
   state => ({
     userState: state.users.currentState,
+    username: state.users.username,
   }),
   dispatch => ({
     doAuthenticate: (username, password) => dispatch(authenticate(username, password)),

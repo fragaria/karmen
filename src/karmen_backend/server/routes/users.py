@@ -87,7 +87,8 @@ def probe():
     return jsonify({"force_pwd_change": False}), 200
 
 
-# This returns nonfresh access_token with reset force_pwd_change user claim
+# This returns fresh access_token with reset force_pwd_change user claim
+# Token is fresh, because you already need a fresh one to call this method
 @app.route("/users/me", methods=["PATCH"])
 @cross_origin()
 @jwt_required
@@ -125,7 +126,7 @@ def change_password():
 
     userdata = dict(user)
     userdata.update({"force_pwd_change": False, "user_uuid": user["uuid"]})
-    return jsonify({"access_token": create_access_token(identity=userdata)}), 200
+    return jsonify({"access_token": create_access_token(identity=userdata, fresh=True)}), 200
 
 
 @app.route("/users/me/tokens", methods=["GET"])
