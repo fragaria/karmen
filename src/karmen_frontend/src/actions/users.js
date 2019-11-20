@@ -41,6 +41,10 @@ export const loadUserApiTokens = createActionThunk('USER_LOAD_API_TOKENS', () =>
   return backend.loadApiTokens();
 });
 
+export const addUserApiToken = createActionThunk('USER_ADD_API_TOKEN', (name) => {
+  return backend.addApiToken(name);
+});
+
 export const deleteUserApiToken = createActionThunk('USER_DELETE_API_TOKEN', (jti) => {
   return backend.deleteApiToken(jti)
     .then((status) => {

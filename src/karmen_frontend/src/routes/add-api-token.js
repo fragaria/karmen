@@ -3,8 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { BackLink } from '../components/back';
 import { FormInputs } from '../components/form-utils';
-import { addApiToken } from '../services/backend';
-import { loadUserApiTokens } from '../actions/users';
+import { addUserApiToken } from '../actions/users';
 import FreshTokenRequiredCheck from '../components/fresh-token-required-check';
 
 class AddApiToken extends React.Component {
@@ -50,7 +49,7 @@ class AddApiToken extends React.Component {
     this.setState({
       form: updatedForm,
     });
-    const { loadApiTokens } = this.props;
+    const { addApiToken } = this.props;
     if (!hasErrors) {
       addApiToken(form.name.val)
         .then((r) => {
@@ -61,7 +60,6 @@ class AddApiToken extends React.Component {
                 showToken: true,
                 createdToken: r.data.access_token,
               });
-              loadApiTokens();
               break;
             default:
               this.setState({
@@ -143,9 +141,9 @@ class AddApiToken extends React.Component {
 
 export default connect(
   state => ({
-    hasFreshToken: state.users.hasFreshToken
+    hasFreshToken: state.users.hasFreshToken,
   }),
   dispatch => ({
-    loadApiTokens: () => (dispatch(loadUserApiTokens())),
+    addApiToken: (name) => (dispatch(addUserApiToken(name))),
   })
 )(AddApiToken);

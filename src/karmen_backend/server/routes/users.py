@@ -1,3 +1,4 @@
+from datetime import datetime
 import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -170,7 +171,12 @@ def create_api_token():
     token = create_access_token(identity=user, expires_delta=False)
     jti = decode_token(token)["jti"]
     api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)
-    response = {"access_token": token, "name": name, "jti": jti}
+    response = {
+        "access_token": token,
+        "name": name,
+        "jti": jti,
+        "created": datetime.now().isoformat(),
+    }
     return jsonify(response), 201
 
 

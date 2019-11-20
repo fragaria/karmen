@@ -4,6 +4,7 @@ export default (state = {
   apiTokens: [],
   apiTokensLoaded: false,
 }, action) => {
+  const { apiTokens } = state;
   switch (action.type) {
     case "USER_LOAD_STATE_SUCCEEDED":
       return Object.assign({}, state, {
@@ -29,8 +30,16 @@ export default (state = {
         apiTokens: action.payload,
         apiTokensLoaded: true,
       });
+    case "USER_ADD_API_TOKEN_SUCCEEDED":
+      apiTokens.push({
+        jti: action.payload.data.jti,
+        name:action.payload.data.name,
+        created: action.payload.data.created,
+      })
+      return Object.assign({}, state, {
+        apiTokens: [].concat(apiTokens),
+      });
     case "USER_DELETE_API_TOKEN_SUCCEEDED":
-      const { apiTokens } = state;
       return Object.assign({}, state, {
         apiTokens: apiTokens.filter((t) => {
           return t.jti !== action.payload.jti;
