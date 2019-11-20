@@ -63,7 +63,7 @@ class PrinterConnectionForm extends React.Component {
                 this.changePrinterConnection();
               }}
               disabled={submitting}>{submitting ? "Working..." : "Yes, please"}</button>
-              <button type="reset" onClick={(e) => {
+              <button type="reset" className={submitting ? "hidden" : ""} onClick={(e) => {
                 e.preventDefault();
                 this.setState({
                   submitting: false,

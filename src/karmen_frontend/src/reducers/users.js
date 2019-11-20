@@ -1,5 +1,6 @@
 export default (state = {
   currentState: 'unknown',
+  username: '',
   apiTokens: [],
   apiTokensLoaded: false,
 }, action) => {
@@ -20,7 +21,7 @@ export default (state = {
       return Object.assign({}, state, {
         currentState: "logged-out",
         identity: null,
-        username: null,
+        username: '',
         role: null,
       });
     case "USER_LOAD_API_TOKENS_SUCCEEDED":

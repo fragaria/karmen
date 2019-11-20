@@ -522,7 +522,12 @@ nav {
     display: flex;
     align-items: center;
 
-    a {
+    li {
+      vertical-align: middle;
+    }
+
+
+    a, button {
       display: inline-block;
       padding: 0 0 0 $base-unit*2;
       color: $color-primary;

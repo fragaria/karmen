@@ -24,14 +24,13 @@ const Menu = ({ userState, username, role, logout }) => {
             </li>
           )}
           <li>
-            <small>
-              <Link to="/users/me">{username}</Link>
-              {' '}
-              <button className="plain" title="Logout" onClick={(e) => {
-                e.preventDefault();
-                logout();
-              }}><i className="icon icon-exit"></i></button>
-            </small>
+            <Link to="/users/me">{username}</Link>
+          </li>
+          <li>
+            <button className="plain" title="Logout" onClick={(e) => {
+              e.preventDefault();
+              logout();
+            }}><i className="icon icon-exit"></i></button>
           </li>
         </ul>
       )}

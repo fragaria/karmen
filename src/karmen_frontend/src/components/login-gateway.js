@@ -15,7 +15,7 @@ class LoginGateway extends React.Component {
       loginForm: {
         username: {
           name: "Username",
-          val: props.username,
+          val: props.username || '',
           type: 'text',
           required: true,
         },
@@ -106,7 +106,7 @@ class LoginGateway extends React.Component {
             <FormInputs definition={loginForm} updateValue={updateValue} />
             <div className="form-actions">
               <button type="submit" onClick={this.login} disabled={submitting}>Login</button>
-              {userState === "fresh-token-required" && <button type="reset" onClick={() => {
+              {userState === "fresh-token-required" && <button className={submitting ? "hidden" : ""} type="reset" onClick={() => {
                 setCurrentUserState("logged-in");
                 history.push('/');
               }} disabled={submitting}>Cancel</button>}
