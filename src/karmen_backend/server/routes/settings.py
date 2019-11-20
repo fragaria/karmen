@@ -1,4 +1,4 @@
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app
 from server.database import settings
@@ -28,12 +28,12 @@ def settings_list():
 def settings_change():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     # Doing this in two passes ensures no partial updates happen
     props = {n.lower(): app.config[n] for n in CONFIGURABLE_SETTINGS}
     for row in data:
         if not "key" in row or not "val" in row or row["key"] not in props:
-            return abort(400)
+            return abort(make_response("", 400))
     for row in data:
         settings.upsert_val(row["key"], row["val"])
     return "", 201

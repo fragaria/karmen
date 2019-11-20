@@ -1,5 +1,5 @@
 import bcrypt
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import (
     create_access_token,
@@ -18,21 +18,21 @@ from server.database import users, local_users, api_tokens
 def authenticate_base(include_refresh_token):
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     username = data.get("username", None)
     password = data.get("password", None)
     if not username or not password:
-        return abort(400)
+        return abort(make_response("", 400))
 
     user = users.get_by_username(username)
     if not user:
-        return abort(401)
+        return abort(make_response("", 401))
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(401)
+        return abort(make_response("", 401))
     if not bcrypt.checkpw(password.encode("utf8"), local["pwd_hash"].encode("utf8")):
-        return abort(401)
+        return abort(make_response("", 401))
 
     userdata = dict(user)
     userdata.update(local)
@@ -63,11 +63,11 @@ def authenticate_fresh():
 def refresh():
     user = get_current_user()
     if not user:
-        return abort(401)
+        return abort(make_response("", 401))
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(401)
+        return abort(make_response("", 401))
     userdata = dict(user)
     userdata.update(local)
     return jsonify({"access_token": create_access_token(identity=userdata)}), 200
@@ -79,7 +79,7 @@ def refresh():
 def probe():
     user = get_current_user()
     if not user:
-        return abort(401)
+        return abort(make_response("", 401))
     if "local" in user["providers"]:
         luser = local_users.get_local_user(user["uuid"])
         if luser["force_pwd_change"]:
@@ -96,7 +96,7 @@ def probe():
 def change_password():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     password = data.get("password", None)
     new_password = data.get("new_password", None)
     new_password_confirmation = data.get("new_password_confirmation", None)
@@ -106,18 +106,18 @@ def change_password():
         or not new_password_confirmation
         or new_password != new_password_confirmation
     ):
-        return abort(400)
+        return abort(make_response("", 400))
 
     user = get_current_user()
     if not user:
-        return abort(401)
+        return abort(make_response("", 401))
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(401)
+        return abort(make_response("", 401))
 
     if not bcrypt.checkpw(password.encode("utf8"), local["pwd_hash"].encode("utf8")):
-        return abort(401)
+        return abort(make_response("", 401))
 
     pwd_hash = bcrypt.hashpw(new_password.encode("utf8"), bcrypt.gensalt())
     local_users.update_local_user(
@@ -126,7 +126,10 @@ def change_password():
 
     userdata = dict(user)
     userdata.update({"force_pwd_change": False, "user_uuid": user["uuid"]})
-    return jsonify({"access_token": create_access_token(identity=userdata, fresh=True)}), 200
+    return (
+        jsonify({"access_token": create_access_token(identity=userdata, fresh=True)}),
+        200,
+    )
 
 
 @app.route("/users/me/tokens", methods=["GET"])
@@ -153,14 +156,14 @@ def list_api_tokens():
 def create_api_token():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     name = data.get("name", None)
     if not name:
-        return abort(400)
+        return abort(make_response("", 400))
 
     user = get_current_user()
     if not user:
-        return abort(401)
+        return abort(make_response("", 401))
     token = create_access_token(identity=user, expires_delta=False)
     jti = decode_token(token)["jti"]
     api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)
@@ -175,8 +178,8 @@ def create_api_token():
 def revoke_api_token(jti):
     token = api_tokens.get_token(jti)
     if token is None or token["revoked"]:
-        return abort(404)
+        return abort(make_response("", 404))
     if get_jwt_identity() != token["user_uuid"]:
-        return abort(401)
+        return abort(make_response("", 401))
     api_tokens.revoke_token(jti)
     return "", 204

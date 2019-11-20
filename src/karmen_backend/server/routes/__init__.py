@@ -1,5 +1,5 @@
 import functools
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_current_user
 from server import app, jwt, __version__
@@ -17,14 +17,28 @@ def jwt_requires_role(required_role):
             role = claims.get("role", None)
             if not role or role != required_role or role != "admin":
                 return abort(
-                    401, "Token does not match the required role of %s" % required_role
+                    make_response(
+                        jsonify(
+                            message="Token does not match the required role of %s"
+                            % required_role
+                        ),
+                        401,
+                    )
                 )
             # check current situation, the token might be from a role-change or user delete period
             user = get_current_user()
             if not user:
-                return abort(401)
+                return abort(make_response("", 401))
             if user["role"] != required_role or role != "admin":
-                return abort(401)
+                return abort(
+                    make_response(
+                        jsonify(
+                            message="User does not have the required role of %s or admin"
+                            % required_role
+                        ),
+                        401,
+                    )
+                )
             return func(*args, **kwargs)
 
         return wrap
@@ -42,11 +56,16 @@ def jwt_force_password_change(func):
         force_pwd_change = claims.get("force_pwd_change", None)
         user = get_current_user()
         if not user:
-            return abort(401)
+            return abort(make_response("", 401))
         if "local" in user["providers"] and force_pwd_change:
             luser = db_local_users.get_local_user(user["uuid"])
             if luser["force_pwd_change"]:
-                return abort(401, "Password change is enforced on this account!")
+                return abort(
+                    make_response(
+                        jsonify(message="Password change is enforced on this account!"),
+                        401,
+                    )
+                )
         return func(*args, **kwargs)
 
     return wrap
@@ -81,7 +100,9 @@ def user_identity_lookup(user):
 def user_loader_callback(identity):
     user = db_users.get_by_uuid(identity)
     if user["suspended"]:
-        return abort(401, "This account has been suspended")
+        return abort(
+            make_response(jsonify(message="This account has been suspended"), 401)
+        )
     return user
 
 

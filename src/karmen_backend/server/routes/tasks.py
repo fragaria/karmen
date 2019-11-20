@@ -1,4 +1,4 @@
-from flask import request, abort
+from flask import request, abort, make_response
 from flask_cors import cross_origin
 from server import app
 from server.tasks.scan_network import scan_network
@@ -12,11 +12,11 @@ from . import jwt_force_password_change, jwt_requires_role
 def enqueue_task():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     if "task" not in data:
-        return abort(400)
+        return abort(make_response("", 400))
     if data["task"] not in ["scan_network"]:
-        return abort(400)
+        return abort(make_response("", 400))
     if data["task"] == "scan_network":
         try:
             scan_network.delay()

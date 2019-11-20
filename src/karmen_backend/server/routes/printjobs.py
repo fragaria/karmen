@@ -1,4 +1,4 @@
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, clients
 from server.database import printjobs, printers, gcodes
@@ -24,24 +24,28 @@ def make_printjob_response(printjob, fields=None):
 def printjob_create():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     gcode_id = data.get("gcode", None)
     printer_host = data.get("printer", None)
     if not gcode_id or not printer_host:
-        return abort(400)
+        return abort(make_response("", 400))
     printer = printers.get_printer(printer_host)
     if printer is None:
-        return abort(404)
+        return abort(make_response("", 404))
     gcode = gcodes.get_gcode(gcode_id)
     if gcode is None:
-        return abort(404)
+        return abort(make_response("", 404))
     try:
         printer_inst = clients.get_printer_instance(printer)
         uploaded = printer_inst.upload_and_start_job(
             gcode["absolute_path"], gcode["path"]
         )
         if not uploaded:
-            return abort(500, "Cannot upload the g-code to the printer")
+            return abort(
+                make_response(
+                    jsonify(message="Cannot upload the g-code to the printer"), 500
+                )
+            )
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode["id"],
             printer_host=printer["host"],
@@ -63,7 +67,7 @@ def printjob_create():
             201,
         )
     except clients.utils.PrinterClientException:
-        return abort(409)
+        return abort(make_response("", 409))
 
 
 @app.route("/printjobs", methods=["GET"])
@@ -73,7 +77,7 @@ def printjobs_list():
     printjob_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
-        return abort(400)
+        return abort(make_response("", 400))
     if order_by in ["gcode_data", "printer_data"]:
         order_by = ""
     try:
@@ -119,7 +123,7 @@ def printjobs_list():
             "%s?%s" % (next_href, "&".join(parts)) if parts else next_href
         )
 
-    return jsonify(response)
+    return jsonify(response), 200
 
 
 @app.route("/printjobs/<id>", methods=["GET"])
@@ -128,7 +132,7 @@ def printjobs_list():
 def printjob_detail(id):
     printjob = printjobs.get_printjob(id)
     if printjob is None:
-        return abort(404)
+        return abort(make_response("", 404))
     return jsonify(make_printjob_response(printjob))
 
 
@@ -138,9 +142,13 @@ def printjob_detail(id):
 def printjob_delete(id):
     printjob = printjobs.get_printjob(id)
     if printjob is None:
-        return abort(404)
+        return abort(make_response("", 404))
     user = get_current_user()
     if user["uuid"] != printjob["user_uuid"] and user["role"] not in ["admin"]:
-        return abort(401)
+        return abort(
+            make_response(
+                jsonify(message="Printjob does not belong to %s" % user["uuid"]), 401
+            )
+        )
     printjobs.delete_printjob(id)
     return "", 204

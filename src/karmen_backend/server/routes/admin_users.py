@@ -1,6 +1,6 @@
 import uuid
 import bcrypt
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
 from server import app
@@ -16,19 +16,19 @@ from . import jwt_requires_role, jwt_force_password_change
 def create_user():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     username = data.get("username", None)
     role = data.get("role", None)
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
     if not username or not password or not role:
-        return abort(400)
+        return abort(make_response("", 400))
     if password != password_confirmation:
-        return abort(400)
+        return abort(make_response("", 400))
     if role not in ["admin", "user"]:
-        return abort(400)
+        return abort(make_response("", 400))
     if users.get_by_username(username) is not None:
-        return abort(409)
+        return abort(make_response("", 409))
 
     pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
     new_uuid = uuid.uuid4()
@@ -57,19 +57,19 @@ def create_user():
 def update_user(uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
-        return abort(409)
+        return abort(make_response("", 409))
     user = users.get_by_uuid(uuid)
     if user is None:
-        return abort(404)
+        return abort(make_response("", 404))
 
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
 
     role = data.get("role", user["role"])
     suspended = data.get("suspended", user["suspended"])
     if role not in ["admin", "user"]:
-        return abort(400)
+        return abort(make_response("", 400))
 
     user["role"] = role
     user["suspended"] = suspended
@@ -105,7 +105,7 @@ def list_users():
     user_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
-        return abort(400)
+        return abort(make_response("", 400))
     try:
         limit = int(request.args.get("limit", 200))
         if limit and limit < 0:
@@ -144,4 +144,4 @@ def list_users():
             "%s?%s" % (next_href, "&".join(parts)) if parts else next_href
         )
 
-    return jsonify(response)
+    return jsonify(response), 200

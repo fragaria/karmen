@@ -58,7 +58,7 @@ def upload():
         )
         analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
-        return abort(e, 500)
+        return abort(500, e)
     return (
         jsonify(
             {

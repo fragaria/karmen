@@ -1,7 +1,7 @@
 import re
 import datetime
 
-from flask import jsonify, request, abort, send_file
+from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
 from server import app, __version__
 from server.database import gcodes, printjobs
@@ -44,7 +44,7 @@ def gcodes_list():
     gcode_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
-        return abort(400)
+        return abort(make_response("", 400))
     try:
         limit = int(request.args.get("limit", 200))
         if limit and limit < 0:
@@ -97,7 +97,7 @@ def gcodes_list():
 def gcode_detail(id):
     gcode = gcodes.get_gcode(id)
     if gcode is None:
-        return abort(404)
+        return abort(make_response("", 404))
     return jsonify(make_gcode_response(gcode))
 
 
@@ -106,13 +106,13 @@ def gcode_detail(id):
 @cross_origin()
 def gcode_create():
     if "file" not in request.files:
-        return abort(400)
+        return abort(make_response("", 400))
     incoming = request.files["file"]
     if incoming.filename == "":
-        return abort(400)
+        return abort(make_response("", 400))
 
     if not re.search(r"\.gco(de)?$", incoming.filename):
-        return abort(415)
+        return abort(make_response("", 415))
 
     try:
         saved = files.save(incoming, request.form.get("path", "/"))
@@ -126,7 +126,7 @@ def gcode_create():
         )
         analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
-        return abort(e, 500)
+        return abort(make_response(jsonify(message=str(e)), 500))
     return (
         jsonify(
             make_gcode_response(
@@ -152,7 +152,7 @@ def gcode_create():
 def gcode_file(id):
     gcode = gcodes.get_gcode(id)
     if gcode is None:
-        return abort(404)
+        return abort(make_response("", 404))
     try:
         return send_file(
             gcode["absolute_path"],
@@ -160,7 +160,7 @@ def gcode_file(id):
             attachment_filename=gcode["filename"],
         )
     except FileNotFoundError:
-        return abort(404)
+        return abort(make_response("", 404))
 
 
 @app.route("/gcodes/<id>", methods=["DELETE"])
@@ -169,10 +169,14 @@ def gcode_file(id):
 def gcode_delete(id):
     gcode = gcodes.get_gcode(id)
     if gcode is None:
-        return abort(404)
+        return abort(make_response("", 404))
     user = get_current_user()
     if user["uuid"] != gcode["user_uuid"] and user["role"] not in ["admin"]:
-        return abort(401)
+        return abort(
+            make_response(
+                jsonify(message="G-Code does not belong to %s" % user["uuid"]), 401
+            )
+        )
     try:
         files.remove(gcode["absolute_path"])
     except IOError:

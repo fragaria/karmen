@@ -1,6 +1,6 @@
 import re
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, __version__
 from server.database import printers
@@ -48,7 +48,7 @@ def printers_list():
     for printer in printers.get_printers():
         # TODO this should somehow go in parallel
         device_list.append(make_printer_response(printer, fields))
-    return jsonify({"items": device_list})
+    return jsonify({"items": device_list}), 200
 
 
 @app.route("/printers/<host>", methods=["GET"])
@@ -58,7 +58,7 @@ def printer_detail(host):
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
     printer = printers.get_printer(host)
     if printer is None:
-        return abort(404)
+        return abort(make_response("", 404))
     return jsonify(make_printer_response(printer, fields))
 
 
@@ -68,7 +68,7 @@ def printer_detail(host):
 def printer_create():
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     host = data.get("host", None)
     name = data.get("name", None)
     api_key = data.get("api_key", None)
@@ -79,9 +79,9 @@ def printer_create():
         or protocol not in ["http", "https"]
         or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", host) is None
     ):
-        return abort(400)
+        return abort(make_response("", 400))
     if printers.get_printer(host) is not None:
-        return abort(409)
+        return abort(make_response("", 409))
     hostname = network.get_avahi_hostname(host)
     printer = clients.get_printer_instance(
         {
@@ -116,7 +116,7 @@ def printer_create():
 def printer_delete(host):
     printer = printers.get_printer(host)
     if printer is None:
-        return abort(404)
+        return abort(make_response("", 404))
     printers.delete_printer(host)
     return "", 204
 
@@ -127,15 +127,15 @@ def printer_delete(host):
 def printer_patch(host):
     printer = printers.get_printer(host)
     if printer is None:
-        return abort(404)
+        return abort(make_response("", 404))
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     name = data.get("name", printer["name"])
     protocol = data.get("protocol", printer["protocol"])
     api_key = data.get("api_key", printer["client_props"].get("api_key", None))
     if not name or protocol not in ["http", "https"]:
-        return abort(400)
+        return abort(make_response("", 400))
     printer_inst = clients.get_printer_instance(printer)
     printer_inst.add_api_key(api_key)
     if data.get("api_key", "-1") != "-1" and data.get("api_key", "-1") != printer[
@@ -181,10 +181,10 @@ def printer_patch(host):
 def printer_change_connection(host):
     printer = printers.get_printer(host)
     if printer is None:
-        return abort(404)
+        return abort(make_response("", 404))
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     state = data.get("state", None)
     printer_inst = clients.get_printer_instance(printer)
     if state == "online":
@@ -202,7 +202,7 @@ def printer_change_connection(host):
             else ("Cannot change printer's connection state to offline", 500)
         )
     else:
-        return abort(400)
+        return abort(make_response("", 400))
     return "", 204
 
 
@@ -215,23 +215,23 @@ def printer_modify_job(host):
     # but that means creating a new tracking of current jobs on each printer
     printer = printers.get_printer(host)
     if printer is None:
-        return abort(404)
+        return abort(make_response("", 404))
     data = request.json
     if not data:
-        return abort(400)
+        return abort(make_response("", 400))
     action = data.get("action", None)
     if not action:
-        return abort(400)
+        return abort(make_response("", 400))
     printer_inst = clients.get_printer_instance(printer)
     try:
         if printer_inst.modify_current_job(action):
             return "", 204
-        return "", 409
+        return abort(make_response("", 409))
     except clients.utils.PrinterClientException as e:
-        return abort(400, e)
+        return abort(make_response(jsonify(message=str(e)), 400))
 
 
 @app.route("/proxied-webcam/<host>", methods=["GET"])
 @cross_origin()
 def printer_webcam(host):
-    return abort(503)
+    return abort(make_response("", 503))
