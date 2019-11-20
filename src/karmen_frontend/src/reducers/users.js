@@ -21,12 +21,12 @@ export default (state = {
         username: null,
         role: null,
       });
-    case "USER_LOAD_API_TOKENS_SUCCEEDED": // TODO
+//    case "USER_LOAD_API_TOKENS_SUCCEEDED": // TODO
+//      return Object.assign({}, state, {
+//      });
+    case "USER_SET_CURRENT_STATE":
       return Object.assign({}, state, {
-      });
-    case "USER_FRESH_TOKEN_REQUIRED":
-      return Object.assign({}, state, {
-        currentState: "fresh-token-required",
+        currentState: action.payload.currentState,
       });
     default:
       return state;

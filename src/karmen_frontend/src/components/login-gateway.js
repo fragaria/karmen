@@ -1,6 +1,7 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { authenticate } from '../actions/users';
+import { authenticate, setCurrentState } from '../actions/users';
 import { FormInputs } from './form-utils';
 import Loader from './loader';
 
@@ -80,7 +81,7 @@ class LoginGateway extends React.Component {
   }
 
   render() {
-    const { children, userState } = this.props;
+    const { children, userState, setCurrentUserState, history } = this.props;
     const { message, messageOk, submitting, loginForm } = this.state;
     if (!userState || userState === 'unknown') {
       return <div><Loader /></div>;
@@ -98,12 +99,17 @@ class LoginGateway extends React.Component {
         <div className="standalone-page">
           <header>
             <h1 className="title">Login required</h1>
+            {userState === "fresh-token-required" && <p><strong>The actions you are about to take need to be authorized by your password.</strong></p>}
           </header>
           <form>
             {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
             <FormInputs definition={loginForm} updateValue={updateValue} />
             <div className="form-actions">
               <button type="submit" onClick={this.login} disabled={submitting}>Login</button>
+              {userState === "fresh-token-required" && <button type="reset" onClick={() => {
+                setCurrentUserState("logged-in");
+                history.push('/');
+              }} disabled={submitting}>Cancel</button>}
             </div>
           </form>
          </div>
@@ -114,12 +120,13 @@ class LoginGateway extends React.Component {
   }
 }
 
-export default connect(
+export default withRouter(connect(
   state => ({
     userState: state.users.currentState,
     username: state.users.username,
   }),
   dispatch => ({
     doAuthenticate: (username, password) => dispatch(authenticate(username, password)),
+    setCurrentUserState: (userState) => dispatch(setCurrentState(userState)),
   })
-)(LoginGateway);
+)(LoginGateway));

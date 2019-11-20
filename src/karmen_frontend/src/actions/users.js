@@ -22,13 +22,17 @@ export const clearUserIdentity = createActionThunk('USER_CLEAR', () => {
   backend.setRefreshToken(null);
 });
 
-export const freshTokenRequired = (dispatch) => {
+export const setCurrentState = (currentState) => (dispatch) => {
   const user = backend.getUser();
-  if (!user.hasFreshToken) {
-    dispatch({
-      type: "USER_FRESH_TOKEN_REQUIRED",
-    });
+  if (user.hasFreshToken && currentState === "fresh-token-required") {
+    return;
   }
+  dispatch({
+    type: "USER_SET_CURRENT_STATE",
+    payload: {
+      currentState: currentState
+    }
+  });
 }
 
 export const setTokenFreshness = createActionThunk('USER_SET_TOKEN_FRESHNESS', (isFresh) => {

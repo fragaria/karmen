@@ -1,7 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { loadUserState, loadUserApiTokens, freshTokenRequired } from '../actions/users';
+import { loadUserState, loadUserApiTokens } from '../actions/users';
 import ChangePasswordForm from '../components/change-password-form';
+import ApiTokensTable from '../components/api-tokens-table';
+import FreshTokenRequiredCheck from '../components/fresh-token-required-check';
 
 class UserPreferences extends React.Component {
   constructor(props) {
@@ -12,31 +14,11 @@ class UserPreferences extends React.Component {
     }
   }
 
-  componentDidMount() {
-    const { tokensLoaded } = this.state;
-    const { loadApiTokens, setFreshTokenRequired } = this.props;
-    setFreshTokenRequired(); // TODO move to a standalone component, improve copy in loginform-gateway
-    if (!tokensLoaded) {
-      loadApiTokens()
-        .then(() => {
-          this.setState({
-            tokensLoaded: true
-          });
-        });
-    }
-  }
-
   render () {
-    const { loadUser } = this.props;
-    const { tokens, tokensLoaded } = this.state;
-    const tokensRows = tokens && tokens.map((t) => {
-      return <tr key={t.id}>
-          <td>{t.jti}</td>
-          <td>{t.name}</td>
-          <td>{t.created}</td>
-          <td>Revoke</td>
-        </tr>
-    });
+    const { loadUser, hasFreshToken, loadApiTokens } = this.props;
+    if (!hasFreshToken) {
+      return <FreshTokenRequiredCheck />
+    }
     return (
       <div className="standalone-page">
         <header>
@@ -51,44 +33,24 @@ class UserPreferences extends React.Component {
                   <span>Add a token</span>
                 </button>
             </header>
-
-            {!tokensLoaded
-              ? <p className="message-block">Loading...</p>
-              : (!tokensRows || tokensRows.length === 0
-                ? <p className="message-error message-block">No API tokens found!</p>
-                : (
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{"width": "50%"}}>Token</th>
-                      <th>Name</th>
-                      <th>Created
-                      <th>Actions</th>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tokensRows}
-                  </tbody>
-                  </table>
-              ))
-            }
+            <ApiTokensTable loadApiTokens={loadApiTokens} />
           </div>
           <div>
             <h2>Change password</h2>
             <ChangePasswordForm onUserStateChanged={loadUser} />
           </div>
-         </div>
+        </div>
       </div>
     );
   }
 }
 
 export default connect(
-  null,
+  state => ({
+    hasFreshToken: state.users.hasFreshToken
+  }),
   dispatch => ({
     loadApiTokens: () => (dispatch(loadUserApiTokens())),
     loadUser: () => (dispatch(loadUserState())),
-    setFreshTokenRequired: () => dispatch(freshTokenRequired),
   })
 )(UserPreferences);
