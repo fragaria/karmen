@@ -28,6 +28,9 @@ def authenticate_base(include_refresh_token):
     if not user:
         return abort(make_response("", 401))
 
+    if user["suspended"]:
+        return abort(make_response(jsonify(message="Account suspended"), 401))
+
     local = local_users.get_local_user(user["uuid"])
     if not local:
         return abort(make_response("", 401))
