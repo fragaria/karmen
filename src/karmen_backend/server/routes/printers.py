@@ -10,7 +10,11 @@ from . import jwt_force_password_change, jwt_requires_role
 
 
 def make_printer_response(printer, fields):
-    printer_inst = clients.get_printer_instance(printer)
+    if not isinstance(printer, clients.utils.PrinterClient):
+        printer_inst = clients.get_printer_instance(printer)
+    else:
+        printer_inst = printer
+
     data = {
         "client": {
             "name": printer_inst.client_name(),
@@ -107,7 +111,7 @@ def printer_create():
             "api_key": printer.client_info.api_key,
         },
     )
-    return "", 201
+    return jsonify(make_printer_response(printer, ['status', 'webcam', 'job'])), 201
 
 
 @app.route("/printers/<host>", methods=["DELETE"])

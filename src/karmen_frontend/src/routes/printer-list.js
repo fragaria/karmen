@@ -1,51 +1,44 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
 import PrinterView from '../components/printer-view';
-import { getPrinters } from '../services/backend';
+import { loadPrinters, deletePrinter } from '../actions/printers';
 
 class PrinterList extends React.Component {
-  state = {
-    printers: null,
-    timer: null,
-  }
-
   constructor(props) {
     super(props);
-    this.loadPrinters = this.loadPrinters.bind(this);
+    this.state = {
+      timer: null,
+    }
+    this.refreshPrinters = this.refreshPrinters.bind(this);
   }
 
-  loadPrinters() {
-    getPrinters(['job', 'status', 'webcam']).then((printers) => {
+  componentDidMount() {
+    this.refreshPrinters();
+  }
+
+  refreshPrinters() {
+    const { loadPrinters } = this.props;
+    loadPrinters().then(() => {
       this.setState({
-        printers,
-        timer: setTimeout(this.loadPrinters, 3000),
+        timer: setTimeout(this.refreshPrinters, 3000),
       });
     });
   }
 
-  componentDidMount() {
-    this.loadPrinters();
-  }
-
   componentWillUnmount() {
     const { timer } = this.state;
-    if (timer) {
-      clearTimeout(timer);
-    }
+    timer && clearTimeout(timer);
   }
 
   render () {
-    const { printers } = this.state;
-    if (printers === null || printers === undefined) {
+    const { printersLoaded, printers, deletePrinter } = this.props;
+    if (!printersLoaded) {
       return <div><Loader /></div>;
     }
-    const printerElements = printers && printers.sort((p, r) => p.name > r.name ? 1 : -1).map((p) => {
-      return <div key={p.host} className="content-box"><PrinterView printer={p} onPrinterDelete={(host) => {
-        this.setState({
-          printers: printers.filter((p) => p.host !== host),
-        });
-      }} /></div>
+    const printerElements = printers && printers.map((p) => {
+      return <div key={p.host} className="content-box"><PrinterView printer={p} onPrinterDelete={deletePrinter} /></div>
     });
     return (
       <div className="printer-list">
@@ -64,4 +57,13 @@ class PrinterList extends React.Component {
   }
 }
 
-export default PrinterList;
+export default connect(
+  state => ({
+    printers: state.printers.printers,
+    printersLoaded: state.printers.printersLoaded,
+  }),
+  dispatch => ({
+    loadPrinters: () => (dispatch(loadPrinters(['job', 'status', 'webcam']))),
+    deletePrinter: (host) => (dispatch(deletePrinter(host))),
+  })
+)(PrinterList);

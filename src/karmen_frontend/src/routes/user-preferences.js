@@ -7,14 +7,6 @@ import ApiTokensTable from '../components/api-tokens-table';
 import FreshTokenRequiredCheck from '../components/fresh-token-required-check';
 
 class UserPreferences extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      tokensLoaded: false,
-      tokens: [],
-    }
-  }
-
   render () {
     const { loadUser, hasFreshToken, loadApiTokens, apiTokens, apiTokensLoaded, onTokenDelete } = this.props;
     if (!hasFreshToken) {

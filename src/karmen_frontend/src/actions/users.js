@@ -26,10 +26,13 @@ export const changePassword = createActionThunk('USER_CHANGE_PASSWORD', (passwor
   return backend.changePassword(password, new_password, new_password_confirmation);
 });
 
-export const clearUserIdentity = createActionThunk('USER_CLEAR', () => {
+export const clearUserIdentity = () => (dispatch) => {
   backend.setAccessToken(null);
   backend.setRefreshToken(null);
-});
+  dispatch({
+    type: "USER_CLEAR",
+  });
+};
 
 export const setTokenFreshness = createActionThunk('USER_SET_TOKEN_FRESHNESS', (isFresh) => {
   return {

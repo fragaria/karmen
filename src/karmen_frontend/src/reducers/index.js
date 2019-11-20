@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux';
+import printers from './printers';
 import users from './users';
 
 export default combineReducers({
- users
+ printers,
+ users,
 });

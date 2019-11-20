@@ -18,7 +18,7 @@ export default (state = {
       return Object.assign({}, state, {
         hasFreshToken: action.payload.isFresh,
       });
-    case "USER_CLEAR_SUCCEEDED":
+    case "USER_CLEAR":
       return Object.assign({}, state, {
         currentState: "logged-out",
         identity: null,
@@ -27,7 +27,7 @@ export default (state = {
       });
     case "USER_LOAD_API_TOKENS_SUCCEEDED":
       return Object.assign({}, state, {
-        apiTokens: action.payload,
+        apiTokens: action.payload.data.items,
         apiTokensLoaded: true,
       });
     case "USER_ADD_API_TOKEN_SUCCEEDED":

@@ -146,6 +146,7 @@ export const refreshAccessToken = () => {
     });
 }
 
+// TODO move this to redux
 let accessTokenExpirationHandler = null;
 
 export const registerAccessTokenExpirationHandler = (timeout=60000, onRefresh=() => {}) => {
@@ -278,14 +279,14 @@ export const loadApiTokens = () => {
   }).then((response) => {
     if (response.status !== 200) {
       console.error(`Cannot get list of api tokens: ${response.status}`);
-      return {};
     }
-    return response.json();
-  }).then((data) => {
-    return data.items;
+    return response.json()
+      .then((data) => {
+        return {status: response.status, data};
+      });
   }).catch((e) => {
     console.error(`Cannot get list of api tokens: ${e}`);
-    return [];
+    return {status: 500, data: {}};
   });
 }
 

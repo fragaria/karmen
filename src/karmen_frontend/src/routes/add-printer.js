@@ -1,9 +1,10 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-
+import { connect } from 'react-redux';
 import { BackLink } from '../components/back';
 import { FormInputs } from '../components/form-utils';
-import { addPrinter } from '../services/backend';
+import { addPrinter } from '../actions/printers';
+import RoleBasedGateway from '../components/role-based-gateway';
 
 class AddPrinter extends React.Component {
   state = {
@@ -62,6 +63,7 @@ class AddPrinter extends React.Component {
     this.setState({
       form: updatedForm,
     });
+    const { createPrinter } = this.props;
     if (!hasErrors) {
       let protocol = "http";
       let host = form.address.val;
@@ -70,9 +72,9 @@ class AddPrinter extends React.Component {
         protocol = url.protocol.replace(':', '');
         host = url.host;
       }
-      addPrinter(protocol, host, form.name.val, form.apiKey.val)
+      createPrinter(protocol, host, form.name.val, form.apiKey.val)
         .then((r) => {
-          switch(r) {
+          switch(r.status) {
             case 201:
               this.setState({
                 submitting: false,
@@ -85,7 +87,6 @@ class AddPrinter extends React.Component {
                 submitting: false,
               });
               break;
-            case 400:
             default:
               this.setState({
                 message: 'Cannot add printer, check server logs',
@@ -106,30 +107,37 @@ class AddPrinter extends React.Component {
       return <Redirect to="/" />
     }
     return (
-      <div className="standalone-page">
-        <header>
-          <h1 className="title">Add a new printer</h1>
-        </header>
-        <form>
-          {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-          <FormInputs definition={form} updateValue={(name, value) => {
-            this.setState({
-              form: Object.assign({}, form, {
-                [name]: Object.assign({}, form[name], {
-                  val: value,
-                  error: null,
-                })
-              }),
-            })
-          }} />
-          <div className="form-actions">
-            <button type="submit" onClick={this.addPrinter} disabled={submitting}>Add printer</button>
-            <BackLink to="/" />
-          </div>
-        </form>
-      </div>
+      <RoleBasedGateway requiredRole="admin">
+        <div className="standalone-page">
+          <header>
+            <h1 className="title">Add a new printer</h1>
+          </header>
+          <form>
+            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+            <FormInputs definition={form} updateValue={(name, value) => {
+              this.setState({
+                form: Object.assign({}, form, {
+                  [name]: Object.assign({}, form[name], {
+                    val: value,
+                    error: null,
+                  })
+                }),
+              })
+            }} />
+            <div className="form-actions">
+              <button type="submit" onClick={this.addPrinter} disabled={submitting}>Add printer</button>
+              <BackLink to="/" />
+            </div>
+          </form>
+        </div>
+      </RoleBasedGateway>
     );
   }
 }
 
-export default AddPrinter;
+export default connect(
+  null,
+  dispatch => ({
+    createPrinter: (protocol, host, name, apiKey) => (dispatch(addPrinter(protocol, host, name, apiKey))),
+  })
+)(AddPrinter);

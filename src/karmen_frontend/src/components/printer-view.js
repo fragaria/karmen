@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import BoxedModal from './boxed-modal';
 import { WebcamStream } from './webcam-stream';
-import { deletePrinter, changeCurrentJob } from '../services/backend';
+import { changeCurrentJob } from '../services/backend';
 import formatters from '../services/formatters';
 
 export const Progress = ({ completion, printTime, printTimeLeft, withProgressBar = true }) => {
@@ -112,7 +112,6 @@ export class PrinterView extends React.Component {
           <h1>Are you sure?</h1>
             <p>You can add the printer back later by simply adding <code>{printer.host}</code> again.</p>
             <button type="submit" onClick={() => {
-              deletePrinter(printer.host);
               onPrinterDelete(printer.host);
             }}>Remove printer</button>
         </BoxedModal>

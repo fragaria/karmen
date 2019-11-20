@@ -13,14 +13,14 @@ export const getPrinters = (fields = []) => {
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printers: ${response.status}`);
-        return {};
       }
-      return response.json();
-    }).then((data) => {
-      return data.items;
+      return response.json()
+        .then((data) => {
+          return {status: response.status, data}
+        })
     }).catch((e) => {
       console.error(`Cannot get list of printers: ${e}`);
-      return [];
+      return {status: 500, data: {}};
     });
 }
 
@@ -59,7 +59,12 @@ export const addPrinter = (protocol, host, name, apiKey) => {
       if (response.status !== 201) {
         console.error(`Cannot add a printer: ${response.status}`);
       }
-      return response.status;
+      return response.json()
+        .then((data) => {
+          return {
+            status: response.status, data
+          }
+        });
     }).catch((e) => {
       console.error(`Cannot add a printer: ${e}`);
       return 500;
@@ -109,7 +114,7 @@ export const deletePrinter = (host) => {
       if (response.status !== 204) {
         console.error(`Cannot remove a printer: ${response.status}`);
       }
-      return response.status;
+      return {status: response.status, data: {host: host}};
     }).catch((e) => {
       console.error(`Cannot remove a printer: ${e}`);
       return 500;
