@@ -54,11 +54,11 @@ class LoginGateway extends React.Component {
       submitting: true,
     });
     doAuthenticate(loginForm.username.val, loginForm.password.val)
-      .then(async (code) => {
-        if (code !== 200) {
+      .then(async (r) => {
+        if (r.status !== 200) {
           this.setState({
             messageOk: false,
-            message: "Login unsuccessful, try again, please.",
+            message: (r.data && r.data.message) || "Login unsuccessful, try again, please.",
             submitting: false,
             loginForm: Object.assign({}, loginForm, {
               password: Object.assign({}, loginForm.password, { val: '' }),

@@ -16,17 +16,19 @@ export const authenticate  = (username, password) => {
     }),
   })
     .then((response) => {
-      if (response.status === 200) {
-        return response.json()
-          .then((data) => {
+      return response.json()
+        .then((data) => {
+          if (response.status === 200) {
             setAccessToken(data.access_token);
             setRefreshToken(data.refresh_token);
-            return response.status;
-          });
-      } else {
-        console.error(`Cannot authenticate: ${response.status}`);
-      }
-      return response.status;
+          } else {
+            console.error(`Cannot authenticate: ${response.status}`);
+          }
+          return {
+            status: response.status,
+            data: data
+          };
+        });
     }).catch((e) => {
       console.error(`Cannot authenticate: ${e}`);
       return 500;
