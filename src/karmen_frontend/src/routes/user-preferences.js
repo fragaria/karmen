@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { loadUserState, loadUserApiTokens } from '../actions/users';
+import { Link } from 'react-router-dom';
+import { loadUserState, loadUserApiTokens, deleteUserApiToken } from '../actions/users';
 import ChangePasswordForm from '../components/change-password-form';
 import ApiTokensTable from '../components/api-tokens-table';
 import FreshTokenRequiredCheck from '../components/fresh-token-required-check';
@@ -15,7 +16,7 @@ class UserPreferences extends React.Component {
   }
 
   render () {
-    const { loadUser, hasFreshToken, loadApiTokens } = this.props;
+    const { loadUser, hasFreshToken, loadApiTokens, apiTokens, apiTokensLoaded, onTokenDelete } = this.props;
     if (!hasFreshToken) {
       return <FreshTokenRequiredCheck />
     }
@@ -25,17 +26,22 @@ class UserPreferences extends React.Component {
           <h1 className="title">User preferences</h1>
         </header>
         <div>
-          <div>
+          <div className="content-section">
             <header>
               <h2 className="title">API tokens</h2>
-                <button className="plain action link">
+                <Link to="/users/me/tokens" className="plain action link">
                   <i className="icon icon-plus"></i>&nbsp;
                   <span>Add a token</span>
-                </button>
+                </Link>
             </header>
-            <ApiTokensTable loadApiTokens={loadApiTokens} />
+            <ApiTokensTable
+              loadTokens={loadApiTokens}
+              tokens={apiTokens}
+              tokensLoaded={apiTokensLoaded}
+              onTokenDelete={onTokenDelete}
+            />
           </div>
-          <div>
+          <div className="content-section">
             <h2>Change password</h2>
             <ChangePasswordForm onUserStateChanged={loadUser} />
           </div>
@@ -47,10 +53,13 @@ class UserPreferences extends React.Component {
 
 export default connect(
   state => ({
-    hasFreshToken: state.users.hasFreshToken
+    hasFreshToken: state.users.hasFreshToken,
+    apiTokens: state.users.apiTokens,
+    apiTokensLoaded: state.users.apiTokensLoaded,
   }),
   dispatch => ({
     loadApiTokens: () => (dispatch(loadUserApiTokens())),
     loadUser: () => (dispatch(loadUserState())),
+    onTokenDelete: (jti) => (dispatch(deleteUserApiToken(jti))),
   })
 )(UserPreferences);

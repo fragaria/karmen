@@ -286,3 +286,41 @@ export const loadApiTokens = () => {
     return [];
   });
 }
+
+export const addApiToken = (name) => {
+  return fetch(`${BASE_URL}/users/me/tokens`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      name,
+    }),
+  })
+    .then((response) => {
+      if (response.status !== 201) {
+        console.error(`Cannot add an API token: ${response.status}`);
+      }
+      return response.json()
+        .then((data) => {
+          return {status: response.status, data};
+        });
+    }).catch((e) => {
+      console.error(`Cannot add an API token: ${e}`);
+      return 500;
+    })
+}
+
+export const deleteApiToken = (jti) => {
+  return fetch(`${BASE_URL}/users/me/tokens/${jti}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  })
+    .then((response) => {
+      if (response.status !== 204) {
+        console.error(`Cannot remove an API token: ${response.status}`);
+      }
+      return response.status;
+    }).catch((e) => {
+      console.error(`Cannot remove an API token: ${e}`);
+      return 500;
+    })
+}

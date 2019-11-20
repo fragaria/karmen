@@ -115,10 +115,15 @@ a, .link {
   }
 }
 
-code {
+code, pre {
   font-family: monospace;
   background-color: map-get($palette, gray-light);
   color: black;
+}
+
+pre {
+  padding: 2em;
+  overflow: auto;
 }
 
 strong {
@@ -556,6 +561,20 @@ nav {
         padding-left: $spacing-default
       }
 
+    }
+  }
+
+  .content-section {
+    padding-bottom: $spacing-default;
+
+    ul {
+      list-style: square;
+      margin-bottom: $spacing-default / 2;
+      margin-left: $spacing-default;
+
+      li {
+        padding: $spacing-default / 4;
+      }
     }
   }
 }

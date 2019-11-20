@@ -1,37 +1,116 @@
 import React from 'react';
+import formatters from '../services/formatters';
 
-class ApiTokensTable extends React.Component {
+class ApiTokensTableRow extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tokensLoaded: false,
-      tokens: [],
+      showDeleteRow: false,
+    };
+  }
+
+  render() {
+    const { token, onTokenDelete } = this.props;
+    const { showDeleteRow } = this.state;
+
+    if (showDeleteRow) {
+      return (
+        <tr className="inverse">
+          <td colSpan="3">
+            Do you really want to revoke <strong>{token.name}</strong>? This cannot be undone.
+          </td>
+          <td className="action-cell">
+            <button className="plain" title="Cancel" onClick={() => {
+              this.setState({
+                showDeleteRow: false,
+              });
+            }}><i className="icon icon-cross"></i></button>
+            <button className="plain" title="Confirm revoke" onClick={() => {
+              onTokenDelete(token.jti);
+            }}><i className="icon icon-checkmark"></i></button>
+          </td>
+        </tr>
+      );
+    }
+
+    return (
+      <tr>
+        <td>{token.jti}</td>
+        <td>{token.name}</td>
+        <td>{formatters.datetime(token.created)}</td>
+        <td className="action-cell">
+          <button className="plain icon-link" onClick={() => {
+            this.setState({
+              showDeleteRow: true,
+            })
+          }}><i className="icon icon-bin"></i></button>
+        </td>
+      </tr>
+    );
+  }
+}
+
+class ApiTokensTable extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.sortTable = this.sortTable.bind(this);
+    this.state = {
+      sortedTokens: [],
+      orderBy: '-created',
     }
   }
 
   componentDidMount() {
-    const { tokensLoaded } = this.state;
-    const { loadApiTokens } = this.props;
+    const { tokensLoaded, loadTokens } = this.props;
     if (!tokensLoaded) {
-      loadApiTokens()
-        .then(() => {
-          this.setState({
-            tokensLoaded: true
-          });
-        });
+      loadTokens();
+    }
+    const { orderBy } = this.state;
+    this.sortTable(orderBy);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.tokens !== this.props.tokens) {
+      const { orderBy } = this.state;
+      this.sortTable(orderBy);
     }
   }
 
-  render() {
-    const { tokens, tokensLoaded } = this.state;
-    const tokensRows = tokens && tokens.map((t) => {
-      return <tr key={t.id}>
-          <td>{t.jti}</td>
-          <td>{t.name}</td>
-          <td>{t.created}</td>
-          <td>Revoke</td>
-        </tr>
+  sortTable(orderBy) {
+    const { tokens } = this.props;
+    const sortedTokens = tokens.sort((a, b) => {
+      const columnName = orderBy.substring(1)
+      if (orderBy[0] === '+') {
+        return a[columnName] < b[columnName] ? -1 : 1;
+      } else {
+        return a[columnName] > b[columnName] ? -1 : 1;
+      }
     });
+    this.setState({
+      sortedTokens,
+      orderBy,
+    })
+  }
+
+  render() {
+    const { tokensLoaded, onTokenDelete } = this.props;
+    const { orderBy, sortedTokens } = this.state;
+    const tokensRows = sortedTokens && sortedTokens.map((t) => {
+      return <ApiTokensTableRow onTokenDelete={onTokenDelete} key={t.jti} token={t} />;
+    });
+    const sortFactory = (column) => {
+      return () => {
+        const { orderBy } = this.state;
+        let order = `+${column}`;
+        if (orderBy === `+${column}`) {
+          order = `-${column}`;
+        } else if (orderBy === `-${column}` && orderBy !== '-created') {
+          order = '-created';
+        }
+        this.sortTable(order);
+      }
+    }
     return (
       <div>
         {!tokensLoaded
@@ -42,11 +121,16 @@ class ApiTokensTable extends React.Component {
             <table>
               <thead>
                 <tr>
-                  <th style={{"width": "50%"}}>Token</th>
-                  <th>Name</th>
-                  <th>Created
-                  <th>Actions</th>
+                  <th>
+                    <button className={`plain sorting-button ${orderBy.indexOf('jti') > -1 ? 'active' : ''}`} onClick={sortFactory("jti")}>Token ID</button>
                   </th>
+                  <th>
+                    <button className={`plain sorting-button ${orderBy.indexOf('name') > -1 ? 'active' : ''}`} onClick={sortFactory("name")}>Name</button>
+                  </th>
+                  <th>
+                    <button className={`plain sorting-button ${orderBy.indexOf('created') > -1 ? 'active' : ''}`} onClick={sortFactory("created")}>Created</button>
+                  </th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>

@@ -12,6 +12,7 @@ import PrinterList from './routes/printer-list';
 import GcodeList from './routes/gcode-list'
 import GcodeDetail from './routes/gcode-detail';
 import PrinterDetail from './routes/printer-detail';
+import AddApiToken from './routes/add-api-token';
 import AddPrinter from './routes/add-printer';
 import AddGcode from './routes/add-gcode';
 import Settings from './routes/settings';
@@ -64,6 +65,7 @@ class App extends React.Component {
             <LoginGateway onUserStateChanged={loadUser}>
               <ForcePwdChangeGateway onUserStateChanged={loadUser}>
                 <Switch>
+                  <Route path="/users/me/tokens" exact component={AddApiToken} />
                   <Route path="/add-printer" exact component={AddPrinter} />
                   <Route path="/add-gcode" exact component={AddGcode} />
                   <Route path="/settings" exact component={Settings} />
