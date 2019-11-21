@@ -298,3 +298,61 @@ class CheckPrintersTest(unittest.TestCase):
             ]
         )
         self.assertEqual(mock_logger.error.call_count, 2)
+
+    @mock.patch(
+        "server.database.printers.get_printers",
+        return_value=[
+            {
+                "hostname": "a",
+                "host": "1234",
+                "client_props": {
+                    "connected": True,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                },
+                "client": "octoprint",
+                "protocol": "https",
+                "printer_props": {"filament_type": "PETG"},
+            },
+        ],
+    )
+    @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.tasks.check_printers.redis")
+    @mock.patch(
+        "server.tasks.check_printers.network.get_avahi_hostname",
+        return_value="router.asus.com",
+    )
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_update_hostname(
+        self,
+        mock_get_data,
+        mock_hostname,
+        mock_redis,
+        mock_update_printer,
+        mock_get_printers,
+    ):
+        check_printers()
+        self.assertEqual(mock_hostname.call_count, 1)
+        self.assertEqual(mock_get_printers.call_count, 1)
+        self.assertEqual(mock_get_data.call_count, 1)
+        self.assertEqual(mock_update_printer.call_count, 1)
+        mock_update_printer.assert_has_calls(
+            [
+                mock.call(
+                    **{
+                        "hostname": "router.asus.com",
+                        "host": "1234",
+                        "name": None,
+                        "client": "octoprint",
+                        "protocol": "https",
+                        "client_props": {
+                            "connected": False,
+                            "version": {},
+                            "access_level": PrinterClientAccessLevel.UNLOCKED,
+                            "api_key": None,
+                        },
+                        "printer_props": {"filament_type": "PETG"},
+                    }
+                ),
+            ]
+        )

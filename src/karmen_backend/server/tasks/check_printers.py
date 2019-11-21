@@ -2,6 +2,7 @@ import redis
 from server import app, celery
 from server.database import printers
 from server import clients
+from server.services import network
 
 redis = redis.Redis(
     host=app.config["WEBCAM_PROXY_CACHE_HOST"],
@@ -27,9 +28,10 @@ def check_printers():
                 app.logger.error(
                     "Cannot save webcam proxy information into cache: %s", e
                 )
+        current_hostname = network.get_avahi_hostname(printer.host)
         printers.update_printer(
             name=printer.name,
-            hostname=printer.hostname,
+            hostname=current_hostname or printer.hostname,
             host=printer.host,
             protocol=printer.protocol,
             client=printer.client_name(),
