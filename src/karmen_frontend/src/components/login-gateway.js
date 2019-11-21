@@ -2,6 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { authenticate, setCurrentState } from '../actions/users';
+import { setAccessToken } from '../services/backend';
 import { FormInputs } from './form-utils';
 import Loader from './loader';
 
@@ -28,6 +29,21 @@ class LoginGateway extends React.Component {
       },
     }
     this.login = this.login.bind(this);
+  }
+
+  componentDidMount() {
+    const { history, location, userState, onUserStateChanged } = this.props;
+    const params = new URLSearchParams(location.search);
+    if (params.has("token")) {
+      if (userState !== "logged-in") {
+        setAccessToken(params.get("token"));
+        onUserStateChanged();
+      }
+      params.delete("token");
+      history.push({
+        search: `?${params.toString()}`
+      });
+    }
   }
 
   login(e) {
