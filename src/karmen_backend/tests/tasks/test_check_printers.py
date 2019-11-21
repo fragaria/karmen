@@ -44,9 +44,18 @@ class CheckPrintersTest(unittest.TestCase):
     )
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.tasks.check_printers.redis")
+    @mock.patch(
+        "server.tasks.check_printers.network.get_avahi_hostname",
+        return_value="router.asus.com",
+    )
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_deactivate_no_data_responding_printer(
-        self, mock_get_data, mock_redis, mock_update_printer, mock_get_printers
+        self,
+        mock_get_data,
+        mock_hostname,
+        mock_redis,
+        mock_update_printer,
+        mock_get_printers,
     ):
         check_printers()
         self.assertEqual(mock_get_printers.call_count, 1)
@@ -56,7 +65,7 @@ class CheckPrintersTest(unittest.TestCase):
             [
                 mock.call(
                     **{
-                        "hostname": "a",
+                        "hostname": "router.asus.com",
                         "host": "1234",
                         "name": None,
                         "client": "octoprint",
@@ -72,7 +81,7 @@ class CheckPrintersTest(unittest.TestCase):
                 ),
                 mock.call(
                     **{
-                        "hostname": "b",
+                        "hostname": "router.asus.com",
                         "host": "5678",
                         "protocol": "http",
                         "name": None,
@@ -118,9 +127,18 @@ class CheckPrintersTest(unittest.TestCase):
     )
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.clients.octoprint.requests.Session.get")
+    @mock.patch(
+        "server.tasks.check_printers.network.get_avahi_hostname",
+        return_value="router.asus.com",
+    )
     @mock.patch("server.tasks.check_printers.redis")
     def test_activate_responding_printer(
-        self, mock_redis, mock_get_data, mock_update_printer, mock_get_printers
+        self,
+        mock_redis,
+        mock_hostname,
+        mock_get_data,
+        mock_update_printer,
+        mock_get_printers,
     ):
         def mock_call(uri, **kwargs):
             if "5678" in uri and "/api/settings" in uri:
@@ -149,7 +167,7 @@ class CheckPrintersTest(unittest.TestCase):
             [
                 mock.call(
                     **{
-                        "hostname": "a",
+                        "hostname": "router.asus.com",
                         "host": "1234",
                         "name": None,
                         "client": "octoprint",
@@ -165,7 +183,7 @@ class CheckPrintersTest(unittest.TestCase):
                 ),
                 mock.call(
                     **{
-                        "hostname": "b",
+                        "hostname": "router.asus.com",
                         "host": "5678",
                         "protocol": "http",
                         "name": None,
@@ -218,10 +236,15 @@ class CheckPrintersTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printers.redis")
+    @mock.patch(
+        "server.tasks.check_printers.network.get_avahi_hostname",
+        return_value="router.asus.com",
+    )
     @mock.patch("server.tasks.check_printers.app.logger")
     def test_no_fail_on_broken_redis(
         self,
         mock_logger,
+        mock_hostname,
         mock_redis,
         mock_get_data,
         mock_update_printer,
@@ -256,7 +279,7 @@ class CheckPrintersTest(unittest.TestCase):
             [
                 mock.call(
                     **{
-                        "hostname": "a",
+                        "hostname": "router.asus.com",
                         "host": "1234",
                         "name": None,
                         "protocol": "https",
@@ -272,7 +295,7 @@ class CheckPrintersTest(unittest.TestCase):
                 ),
                 mock.call(
                     **{
-                        "hostname": "b",
+                        "hostname": "router.asus.com",
                         "host": "5678",
                         "name": None,
                         "protocol": "http",
