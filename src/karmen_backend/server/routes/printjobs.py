@@ -1,18 +1,22 @@
+import uuid
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, clients
-from server.database import printjobs, printers, gcodes
+from server.database import printjobs, printers, gcodes, users
 from . import jwt_force_password_change
 from flask_jwt_extended import get_current_user
 
 
-def make_printjob_response(printjob, fields=None):
-    flist = ["id", "started", "gcode_data", "printer_data", "user_uuid"]
+def make_printjob_response(printjob, fields=None, user_mapping=None):
+    flist = ["id", "started", "gcode_data", "printer_data", "user_uuid", "username"]
     fields = fields if fields else flist
     response = {}
     for field in flist:
         if field in fields:
-            response[field] = printjob[field]
+            if field == "username" and user_mapping:
+                response[field] = user_mapping.get(printjob.get("user_uuid"), None)
+            else:
+                response[field] = printjob.get(field, None)
     if "started" in response:
         response["started"] = response["started"].isoformat()
     return response
@@ -106,9 +110,21 @@ def printjobs_list():
     if len(printjobs_record_set) > int(limit):
         next_record = printjobs_record_set[-1]
         printjobs_record_set = printjobs_record_set[0:-1]
+    # get user mapping so we can send usernames to frontend
+    uuids = list(
+        set(
+            [
+                p.get("user_uuid")
+                for p in printjobs_record_set
+                if p.get("user_uuid") != None
+            ]
+        )
+    )
+    uuid_mapping = {
+        u["uuid"]: u["username"] for u in users.get_usernames_for_uuids(uuids)
+    }
     for printjob in printjobs_record_set:
-        printjob_list.append(make_printjob_response(printjob, fields))
-
+        printjob_list.append(make_printjob_response(printjob, fields, uuid_mapping))
     next_href = "/printjobs"
     parts = ["limit=%s" % limit]
     if order_by:
@@ -133,7 +149,10 @@ def printjob_detail(id):
     printjob = printjobs.get_printjob(id)
     if printjob is None:
         return abort(make_response("", 404))
-    return jsonify(make_printjob_response(printjob))
+    user = users.get_by_uuid(printjob.get("user_uuid"))
+    user_mapping = {}
+    user_mapping[printjob.get("user_uuid")] = user.get("username")
+    return jsonify(make_printjob_response(printjob, None, user_mapping))
 
 
 @app.route("/printjobs/<id>", methods=["DELETE"])

@@ -1,5 +1,4 @@
 import React from 'react';
-import dayjs from 'dayjs';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -191,7 +190,7 @@ const PrinterConnectionStatus = ({ printer, onPrinterConnectionChanged, onPrinte
 
 class PrintJobRow extends React.Component {
   render() {
-    const { gcode_data, started } = this.props;
+    const { gcode_data, started, username } = this.props;
     if (!gcode_data) {
       return (<tr></tr>);
     }
@@ -204,7 +203,8 @@ class PrintJobRow extends React.Component {
           }
         </td>
         <td>{formatters.bytes(gcode_data.size)}</td>
-        <td>{dayjs(started).format('HH:mm:ss YYYY-MM-DD')}</td>
+        <td>{formatters.datetime(started)}</td>
+        <td>{username}</td>
       </tr>
     );
   }
@@ -370,6 +370,7 @@ class PrinterDetail extends React.Component {
                                   this.loadJobsPage(jobsTable.currentPage, order);
                                 }}>Started</button>
                               </th>
+                              <th>User</th>
                             </tr>
                           </thead>
                           <tbody>

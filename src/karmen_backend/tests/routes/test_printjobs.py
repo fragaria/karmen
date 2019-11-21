@@ -64,6 +64,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("id" in response.json["items"][0])
             self.assertTrue("user_uuid" in response.json["items"][0])
+            self.assertTrue("username" in response.json["items"][0])
             self.assertTrue("gcode_data" in response.json["items"][0])
             self.assertTrue("printer_data" in response.json["items"][0])
             self.assertTrue("started" in response.json["items"][0])
