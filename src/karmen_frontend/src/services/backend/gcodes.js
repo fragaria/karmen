@@ -76,7 +76,7 @@ export const uploadGcode = (path, file) => {
   data.append('file', file);
   data.append('path', path);
   const headers = getHeaders();
-  headers.delete('content-type'); // TODO this might not be necessary
+  headers.delete('content-type');
   return fetch(`${BASE_URL}/gcodes`, {
     method: 'POST',
     headers: headers,
