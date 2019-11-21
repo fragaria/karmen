@@ -37,12 +37,14 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("id" in response.json["items"][0])
             self.assertTrue("user_uuid" in response.json["items"][0])
+            self.assertTrue("username" in response.json["items"][0])
             self.assertTrue("path" in response.json["items"][0])
             self.assertTrue("display" in response.json["items"][0])
             self.assertTrue("absolute_path" in response.json["items"][0])
             self.assertTrue("uploaded" in response.json["items"][0])
             self.assertTrue("size" in response.json["items"][0])
             self.assertTrue("data" in response.json["items"][0])
+            self.assertTrue(response.json["items"][0]["username"] is not None)
 
     def test_order_by(self):
         with app.test_client() as c:

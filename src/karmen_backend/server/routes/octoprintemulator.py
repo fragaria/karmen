@@ -45,7 +45,6 @@ def upload():
 
     if not re.search(r"\.gco(de)?$", incoming.filename):
         return abort(415)
-    # TODO set user_uuid to gcode as well
     try:
         saved = files.save(incoming, request.form.get("path", "/"))
         gcode_id = gcodes.add_gcode(

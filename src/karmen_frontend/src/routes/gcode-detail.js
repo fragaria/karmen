@@ -97,7 +97,8 @@ class GcodeDetail extends React.Component {
             <div>
               <div className="printer-connection">
                 <ul>
-                    <li><strong>Uploaded</strong>: {formatters.datetime(gcode.uploaded)}</li>
+                    <li><strong>Uploaded by</strong>: {gcode.username}</li>
+                    <li><strong>Uploaded at</strong>: {formatters.datetime(gcode.uploaded)}</li>
                     <li><strong>Size</strong>: {formatters.bytes(gcode.size)}</li>
                     <li><strong>Download</strong>: <a href={`${window.env.BACKEND_BASE}${gcode.data}`}>{gcode.path}{gcode.path ? '/' : ''}{gcode.filename}</a></li>
                 </ul>

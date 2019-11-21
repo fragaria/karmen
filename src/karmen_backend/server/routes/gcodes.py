@@ -4,14 +4,14 @@ import datetime
 from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
 from server import app, __version__
-from server.database import gcodes, printjobs
+from server.database import gcodes, printjobs, users
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
 from . import jwt_force_password_change
 from flask_jwt_extended import get_current_user
 
 
-def make_gcode_response(gcode, fields=None):
+def make_gcode_response(gcode, fields=None, user_mapping=None):
     flist = [
         "id",
         "path",
@@ -23,11 +23,15 @@ def make_gcode_response(gcode, fields=None):
         "data",
         "analysis",
         "user_uuid",
+        "username",
     ]
     fields = fields if fields else flist
     response = {}
     for field in flist:
         if field in fields:
+            if field == "username" and user_mapping:
+                response[field] = user_mapping.get(gcode.get("user_uuid"), None)
+                continue
             if field == "data":
                 response["data"] = "/gcodes/%s/data" % (gcode["id"],)
                 continue
@@ -71,8 +75,21 @@ def gcodes_list():
     if len(gcodes_record_set) > int(limit):
         next_record = gcodes_record_set[-1]
         gcodes_record_set = gcodes_record_set[0:-1]
+    # get user mapping so we can send usernames to frontend
+    uuids = list(
+        set(
+            [
+                p.get("user_uuid")
+                for p in gcodes_record_set
+                if p.get("user_uuid") != None
+            ]
+        )
+    )
+    uuid_mapping = {
+        u["uuid"]: u["username"] for u in users.get_usernames_for_uuids(uuids)
+    }
     for gcode in gcodes_record_set:
-        gcode_list.append(make_gcode_response(gcode, fields))
+        gcode_list.append(make_gcode_response(gcode, fields, uuid_mapping))
 
     next_href = "/gcodes"
     parts = ["limit=%s" % limit]
@@ -98,7 +115,10 @@ def gcode_detail(id):
     gcode = gcodes.get_gcode(id)
     if gcode is None:
         return abort(make_response("", 404))
-    return jsonify(make_gcode_response(gcode))
+    user = users.get_by_uuid(gcode.get("user_uuid"))
+    user_mapping = {}
+    user_mapping[gcode.get("user_uuid")] = user.get("username")
+    return jsonify(make_gcode_response(gcode, None, user_mapping))
 
 
 @app.route("/gcodes", methods=["POST"])
@@ -133,6 +153,7 @@ def gcode_create():
                 {
                     "id": gcode_id,
                     "user_uuid": get_current_user()["uuid"],
+                    "username": get_current_user()["username"],
                     "path": saved["path"],
                     "filename": saved["filename"],
                     "display": saved["display"],
