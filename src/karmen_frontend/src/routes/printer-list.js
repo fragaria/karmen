@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
 import PrinterView from '../components/printer-view';
-import { loadPrinters, deletePrinter } from '../actions/printers';
+import { loadPrinters, deletePrinter, changeCurrentJob } from '../actions/printers';
 
 class PrinterList extends React.Component {
   constructor(props) {
@@ -33,7 +33,7 @@ class PrinterList extends React.Component {
   }
 
   render () {
-    const { userRole, printersLoaded, printers, deletePrinter } = this.props;
+    const { userRole, printersLoaded, printers, deletePrinter, changeCurrentJobState } = this.props;
     if (!printersLoaded) {
       return <div><Loader /></div>;
     }
@@ -44,6 +44,7 @@ class PrinterList extends React.Component {
           onPrinterDelete={deletePrinter}
           showActions={userRole === 'admin'}
           canChangeCurrentJob={userRole === 'admin'}
+          changeCurrentJobState={changeCurrentJobState}
         />
       </div>
     });
@@ -74,6 +75,7 @@ export default connect(
   }),
   dispatch => ({
     loadPrinters: () => (dispatch(loadPrinters(['job', 'status', 'webcam']))),
+    changeCurrentJobState: (host, action) => (dispatch(changeCurrentJob(host, action))),
     deletePrinter: (host) => (dispatch(deletePrinter(host))),
   })
 )(PrinterList);

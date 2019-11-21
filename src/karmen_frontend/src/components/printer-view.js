@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import BoxedModal from './boxed-modal';
 import { WebcamStream } from './webcam-stream';
-import { changeCurrentJob } from '../services/backend';
 import formatters from '../services/formatters';
 
 export const Progress = ({ completion, printTime, printTimeLeft, withProgressBar = true }) => {
@@ -101,7 +100,7 @@ export class PrinterView extends React.Component {
   }
   render() {
     const { showDeleteModal, showCancelModal } = this.state;
-    const { printer, onPrinterDelete, onCurrentJobStateChange, canChangeCurrentJob } = this.props;
+    const { printer, onPrinterDelete, changeCurrentJobState, canChangeCurrentJob } = this.props;
     let { showActions } = this.props;
     if (showActions === undefined || showActions === null) {
       showActions = true;
@@ -133,15 +132,12 @@ export class PrinterView extends React.Component {
           <h1>Are you sure?</h1>
             <p>You are about to cancel the whole print!</p>
             <button type="submit" onClick={() => {
-              changeCurrentJob(printer.host, 'cancel')
+              changeCurrentJobState(printer.host, 'cancel')
                 .then(() => {
                   this.setState({
                     showDeleteModal: false,
                     showCancelModal: false,
                   });
-                  if (onCurrentJobStateChange) {
-                    onCurrentJobStateChange('cancel');
-                  }
                 })
             }}>Cancel the print</button>
         </BoxedModal>
@@ -160,23 +156,13 @@ export class PrinterView extends React.Component {
               {printer.status.state === 'Paused'
                 ? (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.host, 'toggle')
-                    .then(() => {
-                      if (onCurrentJobStateChange) {
-                        onCurrentJobStateChange('play');
-                      }
-                    })
+                  changeCurrentJobState(printer.host, 'toggle');
                 }}>
                   <span className="icon-play"></span>
                 </button>)
                 : (
                 <button className="plain" onClick={() => {
-                  changeCurrentJob(printer.host, 'toggle')
-                    .then(() => {
-                      if (onCurrentJobStateChange) {
-                        onCurrentJobStateChange('pause');
-                      }
-                    })
+                  changeCurrentJobState(printer.host, 'toggle');
                 }}>
                   <span className="icon-pause"></span>
                 </button>)

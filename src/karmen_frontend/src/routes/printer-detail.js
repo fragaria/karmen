@@ -9,8 +9,8 @@ import { PrinterEditForm } from '../components/printer-edit-form';
 import RoleBasedGateway from '../components/role-based-gateway';
 import formatters from '../services/formatters';
 
-import { getPrinterJobs,  } from '../services/backend';
-import { loadPrinter, patchPrinter, setPrinterConnection } from '../actions/printers';
+import { getPrinterJobs } from '../services/backend';
+import { loadPrinter, patchPrinter, setPrinterConnection, changeCurrentJob } from '../actions/printers';
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -307,7 +307,7 @@ class PrinterDetail extends React.Component {
 
   render () {
     const { printerLoaded, jobs, jobsTable } = this.state;
-    const { getPrinter, match, setPrinterConnection, loadPrinter } = this.props;
+    const { getPrinter, match, setPrinterConnection, loadPrinter, changeCurrentJobState } = this.props;
     const printer = getPrinter(match.params.host);
     if (!printerLoaded) {
       return <div><Loader /></div>;
@@ -332,19 +332,7 @@ class PrinterDetail extends React.Component {
                 <PrinterConnectionStatus
                   printer={printer}
                   onPrinterAuthorizationChanged={this.changePrinter}
-                  onPrinterConnectionChanged={(host, state) => {
-                    return setPrinterConnection(host, state)
-                      .then(() => {
-                        return new Promise((resolve, reject) => {
-                          // This has to be delayed as the dis/connect might take some time
-                          setTimeout(() => {
-                            loadPrinter(host)
-                              .then(() => resolve(true))
-                          }, 3000);
-                        });
-                      })
-                    }
-                  }
+                  onPrinterConnectionChanged={setPrinterConnection}
                 />
                 <div>
                   <h2 className="hidden">Change printer properties</h2>
@@ -404,7 +392,7 @@ class PrinterDetail extends React.Component {
                 <PrinterView
                   printer={printer}
                   showActions={false}
-                  onCurrentJobStateChange={() => {console.log("TODO")}}
+                  changeCurrentJobState={changeCurrentJobState}
                 />
               </div>
             </div>
@@ -423,5 +411,6 @@ export default connect(
     loadPrinter: (host) => (dispatch(loadPrinter(host, ['job', 'status', 'webcam']))),
     patchPrinter: (host, data) => (dispatch(patchPrinter(host, data))),
     setPrinterConnection: (host, state) => (dispatch(setPrinterConnection(host, state))),
+    changeCurrentJobState: (host, action) => (dispatch(changeCurrentJob(host, action))),
   })
 )(PrinterDetail);
