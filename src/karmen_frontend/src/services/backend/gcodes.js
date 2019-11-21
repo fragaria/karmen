@@ -86,9 +86,12 @@ export const uploadGcode = (path, file) => {
       if (response.status !== 201) {
         console.error(`Cannot add a gcode: ${response.status}`);
       }
-      return response.status;
+      return response.json()
+        .then((data) => {
+          return {status: response.status, data};
+        });
     }).catch((e) => {
       console.error(`Cannot add a gcode: ${e}`);
-      return 500;
+      return {};
     });
 }

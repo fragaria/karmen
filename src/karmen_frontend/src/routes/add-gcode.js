@@ -11,6 +11,7 @@ class AddGcode extends React.Component {
     submitting: false,
     message: null,
     messageOk: false,
+    gcodeId: null,
   }
 
   constructor(props) {
@@ -34,7 +35,7 @@ class AddGcode extends React.Component {
     });
     uploadGcode(path, toUpload)
       .then((r) => {
-          switch(r) {
+          switch(r.status) {
             case 201:
               this.setState({
                 submitting: false,
@@ -42,6 +43,7 @@ class AddGcode extends React.Component {
                 path: '',
                 messageOk: true,
                 redirect: true,
+                gcodeId: r.data.id
               });
               break;
             case 415:
@@ -60,9 +62,9 @@ class AddGcode extends React.Component {
   }
 
   render () {
-    const { message, messageOk, redirect, submitting, path } = this.state;
+    const { message, messageOk, redirect, submitting, path, gcodeId } = this.state;
     if (redirect) {
-      return <Redirect to="/gcodes" />
+      return <Redirect to={`/gcodes/${gcodeId}`} />
     }
     return (
       <div className="standalone-page">
