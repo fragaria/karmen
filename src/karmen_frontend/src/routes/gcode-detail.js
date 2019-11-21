@@ -1,14 +1,15 @@
 import React from 'react';
-
+import { connect } from 'react-redux';
 import Loader from '../components/loader';
-import { getGcode, getPrinters, printGcode } from '../services/backend';
+import { getGcode, printGcode } from '../services/backend';
+import { loadPrinters } from '../actions/printers';
 import formatters from '../services/formatters';
 
 class GcodeDetail extends React.Component {
   state = {
     gcode: null,
-    selectedPrinter: null,
-    availablePrinters: [],
+    selectedPrinter: '',
+    printedOn: [],
     submitting: false,
     message: null,
     messageOk: true,
@@ -20,7 +21,6 @@ class GcodeDetail extends React.Component {
   constructor(props) {
     super(props);
     this.loadGcode = this.loadGcode.bind(this);
-    this.loadPrinters = this.loadPrinters.bind(this);
     this.schedulePrint = this.schedulePrint.bind(this);
   }
 
@@ -33,23 +33,11 @@ class GcodeDetail extends React.Component {
     });
   }
 
-  loadPrinters() {
-    getPrinters(["status"]).then((printers) => {
-      const availablePrinters = printers && printers
-        .sort((p, r) => p.name > r.name ? 1 : -1)
-        .filter((p) => p.status && p.status.state === 'Operational')
-        .filter((p) => p.client && p.client.connected)
-        .filter((p) => p.client && p.client.access_level === 'unlocked');
-      this.setState({
-        availablePrinters,
-        selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,
-      });
-    })
-  }
-
   schedulePrint(gcodeId, printerHost) {
     printGcode(gcodeId, printerHost)
       .then((r) => {
+        const { printedOn } = this.state;
+        printedOn.push(printerHost)
         switch(r) {
           case 201:
             this.setState({
@@ -57,8 +45,8 @@ class GcodeDetail extends React.Component {
               message: 'Print was scheduled',
               messageOk: true,
               showFilamentTypeWarningMessage: false,
+              printedOn: [].concat(printedOn),
             });
-            this.loadPrinters();
             break;
           default:
             this.setState({
@@ -72,17 +60,28 @@ class GcodeDetail extends React.Component {
   }
 
   componentDidMount() {
+    const { printersLoaded, loadPrinters } = this.props
+    if (!printersLoaded) {
+      loadPrinters();
+    }
     this.loadGcode();
-    this.loadPrinters();
   }
 
   render() {
-    const { gcode, availablePrinters, selectedPrinter, message, messageOk, submitting,
+    const { gcode, message, messageOk, submitting, printedOn,
       showFilamentTypeWarningMessage, printerFilamentType, gcodeFilamentType
     } = this.state;
+
     if (!gcode) {
       return <div><Loader /></div>;
     }
+    const { getAvailablePrinters } = this.props;
+    const availablePrinters = getAvailablePrinters(printedOn);
+    let { selectedPrinter } = this.state;
+    if (!selectedPrinter) {
+      selectedPrinter = availablePrinters.length ? availablePrinters[0].host : '';
+    }
+
     const availablePrinterOpts = availablePrinters.map((p) => {
       return <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>;
     });
@@ -137,7 +136,6 @@ class GcodeDetail extends React.Component {
                             this.setState({
                               submitting: true,
                             });
-                            const { selectedPrinter } = this.state;
                             this.schedulePrint(gcode.id, selectedPrinter);
                           }}
                           disabled={submitting}>{submitting ? "Uploading..." : "Yes, print"}</button>
@@ -160,7 +158,6 @@ class GcodeDetail extends React.Component {
                         </select>
                         <button className="plain" type="submit" onClick={(e) => {
                           e.preventDefault();
-                          const { selectedPrinter } = this.state;
                           const selected = availablePrinters.find((p) => p.host === selectedPrinter);
                           if (selected && selected.printer_props && selected.printer_props.filament_type &&
                               gcode.analysis && gcode.analysis.filament && gcode.analysis.filament.type &&
@@ -194,4 +191,16 @@ class GcodeDetail extends React.Component {
   }
 }
 
-export default GcodeDetail;
+export default connect(
+  state => ({
+    printersLoaded: state.printers.printersLoaded,
+    getAvailablePrinters: (without=[]) => state.printers.printers
+        .filter((p) => p.status && p.status.state === 'Operational')
+        .filter((p) => p.client && p.client.connected)
+        .filter((p) => p.client && p.client.access_level === 'unlocked')
+        .filter((p) => without.indexOf(p.host) === -1)
+  }),
+  dispatch => ({
+    loadPrinters: () => (dispatch(loadPrinters(['status']))),
+  })
+)(GcodeDetail);

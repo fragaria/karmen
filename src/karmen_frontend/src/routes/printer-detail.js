@@ -301,13 +301,13 @@ class PrinterDetail extends React.Component {
         printerLoaded: true,
       });
     }
-    // TODO drop this
+    // TODO drop this in favour of redux
     this.loadJobsPage(0, jobsTable.orderBy);
   }
 
   render () {
     const { printerLoaded, jobs, jobsTable } = this.state;
-    const { getPrinter, match, setPrinterConnection, loadPrinter, changeCurrentJobState } = this.props;
+    const { getPrinter, match, setPrinterConnection, changeCurrentJobState } = this.props;
     const printer = getPrinter(match.params.host);
     if (!printerLoaded) {
       return <div><Loader /></div>;

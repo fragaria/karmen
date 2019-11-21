@@ -1,8 +1,10 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Loader from '../components/loader';
-import { getPrinters, getGcodes, deleteGcode, printGcode } from '../services/backend';
+import { getGcodes, deleteGcode, printGcode } from '../services/backend';
+import { loadPrinters } from '../actions/printers';
 import formatters from '../services/formatters';
 
 const BASE_URL = window.env.BACKEND_BASE;
@@ -28,6 +30,7 @@ class GcodeRow extends React.Component {
   }
 
   schedulePrint(gcodeId, printerHost) {
+    const { onSchedulePrint } = this.props;
     printGcode(gcodeId, printerHost)
       .then((r) => {
         switch(r) {
@@ -39,6 +42,7 @@ class GcodeRow extends React.Component {
               message: 'Print was scheduled',
               messageOk: true,
             });
+            onSchedulePrint && onSchedulePrint(gcodeId, printerHost);
             break;
           default:
             this.setState({
@@ -53,8 +57,9 @@ class GcodeRow extends React.Component {
   }
 
   render() {
-    const { showDeleteRow, showPrinterSelectRow, canCancelPrintStatusRow, showPrintStatusRow, showFilamentTypeWarningRow, availablePrinters, selectedPrinter } = this.state;
-    const { display, path, size, uploaded, onRowDelete, id, analysis } = this.props;
+    const { showDeleteRow, showPrinterSelectRow, canCancelPrintStatusRow, showPrintStatusRow,
+      showFilamentTypeWarningRow, selectedPrinter} = this.state;
+    const { display, path, size, uploaded, onRowDelete, id, analysis, availablePrinters } = this.props;
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
@@ -187,18 +192,10 @@ class GcodeRow extends React.Component {
         <td>{formatters.datetime(uploaded)}</td>
         <td className="action-cell">
           <button className="plain icon-link" onClick={() => {
-            getPrinters(["status"]).then((printers) => {
-              const availablePrinters = printers && printers
-                .sort((p, r) => p.name > r.name ? 1 : -1)
-                .filter((p) => p.status && p.status.state === 'Operational')
-                .filter((p) => p.client && p.client.connected)
-                .filter((p) => p.client && p.client.access_level === 'unlocked');
-              this.setState({
-                availablePrinters,
-                selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,
-                showPrinterSelectRow: true,
-              });
-            })
+            this.setState({
+              selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,
+              showPrinterSelectRow: true,
+            });
           }}><i className="icon icon-printer"></i></button>
           <button className="plain icon-link" onClick={() => {
             this.setState({
@@ -221,7 +218,8 @@ class GcodeList extends React.Component {
     orderBy: '-uploaded',
     filter: '',
     willBeFilter: '',
-    message: null
+    message: null,
+    printedOn: [],
   }
 
   constructor(props) {
@@ -267,12 +265,17 @@ class GcodeList extends React.Component {
   }
 
   componentDidMount() {
+    const { printersLoaded, loadPrinters } = this.props
+    if (!printersLoaded) {
+      loadPrinters();
+    }
     const { orderBy } = this.state;
     this.loadPage(0, orderBy);
   }
 
   render () {
-    const { gcodes, currentPage, pages, orderBy, filter, willBeFilter } = this.state;
+    const { gcodes, currentPage, pages, orderBy, filter, willBeFilter, printedOn } = this.state;
+    const { getAvailablePrinters } = this.props;
     if (gcodes === null) {
       return <div><Loader /></div>;
     }
@@ -281,6 +284,13 @@ class GcodeList extends React.Component {
         key={g.id}
         {...g}
         history={this.props.history}
+        onSchedulePrint={(gcode, printer) => {
+          printedOn.push(printer);
+          this.setState({
+            printedOn: [].concat(printedOn),
+          })
+        }}
+        availablePrinters={getAvailablePrinters(printedOn)}
         onRowDelete={() => {
           deleteGcode(g.id)
             .then(() => {
@@ -381,4 +391,16 @@ class GcodeList extends React.Component {
   }
 }
 
-export default GcodeList;
+export default connect(
+  state => ({
+    printersLoaded: state.printers.printersLoaded,
+    getAvailablePrinters: (without=[]) => state.printers.printers
+        .filter((p) => p.status && p.status.state === 'Operational')
+        .filter((p) => p.client && p.client.connected)
+        .filter((p) => p.client && p.client.access_level === 'unlocked')
+        .filter((p) => without.indexOf(p.host) === -1)
+  }),
+  dispatch => ({
+    loadPrinters: () => (dispatch(loadPrinters(['status']))),
+  })
+)(GcodeList);

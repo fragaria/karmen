@@ -92,24 +92,3 @@ export const uploadGcode = (path, file) => {
       return 500;
     });
 }
-
-
-export const printGcode = (id, printer) => {
-  return fetch(`${BASE_URL}/printjobs`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({
-      gcode: id,
-      printer: printer,
-    }),
-  })
-    .then((response) => {
-      if (response.status !== 201) {
-        console.error(`Cannot start a printjob: ${response.status}`);
-      }
-      return response.status;
-    }).catch((e) => {
-      console.error(`Cannot start a printjob: ${e}`);
-      return 500;
-    });
-}
