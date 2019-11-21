@@ -374,12 +374,36 @@ class CreateApiTokenRoute(unittest.TestCase):
             self.assertTrue("exp" not in data)
             self.assertTrue("user_claims" in data)
             self.assertTrue("role" in data["user_claims"])
-            self.assertTrue("force_pwd_change" in data["user_claims"])
+            self.assertTrue("force_pwd_change" not in data["user_claims"])
             self.assertEqual(data["user_claims"]["role"], "user")
-            self.assertEqual(data["user_claims"]["force_pwd_change"], False)
             token = api_tokens.get_token(data["jti"])
             self.assertTrue(token is not None)
             self.assertEqual(token["user_uuid"], UUID_USER)
+
+    def test_returns_user_role_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "users/me/tokens",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"name": "my-pretty-token"},
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertTrue("access_token" in response.json)
+            self.assertTrue("name" in response.json)
+            self.assertTrue("jti" in response.json)
+            self.assertTrue("refresh_token" not in response.json)
+            data = get_token_data(response.json["access_token"])
+            self.assertEqual(data["fresh"], False)
+            self.assertEqual(data["type"], "access")
+            self.assertEqual(data["identity"], UUID_ADMIN)
+            self.assertTrue("exp" not in data)
+            self.assertTrue("user_claims" in data)
+            self.assertTrue("role" in data["user_claims"])
+            self.assertTrue("force_pwd_change" not in data["user_claims"])
+            self.assertEqual(data["user_claims"]["role"], "user")
+            token = api_tokens.get_token(data["jti"])
+            self.assertTrue(token is not None)
+            self.assertEqual(token["user_uuid"], UUID_ADMIN)
 
 
 class RevokeApiTokenRoute(unittest.TestCase):
