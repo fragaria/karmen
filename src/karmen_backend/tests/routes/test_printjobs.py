@@ -267,9 +267,10 @@ class CreateRoute(unittest.TestCase):
             self.assertTrue("filename" in pj["gcode_data"])
             self.assertTrue("available" in pj["gcode_data"])
             self.assertTrue(pj["gcode_data"]["available"])
-            c_args, c_kwargs = (
-                mock_print_inst.return_value.upload_and_start_job.call_args
-            )
+            (
+                c_args,
+                c_kwargs,
+            ) = mock_print_inst.return_value.upload_and_start_job.call_args
             self.assertEqual(c_args[0], "/ab/a/b/c")
             self.assertEqual(c_args[1], "a/b/c")
 

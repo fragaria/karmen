@@ -15,5 +15,9 @@ def enqueue_task():
     if data["task"] not in ["scan_network"]:
         return abort(400)
     if data["task"] == "scan_network":
-        scan_network.delay()
+        try:
+            scan_network.delay()
+        except Exception as e:
+            app.logger.error("Cannot enqueue a task: %s", e)
+            abort(500)
     return "", 202
