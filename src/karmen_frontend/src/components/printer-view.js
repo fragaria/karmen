@@ -85,7 +85,8 @@ export const PrinterState = ({ printer }) => {
       {printer.status.temperature ? <PrinterTemperatures temperature={printer.status.temperature} /> : <>&nbsp;</>}
       {printer.job && printer.job.name && <p>Printing: <strong>{(printer.job && printer.job.name) || '\u00A0'}</strong></p>}
       {printer.printer_props && <p>
-        Setup: {printer.printer_props.filament_type} {printer.printer_props.filament_color && <>({printer.printer_props.filament_color}){`, `}</>}
+        Setup: {printer.printer_props.filament_type} {printer.printer_props.filament_color && <>({printer.printer_props.filament_color})</>}
+        {(printer.printer_props.bed_type || printer.printer_props.tool0_diameter) && `, `}
         {printer.printer_props.bed_type}
         {printer.printer_props.tool0_diameter && (<>, nozzle {printer.printer_props.tool0_diameter} mm</>)}
       </p>}
@@ -100,7 +101,11 @@ export class PrinterView extends React.Component {
   }
   render() {
     const { showDeleteModal, showCancelModal } = this.state;
-    const { printer, onPrinterDelete, onCurrentJobStateChange, hideActions } = this.props;
+    const { printer, onPrinterDelete, onCurrentJobStateChange, canChangeCurrentJob } = this.props;
+    let { showActions } = this.props;
+    if (showActions === undefined || showActions === null) {
+      showActions = true;
+    }
     if (showDeleteModal) {
       return (
         <BoxedModal inverse onBack={() => {
@@ -147,7 +152,10 @@ export class PrinterView extends React.Component {
         <div className="stream-wrapper">
           <WebcamStream {...printer.webcam} />
           <Progress {...printer.job} />
-          {printer.status && ['Printing', 'Paused'].indexOf(printer.status.state) > -1 && printer.client.access_level === 'unlocked' && (
+          {printer.status &&
+            ['Printing', 'Paused'].indexOf(printer.status.state) > -1 &&
+            printer.client.access_level === 'unlocked' &&
+            canChangeCurrentJob && (
             <div className="printer-controls">
               {printer.status.state === 'Paused'
                 ? (
@@ -190,7 +198,7 @@ export class PrinterView extends React.Component {
             </a>
           </div>
           <PrinterState printer={printer} />
-          {!hideActions && <PrinterActions host={printer.host} onPrinterDelete={() => {
+          {showActions && <PrinterActions host={printer.host} onPrinterDelete={() => {
             this.setState({
               showDeleteModal: true,
             })

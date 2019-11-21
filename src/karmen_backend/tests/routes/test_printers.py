@@ -311,7 +311,7 @@ class PatchRoute(unittest.TestCase):
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
-            self.assertEqual(response.status_code, 204)
+            self.assertEqual(response.status_code, 200)
             p = printers.get_printer("1.2.3.4")
             self.assertEqual(p["name"], "random-test-printer-name")
             self.assertEqual(p["protocol"], "https")
@@ -330,7 +330,7 @@ class PatchRoute(unittest.TestCase):
                     },
                 },
             )
-            self.assertEqual(response.status_code, 204)
+            self.assertEqual(response.status_code, 200)
             p = printers.get_printer("1.2.3.4")
             self.assertEqual(p["printer_props"]["filament_type"], "PETG")
             self.assertEqual(p["printer_props"]["filament_color"], "žluťoučká")

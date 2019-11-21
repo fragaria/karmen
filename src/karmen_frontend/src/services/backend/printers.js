@@ -35,9 +35,11 @@ export const getPrinter = (host, fields = []) => {
     .then((response) => {
       if (response.status !== 200) {
         console.error(`Cannot get a printer: ${response.status}`);
-        return;
       }
-      return response.json();
+      return response.json()
+        .then((data) => {
+          return {status: response.status, data}
+        })
     }).catch((e) => {
       console.error(`Cannot get a printer: ${e}`);
       return {};
@@ -67,7 +69,7 @@ export const addPrinter = (protocol, host, name, apiKey) => {
         });
     }).catch((e) => {
       console.error(`Cannot add a printer: ${e}`);
-      return 500;
+      return {};
     })
 }
 
@@ -78,13 +80,16 @@ export const patchPrinter = (host, data) => {
     body: JSON.stringify(data),
   })
     .then((response) => {
-      if (response.status !== 204) {
+      if (response.status !== 200) {
         console.error(`Cannot patch a printer: ${response.status}`);
       }
-      return response.status;
+      return response.json()
+        .then((data) => {
+          return {status: response.status, data}
+        })
     }).catch((e) => {
       console.error(`Cannot patch a printer: ${e}`);
-      return 500;
+      return {};
     })
 }
 
@@ -98,10 +103,10 @@ export const setPrinterConnection = (host, state) => {
       if (response.status !== 204) {
         console.error(`Cannot connect a printer: ${response.status}`);
       }
-      return response.status;
+      return {status: response.status};
     }).catch((e) => {
       console.error(`Cannot connect a printer: ${e}`);
-      return 500;
+      return {status: 500};
     })
 }
 

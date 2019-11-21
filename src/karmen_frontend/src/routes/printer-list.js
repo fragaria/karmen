@@ -22,7 +22,7 @@ class PrinterList extends React.Component {
     const { loadPrinters } = this.props;
     loadPrinters().then(() => {
       this.setState({
-        timer: setTimeout(this.refreshPrinters, 3000),
+        timer: setTimeout(this.refreshPrinters, 5000),
       });
     });
   }
@@ -33,21 +33,30 @@ class PrinterList extends React.Component {
   }
 
   render () {
-    const { printersLoaded, printers, deletePrinter } = this.props;
+    const { userRole, printersLoaded, printers, deletePrinter } = this.props;
     if (!printersLoaded) {
       return <div><Loader /></div>;
     }
     const printerElements = printers && printers.map((p) => {
-      return <div key={p.host} className="content-box"><PrinterView printer={p} onPrinterDelete={deletePrinter} /></div>
+      return <div key={p.host} className="content-box">
+        <PrinterView
+          printer={p}
+          onPrinterDelete={deletePrinter}
+          showActions={userRole === 'admin'}
+          canChangeCurrentJob={userRole === 'admin'}
+        />
+      </div>
     });
     return (
       <div className="printer-list">
         <header>
           <h1 className="title">Printers</h1>
-          <Link to="/add-printer" className="action">
-            <i className="icon icon-plus"></i>&nbsp;
-            <span>Add a printer</span>
-          </Link>
+          {userRole === 'admin' && 
+            <Link to="/add-printer" className="action">
+              <i className="icon icon-plus"></i>&nbsp;
+              <span>Add a printer</span>
+            </Link>
+          }
         </header>
         <div className="boxed-content">
           {printerElements}
@@ -61,6 +70,7 @@ export default connect(
   state => ({
     printers: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,
+    userRole: state.users.role,
   }),
   dispatch => ({
     loadPrinters: () => (dispatch(loadPrinters(['job', 'status', 'webcam']))),

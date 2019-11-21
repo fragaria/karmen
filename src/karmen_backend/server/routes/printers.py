@@ -14,7 +14,6 @@ def make_printer_response(printer, fields):
         printer_inst = clients.get_printer_instance(printer)
     else:
         printer_inst = printer
-
     data = {
         "client": {
             "name": printer_inst.client_name(),
@@ -111,7 +110,8 @@ def printer_create():
             "api_key": printer.client_info.api_key,
         },
     )
-    return jsonify(make_printer_response(printer, ['status', 'webcam', 'job'])), 201
+    # TODO cache webcam, job, status for a small amount of time in client
+    return jsonify(make_printer_response(printer, ["status", "webcam", "job"])), 201
 
 
 @app.route("/printers/<host>", methods=["DELETE"])
@@ -176,13 +176,18 @@ def printer_patch(host):
         },
         printer_props=printer_inst.get_printer_props(),
     )
-    return "", 204
+    # TODO cache webcam, job, status for a small amount of time in client
+    return (
+        jsonify(make_printer_response(printer_inst, ["status", "webcam", "job"])),
+        200,
+    )
 
 
 @app.route("/printers/<host>/connection", methods=["POST"])
 @jwt_requires_role("admin")
 @cross_origin()
 def printer_change_connection(host):
+    # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
     printer = printers.get_printer(host)
     if printer is None:
         return abort(make_response("", 404))

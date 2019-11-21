@@ -1,12 +1,16 @@
 import React from 'react';
 import dayjs from 'dayjs';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Loader from '../components/loader';
 import { PrinterView } from '../components/printer-view';
 import { PrinterEditForm } from '../components/printer-edit-form';
-import { getPrinter, patchPrinter, getPrinterJobs, setPrinterConnection } from '../services/backend';
+import RoleBasedGateway from '../components/role-based-gateway';
 import formatters from '../services/formatters';
+
+import { getPrinterJobs,  } from '../services/backend';
+import { loadPrinter, patchPrinter, setPrinterConnection } from '../actions/printers';
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -25,24 +29,13 @@ class PrinterConnectionForm extends React.Component {
   changePrinterConnection() {
     const { targetState } = this.state;
     const { printer, onPrinterConnectionChanged } = this.props;
-    setPrinterConnection(printer.host, targetState)
+    onPrinterConnectionChanged(printer.host, targetState)
       .then((r) => {
-        if (onPrinterConnectionChanged) {
-          onPrinterConnectionChanged(targetState)
-            .then(() => {
-              this.setState({
-                submitting: false,
-                showConnectionWarningRow: false,
-                targetState: null,
-              });
-            });
-        } else {
-          this.setState({
-            submitting: false,
-            showConnectionWarningRow: false,
-            targetState: null,
-          });
-        }
+        this.setState({
+          submitting: false,
+          showConnectionWarningRow: false,
+          targetState: null,
+        });
       });
   }
 
@@ -113,32 +106,20 @@ class PrinterAuthorizationForm extends React.Component {
     this.setApiKey = this.setApiKey.bind(this);
   }
 
-  setApiKey() {
+  setApiKey(e) {
+    e.preventDefault()
+    this.setState({
+      submitting: true,
+    });
     const { apiKey } = this.state;
-    if (!apiKey) {
-      this.setState({
-        submitting: false,
-      });
-    }
-    const { printer, onPrinterAuthorizationChanged } = this.props;
-    patchPrinter(printer.host, {
+    const { onPrinterAuthorizationChanged } = this.props;
+    return onPrinterAuthorizationChanged({
       api_key: apiKey
-    })
-      .then((r) => {
-        if (onPrinterAuthorizationChanged) {
-          onPrinterAuthorizationChanged(apiKey)
-            .then(() => {
-              this.setState({
-                submitting: false,
-                apiKey: '',
-              });
-            });
-        } else {
-          this.setState({
-            submitting: false,
-            apiKey: '',
-          });
-        }
+    }).then((r) => {
+        this.setState({
+          submitting: false,
+          apiKey: '',
+        });
       });
   }
 
@@ -169,14 +150,12 @@ class PrinterAuthorizationForm extends React.Component {
                   apiKey: e.target.value,
                 });
               }} />
-              <button className="plain" type="submit" onClick={(e) => {
-                  e.preventDefault();
-                  this.setState({
-                    submitting: true,
-                  });
-                  this.setApiKey();
-                }}
-                disabled={submitting || (!apiKey && !printer.client.api_key)}>{submitting ? "Working..." : "Set"}</button>
+              <button
+                className="plain"
+                type="submit"
+                onClick={this.setApiKey}
+                disabled={submitting || (!apiKey && !printer.client.api_key)}
+                >{submitting ? "Working..." : "Set"}</button>
             </>
           }
       </form>
@@ -184,7 +163,7 @@ class PrinterAuthorizationForm extends React.Component {
   }
 }
 
-const PrinterConnectionStatus = ({ printer, onPrinterStateChanged }) => {
+const PrinterConnectionStatus = ({ printer, onPrinterConnectionChanged, onPrinterAuthorizationChanged }) => {
   return (
     <div className="printer-connection">
       <h2 className="hidden">Connection</h2>
@@ -196,13 +175,13 @@ const PrinterConnectionStatus = ({ printer, onPrinterStateChanged }) => {
           <li>
             <PrinterConnectionForm
               printer={printer}
-              onPrinterConnectionChanged={onPrinterStateChanged}
+              onPrinterConnectionChanged={onPrinterConnectionChanged}
             />
           </li>
           <li>
             <PrinterAuthorizationForm
               printer={printer}
-              onPrinterAuthorizationChanged={onPrinterStateChanged}
+              onPrinterAuthorizationChanged={onPrinterAuthorizationChanged}
             />
           </li>
       </ul>
@@ -233,7 +212,7 @@ class PrintJobRow extends React.Component {
 
 class PrinterDetail extends React.Component {
   state = {
-    printer: null,
+    printerLoaded: false,
     jobs: [],
     jobsTable: {
       currentPage: 0,
@@ -246,18 +225,8 @@ class PrinterDetail extends React.Component {
 
   constructor(props) {
     super(props);
-    this.loadPrinter = this.loadPrinter.bind(this);
     this.loadJobsPage = this.loadJobsPage.bind(this);
     this.changePrinter = this.changePrinter.bind(this);
-  }
-
-  loadPrinter() {
-    const { match } = this.props;
-    return getPrinter(match.params.host, ['job', 'status', 'webcam']).then((printer) => {
-      this.setState({
-        printer,
-      });
-    });
   }
 
   loadJobsPage(page, newOrderBy) {
@@ -299,19 +268,15 @@ class PrinterDetail extends React.Component {
   }
 
   changePrinter(newParameters) {
-    const { printer } = this.state;
-    return patchPrinter(printer.host, newParameters)
+    const { match, patchPrinter } = this.props;
+    return patchPrinter(match.params.host, newParameters)
       .then((r) => {
-        switch(r) {
-          case 204:
-            this.setState({
-              printer: Object.assign({}, printer, newParameters),
-            });
+        switch(r.status) {
+          case 200:
             return {
               ok: true,
               message: 'Changes saved successfully'
             };
-          case 400:
           default:
             return {
               ok: false,
@@ -323,13 +288,28 @@ class PrinterDetail extends React.Component {
 
   componentDidMount() {
     const { jobsTable } = this.state
-    this.loadPrinter();
+    const { match, loadPrinter, getPrinter } = this.props;
+    if (!getPrinter(match.params.host)) {
+      loadPrinter(match.params.host)
+        .then(() => {
+          this.setState({
+            printerLoaded: true,
+          });
+        });
+    } else {
+      this.setState({
+        printerLoaded: true,
+      });
+    }
+    // TODO drop this
     this.loadJobsPage(0, jobsTable.orderBy);
   }
 
   render () {
-    const { printer, jobs, jobsTable } = this.state;
-    if (!printer) {
+    const { printerLoaded, jobs, jobsTable } = this.state;
+    const { getPrinter, match, setPrinterConnection, loadPrinter } = this.props;
+    const printer = getPrinter(match.params.host);
+    if (!printerLoaded) {
       return <div><Loader /></div>;
     }
     const jobsRows = jobs && jobs.map((j) => {
@@ -339,93 +319,109 @@ class PrinterDetail extends React.Component {
         />
     });
     return (
-      <div className="printer-detail standalone-page">
-        <header>
-          <h1 className="title">
-            {printer.name}
-          </h1>
-        </header>
-        <div>
-          <div className="printer-info">
-            <div >
-              <PrinterConnectionStatus
-                printer={printer}
-                onPrinterStateChanged={() => {
-                  return new Promise((resolve, reject) => {
-                    // TODO this is naive, it should wait for an actual state change
-                    setTimeout(() => {
-                      this.loadPrinter()
-                        .then(() => resolve(true))
-                    }, 3000);
-                  })
-                }}
-              />
-              <div>
-                <h2 className="hidden">Change printer properties</h2>
-                <PrinterEditForm
-                  defaults={{
-                    name: printer.name,
-                    filament_type: (printer.printer_props && printer.printer_props.filament_type) || '',
-                    filament_color: (printer.printer_props && printer.printer_props.filament_color) || '',
-                    bed_type: (printer.printer_props && printer.printer_props.bed_type) || '',
-                    tool0_diameter: (printer.printer_props && printer.printer_props.tool0_diameter) || '',
-                  }}
-                  onSubmit={this.changePrinter}
-                  onCancel={() => {
-                    this.props.history.push('/');
-                  }}
+      <RoleBasedGateway requiredRole="admin">
+        <div className="printer-detail standalone-page">
+          <header>
+            <h1 className="title">
+              {printer.name}
+            </h1>
+          </header>
+          <div>
+            <div className="printer-info">
+              <div >
+                <PrinterConnectionStatus
+                  printer={printer}
+                  onPrinterAuthorizationChanged={this.changePrinter}
+                  onPrinterConnectionChanged={(host, state) => {
+                    return setPrinterConnection(host, state)
+                      .then(() => {
+                        return new Promise((resolve, reject) => {
+                          // This has to be delayed as the dis/connect might take some time
+                          setTimeout(() => {
+                            loadPrinter(host)
+                              .then(() => resolve(true))
+                          }, 3000);
+                        });
+                      })
+                    }
+                  }
+                />
+                <div>
+                  <h2 className="hidden">Change printer properties</h2>
+                  <PrinterEditForm
+                    defaults={{
+                      name: printer.name,
+                      filament_type: (printer.printer_props && printer.printer_props.filament_type) || '',
+                      filament_color: (printer.printer_props && printer.printer_props.filament_color) || '',
+                      bed_type: (printer.printer_props && printer.printer_props.bed_type) || '',
+                      tool0_diameter: (printer.printer_props && printer.printer_props.tool0_diameter) || '',
+                    }}
+                    onSubmit={this.changePrinter}
+                    onCancel={() => {
+                      this.props.history.push('/');
+                    }}
+                  />
+                </div>
+                <div>
+                  {(!jobsRows || jobsRows.length === 0)
+                    ? <></>
+                    : (
+                      <>
+                        <h2>Printing history</h2>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th style={{"width": "50%"}}>Filename</th>
+                              <th>Size</th>
+                              <th>
+                                <button className={`plain sorting-button ${jobsTable.orderBy.indexOf('started') > -1 ? 'active' : ''}`} onClick={() => {
+                                  let order = '+started';
+                                  if (jobsTable.orderBy === '+started') {
+                                    order = '-started';
+                                  }
+                                  this.loadJobsPage(jobsTable.currentPage, order);
+                                }}>Started</button>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {jobsRows}
+                          </tbody>
+                        </table>
+                        <div className="table-pagination">
+                          {jobsTable.currentPage > 0
+                            ? <button className="plain" onClick={() => this.loadJobsPage(Math.max(0, jobsTable.currentPage - 1), jobsTable.orderBy)}>Previous</button>
+                            : <span></span>}
+                          {jobsTable.pages[jobsTable.currentPage + 1]
+                            ? <button className="plain" onClick={() => this.loadJobsPage(jobsTable.currentPage + 1, jobsTable.orderBy)}>Next</button>
+                            : <span></span>}
+                        </div>
+                      </>
+                    )}
+                </div>
+              </div>
+              <div className="content-box">
+                <PrinterView
+                  printer={printer}
+                  showActions={false}
+                  onCurrentJobStateChange={() => {console.log("TODO")}}
                 />
               </div>
-              <div>
-                {(!jobsRows || jobsRows.length === 0)
-                  ? <></>
-                  : (
-                    <>
-                      <h2>Printing history</h2>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th style={{"width": "50%"}}>Filename</th>
-                            <th>Size</th>
-                            <th>
-                              <button className={`plain sorting-button ${jobsTable.orderBy.indexOf('started') > -1 ? 'active' : ''}`} onClick={() => {
-                                let order = '+started';
-                                if (jobsTable.orderBy === '+started') {
-                                  order = '-started';
-                                }
-                                this.loadJobsPage(jobsTable.currentPage, order);
-                              }}>Started</button>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {jobsRows}
-                        </tbody>
-                      </table>
-                      <div className="table-pagination">
-                        {jobsTable.currentPage > 0
-                          ? <button className="plain" onClick={() => this.loadJobsPage(Math.max(0, jobsTable.currentPage - 1), jobsTable.orderBy)}>Previous</button>
-                          : <span></span>}
-                        {jobsTable.pages[jobsTable.currentPage + 1]
-                          ? <button className="plain" onClick={() => this.loadJobsPage(jobsTable.currentPage + 1, jobsTable.orderBy)}>Next</button>
-                          : <span></span>}
-                      </div>
-                    </>
-                  )}
-              </div>
-            </div>
-            <div className="content-box">
-              <PrinterView
-                printer={printer}
-                hideActions={true}
-                onCurrentJobStateChange={this.loadPrinter}
-              />
             </div>
           </div>
         </div>
-      </div>
+      </RoleBasedGateway>
     );
   }
 }
 
-export default PrinterDetail;
+export default connect(
+  state => ({
+    getPrinter: (host) => state.printers.printers.find((p) => p.host === host),
+  }),
+  dispatch => ({
+    loadPrinter: (host) => (dispatch(loadPrinter(host, ['job', 'status', 'webcam']))),
+    patchPrinter: (host, data) => (dispatch(patchPrinter(host, data))),
+    setPrinterConnection: (host, state) => (dispatch(setPrinterConnection(host, state))),
+  })
+)(PrinterDetail);

@@ -1,6 +1,8 @@
 export default (state = {
   currentState: 'unknown',
   username: '',
+  identity: null,
+  role: null,
   apiTokens: [],
   apiTokensLoaded: false,
 }, action) => {
