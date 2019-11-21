@@ -23,6 +23,7 @@ redis = "*"
 yandex-pgmigrate = "*"
 bcrypt = "*"
 flask-jwt-extended = "*"
+flask-executor = "*"
 
 [requires]
 python_version = "3.6"

@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from celery import Celery
 from flask_jwt_extended import JWTManager
+from flask_executor import Executor
 
 __version__ = "0.0.13"
 __author__ = "Jirka Chadima"
@@ -41,6 +42,7 @@ app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access"]
 
 jwt = JWTManager(app)
 celery = setup_celery(app)
+executor = Executor(app)
 
 import server.routes
 import server.tasks

@@ -4,7 +4,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, __version__
 from server.database import printers
-from server import clients
+from server import clients, executor
 from server.services import network
 from . import jwt_force_password_change, jwt_requires_role
 
@@ -48,9 +48,19 @@ def make_printer_response(printer, fields):
 def printers_list():
     device_list = []
     fields = [f for f in request.args.get("fields", "").split(",") if f]
-    for printer in printers.get_printers():
-        # TODO this should somehow go in parallel
-        device_list.append(make_printer_response(printer, fields))
+    futures = [
+        executor.submit_stored(printer["host"], make_printer_response, printer, fields)
+        for printer in printers.get_printers()
+    ]
+    for future in futures:
+        try:
+            data = future.result()
+        except Exception as exc:
+            pass
+        else:
+            device_list.append(data)
+            executor.futures.pop(data["host"])
+
     return jsonify({"items": device_list}), 200
 
 
