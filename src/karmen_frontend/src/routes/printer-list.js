@@ -71,7 +71,7 @@ export default connect(
   state => ({
     printers: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,
-    userRole: state.users.role,
+    userRole: state.users.me.role,
   }),
   dispatch => ({
     loadPrinters: () => (dispatch(loadPrinters(['job', 'status', 'webcam']))),

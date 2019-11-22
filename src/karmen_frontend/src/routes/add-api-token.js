@@ -141,7 +141,7 @@ class AddApiToken extends React.Component {
 
 export default connect(
   state => ({
-    hasFreshToken: state.users.hasFreshToken,
+    hasFreshToken: state.users.me.hasFreshToken,
   }),
   dispatch => ({
     addApiToken: (name) => (dispatch(addUserApiToken(name))),

@@ -138,8 +138,8 @@ class LoginGateway extends React.Component {
 
 export default withRouter(connect(
   state => ({
-    userState: state.users.currentState,
-    username: state.users.username,
+    userState: state.users.me.currentState,
+    username: state.users.me.username,
   }),
   dispatch => ({
     doAuthenticate: (username, password) => dispatch(authenticate(username, password)),

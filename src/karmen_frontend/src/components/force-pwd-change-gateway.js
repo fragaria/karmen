@@ -26,6 +26,6 @@ class ForcePwdChangeGateway extends React.Component {
 
 export default connect(
   state => ({
-    userState: state.users.currentState,
+    userState: state.users.me.currentState,
   })
 )(ForcePwdChangeGateway);

@@ -40,9 +40,9 @@ const Menu = ({ userState, username, role, logout }) => {
 
 export default connect(
   state => ({
-    userState: state.users.currentState,
-    username: state.users.username,
-    role: state.users.role,
+    userState: state.users.me.currentState,
+    username: state.users.me.username,
+    role: state.users.me.role,
   }),
   dispatch => ({
     logout: () => dispatch(clearUserIdentity())
