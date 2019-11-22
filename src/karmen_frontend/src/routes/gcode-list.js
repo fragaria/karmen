@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import Loader from '../components/loader';
 import { getGcodes, deleteGcode, printGcode } from '../services/backend';
 import { loadPrinters } from '../actions/printers';
 import formatters from '../services/formatters';
@@ -277,9 +276,6 @@ class GcodeList extends React.Component {
   render () {
     const { gcodes, currentPage, pages, orderBy, filter, willBeFilter, printedOn } = this.state;
     const { getAvailablePrinters } = this.props;
-    if (gcodes === null) {
-      return <div><Loader /></div>;
-    }
     const gcodeRows = gcodes && gcodes.map((g) => {
       return <GcodeRow
         key={g.id}
@@ -331,62 +327,64 @@ class GcodeList extends React.Component {
               this.loadPage(currentPage, orderBy, null);
             }}>Reset</button>
           </form>
-          {(!gcodeRows || gcodeRows.length === 0)
-          ? <p className="message-error message-block">No G-Codes found!</p>
-          : (
-            <>
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{"width": "50%"}}>
-                      <button className={`plain sorting-button ${orderBy.indexOf('filename') > -1 ? 'active' : ''}`} onClick={() => {
-                        let order = '+filename';
-                        if (orderBy === '+filename') {
-                          order = '-filename';
-                        } else if (orderBy === '-filename') {
-                          order = '-uploaded';
-                        }
-                        this.loadPage(currentPage, order, filter);
-                      }}>Filename</button>
-                    </th>
-                    <th>
-                      <button className={`plain sorting-button ${orderBy.indexOf('size') > -1 ? 'active' : ''}`} onClick={() => {
-                        let order = '+size';
-                        if (orderBy === '+size') {
-                          order = '-size';
-                        } else if (orderBy === '-size') {
-                          order = '-uploaded';
-                        }
-                        this.loadPage(currentPage, order, filter);
-                      }}>Size</button>
-                    </th>
-                    <th>
-                      <button className={`plain sorting-button ${orderBy.indexOf('uploaded') > -1 ? 'active' : ''}`} onClick={() => {
-                        let order = '+uploaded';
-                        if (orderBy === '+uploaded') {
-                          order = '-uploaded';
-                        }
-                        this.loadPage(currentPage, order, filter);
-                      }}>Uploaded at</button>
-                    </th>
-                    <th>User</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gcodeRows}
-                </tbody>
-              </table>
-              <div className="table-pagination">
-                {currentPage > 0
-                  ? <button className="plain" onClick={() => this.loadPage(Math.max(0, currentPage - 1), orderBy, filter)}>Previous</button>
-                  : <span></span>}
-                {pages[currentPage + 1]
-                  ? <button className="plain" onClick={() => this.loadPage(currentPage + 1, orderBy, filter)}>Next</button>
-                  : <span></span>}
-              </div>
-            </>
-          )}
+          {gcodes === null
+            ? <p className="message-block">Loading...</p>
+            : (!gcodeRows || gcodeRows.length === 0)
+              ? <p className="message-error message-block">No G-Codes found!</p>
+              : (
+                <>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style={{"width": "50%"}}>
+                          <button className={`plain sorting-button ${orderBy.indexOf('filename') > -1 ? 'active' : ''}`} onClick={() => {
+                            let order = '+filename';
+                            if (orderBy === '+filename') {
+                              order = '-filename';
+                            } else if (orderBy === '-filename') {
+                              order = '-uploaded';
+                            }
+                            this.loadPage(currentPage, order, filter);
+                          }}>Filename</button>
+                        </th>
+                        <th>
+                          <button className={`plain sorting-button ${orderBy.indexOf('size') > -1 ? 'active' : ''}`} onClick={() => {
+                            let order = '+size';
+                            if (orderBy === '+size') {
+                              order = '-size';
+                            } else if (orderBy === '-size') {
+                              order = '-uploaded';
+                            }
+                            this.loadPage(currentPage, order, filter);
+                          }}>Size</button>
+                        </th>
+                        <th>
+                          <button className={`plain sorting-button ${orderBy.indexOf('uploaded') > -1 ? 'active' : ''}`} onClick={() => {
+                            let order = '+uploaded';
+                            if (orderBy === '+uploaded') {
+                              order = '-uploaded';
+                            }
+                            this.loadPage(currentPage, order, filter);
+                          }}>Uploaded at</button>
+                        </th>
+                        <th>User</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {gcodeRows}
+                    </tbody>
+                  </table>
+                  <div className="table-pagination">
+                    {currentPage > 0
+                      ? <button className="plain" onClick={() => this.loadPage(Math.max(0, currentPage - 1), orderBy, filter)}>Previous</button>
+                      : <span></span>}
+                    {pages[currentPage + 1]
+                      ? <button className="plain" onClick={() => this.loadPage(currentPage + 1, orderBy, filter)}>Next</button>
+                      : <span></span>}
+                  </div>
+                </>
+              )}
           </div>
       </div>
     );

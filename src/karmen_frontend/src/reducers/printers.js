@@ -7,6 +7,7 @@ export default (state = {
   switch (action.type) {
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
       newPrinter = action.payload.data;
+      // TODO possibly switch to findIndex
       origPrinter = printers.find((p) => p.host === newPrinter.host)
       if (!origPrinter && newPrinter) {
         printers.push(newPrinter);
@@ -20,6 +21,7 @@ export default (state = {
       });
     case "PRINTERS_PATCH_SUCCEEDED":
       newPrinter = action.payload.data;
+      // TODO possibly switch to findIndex
       origPrinter = printers.find((p) => p.host === newPrinter.host)
       if (!origPrinter && newPrinter) {
         printers.push(newPrinter);

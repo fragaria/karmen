@@ -50,7 +50,13 @@ export const addUser = (username, role, password, passwordConfirmation) => {
           return {
             status: response.status, data
           }
-        });
+        })
+        // no JSON in response
+        .catch((e) => {
+          return {
+            status: response.status
+          }
+        })
     }).catch((e) => {
       console.error(`Cannot add a user: ${e}`);
       return {};

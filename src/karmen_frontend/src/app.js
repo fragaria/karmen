@@ -16,6 +16,7 @@ import PrinterDetail from './routes/printer-detail';
 import AddApiToken from './routes/add-api-token';
 import AddPrinter from './routes/add-printer';
 import AddGcode from './routes/add-gcode';
+import AddUser from './routes/add-user';
 import Settings from './routes/settings';
 import UserPreferences from './routes/user-preferences';
 
@@ -69,6 +70,7 @@ class App extends React.Component {
                   <Route path="/users" exact component={UserList} />
                   <Route path="/users/me" exact component={UserPreferences} />
                   <Route path="/users/me/tokens" exact component={AddApiToken} />
+                  <Route path="/add-user" exact component={AddUser} />
                   <Route path="/add-printer" exact component={AddPrinter} />
                   <Route path="/add-gcode" exact component={AddGcode} />
                   <Route path="/settings" exact component={Settings} />

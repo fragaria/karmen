@@ -9,7 +9,7 @@ export default (state = {
   },
   list: {
     pages: [],
-    orderBy: 'username',
+    orderBy: '+username',
     usernameFilter: '',
     limit: 10,
   }
@@ -88,6 +88,7 @@ export default (state = {
         state.list.orderBy === action.payload.orderBy &&
         state.list.limit === action.payload.limit
       ) {
+        // TODO possibly switch to findIndex
         const origPage = currentPages.find((p) => p.startWith === action.payload.startWith);
         if (!origPage && action.payload.data) {
           currentPages.push({
@@ -117,13 +118,32 @@ export default (state = {
           limit: action.payload.limit,
         })
       });
+    case "USERS_EDIT_SUCCEEDED":
+      const pages = state.list.pages;
+      if (action.payload.data) {
+        // eslint-disable-next-line no-unused-vars
+        for (let page of pages) {
+          if (page.data && page.data.items) {
+            const user = page.data.items.find((u) => u.uuid === action.payload.data.uuid);
+            if (user) {
+              user.suspended = action.payload.data.suspended;
+              user.role = action.payload.data.role;
+            }
+          }
+        }
+      }
+      return Object.assign({}, state, {
+        list: Object.assign({}, state.list, {
+          pages: [].concat(pages),
+        })
+      });
     case "USERS_CLEAR_PAGES":
       return Object.assign({}, state, {
         list: {
           pages: [],
-          orderBy: 'username',
+          orderBy: '+username',
           usernameFilter: '',
-          limit: 15,
+          limit: 10,
         }
       });
     default:

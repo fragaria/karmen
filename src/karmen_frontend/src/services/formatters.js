@@ -41,9 +41,9 @@ export const timespan = (seconds) => {
 
 export const bool = (value) => {
   if (value === true || ["true", "1", 1, "yes", "on"].indexOf(value) > -1) {
-    return "True";
+    return true;
   } else if (value === false || ["false", "0", 0, "no", "off"].indexOf(value) > -1) {
-    return "False";
+    return false;
   }
   return value;
 }
