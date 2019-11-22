@@ -124,5 +124,7 @@ import server.routes.printers
 import server.routes.printjobs
 import server.routes.settings
 import server.routes.tasks
+
+# me has to come before users
+import server.routes.users_me
 import server.routes.users
-import server.routes.admin_users

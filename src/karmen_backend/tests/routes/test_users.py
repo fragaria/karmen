@@ -1,464 +1,518 @@
-import base64
-import json
+import random
+import string
 import unittest
+import bcrypt
 
 from server import app
+from server.database import users, local_users
 from ..utils import (
     TOKEN_ADMIN_EXPIRED,
-    TOKEN_ADMIN_NONFRESH,
     TOKEN_ADMIN,
+    TOKEN_ADMIN_NONFRESH,
     TOKEN_USER,
-    TOKEN_USER_REFRESH,
     UUID_ADMIN,
     UUID_USER,
 )
-from server.database import api_tokens
 
 
-def get_token_data(jwtoken):
-    information = jwtoken.split(".")[1]
-    information += "=" * (-len(information) % 4)
-    return json.loads(base64.b64decode(information, "-_"))
+def get_random_username():
+    alphabet = string.ascii_lowercase
+    return "user-%s" % "".join(random.sample(alphabet, 10))
 
 
-class AuthenticateRoute(unittest.TestCase):
-    def test_no_data(self):
-        with app.test_client() as c:
-            response = c.post("/users/me/authenticate")
-            self.assertEqual(response.status_code, 400)
-
-    def test_missing_username(self):
-        with app.test_client() as c:
-            response = c.post("/users/me/authenticate", json={"password": "random"})
-            self.assertEqual(response.status_code, 400)
-
-    def test_missing_password(self):
-        with app.test_client() as c:
-            response = c.post("/users/me/authenticate", json={"username": "random"})
-            self.assertEqual(response.status_code, 400)
-
-    def test_unknown_user(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate",
-                json={"username": "random", "password": "random"},
-            )
-            self.assertEqual(response.status_code, 401)
-
-    def test_bad_password(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate",
-                json={"username": "test-admin", "password": "random"},
-            )
-            self.assertEqual(response.status_code, 401)
-
-    def test_returns_fresh_access_token(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("access_token" in response.json)
-            self.assertTrue("refresh_token" in response.json)
-            data = get_token_data(response.json["access_token"])
-            self.assertEqual(data["fresh"], True)
-            self.assertEqual(data["type"], "access")
-            self.assertEqual(data["identity"], UUID_ADMIN)
-            self.assertTrue("user_claims" in data)
-            self.assertTrue("exp" in data)
-            self.assertTrue("role" in data["user_claims"])
-            self.assertTrue("force_pwd_change" in data["user_claims"])
-
-
-class AuthenticateFreshRoute(unittest.TestCase):
-    def test_no_data(self):
-        with app.test_client() as c:
-            response = c.post("/users/me/authenticate-fresh")
-            self.assertEqual(response.status_code, 400)
-
-    def test_missing_username(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate-fresh", json={"password": "random"}
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_missing_password(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate-fresh", json={"username": "random"}
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_unknown_user(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate-fresh",
-                json={"username": "random", "password": "random"},
-            )
-            self.assertEqual(response.status_code, 401)
-
-    def test_bad_password(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate-fresh",
-                json={"username": "test-admin", "password": "random"},
-            )
-            self.assertEqual(response.status_code, 401)
-
-    def test_returns_fresh_access_token(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate-fresh",
-                json={"username": "test-admin", "password": "admin-password"},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("access_token" in response.json)
-            self.assertTrue("refresh_token" not in response.json)
-            data = get_token_data(response.json["access_token"])
-            self.assertEqual(data["fresh"], True)
-            self.assertEqual(data["type"], "access")
-            self.assertEqual(data["identity"], UUID_ADMIN)
-            self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
-            self.assertTrue("force_pwd_change" in data["user_claims"])
-
-
-class AuthenticateRefreshRoute(unittest.TestCase):
+class CreateUserRoute(unittest.TestCase):
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.post("/users/me/authenticate-refresh")
-            self.assertEqual(response.status_code, 401)
-
-    def test_bad_token(self):
-        with app.test_client() as c:
             response = c.post(
-                "/users/me/authenticate-refresh",
-                headers={
-                    "Authorization": "Bearer %s"
-                    % (
-                        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0b3B0YWwuY29tIiwiZXhwIjoxNDI2NDIwODAwLCJodHRwOi8vdG9wdGFsLmNvbS9qd3RfY2xhaW1zL2lzX2FkbWluIjp0cnVlLCJjb21wYW55IjoiVG9wdGFsIiwiYXdlc29tZSI6dHJ1ZX0.yRQYnWzskCZUxPwaQupWkiUzKELZ49eM7oWxAQK_ZXw",
-                    )
-                },
-            )
-            self.assertEqual(response.status_code, 422)
-
-    def test_returns_nonfresh_access_token(self):
-        with app.test_client() as c:
-            response = c.post(
-                "/users/me/authenticate-refresh",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER_REFRESH},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("access_token" in response.json)
-            self.assertTrue("refresh_token" not in response.json)
-            data = get_token_data(response.json["access_token"])
-            self.assertEqual(data["fresh"], False)
-            self.assertEqual(data["type"], "access")
-            self.assertEqual(data["identity"], UUID_USER)
-            self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
-            self.assertTrue("force_pwd_change" in data["user_claims"])
-
-
-class ChangePasswordRoute(unittest.TestCase):
-    def test_missing_jwt(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
+                "/users",
                 json={
-                    "password": "random",
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
                 },
             )
             self.assertEqual(response.status_code, 401)
-
-    def test_nonfresh_jwt(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
-                json={
-                    "password": "random",
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
-                },
-            )
-            self.assertEqual(response.status_code, 401)
-            self.assertTrue("Fresh token required" in response.json["message"])
 
     def test_expired_jwt(self):
         with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_EXPIRED},
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_EXPIRED,)},
                 json={
-                    "password": "admin-password",
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
                 },
             )
             self.assertEqual(response.status_code, 401)
             self.assertTrue("has expired" in response.json["message"])
 
-    def test_mismatch_token_uuid(self):
+    def test_no_admin_token(self):
         with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={
-                    "password": "user-password",
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_nonfresh_admin_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
+                json={
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
                 },
             )
             self.assertEqual(response.status_code, 401)
 
     def test_no_data(self):
         with app.test_client() as c:
-            response = c.patch(
-                "users/me", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            response = c.post(
+                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_missing_new_password(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={"password": "random", "new_password_confirmation": "random"},
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_missing_new_password_confirmation(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={"password": "random", "new_password": "random"},
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_missing_password(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={"new_password_confirmation": "random", "new_password": "random"},
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_bad_password(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                json={
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
-                    "password": "bad-password",
-                },
-            )
-            self.assertEqual(response.status_code, 401)
-
-    def test_new_pwd_mismatch(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={
-                    "new_password_confirmation": "random",
-                    "new_password": "random-mismatch",
-                    "password": "admin-password",
-                },
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_bad_pwd(self):
-        with app.test_client() as c:
-            response = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
-                    "password": "bad-password",
-                },
-            )
-            self.assertEqual(response.status_code, 401)
-
-    def test_pwd_changed(self):
-        with app.test_client() as c:
-            change = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
-                    "password": "admin-password",
-                },
-            )
-            self.assertEqual(change.status_code, 200)
-            auth = c.post(
-                "/users/me/authenticate",
-                json={"username": "test-admin", "password": "random"},
-            )
-            self.assertEqual(auth.status_code, 200)
-            change_back = c.patch(
-                "users/me",
-                headers={"Authorization": "Bearer %s" % (auth.json["access_token"],)},
-                json={
-                    "new_password_confirmation": "admin-password",
-                    "new_password": "admin-password",
-                    "password": "random",
-                },
-            )
-            self.assertEqual(change_back.status_code, 200)
-
-
-class ListApiTokensRoute(unittest.TestCase):
-    def test_no_token(self):
-        with app.test_client() as c:
-            response = c.get("users/me/tokens")
-            self.assertEqual(response.status_code, 401)
-
-    def test_returns_token_list(self):
+    def test_no_username(self):
         with app.test_client() as c:
             response = c.post(
-                "users/me/tokens",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"name": "my-pretty-token"},
-            )
-            response = c.get(
-                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
-            for token in response.json["items"]:
-                db_token = api_tokens.get_token(token["jti"])
-                self.assertEqual(db_token["user_uuid"], UUID_USER)
-                self.assertFalse(db_token["revoked"])
-
-
-class CreateApiTokenRoute(unittest.TestCase):
-    def test_no_token(self):
-        with app.test_client() as c:
-            response = c.post("users/me/tokens")
-            self.assertEqual(response.status_code, 401)
-
-    def test_missing_name(self):
-        with app.test_client() as c:
-            response = c.post(
-                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_returns_eternal_access_token(self):
+    def test_no_role(self):
         with app.test_client() as c:
             response = c.post(
-                "users/me/tokens",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"name": "my-pretty-token"},
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "username": "username",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_unknown_role(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "username": get_random_username(),
+                    "role": "doesnotexist",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_password_mismatch(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one-mismatch",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_create_user(self):
+        with app.test_client() as c:
+            username = get_random_username()
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "username": username,
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
             )
             self.assertEqual(response.status_code, 201)
-            self.assertTrue("access_token" in response.json)
-            self.assertTrue("name" in response.json)
-            self.assertTrue("jti" in response.json)
-            self.assertTrue("refresh_token" not in response.json)
-            data = get_token_data(response.json["access_token"])
-            self.assertEqual(data["fresh"], False)
-            self.assertEqual(data["type"], "access")
-            self.assertEqual(data["identity"], UUID_USER)
-            self.assertTrue("exp" not in data)
-            self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
-            self.assertTrue("force_pwd_change" not in data["user_claims"])
-            self.assertEqual(data["user_claims"]["role"], "user")
-            token = api_tokens.get_token(data["jti"])
-            self.assertTrue(token is not None)
-            self.assertEqual(token["user_uuid"], UUID_USER)
+            self.assertTrue("uuid" in response.json)
+            self.assertTrue("username" in response.json)
+            self.assertTrue("role" in response.json)
+            self.assertTrue("suspended" in response.json)
+            user = users.get_by_username(username)
+            self.assertTrue(user is not None)
+            self.assertEqual(user["username"], username)
+            self.assertEqual(user["role"], "user")
+            luser = local_users.get_local_user(user["uuid"])
+            self.assertTrue(luser is not None)
+            self.assertEqual(luser["force_pwd_change"], True)
+            self.assertTrue(
+                bcrypt.checkpw(
+                    "temp-one".encode("utf8"), luser["pwd_hash"].encode("utf8")
+                )
+            )
 
-    def test_returns_user_role_token(self):
+    def test_conflict_usernames(self):
         with app.test_client() as c:
+            username = get_random_username()
             response = c.post(
-                "users/me/tokens",
+                "/users",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={"name": "my-pretty-token"},
+                json={
+                    "username": username,
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
             )
             self.assertEqual(response.status_code, 201)
-            self.assertTrue("access_token" in response.json)
-            self.assertTrue("name" in response.json)
-            self.assertTrue("jti" in response.json)
-            self.assertTrue("refresh_token" not in response.json)
-            data = get_token_data(response.json["access_token"])
-            self.assertEqual(data["fresh"], False)
-            self.assertEqual(data["type"], "access")
-            self.assertEqual(data["identity"], UUID_ADMIN)
-            self.assertTrue("exp" not in data)
-            self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
-            self.assertTrue("force_pwd_change" not in data["user_claims"])
-            self.assertEqual(data["user_claims"]["role"], "user")
-            token = api_tokens.get_token(data["jti"])
-            self.assertTrue(token is not None)
-            self.assertEqual(token["user_uuid"], UUID_ADMIN)
+            response = c.post(
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "username": username,
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
+            )
+            self.assertEqual(response.status_code, 409)
 
 
-class RevokeApiTokenRoute(unittest.TestCase):
+class UpdateUserRoute(unittest.TestCase):
     def setUp(self):
         with app.test_client() as c:
             response = c.post(
-                "users/me/tokens",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"name": "my-pretty-token"},
+                "/users",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "username": get_random_username(),
+                    "role": "user",
+                    "password": "temp-one",
+                    "password_confirmation": "temp-one",
+                },
             )
-            self.token = response.json["access_token"]
-            self.token_jti = get_token_data(self.token)["jti"]
+            self.uuid = response.json["uuid"]
 
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.delete("/users/me/tokens/%s" % (self.token_jti))
+            response = c.patch("/users/%s" % self.uuid, json={"role": "user"})
             self.assertEqual(response.status_code, 401)
 
-    def test_bad_token(self):
+    def test_no_admin_token(self):
         with app.test_client() as c:
-            response = c.delete(
-                "/users/me/tokens/%s" % (self.token_jti),
+            response = c.patch(
+                "/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                json={"role": "user"},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_no_fresh_token(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
+                json={"role": "user"},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_no_data(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/%s" % self.uuid,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
-            self.assertEqual(response.status_code, 401)
+            self.assertEqual(response.status_code, 400)
 
-    def test_bad_jti(self):
+    def test_no_role(self):
         with app.test_client() as c:
-            response = c.delete(
-                "/users/me/tokens/%s" % (UUID_USER),
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
-            )
-            self.assertEqual(response.status_code, 404)
-
-    def test_revokes_token_once(self):
-        with app.test_client() as c:
-            db_token = api_tokens.get_token(self.token_jti)
-            self.assertFalse(db_token["revoked"])
-            response = c.get(
-                "/settings", headers={"Authorization": "Bearer %s" % self.token}
+            response = c.patch(
+                "/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"suspended": True},
             )
             self.assertEqual(response.status_code, 200)
-            response = c.delete(
-                "/users/me/tokens/%s" % (self.token_jti),
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            self.assertTrue("role" in response.json)
+            self.assertTrue("suspended" in response.json)
+            self.assertEqual(response.json["role"], "user")
+            self.assertEqual(response.json["suspended"], True)
+            user = users.get_by_uuid(self.uuid)
+            self.assertTrue(user is not None)
+            self.assertEqual(user["role"], "user")
+            self.assertEqual(user["suspended"], True)
+
+    def test_no_suspended(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"role": "admin"},
             )
-            self.assertEqual(response.status_code, 204)
-            db_token = api_tokens.get_token(self.token_jti)
-            self.assertTrue(db_token["revoked"])
-            response = c.delete(
-                "/users/me/tokens/%s" % (self.token_jti),
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("role" in response.json)
+            self.assertTrue("suspended" in response.json)
+            self.assertEqual(response.json["role"], "admin")
+            self.assertEqual(response.json["suspended"], False)
+            user = users.get_by_uuid(self.uuid)
+            self.assertTrue(user is not None)
+            self.assertEqual(user["role"], "admin")
+            self.assertEqual(user["suspended"], False)
+
+    def test_unknown_role(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"role": "doesnotexist"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_update_user(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"role": "admin", "suspended": True},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("role" in response.json)
+            self.assertTrue("suspended" in response.json)
+            self.assertEqual(response.json["role"], "admin")
+            self.assertEqual(response.json["suspended"], True)
+            user = users.get_by_uuid(self.uuid)
+            self.assertTrue(user is not None)
+            self.assertEqual(user["role"], "admin")
+            self.assertEqual(user["suspended"], True)
+
+    def test_self_lockout(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/%s" % UUID_ADMIN,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"role": "admin", "suspended": True},
+            )
+            self.assertEqual(response.status_code, 409)
+
+    def test_nonexisting_user(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"role": "user", "suspended": False},
             )
             self.assertEqual(response.status_code, 404)
+
+
+class ListRoute(unittest.TestCase):
+    def test_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/users")
+            self.assertEqual(response.status_code, 401)
+
+    def test_no_admin_token(self):
+        with app.test_client() as c:
             response = c.get(
-                "/settings", headers={"Authorization": "Bearer %s" % self.token}
+                "/users", headers={"Authorization": "Bearer %s" % TOKEN_USER}
             )
             self.assertEqual(response.status_code, 401)
+
+    def test_nonfresh_token(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_list(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            if len(response.json["items"]) < 200:
+                self.assertTrue("next" not in response.json)
+            self.assertTrue(len(response.json["items"]) >= 2)
+            self.assertTrue("uuid" in response.json["items"][0])
+            self.assertTrue("username" in response.json["items"][0])
+            self.assertTrue("role" in response.json["items"][0])
+            self.assertTrue("suspended" in response.json["items"][0])
+
+    def test_order_by(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?order_by=username",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue(len(response.json["items"]) >= 2)
+            prev = None
+            for code in response.json["items"]:
+                if prev:
+                    self.assertTrue(code["username"] >= prev["username"])
+                    # we are ordering implicitly by id ASC as well
+                    if code["username"] == prev["username"]:
+                        self.assertTrue(code["uuid"] >= prev["uuid"])
+                prev = code
+
+    def test_limit(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=1&order_by=username",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" in response.json)
+            self.assertTrue(len(response.json["items"]) == 1)
+            self.assertTrue("/users?limit=1&order_by=username" in response.json["next"])
+
+    def test_no_multi_order_by(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=3&order_by=uuid,username",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_start_with(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=2&start_with=%s&order_by=-uuid" % UUID_USER,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" in response.json)
+            self.assertTrue(len(response.json["items"]) == 2)
+            self.assertTrue(response.json["items"][0]["uuid"] == UUID_USER)
+            self.assertTrue(
+                response.json["items"][1]["uuid"] < response.json["items"][0]["uuid"]
+            )
+            self.assertTrue(
+                "/users?limit=2&order_by=-uuid&start_with" in response.json["next"]
+            )
+
+    def test_start_with_non_existent(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=1&start_with=00005957-8ebb-4a44-1234-758dbf28bb9f&order_by=-username",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue(len(response.json["items"]) == 0)
+
+    def test_ignore_start_with_str(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=3&start_with=asdfasdf",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
+    def test_ignore_negative_limit(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=-3", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
+    def test_survive_ignore_start_with_negative(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=3&start_with=-1",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
+    def test_survive_ignore_limit_str(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?limit=asdfasdf&start_with=5",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+
+    def test_filter_absent(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?filter=username:unknown-username",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue(len(response.json["items"]) == 0)
+
+    def test_filter(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?filter=username:admin&order_by=uuid",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            for user in response.json["items"]:
+                self.assertTrue(user["username"], "admin-test")
+
+    def test_filter_next(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?filter=username:user&limit=2&order_by=-uuid",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue("next" in response.json)
+            self.assertTrue(len(response.json["items"]) == 2)
+            response2 = c.get(
+                response.json["next"],
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertTrue("items" in response2.json)
+            self.assertTrue(
+                response.json["items"][0]["uuid"] > response2.json["items"][0]["uuid"]
+            )
+
+    def test_filter_ignore_bad_column(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?filter=random:file1",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue(len(response.json["items"]) >= 1)
+
+    def test_filter_ignore_bad_format(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?filter=file1",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("items" in response.json)
+            self.assertTrue(len(response.json["items"]) >= 1)
