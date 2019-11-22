@@ -25,13 +25,13 @@ export const printGcode = (id, printer) => {
 export const getPrinterJobs = (startWith = null, orderBy = null, printerFilter = null, limit = 10) => {
   let uri = `${BASE_URL}/printjobs?limit=${limit}`;
   if (startWith) {
-    uri += `&start_with=${startWith}`;
+    uri += `&start_with=${encodeURIComponent(startWith)}`;
   }
   if (orderBy) {
-    uri += `&order_by=${orderBy}`;
+    uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
   if (printerFilter) {
-    uri += `&filter=printer_host:${printerFilter}`;
+    uri += `&filter=printer_host:${encodeURIComponent(printerFilter)}`;
   }
   return fetch(uri, {
     headers: getHeaders()

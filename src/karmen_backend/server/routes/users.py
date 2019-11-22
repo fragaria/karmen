@@ -106,6 +106,8 @@ def list_users():
     order_by = request.args.get("order_by", "")
     if "," in order_by:
         return abort(make_response("", 400))
+    if order_by in ["suspended"]:
+        order_by = ""
     try:
         limit = int(request.args.get("limit", 200))
         if limit and limit < 0:

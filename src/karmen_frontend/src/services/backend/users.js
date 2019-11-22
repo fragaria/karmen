@@ -5,13 +5,13 @@ const BASE_URL = window.env.BACKEND_BASE;
 export const getUsers = (startWith = null, orderBy = null, usernameFilter = null, limit = 15) => {
   let uri = `${BASE_URL}/users?limit=${limit}`;
   if (startWith) {
-    uri += `&start_with=${startWith}`;
+    uri += `&start_with=${encodeURIComponent(startWith)}`;
   }
   if (orderBy) {
-    uri += `&order_by=${orderBy}`;
+    uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
   if (usernameFilter) {
-    uri += `&filter=username:${usernameFilter}`;
+    uri += `&filter=username:${encodeURIComponent(usernameFilter)}`;
   }
   return fetch(uri, {
       headers: getHeaders()

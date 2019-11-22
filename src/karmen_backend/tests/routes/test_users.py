@@ -1,4 +1,5 @@
 import random
+import math
 import string
 import unittest
 import bcrypt
@@ -373,6 +374,17 @@ class ListRoute(unittest.TestCase):
                     if code["username"] == prev["username"]:
                         self.assertTrue(code["uuid"] >= prev["uuid"])
                 prev = code
+
+    def test_order_by_with_plus(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/users?order_by=%2Busername&limit=2",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(
+                response.json.get("next"),
+                "/users?limit=2&order_by=+username&start_with=77315957-8ebb-4a44-976c-758dbf28bb9f",
+            )
 
     def test_limit(self):
         with app.test_client() as c:

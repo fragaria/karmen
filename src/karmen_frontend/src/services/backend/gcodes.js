@@ -8,13 +8,13 @@ export const getGcodes = (startWith = null, orderBy = null, displayFilter = null
     uri += `&fields=${fields.join(',')}`;
   }
   if (startWith) {
-    uri += `&start_with=${startWith}`;
+    uri += `&start_with=${encodeURIComponent(startWith)}`;
   }
   if (orderBy) {
-    uri += `&order_by=${orderBy}`;
+    uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
   if (displayFilter) {
-    uri += `&filter=display:${displayFilter}`;
+    uri += `&filter=display:${encodeURIComponent(displayFilter)}`;
   }
   return fetch(uri, {
       headers: getHeaders()
