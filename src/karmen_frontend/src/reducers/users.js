@@ -6,6 +6,12 @@ export default (state = {
     role: null,
     apiTokens: [],
     apiTokensLoaded: false,
+  },
+  list: {
+    pages: [],
+    orderBy: 'username',
+    usernameFilter: '',
+    limit: 10,
   }
 }, action) => {
   const { me } = state;
@@ -70,6 +76,55 @@ export default (state = {
         me: Object.assign({}, state.me, {
           currentState: action.payload.currentState,
         })
+      });
+    case "USERS_LOAD_PAGE_SUCCEEDED":
+      if (action.payload.status !== 200) {
+        return state;
+      }
+      let currentPages = state.list.pages;
+      // continue only with the same conditions
+      if (
+        state.list.usernameFilter === action.payload.usernameFilter && 
+        state.list.orderBy === action.payload.orderBy &&
+        state.list.limit === action.payload.limit
+      ) {
+        const origPage = currentPages.find((p) => p.startWith === action.payload.startWith);
+        if (!origPage && action.payload.data) {
+          currentPages.push({
+            data: action.payload.data,
+            startWith: action.payload.startWith,
+          });
+        }
+        if (origPage && action.payload.data) {
+          const origIndex = currentPages.indexOf(origPage);
+          currentPages[origIndex] = {
+            data: action.payload.data,
+            startWith: action.payload.startWith,
+          };
+        }
+      // if any option changes, reset pages
+      } else {
+        currentPages = [{
+          data: action.payload.data,
+          startWith: action.payload.startWith,
+        }]
+      }
+      return Object.assign({}, state, {
+        list: Object.assign({}, state.list, {
+          pages: [].concat(currentPages),
+          orderBy: action.payload.orderBy,
+          usernameFilter: action.payload.usernameFilter,
+          limit: action.payload.limit,
+        })
+      });
+    case "USERS_CLEAR_PAGES":
+      return Object.assign({}, state, {
+        list: {
+          pages: [],
+          orderBy: 'username',
+          usernameFilter: '',
+          limit: 15,
+        }
       });
     default:
       return state;

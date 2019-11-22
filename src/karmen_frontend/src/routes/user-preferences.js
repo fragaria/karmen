@@ -7,7 +7,6 @@ import ApiTokensTable from '../components/api-tokens-table';
 import FreshTokenRequiredCheck from '../components/fresh-token-required-check';
 
 const UserPreferences = ({ loadUser, hasFreshToken, loadApiTokens, apiTokens, apiTokensLoaded, onTokenDelete }) => {
-  console.log(apiTokens)
   if (!hasFreshToken) {
     return <FreshTokenRequiredCheck />
   }

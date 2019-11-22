@@ -20,6 +20,11 @@ const Menu = ({ userState, username, role, logout }) => {
           </li>
           {role === "admin" && (
             <li>
+              <Link to="/users">Users</Link>
+            </li>
+          )}
+          {role === "admin" && (
+            <li>
               <Link to="/settings">Settings</Link>
             </li>
           )}

@@ -57,3 +57,31 @@ export const deleteUserApiToken = createActionThunk('USER_DELETE_API_TOKEN', (jt
       return {jti}
     });
 });
+
+export const clearUsersPages = () => (dispatch) => {
+  return dispatch({
+    type: "USERS_CLEAR_PAGES",
+  });
+}
+
+export const getUsersPage = createActionThunk('USERS_LOAD_PAGE', (startWith = null, orderBy = null, usernameFilter = null, limit = 15) => {
+  return backend.getUsers(startWith, orderBy, usernameFilter, limit)
+    .then((r) => {
+      return {
+        status: r.status,
+        data: r.data,
+        startWith,
+        orderBy,
+        usernameFilter,
+        limit,
+      }
+    });
+});
+
+export const addUser = createActionThunk('USERS_ADD', (username, role, password, passwordConfirmation) => {
+  return backend.addUser(username, role, password, passwordConfirmation);
+});
+
+export const patchUser = createActionThunk('USERS_EDIT', (uuid, role, suspended) => {
+  return backend.patchUser(uuid, role, suspended);
+});

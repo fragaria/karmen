@@ -39,8 +39,18 @@ export const timespan = (seconds) => {
   return result;
 }
 
+export const bool = (value) => {
+  if (value === true || ["true", "1", 1, "yes", "on"].indexOf(value) > -1) {
+    return "True";
+  } else if (value === false || ["false", "0", 0, "no", "off"].indexOf(value) > -1) {
+    return "False";
+  }
+  return value;
+}
+
 export default {
   bytes,
   datetime,
   timespan,
+  bool,
 }

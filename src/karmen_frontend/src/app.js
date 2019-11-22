@@ -10,6 +10,7 @@ import Loader from './components/loader';
 
 import PrinterList from './routes/printer-list';
 import GcodeList from './routes/gcode-list'
+import UserList from './routes/user-list'
 import GcodeDetail from './routes/gcode-detail';
 import PrinterDetail from './routes/printer-detail';
 import AddApiToken from './routes/add-api-token';
@@ -65,11 +66,12 @@ class App extends React.Component {
             <LoginGateway onUserStateChanged={loadUser}>
               <ForcePwdChangeGateway onUserStateChanged={loadUser}>
                 <Switch>
+                  <Route path="/users" exact component={UserList} />
+                  <Route path="/users/me" exact component={UserPreferences} />
                   <Route path="/users/me/tokens" exact component={AddApiToken} />
                   <Route path="/add-printer" exact component={AddPrinter} />
                   <Route path="/add-gcode" exact component={AddGcode} />
                   <Route path="/settings" exact component={Settings} />
-                  <Route path="/users/me" exact component={UserPreferences} />
                   <Route path="/gcodes" exact component={GcodeList} />
                   <Route path="/gcodes/:id" exact component={GcodeDetail} />
                   <Route path="/printers/:host" exact component={PrinterDetail} />
