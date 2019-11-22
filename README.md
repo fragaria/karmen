@@ -51,6 +51,14 @@ features by altering the network settings of the containers, check [`docker-comp
 On the other hand, two fake virtual printers are automatically added to your envirnoment, so you have a few
 things to play with.
 
+Also, there are at least two users available in the fresh dev environment:
+
+- `test-admin` (password *admin-password*) - An Administrator that can do everything, for example add more users.
+- `test-user` (password *user-password*) - A user with restricted permissions. She cannot manage other users and
+printers.
+
+All of the g-codes are currently shared across all user accounts.
+
 **Note**: If something suddenly breaks within this setup, try to clean docker with `docker system prune`, it might help.
 
 ## Versioning and releases

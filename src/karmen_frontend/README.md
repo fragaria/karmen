@@ -21,3 +21,17 @@ docker run -p 3000:9765 -e ENV=develop -e BACKEND_BASE=http://localhost:5000 fra
 ```
 
 `BACKEND_BASE` is a base url of Karmen REST backend.
+
+## User access model
+
+Since all of the operations require a valid JWT tied to a user account, you have to go through a login screen
+every time you want to access the application. The JWT's are stored in your browser, however, and you will
+be automatically logged in if you come back within 30 days.
+
+If you want a more permanent setup, for example for a monitoring dashboard, create an API token that has
+no expiration date. You can then run the app with the `token` query param such as:
+
+`http://karmen.local?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9......`
+
+If no valid user session is detected, the token gets consumed by the frontend app and is remembered by
+the browser until you press the logout button.

@@ -49,19 +49,6 @@ which affects how it is connected to the other containers (database, redis).
 - `flask run` and the server will start to accept connections on `http://localhost:5000`
 - Visit `localhost:5000`
 
-## Webcam proxying
-
-In the dev mode (without nginx), the webcam proxying does not really work due to bad
-performance of the raw Python.
-
-In production mode (when flask is run through uWSGI and nginx), the webcams are dynamically proxied directly
-through nginx. How does it work? In every call of the `check_printers` task, every responding
-printer is queried for its webcam stream address. If there is one, it is stored in redis cache.
-
-Nginx ([openresty](https://openresty.org/) flavour in particular) is then performing a lookup via lua script
-connected to the redis cache on every request to `/proxied-webcam/<ip>`. If it finds an active record,
-it passes the connection there, if it doesn't, it responds with 404.
-
 ## User access model
 
 - `users` - A list of users in the system. Every user has potentially multiple *providers*. These
@@ -80,3 +67,27 @@ token are marked as *nonfresh*. Sensitive operations (such as password changes a
 Thus forcing the user to send the username/password pair again. A special endpoint should be used for that
 to prevent issuing unnecessary refresh tokens.
 - User accounts can be suspended by admins. Whole API is then rendered inaccessible for them.
+- Every user can have multiple **API tokens**. These are *always nonfresh, in a `user` role and do not expire.*
+If you need to get rid of them, revoke them in the application.
+
+Also, there are at least two users available in the fresh dev environment:
+
+- `test-admin` (password *admin-password*) - An Administrator that can do everything, for example add more users.
+- `test-user` (password *user-password*) - A user with restricted permissions. She cannot manage other users and
+printers.
+
+In the production mode, there is a default admin user named `karmen` with password `karmen3D` that has to be changed
+upon first login. Make sure that you do this right after the installation.
+
+## Webcam proxying
+
+In the dev mode (without nginx), the webcam proxying does not really work due to bad
+performance of the raw Python.
+
+In production mode (when flask is run through uWSGI and nginx), the webcams are dynamically proxied directly
+through nginx. How does it work? In every call of the `check_printers` task, every responding
+printer is queried for its webcam stream address. If there is one, it is stored in redis cache.
+
+Nginx ([openresty](https://openresty.org/) flavour in particular) is then performing a lookup via lua script
+connected to the redis cache on every request to `/proxied-webcam/<ip>`. If it finds an active record,
+it passes the connection there, if it doesn't, it responds with 404.

@@ -7,10 +7,6 @@ Installation
 .. toctree::
   :maxdepth: 2
 
-.. note::
-  There might be other viable solutions, but at the moment, Karmen supports only
-  Octoprint.
-
 Making your printer Karmen-ready
 --------------------------------
 
@@ -20,11 +16,18 @@ simplified by using a Raspbian-derived image with a pre-configured installation
 called `OctoPi <https://github.com/guysoft/OctoPi>`_ that is designed for Raspberry Pi
 microcomputers.
 
+.. note::
+  There might be other viable solutions, but at the moment, Karmen supports only
+  Octoprint.
+
 After the initial Octoprint/OctoPi setup that connects your printer is performed,
 you are ready to connect the printer to Karmen. Please note, that any issues you
 might have with a webcam stream or other specifics, are related to Octoprint/OctoPi
 and not to Karmen. *Karmen is only using Octoprint's API to communicate with the
 printer.*
+
+Karmen supports password-protected Octoprint instances as well, it is possible
+to attach an API token to a printer.
 
 Also, make sure that the Octoprint instance is accessible over the network
 from a computer on which Karmen will be running.
@@ -119,6 +122,8 @@ is to add the following line at the end of your ``/etc/rc.local`` file just befo
    cd /home/pi/karmen/ && BASE_HOST=<public-ip-address> ./run-karmen.sh
 
 You should also keep your installation :ref:`up to date <updating>` at all times.
+
+After the installation is ready, you can proceed with your :ref:`first run <firstrun>`.
 
 .. note::
 

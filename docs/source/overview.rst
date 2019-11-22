@@ -27,25 +27,21 @@ in Python and a `light frontend client <https://github.com/fragaria/karmen/tree/
 in Javascript accessible from a browser.
 
 The backend essentially works as a proxy for any configured and connected printer that
-can talk in one of the supported dialects (see below).
+can talk in one of the supported dialects.
 
 To add a new printer, you just tell Karmen the IP address of that printer
 and that's it. Everything else is done automatically.
 
-  .. warning::
-    We are still working on a software security layer. Do not ever expose
-    Karmen or unsecured printer to the internet!
-
 The printers
 ------------
 
-Any 3D printer that uses a supported connector can be added to the system. Right now,
+Any 3D printer that uses a supported software connector can be added to the system. Right now,
 we support only *Octoprint*, but more will come in the future. It is, of course, required
 for the two devices to see each other on the network. You have essentially two options for
 that:
 
 1. Connect everything into an existing network
-2. Create an isolated network for the printers and expose the control hub's interface
+2. Create an isolated network for the printers and expose the control hub's user interface
    to a commonly accessible network
 
 Any of the two will work, **just make sure that none of the devices are directly accessible
