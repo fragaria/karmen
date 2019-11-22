@@ -35,7 +35,7 @@ export default (state = {
       });
     case "PRINTERS_LOAD_SUCCEEDED":
       return Object.assign({}, state, {
-        printers: action.payload.data.items.sort((p, r) => p.name > r.name ? 1 : -1),
+        printers: action.payload.data.items ? action.payload.data.items.sort((p, r) => p.name > r.name ? 1 : -1) : [],
         printersLoaded: true,
       });
     case "PRINTERS_ADD_SUCCEEDED":

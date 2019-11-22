@@ -79,7 +79,7 @@ class ApiTokensTable extends React.Component {
 
   sortTable(orderBy) {
     const { tokens } = this.props;
-    const sortedTokens = tokens.sort((a, b) => {
+    const sortedTokens = tokens && tokens.sort((a, b) => {
       const columnName = orderBy.substring(1)
       if (orderBy[0] === '+') {
         return a[columnName] < b[columnName] ? -1 : 1;
