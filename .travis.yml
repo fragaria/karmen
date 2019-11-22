@@ -18,7 +18,7 @@ matrix:
     before_script:
     - cd src/karmen_backend
     script:
-    - pipenv install
+    - pipenv install --dev
     - make test
   - language: python
     python: '3.7'
@@ -27,7 +27,7 @@ matrix:
     before_script:
     - cd src/karmen_backend
     script:
-    - pipenv install
+    - pipenv install --dev
     - make coverage
     - make coveralls
   - language: python
@@ -37,7 +37,7 @@ matrix:
     before_script:
     - cd src/karmen_backend
     script:
-    - pipenv install
+    - pipenv install --dev
     - make test
   - language: node_js
     stage: test
