@@ -1,7 +1,5 @@
 import React from 'react';
 
-const BACKEND_BASE_URL = window.env.BACKEND_BASE;
-
 export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
@@ -30,13 +28,12 @@ export class WebcamStream extends React.Component {
           });
         }
       }).catch((e) => {
-        const proxiedStream = `${BACKEND_BASE_URL}${proxied}`;
-        fetch(proxiedStream)
+        fetch(proxied)
           .then((r) => {
             if (r.status === 200) {
               this.setState({
                 isOnline: true,
-                source: proxiedStream,
+                source: proxied,
               });
             }
           }).catch((e) => {
