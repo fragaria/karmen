@@ -97,12 +97,12 @@ services:
       - dbfiles
     ports:
       - 127.0.0.1:5433:5432
-  leds:
-    image: fragaria/rpi-led-control
-    devices:
-      - /dev/gpiomem:/dev/gpiomem
-    restart: unless-stopped
-    environment:
-      START_COLOR: red
-    ports:
-      - 127.0.0.1:8082:5000
+  # leds:
+  #   image: fragaria/rpi-led-control
+  #   devices:
+  #     - /dev/gpiomem:/dev/gpiomem
+  #   restart: unless-stopped
+  #   environment:
+  #     START_COLOR: red
+  #   ports:
+  #     - 127.0.0.1:8082:5000

@@ -25,8 +25,8 @@ clean_pid_file() {
 if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
-    sed -i "s/~~SERVICE_PORT~~/${SERVICE_PORT:-9764}/g" /usr/local/openresty/nginx/conf/nginx.conf.template
-    cp /usr/local/openresty/nginx/conf/nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf
+    SERVICE_PORT=${SERVICE_PORT:-9764}
+    envsubst '$SERVICE_PORT' < /usr/local/openresty/nginx/conf/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf
     openresty
     uwsgi --ini uwsgi.ini
   else
