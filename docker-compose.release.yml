@@ -1,13 +1,44 @@
 version: "3.4"
 services:
+  proxy:
+    image: fragaria/karmen-proxy
+    network_mode: host
+    environment:
+      SERVICE_PORT: ${KARMEN_PORT:-80}
+      REDIS_HOST: 127.0.0.1
+      FRONTEND_HOST: 127.0.0.1
+      FRONTEND_PORT: ${FRONTEND_PORT:-9765}
+      BACKEND_HOST: 127.0.0.1
+      BACKEND_PORT: ${BACKEND_PORT:-9764}
+    depends_on:
+      - frontend
+      - backend_flask
   frontend:
     image: fragaria/karmen-frontend
+    network_mode: host
     restart: unless-stopped
     environment:
       ENV: production
-      BACKEND_BASE: http://${BASE_HOST}:${BASE_API_PORT:-8080}
-    ports:
-      - ${BASE_PORT:-80}:9765
+      BACKEND_BASE: /api
+      SERVICE_PORT: ${FRONTEND_PORT:-9765}
+  backend_flask:
+    image: fragaria/karmen-backend
+    restart: unless-stopped
+    network_mode: host # for arp-scan
+    environment:
+      ENV: production
+      SERVICE: flask
+      SERVICE_PORT: ${BACKEND_PORT:-9764}
+      FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
+    volumes:
+      - ./config.local.cfg:/usr/src/app/config.local.cfg
+      - ./karmen-files:/tmp/karmen-files
+      - /var/run/dbus:/var/run/dbus # for mdns resolution
+    privileged: true # for mdns resolution
+    depends_on:
+      - files
+      - redis
+      - dbmigrations
   files:
     image: fragaria/karmen-backend
     user: root
@@ -30,25 +61,6 @@ services:
       POSTGRES_PORT: 5433
     depends_on:
       - postgres
-  backend_flask:
-    image: fragaria/karmen-backend
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      REDIS_HOST: 127.0.0.1
-      ENV: production
-      SERVICE: flask
-      SERVICE_PORT: ${BASE_API_PORT:-8080}
-      FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
-    volumes:
-      - ./config.local.cfg:/usr/src/app/config.local.cfg
-      - ./karmen-files:/tmp/karmen-files
-      - /var/run/dbus:/var/run/dbus # for mdns resolution
-    privileged: true # for mdns resolution
-    depends_on:
-      - files
-      - redis
-      - dbmigrations
   backend_celery_worker:
     image: fragaria/karmen-backend
     restart: unless-stopped
