@@ -48,10 +48,19 @@ def make_printer_response(printer, fields):
 def printers_list():
     device_list = []
     fields = [f for f in request.args.get("fields", "").split(",") if f]
-    futures = [
-        executor.submit_stored(printer["host"], make_printer_response, printer, fields)
-        for printer in printers.get_printers()
-    ]
+    futures = []
+    for printer in printers.get_printers():
+        try:
+            futures.append(
+                executor.submit_stored(
+                    printer["host"], make_printer_response, printer, fields
+                )
+            )
+        # This means that the future already exists and has not been poped yet -
+        # that's a race condition right there
+        except ValueError:
+            pass
+
     for future in futures:
         try:
             data = future.result()
