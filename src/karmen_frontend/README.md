@@ -4,6 +4,9 @@ Frontend browser UI for Karmen bootstrapped with [react-scripts](https://www.npm
 
 ## Development
 
+It is possible to run this as a standalone app, but since you need the backend as well, it is
+recommended to run the whole bundle with `docker-compose` as described in [the global README](../../README.md).
+
 ```sh
 nvm install
 nvm use
@@ -17,10 +20,12 @@ Visit `http://localhost:3000`.
  
 ```sh
 docker build --build-arg REACT_APP_GIT_REV=`git rev-parse --short HEAD` -t fragaria/karmen-frontend .
-docker run -p 3000:9765 -e ENV=develop -e BACKEND_BASE=http://localhost:5000 fragaria/karmen-frontend
+docker run -p 3000:9765 -e ENV=develop fragaria/karmen-frontend
 ```
 
-`BACKEND_BASE` is a base url of Karmen REST backend.
+There are problems with compiling the app directly for arm/v7 architecture, so the resulting docker image
+is `Dockerfile.serve` serving a JS bundle compiled with `Dockerfile.build`. The `Dockerfile` is used
+for development only.
 
 ## User access model
 
@@ -35,3 +40,4 @@ no expiration date. You can then run the app with the `token` query param such a
 
 If no valid user session is detected, the token gets consumed by the frontend app and is remembered by
 the browser until you press the logout button.
+

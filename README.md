@@ -19,8 +19,6 @@ Our solution is a perfect fit for a shared makerspace, small batch
 part factory or a public school that offers multiple printers to various
 users.
 
-<TODO screenshot>
-
 ## Contributing and support
 
 If you would like to take part in this project, hit us up on karmen@fragaria.cz
@@ -35,8 +33,8 @@ Check our [documentation](https://karmen.readthedocs.io/en/latest/installation.h
 
 ## Development
 
-While it is possible to run both the Python backend and Javascript frontend as standalone projects,
-the most comfortable way is again with docker compose.
+While it is possible to run all of the components as standalone projects,
+the most comfortable way is with docker compose.
 
 ```sh
 $ git clone git@github.com:fragaria/karmen.git && cd karmen/ # get the repo

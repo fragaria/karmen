@@ -1,17 +1,56 @@
 # This is for development only! Do not run a production instance from this blueprint.
 version: "3.4"
 services:
+  proxy:
+    image: fragaria/karmen-proxy
+    build: ./src/proxy
+    ports:
+      - 127.0.0.1:4000:9766
+    environment:
+      REDIS_HOST: redis
+    networks:
+      - backend
+      - default
+    depends_on:
+      - frontend
+      - backend_flask
   frontend:
     image: fragaria/karmen-frontend
     build: ./src/karmen_frontend
     environment:
       ENV: develop
-      BACKEND_BASE: http://localhost:5000
     ports:
       - 127.0.0.1:3000:9765
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
+    networks:
+      - default
+  backend_flask:
+    image: fragaria/karmen-backend
+    user: www-data
+    build: ./src/karmen_backend
+    environment:
+      REDIS_HOST: redis
+      ENV: develop
+      SERVICE: flask
+      FLASKR_SETTINGS: '../config.dev.cfg'
+      PROXY_WEBCAM_BASE: 'http://localhost:4000/proxied-webcam/'
+    ports:
+      - 127.0.0.1:5000:9764
+    volumes:
+      - ./src/karmen_backend/server:/usr/src/app/server
+      - ./tmp/karmen-files:/tmp/karmen-files
+    networks:
+      - default
+      - printers
+      - backend
+    depends_on:
+      - files
+      - dbmigrations
+    links:
+      - postgres
+      - redis
   files:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
@@ -40,30 +79,6 @@ services:
       - default
     links:
       - postgres
-  backend_flask:
-    image: fragaria/karmen-backend
-    user: www-data
-    build: ./src/karmen_backend
-    environment:
-      REDIS_HOST: redis
-      ENV: develop
-      SERVICE: flask
-      FLASKR_SETTINGS: '../config.dev.cfg'
-    ports:
-      - 127.0.0.1:5000:9764
-    volumes:
-      - ./src/karmen_backend/server:/usr/src/app/server
-      - ./tmp/karmen-files:/tmp/karmen-files
-    networks:
-      - default
-      - printers
-      - backend
-    depends_on:
-      - files
-      - dbmigrations
-    links:
-      - postgres
-      - redis
   fake_printer1:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend

@@ -7,7 +7,7 @@ Python based REST API backend for Karmen.
 
 ## Development
 
-The preferred way is to use the composed docker package as [described in here](https://github.com/fragaria/karmen/blob/master/README.md).
+The preferred way is to use the composed docker package as [described in here](../../README.md).
 You don't have to bother with setup of database and other services.
 
 ### Docker
@@ -78,16 +78,3 @@ printers.
 
 In the production mode, there is a default admin user named `karmen` with password `karmen3D` that has to be changed
 upon first login. Make sure that you do this right after the installation.
-
-## Webcam proxying
-
-In the dev mode (without nginx), the webcam proxying does not really work due to bad
-performance of the raw Python.
-
-In production mode (when flask is run through uWSGI and nginx), the webcams are dynamically proxied directly
-through nginx. How does it work? In every call of the `check_printers` task, every responding
-printer is queried for its webcam stream address. If there is one, it is stored in redis cache.
-
-Nginx ([openresty](https://openresty.org/) flavour in particular) is then performing a lookup via lua script
-connected to the redis cache on every request to `/proxied-webcam/<ip>`. If it finds an active record,
-it passes the connection there, if it doesn't, it responds with 404.
