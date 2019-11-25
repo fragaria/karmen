@@ -23,11 +23,11 @@ http {
   default_type        application/octet-stream;
 
   upstream karmen_backend {
-      server backend_flask:9764;
+      server ${BACKEND_HOST}:${BACKEND_PORT};
   }
 
   upstream karmen_frontend {
-      server frontend:9765;
+      server ${FRONTEND_HOST}:${FRONTEND_PORT};
   }
 
   server {
@@ -73,13 +73,13 @@ http {
       proxy_pass                  $upstream;
     }
 
-    location ~ ^/api/ {
+    location ~ ^/api/?(.*) {
       proxy_redirect     off;
       proxy_set_header   Host $host;
       proxy_set_header   X-Real-IP $remote_addr;
       proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header   X-Forwarded-Host $server_name;
-      proxy_pass http://karmen_backend/$uri$is_args$args;
+      proxy_pass http://karmen_backend/$1$is_args$args;
     }
 
     location / {

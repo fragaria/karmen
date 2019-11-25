@@ -1,6 +1,6 @@
-FROM fragaria/python-openresty
+FROM python:3.6-slim
 
-RUN apt-get update && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan build-essential postgresql-client
+RUN apt-get update && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan build-essential postgresql-client nginx gettext-base
 
 RUN pip install --upgrade pip
 RUN pip install pipenv uwsgi
@@ -20,7 +20,7 @@ ENV REDIS_HOST 127.0.0.1
 ENV REDIS_PORT 6379
 ENV SERVICE_PORT 9764
 
-COPY ./scripts/nginx.conf.template /usr/local/openresty/nginx/conf/nginx.conf.template
+COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY . .
 
 CMD ["./scripts/docker-start.sh"]

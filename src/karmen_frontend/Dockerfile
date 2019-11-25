@@ -1,6 +1,6 @@
 FROM mhart/alpine-node:10
 
-RUN apk add gettext-base
+RUN apk add gettext
 
 WORKDIR /usr/src/app
 

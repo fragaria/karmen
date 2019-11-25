@@ -26,8 +26,8 @@ if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
     SERVICE_PORT=${SERVICE_PORT:-9764}
-    envsubst '$SERVICE_PORT' < /usr/local/openresty/nginx/conf/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf
-    openresty
+    envsubst '$SERVICE_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+    nginx
     uwsgi --ini uwsgi.ini
   else
     export FLASK_APP=server

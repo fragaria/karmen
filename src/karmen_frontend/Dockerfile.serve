@@ -1,6 +1,6 @@
 FROM node:10-alpine
 
-RUN apk add nginx gettext-base
+RUN apk add nginx gettext
 
 WORKDIR /usr/src/app
 
