@@ -86,24 +86,24 @@ containers from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&t
 
 .. code-block:: sh
 
-   BASE_HOST=<public-ip-address> ./run-karmen.sh
+   ./run-karmen.sh
 
-``BASE_HOST`` is an address or hostname of the machine where Karmen is running and is used to call
-the Python backend from the frontend UI. You will also use it to access the Javascript frontend
-from your browser. The frontend is run on standard port 80 and the API is accessible on port 8080.
+The browser-accessible frontend is then run on the standard port 80.
 
-It is possible to modify the default ports with the following environment variables:
+It is possible to modify the port like this:
 
 .. code-block:: sh
 
-   BASE_PORT=3777 BASE_API_PORT=3778 BASE_HOST=<public-ip-address> ./run-karmen.sh
+   KARMEN_PORT=3776 ./run-karmen.sh
 
-This will run the frontend on port 3777 and the API on port 3778. You then don't have to worry about
-the port change during the Karmen update.
+This will run the frontend on port 3776.
+
+You can access the UI by accessing the public IP address of your machine, or by accessing the
+``<hostname>.local`` address which is automatically provided by Raspbian.
 
   .. note::
-    Although the Raspbian and OctoPi images support `mDNS <https://en.wikipedia.org/wiki/Multicast_DNS>`_,
-    you should set BASE_HOST to the IP address as mDNS might not work on all systems (namely Windows)
+    Although the Raspbian and OctoPi images provide the ``<hostname>.local`` via
+    `mDNS <https://en.wikipedia.org/wiki/Multicast_DNS>`_, it might not work on some systems (namely Windows)
     without prior configuration.
 
 
@@ -119,7 +119,7 @@ is to add the following line at the end of your ``/etc/rc.local`` file just befo
 
 .. code-block:: sh
 
-   cd /home/pi/karmen/ && BASE_HOST=<public-ip-address> ./run-karmen.sh
+   ./home/pi/karmen/run-karmen.sh
 
 You should also keep your installation :ref:`up to date <updating>` at all times.
 

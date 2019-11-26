@@ -39,7 +39,7 @@ the most comfortable way is with docker compose.
 ```sh
 $ git clone git@github.com:fragaria/karmen.git && cd karmen/ # get the repo
 $ mkdir tmp && docker-compose up --build
-# GO VISIT http://localhost:3000/
+# GO VISIT http://localhost:4000/
 ```
 
 The network autodiscovery via ARP does not work at all in the dev mode. The mDNS resolution
