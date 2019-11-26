@@ -23,6 +23,7 @@ services:
       SERVICE_PORT: ${FRONTEND_PORT:-9765}
   backend_flask:
     image: fragaria/karmen-backend
+    build: ./src/karmen_backend
     restart: unless-stopped
     network_mode: host # for arp-scan
     environment:

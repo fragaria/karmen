@@ -1,9 +1,9 @@
 FROM python:3.6-slim
 
-RUN apt-get update && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan build-essential postgresql-client nginx gettext-base
+RUN apt-get update && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan build-essential postgresql-client nginx gettext-base libssl-dev libffi-dev
 
 RUN pip install --upgrade pip
-RUN pip install pipenv uwsgi
+RUN pip install pipenv uwsgi supervisor
 
 # enable mdns discovery, this works only when container is run in
 # privileged mode and /var/run/dbus is mounted as a volume
@@ -21,6 +21,9 @@ ENV REDIS_PORT 6379
 ENV SERVICE_PORT 9764
 
 COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY ./scripts/uwsgi.ini /etc/uwsgi/wsgi.ini
+COPY ./scripts/supervisord.conf /etc/supervisord.conf
+
 COPY . .
 
 CMD ["./scripts/docker-start.sh"]

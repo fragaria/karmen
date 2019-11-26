@@ -26,9 +26,9 @@ if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
     SERVICE_PORT=${SERVICE_PORT:-9764}
+    echo $SERVICE_PORT
     envsubst '$SERVICE_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-    nginx
-    uwsgi --ini uwsgi.ini
+    /usr/local/bin/supervisord
   else
     export FLASK_APP=server
     export FLASK_DEBUG=true
