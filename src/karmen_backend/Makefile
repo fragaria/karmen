@@ -30,7 +30,7 @@ test-watch: run-docker-postgres
 	@-docker rm karmen_pg_test
 
 coverage: run-docker-postgres
-	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && coverage run --branch --source server -m pytest -n auto --dist=loadfile
+	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && coverage run --branch --source server -m pytest
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 
