@@ -9,7 +9,7 @@ run-docker-postgres:
 		-e POSTGRES_USER=print3d \
 		-e POSTGRES_DB=print3d \
 		-p 5433:5432 \
-		--privileged=true postgres &
+		--privileged=true postgres:11 &
 	while ! pg_isready --port 5433 --host localhost > /dev/null 2>&1; do echo 'Waiting for postgres...'; sleep 1; done
 	ENV=develop POSTGRES_PORT=5433 POSTGRES_HOST=localhost sh ./scripts/migrate.sh
 
