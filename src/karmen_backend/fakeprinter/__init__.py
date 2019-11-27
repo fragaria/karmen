@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 
-__version__ = "0.0.14-rc.1"
+__version__ = "0.0.14-rc.2"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
