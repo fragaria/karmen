@@ -22,7 +22,7 @@ copyright = '2019, <a href="https://fragaria.cz">Fragaria s.r.o.</a>'
 author = 'Fragaria s.r.o.'
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.14-rc.2"
+release = "0.0.14-rc.3"
 
 
 # -- General configuration ---------------------------------------------------
