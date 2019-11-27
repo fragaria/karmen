@@ -4,25 +4,27 @@ from server import clients
 
 
 def save_printer_data(**kwargs):
-    has_record = printers.get_printer(kwargs["host"])
-    if has_record is None and not kwargs["client_props"]["connected"]:
+    if not kwargs["client_props"]["connected"]:
+        app.logger.info("Printer on %s is not responding as connected" % kwargs["host"])
         return
-    if has_record is None:
-        printers.add_printer(
-            **{
-                "name": None,
-                "client_props": {
-                    "connected": False,
-                    "version": {},
-                    "access_level": clients.utils.PrinterClientAccessLevel.PROTECTED,
-                },
-                **kwargs,
-            }
+    has_record = printers.get_printer(kwargs["host"])
+    # No need to update registered printers
+    if has_record is not None:
+        app.logger.info(
+            "Printer on %s is already registered within karmen" % kwargs["host"]
         )
-    else:
-        printers.update_printer(
-            **{**has_record, **kwargs, **{"name": has_record["name"]}}
-        )
+        return
+    printers.add_printer(
+        **{
+            "name": None,
+            "client_props": {
+                "connected": False,
+                "version": {},
+                "access_level": clients.utils.PrinterClientAccessLevel.PROTECTED,
+            },
+            **kwargs,
+        }
+    )
 
 
 @celery.task(name="sniff_printer")

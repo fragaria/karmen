@@ -14,7 +14,7 @@ class SavePrinterDataTest(unittest.TestCase):
         self, mock_get_printer, mock_add_printer, mock_update_printer
     ):
         save_printer_data(host="1.2.3.4", client_props={"connected": False})
-        self.assertEqual(mock_get_printer.call_count, 1)
+        self.assertEqual(mock_get_printer.call_count, 0)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 0)
 
@@ -33,47 +33,43 @@ class SavePrinterDataTest(unittest.TestCase):
     @mock.patch("server.database.printers.add_printer")
     @mock.patch(
         "server.database.printers.get_printer",
-        return_value={"name": "1234", "host": "1.2.3.4."},
+        return_value={
+            "name": "1234",
+            "host": "1.2.3.4.",
+            "client_props": {"api_key": "5678",},
+        },
     )
-    def test_update_any_known_printer(
+    def test_not_update_any_known_printer(
         self, mock_get_printer, mock_add_printer, mock_update_printer
     ):
         save_printer_data(
             host="1.2.3.4", client_props={"connected": True}, name="1.2.3.4"
         )
-        save_printer_data(
-            host="1.2.3.4", client_props={"connected": False}, name="1.2.3.4"
-        )
-        self.assertEqual(mock_get_printer.call_count, 2)
+        self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 0)
-        self.assertEqual(mock_update_printer.call_count, 2)
-        args, update_kwargs = mock_update_printer.call_args
-        # Should not overwrite custom editable name
-        self.assertEqual(update_kwargs["name"], "1234")
+        self.assertEqual(mock_update_printer.call_count, 0)
 
 
 class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
-    def test_deactivate_no_data_responding_printer(
-        self, mock_get_data, mock_update_printer
-    ):
+    def test_not_add_no_data_responding_printer(self, mock_get_data, mock_save_printer):
         sniff_printer("octopi.local", "192.168.1.10")
-        self.assertEqual(mock_update_printer.call_count, 0)
+        self.assertEqual(mock_save_printer.call_count, 0)
 
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    def test_deactivate_bad_data_responding_printer(
-        self, mock_get_data, mock_update_printer
+    def test_not_add_bad_data_responding_printer(
+        self, mock_get_data, mock_save_printer
     ):
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "Fumbleprint"}
         sniff_printer("octopi.local", "192.168.1.11")
-        self.assertEqual(mock_update_printer.call_count, 0)
+        self.assertEqual(mock_save_printer.call_count, 0)
 
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    def test_activate_responding_printer(self, mock_get_data, mock_update_printer):
+    def test_add_responding_printer(self, mock_get_data, mock_update_printer):
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
         sniff_printer("octopi.local", "192.168.1.12")
