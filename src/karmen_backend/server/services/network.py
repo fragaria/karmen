@@ -1,14 +1,21 @@
 import subprocess
 import re
 
+from server import app
+
 
 def do_arp_scan(network_interface):
     proc = subprocess.Popen(
         ["arp-scan", "--interface", network_interface, "--localnet", "-q"],
         stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     devices = []
     while True:
+        rawerr = proc.stderr.readline() if proc.stderr else None
+        if rawerr:
+            app.logger.error("arp-scan error: %s" % rawerr.rstrip().decode("utf-8"))
+            break
         rawline = proc.stdout.readline()
         if not rawline:
             break
@@ -24,9 +31,17 @@ def do_arp_scan(network_interface):
 
 def get_avahi_hostname(ip_address):
     proc = subprocess.Popen(
-        ["avahi-resolve-address", ip_address], stdout=subprocess.PIPE
+        ["avahi-resolve-address", ip_address],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     while True:
+        rawerr = proc.stderr.readline() if proc.stderr else None
+        if rawerr:
+            app.logger.error(
+                "avahi-resolve-address error: %s" % rawerr.rstrip().decode("utf-8")
+            )
+            break
         rawline = proc.stdout.readline()
         if not rawline:
             break
