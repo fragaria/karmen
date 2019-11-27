@@ -8,6 +8,7 @@ addons:
   apt:
     packages:
     - docker-ce
+    - jq
 matrix:
   include:
   - stage: test

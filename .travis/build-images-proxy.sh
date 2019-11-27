@@ -59,3 +59,26 @@ docker manifest annotate fragaria/karmen-proxy:latest fragaria/karmen-proxy:late
 docker manifest annotate fragaria/karmen-proxy:latest fragaria/karmen-proxy:latest-amd64 --arch amd64
 
 docker manifest push fragaria/karmen-proxy:latest
+
+# Delete unnecessary tags
+DOCKER_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${DOCKER_USER}'", "password": "'${DOCKER_PASSWORD}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+curl -i -X DELETE \
+  -H "Accept: application/json" \
+  -H "Authorization: JWT ${DOCKER_TOKEN}" \
+  "https://hub.docker.com/v2/repositories/fragaria/karmen-proxy/tags/${TRAVIS_BRANCH}-amd64/"
+
+curl -i -X DELETE \
+  -H "Accept: application/json" \
+  -H "Authorization: JWT ${DOCKER_TOKEN}" \
+  "https://hub.docker.com/v2/repositories/fragaria/karmen-proxy/tags/${TRAVIS_BRANCH}-armhf/"
+
+curl -i -X DELETE \
+  -H "Accept: application/json" \
+  -H "Authorization: JWT ${DOCKER_TOKEN}" \
+  "https://hub.docker.com/v2/repositories/fragaria/karmen-proxy/tags/latest-amd64/"
+
+curl -i -X DELETE \
+  -H "Accept: application/json" \
+  -H "Authorization: JWT ${DOCKER_TOKEN}" \
+  "https://hub.docker.com/v2/repositories/fragaria/karmen-proxy/tags/latest-armhf/"
