@@ -95,16 +95,41 @@ def printer_create():
     name = data.get("name", None)
     api_key = data.get("api_key", None)
     protocol = data.get("protocol", "http")
+    hostname = None
     if (
         not host
         or not name
         or protocol not in ["http", "https"]
-        or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", host) is None
+        or re.match(
+            r"^([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?$",
+            host,
+        )
+        is None
     ):
         return abort(make_response("", 400))
+
+    # we got a hostname, not IP
+    if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", host) is None:
+        # take out the port number
+        m = re.search(r"^([0-9a-zA-Z.-]+):?(\d{0,5}?)$", host)
+        if m is None:
+            return abort(make_response("", 400))
+        hostname = m.group(1)
+        port = m.group(2)
+        # resolve hostname with mDNS
+        host = network.get_avahi_address(hostname)
+        if (
+            not host
+            or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}?$", host) is None
+        ):
+            return abort(make_response("Cannot resolve %s with mDNS" % hostname, 500))
+        if port:
+            host = "%s:%s" % (host, port)
+
     if printers.get_printer(host) is not None:
         return abort(make_response("", 409))
-    hostname = network.get_avahi_hostname(host)
+    if not hostname:
+        hostname = network.get_avahi_hostname(host)
     printer = clients.get_printer_instance(
         {
             "hostname": hostname,

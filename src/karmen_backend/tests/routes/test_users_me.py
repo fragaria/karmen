@@ -220,7 +220,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_no_data(self):
         with app.test_client() as c:
             response = c.patch(
-                "users/me", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "users/me", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
             )
             self.assertEqual(response.status_code, 400)
 
@@ -332,7 +332,7 @@ class ListApiTokensRoute(unittest.TestCase):
                 json={"name": "my-pretty-token"},
             )
             response = c.get(
-                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -351,7 +351,7 @@ class CreateApiTokenRoute(unittest.TestCase):
     def test_missing_name(self):
         with app.test_client() as c:
             response = c.post(
-                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "users/me/tokens", headers={"Authorization": "Bearer %s" % TOKEN_USER}
             )
             self.assertEqual(response.status_code, 400)
 

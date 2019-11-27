@@ -118,6 +118,110 @@ class CreateRoute(unittest.TestCase):
                     "/printers",
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                     json={
+                        "host": "172.16.236.200",
+                        "name": "random-test-printer-name",
+                        "protocol": "https",
+                    },
+                )
+                self.assertEqual(response.status_code, 201)
+                response = c.get(
+                    "/printers/172.16.236.200",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json["host"], "172.16.236.200")
+                self.assertEqual(response.json["protocol"], "https")
+                self.assertEqual(response.json["name"], "random-test-printer-name")
+                self.assertEqual(response.json["client"]["name"], "octoprint")
+        except Exception as e:
+            raise e
+        finally:
+            c.delete(
+                "/printers/172.16.236.200",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+
+    @mock.patch(
+        "server.services.network.get_avahi_address", return_value="172.16.236.220"
+    )
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_hostname(self, mock_get_uri, mock_avahi, mock_avahi_address):
+        try:
+            with app.test_client() as c:
+                response = c.post(
+                    "/printers",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    json={
+                        "host": "random-address.local",
+                        "name": "random-test-printer-name",
+                        "protocol": "https",
+                    },
+                )
+                self.assertEqual(response.status_code, 201)
+                response = c.get(
+                    "/printers/172.16.236.220",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json["host"], "172.16.236.220")
+                self.assertEqual(response.json["hostname"], "random-address.local")
+                self.assertEqual(response.json["protocol"], "https")
+                self.assertEqual(response.json["name"], "random-test-printer-name")
+                self.assertEqual(response.json["client"]["name"], "octoprint")
+        except Exception as e:
+            raise e
+        finally:
+            c.delete(
+                "/printers/172.16.236.220",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+
+    @mock.patch(
+        "server.services.network.get_avahi_address", return_value="172.16.236.220"
+    )
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_hostname_port(self, mock_get_uri, mock_avahi, mock_avahi_address):
+        try:
+            with app.test_client() as c:
+                response = c.post(
+                    "/printers",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    json={
+                        "host": "random-address.local:8080",
+                        "name": "random-test-printer-name",
+                        "protocol": "http",
+                    },
+                )
+                self.assertEqual(response.status_code, 201)
+                response = c.get(
+                    "/printers/172.16.236.220:8080",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json["host"], "172.16.236.220:8080")
+                self.assertEqual(response.json["hostname"], "random-address.local")
+                self.assertEqual(response.json["protocol"], "http")
+                self.assertEqual(response.json["name"], "random-test-printer-name")
+                self.assertEqual(response.json["client"]["name"], "octoprint")
+        except Exception as e:
+            raise e
+        finally:
+            c.delete(
+                "/printers/172.16.236.220:8080",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_with_port(self, mock_get_uri, mock_avahi):
+        try:
+            with app.test_client() as c:
+                response = c.post(
+                    "/printers",
+                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    json={
                         "host": "172.16.236.200:81",
                         "name": "random-test-printer-name",
                         "protocol": "https",
@@ -172,6 +276,36 @@ class CreateRoute(unittest.TestCase):
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
 
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_http(self, mock_get_uri, mock_avahi):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "host": "http://172.16.236.200:81",
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_dotcom(self, mock_get_uri, mock_avahi):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "host": "http://printer.example.com",
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_bad_token(self):
         with app.test_client() as c:
             response = c.post(
@@ -185,7 +319,7 @@ class CreateRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
 
-    def tes_no_token(self):
+    def test_no_token(self):
         with app.test_client() as c:
             response = c.post(
                 "/printers",

@@ -338,7 +338,7 @@ class ListRoute(unittest.TestCase):
     def test_nonfresh_token(self):
         with app.test_client() as c:
             response = c.get(
-                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
+                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH}
             )
             self.assertEqual(response.status_code, 401)
 
@@ -446,7 +446,7 @@ class ListRoute(unittest.TestCase):
     def test_ignore_negative_limit(self):
         with app.test_client() as c:
             response = c.get(
-                "/users?limit=-3", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/users?limit=-3", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)

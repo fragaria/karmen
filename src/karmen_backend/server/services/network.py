@@ -52,3 +52,29 @@ def get_avahi_hostname(ip_address):
         if not match:
             continue
         return match[0][1]
+
+
+def get_avahi_address(hostname):
+    proc = subprocess.Popen(
+        ["avahi-resolve-host-name", hostname],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    # TODO this might return mac address instead of IP address
+    while True:
+        rawerr = proc.stderr.readline() if proc.stderr else None
+        if rawerr:
+            app.logger.error(
+                "avahi-resolve-host-name error: %s" % rawerr.rstrip().decode("utf-8")
+            )
+            break
+        rawline = proc.stdout.readline()
+        if not rawline:
+            break
+        line = rawline.rstrip().decode("utf-8")
+        if not line:
+            continue
+        match = re.findall(r"^([0-9a-zA-Z\.-]+)[ \t]+(.+)", line)
+        if not match:
+            continue
+        return match[0][1]

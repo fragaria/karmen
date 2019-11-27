@@ -328,7 +328,7 @@ class CheckPrintersTest(unittest.TestCase):
                 "client": "octoprint",
                 "protocol": "https",
                 "printer_props": {"filament_type": "PETG"},
-            },
+            }
         ],
     )
     @mock.patch("server.database.printers.update_printer")
@@ -368,6 +368,6 @@ class CheckPrintersTest(unittest.TestCase):
                         },
                         "printer_props": {"filament_type": "PETG"},
                     }
-                ),
+                )
             ]
         )

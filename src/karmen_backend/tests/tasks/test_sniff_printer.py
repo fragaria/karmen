@@ -36,7 +36,7 @@ class SavePrinterDataTest(unittest.TestCase):
         return_value={
             "name": "1234",
             "host": "1.2.3.4.",
-            "client_props": {"api_key": "5678",},
+            "client_props": {"api_key": "5678"},
         },
     )
     def test_not_update_any_known_printer(

@@ -171,7 +171,7 @@ def create_api_token():
     token = create_access_token(
         identity=user,
         expires_delta=False,
-        user_claims={"role": "user", "username": user.get("username"),},
+        user_claims={"role": "user", "username": user.get("username")},
     )
     jti = decode_token(token)["jti"]
     api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)
