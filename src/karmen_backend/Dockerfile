@@ -1,6 +1,9 @@
 FROM python:3.6-slim
 
-RUN apt-get update && apt-get install --yes --no-install-recommends libpq-dev avahi-utils avahi-daemon arp-scan build-essential postgresql-client nginx gettext-base libssl-dev libffi-dev
+# build deps
+RUN apt-get update && apt-get install --yes --no-install-recommends build-essential postgresql-client libpq-dev
+# runtime deps
+RUN apt-get update && apt-get install --yes --no-install-recommends nginx gettext-base avahi-utils avahi-daemon arp-scan
 
 RUN pip install --upgrade pip
 RUN pip install pipenv uwsgi supervisor
