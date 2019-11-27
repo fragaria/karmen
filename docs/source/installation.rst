@@ -119,7 +119,10 @@ is to add the following line at the end of your ``/etc/rc.local`` file just befo
 
 .. code-block:: sh
 
-   ./home/pi/karmen/run-karmen.sh
+   cd /home/pi/karmen && ./run-karmen.sh >> /home/pi/karmen/startup.log
+
+This will also put all of the startup information into a logfile in case you need to debug a broken start of Karmen.
+Be aware that this method starts all of the containers under a ``root`` account, which might not be the best idea.
 
 You should also keep your installation :ref:`up to date <updating>` at all times.
 
