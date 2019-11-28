@@ -21,6 +21,7 @@ http {
 
   include             mime.types;
   default_type        application/octet-stream;
+  client_max_body_size 256M;
 
   upstream karmen_backend {
       server ${BACKEND_HOST}:${BACKEND_PORT};
