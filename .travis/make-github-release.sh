@@ -102,7 +102,7 @@ docker-compose stop
 echo -ne "Getting new version...\n\n"
 docker-compose pull
 
-echo -ne "To run Karmen again, run \n\n     BASE_HOST=<public-ip-address> ./run-karmen.sh\n\n"
+echo -ne "To run Karmen again, run \n\n     ./run-karmen.sh\n\n"
 EOF
 chmod +x "${DEST}/update.sh"
 
