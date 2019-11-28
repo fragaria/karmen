@@ -3,7 +3,7 @@ import unittest
 import tempfile
 import mock
 
-from server.services.network import do_arp_scan, get_avahi_hostname
+from server.services.network import do_arp_scan, get_avahi_hostname, get_avahi_address
 
 
 class DoArpScanTest(unittest.TestCase):
@@ -184,3 +184,89 @@ Failed to create client object: Daemon not running
         mock_logger.called_with(
             "avahi-resolve-address error: Failed to create client object: Daemon not running"
         )
+
+
+class GetAvahiAddressTest(unittest.TestCase):
+    def setUp(self):
+        self.stdout_mock = tempfile.NamedTemporaryFile(delete=False)
+        self.stderr_mock = tempfile.NamedTemporaryFile(delete=False)
+
+    def tearDown(self):
+        self.stdout_mock.close()
+        os.remove(self.stdout_mock.name)
+        self.stderr_mock.close()
+        os.remove(self.stderr_mock.name)
+
+    @mock.patch("subprocess.Popen")
+    def test_drop_error_message(self, mock_popen):
+        self.stdout_mock.write(
+            b"""
+Failed to resolve host name 'octopi.local': Timeout reached
+"""
+        )
+        self.stdout_mock.seek(0)
+        mock_popen.return_value.stdout = self.stdout_mock
+        self.stderr_mock.seek(0)
+        mock_popen.return_value.stderr = self.stderr_mock
+        self.assertEqual(get_avahi_address("octopi.local"), None)
+
+    @mock.patch("subprocess.Popen")
+    def test_regex(self, mock_popen):
+        self.stdout_mock.write(
+            b"""
+octopi.local\t10.192.202.23
+"""
+        )
+        self.stdout_mock.seek(0)
+        mock_popen.return_value.stdout = self.stdout_mock
+        self.stderr_mock.seek(0)
+        mock_popen.return_value.stderr = self.stderr_mock
+        result = get_avahi_address("octopi.local")
+        self.assertEqual(result, "10.192.202.23")
+
+    @mock.patch("subprocess.Popen")
+    def test_pass_hostname(self, mock_popen):
+        self.stdout_mock.write(
+            b"""
+octopi.local\t10.192.202.23
+"""
+        )
+        self.stdout_mock.seek(0)
+        mock_popen.return_value.stdout = self.stdout_mock
+        self.stderr_mock.seek(0)
+        mock_popen.return_value.stderr = self.stderr_mock
+        get_avahi_address("octopi.local")
+        mock_popen.assert_called_with(
+            ["avahi-resolve-host-name", "-4", "octopi.local"], stdout=-1, stderr=-1
+        )
+
+    @mock.patch("server.services.network.app.logger.error")
+    @mock.patch("subprocess.Popen")
+    def test_err(self, mock_popen, mock_logger):
+        self.stderr_mock.write(
+            b"""
+Failed to create client object: Daemon not running
+"""
+        )
+        self.stdout_mock.seek(0)
+        mock_popen.return_value.stdout = self.stdout_mock
+        self.stderr_mock.seek(0)
+        mock_popen.return_value.stderr = self.stderr_mock
+        get_avahi_address("octopi.local")
+        self.assertTrue(mock_logger.call_count, 1)
+        mock_logger.called_with(
+            "avahi-resolve-host-name error: Failed to create client object: Daemon not running"
+        )
+
+    @mock.patch("subprocess.Popen")
+    def test_mac_addr_on_first_try(self, mock_popen):
+        self.stdout_mock.write(
+            b"""
+octopi.local fe80::1015:d815:253e:f8e5
+"""
+        )
+        self.stdout_mock.seek(0)
+        mock_popen.return_value.stdout = self.stdout_mock
+        self.stderr_mock.seek(0)
+        mock_popen.return_value.stderr = self.stderr_mock
+        self.assertEqual(get_avahi_address("octopi.local"), None)

@@ -118,10 +118,7 @@ def printer_create():
         port = m.group(2)
         # resolve hostname with mDNS
         host = network.get_avahi_address(hostname)
-        if (
-            not host
-            or re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}?$", host) is None
-        ):
+        if not host:
             return abort(make_response("Cannot resolve %s with mDNS" % hostname, 500))
         if port:
             host = "%s:%s" % (host, port)

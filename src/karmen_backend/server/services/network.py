@@ -55,12 +55,12 @@ def get_avahi_hostname(ip_address):
 
 
 def get_avahi_address(hostname):
+    # -4 ensures that an IPv4 address is resolved, we might get IPv6 otherwise
     proc = subprocess.Popen(
-        ["avahi-resolve-host-name", hostname],
+        ["avahi-resolve-host-name", "-4", hostname],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    # TODO this might return mac address instead of IP address
     while True:
         rawerr = proc.stderr.readline() if proc.stderr else None
         if rawerr:
@@ -74,7 +74,10 @@ def get_avahi_address(hostname):
         line = rawline.rstrip().decode("utf-8")
         if not line:
             continue
-        match = re.findall(r"^([0-9a-zA-Z\.-]+)[ \t]+(.+)", line)
+
+        match = re.findall(
+            r"^([0-9a-zA-Z\.-]+)[ \t]+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", line
+        )
         if not match:
             continue
         return match[0][1]

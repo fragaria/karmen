@@ -213,6 +213,24 @@ class CreateRoute(unittest.TestCase):
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
 
+    @mock.patch("server.services.network.get_avahi_address", return_value=None)
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_hostname_no_resolution(
+        self, mock_get_uri, mock_avahi, mock_avahi_address
+    ):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={
+                    "host": "random-address.local",
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                },
+            )
+            self.assertEqual(response.status_code, 500)
+
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_with_port(self, mock_get_uri, mock_avahi):
