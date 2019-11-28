@@ -32,7 +32,7 @@ either by restarting your device (if you have set up the startup script), or by 
 
 .. code-block:: sh
 
-   cd /home/pi/karmen/ && ./run-karmen.sh
+   /home/pi/karmen/run-karmen.sh
 
 
 By default, the update script will update to the latest stable release. If you're feeling adventurous,
@@ -54,4 +54,4 @@ All of the following commands are run from the ``/home/pi/karmen`` directory unl
 
 .. code-block:: sh
 
-   cd /home/pi/karmen/ && ./run-karmen.sh
+   /home/pi/karmen/run-karmen.sh
