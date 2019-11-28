@@ -29,4 +29,5 @@ The project is released under the `GNU Affero General Public License V3 <http://
   firstrun
   updating
   printing
+  internet-access
   faq
