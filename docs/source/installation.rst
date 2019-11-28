@@ -26,8 +26,9 @@ might have with a webcam stream or other specifics, are related to Octoprint/Oct
 and not to Karmen. *Karmen is only using Octoprint's API to communicate with the
 printer.*
 
-Karmen supports password-protected Octoprint instances as well, it is possible
-to attach an API token to a printer.
+Karmen supports `password-protected Octoprint <http://docs.octoprint.org/en/master/features/accesscontrol.html>`_
+instances as well, it is possible to attach an API token to a printer on the printer settings screen (the option is
+only available when Octoprint is actually password-protected).
 
 Also, make sure that the Octoprint instance is accessible over the network
 from a computer on which Karmen will be running.
