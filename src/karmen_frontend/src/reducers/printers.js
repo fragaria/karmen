@@ -50,7 +50,7 @@ export default (state = {
       });
     case "PRINTERS_DELETE_STARTED":
       return Object.assign({}, state, {
-        toBeDeleted: [].concat(state.toBeDeleted.push(action.payload[0]))
+        toBeDeleted: state.toBeDeleted.concat(action.payload)
       });
     case "PRINTERS_DELETE_SUCCEEDED":
       return Object.assign({}, state, {
