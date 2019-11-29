@@ -1,5 +1,25 @@
 import React from 'react';
 
+// kudos to https://stackoverflow.com/a/50096215 and https://stackoverflow.com/a/49857905
+function fetchWithTimeout(url, options, delay) {
+   const timer = new Promise((resolve) => {
+      setTimeout(resolve, delay, {
+        timeout: true,
+      });
+   });
+   return Promise.race([
+      fetch(url, options),
+      timer
+   ]).then((response) => {
+      if (response.timeout) { 
+        Promise.reject(`Timeout reached for ${url}`);
+      }
+      return response;
+   }).catch((e) => {
+    Promise.reject(e);
+   });
+}
+
 export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
@@ -19,25 +39,27 @@ export class WebcamStream extends React.Component {
       });
       return;
     }
-    fetch(stream)
+    fetchWithTimeout(stream, {}, 3000)
       .then((r) => {
         if (r.status === 200) {
           this.setState({
             isOnline: true,
-            source: stream,
+            source: `${stream}?t=${(new Date()).getTime()}`,
           });
+        } else {
+          throw new Error(`Cannot work with stream on ${stream}`);
         }
       }).catch((e) => {
-        fetch(proxied)
+        fetchWithTimeout(proxied, {}, 3000)
           .then((r) => {
             if (r.status === 200) {
               this.setState({
                 isOnline: true,
-                source: proxied,
+                source: `${proxied}?t=${(new Date()).getTime()}`,
               });
             }
           }).catch((e) => {
-            // pass
+            throw new Error(`Cannot work with stream on ${proxied}`);
           });
       });
   }
@@ -85,15 +107,17 @@ export class WebcamStream extends React.Component {
         })
       }}
     >
-      {isOnline ?
-        <img
-          className={klass.join(' ')}
-          alt={source}
-          src={`${source}?t=${(new Date()).getTime()}`}
-        /> :
-        <p className="no-stream">
-          Stream unavailable
-        </p>
+      {isOnline
+        ?
+          <img
+            className={klass.join(' ')}
+            alt={source}
+            src={source}
+          />
+        :
+          <p className="no-stream">
+            Stream unavailable
+          </p>
       }
     </div>;
   }
