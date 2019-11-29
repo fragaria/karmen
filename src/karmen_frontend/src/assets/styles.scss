@@ -433,7 +433,7 @@ input[type=text], input[type=password], select {
     padding: 0 0 0 $base-unit*2;
   }
 
-  @media screen and (max-width: 600px) {
+  @media screen and (hover: none) {
     .box-actions {
       display: inline-block;
     }
