@@ -260,7 +260,7 @@ button.plain {
 }
 
 button[type=submit] {
-  height: $form-elements-height;
+  min-height: $form-elements-height;
   padding: $base-unit $spacing-default;
   border: none;
   outline: none;
@@ -278,7 +278,7 @@ button[type=reset] {
   border: none;
   outline: none;
   text-decoration: underline;
-  background: #fff;
+  background-color: transparent;
   color: map-get($palette, red);
   margin-left: $base-unit;
 
@@ -433,9 +433,19 @@ input[type=text], input[type=password], select {
     padding: 0 0 0 $base-unit*2;
   }
 
+  @media screen and (max-width: 600px) {
+    .box-actions {
+      display: inline-block;
+    }
+
+    .printer-controls {
+      display: block;
+    }
+  }
+
   &:hover {
     .box-actions {
-      display: flex;
+      display: inline-block;
     }
 
     .printer-controls {
@@ -587,9 +597,16 @@ nav {
 .form-actions {
   margin: $base-unit 0 0 260px;
 
+  @media only screen and (max-width: 600px) {
+    margin: $base-unit 0 0 0px;
+    text-align: center;
+  }
+
   .back-link {
     display: inline-block;
     margin: 0 $base-unit*2;
+    min-height: $form-elements-height;
+    line-height: $form-elements-height;
   }
 }
 
