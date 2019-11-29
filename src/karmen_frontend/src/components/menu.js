@@ -1,13 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { clearUserIdentity } from '../actions/users'
+import { clearUserIdentity, setCurrentState } from '../actions/users'
 
-const Menu = ({ userState, username, role, logout }) => {
+const Menu = ({ userState, username, role, logout, setCurrentUserState }) => {
   return (
     <nav>
       <h2 className="hidden">Navigation</h2>
-      <Link to="/" className="karmen-logo">
+      <Link to="/" className="karmen-logo" onClick={() => {
+        if (userState === "fresh-token-required") {
+          setCurrentUserState("logged-in");
+        }
+      }}>
         <img alt="Karmen logo" src="/logo.svg" />
       </Link>
       {userState === "logged-in" && (
@@ -50,6 +54,7 @@ export default connect(
     role: state.users.me.role,
   }),
   dispatch => ({
-    logout: () => dispatch(clearUserIdentity())
+    logout: () => dispatch(clearUserIdentity()),
+    setCurrentUserState: (userState) => dispatch(setCurrentState(userState)),
   })
 )(Menu);
