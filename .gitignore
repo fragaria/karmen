@@ -6,3 +6,5 @@ config.local.cfg
 tmp
 .travis/karmen
 .travis/*.zip
+.idea
+
