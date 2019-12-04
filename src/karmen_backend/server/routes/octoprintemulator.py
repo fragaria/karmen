@@ -120,8 +120,6 @@ def upload():
     if not re.search(r"\.gco(de)?$", incoming.filename):
         return abort(415)
     try:
-        print("DEBUG: REQUEST PATH", [request.form.get("path", "")])
-
         saved = files.save(incoming, request.form.get("path", ""))
         gcode_id = gcodes.add_gcode(
             path=saved["path"],
@@ -133,7 +131,7 @@ def upload():
         )
         analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
-        return abort(500, "upload IOError;\t" + str(e))
+        return abort(500, e)
     return (
         jsonify(
             {
