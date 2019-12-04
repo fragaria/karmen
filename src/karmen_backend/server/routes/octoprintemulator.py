@@ -25,6 +25,80 @@ def version():
     )
 
 
+@app.route("/octoprint-emulator/api/settings", methods=["GET"])
+@cross_origin()
+def settings():
+    token = request.headers.get("x-api-key", None)
+    if not token:
+        return abort(403)
+    try:
+        decode_token(token)
+    except Exception as e:
+        abort(403)
+
+    return jsonify(
+        {}
+    )
+
+
+@app.route("/octoprint-emulator/api/printer", methods=["GET"])
+@cross_origin()
+def printer():
+    token = request.headers.get("x-api-key", None)
+    if not token:
+        return abort(403)
+    try:
+        decode_token(token)
+    except Exception as e:
+        abort(403)
+
+    return jsonify(
+        {
+            "sd": {
+                "ready": True
+            },
+            "state": {
+                "flags": {
+                    "cancelling": False,
+                    "closedOrError": False,
+                    "error": False,
+                    "finishing": False,
+                    "operational": True,
+                    "paused": False,
+                    "pausing": False,
+                    "printing": False,
+                    "ready": True,
+                    "resuming": False,
+                    "sdReady": True
+                },
+                "text": "Operational"
+            },
+
+        }
+    )
+
+
+@app.route("/octoprint-emulator/api/job", methods=["GET"])
+@cross_origin()
+def job():
+
+    token = request.headers.get("x-api-key", None)
+    if not token:
+        return abort(403)
+    try:
+        decode_token(token)
+    except Exception as e:
+        abort(403)
+
+    return jsonify(
+        {
+            "job": {
+            }
+
+        }
+    )
+
+
 @app.route("/octoprint-emulator/api/files/local", methods=["POST"])
 @cross_origin()
 def upload():
@@ -46,7 +120,7 @@ def upload():
     if not re.search(r"\.gco(de)?$", incoming.filename):
         return abort(415)
     try:
-        saved = files.save(incoming, request.form.get("path", "/"))
+        saved = files.save(incoming, request.form.get("path", ""))
         gcode_id = gcodes.add_gcode(
             path=saved["path"],
             filename=saved["filename"],
