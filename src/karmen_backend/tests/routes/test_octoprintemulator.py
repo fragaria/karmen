@@ -32,6 +32,81 @@ class VersionRoute(unittest.TestCase):
             self.assertTrue("OctoPrint" in response.json["text"])
 
 
+class SettingsRoute(unittest.TestCase):
+    def test_settings_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/octoprint-emulator/api/settings")
+            self.assertEqual(response.status_code, 403)
+
+    def test_settings_expired_token(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/octoprint-emulator/api/settings",
+                headers={"X-Api-Key": TOKEN_ADMIN_EXPIRED},
+            )
+            self.assertEqual(response.status_code, 403)
+
+    def test_settings(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/octoprint-emulator/api/settings", headers={"X-Api-Key": TOKEN_USER}
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(len(response.json) == 0)
+
+
+class JobRoute(unittest.TestCase):
+    def test_job_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/octoprint-emulator/api/job")
+            self.assertEqual(response.status_code, 403)
+
+    def test_job_expired_token(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/octoprint-emulator/api/job",
+                headers={"X-Api-Key": TOKEN_ADMIN_EXPIRED},
+            )
+            self.assertEqual(response.status_code, 403)
+
+    def test_job(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/octoprint-emulator/api/job", headers={"X-Api-Key": TOKEN_USER}
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("job" in response.json)
+            self.assertTrue(response.json["job"] == {})
+
+
+class PrinterRoute(unittest.TestCase):
+    def test_printer_no_token(self):
+        with app.test_client() as c:
+            response = c.get("/octoprint-emulator/api/printer")
+            self.assertEqual(response.status_code, 403)
+
+    def test_printer_expired_token(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/octoprint-emulator/api/printer",
+                headers={"X-Api-Key": TOKEN_ADMIN_EXPIRED},
+            )
+            self.assertEqual(response.status_code, 403)
+
+    def test_printer(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/octoprint-emulator/api/printer", headers={"X-Api-Key": TOKEN_USER}
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("sd" in response.json)
+            self.assertTrue("ready" in response.json["sd"])
+            self.assertTrue(response.json["sd"]["ready"] == True)
+            self.assertTrue("state" in response.json)
+            self.assertTrue("text" in response.json["state"])
+            self.assertTrue("Operational" == response.json["state"]["text"])
+
+
 class FilesLocalRoute(unittest.TestCase):
     @mock.patch("server.routes.gcodes.analyze_gcode.delay")
     @mock.patch(
@@ -55,7 +130,7 @@ class FilesLocalRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "/")
+            self.assertEqual(args[1], "")
             self.assertEqual(mocked_delay.call_count, 1)
 
     @mock.patch("server.routes.gcodes.gcodes.add_gcode")
