@@ -1,4 +1,5 @@
 import { getHeaders } from './utils';
+import download from 'downloadjs';
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -93,5 +94,24 @@ export const uploadGcode = (path, file) => {
     }).catch((e) => {
       console.error(`Cannot add a gcode: ${e}`);
       return {};
+    });
+}
+
+export const downloadGcode = (dataLink, filename) => {
+  return fetch(`${BASE_URL}/${dataLink}`, {
+    method: 'GET',
+    headers: getHeaders(),
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.blob()
+          .then((d) => {
+            download(d, filename, d.type);
+          });
+      }
+      console.error(`Cannot download a gcode: ${response.status}`);
+    }).catch((e) => {
+      console.error(`Cannot download a gcode: ${e}`);
+      return false;
     });
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loader from '../components/loader';
-import { getGcode, printGcode } from '../services/backend';
+import { getGcode, printGcode, downloadGcode } from '../services/backend';
 import { loadPrinters } from '../actions/printers';
 import formatters from '../services/formatters';
 
@@ -100,7 +100,9 @@ class GcodeDetail extends React.Component {
                     <li><strong>Uploaded by</strong>: {gcode.username}</li>
                     <li><strong>Uploaded at</strong>: {formatters.datetime(gcode.uploaded)}</li>
                     <li><strong>Size</strong>: {formatters.bytes(gcode.size)}</li>
-                    <li><strong>Download</strong>: <a href={`${window.env.BACKEND_BASE}${gcode.data}`}>{gcode.path}{gcode.path ? '/' : ''}{gcode.filename}</a></li>
+                    <li><strong>Download</strong>: <button className="plain link" onClick={() => {
+                      downloadGcode(gcode.data, gcode.filename);
+                    }}>{gcode.path}{gcode.path ? '/' : ''}{gcode.filename}</button></li>
                 </ul>
               </div>
               <div className="printer-connection">

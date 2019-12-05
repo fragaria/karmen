@@ -104,6 +104,7 @@ hr, .hidden {
 
 a, .link {
   color: $color-secondary;
+  text-decoration: underline;
 
   &:hover, &:active {
     color: $color-secondary;
