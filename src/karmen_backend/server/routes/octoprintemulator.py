@@ -1,5 +1,7 @@
 import re
 
+import functools
+
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
 
@@ -10,16 +12,25 @@ from server.tasks.analyze_gcode import analyze_gcode
 from flask_jwt_extended import decode_token
 
 
+def x_api_key_required(func):
+    @functools.wraps(func)
+    def wrap():
+        token = request.headers.get("x-api-key", None)
+        if not token:
+            return abort(403)
+        try:
+            decode_token(token)
+        except Exception as e:
+            return abort(403)
+        return func()
+
+    return wrap
+
+
 @app.route("/octoprint-emulator/api/version", methods=["GET"])
 @cross_origin()
+@x_api_key_required
 def version():
-    token = request.headers.get("x-api-key", None)
-    if not token:
-        return abort(403)
-    try:
-        decode_token(token)
-    except Exception as e:
-        abort(403)
     return jsonify(
         {"api": "karmen", "text": "OctoPrint emulator by Karmen", "server": __version__}
     )
@@ -27,36 +38,18 @@ def version():
 
 @app.route("/octoprint-emulator/api/settings", methods=["GET"])
 @cross_origin()
+@x_api_key_required
 def settings():
-    token = request.headers.get("x-api-key", None)
-    if not token:
-        return abort(403)
-    try:
-        decode_token(token)
-    except Exception as e:
-        abort(403)
-
-    return jsonify(
-        {}
-    )
+    return jsonify({})
 
 
 @app.route("/octoprint-emulator/api/printer", methods=["GET"])
 @cross_origin()
+@x_api_key_required
 def printer():
-    token = request.headers.get("x-api-key", None)
-    if not token:
-        return abort(403)
-    try:
-        decode_token(token)
-    except Exception as e:
-        abort(403)
-
     return jsonify(
         {
-            "sd": {
-                "ready": True
-            },
+            "sd": {"ready": True},
             "state": {
                 "flags": {
                     "cancelling": False,
@@ -69,34 +62,19 @@ def printer():
                     "printing": False,
                     "ready": True,
                     "resuming": False,
-                    "sdReady": True
+                    "sdReady": True,
                 },
-                "text": "Operational"
+                "text": "Operational",
             },
-
         }
     )
 
 
 @app.route("/octoprint-emulator/api/job", methods=["GET"])
 @cross_origin()
+@x_api_key_required
 def job():
-
-    token = request.headers.get("x-api-key", None)
-    if not token:
-        return abort(403)
-    try:
-        decode_token(token)
-    except Exception as e:
-        abort(403)
-
-    return jsonify(
-        {
-            "job": {
-            }
-
-        }
-    )
+    return jsonify({"job": {}})
 
 
 @app.route("/octoprint-emulator/api/files/local", methods=["POST"])
