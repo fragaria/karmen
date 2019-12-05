@@ -85,7 +85,7 @@ class PrinterRoute(unittest.TestCase):
             response = c.get("/octoprint-emulator/api/printer")
             self.assertEqual(response.status_code, 403)
 
-    def test_printe_expired_token(self):
+    def test_printer_expired_token(self):
         with app.test_client() as c:
             response = c.get(
                 "/octoprint-emulator/api/printer",
