@@ -24,6 +24,7 @@ export class WebcamStream extends React.Component {
   state = {
     isOnline: false,
     isMaximized: false,
+    elemid: `webcam-${Math.random().toString(36).substring(2, 15)}`,
   }
 
   constructor(props) {
@@ -42,9 +43,10 @@ export class WebcamStream extends React.Component {
     fetchWithTimeout(stream, {}, 3000)
       .then((r) => {
         if (r.status === 200) {
+          const separator = stream.indexOf('?') > -1 ? '&' : '?';
           this.setState({
             isOnline: true,
-            source: `${stream}?t=${(new Date()).getTime()}`,
+            source: `${stream}${separator}t=${(new Date()).getTime()}`,
           });
         } else {
           throw new Error(`Cannot work with stream on ${stream}`);
@@ -53,9 +55,10 @@ export class WebcamStream extends React.Component {
         fetchWithTimeout(proxied, {}, 3000)
           .then((r) => {
             if (r.status === 200) {
+              const separator = proxied.indexOf('?') > -1 ? '&' : '?';
               this.setState({
                 isOnline: true,
-                source: `${proxied}?t=${(new Date()).getTime()}`,
+                source: `${proxied}${separator}t=${(new Date()).getTime()}`,
               });
             }
           }).catch((e) => {
@@ -76,15 +79,22 @@ export class WebcamStream extends React.Component {
   }
 
   componentWillUnmount() {
+    const { elemid } = this.state;
     this.setState({
       isOnline: false,
       source: null,
-    })
+    });
+    // Actually stop loading the displayed image - there are some issues under the react hood
+    // https://bugs.webkit.org/show_bug.cgi?id=6656
+    const elem = document.querySelector(`#${elemid}`);
+    if (elem) {
+      elem.src = '';
+    }
   }
 
   render() {
     const { flipHorizontal, flipVertical, rotate90 } = this.props;
-    const { isOnline, isMaximized, source } = this.state;
+    const { isOnline, isMaximized, source, elemid } = this.state;
     let klass = [];
     if (flipHorizontal) {
       klass.push('flip-horizontal');
@@ -110,6 +120,7 @@ export class WebcamStream extends React.Component {
       {isOnline
         ?
           <img
+            id={elemid}
             className={klass.join(' ')}
             alt={source}
             src={source}
