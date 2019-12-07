@@ -127,7 +127,7 @@ class UsersTable extends React.Component {
       if (prevState.currentPageIndex < this.state.currentPageIndex) {
         let nextStartWith = null;
         if (prevPage && prevPage.data && prevPage.data.next) {
-          const uri = new URL(prevPage.data.next.indexOf('http') !== 0 ? `http://karmen.local${prevPage.data.next}` : prevPage.data.next)
+          const uri = new URL(formatters.absoluteUrl(prevPage.data.next));
           nextStartWith = uri.searchParams.get('start_with');
         }
         if (!userList.pages.find((p) => p.startWith === nextStartWith)) {

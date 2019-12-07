@@ -6,8 +6,6 @@ import { getGcodes, deleteGcode, printGcode } from '../services/backend';
 import { loadPrinters } from '../actions/printers';
 import formatters from '../services/formatters';
 
-const BASE_URL = window.env.BACKEND_BASE;
-
 class GcodeRow extends React.Component {
   state = {
     showDeleteRow: false,
@@ -244,7 +242,7 @@ class GcodeList extends React.Component {
       }
       let nextStartWith;
       if (gcodes.next) {
-        const uri = new URL(gcodes.next.indexOf('http') !== 0 ? `${BASE_URL}${gcodes.next}` : gcodes.next)
+        const uri = new URL(formatters.absoluteUrl(gcodes.next));
         nextStartWith = uri.searchParams.get('start_with');
       }
       if (nextStartWith) {

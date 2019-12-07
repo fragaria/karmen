@@ -11,8 +11,6 @@ import formatters from '../services/formatters';
 import { getPrinterJobs } from '../services/backend';
 import { loadPrinter, patchPrinter, setPrinterConnection, changeCurrentJob } from '../actions/printers';
 
-const BASE_URL = window.env.BACKEND_BASE;
-
 class PrinterConnectionForm extends React.Component {
   state = {
     showConnectionWarningRow: false,
@@ -246,7 +244,7 @@ class PrinterDetail extends React.Component {
       }
       let nextStartWith;
       if (jobs.next) {
-        const uri = new URL(jobs.next.indexOf('http') !== 0 ? `${BASE_URL}${jobs.next}` : jobs.next)
+        const uri = new URL(formatters.absoluteUrl(jobs.next))
         nextStartWith = uri.searchParams.get('start_with');
       }
       if (nextStartWith) {

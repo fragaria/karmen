@@ -48,9 +48,20 @@ export const bool = (value) => {
   return value;
 }
 
+export const absoluteUrl = (partial) => {
+  if (partial.indexOf('http://') > -1 || partial.indexOf('https://') > -1) {
+    return partial;
+  }
+  if (window.env.BACKEND_BASE.indexOf('http://') > -1 || window.env.BACKEND_BASE.indexOf('https://') > -1) {
+    return `${window.env.BACKEND_BASE}${partial}`;
+  }
+  return `${window.location.origin}${window.env.BACKEND_BASE}${partial}`
+}
+
 export default {
   bytes,
   datetime,
   timespan,
   bool,
+  absoluteUrl,
 }
