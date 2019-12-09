@@ -2,6 +2,7 @@ import os
 import unittest
 import tempfile
 import mock
+from textwrap import dedent
 
 from server.services.network import do_arp_scan, get_avahi_hostname, get_avahi_address
 
@@ -22,12 +23,14 @@ class DoArpScanTest(unittest.TestCase):
     @mock.patch("subprocess.Popen")
     def test_drop_useless_line(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-Interface: wlp4s0, datalink type: EN10MB (Ethernet)
-Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
-10.192.202.1\t54:a0:50:e4:89:c0
-10.192.202.4\tb8:27:eb:05:5d:d1
-"""
+            dedent(
+                """
+                Interface: wlp4s0, datalink type: EN10MB (Ethernet)
+                Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
+                10.192.202.1\t54:a0:50:e4:89:c0
+                10.192.202.4\tb8:27:eb:05:5d:d1
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -38,12 +41,14 @@ Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/
     @mock.patch("subprocess.Popen")
     def test_parse_lines(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-Interface: wlp4s0, datalink type: EN10MB (Ethernet)
-Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
-10.192.202.1\t54:a0:50:e4:89:c0
-10.192.202.4\tb8:27:eb:05:5d:d1
-"""
+            dedent(
+                """
+                Interface: wlp4s0, datalink type: EN10MB (Ethernet)
+                Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
+                10.192.202.1\t54:a0:50:e4:89:c0
+                10.192.202.4\tb8:27:eb:05:5d:d1
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -54,12 +59,14 @@ Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/
     @mock.patch("subprocess.Popen")
     def test_pass_network_interface(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-Interface: wlp4s0, datalink type: EN10MB (Ethernet)
-Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
-10.192.202.1\t54:a0:50:e4:89:c0
-10.192.202.4\tb8:27:eb:05:5d:d1
-"""
+            dedent(
+                """
+                Interface: wlp4s0, datalink type: EN10MB (Ethernet)
+                Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
+                10.192.202.1\t54:a0:50:e4:89:c0
+                10.192.202.4\tb8:27:eb:05:5d:d1
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -75,14 +82,16 @@ Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/
     @mock.patch("subprocess.Popen")
     def test_regex(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-Interface: wlp4s0, datalink type: EN10MB (Ethernet)
-Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
-10.192.202.1\t54:a0:50:e4:89:c0
-10.192.202.4\tb8:27:eb:05:5d:d1
-17 packets received by filter, 0 packets dropped by kernel
-Ending arp-scan 1.9: 256 hosts scanned in 2.443 seconds (104.79 hosts/sec). 17 responded
-"""
+            dedent(
+                """
+                Interface: wlp4s0, datalink type: EN10MB (Ethernet)
+                Starting arp-scan 1.9 with 256 hosts (http://www.nta-monitor.com/tools/arp-scan/)
+                10.192.202.1\t54:a0:50:e4:89:c0
+                10.192.202.4\tb8:27:eb:05:5d:d1
+                17 packets received by filter, 0 packets dropped by kernel
+                Ending arp-scan 1.9: 256 hosts scanned in 2.443 seconds (104.79 hosts/sec). 17 responded
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -97,9 +106,11 @@ Ending arp-scan 1.9: 256 hosts scanned in 2.443 seconds (104.79 hosts/sec). 17 r
     @mock.patch("subprocess.Popen")
     def test_err(self, mock_popen, mock_logger):
         self.stderr_mock.write(
-            b"""
-ioctl: No such device
-"""
+            dedent(
+                """
+                ioctl: No such device
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -127,9 +138,11 @@ class GetAvahiHostnameTest(unittest.TestCase):
     @mock.patch("subprocess.Popen")
     def test_drop_error_message(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-Failed to resolve address '10.192.202.200': Timeout reached
-"""
+            dedent(
+                """
+                Failed to resolve address '10.192.202.200': Timeout reached
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -140,9 +153,11 @@ Failed to resolve address '10.192.202.200': Timeout reached
     @mock.patch("subprocess.Popen")
     def test_regex(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-10.192.202.23\toctopi.local
-"""
+            dedent(
+                """
+                10.192.202.23\toctopi.local
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -154,9 +169,11 @@ Failed to resolve address '10.192.202.200': Timeout reached
     @mock.patch("subprocess.Popen")
     def test_pass_ip_address(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-10.192.202.23\toctopi.local
-"""
+            dedent(
+                """
+                10.192.202.23\toctopi.local
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -171,9 +188,11 @@ Failed to resolve address '10.192.202.200': Timeout reached
     @mock.patch("subprocess.Popen")
     def test_err(self, mock_popen, mock_logger):
         self.stderr_mock.write(
-            b"""
-Failed to create client object: Daemon not running
-"""
+            dedent(
+                """
+                Failed to create client object: Daemon not running
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -200,9 +219,11 @@ class GetAvahiAddressTest(unittest.TestCase):
     @mock.patch("subprocess.Popen")
     def test_drop_error_message(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-Failed to resolve host name 'octopi.local': Timeout reached
-"""
+            dedent(
+                """
+                Failed to resolve host name 'octopi.local': Timeout reached
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -213,9 +234,11 @@ Failed to resolve host name 'octopi.local': Timeout reached
     @mock.patch("subprocess.Popen")
     def test_regex(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-octopi.local\t10.192.202.23
-"""
+            dedent(
+                """
+                octopi.local\t10.192.202.23
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -227,9 +250,11 @@ octopi.local\t10.192.202.23
     @mock.patch("subprocess.Popen")
     def test_pass_hostname(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-octopi.local\t10.192.202.23
-"""
+            dedent(
+                """
+                octopi.local\t10.192.202.23
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -244,9 +269,11 @@ octopi.local\t10.192.202.23
     @mock.patch("subprocess.Popen")
     def test_err(self, mock_popen, mock_logger):
         self.stderr_mock.write(
-            b"""
-Failed to create client object: Daemon not running
-"""
+            dedent(
+                """
+                Failed to create client object: Daemon not running
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
@@ -261,9 +288,11 @@ Failed to create client object: Daemon not running
     @mock.patch("subprocess.Popen")
     def test_mac_addr_on_first_try(self, mock_popen):
         self.stdout_mock.write(
-            b"""
-octopi.local fe80::1015:d815:253e:f8e5
-"""
+            dedent(
+                """
+                octopi.local fe80::1015:d815:253e:f8e5
+                """
+            ).encode("utf-8")
         )
         self.stdout_mock.seek(0)
         mock_popen.return_value.stdout = self.stdout_mock
