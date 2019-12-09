@@ -1,5 +1,6 @@
 import unittest
 import mock
+import random
 
 from server import app
 from server.database import printers
@@ -443,35 +444,38 @@ class DeleteRoute(unittest.TestCase):
 
 class PatchRoute(unittest.TestCase):
     def setUp(self):
-        printers.delete_printer("1.2.3.4")
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.ip)
         printers.add_printer(
             name="name",
             hostname="hostname",
-            host="1.2.3.4",
+            host=self.ip,
             client="octoprint",
             client_props={"version": "123"},
             printer_props={"filament_type": "PLA"},
         )
 
     def tearDown(self):
-        printers.delete_printer("1.2.3.4")
+        printers.delete_printer(self.ip)
 
     def test_patch(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
             self.assertEqual(response.status_code, 200)
-            p = printers.get_printer("1.2.3.4")
+            p = printers.get_printer(self.ip)
             self.assertEqual(p["name"], "random-test-printer-name")
             self.assertEqual(p["protocol"], "https")
 
     def test_patch_printer_props(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={
                     "name": "random-test-printer-name",
@@ -483,7 +487,7 @@ class PatchRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(response.status_code, 200)
-            p = printers.get_printer("1.2.3.4")
+            p = printers.get_printer(self.ip)
             self.assertEqual(p["printer_props"]["filament_type"], "PETG")
             self.assertEqual(p["printer_props"]["filament_color"], "žluťoučká")
             self.assertTrue("random" not in p["printer_props"])
@@ -491,7 +495,7 @@ class PatchRoute(unittest.TestCase):
     def test_patch_no_token(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
             self.assertEqual(response.status_code, 401)
@@ -499,7 +503,7 @@ class PatchRoute(unittest.TestCase):
     def test_patch_bad_token(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
@@ -517,7 +521,7 @@ class PatchRoute(unittest.TestCase):
     def test_patch_no_data(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 400)
@@ -525,7 +529,7 @@ class PatchRoute(unittest.TestCase):
     def test_patch_empty_name(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": ""},
             )
@@ -534,7 +538,7 @@ class PatchRoute(unittest.TestCase):
     def test_patch_empty_bad_protocol(self):
         with app.test_client() as c:
             response = c.patch(
-                "/printers/1.2.3.4",
+                "/printers/%s" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"name": "some", "protocol": "ftp"},
             )
@@ -543,22 +547,25 @@ class PatchRoute(unittest.TestCase):
 
 class CurrentJobRoute(unittest.TestCase):
     def setUp(self):
-        printers.delete_printer("1.2.3.4")
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.ip)
         printers.add_printer(
             name="name",
             hostname="hostname",
-            host="1.2.3.4",
+            host=self.ip,
             client="octoprint",
             client_props={"version": "123", "connected": True},
         )
 
     def tearDown(self):
-        printers.delete_printer("1.2.3.4")
+        printers.delete_printer(self.ip)
 
     def test_current_job_no_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job", json={"action": "cancel"}
+                "/printers/%s/current-job" % self.ip, json={"action": "cancel"}
             )
             self.assertEqual(response.status_code, 401)
 
@@ -568,7 +575,7 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job",
+                "/printers/%s/current-job" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "cancel"},
             )
@@ -580,7 +587,7 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_admin(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job",
+                "/printers/%s/current-job" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "cancel"},
             )
@@ -590,7 +597,7 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_unable(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job",
+                "/printers/%s/current-job" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "cancel"},
             )
@@ -599,7 +606,7 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_bad_action(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job",
+                "/printers/%s/current-job" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": "random"},
             )
@@ -617,7 +624,7 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_no_data(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job",
+                "/printers/%s/current-job" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 400)
@@ -625,7 +632,7 @@ class CurrentJobRoute(unittest.TestCase):
     def test_current_job_empty_action(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/current-job",
+                "/printers/%s/current-job" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"action": ""},
             )
@@ -634,17 +641,20 @@ class CurrentJobRoute(unittest.TestCase):
 
 class PrinterConnectionRoute(unittest.TestCase):
     def setUp(self):
-        printers.delete_printer("1.2.3.4")
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.ip)
         printers.add_printer(
             name="name",
             hostname="hostname",
-            host="1.2.3.4",
+            host=self.ip,
             client="octoprint",
             client_props={"version": "123", "connected": True},
         )
 
     def tearDown(self):
-        printers.delete_printer("1.2.3.4")
+        printers.delete_printer(self.ip)
 
     @mock.patch(
         "server.clients.octoprint.requests.Session.post", return_value=Response(204)
@@ -656,7 +666,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     def test_change_connection_to_online(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"state": "online"},
             )
@@ -672,7 +682,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     def test_change_connection_to_online_already_on(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"state": "online"},
             )
@@ -690,7 +700,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     ):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"state": "offline"},
             )
@@ -706,7 +716,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     def test_change_connection_to_offline(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"state": "offline"},
             )
@@ -715,7 +725,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     def test_change_connection_bad_token(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"state": "online"},
             )
@@ -723,13 +733,15 @@ class PrinterConnectionRoute(unittest.TestCase):
 
     def test_change_connection_no_token(self):
         with app.test_client() as c:
-            response = c.post("/printers/1.2.3.4/connection", json={"state": "online"})
+            response = c.post(
+                "/printers/%s/connection" % self.ip, json={"state": "online"}
+            )
             self.assertEqual(response.status_code, 401)
 
     def test_change_connection_bad_state(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"state": "random"},
             )
@@ -747,7 +759,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     def test_change_connection_no_data(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 400)
@@ -755,7 +767,7 @@ class PrinterConnectionRoute(unittest.TestCase):
     def test_change_connection_empty_state(self):
         with app.test_client() as c:
             response = c.post(
-                "/printers/1.2.3.4/connection",
+                "/printers/%s/connection" % self.ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 json={"state": ""},
             )

@@ -14,7 +14,7 @@ run-docker-test-postgres:
 	ENV=develop POSTGRES_PORT=54350 POSTGRES_HOST=localhost sh ./scripts/migrate.sh
 
 test: run-docker-test-postgres
-	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest -n auto --dist=loadfile
+	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest -n auto --dist=loadscope
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 
@@ -25,7 +25,7 @@ lint:
 	pylint server/ tests/
 
 test-watch: run-docker-test-postgres
-	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest --looponfail -n auto --dist=loadfile
+	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest --looponfail -n auto --dist=loadscope
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 

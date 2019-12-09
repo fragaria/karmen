@@ -493,13 +493,13 @@ class ListRoute(unittest.TestCase):
     def test_filter_next(self):
         with app.test_client() as c:
             response = c.get(
-                "/users?filter=username:user&limit=2&order_by=-uuid",
+                "/users?filter=username:user&limit=1&order_by=-uuid",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
-            self.assertTrue(len(response.json["items"]) == 2)
+            self.assertTrue(len(response.json["items"]) == 1)
             response2 = c.get(
                 response.json["next"],
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
