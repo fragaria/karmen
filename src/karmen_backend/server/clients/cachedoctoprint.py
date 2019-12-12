@@ -58,3 +58,9 @@ class CachedOctoprint(Octoprint):
         if not force:
             redisinstance.set(self.get_cache_key(uri), pickle.dumps(response), ex=13)
         return response
+
+    def modify_current_job(self, action):
+        result = super().modify_current_job(action)
+        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), "/api/job")
+        redisinstance.delete(self.get_cache_key(uri))
+        return result

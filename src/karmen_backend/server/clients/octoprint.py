@@ -112,7 +112,7 @@ class Octoprint(PrinterClient):
         return self.client_info.connected
 
     def connect_printer(self):
-        state_check = self.status()
+        state_check = self.uncached_status()
         # printer is offline, it should be safe to do a connect attempt
         if state_check and state_check["state"] in [
             "Offline",
@@ -133,7 +133,7 @@ class Octoprint(PrinterClient):
         return False
 
     def disconnect_printer(self):
-        state_check = self.status()
+        state_check = self.uncached_status()
         # printer is offline, it should be safe to do a connect attempt
         if state_check and state_check["state"] not in [
             "Offline",
@@ -255,7 +255,10 @@ class Octoprint(PrinterClient):
         )
 
     def status(self):
-        request = self._http_get("/api/printer?exclude=history")
+        return self.uncached_status(force=False)
+
+    def uncached_status(self, force=True):
+        request = self._http_get("/api/printer?exclude=history", force=force)
         if request is not None and request.status_code == 200:
             try:
                 data = request.json()
@@ -316,7 +319,7 @@ class Octoprint(PrinterClient):
             return {}
 
     def upload_and_start_job(self, gcode_disk_path, path=None):
-        status = self.status()
+        status = self.uncached_status()
         if self.client_info.connected and status["state"] != "Operational":
             raise PrinterClientException(
                 "Printer is printing, cannot start another print"
@@ -330,11 +333,11 @@ class Octoprint(PrinterClient):
         return bool(request is not None and request.status_code == 201)
 
     def modify_current_job(self, action):
-        if action not in ("cancel", "start", "toggle"):
+        if action not in ("cancel", "start", "toggle", "pause", "resume"):
             raise PrinterClientException("Action %s is not allowed" % (action,))
         body = {"command": action}
-        if action == "toggle":
-            body = {"command": "pause", "action": "toggle"}
+        if action in ["toggle", "pause", "resume"]:
+            body = {"command": "pause", "action": action}
         request = self._http_post("/api/job", json=body)
         # TODO improve return value
         return bool(request is not None and request.status_code == 204)

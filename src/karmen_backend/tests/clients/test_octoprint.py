@@ -62,7 +62,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint("192.168.1.15")
         self.assertFalse(printer.connect_printer())
-        self.assertEqual(mock_get_uri.call_count, 0)
+        self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
     @mock.patch(
@@ -109,7 +109,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint("192.168.1.15")
         self.assertTrue(printer.disconnect_printer())
-        self.assertEqual(mock_get_uri.call_count, 0)
+        self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
     @mock.patch(

@@ -157,13 +157,13 @@ export class PrinterView extends React.Component {
               {printer.status.state === 'Paused'
                 ? (
                 <button className="plain" onClick={() => {
-                  changeCurrentJobState(printer.host, 'toggle');
+                  changeCurrentJobState(printer.host, 'resume');
                 }}>
                   <span className="icon-play"></span>
                 </button>)
                 : (
                 <button className="plain" onClick={() => {
-                  changeCurrentJobState(printer.host, 'toggle');
+                  changeCurrentJobState(printer.host, 'pause');
                 }}>
                   <span className="icon-pause"></span>
                 </button>)
