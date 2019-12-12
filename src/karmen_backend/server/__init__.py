@@ -40,6 +40,11 @@ app.config["JWT_ERROR_MESSAGE_KEY"] = "message"
 app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access"]
 
+if not app.config.get("REDIS_HOST"):
+    app.config["REDIS_HOST"] = os.environ.get("REDIS_HOST", "localhost")
+if not app.config.get("REDIS_PORT"):
+    app.config["REDIS_PORT"] = os.environ.get("REDIS_PORT", 6379)
+
 jwt = JWTManager(app)
 celery = setup_celery(app)
 executor = Executor(app)

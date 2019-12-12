@@ -1,4 +1,6 @@
 import re
+import random
+import string
 
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -49,23 +51,32 @@ def printers_list():
     device_list = []
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     futures = []
+
+    def reqid():
+        letters = string.ascii_lowercase
+        return "".join(random.choice(letters) for i in range(10))
+
+    uqid = reqid()
     for printer in printers.get_printers():
         try:
             futures.append(
                 executor.submit_stored(
-                    printer["host"], make_printer_response, printer, fields
+                    "%s:%s" % (uqid, printer["host"]),
+                    make_printer_response,
+                    printer,
+                    fields,
                 )
             )
         # This means that the future already exists and has not been poped yet -
-        # that's a race condition right there
-        except ValueError:
-            pass
+        # that's a race condition right there. It shouldn't happen as each request is identified by uqid though
+        except ValueError as e:
+            app.logger.error("ValueError %s" % e)
 
     for future in futures:
         try:
             data = future.result()
-        except Exception as exc:
-            pass
+        except Exception as e:
+            app.logger.error("Exception %s" % e)
         else:
             device_list.append(data)
             executor.futures.pop(data["host"])

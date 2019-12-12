@@ -124,8 +124,10 @@ class CheckPrintersTest(unittest.TestCase):
         return_value="router.asus.com",
     )
     @mock.patch("server.tasks.check_printers.redis")
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
     def test_activate_responding_printer(
         self,
+        mock_octoprint_redis,
         mock_redis,
         mock_hostname,
         mock_get_data,
@@ -148,6 +150,7 @@ class CheckPrintersTest(unittest.TestCase):
                 )
             return Response(200)
 
+        mock_octoprint_redis.get.return_value = None
         mock_get_data.side_effect = mock_call
         check_printers()
         self.assertEqual(mock_get_printers.call_count, 1)
@@ -228,6 +231,7 @@ class CheckPrintersTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printers.redis")
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
     @mock.patch(
         "server.tasks.check_printers.network.get_avahi_hostname",
         return_value="router.asus.com",
@@ -237,6 +241,7 @@ class CheckPrintersTest(unittest.TestCase):
         self,
         mock_logger,
         mock_hostname,
+        mock_octoprint_redis,
         mock_redis,
         mock_get_data,
         mock_update_printer,
@@ -259,6 +264,7 @@ class CheckPrintersTest(unittest.TestCase):
             return Response(200)
 
         mock_get_data.side_effect = mock_call
+        mock_octoprint_redis.get.return_value = None
         mock_redis.delete.side_effect = Exception("Cannot delete in redis")
         mock_redis.set.side_effect = Exception("Cannot set in redis")
         check_printers()

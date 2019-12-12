@@ -57,11 +57,13 @@ class SniffPrinterTest(unittest.TestCase):
         sniff_printer("octopi.local", "192.168.1.10")
         self.assertEqual(mock_save_printer.call_count, 0)
 
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_not_add_bad_data_responding_printer(
-        self, mock_get_data, mock_save_printer
+        self, mock_get_data, mock_save_printer, mock_redis
     ):
+        mock_redis.get.return_value = None
         mock_get_data.return_value.status_code = 200
         mock_get_data.return_value.json.return_value = {"text": "Fumbleprint"}
         sniff_printer("octopi.local", "192.168.1.11")
