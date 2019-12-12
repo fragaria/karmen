@@ -35,7 +35,6 @@ services:
       ENV: develop
       SERVICE: flask
       FLASKR_SETTINGS: '../config.dev.cfg'
-      PROXY_WEBCAM_BASE: 'http://localhost:4000/proxied-webcam/'
     ports:
       - 127.0.0.1:5000:9764
     volumes:

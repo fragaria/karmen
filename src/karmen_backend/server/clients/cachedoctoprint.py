@@ -3,8 +3,9 @@ import json
 import redis
 from urllib import parse as urlparse
 import requests
+from concurrent.futures import ThreadPoolExecutor
 
-from server import app, executor
+from server import app
 from server.clients.utils import PrinterClientAccessLevel, PrinterClientException
 from server.clients.octoprint import Octoprint
 
@@ -21,6 +22,32 @@ class CachedOctoprint(Octoprint):
     cleared before the calls. This is, of course, suspect to race conditions but that 
     should happen very rarely.
     """
+
+    expiration_map = {
+        "/api/settings": 121,
+        "/api/job": 7,
+        "/api/printer?exclude=history": 13,
+    }
+    running_requests = {}
+
+    def __init__(
+        self,
+        host,
+        protocol="http",
+        hostname=None,
+        name=None,
+        client_props=None,
+        printer_props=None,
+        **kwargs
+    ):
+        super(CachedOctoprint, self).__init__(
+            host, protocol, hostname, name, client_props, printer_props, **kwargs
+        )
+        # We can't use the flask executor as that cannot work in a low-level place like this
+        self.executor = ThreadPoolExecutor(max_workers=4)
+
+    def __del__(self):
+        self.executor.shutdown()
 
     def get_cache_key(self, path):
         return "cache_octoprint_api_%s_%s" % (self.host, path)
@@ -55,13 +82,38 @@ class CachedOctoprint(Octoprint):
         if not self.client_info.connected and not force:
             return None
         uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
-        result = redisinstance.get(self.get_cache_key(uri))
-        if result and not force:
-            return pickle.loads(result)
-        response = self._perform_http_get(uri)
-        if not force:
-            redisinstance.set(self.get_cache_key(uri), pickle.dumps(response), ex=13)
-        return response
+        if force:
+            return self._perform_http_get(uri)
+        cache_key = self.get_cache_key(uri)
+        cached = redisinstance.get(cache_key)
+        if cached:
+            return pickle.loads(cached)
+        if CachedOctoprint.running_requests.get(cache_key):
+            app.logger.debug("futures: reusing %s" % cache_key)
+            future_wrap = CachedOctoprint.running_requests.get(cache_key)
+            future_wrap["users"] = future_wrap["users"] + 1
+        else:
+            app.logger.debug("futures: newone %s" % cache_key)
+            future = self.executor.submit(self._perform_http_get, uri)
+            CachedOctoprint.running_requests[cache_key] = {"future": future, "users": 1}
+
+        fut = CachedOctoprint.running_requests.get(cache_key)
+        data = fut["future"].result()
+        fut["users"] = fut["users"] - 1
+        app.logger.debug("futures: state %s %s" % (cache_key, fut["users"]))
+        if fut["users"] == 0:
+            app.logger.debug("futures: cleanup %s" % cache_key)
+            try:
+                del CachedOctoprint.running_requests[cache_key]
+            except Exception:
+                app.logger.debug("futures: cleanup unsuccessful %s" % cache_key)
+
+        redisinstance.set(
+            cache_key,
+            pickle.dumps(data),
+            ex=CachedOctoprint.expiration_map.get(path, 13),
+        )
+        return data
 
     def connect_printer(self):
         result = super().connect_printer()

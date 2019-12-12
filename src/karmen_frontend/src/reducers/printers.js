@@ -48,7 +48,7 @@ export default (state = {
           "resume": "Printing",
           "cancel": "Cancelling",
           "offline": "Offline",
-          "online": "Starting",
+          "online": "Connecting",
         }
         printers[origIndex] = Object.assign({}, origPrinter, {
           status: Object.assign({}, origPrinter.status, {
@@ -73,7 +73,7 @@ export default (state = {
           "resume": "Printing",
           "cancel": "Cancelling",
           "offline": "Offline",
-          "online": "Starting",
+          "online": "Connecting",
         }
         printers[origIndex] = Object.assign({}, origPrinter, {
           status: Object.assign({}, origPrinter.status, {

@@ -79,7 +79,7 @@ def printers_list():
             app.logger.error("Exception %s" % e)
         else:
             device_list.append(data)
-            executor.futures.pop(data["host"])
+            executor.futures.pop("%s:%s" % (uqid, data["host"]))
 
     return jsonify({"items": device_list}), 200
 
