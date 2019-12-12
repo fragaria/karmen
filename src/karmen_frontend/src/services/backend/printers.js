@@ -103,7 +103,7 @@ export const setPrinterConnection = (host, state) => {
       if (response.status !== 204) {
         console.error(`Cannot connect a printer: ${response.status}`);
       }
-      return {status: response.status};
+      return {status: response.status, data: {host, state: state}};
     }).catch((e) => {
       console.error(`Cannot connect a printer: ${e}`);
       return {status: 500};
@@ -138,7 +138,7 @@ export const changeCurrentJob = (host, action) => {
       if (response.status !== 204) {
         console.error(`Cannot change current job: ${response.status}`);
       }
-      return response.status;
+      return {status: response.status, data: {host: host, action: action}};
     }).catch((e) => {
       console.error(`Cannot change current job: ${e}`);
       return 500;

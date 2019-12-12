@@ -34,6 +34,56 @@ export default (state = {
       return Object.assign({}, state, {
         printers: [].concat(printers).sort((p, r) => p.name > r.name ? 1 : -1),
       });
+    case "PRINTERS_CHANGE_JOB_SUCCEEDED":
+      newPrinter = action.payload.data;
+      // TODO possibly switch to findIndex
+      origPrinter = printers.find((p) => p.host === newPrinter.host)
+      if (!origPrinter && newPrinter) {
+        return state;
+      }
+      if (origPrinter && newPrinter) {
+        const origIndex = printers.indexOf(origPrinter);
+        const states = {
+          "pause": "Paused",
+          "resume": "Printing",
+          "cancel": "Cancelling",
+          "offline": "Offline",
+          "online": "Starting",
+        }
+        printers[origIndex] = Object.assign({}, origPrinter, {
+          status: Object.assign({}, origPrinter.status, {
+            state: states[newPrinter.action] || "Unknown",
+          }),
+        });
+      }
+      return Object.assign({}, state, {
+        printers: [].concat(printers).sort((p, r) => p.name > r.name ? 1 : -1),
+      });
+    case "PRINTERS_SET_CONNECTION_SUCCEEDED":
+      newPrinter = action.payload.data;
+      // TODO possibly switch to findIndex
+      origPrinter = printers.find((p) => p.host === newPrinter.host)
+      if (!origPrinter && newPrinter) {
+        return state;
+      }
+      if (origPrinter && newPrinter) {
+        const origIndex = printers.indexOf(origPrinter);
+        const states = {
+          "pause": "Paused",
+          "resume": "Printing",
+          "cancel": "Cancelling",
+          "offline": "Offline",
+          "online": "Starting",
+        }
+        printers[origIndex] = Object.assign({}, origPrinter, {
+          status: Object.assign({}, origPrinter.status, {
+            state: states[newPrinter.state] || "Unknown",
+          }),
+        });
+      }
+      return Object.assign({}, state, {
+        printers: [].concat(printers).sort((p, r) => p.name > r.name ? 1 : -1),
+      });
     case "PRINTERS_LOAD_SUCCEEDED":
       return Object.assign({}, state, {
         printers: action.payload.data.items

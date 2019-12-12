@@ -25,6 +25,10 @@ class CachedOctoprint(Octoprint):
     def get_cache_key(self, path):
         return "cache_octoprint_api_%s_%s" % (self.host, path)
 
+    def delete_cache_key(self, path):
+        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
+        redisinstance.delete(self.get_cache_key(uri))
+
     def _perform_http_get(self, uri):
         try:
             req = self.http_session.get(uri)
@@ -59,8 +63,18 @@ class CachedOctoprint(Octoprint):
             redisinstance.set(self.get_cache_key(uri), pickle.dumps(response), ex=13)
         return response
 
+    def connect_printer(self):
+        result = super().connect_printer()
+        self.delete_cache_key("/api/printer?exclude=history")
+        return result
+
+    def disconnect_printer(self):
+        result = super().disconnect_printer()
+        self.delete_cache_key("/api/printer?exclude=history")
+        return result
+
     def modify_current_job(self, action):
         result = super().modify_current_job(action)
-        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), "/api/job")
-        redisinstance.delete(self.get_cache_key(uri))
+        self.delete_cache_key("/api/job")
+        self.delete_cache_key("/api/printer?exclude=history")
         return result
