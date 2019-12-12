@@ -408,14 +408,17 @@ class DeleteRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_delete(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
+            ip = "192.168.%s" % ".".join(
+                [str(random.randint(0, 255)) for _ in range(2)]
+            )
             response = c.post(
                 "/printers",
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
-                json={"host": "172.16.236.200:81", "name": "random-test-printer-name"},
+                json={"host": ip, "name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 201)
             response = c.delete(
-                "/printers/172.16.236.200:81",
+                "/printers/%s" % ip,
                 headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
             )
             self.assertEqual(response.status_code, 204)
