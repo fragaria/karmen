@@ -22,7 +22,7 @@ class PrinterList extends React.Component {
     const { loadPrinters } = this.props;
     loadPrinters().then(() => {
       this.setState({
-        timer: setTimeout(this.refreshPrinters, 5000),
+        timer: setTimeout(this.refreshPrinters, Math.floor(Math.random()*(4000+1)+3000)),
       });
     });
   }
