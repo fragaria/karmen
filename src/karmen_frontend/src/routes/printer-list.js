@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
 import PrinterView from '../components/printer-view';
-import { loadPrinters, deletePrinter, changeCurrentJob } from '../actions/printers';
+import { loadAndQueuePrinters, deletePrinter, changeCurrentJob } from '../actions/printers';
 
 class PrinterList extends React.Component {
   constructor(props) {
@@ -11,18 +11,28 @@ class PrinterList extends React.Component {
     this.state = {
       timer: null,
     }
-    this.refreshPrinters = this.refreshPrinters.bind(this);
+    this.getPrinters = this.getPrinters.bind(this);
   }
 
   componentDidMount() {
-    this.refreshPrinters();
+    this.getPrinters();
   }
 
-  refreshPrinters() {
-    const { loadPrinters } = this.props;
-    loadPrinters().then(() => {
+  getPrinters() {
+    const { printersLoaded, loadPrinters } = this.props;
+    let load;
+    if (printersLoaded) {
+      load = loadPrinters(['status']);
+    } else {
+      load = loadPrinters(['job', 'status', 'webcam']);
+    }
+    // We are periodically checking for new printers - this is
+    // required for the printers to show up after the network scan
+    // or added in a different client.
+    // But we are checking only for the local db data, so it should be blazing fast.
+    load.then(() => {
       this.setState({
-        timer: setTimeout(this.refreshPrinters, Math.floor(Math.random()*(4000+1)+3000)),
+        timer: setTimeout(this.getPrinters, 60 * 1000),
       });
     });
   }
@@ -30,7 +40,7 @@ class PrinterList extends React.Component {
   componentWillUnmount() {
     const { timer } = this.state;
     timer && clearTimeout(timer);
-  }
+   }
 
   render () {
     const { userRole, printersLoaded, printers, deletePrinter, changeCurrentJobState } = this.props;
@@ -74,7 +84,7 @@ export default connect(
     userRole: state.users.me.role,
   }),
   dispatch => ({
-    loadPrinters: () => (dispatch(loadPrinters(['job', 'status', 'webcam']))),
+    loadPrinters: (fields) => (dispatch(loadAndQueuePrinters(fields))),
     changeCurrentJobState: (host, action) => (dispatch(changeCurrentJob(host, action))),
     deletePrinter: (host) => (dispatch(deletePrinter(host))),
   })

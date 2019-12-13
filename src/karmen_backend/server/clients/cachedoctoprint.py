@@ -49,6 +49,12 @@ class CachedOctoprint(Octoprint):
     def __del__(self):
         self.executor.shutdown()
 
+    def add_api_key(self, api_key):
+        super().add_api_key(api_key)
+        self.delete_cache_key("/api/printer?exclude=history")
+        self.delete_cache_key("/api/settings")
+        self.delete_cache_key("/api/job")
+
     def get_cache_key(self, path):
         return "cache_octoprint_api_%s_%s" % (self.host, path)
 
