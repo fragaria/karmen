@@ -393,6 +393,23 @@ input[type=text], input[type=password], select {
   width: 100%;
   min-height: 440px;
   border: 1px solid map-get($palette, gray-medium);
+  overflow: hidden;
+
+  @media screen and (min-width: 600px) {
+    max-width: 500px;
+  }
+
+  @media screen and (min-width: 890px) {
+    max-width: 500px;
+  }
+
+  @media screen and (min-width: 1280px) {
+    max-width: 500px;
+  }
+
+  @media screen and (min-width: 1500px) {
+    max-width: 500px;
+  }
 
   .title {
     padding: $base-unit*2 $base-unit*2 $base-unit 0;
@@ -616,12 +633,17 @@ nav {
   .printer-info {
     display: flex;
 
+    .content-box {
+      align-self: self-start;
+    }
+
     > div {
       flex: 1;
       margin: $spacing-default $spacing-default / 2;
 
       &:first-child {
         margin-left: 0;
+        max-width: 50%;
       }
 
       &:last-child {
