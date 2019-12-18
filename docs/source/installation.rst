@@ -50,7 +50,7 @@ before installing docker. That installs the latest version of all of the system 
    sudo apt install software-properties-common -y
    curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
    sudo usermod -aG docker pi
-   sudo apt install docker-compose
+   sudo apt install docker-compose -y
    sudo reboot
    docker info
 
