@@ -23,7 +23,7 @@ sed -i "s/fragaria\/karmen-backend/fragaria\/karmen-backend:${TRAVIS_BRANCH-late
 cat << "EOF" > "$DEST/run-karmen.sh"
 #!/bin/bash
 ## Make sure that we are doing this in the right context
-PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+PARENT_PATH=$( cd $(dirname $(readlink -f "$0")) ; pwd -P )
 cd "$PARENT_PATH"
 
 if [ ! -f "./config.local.cfg" ]; then
