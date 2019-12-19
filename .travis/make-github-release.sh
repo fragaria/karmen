@@ -18,6 +18,7 @@ echo "${TRAVIS_BRANCH-latest}" > "${DEST}/VERSION"
 # Hardcode version into docker-compose
 sed -i "s/fragaria\/karmen-frontend/fragaria\/karmen-frontend:${TRAVIS_BRANCH-latest}/g" "${DEST}/docker-compose.yml"
 sed -i "s/fragaria\/karmen-backend/fragaria\/karmen-backend:${TRAVIS_BRANCH-latest}/g" "${DEST}/docker-compose.yml"
+sed -i "s/fragaria\/karmen-proxy/fragaria\/karmen-proxy:${TRAVIS_BRANCH-latest}/g" "${DEST}/docker-compose.yml"
 
 # Prepare run script
 cat << "EOF" > "$DEST/run-karmen.sh"
