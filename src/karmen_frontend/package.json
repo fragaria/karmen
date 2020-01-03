@@ -50,5 +50,5 @@
     "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start", 
     "test": "react-scripts test"
   }, 
-  "version": "v0.2.0-rc3"
+  "version": "0.2.0-rc3"
 }
