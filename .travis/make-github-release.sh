@@ -31,7 +31,6 @@ if [ ! -f "./config.local.cfg" ]; then
   echo "Cannot run karmen without the ./config.local.cfg file"
   exit
 fi
-docker-compose stop
 docker-compose up -d
 EOF
 chmod +x "${DEST}/run-karmen.sh"
