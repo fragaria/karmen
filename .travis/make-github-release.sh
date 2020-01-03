@@ -10,9 +10,6 @@ mkdir -p "${DEST}/db"
 cp ../README.md "${DEST}"
 cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
 cp ../src/karmen_backend/config.release.cfg "${DEST}/config.local.cfg.sample"
-cp -r ../src/karmen_backend/db/* "${DEST}/db"
-rm "${DEST}/db/fake-printers.sql"
-rm "${DEST}/db/test-users.sql"
 echo "${TRAVIS_BRANCH-latest}" > "${DEST}/VERSION"
 
 # Hardcode version into docker-compose
