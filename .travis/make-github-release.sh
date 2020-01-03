@@ -36,6 +36,17 @@ docker-compose up -d
 EOF
 chmod +x "${DEST}/run-karmen.sh"
 
+# Prepare stop script
+cat << "EOF" > "$DEST/stop-karmen.sh"
+#!/bin/bash
+## Make sure that we are doing this in the right context
+PARENT_PATH=$( cd $(dirname $(readlink -f "$0")) ; pwd -P )
+cd "$PARENT_PATH"
+
+docker-compose stop
+EOF
+chmod +x "${DEST}/stop-karmen.sh"
+
 # Prepare update script
 cat << "EOF" > "$DEST/update.sh"
 #!/bin/bash
