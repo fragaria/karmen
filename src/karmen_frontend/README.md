@@ -23,7 +23,14 @@ docker build --build-arg REACT_APP_GIT_REV=`git rev-parse --short HEAD` -t fraga
 docker run -p 3000:9765 -e ENV=develop fragaria/karmen-frontend
 ```
 
-There are problems with compiling the app directly for arm/v7 architecture, so the resulting docker image
+You can control the exposed interface and port with the following environment variables. This is useful when container is
+run in the docker's networking host mode.
+
+- `SERVICE_HOST` - Interface on which the proxy will be exposed, defaults to `0.0.0.0`. 
+- `SERVICE_PORT` - Port on which the proxy will be exposed, defaults to `9766`
+
+
+There are problems with compiling the app directly for `arm/v7` architecture, so the resulting docker image
 is `Dockerfile.serve` serving a JS bundle compiled with `Dockerfile.build`. The `Dockerfile` is used
 for development only.
 

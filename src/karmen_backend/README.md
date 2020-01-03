@@ -23,6 +23,13 @@ docker run -e ENV=develop -e SERVICE=celery-worker FLASKR_SETTINGS='../config.de
 docker run -e ENV=develop -e SERVICE=celery-beat FLASKR_SETTINGS='../config.dev.cfg' fragaria/karmen-backend
 ```
 
+You can control the exposed interface and port with the following environment variables. This is useful when container is
+run in the docker's networking host mode.
+
+- `SERVICE_HOST` - Interface on which the proxy will be exposed, defaults to `0.0.0.0`. 
+- `SERVICE_PORT` - Port on which the proxy will be exposed, defaults to `9766`
+
+
 **Culprits**
 
 - The `celery-*` services are necessary for regular checks of the state of connected printers and for network discovery.

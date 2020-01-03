@@ -32,8 +32,7 @@ http {
   }
 
   server {
-    listen       ${SERVICE_PORT} default_server;
-    listen       [::]:${SERVICE_PORT} default_server;
+    listen       ${SERVICE_HOST}:${SERVICE_PORT} default_server;
     resolver     127.0.0.11 valid=5m;
     server_name  localhost;
 

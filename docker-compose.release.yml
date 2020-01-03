@@ -4,11 +4,12 @@ services:
     image: fragaria/karmen-proxy
     network_mode: host
     environment:
+      SERVICE_HOST: ${KARMEN_HOST:-0.0.0.0}
       SERVICE_PORT: ${KARMEN_PORT:-80}
       REDIS_HOST: 127.0.0.1
-      FRONTEND_HOST: 127.0.0.1
+      FRONTEND_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
       FRONTEND_PORT: ${KARMEN_FRONTEND_PORT:-9765}
-      BACKEND_HOST: 127.0.0.1
+      BACKEND_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
       BACKEND_PORT: ${KARMEN_BACKEND_PORT:-9764}
     depends_on:
       - frontend
@@ -20,6 +21,7 @@ services:
     environment:
       ENV: production
       BACKEND_BASE: /api
+      SERVICE_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_FRONTEND_PORT:-9765}
   backend_flask:
     image: fragaria/karmen-backend
@@ -28,6 +30,7 @@ services:
     environment:
       ENV: production
       SERVICE: flask
+      SERVICE_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:

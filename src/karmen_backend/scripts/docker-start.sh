@@ -26,13 +26,13 @@ if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
   if [ "$ENV" = 'production' ]; then
     SERVICE_PORT=${SERVICE_PORT:-9764}
-    echo $SERVICE_PORT
-    envsubst '$SERVICE_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+    SERVICE_HOST=${SERVICE_HOST:-0.0.0.0}
+    envsubst '$SERVICE_PORT $SERVICE_HOST' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
     /usr/local/bin/supervisord
   else
     export FLASK_APP=server
     export FLASK_DEBUG=true
-    flask run --host=0.0.0.0 --port ${SERVICE_PORT:-9764}
+    flask run --host=${SERVICE_HOST:-0.0.0.0} --port ${SERVICE_PORT:-9764}
   fi
 elif [ "$SERVICE" = 'celery-beat' ]; then
   test_flaskr_settings
@@ -55,7 +55,7 @@ elif [ "$SERVICE" = 'celery-worker' ]; then
 elif [ "$SERVICE" = 'fake-printer' ]; then
   export FLASK_APP=fakeprinter
   export FLASK_DEBUG=true
-  flask run --host=0.0.0.0 --port ${SERVICE_PORT:-8080}
+  flask run --host=${SERVICE_HOST:-0.0.0.0} --port ${SERVICE_PORT:-8080}
 else
   echo "Unknown service ${SERVICE} encountered. I know of [flask, celery-beat and celery-worker, fake-printer]"
   exit 1

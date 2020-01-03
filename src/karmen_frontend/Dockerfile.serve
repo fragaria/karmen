@@ -5,6 +5,8 @@ RUN apk add nginx gettext
 WORKDIR /usr/src/app
 
 ENV ENV production
+
+ENV SERVICE_HOST 0.0.0.0
 ENV SERVICE_PORT 9765
 
 COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
