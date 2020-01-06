@@ -98,7 +98,7 @@ export const uploadGcode = (path, file) => {
 }
 
 export const downloadGcode = (dataLink, filename) => {
-  return fetch(`${BASE_URL}/${dataLink}`, {
+  return fetch(`${BASE_URL}/${dataLink[0] === '/' ? dataLink.substr(1) : dataLink}`, {
     method: 'GET',
     headers: getHeaders(),
   })
