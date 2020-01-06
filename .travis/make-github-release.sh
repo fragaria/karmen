@@ -6,7 +6,7 @@ DEST="karmen"
 
 # Create release bundle
 rm -r "$DEST" 2> /dev/null
-mkdir -p "${DEST}/db"
+mkdir -p "${DEST}"
 cp ../README.md "${DEST}"
 cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
 cp ../src/karmen_backend/config.release.cfg "${DEST}/config.local.cfg.sample"
