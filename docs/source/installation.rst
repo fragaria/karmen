@@ -82,40 +82,45 @@ should **absolutely change the** ``SECRET_KEY`` variable for security reasons.
 The database schema is created automatically upon the first start and is kept up to date during updates.
 The datafiles are created on your filesystem, not inside the container, so no data will be lost during Karmen's downtime.
 
-Finally, you can start all of the services. The shorthand script will download and run all of the
-containers from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&type=image>`_ for you.
+Finally, you can start all of the services. During the first startup, the script will automatically
+download (from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&type=image>`_) and run
+all of the necessary containers setup scripts. This might take a few minutes. For the first and
+all other starts, you can use a shorthand script like this:
 
 .. code-block:: sh
 
    ./run-karmen.sh
 
-The browser-accessible frontend is then run on the standard port 80.
+The browser-accessible frontend is then accessible on the standard port 80.
 
-It is possible to modify the port like this:
+It is possible to modify the listening host and port like this:
 
 .. code-block:: sh
 
-   KARMEN_PORT=3776 ./run-karmen.sh
+   KARMEN_HOST=127.0.0.1 KARMEN_PORT=3776 ./run-karmen.sh
 
-This will run the frontend on port 3776.
+This will run the frontend on port 3776 bound only to the local interface. Karmen will not be accessible from other computers.
+By default, Karmen listens on all interfaces (``0.0.0.0``) and on port ``80``.
 
 You can access the UI by accessing the public IP address of your machine, or by accessing the
-``<hostname>.local`` address which is automatically provided by Raspbian.
+``<hostname>.local`` address which is automatically provided by Raspbian. The default hostname
+for standard Raspbian is ``raspberrypi`` and can be changed from the command line by running the
+``raspi-config`` program.
 
   .. note::
-    Although the Raspbian and OctoPi images provide the ``<hostname>.local`` via
-    `mDNS <https://en.wikipedia.org/wiki/Multicast_DNS>`_, it might not work on some systems (namely Windows)
-    without prior configuration.
+    Raspbian and OctoPi provide the ``<hostname>.local`` service via
+    `mDNS <https://en.wikipedia.org/wiki/Multicast_DNS>`_. This technology might not work on some
+    clients without prior configuration.
 
 
 You can stop everything by running 
 
 .. code-block:: sh
   
-   docker-compose stop
+   ./stop-karmen.sh
 
 
-You probably want to start Karmen every time your Raspberry Pi boots up. The easiest way
+You probably want to start Karmen every time your Raspberry Pi boots up. The easiest (but in no way perfect) method
 is to add the following line at the end of your ``/etc/rc.local`` file just before the ``exit 0`` line:
 
 .. code-block:: sh
@@ -124,6 +129,28 @@ is to add the following line at the end of your ``/etc/rc.local`` file just befo
 
 This will also put all of the startup information into a logfile in case you need to debug a broken start of Karmen.
 Be aware that this method starts all of the containers under a ``root`` account, which might not be the best idea.
+
+An alternative might be a `systemd <https://www.linode.com/docs/quick-answers/linux/start-service-at-boot/>`_ service
+which might be setup with a file like this:
+
+.. code-block:: sh
+
+  [Unit]
+  Description=Karmen
+  DefaultDependencies=no
+  After=docker.service
+
+  [Service]
+  User=pi
+  Group=users
+  ExecStart=/usr/bin/karmen
+  RemainAfterExit=yes
+  ExecStop=/usr/bin/karmen-stop
+
+  [Install]
+  WantedBy=multi-user.target
+
+The ``/usr/bin/`` scripts are just links to the aforementioned ``run-karmen.sh`` and ``stop-karmen.sh`` scripts.
 
 You should also keep your installation :ref:`up to date <updating>` at all times.
 

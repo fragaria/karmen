@@ -25,7 +25,7 @@ Administrators can manage printers and users. Common users can use all of the pr
 access the shared gcode library.
 
 Upon installation, there is an administrator account ready with username **karmen** and
-password *karmen3D* for you. THe application will prompt you to change the password upon
+password *karmen3D* for you. The application will prompt you to change the password upon
 the first login. So make sure that you log in right after the installation is complete
 so nobody else can hijack the installation from you.
 
@@ -60,3 +60,7 @@ like this:
 .. note::
   The tokens are signed by the application and if you change the ``SECRET_KEY`` value in your
   configuration, they will stop working altogether.
+
+If you need to automate some administrative tasks, you should be successful if you copy your active
+session token (after you are prompted for password) from the browser's local storage. Such token has
+will expire in a few minutes, though, so you have to be quick.
