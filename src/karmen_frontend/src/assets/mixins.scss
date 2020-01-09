@@ -1,0 +1,6 @@
+@import "./variables";
+
+@mixin blurred-bg ($aplha: .72) {
+  backdrop-filter: saturate(180%) blur(20px);
+  background: rgba($bg-color, $aplha);
+}

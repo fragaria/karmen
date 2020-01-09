@@ -25,7 +25,7 @@ import { loadUserState, setTokenFreshness } from './actions/users';
 import { registerAccessTokenExpirationHandler, deregisterAccessTokenExpirationHandler } from './services/backend';
 
 class App extends React.Component {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -63,7 +63,7 @@ class App extends React.Component {
       <>
         <BrowserRouter>
           <Menu />
-          <main>
+          <main className="main">
             <LoginGateway onUserStateChanged={loadUser}>
               <ForcePwdChangeGateway onUserStateChanged={loadUser}>
                 <Switch>

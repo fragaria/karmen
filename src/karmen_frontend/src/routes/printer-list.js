@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import Loader from '../components/loader';
-import PrinterView from '../components/printer-view';
+import PrinterState from '../components/printer-state';
 import { loadAndQueuePrinters, deletePrinter, changeCurrentJob } from '../actions/printers';
 
 class PrinterList extends React.Component {
@@ -47,32 +47,54 @@ class PrinterList extends React.Component {
     if (!printersLoaded) {
       return <div><Loader /></div>;
     }
-    const printerElements = printers && printers.map((p) => {
-      return <div key={p.host} className="content-box">
-        <PrinterView
-          printer={p}
-          onPrinterDelete={deletePrinter}
-          showActions={userRole === 'admin'}
-          canChangeCurrentJob={true}
-          changeCurrentJobState={changeCurrentJobState}
-        />
-      </div>
+    const printerElements = printers && printers.map((printer) => {
+      return (
+        <Link
+          className="list-item"
+          key={printer.host}
+          to={printer.host}
+        >
+          <div className="list-item-content">
+            <span className="list-item-title">{printer.name}</span>
+            <span className="list-item-subtitle">
+              <PrinterState printer={printer} />
+            </span>
+
+            {printer.job && (
+              <>
+                <div className="list-item-subtitle">
+                  <span>
+                    {printer.job.completion}% done,
+                  </span>
+                    ETA: {printer.job.printTimeLeft}
+                </div>
+                <span>
+                  {printer.job.name}
+                </span>
+              </>
+            )}
+          </div>
+        </Link>
+      )
     });
+
     return (
-      <div className="printer-list">
-        <header>
-          <h1 className="title">Printers</h1>
-          {userRole === 'admin' && 
-            <Link to="/add-printer" className="action">
-              <i className="icon icon-plus"></i>&nbsp;
-              <span>Add a printer</span>
-            </Link>
-          }
-        </header>
-        <div className="boxed-content">
+      <div className="content printer-list">
+        <div className="container">
+          <h1 className="main-title">
+            Printers
+            {userRole === 'admin' &&
+              <Link to="/add-printer" className="btn btn-sm">
+                <span>+ Add a printer</span>
+              </Link>
+            }
+          </h1>
+        </div>
+
+        <div className="list">
           {printerElements}
-         </div>
-      </div>
+        </div>
+       </div>
     );
   }
 }

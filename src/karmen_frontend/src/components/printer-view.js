@@ -54,7 +54,7 @@ export const PrinterTags = ({ printer }) => {
     <div className="tags">
       {printer.client.access_level === 'protected'
        ? <span className={`tag state-inactive`}>Authorization required</span>
-       : 
+       :
        <>
          <span className={`tag ${printer.client.connected ? "state-active" : "state-inactive"}`}>
           {printer.client.connected ? `${printer.client.name} connected` : `${printer.client.name} disconnected`}
