@@ -295,14 +295,24 @@ class GcodeList extends React.Component {
     });
 
     return (
-      <div className="gcode-list standalone-page">
-        <header>
-          <h1 className="title">G-Codes</h1>
-          <Link to="/add-gcode" className="action">
-            <i className="icon icon-plus"></i>&nbsp;
-            <span>Add a g-code</span>
-          </Link>
-        </header>
+
+    <section className="content">
+      <div className="container">
+        <h1 className="main-title">
+          G-Codes
+          <Link to="/add-gcode" className="btn btn-sm">+ Upload a g-code</Link>
+        </h1>
+      </div>
+      <div className="list">
+        <div
+          className="list-item"
+        >
+
+        </div>
+      </div>
+
+
+
 
         <div>
           <form className="inline-form">
@@ -384,7 +394,7 @@ class GcodeList extends React.Component {
                 </>
               )}
           </div>
-      </div>
+      </section>
     );
   }
 }

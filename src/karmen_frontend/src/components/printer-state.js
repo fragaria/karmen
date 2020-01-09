@@ -1,8 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import BoxedModal from './boxed-modal';
-import { WebcamStream } from './webcam-stream';
-import formatters from '../services/formatters';
 
 export const PrinterState = ({ printer }) => {
   let printerStatusClass = '';

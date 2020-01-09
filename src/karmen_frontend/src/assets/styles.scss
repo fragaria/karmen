@@ -1,7 +1,7 @@
 // @import "fonts.css";
 @import "reset.css";
 @import "./icons/style.css";
-// @import "fonts";
+@import "fonts";
 @import "variables";
 @import "mixins";
 
@@ -161,6 +161,8 @@ footer {
   .navigation-toggle {
     font-size: 3rem;
     z-index: 1;
+    outline: none;
+    @include button-reset;
 
     &:hover {
       cursor: pointer;
@@ -426,8 +428,5 @@ select {
 
 #passphrase-reveal {
   height: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  cursor: pointer;
+  @include button-reset;
 }

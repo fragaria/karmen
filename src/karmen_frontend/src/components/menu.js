@@ -65,7 +65,7 @@ class Menu extends React.Component {
                 </li>
               </ul>
             )}
-            <a className="navigation-toggle" onClick={(e) => {
+            <button className="navigation-toggle" onClick={(e) => {
                 e.preventDefault();
                 const {navigation} = this.state;
                 this.setState({navigation: !navigation})
@@ -76,7 +76,7 @@ class Menu extends React.Component {
               {!navigation && (
                 <span className="icon-menu"></span>
               )}
-            </a>
+            </button>
           </>
         )}
       </nav>

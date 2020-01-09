@@ -4,3 +4,10 @@
   backdrop-filter: saturate(180%) blur(20px);
   background: rgba($bg-color, $aplha);
 }
+
+@mixin button-reset () {
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+}

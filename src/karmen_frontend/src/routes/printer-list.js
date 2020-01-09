@@ -43,7 +43,7 @@ class PrinterList extends React.Component {
    }
 
   render () {
-    const { userRole, printersLoaded, printers, deletePrinter, changeCurrentJobState } = this.props;
+    const { userRole, printersLoaded, printers } = this.props;
     if (!printersLoaded) {
       return <div><Loader /></div>;
     }
