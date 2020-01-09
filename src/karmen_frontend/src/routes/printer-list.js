@@ -53,7 +53,7 @@ class PrinterList extends React.Component {
           printer={p}
           onPrinterDelete={deletePrinter}
           showActions={userRole === 'admin'}
-          canChangeCurrentJob={userRole === 'admin'}
+          canChangeCurrentJob={true}
           changeCurrentJobState={changeCurrentJobState}
         />
       </div>

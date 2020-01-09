@@ -575,7 +575,7 @@ class CurrentJobRoute(unittest.TestCase):
     @mock.patch(
         "server.clients.octoprint.requests.Session.post", return_value=Response(204)
     )
-    def test_current_job(self, post_uri_mock):
+    def test_current_job_admin(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
                 "/printers/%s/current-job" % self.ip,
@@ -587,17 +587,17 @@ class CurrentJobRoute(unittest.TestCase):
     @mock.patch(
         "server.clients.octoprint.requests.Session.post", return_value=Response(204)
     )
-    def test_current_job_admin(self, post_uri_mock):
+    def test_current_job_user(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
                 "/printers/%s/current-job" % self.ip,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 204)
 
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
-    def test_current_job_unable(self, post_uri_mock):
+    def test_current_job_unable_to_call_printer(self, post_uri_mock):
         with app.test_client() as c:
             response = c.post(
                 "/printers/%s/current-job" % self.ip,

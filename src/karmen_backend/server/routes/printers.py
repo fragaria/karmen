@@ -9,6 +9,7 @@ from server.database import printers
 from server import clients, executor
 from server.services import network
 from . import jwt_force_password_change, jwt_requires_role
+from flask_jwt_extended import get_current_user
 
 
 def make_printer_response(printer, fields):
@@ -268,12 +269,15 @@ def printer_change_connection(host):
 
 
 @app.route("/printers/<host>/current-job", methods=["POST"])
-@jwt_requires_role("admin")
+@jwt_force_password_change
 @cross_origin()
 def printer_modify_job(host):
-    # TODO make this the last resort for admins
     # TODO allow users to pause/cancel only their own prints via printjob_id
+    # And allow admins to pause/cancel anything
     # but that means creating a new tracking of current jobs on each printer
+    # and does not handle prints issued by bypassing Karmen Hub
+    # Alternative is to log who modified the current job into an admin-accessible eventlog
+    # See https://trello.com/c/uiv0luZ8/142 for details
     printer = printers.get_printer(host)
     if printer is None:
         return abort(make_response("", 404))
@@ -286,6 +290,13 @@ def printer_modify_job(host):
     printer_inst = clients.get_printer_instance(printer)
     try:
         if printer_inst.modify_current_job(action):
+            user = get_current_user()
+            app.logger.info(
+                "User %s successfully issued a modification (%s) of current job on printer %s ",
+                user["uuid"],
+                action,
+                host,
+            )
             return "", 204
         return abort(make_response("", 409))
     except clients.utils.PrinterClientException as e:
