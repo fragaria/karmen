@@ -290,9 +290,3 @@ def printer_modify_job(host):
         return abort(make_response("", 409))
     except clients.utils.PrinterClientException as e:
         return abort(make_response(jsonify(message=str(e)), 400))
-
-
-@app.route("/proxied-webcam/<host>", methods=["GET"])
-@cross_origin()
-def printer_webcam(host):
-    return abort(make_response("", 503))
