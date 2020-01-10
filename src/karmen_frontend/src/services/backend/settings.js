@@ -1,34 +1,36 @@
-import { getHeaders } from './utils';
+import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const changeSettings = (settings) => {
+export const changeSettings = settings => {
   return fetch(`${BASE_URL}/settings`, {
-    method: 'POST',
+    method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify(settings),
+    body: JSON.stringify(settings)
   })
-    .then((response) => {
+    .then(response => {
       if (response.status !== 201) {
         console.error(`Cannot change a setting: ${response.status}`);
       }
       return response.status;
-    }).catch((e) => {
+    })
+    .catch(e => {
       console.error(`Cannot change a setting: ${e}`);
       return 500;
     });
-}
+};
 
-export const getSettings = (settings) => {
-  return fetch(`${BASE_URL}/settings`, {headers: getHeaders()})
-    .then((response) => {
+export const getSettings = settings => {
+  return fetch(`${BASE_URL}/settings`, { headers: getHeaders() })
+    .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get settings: ${response.status}`);
         return [];
       }
       return response.json();
-    }).catch((e) => {
+    })
+    .catch(e => {
       console.error(`Cannot get settings: ${e}`);
       return [];
-    })
-}
+    });
+};

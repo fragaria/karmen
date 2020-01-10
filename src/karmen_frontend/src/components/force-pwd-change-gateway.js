@@ -1,15 +1,19 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import ChangePasswordForm from './change-password-form';
-import Loader from './loader';
+import React from "react";
+import { connect } from "react-redux";
+import ChangePasswordForm from "./change-password-form";
+import Loader from "./loader";
 
 class ForcePwdChangeGateway extends React.Component {
   render() {
     const { children, userState, onUserStateChanged } = this.props;
-    if (!userState || userState === 'unknown') {
-      return <div><Loader /></div>;
+    if (!userState || userState === "unknown") {
+      return (
+        <div>
+          <Loader />
+        </div>
+      );
     }
-    if (userState === 'pwd-change-required') {
+    if (userState === "pwd-change-required") {
       return (
         <div className="standalone-page">
           <header>
@@ -24,8 +28,6 @@ class ForcePwdChangeGateway extends React.Component {
   }
 }
 
-export default connect(
-  state => ({
-    userState: state.users.me.currentState,
-  })
-)(ForcePwdChangeGateway);
+export default connect(state => ({
+  userState: state.users.me.currentState
+}))(ForcePwdChangeGateway);

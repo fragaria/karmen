@@ -1,38 +1,40 @@
-import { getHeaders } from './utils';
+import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const enqueueTask = (task) => {
+export const enqueueTask = task => {
   return fetch(`${BASE_URL}/tasks`, {
-    method: 'POST',
+    method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
-      task: task,
-    }),
+      task: task
+    })
   })
-    .then((response) => {
+    .then(response => {
       if (response.status !== 202) {
         console.error(`Cannot enqueue a task: ${response.status}`);
       }
       return response.status;
-    }).catch((e) => {
+    })
+    .catch(e => {
       console.error(`Cannot enqueue a task: ${e}`);
       return 500;
-    }); 
-}
+    });
+};
 
 export const heartbeat = () => {
   return fetch(`${BASE_URL}/`, {
-      headers: getHeaders(),
-    })
-    .then((response) => {
+    headers: getHeaders()
+  })
+    .then(response => {
       if (response.status !== 200) {
         console.error(`Heartbeat fail: ${response.status}`);
         return false;
       }
       return true;
-    }).catch((e) => {
+    })
+    .catch(e => {
       console.error(`Heartbeat fail: ${e}`);
       return false;
-    })
-}
+    });
+};

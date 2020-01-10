@@ -1,14 +1,25 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { loadUserState, loadUserApiTokens, deleteUserApiToken } from '../actions/users';
-import ChangePasswordForm from '../components/change-password-form';
-import ApiTokensTable from '../components/api-tokens-table';
-import FreshTokenRequiredCheck from '../components/fresh-token-required-check';
+import React from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import {
+  loadUserState,
+  loadUserApiTokens,
+  deleteUserApiToken
+} from "../actions/users";
+import ChangePasswordForm from "../components/change-password-form";
+import ApiTokensTable from "../components/api-tokens-table";
+import FreshTokenRequiredCheck from "../components/fresh-token-required-check";
 
-const UserPreferences = ({ loadUser, hasFreshToken, loadApiTokens, apiTokens, apiTokensLoaded, onTokenDelete }) => {
+const UserPreferences = ({
+  loadUser,
+  hasFreshToken,
+  loadApiTokens,
+  apiTokens,
+  apiTokensLoaded,
+  onTokenDelete
+}) => {
   if (!hasFreshToken) {
-    return <FreshTokenRequiredCheck />
+    return <FreshTokenRequiredCheck />;
   }
   return (
     <div className="standalone-page">
@@ -19,10 +30,10 @@ const UserPreferences = ({ loadUser, hasFreshToken, loadApiTokens, apiTokens, ap
         <div className="content-section">
           <header>
             <h2 className="title">API tokens</h2>
-              <Link to="/users/me/tokens" className="plain action link">
-                <i className="icon icon-plus"></i>&nbsp;
-                <span>Add a token</span>
-              </Link>
+            <Link to="/users/me/tokens" className="plain action link">
+              <i className="icon icon-plus"></i>&nbsp;
+              <span>Add a token</span>
+            </Link>
           </header>
           <ApiTokensTable
             loadTokens={loadApiTokens}
@@ -38,17 +49,17 @@ const UserPreferences = ({ loadUser, hasFreshToken, loadApiTokens, apiTokens, ap
       </div>
     </div>
   );
-}
+};
 
 export default connect(
   state => ({
     hasFreshToken: state.users.me.hasFreshToken,
     apiTokens: state.users.me.apiTokens,
-    apiTokensLoaded: state.users.me.apiTokensLoaded,
+    apiTokensLoaded: state.users.me.apiTokensLoaded
   }),
   dispatch => ({
-    loadApiTokens: () => (dispatch(loadUserApiTokens())),
-    loadUser: () => (dispatch(loadUserState())),
-    onTokenDelete: (jti) => (dispatch(deleteUserApiToken(jti))),
+    loadApiTokens: () => dispatch(loadUserApiTokens()),
+    loadUser: () => dispatch(loadUserState()),
+    onTokenDelete: jti => dispatch(deleteUserApiToken(jti))
   })
 )(UserPreferences);

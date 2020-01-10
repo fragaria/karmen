@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
-import Loader from '../components/loader';
-import { FormInputs } from '../components/form-utils';
-import RoleBasedGateway from '../components/role-based-gateway';
-import { getSettings, changeSettings, enqueueTask } from '../services/backend';
+import Loader from "../components/loader";
+import { FormInputs } from "../components/form-utils";
+import RoleBasedGateway from "../components/role-based-gateway";
+import { getSettings, changeSettings, enqueueTask } from "../services/backend";
 
 class Settings extends React.Component {
   state = {
@@ -12,15 +12,15 @@ class Settings extends React.Component {
     settings: {
       network_interface: {
         name: "On which network interface should we be looking for printers?",
-        val: '',
-        type: 'text',
+        val: "",
+        type: "text",
         required: true,
-        error: null,
-      },
+        error: null
+      }
     },
     message: null,
-    messageOk: false,
-  }
+    messageOk: false
+  };
 
   constructor(props) {
     super(props);
@@ -30,7 +30,7 @@ class Settings extends React.Component {
 
   loadSettings() {
     const { settings } = this.state;
-    getSettings().then((serverSide) => {
+    getSettings().then(serverSide => {
       // eslint-disable-next-line no-unused-vars
       for (let option of serverSide) {
         if (settings[option.key]) {
@@ -39,7 +39,7 @@ class Settings extends React.Component {
       }
       this.setState({
         settings,
-        init: false,
+        init: false
       });
     });
   }
@@ -53,78 +53,85 @@ class Settings extends React.Component {
     this.setState({
       message: null,
       messageOk: false,
-      submitting: true,
+      submitting: true
     });
     const { settings } = this.state;
     let hasErrors = false;
     const updatedSettings = Object.assign({}, settings);
     const changedSettings = [];
     // eslint-disable-next-line array-callback-return
-    Object.keys(settings).map((opt) => {
-      if (settings[opt].required && settings[opt].type === 'text' && !settings[opt].val) {
+    Object.keys(settings).map(opt => {
+      if (
+        settings[opt].required &&
+        settings[opt].type === "text" &&
+        !settings[opt].val
+      ) {
         hasErrors = true;
-        updatedSettings[opt].error = 'This is a required field!';
+        updatedSettings[opt].error = "This is a required field!";
       }
       changedSettings.push({
         key: opt,
-        val: settings[opt].val,
+        val: settings[opt].val
       });
-    })
+    });
     this.setState({
-      settings: updatedSettings,
+      settings: updatedSettings
     });
     if (!hasErrors) {
-      changeSettings(changedSettings)
-        .then((r) => {
-          switch(r) {
-            case 201:
-              enqueueTask("scan_network")
-                .then((r) => {
-                  switch(r) {
-                    case 202:
-                      this.setState({
-                        message: 'Network scan initiated, the printers should start popping up at any moment',
-                        messageOk: true,
-                        submitting: false,
-                      });
-                      break;
-                    case 400:
-                    default:
-                      this.setState({
-                        message: 'Cannot scan the network, check server logs',
-                        submitting: false,
-                      });
-                  }
-                });
-              break;
-            case 400:
-            default:
-              this.setState({
-                message: 'Cannot scan the network, check server logs',
-                submitting: false,
-              });
-          }
-        });
+      changeSettings(changedSettings).then(r => {
+        switch (r) {
+          case 201:
+            enqueueTask("scan_network").then(r => {
+              switch (r) {
+                case 202:
+                  this.setState({
+                    message:
+                      "Network scan initiated, the printers should start popping up at any moment",
+                    messageOk: true,
+                    submitting: false
+                  });
+                  break;
+                case 400:
+                default:
+                  this.setState({
+                    message: "Cannot scan the network, check server logs",
+                    submitting: false
+                  });
+              }
+            });
+            break;
+          case 400:
+          default:
+            this.setState({
+              message: "Cannot scan the network, check server logs",
+              submitting: false
+            });
+        }
+      });
     } else {
       this.setState({
-        submitting: false,
+        submitting: false
       });
     }
   }
 
-  render () {
+  render() {
     const { init, submitting, settings, message, messageOk } = this.state;
     if (init) {
-      return (<div><Loader /></div>);
+      return (
+        <div>
+          <Loader />
+        </div>
+      );
     }
     const updateValue = (name, value) => {
       const { settings } = this.state;
       this.setState({
         settings: Object.assign({}, settings, {
-          [name]: Object.assign({}, settings[name], {val: value, error: null})
+          [name]: Object.assign({}, settings[name], { val: value, error: null })
         })
       });
-    }
+    };
     return (
       <RoleBasedGateway requiredRole="admin">
         <div className="settings standalone-page">
@@ -133,13 +140,23 @@ class Settings extends React.Component {
           </header>
           <form>
             <fieldset>
-              {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
               <FormInputs definition={settings} updateValue={updateValue} />
               <div className="form-actions">
-                <button type="submit" onClick={this.startNetworkScan} disabled={submitting}>Scan the network for printers</button>
+                <button
+                  type="submit"
+                  onClick={this.startNetworkScan}
+                  disabled={submitting}
+                >
+                  Scan the network for printers
+                </button>
               </div>
             </fieldset>
-           </form>
+          </form>
         </div>
       </RoleBasedGateway>
     );
