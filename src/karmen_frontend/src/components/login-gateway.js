@@ -147,10 +147,10 @@ class LoginGateway extends React.Component {
                 disabled={submitting}
               >
                 Login
-              </button>
+              </button>{" "}
               {userState === "fresh-token-required" && (
                 <button
-                  className={submitting ? "hidden" : ""}
+                  className={submitting ? "hidden" : "btn btn-plain"}
                   type="reset"
                   onClick={() => {
                     setCurrentUserState("logged-in");
