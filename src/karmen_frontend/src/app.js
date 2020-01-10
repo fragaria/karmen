@@ -99,38 +99,42 @@ class App extends React.Component {
         </BrowserRouter>
         <footer>
           <section>
-            &copy; {new Date().getFullYear()}
+            &copy; {new Date().getFullYear()}{" "}
             <a
               href="https://fragaria.cz"
               target="_blank"
               rel="noopener noreferrer"
+              className="anchor"
             >
               Fragaria s.r.o.
             </a>
           </section>
-          <section>
+          <small>
             <a
               href="https://github.com/fragaria/karmen/blob/master/LICENSE.txt"
               target="_blank"
               rel="noopener noreferrer"
+              className="anchor"
             >
               License
-            </a>
+            </a>{" "}
             <a
               href="https://github.com/fragaria/karmen"
               target="_blank"
               rel="noopener noreferrer"
+              className="anchor"
             >
               Source
-            </a>
+            </a>{" "}
             <a
               href={`https://github.com/fragaria/karmen/releases/tag/${process.env.REACT_APP_GIT_REV}`}
               target="_blank"
               rel="noopener noreferrer"
+              className="anchor"
             >
               {process.env.REACT_APP_GIT_REV}
             </a>
-          </section>
+          </small>
         </footer>
       </>
     );

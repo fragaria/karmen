@@ -449,28 +449,32 @@ class GcodeList extends React.Component {
                 }}
               />
             </label>
-            <button
-              type="submit"
-              onClick={e => {
-                e.preventDefault();
-                const { willBeFilter } = this.state;
-                this.loadPage(currentPage, orderBy, willBeFilter);
-              }}
-            >
-              Filter
-            </button>
-            <button
-              type="reset"
-              onClick={e => {
-                e.preventDefault();
-                this.setState({
-                  willBeFilter: ""
-                });
-                this.loadPage(currentPage, orderBy, null);
-              }}
-            >
-              Reset
-            </button>
+            <div>
+              <button
+                className="btn-reset"
+                type="submit"
+                onClick={e => {
+                  e.preventDefault();
+                  const { willBeFilter } = this.state;
+                  this.loadPage(currentPage, orderBy, willBeFilter);
+                }}
+              >
+                Filter
+              </button>
+              <button
+                className="btn-reset"
+                type="reset"
+                onClick={e => {
+                  e.preventDefault();
+                  this.setState({
+                    willBeFilter: ""
+                  });
+                  this.loadPage(currentPage, orderBy, null);
+                }}
+              >
+                Reset
+              </button>
+            </div>
           </form>
         </div>
 

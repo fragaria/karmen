@@ -124,13 +124,11 @@ class LoginGateway extends React.Component {
       return (
         <section className="content">
           <div className="container">
-            <h1 className="main-title">Login required</h1>
+            <h1 className="main-title text-center">Login required</h1>
             {userState === "fresh-token-required" && (
-              <p>
-                <strong>
-                  The actions you are about to take need to be authorized by
-                  your password.
-                </strong>
+              <p className="text-center">
+                The actions you are about to take need to be authorized by your
+                password.
               </p>
             )}
           </div>
@@ -141,8 +139,13 @@ class LoginGateway extends React.Component {
               </p>
             )}
             <FormInputs definition={loginForm} updateValue={updateValue} />
-            <div className="form-actions">
-              <button type="submit" onClick={this.login} disabled={submitting}>
+            <div className="cta-box text-center">
+              <button
+                className="btn"
+                type="submit"
+                onClick={this.login}
+                disabled={submitting}
+              >
                 Login
               </button>
               {userState === "fresh-token-required" && (

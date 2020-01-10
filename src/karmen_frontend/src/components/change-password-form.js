@@ -134,8 +134,13 @@ class ChangePasswordForm extends React.Component {
           </p>
         )}
         <FormInputs definition={changePwdForm} updateValue={updateValue} />
-        <div className="form-actions">
-          <button type="submit" onClick={this.changePwd} disabled={submitting}>
+        <div className="cta-box text-center">
+          <button
+            className="btn"
+            type="submit"
+            onClick={this.changePwd}
+            disabled={submitting}
+          >
             Change password
           </button>
         </div>

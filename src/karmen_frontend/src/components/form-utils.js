@@ -6,7 +6,7 @@ export const FormInputs = ({ definition, updateValue }) => {
       case "text":
       case "password":
         return (
-          <p key={name}>
+          <p key={name} className="input-group">
             <label htmlFor={name}>{definition[name].name}</label>
             <input
               type={definition[name].type}
@@ -41,7 +41,7 @@ export const FormInputs = ({ definition, updateValue }) => {
           );
         });
         return (
-          <p key={name}>
+          <p key={name} className="input-group">
             <label htmlFor={name}>{definition[name].name}</label>
             <select
               id={name}

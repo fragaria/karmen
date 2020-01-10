@@ -190,6 +190,10 @@ footer {
   margin: $base-unit*2 0 $spacing-default;
   align-items: center;
   justify-content: space-between;
+
+  &.text-center {
+    display: block;
+  }
 }
 
 .cta-box {
