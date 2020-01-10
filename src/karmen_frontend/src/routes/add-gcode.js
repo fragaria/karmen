@@ -118,8 +118,7 @@ class AddGcode extends React.Component {
                 disabled={submitting}
               >
                 {submitting ? "Uploading..." : "Upload G-Code"}
-              </button>
-              {" "}
+              </button>{" "}
               <BackLink to="/gcodes" />
             </div>
           </form>

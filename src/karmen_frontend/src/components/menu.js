@@ -87,14 +87,14 @@ class Menu extends React.Component {
                 </li>
                 <li>
                   <button
-                    className="plain"
+                    className="btn-reset"
                     title="Logout"
                     onClick={e => {
                       e.preventDefault();
                       logout();
                     }}
                   >
-                    <i className="icon icon-exit"></i>
+                    Logout
                   </button>
                 </li>
               </ul>

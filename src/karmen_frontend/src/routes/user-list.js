@@ -24,25 +24,23 @@ const UserList = ({
   }
   return (
     <RoleBasedGateway requiredRole="admin">
-      <div className="standalone-page">
-        <header>
-          <h1 className="title">Users</h1>
-          <Link to="/add-user" className="plain action link">
-            <i className="icon icon-plus"></i>&nbsp;
-            <span>Add a user</span>
-          </Link>
-        </header>
-        <div>
-          <div className="content-section">
-            <UsersTable
-              currentUuid={currentUuid}
-              userList={userList}
-              loadUsersPage={loadUsersPage}
-              clearUsersPages={clearUsersPages}
-              onUserChange={onUserChange}
-            />
-          </div>
+      <div className="content user-list">
+        <div className="container">
+          <h1 className="main-title">
+            Users
+            <Link to="/add-user" className="btn btn-sm">
+              <span>+ Add a user</span>
+            </Link>
+          </h1>
         </div>
+
+        <UsersTable
+          currentUuid={currentUuid}
+          userList={userList}
+          loadUsersPage={loadUsersPage}
+          clearUsersPages={clearUsersPages}
+          onUserChange={onUserChange}
+        />
       </div>
     </RoleBasedGateway>
   );

@@ -133,7 +133,13 @@ class LoginGateway extends React.Component {
             )}
             <form>
               {message && (
-                <p className={messageOk ? "message-success" : "message-error"}>
+                <p
+                  className={
+                    messageOk
+                      ? "text-success text-center"
+                      : "text-secondary text-center"
+                  }
+                >
                   {message}
                 </p>
               )}

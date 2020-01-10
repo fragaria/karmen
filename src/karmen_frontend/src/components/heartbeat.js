@@ -37,8 +37,10 @@ class Heartbeat extends React.Component {
     const { isOnline } = this.state;
     if (!isOnline) {
       return (
-        <p className="heartbeat">
-          Karmen's local API is not responding. Check the server logs, please.
+        <p className="heartbeat text-center">
+          <strong className="text-secondary">
+            Karmen's local API is not responding. Check the server logs, please.
+          </strong>
         </p>
       );
     }

@@ -13,14 +13,17 @@ class UsersTableRow extends React.Component {
 
     if (showSuspendRow) {
       return (
-        <tr className="inverse">
-          <td colSpan="4">
-            Do you really want to {user.suspended ? "allow" : "disallow"}{" "}
-            <strong>{user.username}</strong>?
-          </td>
-          <td className="action-cell">
+        <div className="list-item list-item-inverse">
+          <div className="list-item-content">
+            <span className="list-item-title">
+              Do you really want to {user.suspended ? "allow" : "disallow"}{" "}
+              <strong>{user.username}</strong>?
+            </span>
+          </div>
+
+          <div className="list-item-cta">
             <button
-              className="plain"
+              className="btn-reset"
               title="Cancel"
               onClick={() => {
                 this.setState({
@@ -28,10 +31,10 @@ class UsersTableRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-cross"></i>
+              <i className="icon-close"></i>
             </button>
             <button
-              className="plain"
+              className="btn-reset"
               title="Confirm"
               onClick={() => {
                 onUserChange(user.uuid, user.role, !user.suspended).then(() => {
@@ -41,24 +44,28 @@ class UsersTableRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-checkmark"></i>
+              <i className="icon-check"></i>
             </button>
-          </td>
-        </tr>
+          </div>
+        </div>
       );
     }
 
     if (showChangeRoleRow) {
       return (
-        <tr className="inverse">
-          <td colSpan="4">
-            Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
-            <strong>{user.username}</strong> to{" "}
-            {user.role === "admin" ? "user" : "admin"}?
-          </td>
-          <td className="action-cell">
+        <div className="list-item list-item-inverse">
+          <div className="list-item-content">
+            <span className="list-item-title">
+              Do you really want to{" "}
+              {user.role === "admin" ? "demote" : "promote"}{" "}
+              <strong>{user.username}</strong> to{" "}
+              {user.role === "admin" ? "user" : "admin"}?
+            </span>
+          </div>
+
+          <div className="list-item-cta">
             <button
-              className="plain"
+              className="btn-reset"
               title="Cancel"
               onClick={() => {
                 this.setState({
@@ -66,10 +73,10 @@ class UsersTableRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-cross"></i>
+              <i className="icon-close"></i>
             </button>
             <button
-              className="plain"
+              className="btn-reset"
               title="Confirm"
               onClick={() => {
                 // this will get more complicated, obviously
@@ -81,30 +88,35 @@ class UsersTableRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-checkmark"></i>
+              <i className="icon-check"></i>
             </button>
-          </td>
-        </tr>
+          </div>
+        </div>
       );
     }
 
     return (
-      <tr>
-        <td>{user.uuid}</td>
-        <td>{user.username}</td>
-        <td>{user.role}</td>
-        <td>
-          {formatters.bool(user.suspended) ? (
-            <i className="icon icon-cross icon-state-cancel"></i>
-          ) : (
-            <i className="icon icon-checkmark icon-state-confirm"></i>
-          )}
-        </td>
-        <td className="action-cell">
+      <div className="list-item">
+        <div className="list-item-content">
+          <span className="list-item-title">{user.username}</span>
+          <span className="list-item-subtitle">
+            <span>is </span>
+            <strong>{user.role} </strong>
+            <span>and </span>
+            {formatters.bool(user.suspended) ? (
+              <strong className="text-secondary">disabled</strong>
+            ) : (
+              <strong className="text-success">enabled</strong>
+            )}
+          </span>
+          <span>{user.uuid}</span>
+        </div>
+
+        <div className="list-item-cta">
           {currentUuid !== user.uuid && (
             <>
               <button
-                className="plain icon-link"
+                className="btn-reset"
                 title={user.suspended ? "Allow" : "Disallow"}
                 onClick={() => {
                   this.setState({
@@ -113,13 +125,13 @@ class UsersTableRow extends React.Component {
                 }}
               >
                 {user.suspended ? (
-                  <i className="icon icon-checkmark"></i>
+                  <i className="icon-check text-success"></i>
                 ) : (
-                  <i className="icon icon-cross"></i>
+                  <i className="icon-close text-secondary"></i>
                 )}
               </button>
               <button
-                className="plain icon-link"
+                className="btn-reset"
                 title="Change role"
                 onClick={() => {
                   this.setState({
@@ -127,12 +139,12 @@ class UsersTableRow extends React.Component {
                   });
                 }}
               >
-                <i className="icon icon-file-text2"></i>
+                <i className="icon-edit"></i>
               </button>
             </>
           )}
-        </td>
-      </tr>
+        </div>
+      </div>
     );
   }
 }
@@ -244,130 +256,134 @@ class UsersTable extends React.Component {
     };
 
     return (
-      <div>
-        <form className="inline-form">
-          <label htmlFor="filter">Filter by username</label>
-          <input
-            type="text"
-            name="filter"
-            id="filter"
-            value={willBeFilter}
-            onChange={e => {
-              this.setState({
-                willBeFilter: e.target.value
-              });
-            }}
-          />
-          <button
-            type="submit"
-            onClick={e => {
-              e.preventDefault();
-              const { willBeFilter } = this.state;
-              const { userList } = this.props;
-              this.reloadTableWith(
-                null,
-                userList.orderBy,
-                willBeFilter,
-                userList.limit
-              );
-            }}
-          >
-            Filter
-          </button>
-          <button
-            type="reset"
-            onClick={e => {
-              e.preventDefault();
-              const { userList } = this.props;
-              this.setState({
-                willBeFilter: ""
-              });
-              this.reloadTableWith(null, userList.orderBy, "", userList.limit);
-            }}
-          >
-            Reset
-          </button>
-        </form>
-        {!usersLoaded ? (
-          <p className="message-block">Loading...</p>
-        ) : !usersRows || usersRows.length === 0 ? (
-          <p className="message-error message-block">No users found!</p>
-        ) : (
-          <>
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    <button
-                      className={`plain sorting-button ${
-                        userList.orderBy.indexOf("uuid") > -1 ? "active" : ""
-                      }`}
-                      onClick={sortFactory("uuid")}
-                    >
-                      UUID
-                    </button>
-                  </th>
-                  <th>
-                    <button
-                      className={`plain sorting-button ${
-                        userList.orderBy.indexOf("username") > -1
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={sortFactory("username")}
-                    >
-                      Username
-                    </button>
-                  </th>
-                  <th>
-                    <button
-                      className={`plain sorting-button ${
-                        userList.orderBy.indexOf("role") > -1 ? "active" : ""
-                      }`}
-                      onClick={sortFactory("role")}
-                    >
-                      Role
-                    </button>
-                  </th>
-                  <th>Allowed?</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>{usersRows}</tbody>
-            </table>
-            <div className="table-pagination">
-              {currentPageIndex > 0 ? (
-                <button
-                  className="plain"
-                  onClick={() => {
-                    this.setState({
-                      currentPageIndex: Math.max(0, currentPageIndex - 1)
-                    });
-                  }}
-                >
-                  Previous
-                </button>
-              ) : (
-                <span></span>
-              )}
-              {currentPage.data.next ? (
-                <button
-                  className="plain"
-                  onClick={() => {
-                    this.setState({
-                      currentPageIndex: currentPageIndex + 1
-                    });
-                  }}
-                >
-                  Next
-                </button>
-              ) : (
-                <span></span>
-              )}
+      <>
+        <div className="container">
+          <form className="input-group">
+            <label htmlFor="filter">
+              <span className="input-label-icon icon-search"></span>
+              <input
+                type="search"
+                name="filter"
+                id="filter"
+                value={willBeFilter}
+                onChange={e => {
+                  this.setState({
+                    willBeFilter: e.target.value
+                  });
+                }}
+              />
+            </label>
+            <div>
+              <button
+                className="btn-reset"
+                type="submit"
+                onClick={e => {
+                  e.preventDefault();
+                  const { willBeFilter } = this.state;
+                  const { userList } = this.props;
+                  this.reloadTableWith(
+                    null,
+                    userList.orderBy,
+                    willBeFilter,
+                    userList.limit
+                  );
+                }}
+              >
+                Filter
+              </button>
+              <button
+                className="btn-reset"
+                type="reset"
+                onClick={e => {
+                  e.preventDefault();
+                  const { userList } = this.props;
+                  this.setState({
+                    willBeFilter: ""
+                  });
+                  this.reloadTableWith(
+                    null,
+                    userList.orderBy,
+                    "",
+                    userList.limit
+                  );
+                }}
+              >
+                Reset
+              </button>
             </div>
-          </>
-        )}
-      </div>
+          </form>
+        </div>
+
+        <div className="list">
+          {!usersLoaded ? (
+            <p className="list-item list-item-message">Loading...</p>
+          ) : !usersRows || usersRows.length === 0 ? (
+            <p className="list-item list-item-message">No users found!</p>
+          ) : (
+            <>
+              <div className="list-header">
+                <button
+                  className={`plain sorting-button ${
+                    userList.orderBy.indexOf("uuid") > -1 ? "active" : ""
+                  }`}
+                  onClick={sortFactory("uuid")}
+                >
+                  UUID
+                </button>
+                <button
+                  className={`plain sorting-button ${
+                    userList.orderBy.indexOf("username") > -1 ? "active" : ""
+                  }`}
+                  onClick={sortFactory("username")}
+                >
+                  Username
+                </button>
+                <button
+                  className={`plain sorting-button ${
+                    userList.orderBy.indexOf("role") > -1 ? "active" : ""
+                  }`}
+                  onClick={sortFactory("role")}
+                >
+                  Role
+                </button>
+              </div>
+
+              {usersRows}
+
+              <div className="list-pagination">
+                {currentPageIndex > 0 ? (
+                  <button
+                    className="plain"
+                    onClick={() => {
+                      this.setState({
+                        currentPageIndex: Math.max(0, currentPageIndex - 1)
+                      });
+                    }}
+                  >
+                    Previous
+                  </button>
+                ) : (
+                  <span></span>
+                )}
+                {currentPage.data.next ? (
+                  <button
+                    className="plain"
+                    onClick={() => {
+                      this.setState({
+                        currentPageIndex: currentPageIndex + 1
+                      });
+                    }}
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <span></span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </>
     );
   }
 }

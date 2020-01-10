@@ -66,7 +66,7 @@ class PrinterList extends React.Component {
                 <PrinterState printer={printer} />
               </span>
 
-              {(printer.job && printer.job.name) && (
+              {printer.job && printer.job.name && (
                 <>
                   <div className="list-item-subtitle">
                     <span>{printer.job.completion}% done, </span>

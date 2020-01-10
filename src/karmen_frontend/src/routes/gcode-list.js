@@ -84,7 +84,7 @@ class GcodeRow extends React.Component {
 
           {canCancelPrintStatusRow && (
             <button
-              className="plain"
+              className="btn-reset"
               onClick={() => {
                 this.setState({
                   showPrintStatusRow: false
@@ -99,19 +99,22 @@ class GcodeRow extends React.Component {
     }
     if (showDeleteRow) {
       return (
-        <tr className="inverse">
-          <td colSpan="4">
-            Do you really want to delete{" "}
-            <strong>
-              {path}
-              {path ? "/" : ""}
-              {display}
-            </strong>
-            ? This cannot be undone.
-          </td>
-          <td className="action-cell">
+        <div className="list-item list-item-inverse">
+          <div className="list-item-content">
+            <span className="list-item-title">
+              Do you really want to delete{" "}
+              <strong>
+                {path}
+                {path ? "/" : ""}
+                {display}
+              </strong>
+              ? This cannot be undone.
+            </span>
+          </div>
+
+          <div className="list-item-cta">
             <button
-              className="plain"
+              className="btn-reset"
               title="Cancel"
               onClick={() => {
                 this.setState({
@@ -119,34 +122,37 @@ class GcodeRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-cross"></i>
+              <i className="icon-close"></i>
             </button>
             <button
-              className="plain"
+              className="btn-reset"
               title="Confirm delete"
               onClick={() => {
                 onRowDelete();
               }}
             >
-              <i className="icon icon-checkmark"></i>
+              <i className="icon-check"></i>
             </button>
-          </td>
-        </tr>
+          </div>
+        </div>
       );
     }
 
     if (showFilamentTypeWarningRow) {
       const { printerFilamentType, gcodeFilamentType } = this.state;
       return (
-        <tr>
-          <td colSpan="4">
-            Are you sure? There seems to be a filament mismatch: Printer has{" "}
-            <strong>{printerFilamentType}</strong> configured, but this gcode
-            was sliced for <strong>{gcodeFilamentType}</strong>.
-          </td>
-          <td className="action-cell">
+        <div className="list-item list-item-inverse">
+          <div className="list-item-content">
+            <span className="list-item-title">
+              Are you sure? There seems to be a filament mismatch: Printer has{" "}
+              <strong>{printerFilamentType}</strong> configured, but this gcode
+              was sliced for <strong>{gcodeFilamentType}</strong>.
+            </span>
+          </div>
+
+          <div className="list-item-cta">
             <button
-              className="plain"
+              className="btn-reset"
               title="Cancel"
               onClick={() => {
                 this.setState({
@@ -157,7 +163,7 @@ class GcodeRow extends React.Component {
               <i className="icon icon-cross icon-state-cancel"></i>
             </button>
             <button
-              className="plain"
+              className="btn-reset"
               title="Print"
               onClick={() => {
                 const { selectedPrinter } = this.state;
@@ -174,8 +180,8 @@ class GcodeRow extends React.Component {
             >
               <i className="icon icon-checkmark icon-state-confirm"></i>
             </button>
-          </td>
-        </tr>
+          </div>
+        </div>
       );
     }
 
@@ -186,31 +192,34 @@ class GcodeRow extends React.Component {
         );
       });
       return (
-        <tr>
-          <td colSpan="4">
-            {!!availablePrinters.length ? (
-              <>
-                On which printer would you like to print?{" "}
-                <select
-                  id="selectedPrinter"
-                  name="selectedPrinter"
-                  value={selectedPrinter}
-                  onChange={e =>
-                    this.setState({
-                      selectedPrinter: e.target.value
-                    })
-                  }
-                >
-                  {availablePrinterOpts}
-                </select>
-              </>
-            ) : (
-              <p>No available printers found.</p>
-            )}
-          </td>
-          <td className="action-cell">
+        <div className="list-item">
+          <div className="list-item-content">
+            <span className="list-item-title">
+              {!!availablePrinters.length ? (
+                <>
+                  On which printer would you like to print?{" "}
+                  <select
+                    id="selectedPrinter"
+                    name="selectedPrinter"
+                    value={selectedPrinter}
+                    onChange={e =>
+                      this.setState({
+                        selectedPrinter: e.target.value
+                      })
+                    }
+                  >
+                    {availablePrinterOpts}
+                  </select>
+                </>
+              ) : (
+                <p>No available printers found.</p>
+              )}
+            </span>
+          </div>
+
+          <div className="list-item-cta">
             <button
-              className="plain"
+              className="btn-reset"
               onClick={() => {
                 this.setState({
                   showPrinterSelectRow: false,
@@ -218,11 +227,11 @@ class GcodeRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-cross icon-state-cancel"></i>
+              <i className="icon-close text-secondary"></i>
             </button>
             {!!availablePrinters.length && (
               <button
-                className="plain"
+                className="btn-reset"
                 onClick={e => {
                   e.preventDefault();
                   const { selectedPrinter } = this.state;
@@ -258,11 +267,11 @@ class GcodeRow extends React.Component {
                   this.schedulePrint(id, selectedPrinter);
                 }}
               >
-                <i className="icon icon-checkmark icon-state-confirm"></i>
+                <i className="icon-check text-success"></i>
               </button>
             )}
-          </td>
-        </tr>
+          </div>
+        </div>
       );
     }
 

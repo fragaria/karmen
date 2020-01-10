@@ -68,6 +68,7 @@ class App extends React.Component {
       <>
         <BrowserRouter>
           <Menu />
+          <Heartbeat />
           <main className="main">
             <LoginGateway onUserStateChanged={loadUser}>
               <ForcePwdChangeGateway onUserStateChanged={loadUser}>
@@ -94,7 +95,6 @@ class App extends React.Component {
                 </Switch>
               </ForcePwdChangeGateway>
             </LoginGateway>
-            <Heartbeat />
           </main>
         </BrowserRouter>
         <footer>

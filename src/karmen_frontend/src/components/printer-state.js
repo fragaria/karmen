@@ -22,7 +22,7 @@ export const PrinterState = ({ printer }) => {
               printer.client.connected ? "text-success" : "text-secondary"
             }
           >
-            {printer.client.connected ? 'connected' : 'disconnected'}
+            {printer.client.connected ? "connected" : "disconnected"}
           </strong>
           <span> and </span>
           <strong className={printerStatusClass}>{printer.status.state}</strong>

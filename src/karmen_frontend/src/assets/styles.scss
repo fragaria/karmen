@@ -352,6 +352,16 @@ footer {
       padding: $base-unit*2;
       font-weight: bold;
     }
+
+    &.list-item-inverse {
+      padding: $base-unit*2;
+      background: $color-secondary;
+
+      .list-item-title,
+      .list-item-cta button {
+        color: #fff!important;
+      }
+    }
   }
 
   .list-item-content {
@@ -470,6 +480,13 @@ select {
   }
 }
 
+.heartbeat {
+  margin-top: $navigation-height-xs;
+
+  @media (min-width: $screen-sm-min) {
+    margin-top: $navigation-height;
+  }
+}
 
 #passphrase-reveal {
   height: 100%;
