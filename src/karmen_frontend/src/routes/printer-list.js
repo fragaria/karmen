@@ -66,11 +66,11 @@ class PrinterList extends React.Component {
                 <PrinterState printer={printer} />
               </span>
 
-              {printer.job && (
+              {(printer.job && printer.job.name) && (
                 <>
                   <div className="list-item-subtitle">
-                    <span>{printer.job.completion}% done,</span>
-                    ETA: {printer.job.printTimeLeft}
+                    <span>{printer.job.completion}% done, </span>
+                    <span>ETA: {printer.job.printTimeLeft}</span>
                   </div>
                   <span>{printer.job.name}</span>
                 </>

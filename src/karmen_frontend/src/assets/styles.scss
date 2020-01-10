@@ -357,6 +357,7 @@ footer {
   .list-item-content {
     display: block;
     color: $color-light;
+    word-break: break-all;
   }
 
   .list-item-title,
@@ -372,8 +373,16 @@ footer {
     font-size: 2rem;
   }
 
-  .list-item-cta > * {
-    margin-left: $base-unit*2
+  .list-item-cta {
+    white-space: nowrap;
+
+    & > * {
+      margin-left: $base-unit;
+
+      @media (min-width: $screen-md-min) {
+        margin-left: $base-unit*2;
+      }
+    }
   }
 }
 
@@ -397,7 +406,6 @@ select {
 
   label {
     position: relative;
-    padding-top: 8px;
     color: rgba(0, 0, 0, .6);
 
     &.input-group-title {
@@ -445,7 +453,6 @@ select {
     grid-gap: .5rem 1rem;
 
     label {
-      padding-top: 0;
       text-align: right;
     }
 

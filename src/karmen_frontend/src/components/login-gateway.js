@@ -131,38 +131,38 @@ class LoginGateway extends React.Component {
                 password.
               </p>
             )}
-          </div>
-          <form>
-            {message && (
-              <p className={messageOk ? "message-success" : "message-error"}>
-                {message}
-              </p>
-            )}
-            <FormInputs definition={loginForm} updateValue={updateValue} />
-            <div className="cta-box text-center">
-              <button
-                className="btn"
-                type="submit"
-                onClick={this.login}
-                disabled={submitting}
-              >
-                Login
-              </button>{" "}
-              {userState === "fresh-token-required" && (
+            <form>
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
+              <FormInputs definition={loginForm} updateValue={updateValue} />
+              <div className="cta-box text-center">
                 <button
-                  className={submitting ? "hidden" : "btn btn-plain"}
-                  type="reset"
-                  onClick={() => {
-                    setCurrentUserState("logged-in");
-                    history.push("/");
-                  }}
+                  className="btn"
+                  type="submit"
+                  onClick={this.login}
                   disabled={submitting}
                 >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
+                  Login
+                </button>{" "}
+                {userState === "fresh-token-required" && (
+                  <button
+                    className={submitting ? "hidden" : "btn btn-plain"}
+                    type="reset"
+                    onClick={() => {
+                      setCurrentUserState("logged-in");
+                      history.push("/");
+                    }}
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
         </section>
       );
     } else {

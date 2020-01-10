@@ -16,20 +16,15 @@ export const PrinterState = ({ printer }) => {
         <span className={`text-secondary`}>Authorization required</span>
       ) : (
         <>
-          <span>is</span>
-          &nbsp;
+          <span>is </span>
           <strong
             className={
               printer.client.connected ? "text-success" : "text-secondary"
             }
           >
-            {printer.client.connected
-              ? `${printer.client.name} connected`
-              : `${printer.client.name} disconnected`}
+            {printer.client.connected ? 'connected' : 'disconnected'}
           </strong>
-          &nbsp;
-          <span>and</span>
-          &nbsp;
+          <span> and </span>
           <strong className={printerStatusClass}>{printer.status.state}</strong>
           {printer.client.access_level === "read_only" && (
             <span className={`tag`}>{"Read only"}</span>

@@ -73,53 +73,57 @@ class AddGcode extends React.Component {
       return <Redirect to={`/gcodes/${gcodeId}`} />;
     }
     return (
-      <div className="standalone-page">
-        <header>
-          <h1 className="title">Add a G-Code</h1>
-        </header>
-        <form>
-          {message && (
-            <p className={messageOk ? "message-success" : "message-error"}>
-              {message}
-            </p>
-          )}
-          <p>
-            <label htmlFor="file">Select your gcode</label>
-            <input
-              type="file"
-              name="file"
-              onChange={e => {
-                this.setState({
-                  toUpload: e.target.files[0]
-                });
-              }}
-            />
-          </p>
-          <p>
-            <label htmlFor="path">Path (optional)</label>
-            <input
-              type="text"
-              id="path"
-              name="path"
-              value={path}
-              onChange={e =>
-                this.setState({
-                  path: e.target.value
-                })
-              }
-            />
-          </p>
-          <div className="form-actions">
-            <button
-              type="submit"
-              onClick={e => this.addCode(e)}
-              disabled={submitting}
-            >
-              {submitting ? "Uploading..." : "Upload G-Code"}
-            </button>
-            <BackLink to="/gcodes" />
-          </div>
-        </form>
+      <div className="content printer-list">
+        <div className="container">
+          <h1 className="main-title text-center">Add a G-Code</h1>
+
+          <form>
+            {message && (
+              <p className={messageOk ? "message-success" : "message-error"}>
+                {message}
+              </p>
+            )}
+            <div className="input-group">
+              <label htmlFor="file">Select your gcode</label>
+              <input
+                type="file"
+                name="file"
+                onChange={e => {
+                  this.setState({
+                    toUpload: e.target.files[0]
+                  });
+                }}
+              />
+              <span></span>
+
+              <label htmlFor="path">Path (optional)</label>
+              <input
+                type="text"
+                id="path"
+                name="path"
+                value={path}
+                onChange={e =>
+                  this.setState({
+                    path: e.target.value
+                  })
+                }
+              />
+              <span></span>
+            </div>
+            <div className="cta-box text-center">
+              <button
+                className="btn"
+                type="submit"
+                onClick={e => this.addCode(e)}
+                disabled={submitting}
+              >
+                {submitting ? "Uploading..." : "Upload G-Code"}
+              </button>
+              {" "}
+              <BackLink to="/gcodes" />
+            </div>
+          </form>
+        </div>
       </div>
     );
   }
