@@ -135,44 +135,45 @@ class AddUser extends React.Component {
     }
     return (
       <RoleBasedGateway requiredRole="admin">
-        <div className="standalone-page">
-          <header>
-            <h1 className="title">Add a new user</h1>
-          </header>
-          <p>
-            The password is for the first login only and will have to be changed
-            afterwards.
-          </p>
-          <form>
-            {message && (
-              <p className={messageOk ? "message-success" : "message-error"}>
-                {message}
-              </p>
-            )}
-            <FormInputs
-              definition={form}
-              updateValue={(name, value) => {
-                this.setState({
-                  form: Object.assign({}, form, {
-                    [name]: Object.assign({}, form[name], {
-                      val: value,
-                      error: null
+        <div className="content printer-list">
+          <div className="container">
+            <h1 className="main-title text-center">Add a new user</h1>
+            <p className="text-center">
+              The password is for the first login only and will have to be changed
+              afterwards.
+            </p>
+            <form>
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
+              <FormInputs
+                definition={form}
+                updateValue={(name, value) => {
+                  this.setState({
+                    form: Object.assign({}, form, {
+                      [name]: Object.assign({}, form[name], {
+                        val: value,
+                        error: null
+                      })
                     })
-                  })
-                });
-              }}
-            />
-            <div className="form-actions">
-              <button
-                type="submit"
-                onClick={this.addUser}
-                disabled={submitting}
-              >
-                Add user
-              </button>
-              <BackLink to="/" />
-            </div>
-          </form>
+                  });
+                }}
+              />
+              <div className="cta-box text-center">
+                <button
+                  className="btn"
+                  type="submit"
+                  onClick={this.addUser}
+                  disabled={submitting}
+                >
+                  Add user
+                </button>{" "}
+                <BackLink to="/" />
+              </div>
+            </form>
+          </div>
         </div>
       </RoleBasedGateway>
     );

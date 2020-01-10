@@ -6,7 +6,7 @@ export const FormInputs = ({ definition, updateValue }) => {
       case "text":
       case "password":
         return (
-          <p key={name} className="input-group">
+          <>
             <label htmlFor={name}>{definition[name].name}</label>
             <input
               type={definition[name].type}
@@ -15,12 +15,14 @@ export const FormInputs = ({ definition, updateValue }) => {
               value={definition[name].val}
               onChange={e => updateValue(name, e.target.value)}
             />
-            {definition[name].error && <small>{definition[name].error}</small>}
-          </p>
+            <span>
+              {definition[name].error && <small>{definition[name].error}</small>}
+            </span>
+          </>
         );
       case "checkbox":
         return (
-          <p key={name}>
+          <>
             <label htmlFor={name}>{definition[name].name}</label>
             <input
               type="checkbox"
@@ -29,8 +31,10 @@ export const FormInputs = ({ definition, updateValue }) => {
               checked={definition[name].val}
               onChange={e => updateValue(name, e.target.checked)}
             />
-            {definition[name].error && <small>{definition[name].error}</small>}
-          </p>
+            <span>
+              {definition[name].error && <small>{definition[name].error}</small>}
+            </span>
+          </>
         );
       case "select":
         const opts = definition[name].options.map(opt => {
@@ -41,7 +45,7 @@ export const FormInputs = ({ definition, updateValue }) => {
           );
         });
         return (
-          <p key={name} className="input-group">
+          <>
             <label htmlFor={name}>{definition[name].name}</label>
             <select
               id={name}
@@ -51,15 +55,17 @@ export const FormInputs = ({ definition, updateValue }) => {
             >
               {opts}
             </select>
-            {definition[name].error && <small>{definition[name].error}</small>}
-          </p>
+            <span>
+              {definition[name].error && <small>{definition[name].error}</small>}
+            </span>
+          </>
         );
       default:
         return null;
     }
   });
 
-  return <>{optionRows}</>;
+  return <div className="input-group">{optionRows}</div>;
 };
 
 export default FormInputs;
