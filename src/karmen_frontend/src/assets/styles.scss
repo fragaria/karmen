@@ -251,6 +251,11 @@ footer {
     color: $color-secondary;
     text-decoration: underline;
   }
+
+}
+
+.btn-reset {
+  @include button-reset;
 }
 
 .dl-horizontal {
@@ -321,13 +326,28 @@ footer {
 .list {
   margin-top: $base-unit;
 
+  .list-header {
+    padding: $base-unit $base-unit*2;
+
+  }
+
+  .list-pagination {
+
+  }
+
+
   .list-item {
     display: flex;
     width: 100%;
     padding: $base-unit $base-unit*2;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid $border-color;
+    border-top: 1px solid $list-border-color;
+
+    &.list-item-message {
+      padding: $base-unit*2;
+      font-weight: bold;
+    }
   }
 
   .list-item-content {
@@ -354,13 +374,14 @@ footer {
 }
 
 input[type=text],
+input[type=search],
 input[type=password],
 select {
-  height: 46px;
-  padding: 8px;
+  height: $form-elements-height;
+  padding: $base-unit;
   background-color: #fff;
   color: #000;
-  border: 1px solid #979797;
+  border: $border-default;
   border-radius: 0;
   font-family: "Monoid", sans-serif;
 }
@@ -371,12 +392,25 @@ select {
   align-items: center;
 
   label {
+    position: relative;
     padding-top: 8px;
     color: rgba(0, 0, 0, .6);
 
     &.input-group-title {
       text-align: left;
       padding-top: 24px;
+    }
+
+    .input-label-icon {
+      position: absolute;
+      top: 19px;
+      left: 12px;
+      font-size: 2.4rem;
+      color: $border-color;
+
+      & + input {
+        padding-left: $base-unit*6;
+      }
     }
   }
 
@@ -414,8 +448,8 @@ select {
     input,
     select,
     textarea {
-      width: 400px;
-      max-width: 400px;
+      // width: 400px;
+      // max-width: 400px;
       margin: 8px 0;
     }
 

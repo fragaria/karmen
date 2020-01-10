@@ -112,11 +112,13 @@ class LoginGateway extends React.Component {
         });
       }
       return (
-        <div className="standalone-page">
-          <header>
-            <h1 className="title">Login required</h1>
+        <section className="content">
+          <div className="container">
+            <h1 className="main-title">
+              Login required
+            </h1>
             {userState === "fresh-token-required" && <p><strong>The actions you are about to take need to be authorized by your password.</strong></p>}
-          </header>
+          </div>
           <form>
             {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
             <FormInputs definition={loginForm} updateValue={updateValue} />
@@ -128,7 +130,7 @@ class LoginGateway extends React.Component {
               }} disabled={submitting}>Cancel</button>}
             </div>
           </form>
-         </div>
+         </section>
       );
     } else {
       return <React.Fragment>{children}</React.Fragment>;

@@ -9,7 +9,9 @@ $txt-color: $color-primary;
 $txt-color-accented: #000;
 $anchor-color: $color-secondary;
 $bg-color: #fff;
-$border-color: #dfdfdf;
+$border-color: lighten($color-primary, 55%);
+
+$border-default: 1px solid $border-color;
 
 $palette: (
   black: #000,
@@ -24,6 +26,7 @@ $palette: (
   gray-very-dark: #333,
 );
 
+// $sans-serif: "Monoid", sans-serif;
 $sans-serif: "Monoid", sans-serif;
 
 $base-unit: 8px;
@@ -39,6 +42,8 @@ $logo-height: 75px;
 $logo-height-xs: 45px;
 
 $form-elements-height: 45px;
+
+$list-border-color: lighten($color-primary, 75%);
 
 // ------------- MEDIA QUERY BREAKPOINTS -------------
 //## Define the breakpoints at which your layout will change, adapting to different screen sizes.
