@@ -447,7 +447,8 @@ select {
   textarea {
     width: 100%;
     max-width: 100%;
-    margin: 8px 0;
+    min-width: 300px;
+    margin: 0 0 $base-unit*2;
   }
 
 
@@ -461,7 +462,11 @@ select {
     color: #ea272e;
     font-weight: bold;
     text-align: left;
-    font-size: 80%
+    font-size: 80%;
+
+    @media (max-width: $screen-sm-min) {
+      margin-top: -12px;
+    }
   }
 
   @media (min-width: $screen-sm-min) {

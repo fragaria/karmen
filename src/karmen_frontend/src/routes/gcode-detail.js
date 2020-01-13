@@ -173,28 +173,28 @@ class GcodeDetail extends React.Component {
                       {gcode.analysis.temperatures.bed_first && (
                         <>
                           <dt className="term">Bed - First layer: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.bed_first} &#176;C</dd>
+                          <dd className="description">{gcode.analysis.temperatures.bed_first}&#176;{" "}C</dd>
                         </>
                       )}
 
                       {gcode.analysis.temperatures.bed && (
                         <>
                           <dt className="term">Bed: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.bed} &#176;C</dd>
+                          <dd className="description">{gcode.analysis.temperatures.bed}&#176;{" "}C</dd>
                         </>
                       )}
 
                       {gcode.analysis.temperatures.tool0_first && (
                         <>
                           <dt className="term">Tool - First layer: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.tool0_first} &#176;C</dd>
+                          <dd className="description">{gcode.analysis.temperatures.tool0_first}&#176;{" "}C</dd>
                         </>
                       )}
 
                       {gcode.analysis.temperatures.tool0 && (
                         <>
                           <dt className="term">Tool: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.tool0} &#176;C</dd>
+                          <dd className="description">{gcode.analysis.temperatures.tool0}&#176;{" "}C</dd>
                         </>
                       )}
                     </>

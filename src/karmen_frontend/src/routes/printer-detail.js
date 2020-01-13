@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import Loader from "../components/loader";
-import { PrinterView } from "../components/printer-view";
 import RoleBasedGateway from "../components/role-based-gateway";
 import Progress from "../components/progress";
 import { WebcamStream } from "../components/webcam-stream";
