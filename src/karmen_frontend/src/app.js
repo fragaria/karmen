@@ -19,6 +19,7 @@ import AddGcode from "./routes/add-gcode";
 import AddUser from "./routes/add-user";
 import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
+import Page404 from "./routes/page404";
 
 import { loadUserState, setTokenFreshness } from "./actions/users";
 
@@ -92,6 +93,7 @@ class App extends React.Component {
                     component={PrinterDetail}
                   />
                   <Route path="/" exact component={PrinterList} />
+                  <Route component={Page404} />
                 </Switch>
               </ForcePwdChangeGateway>
             </LoginGateway>
