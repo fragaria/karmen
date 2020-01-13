@@ -8,6 +8,7 @@ import {
   deletePrinter,
   changeCurrentJob
 } from "../actions/printers";
+import formatters from "../services/formatters";
 
 class PrinterList extends React.Component {
   constructor(props) {
@@ -74,7 +75,9 @@ class PrinterList extends React.Component {
                 <>
                   <div className="list-item-subtitle">
                     <span>{printer.job.completion}% done, </span>
-                    <span>ETA: {printer.job.printTimeLeft}</span>
+                    <span>
+                      ETA: {formatters.timespan(printer.job.printTimeLeft)}
+                    </span>
                   </div>
                   <span>{printer.job.name}</span>
                 </>
