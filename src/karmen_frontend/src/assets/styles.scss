@@ -238,6 +238,7 @@ footer {
 
   &:hover {
     cursor: pointer;
+    background: darken($color-secondary, 10%);
   }
 
   &.btn-sm {
@@ -254,6 +255,10 @@ footer {
     background-color: transparent;
     color: $color-secondary;
     text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
   }
 
 }
@@ -379,6 +384,7 @@ footer {
   .list-item-title {
     font-size: 1.618rem;
   }
+
   [class^="icon-"] {
     font-size: 2rem;
   }

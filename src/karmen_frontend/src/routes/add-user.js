@@ -139,8 +139,8 @@ class AddUser extends React.Component {
           <div className="container">
             <h1 className="main-title text-center">Add a new user</h1>
             <p className="text-center">
-              The password is for the first login only and will have to be changed
-              afterwards.
+              The password is for the first login only and will have to be
+              changed afterwards.
             </p>
             <form>
               {message && (

@@ -16,7 +16,9 @@ export const FormInputs = ({ definition, updateValue }) => {
               onChange={e => updateValue(name, e.target.value)}
             />
             <span>
-              {definition[name].error && <small>{definition[name].error}</small>}
+              {definition[name].error && (
+                <small>{definition[name].error}</small>
+              )}
             </span>
           </>
         );
@@ -32,7 +34,9 @@ export const FormInputs = ({ definition, updateValue }) => {
               onChange={e => updateValue(name, e.target.checked)}
             />
             <span>
-              {definition[name].error && <small>{definition[name].error}</small>}
+              {definition[name].error && (
+                <small>{definition[name].error}</small>
+              )}
             </span>
           </>
         );
@@ -56,7 +60,9 @@ export const FormInputs = ({ definition, updateValue }) => {
               {opts}
             </select>
             <span>
-              {definition[name].error && <small>{definition[name].error}</small>}
+              {definition[name].error && (
+                <small>{definition[name].error}</small>
+              )}
             </span>
           </>
         );

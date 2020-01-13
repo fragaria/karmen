@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export const BackLink = ({ to, onClick, text }) => {
   onClick = onClick || function() {};
   return (
-    <Link to={to} onClick={onClick} className="back-link">
+    <Link to={to} onClick={onClick} className="btn btn-plain">
       {text || "Cancel"}
     </Link>
   );
@@ -13,7 +13,7 @@ export const BackLink = ({ to, onClick, text }) => {
 export const BackButton = ({ onClick, text }) => {
   onClick = onClick || function() {};
   return (
-    <button className="plain link" onClick={onClick}>
+    <button className="btn btn-plain" onClick={onClick}>
       {text || "Cancel"}
     </button>
   );

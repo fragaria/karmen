@@ -59,7 +59,11 @@ class PrinterList extends React.Component {
       printers &&
       printers.map(printer => {
         return (
-          <Link className="list-item" key={printer.host} to={`/printers/${printer.host}`}>
+          <Link
+            className="list-item"
+            key={printer.host}
+            to={`/printers/${printer.host}`}
+          >
             <div className="list-item-content">
               <span className="list-item-title">{printer.name}</span>
               <span className="list-item-subtitle">
