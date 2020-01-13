@@ -494,6 +494,18 @@ select {
   }
 }
 
+.webcam-stream {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 300px;
+  background: #adadad;
+  color: map-get($palette, "gray-light");
+  font-size: 2rem;
+}
+
+
 #passphrase-reveal {
   height: 100%;
   @include button-reset;

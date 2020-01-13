@@ -6,6 +6,8 @@ import Loader from "../components/loader";
 import { PrinterView } from "../components/printer-view";
 import { PrinterEditForm } from "../components/printer-edit-form";
 import RoleBasedGateway from "../components/role-based-gateway";
+import Progress from "../components/progress";
+import { WebcamStream } from "../components/webcam-stream";
 import formatters from "../services/formatters";
 
 import { getPrinterJobs } from "../services/backend";
@@ -423,13 +425,8 @@ class PrinterDetail extends React.Component {
     return (
       <RoleBasedGateway requiredRole="admin">
         <section className="content">
-          <div className="stream">
-            <PrinterView
-              printer={printer}
-              showActions={false}
-              changeCurrentJobState={changeCurrentJobState}
-            />
-          </div>
+          <WebcamStream {...printer.webcam} />
+          <Progress {...printer.job} />
 
           <div className="container">
             <h1 className="main-title">{printer.name}</h1>
@@ -535,11 +532,12 @@ class PrinterDetail extends React.Component {
                           <span></span>
                         )}
                       </div>
-                      <div className="cta-box text-center">
-                        <button className="btn">Printer settings</button>
-                      </div>
                     </>
                   )}
+                </div>
+
+                <div className="cta-box text-center">
+                  <button className="btn">Printer settings</button>
                 </div>
               </div>
             </div>

@@ -92,7 +92,7 @@ export class WebcamStream extends React.Component {
             src={source}
           />
         ) : (
-          <p className="no-stream">Stream unavailable</p>
+          <div className="webcam-stream">Stream unavailable</div>
         )}
       </div>
     );
