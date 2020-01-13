@@ -533,8 +533,8 @@ class PrinterDetail extends React.Component {
                           <span></span>
                         )}
                       </div>
-                      <div class="cta-box text-center">
-                        <button class="btn">Printer settings</button>
+                      <div className="cta-box text-center">
+                        <button className="btn">Printer settings</button>
                       </div>
                     </>
                   )}
