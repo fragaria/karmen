@@ -49,47 +49,47 @@ class PrinterConnectionForm extends React.Component {
           <div>
             <p className="message-warning">
               Are you sure? This might affect any current printer operation.
-              <button
-                className="plain"
-                type="submit"
-                onClick={e => {
-                  e.preventDefault();
-                  this.setState({
-                    submitting: true
-                  });
-                  this.changePrinterConnection();
-                }}
-                disabled={submitting}
-              >
-                {submitting ? "Working..." : "Yes, please"}
-              </button>
-              <button
-                type="reset"
-                className={submitting ? "hidden" : ""}
-                onClick={e => {
-                  e.preventDefault();
-                  this.setState({
-                    submitting: false,
-                    showConnectionWarningRow: false,
-                    targetState: null
-                  });
-                }}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
             </p>
+            <button
+              className="btn btn-sm"
+              type="submit"
+              onClick={e => {
+                e.preventDefault();
+                this.setState({
+                  submitting: true
+                });
+                this.changePrinterConnection();
+              }}
+              disabled={submitting}
+            >
+              {submitting ? "Working..." : "Yes, please"}
+            </button>{" "}
+            <button
+              type="reset"
+              className={submitting ? "hidden" : "btn btn-sm btn-secondary"}
+              onClick={e => {
+                e.preventDefault();
+                this.setState({
+                  submitting: false,
+                  showConnectionWarningRow: false,
+                  targetState: null
+                });
+              }}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
           </div>
         ) : (
-          <>
-            <dd className="description">{printer.status.state}</dd>
+          <dd className="description">
+            {printer.status.state}{" "}
 
             {printer.client.access_level === "unlocked" && (
               <>
                 {(["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
                   printer.status.state.match(/printer is not connected/i)) && (
                   <button
-                    className="plain"
+                    className="btn btn-sm"
                     type="submit"
                     onClick={e => {
                       e.preventDefault();
@@ -108,7 +108,7 @@ class PrinterConnectionForm extends React.Component {
                 ) === -1 &&
                   !printer.status.state.match(/printer is not connected/i) && (
                     <button
-                      className="plain"
+                      className="btn-reset anchor"
                       type="submit"
                       onClick={e => {
                         e.preventDefault();
@@ -124,7 +124,7 @@ class PrinterConnectionForm extends React.Component {
                   )}
               </>
             )}
-          </>
+          </dd>
         )}
       </form>
     );
@@ -195,7 +195,7 @@ class PrinterAuthorizationForm extends React.Component {
               }}
             />
             <button
-              className="plain"
+              className="btn btn-sm"
               type="submit"
               onClick={this.setApiKey}
               disabled={submitting || (!apiKey && !printer.client.api_key)}
@@ -232,6 +232,7 @@ const PrinterConnectionStatus = ({
         <dt className="term">Client host: </dt>
         <dd className="decription">
           <a
+            className="anchor"
             href={`${printer.protocol}://${printer.host}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -245,6 +246,7 @@ const PrinterConnectionStatus = ({
             <dt className="term">Hostname: </dt>
             <dd className="decription">
               <a
+                className="anchor"
                 href={`${printer.protocol}://${printer.hostname}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -476,7 +478,7 @@ class PrinterDetail extends React.Component {
                         <li className="tab active">
                           <h2>Jobs</h2>
                             <button
-                              className={`plain sorting-button ${
+                              className={`plain ${
                                 jobsTable.orderBy.indexOf("started") > -1
                                   ? "active"
                                   : ""
@@ -504,7 +506,7 @@ class PrinterDetail extends React.Component {
                       <div className="table-pagination">
                         {jobsTable.currentPage > 0 ? (
                           <button
-                            className="plain"
+                            className="btn btn-sm"
                             onClick={() =>
                               this.loadJobsPage(
                                 Math.max(0, jobsTable.currentPage - 1),
@@ -519,7 +521,7 @@ class PrinterDetail extends React.Component {
                         )}
                         {jobsTable.pages[jobsTable.currentPage + 1] ? (
                           <button
-                            className="plain"
+                            className="btn btn-sm"
                             onClick={() =>
                               this.loadJobsPage(
                                 jobsTable.currentPage + 1,
