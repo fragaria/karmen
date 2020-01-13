@@ -149,11 +149,11 @@ export class PrinterEditForm extends React.Component {
           </p>
         )}
         <FormInputs definition={form} updateValue={updateValue} />
-        <div className="form-actions">
-          <button type="submit" onClick={this.submit} disabled={submitting}>
+        <div className="cta-box text-center">
+          <button className="btn" type="submit" onClick={this.submit} disabled={submitting}>
             Save
-          </button>
-          <button type="reset" onClick={onCancel} disabled={submitting}>
+          </button>{" "}
+          <button className="btn btn-secondary" type="reset" onClick={onCancel} disabled={submitting}>
             Cancel
           </button>
         </div>

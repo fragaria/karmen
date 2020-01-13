@@ -542,10 +542,6 @@ class PrinterDetail extends React.Component {
                     </Link>
                   </div>
                 </div>
-
-                <div className="cta-box text-center">
-                  <button className="btn">Printer settings</button>
-                </div>
               </div>
             </div>
           </div>
