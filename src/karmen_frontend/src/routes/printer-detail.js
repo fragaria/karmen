@@ -214,6 +214,8 @@ const PrinterConnectionStatus = ({
   onPrinterConnectionChanged,
   onPrinterAuthorizationChanged
 }) => {
+  const props = printer.printer_props;
+
   return (
     <div className="printer-connection">
       <h2 className="hidden">Connection</h2>
@@ -268,6 +270,39 @@ const PrinterConnectionStatus = ({
           printer={printer}
           onPrinterAuthorizationChanged={onPrinterAuthorizationChanged}
         />
+
+        {props &&
+          (props.filament_type ||
+            props.filament_color ||
+            props.bed_type ||
+            props.tool0_diameter) && (
+            <>
+              <dt className="term">Setup:</dt>
+              <dd className="description">{props.filament_type}</dd>
+
+              {props.filament_color && (
+                <>
+                  <dt className="term">Filament color:</dt>
+                  <dd className="description">{props.filament_color}</dd>
+                </>
+               )}
+
+              {props.bed_type && (
+                <>
+                  <dt className="term">Bed type:</dt>
+                  <dd className="description">{props.bed_type}</dd>
+                </>
+               )}
+
+              {props.tool0_diameter && (
+                <>
+                  <dt className="term">Nozzle:</dt>
+                  <dd className="description">{props.tool0_diameter} mm</dd>
+                </>
+               )}
+            </>
+          )
+        }
       </dl>
     </div>
   );
