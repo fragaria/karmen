@@ -329,9 +329,21 @@ def _get_webcam_snapshot(snapshot_url):
 
 
 @app.route("/printers/<host>/webcam-snapshot", methods=["GET"])
-# @jwt_force_password_change
+@jwt_force_password_change
 @cross_origin()
 def printer_webcam_snapshot(host):
+    """
+    Instead of direct streaming from the end-devices, we are deferring
+    the video-like feature to the clients. This (in case of MJPEG) brings
+    significant performance gains throughout the whole pipeline.
+
+    This endpoint serves as a microcache of latest captured image from any
+    given printer. New snapshot is requested, but the old one is served to
+    the client. In case of the first request, a 202 is returned and the client
+    should ask again. By asking periodically for new snapshots, the client
+    can emulate a video-like experience. Since we have no sound, this should be
+    fine.
+    """
     printer = printers.get_printer(host)
     if printer is None:
         return abort(make_response("", 404))
