@@ -41,7 +41,6 @@ not work on Windows, Android and other operating systems.
 - The network autodiscovery service is off by default. It is using [ARP queries](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
 which don't work out of the box in a docker container. To make ARP work, the container has to run in a `host` network mode
 which affects how it is connected to the other containers (database, redis).
-- The webcam proxy does not really work in its python form.
 
 ### Manual mode
 
