@@ -312,16 +312,19 @@ class PrintJobRow extends React.Component {
   render() {
     const { gcode_data, started, username } = this.props;
     if (!gcode_data) {
-      return <div className="item"></div>;
+      return <div className="list-item"></div>;
     }
     return (
-      <div className="item">
-        <div>
+      <div className="list-item">
+        <div className="list-item-content">
           {gcode_data && gcode_data.available ? (
-            <Link to={`/gcodes/${gcode_data.id}`}>{gcode_data.filename}</Link>
+            <Link
+              className="list-item-subtitle"
+              to={`/gcodes/${gcode_data.id}`}>{gcode_data.filename}</Link>
           ) : (
-            <strong>{gcode_data.filename}</strong>
+            <span className="list-item-subtitle">{gcode_data.filename}</span>
           )}
+
           <small>
             {formatters.bytes(gcode_data.size)}
             {", "}
@@ -481,26 +484,30 @@ class PrinterDetail extends React.Component {
                       <ul className="tabs-navigation">
                         <li className="tab active">
                           <h2>Jobs</h2>
-                          <button
-                            className={`plain ${
-                              jobsTable.orderBy.indexOf("started") > -1
-                                ? "active"
-                                : ""
-                            }`}
-                            onClick={() => {
-                              let order = "+started";
-                              if (jobsTable.orderBy === "+started") {
-                                order = "-started";
-                              }
-                              this.loadJobsPage(jobsTable.currentPage, order);
-                            }}
-                          >
-                            Started
-                          </button>
                         </li>
                       </ul>
 
-                      <div className="tabs-content">{jobsRows}</div>
+                      <div className="tabs-content">
+                        <button
+                          className={`plain ${
+                            jobsTable.orderBy.indexOf("started") > -1
+                              ? "active"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            let order = "+started";
+                            if (jobsTable.orderBy === "+started") {
+                              order = "-started";
+                            }
+                            this.loadJobsPage(jobsTable.currentPage, order);
+                          }}
+                        >
+                          Started
+                        </button>
+                        <div className="list">
+                          {jobsRows}
+                        </div>
+                      </div>
 
                       <div className="table-pagination">
                         {jobsTable.currentPage > 0 ? (
