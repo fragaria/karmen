@@ -154,12 +154,12 @@ function arrayBufferToBase64(buffer) {
 };
 
 export const getWebcamSnapshot = (snapshotUrl) => {
+  let headers = getHeaders();
+  headers.set("pragma", "no-cache");
+  headers.set("cache-control", "no-cache");
   return fetch(`${BASE_URL}/${snapshotUrl[0] === '/' ? snapshotUrl.substr(1) : snapshotUrl}`, {
     method: 'GET',
-    headers: Object.assign({}, getHeaders(), {
-      "pragma": "no-cache",
-      "cache-control": "no-cache"
-    }),
+    headers: headers,
   })
     .then((response) => {
       if (response.status === 202) {
