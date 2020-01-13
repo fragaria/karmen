@@ -100,108 +100,108 @@ class GcodeDetail extends React.Component {
       );
     });
     return (
-      <div className="printer-detail standalone-page">
-        <header>
-          <h1 className="title">{gcode.display}</h1>
-        </header>
-        <div>
-          <div className="printer-info">
-            <div>
-              <div className="printer-connection">
-                <ul>
-                  <li>
-                    <strong>Uploaded by</strong>: {gcode.username}
-                  </li>
-                  <li>
-                    <strong>Uploaded at</strong>:{" "}
-                    {formatters.datetime(gcode.uploaded)}
-                  </li>
-                  <li>
-                    <strong>Size</strong>: {formatters.bytes(gcode.size)}
-                  </li>
-                  <li>
-                    <strong>Download</strong>:{" "}
-                    <button
-                      className="plain link"
-                      onClick={() => {
-                        downloadGcode(gcode.data, gcode.filename);
-                      }}
-                    >
-                      {gcode.path}
-                      {gcode.path ? "/" : ""}
-                      {gcode.filename}
-                    </button>
-                  </li>
-                </ul>
-              </div>
-              <div className="printer-connection">
-                {gcode.analysis && (
-                  <>
-                    <ul>
-                      <li>
-                        <strong>Sliced with</strong>:{" "}
-                        {gcode.analysis.slicer ? gcode.analysis.slicer : "N/A"}
-                      </li>
-                      {gcode.analysis.time && gcode.analysis.time.estimate_s && (
-                        <li>
-                          <strong>Estimated print time</strong>:{" "}
-                          {formatters.timespan(gcode.analysis.time.estimate_s)}
-                        </li>
-                      )}
-                      {gcode.analysis.filament && (
+      <section className="content">
+        <div className="container">
+          <h1 className="main-title">
+            {gcode.display}
+          </h1>
+          <dl className="dl-horizontal">
+            <dt className="term">Uploaded by: </dt>
+            <dd className="description">{gcode.username}</dd>
+
+            <dt className="term">Uploaded at: </dt>
+            <dd className="description">{formatters.datetime(gcode.uploaded)}</dd>
+
+            <dt className="term">Size: </dt>
+            <dd className="description">{formatters.bytes(gcode.size)}</dd>
+
+            <dt className="term">Download: </dt>
+            <dd className="description">
+              <button
+                className="btn-reset anchor"
+                onClick={() => {
+                  downloadGcode(gcode.data, gcode.filename);
+                }}
+              >
+                {gcode.path}
+                {gcode.path ? "/" : ""}
+                {gcode.filename}
+              </button>
+            </dd>
+
+            {gcode.analysis && (
+              <>
+                <dt className="term">Sliced with: </dt>
+                <dd className="description">{gcode.analysis.slicer ? gcode.analysis.slicer : "N/A"}</dd>
+
+                  {gcode.analysis.time && gcode.analysis.time.estimate_s && (
+                    <>
+                      <dt className="term">Estimated print time: </dt>
+                      <dd className="description">{formatters.timespan(gcode.analysis.time.estimate_s)}</dd>
+                    </>
+                  )}
+
+                  {gcode.analysis.filament && (
+                    <>
+                      {gcode.analysis.filament.type && (
                         <>
-                          {gcode.analysis.filament.type && (
-                            <li>
-                              <strong>Filament type</strong>:{" "}
-                              {gcode.analysis.filament.type}
-                            </li>
-                          )}
-                          {gcode.analysis.filament.length_mm && (
-                            <li>
-                              <strong>Estimated filament usage</strong>:{" "}
-                              {`${gcode.analysis.filament.length_mm} mm`}
-                              {gcode.analysis.filament.volume_cm3 && (
-                                <>
-                                  {" "}
-                                  ({gcode.analysis.filament.volume_cm3} cm
-                                  <sup>3</sup>)
-                                </>
-                              )}
-                            </li>
-                          )}
+                          <dt className="term">Filament type: </dt>
+                          <dd className="description">{gcode.analysis.filament.type}</dd>
                         </>
                       )}
-                      {gcode.analysis.temperatures && (
+
+                      {gcode.analysis.filament.length_mm && (
                         <>
-                          {gcode.analysis.temperatures.bed_first && (
-                            <li>
-                              <strong>Bed - First layer</strong>:{" "}
-                              {gcode.analysis.temperatures.bed_first} &#176;C
-                            </li>
-                          )}
-                          {gcode.analysis.temperatures.bed && (
-                            <li>
-                              <strong>Bed</strong>:{" "}
-                              {gcode.analysis.temperatures.bed} &#176;C
-                            </li>
-                          )}
-                          {gcode.analysis.temperatures.tool0_first && (
-                            <li>
-                              <strong>Tool - First layer</strong>:{" "}
-                              {gcode.analysis.temperatures.tool0_first} &#176;C
-                            </li>
-                          )}
-                          {gcode.analysis.temperatures.tool0 && (
-                            <li>
-                              <strong>Tool</strong>:{" "}
-                              {gcode.analysis.temperatures.tool0} &#176;C
-                            </li>
-                          )}
+                          <dt className="term">Estimated filament usage: </dt>
+                          <dd className="description">
+                            {`${gcode.analysis.filament.length_mm} mm`}
+                            {gcode.analysis.filament.volume_cm3 && (
+                              <>
+                                {" "}
+                                ({gcode.analysis.filament.volume_cm3} cm
+                                <sup>3</sup>)
+                              </>
+                            )}
+                          </dd>
                         </>
                       )}
-                    </ul>
-                  </>
-                )}
+                    </>
+                  )}
+
+                  {gcode.analysis.temperatures && (
+                    <>
+                      {gcode.analysis.temperatures.bed_first && (
+                        <>
+                          <dt className="term">Bed - First layer: </dt>
+                          <dd className="description">{gcode.analysis.temperatures.bed_first} &#176;C</dd>
+                        </>
+                      )}
+
+                      {gcode.analysis.temperatures.bed && (
+                        <>
+                          <dt className="term">Bed: </dt>
+                          <dd className="description">{gcode.analysis.temperatures.bed} &#176;C</dd>
+                        </>
+                      )}
+
+                      {gcode.analysis.temperatures.tool0_first && (
+                        <>
+                          <dt className="term">Tool - First layer: </dt>
+                          <dd className="description">{gcode.analysis.temperatures.tool0_first} &#176;C</dd>
+                        </>
+                      )}
+
+                      {gcode.analysis.temperatures.tool0 && (
+                        <>
+                          <dt className="term">Tool: </dt>
+                          <dd className="description">{gcode.analysis.temperatures.tool0} &#176;C</dd>
+                        </>
+                      )}
+                    </>
+                  )}
+              </>
+            )}
+            </dl>
                 <div>
                   {!!availablePrinters.length && (
                     <form className="inline-form">
@@ -257,7 +257,7 @@ class GcodeDetail extends React.Component {
                             {availablePrinterOpts}
                           </select>
                           <button
-                            className="plain"
+                            className="btn"
                             type="submit"
                             onClick={e => {
                               e.preventDefault();
@@ -306,11 +306,8 @@ class GcodeDetail extends React.Component {
                     </form>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
+      </section>
     );
   }
 }
