@@ -170,7 +170,7 @@ class AddUser extends React.Component {
                 >
                   Add user
                 </button>{" "}
-                <BackLink to="/" />
+                <BackLink to="/users" />
               </div>
             </form>
           </div>
