@@ -16,11 +16,13 @@ class PrinterClientInfo:
         connected=False,
         access_level=PrinterClientAccessLevel.UNKNOWN,
         api_key=None,
+        webcam=None,
     ):
         self.version = version
         self.connected = connected
         self.access_level = access_level
         self.api_key = api_key
+        self.webcam = webcam
 
 
 class PrinterClient(abc.ABC):

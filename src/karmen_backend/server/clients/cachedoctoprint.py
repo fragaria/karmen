@@ -114,11 +114,15 @@ class CachedOctoprint(Octoprint):
             except Exception:
                 app.logger.debug("futures: cleanup unsuccessful %s" % cache_key)
 
-        redisinstance.set(
-            cache_key,
-            pickle.dumps(data),
-            ex=CachedOctoprint.expiration_map.get(path, 13),
-        )
+        try:
+            redisinstance.set(
+                cache_key,
+                pickle.dumps(data),
+                ex=CachedOctoprint.expiration_map.get(path, 13),
+            )
+        except pickle.PicklingError:
+            # This is OK, the cache won't be hit for this
+            pass
         return data
 
     def connect_printer(self):

@@ -37,9 +37,7 @@ def make_printer_response(printer, fields):
     if "status" in fields:
         data["status"] = printer_inst.status()
     if "webcam" in fields:
-        data["webcam"] = printer_inst.webcam()
-        if "stream" in data["webcam"]:
-            data["webcam"]["proxied"] = "/proxied-webcam/%s" % (printer_inst.host,)
+        data["webcam"] = "/printers/%s/webcam-snapshot" % (printer_inst.host,)
     if "job" in fields:
         data["job"] = printer_inst.job()
     return data
@@ -161,6 +159,7 @@ def printer_create():
             "connected": printer.client_info.connected,
             "access_level": printer.client_info.access_level,
             "api_key": printer.client_info.api_key,
+            "webcam": printer.webcam(),
         },
     )
     # TODO cache webcam, job, status for a small amount of time in client
@@ -226,6 +225,7 @@ def printer_patch(host):
             "connected": printer_inst.client_info.connected,
             "access_level": printer_inst.client_info.access_level,
             "api_key": printer_inst.client_info.api_key,
+            "webcam": printer_inst.webcam(),
         },
         printer_props=printer_inst.get_printer_props(),
     )

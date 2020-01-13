@@ -40,6 +40,7 @@ class Octoprint(PrinterClient):
                 "access_level", PrinterClientAccessLevel.PROTECTED
             ),
             api_key=client_props.get("api_key", None),
+            webcam=client_props.get("webcam", None),
         )
         self.http_session = requests.Session()
         self.http_session.timeout = app.config.get("NETWORK_TIMEOUT", 10)
@@ -283,13 +284,34 @@ class Octoprint(PrinterClient):
                 data = request.json()
                 self.client_info.connected = True
                 if "webcam" not in data or not data["webcam"]["webcamEnabled"]:
-                    return {"message": "Stream disabled in octoprint"}
-                stream_url = data["webcam"]["streamUrl"]
-                if re.match(r"^https?", stream_url, re.IGNORECASE) is None:
+                    return {"message": "Webcam disabled in octoprint"}
+                stream_url = data["webcam"].get("streamUrl", None)
+                snapshot_url = data["webcam"].get("snapshotUrl", None)
+                if (
+                    stream_url
+                    and re.match(r"^https?", stream_url, re.IGNORECASE) is None
+                ):
                     stream_url = "%s://%s%s" % (self.protocol, self.host, stream_url)
+                if snapshot_url is not None:
+                    if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
+                        snapshot_url = "%s://%s%s" % (
+                            self.protocol,
+                            self.host,
+                            snapshot_url,
+                        )
+                    host_without_port = re.sub(r":(\d+)", "", self.host)
+                    if re.match(r"127.0.0.1", snapshot_url, re.IGNORECASE) is None:
+                        snapshot_url = snapshot_url.replace(
+                            "127.0.0.1", host_without_port
+                        )
+                    if re.match(r"localhost", snapshot_url, re.IGNORECASE) is None:
+                        snapshot_url = snapshot_url.replace(
+                            "localhost", host_without_port
+                        )
                 return {
                     "message": "OK",
                     "stream": stream_url,
+                    "snapshot": snapshot_url,
                     "flipHorizontal": data["webcam"]["flipH"],
                     "flipVertical": data["webcam"]["flipV"],
                     "rotate90": data["webcam"]["rotate90"],
@@ -297,7 +319,7 @@ class Octoprint(PrinterClient):
             except json.decoder.JSONDecodeError:
                 return {"message": "Cannot decode JSON"}
         else:
-            return {"message": "Stream not accessible"}
+            return {"message": "Webcam not accessible"}
 
     def job(self):
         request = self._http_get("/api/job")

@@ -63,6 +63,7 @@ def sniff_printer(hostname, host):
             "connected": printer.client_info.connected,
             "access_level": printer.client_info.access_level,
             "api_key": printer.client_info.api_key,
+            "webcam": printer.webcam(),
         },
         printer_props=printer.get_printer_props(),
     )

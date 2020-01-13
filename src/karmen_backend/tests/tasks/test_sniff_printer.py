@@ -69,10 +69,14 @@ class SniffPrinterTest(unittest.TestCase):
         sniff_printer("octopi.local", "192.168.1.11")
         self.assertEqual(mock_save_printer.call_count, 0)
 
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    def test_add_responding_printer(self, mock_get_data, mock_update_printer):
+    def test_add_responding_printer(
+        self, mock_get_data, mock_update_printer, mock_redis
+    ):
         mock_get_data.return_value.status_code = 200
+        mock_redis.get.return_value = None
         mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
         sniff_printer("octopi.local", "192.168.1.12")
         self.assertEqual(mock_update_printer.call_count, 1)
@@ -88,6 +92,7 @@ class SniffPrinterTest(unittest.TestCase):
                     "version": {"text": "OctoPrint"},
                     "access_level": PrinterClientAccessLevel.UNLOCKED,
                     "api_key": None,
+                    "webcam": {"message": "Webcam disabled in octoprint"},
                 },
                 "printer_props": None,
             }
@@ -105,7 +110,7 @@ class SniffPrinterTest(unittest.TestCase):
 
         sniff_printer("octopi.local", "192.168.1.12")
         self.assertEqual(mock_update_printer.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 2)
+        self.assertEqual(mock_get_data.call_count, 3)
         mock_update_printer.assert_called_with(
             **{
                 "hostname": "octopi.local",
@@ -118,6 +123,7 @@ class SniffPrinterTest(unittest.TestCase):
                     "version": {"text": "OctoPrint"},
                     "access_level": PrinterClientAccessLevel.UNLOCKED,
                     "api_key": None,
+                    "webcam": {"message": "Webcam disabled in octoprint"},
                 },
                 "printer_props": None,
             }
