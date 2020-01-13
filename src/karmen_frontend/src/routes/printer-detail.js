@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 import Loader from "../components/loader";
 import { PrinterView } from "../components/printer-view";
-import { PrinterEditForm } from "../components/printer-edit-form";
 import RoleBasedGateway from "../components/role-based-gateway";
 import Progress from "../components/progress";
 import { WebcamStream } from "../components/webcam-stream";
@@ -85,7 +84,6 @@ class PrinterConnectionForm extends React.Component {
         ) : (
           <dd className="description">
             {printer.status.state}{" "}
-
             {printer.client.access_level === "unlocked" && (
               <>
                 {(["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
@@ -290,8 +288,10 @@ class PrintJobRow extends React.Component {
             <strong>{gcode_data.filename}</strong>
           )}
           <small>
-            {formatters.bytes(gcode_data.size)}{", "}
-            {formatters.datetime(started)}{", "}
+            {formatters.bytes(gcode_data.size)}
+            {", "}
+            {formatters.datetime(started)}
+            {", "}
             {username}
           </small>
         </div>
@@ -439,34 +439,6 @@ class PrinterDetail extends React.Component {
                   onPrinterConnectionChanged={setPrinterConnection}
                 />
                 <div>
-                  <h2 className="hidden">Change printer properties</h2>
-                  <PrinterEditForm
-                    defaults={{
-                      name: printer.name,
-                      filament_type:
-                        (printer.printer_props &&
-                          printer.printer_props.filament_type) ||
-                        "",
-                      filament_color:
-                        (printer.printer_props &&
-                          printer.printer_props.filament_color) ||
-                        "",
-                      bed_type:
-                        (printer.printer_props &&
-                          printer.printer_props.bed_type) ||
-                        "",
-                      tool0_diameter:
-                        (printer.printer_props &&
-                          printer.printer_props.tool0_diameter) ||
-                        ""
-                    }}
-                    onSubmit={this.changePrinter}
-                    onCancel={() => {
-                      this.props.history.push("/");
-                    }}
-                  />
-                </div>
-                <div>
                   {!jobsRows || jobsRows.length === 0 ? (
                     <></>
                   ) : (
@@ -474,31 +446,26 @@ class PrinterDetail extends React.Component {
                       <ul className="tabs-navigation">
                         <li className="tab active">
                           <h2>Jobs</h2>
-                            <button
-                              className={`plain ${
-                                jobsTable.orderBy.indexOf("started") > -1
-                                  ? "active"
-                                  : ""
-                              }`}
-                              onClick={() => {
-                                let order = "+started";
-                                if (jobsTable.orderBy === "+started") {
-                                  order = "-started";
-                                }
-                                this.loadJobsPage(
-                                  jobsTable.currentPage,
-                                  order
-                                );
-                              }}
-                            >
-                              Started
-                            </button>
+                          <button
+                            className={`plain ${
+                              jobsTable.orderBy.indexOf("started") > -1
+                                ? "active"
+                                : ""
+                            }`}
+                            onClick={() => {
+                              let order = "+started";
+                              if (jobsTable.orderBy === "+started") {
+                                order = "-started";
+                              }
+                              this.loadJobsPage(jobsTable.currentPage, order);
+                            }}
+                          >
+                            Started
+                          </button>
                         </li>
                       </ul>
 
-                      <div className="tabs-content">
-                        {jobsRows}
-                      </div>
+                      <div className="tabs-content">{jobsRows}</div>
 
                       <div className="table-pagination">
                         {jobsTable.currentPage > 0 ? (
@@ -534,6 +501,11 @@ class PrinterDetail extends React.Component {
                       </div>
                     </>
                   )}
+                  <div className="cta-box text-center">
+                    <Link to={`/printers/${printer.host}/settings`}>
+                      <button className="btn">Printer settings</button>
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="cta-box text-center">

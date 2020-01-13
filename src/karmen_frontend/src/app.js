@@ -13,6 +13,7 @@ import GcodeList from "./routes/gcode-list";
 import UserList from "./routes/user-list";
 import GcodeDetail from "./routes/gcode-detail";
 import PrinterDetail from "./routes/printer-detail";
+import PrinterSettings from "./routes/printer-settings";
 import AddApiToken from "./routes/add-api-token";
 import AddPrinter from "./routes/add-printer";
 import AddGcode from "./routes/add-gcode";
@@ -87,6 +88,11 @@ class App extends React.Component {
                   <Route path="/settings" exact component={Settings} />
                   <Route path="/gcodes" exact component={GcodeList} />
                   <Route path="/gcodes/:id" exact component={GcodeDetail} />
+                  <Route
+                    path="/printers/:host/settings"
+                    exact
+                    component={PrinterSettings}
+                  />
                   <Route
                     path="/printers/:host"
                     exact
