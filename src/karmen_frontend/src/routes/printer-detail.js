@@ -285,7 +285,7 @@ class PrinterDetail extends React.Component {
   }
 
   componentDidMount() {
-    const { jobsTable } = this.state
+    const { jobsTable } = this.state;
     const { match, loadPrinter, getPrinter } = this.props;
     if (!getPrinter(match.params.host)) {
       loadPrinter(match.params.host)

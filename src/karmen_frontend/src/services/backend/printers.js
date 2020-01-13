@@ -144,3 +144,37 @@ export const changeCurrentJob = (host, action) => {
       return 500;
     });
 }
+
+// kudos https://medium.com/front-end-weekly/fetching-images-with-the-fetch-api-fb8761ed27b2
+function arrayBufferToBase64(buffer) {
+  var binary = '';
+  var bytes = [].slice.call(new Uint8Array(buffer));
+  bytes.forEach((b) => binary += String.fromCharCode(b));
+  return window.btoa(binary);
+};
+
+export const getWebcamSnapshot = (snapshotUrl) => {
+  return fetch(`${BASE_URL}/${snapshotUrl[0] === '/' ? snapshotUrl.substr(1) : snapshotUrl}`, {
+    method: 'GET',
+    headers: Object.assign({}, getHeaders(), {
+      "pragma": "no-cache",
+      "cache-control": "no-cache"
+    }),
+  })
+    .then((response) => {
+      if (response.status === 202) {
+        return 202;
+      }
+      if (response.status === 200) {
+        let contentType = response.headers.get('content-type');
+        return response.arrayBuffer().then((buffer) => ({
+          prefix: `data:${contentType ? contentType : 'image/jpeg'};base64,`,
+          data: arrayBufferToBase64(buffer)
+        }));
+      }
+      console.error(`Cannot get webcam snapshot: ${response.status}`);
+    }).catch((e) => {
+      console.error(`Cannot get webcam snapshot: ${e}`);
+      return 500;
+    });
+}

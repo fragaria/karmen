@@ -1,5 +1,6 @@
 import re
 import random
+import requests
 import string
 
 from flask import jsonify, request, abort, make_response
@@ -37,7 +38,13 @@ def make_printer_response(printer, fields):
     if "status" in fields:
         data["status"] = printer_inst.status()
     if "webcam" in fields:
-        data["webcam"] = "/printers/%s/webcam-snapshot" % (printer_inst.host,)
+        webcam_data = printer_inst.client_info.webcam or {}
+        data["webcam"] = {
+            "url": "/printers/%s/webcam-snapshot" % (printer_inst.host,),
+            "flipHorizontal": webcam_data.get("flipHorizontal"),
+            "flipVertical": webcam_data.get("flipVertical"),
+            "rotate90": webcam_data.get("rotate90"),
+        }
     if "job" in fields:
         data["job"] = printer_inst.job()
     return data
@@ -301,3 +308,55 @@ def printer_modify_job(host):
         return abort(make_response("", 409))
     except clients.utils.PrinterClientException as e:
         return abort(make_response(jsonify(message=str(e)), 400))
+
+
+WEBCAM_MICROCACHE = {}
+FUTURES_MICROCACHE = {}
+
+
+def _get_webcam_snapshot(snapshot_url):
+    try:
+        req = requests.get(
+            snapshot_url,
+            timeout=app.config.get("NETWORK_TIMEOUT", 10),
+            verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
+        )
+        if req is not None:
+            return req
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout,) as e:
+        app.logger.debug("Cannot call %s because %s" % (snapshot_url, e))
+        return None
+
+
+@app.route("/printers/<host>/webcam-snapshot", methods=["GET"])
+# @jwt_force_password_change
+@cross_origin()
+def printer_webcam_snapshot(host):
+    printer = printers.get_printer(host)
+    if printer is None:
+        return abort(make_response("", 404))
+    printer_inst = clients.get_printer_instance(printer)
+    snapshot_url = printer_inst.client_info.webcam.get("snapshot")
+    if snapshot_url is None:
+        return abort(make_response("", 404))
+    # process current future
+    if FUTURES_MICROCACHE.get(host):
+        WEBCAM_MICROCACHE[host] = FUTURES_MICROCACHE[host].result()
+        try:
+            del FUTURES_MICROCACHE[host]
+        except Exception:
+            # that's ok, probably a race condition
+            pass
+    # issue a new future
+    FUTURES_MICROCACHE[host] = executor.submit(_get_webcam_snapshot, snapshot_url)
+
+    if WEBCAM_MICROCACHE.get(host) is not None:
+        response = WEBCAM_MICROCACHE.get(host)
+        return (
+            response.content,
+            200,
+            {"Content-Type": response.headers.get("content-type", "image/jpeg")},
+        )
+    # This should be the first time anybody asked for an image for this host
+    # We don't want to end with an error here
+    return "", 202
