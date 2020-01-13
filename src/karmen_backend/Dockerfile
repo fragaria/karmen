@@ -1,7 +1,7 @@
 FROM python:3.7-slim
 
 # build deps
-RUN apt-get update && apt-get install --yes --no-install-recommends build-essential postgresql-client libpq-dev libssl-dev libffi-dev
+RUN apt-get update && apt-get install --yes --no-install-recommends build-essential postgresql-client libpq-dev libssl-dev libffi-dev zlib1g-dev
 # runtime deps
 RUN apt-get update && apt-get install --yes --no-install-recommends nginx gettext-base avahi-utils avahi-daemon arp-scan
 
