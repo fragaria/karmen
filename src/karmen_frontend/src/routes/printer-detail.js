@@ -82,7 +82,8 @@ class PrinterConnectionForm extends React.Component {
           </div>
         ) : (
           <>
-            <strong>Printer status</strong>: {printer.status.state}
+            <dd className="description">{printer.status.state}</dd>
+
             {printer.client.access_level === "unlocked" && (
               <>
                 {(["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
@@ -176,8 +177,9 @@ class PrinterAuthorizationForm extends React.Component {
     };
     return (
       <form className="inline-form">
-        <strong>Client availability</strong>:{" "}
-        <span>{getAccessLevelString(printer.client.access_level)}</span>
+        <dd className="description">
+          {getAccessLevelString(printer.client.access_level)}
+        </dd>
         {["unlocked", "unknown"].indexOf(printer.client.access_level) ===
           -1 && (
           <>
@@ -215,17 +217,20 @@ const PrinterConnectionStatus = ({
   return (
     <div className="printer-connection">
       <h2 className="hidden">Connection</h2>
-      <ul>
-        <li>
-          <strong>Client status</strong>:{" "}
+      <dl className="dl-horizontal">
+        <dt className="term">Client status: </dt>
+        <dd className="description">
           {printer.client.connected ? "Connected" : "Disconnected"}
-        </li>
-        <li>
-          <strong>Client</strong>: {printer.client.name} (
+        </dd>
+
+        <dt className="term">Client: </dt>
+        <dd className="description">
+          {printer.client.name} (
           <code>{JSON.stringify(printer.client.version)}</code>)
-        </li>
-        <li>
-          <strong>Client host</strong>:{" "}
+        </dd>
+
+        <dt className="term">Client host: </dt>
+        <dd className="decription">
           <a
             href={`${printer.protocol}://${printer.host}`}
             target="_blank"
@@ -233,32 +238,35 @@ const PrinterConnectionStatus = ({
           >
             {printer.host}
           </a>
-        </li>
+        </dd>
+
         {printer.hostname && (
-          <li>
-            <strong>Hostname</strong>:{" "}
-            <a
-              href={`${printer.protocol}://${printer.hostname}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {printer.hostname}
-            </a>
-          </li>
+          <>
+            <dt className="term">Hostname: </dt>
+            <dd className="decription">
+              <a
+                href={`${printer.protocol}://${printer.hostname}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {printer.hostname}
+              </a>
+            </dd>
+          </>
         )}
-        <li>
-          <PrinterConnectionForm
-            printer={printer}
-            onPrinterConnectionChanged={onPrinterConnectionChanged}
-          />
-        </li>
-        <li>
-          <PrinterAuthorizationForm
-            printer={printer}
-            onPrinterAuthorizationChanged={onPrinterAuthorizationChanged}
-          />
-        </li>
-      </ul>
+
+        <dt className="term">Printer status: </dt>
+        <PrinterConnectionForm
+          printer={printer}
+          onPrinterConnectionChanged={onPrinterConnectionChanged}
+        />
+
+        <dt className="term">Client availability: </dt>
+        <PrinterAuthorizationForm
+          printer={printer}
+          onPrinterAuthorizationChanged={onPrinterAuthorizationChanged}
+        />
+      </dl>
     </div>
   );
 };
@@ -267,21 +275,23 @@ class PrintJobRow extends React.Component {
   render() {
     const { gcode_data, started, username } = this.props;
     if (!gcode_data) {
-      return <tr></tr>;
+      return <div className="item"></div>;
     }
     return (
-      <tr>
-        <td>
+      <div className="item">
+        <div>
           {gcode_data && gcode_data.available ? (
             <Link to={`/gcodes/${gcode_data.id}`}>{gcode_data.filename}</Link>
           ) : (
-            <span>{gcode_data.filename}</span>
+            <strong>{gcode_data.filename}</strong>
           )}
-        </td>
-        <td>{formatters.bytes(gcode_data.size)}</td>
-        <td>{formatters.datetime(started)}</td>
-        <td>{username}</td>
-      </tr>
+          <small>
+            {formatters.bytes(gcode_data.size)}{", "}
+            {formatters.datetime(started)}{", "}
+            {username}
+          </small>
+        </div>
+      </div>
     );
   }
 }
@@ -410,11 +420,18 @@ class PrinterDetail extends React.Component {
       });
     return (
       <RoleBasedGateway requiredRole="admin">
-        <div className="printer-detail standalone-page">
-          <header>
-            <h1 className="title">{printer.name}</h1>
-          </header>
-          <div>
+        <section className="content">
+          <div className="stream">
+            <PrinterView
+              printer={printer}
+              showActions={false}
+              changeCurrentJobState={changeCurrentJobState}
+            />
+          </div>
+
+          <div className="container">
+            <h1 className="main-title">{printer.name}</h1>
+
             <div className="printer-info">
               <div>
                 <PrinterConnectionStatus
@@ -455,38 +472,35 @@ class PrinterDetail extends React.Component {
                     <></>
                   ) : (
                     <>
-                      <h2>Printing history</h2>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th style={{ width: "50%" }}>Filename</th>
-                            <th>Size</th>
-                            <th>
-                              <button
-                                className={`plain sorting-button ${
-                                  jobsTable.orderBy.indexOf("started") > -1
-                                    ? "active"
-                                    : ""
-                                }`}
-                                onClick={() => {
-                                  let order = "+started";
-                                  if (jobsTable.orderBy === "+started") {
-                                    order = "-started";
-                                  }
-                                  this.loadJobsPage(
-                                    jobsTable.currentPage,
-                                    order
-                                  );
-                                }}
-                              >
-                                Started
-                              </button>
-                            </th>
-                            <th>User</th>
-                          </tr>
-                        </thead>
-                        <tbody>{jobsRows}</tbody>
-                      </table>
+                      <ul className="tabs-navigation">
+                        <li className="tab active">
+                          <h2>Jobs</h2>
+                            <button
+                              className={`plain sorting-button ${
+                                jobsTable.orderBy.indexOf("started") > -1
+                                  ? "active"
+                                  : ""
+                              }`}
+                              onClick={() => {
+                                let order = "+started";
+                                if (jobsTable.orderBy === "+started") {
+                                  order = "-started";
+                                }
+                                this.loadJobsPage(
+                                  jobsTable.currentPage,
+                                  order
+                                );
+                              }}
+                            >
+                              Started
+                            </button>
+                        </li>
+                      </ul>
+
+                      <div className="tabs-content">
+                        {jobsRows}
+                      </div>
+
                       <div className="table-pagination">
                         {jobsTable.currentPage > 0 ? (
                           <button
@@ -519,20 +533,16 @@ class PrinterDetail extends React.Component {
                           <span></span>
                         )}
                       </div>
+                      <div class="cta-box text-center">
+                        <button class="btn">Printer settings</button>
+                      </div>
                     </>
                   )}
                 </div>
               </div>
-              <div className="content-box">
-                <PrinterView
-                  printer={printer}
-                  showActions={false}
-                  changeCurrentJobState={changeCurrentJobState}
-                />
-              </div>
             </div>
           </div>
-        </div>
+        </section>
       </RoleBasedGateway>
     );
   }
