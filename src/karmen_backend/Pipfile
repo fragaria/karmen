@@ -24,6 +24,7 @@ yandex-pgmigrate = "*"
 bcrypt = "*"
 flask-jwt-extended = "*"
 flask-executor = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"

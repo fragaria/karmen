@@ -1,6 +1,9 @@
+import io
 import os
 import re
 
+from datetime import datetime
+from PIL import Image, ImageFont, ImageDraw
 from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
@@ -33,7 +36,8 @@ def settings():
         {
             "webcam": {
                 "webcamEnabled": True,
-                "streamUrl": "/stream",
+                "streamUrl": "/snapshot",
+                "snapshotUrl": "/snapshot",
                 "flipH": False,
                 "flipV": False,
                 "rotate90": False,
@@ -175,8 +179,14 @@ def upload():
     )
 
 
-@app.route("/stream", methods=["GET", "OPTIONS"])
+@app.route("/snapshot", methods=["GET", "OPTIONS"])
 @cross_origin()
-def stream():
-    dirname = os.path.dirname(__file__)
-    return send_file(os.path.join(dirname, "./printer.jpg"))
+def snapshot():
+    IMAGE = Image.open(os.path.join(os.path.dirname(__file__), "./printer.jpg"))
+    imgio = io.BytesIO()
+    draw = ImageDraw.Draw(IMAGE)
+    font = ImageFont.load_default()
+    draw.text((10, 10), datetime.now().strftime("%d/%m/%Y %H:%M:%S"), font=font)
+    IMAGE.save(imgio, "JPEG", quality=90)
+    imgio.seek(0)
+    return send_file(imgio, mimetype="image/jpeg")
