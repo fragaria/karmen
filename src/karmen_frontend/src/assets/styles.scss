@@ -269,7 +269,7 @@ footer {
 
 .dl-horizontal {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 25% 1fr;
   grid-column-gap: $base-unit;
   grid-row-gap: $base-unit;
   margin: $base-unit*2 0;
@@ -279,7 +279,8 @@ footer {
   }
 
   .description {
-    font-weight: bold
+    font-weight: bold;
+    overflow-x: hidden;
   }
 }
 

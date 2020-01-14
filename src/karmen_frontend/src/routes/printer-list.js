@@ -74,7 +74,7 @@ class PrinterList extends React.Component {
               {printer.job && printer.job.name && (
                 <>
                   <div className="list-item-subtitle">
-                    <span>{printer.job.completion}% done, </span>
+                    <span>{printer.job.completion.toFixed(2)}% done, </span>
                     <span>
                       ETA: {formatters.timespan(printer.job.printTimeLeft)}
                     </span>
