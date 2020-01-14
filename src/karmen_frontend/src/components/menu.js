@@ -60,16 +60,6 @@ class Menu extends React.Component {
                 {role === "admin" && (
                   <li>
                     <Link
-                      to="/users"
-                      onClick={() => this.setState({ navigation: false })}
-                    >
-                      Users
-                    </Link>
-                  </li>
-                )}
-                {role === "admin" && (
-                  <li>
-                    <Link
                       to="/settings"
                       onClick={() => this.setState({ navigation: false })}
                     >

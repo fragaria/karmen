@@ -131,7 +131,7 @@ class AddUser extends React.Component {
       );
     }
     if (redirect) {
-      return <Redirect to="/users" />;
+      return <Redirect to="/settings" />;
     }
     return (
       <RoleBasedGateway requiredRole="admin">
@@ -170,7 +170,7 @@ class AddUser extends React.Component {
                 >
                   Add user
                 </button>{" "}
-                <BackLink to="/users" />
+                <BackLink to="/settings" />
               </div>
             </form>
           </div>

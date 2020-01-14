@@ -1,166 +1,68 @@
 import React from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
-import Loader from "../components/loader";
-import { FormInputs } from "../components/form-utils";
 import RoleBasedGateway from "../components/role-based-gateway";
-import { getSettings, changeSettings, enqueueTask } from "../services/backend";
+import FreshUserRequiredCheck from "../components/fresh-token-required-check";
+import UsersTable from "../components/users-table";
+import NetworkScan from "../components/network-scan";
+import { getUsersPage, clearUsersPages, patchUser } from "../actions/users";
 
-class Settings extends React.Component {
-  state = {
-    init: true,
-    submitting: false,
-    settings: {
-      network_interface: {
-        name: "On which network interface should we be looking for printers?",
-        val: "",
-        type: "text",
-        required: true,
-        error: null
-      }
-    },
-    message: null,
-    messageOk: false
-  };
-
-  constructor(props) {
-    super(props);
-    this.startNetworkScan = this.startNetworkScan.bind(this);
-    this.loadSettings = this.loadSettings.bind(this);
-  }
-
-  loadSettings() {
-    const { settings } = this.state;
-    getSettings().then(serverSide => {
-      // eslint-disable-next-line no-unused-vars
-      for (let option of serverSide) {
-        if (settings[option.key]) {
-          settings[option.key].val = option.val;
-        }
-      }
-      this.setState({
-        settings,
-        init: false
-      });
-    });
-  }
-
-  componentDidMount() {
-    this.loadSettings();
-  }
-
-  startNetworkScan(e) {
-    e.preventDefault();
-    this.setState({
-      message: null,
-      messageOk: false,
-      submitting: true
-    });
-    const { settings } = this.state;
-    let hasErrors = false;
-    const updatedSettings = Object.assign({}, settings);
-    const changedSettings = [];
-    // eslint-disable-next-line array-callback-return
-    Object.keys(settings).map(opt => {
-      if (
-        settings[opt].required &&
-        settings[opt].type === "text" &&
-        !settings[opt].val
-      ) {
-        hasErrors = true;
-        updatedSettings[opt].error = "This is a required field!";
-      }
-      changedSettings.push({
-        key: opt,
-        val: settings[opt].val
-      });
-    });
-    this.setState({
-      settings: updatedSettings
-    });
-    if (!hasErrors) {
-      changeSettings(changedSettings).then(r => {
-        switch (r) {
-          case 201:
-            enqueueTask("scan_network").then(r => {
-              switch (r) {
-                case 202:
-                  this.setState({
-                    message:
-                      "Network scan initiated, the printers should start popping up at any moment",
-                    messageOk: true,
-                    submitting: false
-                  });
-                  break;
-                case 400:
-                default:
-                  this.setState({
-                    message: "Cannot scan the network, check server logs",
-                    submitting: false
-                  });
-              }
-            });
-            break;
-          case 400:
-          default:
-            this.setState({
-              message: "Cannot scan the network, check server logs",
-              submitting: false
-            });
-        }
-      });
-    } else {
-      this.setState({
-        submitting: false
-      });
-    }
-  }
-
-  render() {
-    const { init, submitting, settings, message, messageOk } = this.state;
-    if (init) {
-      return (
-        <div>
-          <Loader />
-        </div>
-      );
-    }
-    const updateValue = (name, value) => {
-      const { settings } = this.state;
-      this.setState({
-        settings: Object.assign({}, settings, {
-          [name]: Object.assign({}, settings[name], { val: value, error: null })
-        })
-      });
-    };
+const Settings = ({
+  currentUuid,
+  hasFreshUser,
+  loadUsersPage,
+  clearUsersPages,
+  userList,
+  onUserChange
+}) => {
+  if (!hasFreshUser) {
     return (
       <RoleBasedGateway requiredRole="admin">
-        <div className="settings standalone-page">
-          <header>
-            <h1 className="title">Settings</h1>
-          </header>
-          <form>
-            <fieldset>
-              {message && (
-                <p className={messageOk ? "message-success" : "message-error"}>
-                  {message}
-                </p>
-              )}
-              <FormInputs definition={settings} updateValue={updateValue} />
-              <div className="form-actions">
-                <button
-                  type="submit"
-                  onClick={this.startNetworkScan}
-                  disabled={submitting}
-                >
-                  Scan the network for printers
-                </button>
-              </div>
-            </fieldset>
-          </form>
-        </div>
+        <FreshUserRequiredCheck />
       </RoleBasedGateway>
     );
   }
-}
+  return (
+    <RoleBasedGateway requiredRole="admin">
+      <div className="content user-list">
+        <div className="container">
+          <h1 className="main-title">
+            Users
+            <Link to="/add-user" className="btn btn-sm">
+              <span>+ Add a user</span>
+            </Link>
+          </h1>
+        </div>
 
-export default Settings;
+        <UsersTable
+          currentUuid={currentUuid}
+          userList={userList}
+          loadUsersPage={loadUsersPage}
+          clearUsersPages={clearUsersPages}
+          onUserChange={onUserChange}
+        />
+        <div className="container">
+          <h1 className="main-title">Network scan</h1>
+
+          <NetworkScan />
+        </div>
+      </div>
+    </RoleBasedGateway>
+  );
+};
+
+export default connect(
+  state => ({
+    hasFreshUser: state.users.me.hasFreshToken,
+    userList: state.users.list,
+    currentUuid: state.users.me.identity
+  }),
+  dispatch => ({
+    loadUsersPage: (startWith, orderBy, usernameFilter, limit) =>
+      dispatch(getUsersPage(startWith, orderBy, usernameFilter, limit)),
+    clearUsersPages: () => dispatch(clearUsersPages()),
+    onUserChange: (uuid, role, suspended) =>
+      dispatch(patchUser(uuid, role, suspended))
+  })
+)(Settings);
