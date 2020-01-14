@@ -351,16 +351,17 @@ def printer_webcam_snapshot(host):
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
     if snapshot_url is None:
         return abort(make_response("", 404))
-    # process current future
-    if FUTURES_MICROCACHE.get(host):
+    # process current future if done
+    if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host).done():
         WEBCAM_MICROCACHE[host] = FUTURES_MICROCACHE[host].result()
         try:
             del FUTURES_MICROCACHE[host]
         except Exception:
             # that's ok, probably a race condition
             pass
-    # issue a new future
-    FUTURES_MICROCACHE[host] = executor.submit(_get_webcam_snapshot, snapshot_url)
+    # issue a new future if not present
+    if not FUTURES_MICROCACHE.get(host):
+        FUTURES_MICROCACHE[host] = executor.submit(_get_webcam_snapshot, snapshot_url)
 
     if WEBCAM_MICROCACHE.get(host) is not None:
         response = WEBCAM_MICROCACHE.get(host)
@@ -369,6 +370,7 @@ def printer_webcam_snapshot(host):
             200,
             {"Content-Type": response.headers.get("content-type", "image/jpeg")},
         )
-    # This should be the first time anybody asked for an image for this host
-    # We don't want to end with an error here
+    # There should be a future running, if the client retries, they should
+    # eventually get a snapshot.
+    # We don't want to end with an error here, so the clients keep retrying
     return "", 202
