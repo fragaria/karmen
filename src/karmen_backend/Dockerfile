@@ -26,6 +26,8 @@ WORKDIR /usr/src/app
 COPY --from=builder /root/.cache /root/.cache
 COPY --from=builder /install/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install uwsgi supervisor
 
 # enable mdns discovery, this works only when container is run in
 # privileged mode and /var/run/dbus is mounted as a volume
