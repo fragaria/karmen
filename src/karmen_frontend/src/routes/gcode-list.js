@@ -197,7 +197,7 @@ class GcodeRow extends React.Component {
             <span className="list-item-title">
               {!!availablePrinters.length ? (
                 <>
-                  Select printer to print on: {" "}
+                  Select printer to print on:{" "}
                   <select
                     id="selectedPrinter"
                     name="selectedPrinter"

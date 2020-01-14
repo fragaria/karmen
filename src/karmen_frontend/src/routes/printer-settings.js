@@ -82,7 +82,8 @@ class PrinterSettings extends React.Component {
                     printer.printer_props.filament_color) ||
                   "",
                 bed_type:
-                  (printer.printer_props && printer.printer_props.bed_type) || "",
+                  (printer.printer_props && printer.printer_props.bed_type) ||
+                  "",
                 tool0_diameter:
                   (printer.printer_props &&
                     printer.printer_props.tool0_diameter) ||

@@ -12,8 +12,7 @@ import { getPrinterJobs } from "../services/backend";
 import {
   loadPrinter,
   patchPrinter,
-  setPrinterConnection,
-  changeCurrentJob
+  setPrinterConnection
 } from "../actions/printers";
 
 class PrinterConnectionForm extends React.Component {
@@ -284,24 +283,23 @@ const PrinterConnectionStatus = ({
                   <dt className="term">Filament color:</dt>
                   <dd className="description">{props.filament_color}</dd>
                 </>
-               )}
+              )}
 
               {props.bed_type && (
                 <>
                   <dt className="term">Bed type:</dt>
                   <dd className="description">{props.bed_type}</dd>
                 </>
-               )}
+              )}
 
               {props.tool0_diameter && (
                 <>
                   <dt className="term">Nozzle:</dt>
                   <dd className="description">{props.tool0_diameter} mm</dd>
                 </>
-               )}
+              )}
             </>
-          )
-        }
+          )}
       </dl>
     </div>
   );
@@ -319,7 +317,10 @@ class PrintJobRow extends React.Component {
           {gcode_data && gcode_data.available ? (
             <Link
               className="list-item-subtitle"
-              to={`/gcodes/${gcode_data.id}`}>{gcode_data.filename}</Link>
+              to={`/gcodes/${gcode_data.id}`}
+            >
+              {gcode_data.filename}
+            </Link>
           ) : (
             <span className="list-item-subtitle">{gcode_data.filename}</span>
           )}
@@ -440,12 +441,7 @@ class PrinterDetail extends React.Component {
 
   render() {
     const { printerLoaded, jobs, jobsTable } = this.state;
-    const {
-      getPrinter,
-      match,
-      setPrinterConnection,
-      changeCurrentJobState
-    } = this.props;
+    const { getPrinter, match, setPrinterConnection } = this.props;
     const printer = getPrinter(match.params.host);
     if (!printerLoaded) {
       return (
@@ -503,9 +499,7 @@ class PrinterDetail extends React.Component {
                         >
                           Started
                         </button>
-                        <div className="list">
-                          {jobsRows}
-                        </div>
+                        <div className="list">{jobsRows}</div>
                       </div>
 
                       <div className="table-pagination">
@@ -566,8 +560,6 @@ export default connect(
       dispatch(loadPrinter(host, ["job", "status", "webcam"])),
     patchPrinter: (host, data) => dispatch(patchPrinter(host, data)),
     setPrinterConnection: (host, state) =>
-      dispatch(setPrinterConnection(host, state)),
-    changeCurrentJobState: (host, action) =>
-      dispatch(changeCurrentJob(host, action))
+      dispatch(setPrinterConnection(host, state))
   })
 )(PrinterDetail);

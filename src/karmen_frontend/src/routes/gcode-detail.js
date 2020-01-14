@@ -102,15 +102,15 @@ class GcodeDetail extends React.Component {
     return (
       <section className="content">
         <div className="container">
-          <h1 className="main-title">
-            {gcode.display}
-          </h1>
+          <h1 className="main-title">{gcode.display}</h1>
           <dl className="dl-horizontal">
             <dt className="term">Uploaded by: </dt>
             <dd className="description">{gcode.username}</dd>
 
             <dt className="term">Uploaded at: </dt>
-            <dd className="description">{formatters.datetime(gcode.uploaded)}</dd>
+            <dd className="description">
+              {formatters.datetime(gcode.uploaded)}
+            </dd>
 
             <dt className="term">Size: </dt>
             <dd className="description">{formatters.bytes(gcode.size)}</dd>
@@ -132,180 +132,193 @@ class GcodeDetail extends React.Component {
             {gcode.analysis && (
               <>
                 <dt className="term">Sliced with: </dt>
-                <dd className="description">{gcode.analysis.slicer ? gcode.analysis.slicer : "N/A"}</dd>
+                <dd className="description">
+                  {gcode.analysis.slicer ? gcode.analysis.slicer : "N/A"}
+                </dd>
 
-                  {gcode.analysis.time && gcode.analysis.time.estimate_s && (
-                    <>
-                      <dt className="term">Estimated print time: </dt>
-                      <dd className="description">{formatters.timespan(gcode.analysis.time.estimate_s)}</dd>
-                    </>
-                  )}
+                {gcode.analysis.time && gcode.analysis.time.estimate_s && (
+                  <>
+                    <dt className="term">Estimated print time: </dt>
+                    <dd className="description">
+                      {formatters.timespan(gcode.analysis.time.estimate_s)}
+                    </dd>
+                  </>
+                )}
 
-                  {gcode.analysis.filament && (
-                    <>
-                      {gcode.analysis.filament.type && (
-                        <>
-                          <dt className="term">Filament type: </dt>
-                          <dd className="description">{gcode.analysis.filament.type}</dd>
-                        </>
-                      )}
+                {gcode.analysis.filament && (
+                  <>
+                    {gcode.analysis.filament.type && (
+                      <>
+                        <dt className="term">Filament type: </dt>
+                        <dd className="description">
+                          {gcode.analysis.filament.type}
+                        </dd>
+                      </>
+                    )}
 
-                      {gcode.analysis.filament.length_mm && (
-                        <>
-                          <dt className="term">Estimated filament usage: </dt>
-                          <dd className="description">
-                            {`${gcode.analysis.filament.length_mm} mm`}
-                            {gcode.analysis.filament.volume_cm3 && (
-                              <>
-                                {" "}
-                                ({gcode.analysis.filament.volume_cm3} cm
-                                <sup>3</sup>)
-                              </>
-                            )}
-                          </dd>
-                        </>
-                      )}
-                    </>
-                  )}
+                    {gcode.analysis.filament.length_mm && (
+                      <>
+                        <dt className="term">Estimated filament usage: </dt>
+                        <dd className="description">
+                          {`${gcode.analysis.filament.length_mm} mm`}
+                          {gcode.analysis.filament.volume_cm3 && (
+                            <>
+                              {" "}
+                              ({gcode.analysis.filament.volume_cm3} cm
+                              <sup>3</sup>)
+                            </>
+                          )}
+                        </dd>
+                      </>
+                    )}
+                  </>
+                )}
 
-                  {gcode.analysis.temperatures && (
-                    <>
-                      {gcode.analysis.temperatures.bed_first && (
-                        <>
-                          <dt className="term">Bed - First layer: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.bed_first}&#176;{" "}C</dd>
-                        </>
-                      )}
+                {gcode.analysis.temperatures && (
+                  <>
+                    {gcode.analysis.temperatures.bed_first && (
+                      <>
+                        <dt className="term">Bed - First layer: </dt>
+                        <dd className="description">
+                          {gcode.analysis.temperatures.bed_first}&#176; C
+                        </dd>
+                      </>
+                    )}
 
-                      {gcode.analysis.temperatures.bed && (
-                        <>
-                          <dt className="term">Bed: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.bed}&#176;{" "}C</dd>
-                        </>
-                      )}
+                    {gcode.analysis.temperatures.bed && (
+                      <>
+                        <dt className="term">Bed: </dt>
+                        <dd className="description">
+                          {gcode.analysis.temperatures.bed}&#176; C
+                        </dd>
+                      </>
+                    )}
 
-                      {gcode.analysis.temperatures.tool0_first && (
-                        <>
-                          <dt className="term">Tool - First layer: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.tool0_first}&#176;{" "}C</dd>
-                        </>
-                      )}
+                    {gcode.analysis.temperatures.tool0_first && (
+                      <>
+                        <dt className="term">Tool - First layer: </dt>
+                        <dd className="description">
+                          {gcode.analysis.temperatures.tool0_first}&#176; C
+                        </dd>
+                      </>
+                    )}
 
-                      {gcode.analysis.temperatures.tool0 && (
-                        <>
-                          <dt className="term">Tool: </dt>
-                          <dd className="description">{gcode.analysis.temperatures.tool0}&#176;{" "}C</dd>
-                        </>
-                      )}
-                    </>
-                  )}
+                    {gcode.analysis.temperatures.tool0 && (
+                      <>
+                        <dt className="term">Tool: </dt>
+                        <dd className="description">
+                          {gcode.analysis.temperatures.tool0}&#176; C
+                        </dd>
+                      </>
+                    )}
+                  </>
+                )}
               </>
             )}
-            </dl>
-                <div>
-                  {!!availablePrinters.length && (
-                    <form className="inline-form">
-                      {showFilamentTypeWarningMessage ? (
-                        <div>
-                          <p className="message-warning">
-                            Are you sure? There seems to be a filament mismatch:
-                            Printer has <strong>{printerFilamentType}</strong>{" "}
-                            configured, but this gcode was sliced for{" "}
-                            <strong>{gcodeFilamentType}</strong>.
-                            <button
-                              className="plain"
-                              type="submit"
-                              onClick={e => {
-                                e.preventDefault();
-                                this.setState({
-                                  submitting: true
-                                });
-                                this.schedulePrint(gcode.id, selectedPrinter);
-                              }}
-                              disabled={submitting}
-                            >
-                              {submitting ? "Uploading..." : "Yes, print"}
-                            </button>
-                            <button
-                              type="reset"
-                              onClick={e => {
-                                e.preventDefault();
-                                this.setState({
-                                  submitting: false,
-                                  showFilamentTypeWarningMessage: false
-                                });
-                              }}
-                              disabled={submitting}
-                            >
-                              Cancel
-                            </button>
-                          </p>
-                        </div>
-                      ) : (
-                        <div>
-                          On which printer would you like to print?{" "}
-                          <select
-                            id="selectedPrinter"
-                            name="selectedPrinter"
-                            value={selectedPrinter}
-                            onChange={e =>
-                              this.setState({
-                                selectedPrinter: e.target.value
-                              })
-                            }
-                          >
-                            {availablePrinterOpts}
-                          </select>
-                          <button
-                            className="btn"
-                            type="submit"
-                            onClick={e => {
-                              e.preventDefault();
-                              const selected = availablePrinters.find(
-                                p => p.host === selectedPrinter
-                              );
-                              if (
-                                selected &&
-                                selected.printer_props &&
-                                selected.printer_props.filament_type &&
-                                gcode.analysis &&
-                                gcode.analysis.filament &&
-                                gcode.analysis.filament.type &&
-                                gcode.analysis.filament.type !==
-                                  selected.printer_props.filament_type
-                              ) {
-                                this.setState({
-                                  showFilamentTypeWarningMessage: true,
-                                  printerFilamentType:
-                                    selected.printer_props.filament_type,
-                                  gcodeFilamentType:
-                                    gcode.analysis.filament.type
-                                });
-                                return;
-                              }
-                              this.setState({
-                                submitting: true
-                              });
-                              this.schedulePrint(gcode.id, selectedPrinter);
-                            }}
-                            disabled={submitting}
-                          >
-                            {submitting ? "Uploading..." : "Print"}
-                          </button>
-                          {message && (
-                            <p
-                              className={
-                                messageOk ? "message-success" : "message-error"
-                              }
-                            >
-                              {message}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </form>
-                  )}
-                </div>
+          </dl>
+          <div>
+            {!!availablePrinters.length && (
+              <form className="inline-form">
+                {showFilamentTypeWarningMessage ? (
+                  <div>
+                    <p className="message-warning">
+                      Are you sure? There seems to be a filament mismatch:
+                      Printer has <strong>{printerFilamentType}</strong>{" "}
+                      configured, but this gcode was sliced for{" "}
+                      <strong>{gcodeFilamentType}</strong>.
+                      <button
+                        className="plain"
+                        type="submit"
+                        onClick={e => {
+                          e.preventDefault();
+                          this.setState({
+                            submitting: true
+                          });
+                          this.schedulePrint(gcode.id, selectedPrinter);
+                        }}
+                        disabled={submitting}
+                      >
+                        {submitting ? "Uploading..." : "Yes, print"}
+                      </button>
+                      <button
+                        type="reset"
+                        onClick={e => {
+                          e.preventDefault();
+                          this.setState({
+                            submitting: false,
+                            showFilamentTypeWarningMessage: false
+                          });
+                        }}
+                        disabled={submitting}
+                      >
+                        Cancel
+                      </button>
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    On which printer would you like to print?{" "}
+                    <select
+                      id="selectedPrinter"
+                      name="selectedPrinter"
+                      value={selectedPrinter}
+                      onChange={e =>
+                        this.setState({
+                          selectedPrinter: e.target.value
+                        })
+                      }
+                    >
+                      {availablePrinterOpts}
+                    </select>
+                    <button
+                      className="btn"
+                      type="submit"
+                      onClick={e => {
+                        e.preventDefault();
+                        const selected = availablePrinters.find(
+                          p => p.host === selectedPrinter
+                        );
+                        if (
+                          selected &&
+                          selected.printer_props &&
+                          selected.printer_props.filament_type &&
+                          gcode.analysis &&
+                          gcode.analysis.filament &&
+                          gcode.analysis.filament.type &&
+                          gcode.analysis.filament.type !==
+                            selected.printer_props.filament_type
+                        ) {
+                          this.setState({
+                            showFilamentTypeWarningMessage: true,
+                            printerFilamentType:
+                              selected.printer_props.filament_type,
+                            gcodeFilamentType: gcode.analysis.filament.type
+                          });
+                          return;
+                        }
+                        this.setState({
+                          submitting: true
+                        });
+                        this.schedulePrint(gcode.id, selectedPrinter);
+                      }}
+                      disabled={submitting}
+                    >
+                      {submitting ? "Uploading..." : "Print"}
+                    </button>
+                    {message && (
+                      <p
+                        className={
+                          messageOk ? "message-success" : "message-error"
+                        }
+                      >
+                        {message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
         </div>
       </section>
     );
