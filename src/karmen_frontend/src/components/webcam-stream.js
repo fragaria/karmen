@@ -8,41 +8,42 @@ export class WebcamStream extends React.Component {
       isOnline: false,
       isMaximized: false,
       timer: null,
-      timerRunning: false,
+      snapshotPromise: null,
     }
     this.getSnapshot = this.getSnapshot.bind(this);
   }
 
   getSnapshot() {
     const { url } = this.props;
-    const { timerRunning } = this.state;
-    this.setState({
-      timerRunning: true,
-    });
-    if (!timerRunning) {
-      getWebcamSnapshot(url).then((r) => {
-        if (r === 202) {
-          this.setState({
-            timer: setTimeout(this.getSnapshot, 1000),
-            timerRunning: false,
-          });
-        } else if (r && r.prefix && r.data) {
-          this.setState({
-            isOnline: true,
-            timer: setTimeout(this.getSnapshot, 1000 / 5), // 1000 / 5 = 5 FPS
-            timerRunning: false,
-            source: `${r.prefix}${r.data}`,
-          });
-        } else {
-          this.setState({
-            isOnline: false,
-            timer: null,
-            timerRunning: false,
-            source: null,
-          });
-        }
-      });
+    const { snapshotPromise } = this.state;
+    if (snapshotPromise) {
+      return;
     }
+    const newSnapshotPromise = getWebcamSnapshot(url).then((r) => {
+      if (r === 202) {
+        this.setState({
+          timer: setTimeout(this.getSnapshot, 1000),
+          snapshotPromise: null,
+        });
+      } else if (r && r.prefix && r.data) {
+        this.setState({
+          isOnline: true,
+          timer: setTimeout(this.getSnapshot, 1000 / 5), // 1000 / 5 = 5 FPS
+          source: `${r.prefix}${r.data}`,
+          snapshotPromise: null,
+        });
+      } else {
+        this.setState({
+          isOnline: false,
+          timer: null,
+          source: null,
+          snapshotPromise: null,
+        });
+      }
+    });
+    this.setState({
+      snapshotPromise: newSnapshotPromise,
+    });
   }
 
   componentDidMount() {
