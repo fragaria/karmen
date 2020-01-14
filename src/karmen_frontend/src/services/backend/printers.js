@@ -154,6 +154,9 @@ function arrayBufferToBase64(buffer) {
 };
 
 export const getWebcamSnapshot = (snapshotUrl) => {
+  if (!snapshotUrl) {
+    return Promise.resolve();
+  }
   let headers = getHeaders();
   headers.set("pragma", "no-cache");
   headers.set("cache-control", "no-cache");
