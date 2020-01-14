@@ -34,13 +34,14 @@ with open(os.path.join(DIR_PATH, "./src/karmen_backend/server/__init__.py"), "r"
     with open(os.path.join(DIR_PATH, "./src/karmen_backend/server/__init__.py"), "w") as file:
         file.write('\n'.join(output) + '\n')
 
-with open(os.path.join(DIR_PATH, "./src/karmen_backend/fakeprinter/__init__.py"), "r") as file:
+# fakeprinter
+with open(os.path.join(DIR_PATH, "./src/fakeprinter/fakeprinter/__init__.py"), "r") as file:
     output = []
     for line in file:
         if re.match(r'^__version__ = ', line):
             line = '__version__ = "%s"' % (VERSION,)
         output.append(line.rstrip('\n'))
-    with open(os.path.join(DIR_PATH, "./src/karmen_backend/fakeprinter/__init__.py"), "w") as file:
+    with open(os.path.join(DIR_PATH, "./src/fakeprinter/fakeprinter/__init__.py"), "w") as file:
         file.write('\n'.join(output) + '\n')
 
 

@@ -4,26 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pytest = "*"
-pytest-xdist = "*"
-mock = "*"
 pylint = "*"
 black = "==19.*"
-coverage = "*"
-coveralls = "*"
 
 [packages]
 flask = "*"
 flask-cors = "*"
-requests = "*"
-celery = "*"
-psycopg2 = "*"
-redis = "*"
-watchdog = "*"
-yandex-pgmigrate = "*"
-bcrypt = "*"
-flask-jwt-extended = "*"
-flask-executor = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"

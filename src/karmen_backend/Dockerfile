@@ -4,7 +4,7 @@ RUN mkdir /install
 WORKDIR /install
 
 # build deps
-RUN apt-get update && apt-get install --yes --no-install-recommends build-essential postgresql-client libpq-dev libssl-dev libffi-dev zlib1g-dev libjpeg-dev jq
+RUN apt-get update && apt-get install --yes --no-install-recommends build-essential postgresql-client libpq-dev libssl-dev libffi-dev jq
 
 RUN pip install --upgrade pip
 RUN pip install uwsgi supervisor
@@ -25,8 +25,8 @@ WORKDIR /usr/src/app
 # Install from cache - no need for system dependencies for this
 COPY --from=builder /root/.cache /root/.cache
 COPY --from=builder /install/requirements.txt requirements.txt
-RUN pip install -r requirements.txt
 RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 RUN pip install uwsgi supervisor
 
 # enable mdns discovery, this works only when container is run in

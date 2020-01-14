@@ -79,21 +79,17 @@ services:
     links:
       - postgres
   fake_printer1:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
+    image: fragaria/karmen-fakeprinter
+    build: ./src/fakeprinter
     environment:
-      ENV: develop
-      SERVICE: fake-printer
       SERVICE_PORT: 8080
     networks:
       printers:
         ipv4_address: 172.16.236.11
   fake_printer2:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
+    image: fragaria/karmen-fakeprinter
+    build: ./src/fakeprinter
     environment:
-      ENV: develop
-      SERVICE: fake-printer
       SERVICE_PORT: 8080
     networks:
       printers:

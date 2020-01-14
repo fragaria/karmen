@@ -52,11 +52,7 @@ elif [ "$SERVICE" = 'celery-worker' ]; then
     export FLASK_DEBUG=true
     watchmedo auto-restart --recursive -- celery -A server.celery worker --pidfile=/tmp/celeryworkerd.pid
   fi
-elif [ "$SERVICE" = 'fake-printer' ]; then
-  export FLASK_APP=fakeprinter
-  export FLASK_DEBUG=true
-  flask run --host=${SERVICE_HOST:-0.0.0.0} --port ${SERVICE_PORT:-8080}
 else
-  echo "Unknown service ${SERVICE} encountered. I know of [flask, celery-beat and celery-worker, fake-printer]"
+  echo "Unknown service ${SERVICE} encountered. I know of [flask, celery-beat and celery-worker]"
   exit 1
 fi
