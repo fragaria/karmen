@@ -1,10 +1,11 @@
-FROM python:3.7-slim as builder
+FROM python:3.7-alpine as builder
+RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
 RUN mkdir /install
 WORKDIR /install
 
 # build deps
-RUN apt-get update && apt-get install --yes --no-install-recommends build-essential postgresql-client libpq-dev libssl-dev libffi-dev jq
+RUN apk --update add --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers
 
 RUN pip install --upgrade pip
 RUN pip install uwsgi supervisor
@@ -15,10 +16,16 @@ RUN jq -r '.default | to_entries[] | .key + .value.version' \
     Pipfile.lock > requirements.txt && pip install -r requirements.txt
 
 
-FROM python:3.7-slim as runner
+FROM python:3.7-alpine as runner
+RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
 # runtime deps
-RUN apt-get update && apt-get install --yes --no-install-recommends nginx gettext-base avahi-utils avahi-daemon arp-scan postgresql-client
+RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash
+
+# ensure www-data user
+RUN set -x ; \
+  addgroup -g 82 -S www-data ; \
+  adduser -u 82 -D -S -G www-data www-data && exit 0 ; exit 1
 
 WORKDIR /usr/src/app
 
@@ -28,11 +35,6 @@ COPY --from=builder /install/requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install uwsgi supervisor
-
-# enable mdns discovery, this works only when container is run in
-# privileged mode and /var/run/dbus is mounted as a volume
-# see https://github.com/ianblenke/docker-avahi for details
-RUN update-rc.d avahi-daemon enable
 
 ENV PYTHONPATH=$PYTHONPATH:/usr/src/app
 
