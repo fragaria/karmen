@@ -312,11 +312,8 @@ def printer_modify_job(host):
         return abort(make_response(jsonify(message=str(e)), 400))
 
 
+WEBCAM_MICROCACHE = {}
 FUTURES_MICROCACHE = {}
-
-redisinstance = redis.Redis(
-    host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"]
-)
 
 
 def _get_webcam_snapshot(snapshot_url):
@@ -358,23 +355,9 @@ def printer_webcam_snapshot(host):
     if snapshot_url is None:
         return abort(make_response("", 404))
 
-    response_cache_key = "WEBCAM_PIC_%s_RESPONSE" % host
-    response_type_cache_key = "WEBCAM_PIC_%s_TYPE" % host
-    timestamp_cache_key = "WEBCAM_PIC_%s_TIMESTAMP"
-
     # process current future if done
-    if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host)["future"].done():
-        result = FUTURES_MICROCACHE[host]["future"].result()
-        result_timestamp = FUTURES_MICROCACHE[host]["timestamp"]
-        last_pic_timestamp = redisinstance.get(timestamp_cache_key)
-        if last_pic_timestamp is None or (result_timestamp > float(last_pic_timestamp)):
-            app.logger.debug("saving pic")
-            redisinstance.set(response_cache_key, result.content)
-            redisinstance.set(
-                response_type_cache_key,
-                result.headers.get("content-type", "image/jpeg"),
-            )
-            redisinstance.set(timestamp_cache_key, result_timestamp)
+    if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host).done():
+        WEBCAM_MICROCACHE[host] = FUTURES_MICROCACHE[host].result()
         try:
             del FUTURES_MICROCACHE[host]
         except Exception:
@@ -382,18 +365,14 @@ def printer_webcam_snapshot(host):
             pass
     # issue a new future if not present
     if not FUTURES_MICROCACHE.get(host):
-        FUTURES_MICROCACHE[host] = {
-            "future": executor.submit(_get_webcam_snapshot, snapshot_url),
-            "timestamp": time.time(),
-        }
-    cached_response = redisinstance.get(response_cache_key)
+        FUTURES_MICROCACHE[host] = executor.submit(_get_webcam_snapshot, snapshot_url)
 
-    if cached_response is not None:
-        content_type = redisinstance.get(response_type_cache_key)
+    if WEBCAM_MICROCACHE.get(host) is not None:
+        response = WEBCAM_MICROCACHE.get(host)
         return (
-            cached_response,
+            response.content,
             200,
-            {"Content-Type": content_type or "image/jpeg"},
+            {"Content-Type": response.headers.get("content-type", "image/jpeg")},
         )
     # There should be a future running, if the client retries, they should
     # eventually get a snapshot.

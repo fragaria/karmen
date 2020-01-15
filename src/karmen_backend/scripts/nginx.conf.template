@@ -36,7 +36,16 @@ http {
         proxy_send_timeout 1h;
         proxy_read_timeout 1h;
         include uwsgi_params;
-        uwsgi_pass unix:///tmp/uwsgi.sock;
+        uwsgi_pass uwsgicluster;
     }
   }
+
+  upstream uwsgicluster {
+    ip_hash;
+    server unix:///tmp/uwsgi1.sock;
+    server unix:///tmp/uwsgi2.sock;
+    server unix:///tmp/uwsgi3.sock;
+    server unix:///tmp/uwsgi4.sock;
+  }
+  
 }

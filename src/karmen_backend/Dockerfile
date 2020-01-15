@@ -43,7 +43,7 @@ ENV SERVICE_HOST 0.0.0.0
 ENV SERVICE_PORT 9764
 
 COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
-COPY ./scripts/uwsgi.ini /etc/uwsgi/wsgi.ini
+COPY ./scripts/uwsgi.ini.template /etc/uwsgi/uwsgi.ini.template
 COPY ./scripts/supervisord.conf /etc/supervisord.conf
 
 COPY . .
