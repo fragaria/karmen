@@ -27,25 +27,21 @@ http {
     server_name  localhost;
 
     location / {
-        try_files \$uri @app;
-    }
-
-    location @app {
         uwsgi_read_timeout 1h;
         uwsgi_send_timeout 1h;
         proxy_send_timeout 1h;
         proxy_read_timeout 1h;
         include uwsgi_params;
-        uwsgi_pass uwsgicluster;
+        uwsgi_pass unix:///tmp/uwsgi.sock;
+    }
+
+    location ~* /printers/.*/webcam-snapshot {
+        uwsgi_read_timeout 1h;
+        uwsgi_send_timeout 1h;
+        proxy_send_timeout 1h;
+        proxy_read_timeout 1h;
+        include uwsgi_params;
+        uwsgi_pass unix:///tmp/uwsgi-webcam-snapshots.sock;
     }
   }
-
-  upstream uwsgicluster {
-    ip_hash;
-    server unix:///tmp/uwsgi1.sock;
-    server unix:///tmp/uwsgi2.sock;
-    server unix:///tmp/uwsgi3.sock;
-    server unix:///tmp/uwsgi4.sock;
-  }
-  
 }

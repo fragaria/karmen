@@ -28,10 +28,6 @@ if [ "$SERVICE" = 'flask' ]; then
     SERVICE_PORT=${SERVICE_PORT:-9764}
     SERVICE_HOST=${SERVICE_HOST:-0.0.0.0}
     envsubst '$SERVICE_PORT $SERVICE_HOST' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-    for UWSGIPID in {1..4}; do
-      sed -e "s|socket = /tmp/uwsgi.sock|socket = /tmp/uwsgi${UWSGIPID}.sock|g" "/etc/uwsgi/uwsgi.ini.template" > "/etc/uwsgi/uwsgi${UWSGIPID}.ini"
-    done
-    
     /usr/local/bin/supervisord
   else
     export FLASK_APP=server

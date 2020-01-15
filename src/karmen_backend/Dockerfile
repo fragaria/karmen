@@ -43,7 +43,8 @@ ENV SERVICE_HOST 0.0.0.0
 ENV SERVICE_PORT 9764
 
 COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
-COPY ./scripts/uwsgi.ini.template /etc/uwsgi/uwsgi.ini.template
+COPY ./scripts/uwsgi.ini /etc/uwsgi/uwsgi.ini
+COPY ./scripts/uwsgi-webcam-snapshots.ini /etc/uwsgi/uwsgi-webcam-snapshots.ini
 COPY ./scripts/supervisord.conf /etc/supervisord.conf
 
 COPY . .
