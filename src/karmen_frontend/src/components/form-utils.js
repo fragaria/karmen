@@ -6,7 +6,7 @@ export const FormInputs = ({ definition, updateValue }) => {
       case "text":
       case "password":
         return (
-          <>
+          <React.Fragment key={name}>
             <label htmlFor={name}>{definition[name].name}</label>
             <input
               type={definition[name].type}
@@ -20,11 +20,11 @@ export const FormInputs = ({ definition, updateValue }) => {
                 <small>{definition[name].error}</small>
               )}
             </span>
-          </>
+          </React.Fragment>
         );
       case "checkbox":
         return (
-          <>
+          <React.Fragment key={name}>
             <label htmlFor={name}>{definition[name].name}</label>
             <input
               type="checkbox"
@@ -38,7 +38,7 @@ export const FormInputs = ({ definition, updateValue }) => {
                 <small>{definition[name].error}</small>
               )}
             </span>
-          </>
+          </React.Fragment>
         );
       case "select":
         const opts = definition[name].options.map(opt => {
@@ -49,7 +49,7 @@ export const FormInputs = ({ definition, updateValue }) => {
           );
         });
         return (
-          <>
+          <React.Fragment key={name}>
             <label htmlFor={name}>{definition[name].name}</label>
             <select
               id={name}
@@ -64,7 +64,7 @@ export const FormInputs = ({ definition, updateValue }) => {
                 <small>{definition[name].error}</small>
               )}
             </span>
-          </>
+          </React.Fragment>
         );
       default:
         return null;
