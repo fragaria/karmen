@@ -366,8 +366,8 @@ def printer_webcam_snapshot(host):
     if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host)["future"].done():
         result = FUTURES_MICROCACHE[host]["future"].result()
         result_timestamp = FUTURES_MICROCACHE[host]["timestamp"]
-        last_pic_timestamp = float(redisinstance.get(timestamp_cache_key))
-        if last_pic_timestamp is None or (result_timestamp > last_pic_timestamp):
+        last_pic_timestamp = redisinstance.get(timestamp_cache_key)
+        if last_pic_timestamp is None or (result_timestamp > float(last_pic_timestamp)):
             app.logger.debug("saving pic")
             redisinstance.set(response_cache_key, result.content)
             redisinstance.set(
