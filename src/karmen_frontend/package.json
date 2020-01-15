@@ -44,7 +44,6 @@
   },
   "scripts": {
     "build": "react-scripts build",
-    "build-env-file": "node ./scripts/build-env-file.js",
     "eject": "react-scripts eject",
     "lint": "eslint src --ext jsx,js",
     "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start",

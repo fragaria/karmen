@@ -1,4 +1,6 @@
-FROM nginx
+FROM nginx:alpine
+
+RUN apk add gettext
 
 ENV REDIS_HOST 127.0.0.1
 ENV REDIS_PORT 6379
