@@ -5,6 +5,7 @@ import { authenticate, setCurrentState } from "../actions/users";
 import { setAccessToken } from "../services/backend";
 import { FormInputs } from "./form-utils";
 import Loader from "./loader";
+import BusyButton from "./busy-button";
 
 class LoginGateway extends React.Component {
   constructor(props) {
@@ -69,7 +70,7 @@ class LoginGateway extends React.Component {
     this.setState({
       submitting: true
     });
-    doAuthenticate(loginForm.username.val, loginForm.password.val).then(
+    return doAuthenticate(loginForm.username.val, loginForm.password.val).then(
       async r => {
         if (r.status !== 200) {
           this.setState({
@@ -145,17 +146,18 @@ class LoginGateway extends React.Component {
               )}
               <FormInputs definition={loginForm} updateValue={updateValue} />
               <div className="cta-box text-center">
-                <button
+                <BusyButton
                   className="btn"
                   type="submit"
                   onClick={this.login}
-                  disabled={submitting}
+                  makeDisabled={true}
+                  busyChildren="Logging in..."
                 >
                   Login
-                </button>{" "}
+                </BusyButton>{" "}
                 {userState === "fresh-token-required" && (
                   <button
-                    className={submitting ? "hidden" : "btn btn-plain"}
+                    className={"btn btn-plain"}
                     type="reset"
                     onClick={() => {
                       setCurrentUserState("logged-in");

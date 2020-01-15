@@ -3,12 +3,12 @@ import { Redirect } from "react-router-dom";
 
 import { BackLink } from "../components/back";
 import { uploadGcode } from "../services/backend";
+import BusyButton from "../components/busy-button";
 
 class AddGcode extends React.Component {
   state = {
     toUpload: null,
     path: "",
-    submitting: false,
     message: null,
     messageOk: false,
     gcodeId: null
@@ -29,15 +29,13 @@ class AddGcode extends React.Component {
       return;
     }
     this.setState({
-      submitting: true,
       message: null,
       messageOk: false
     });
-    uploadGcode(path, toUpload).then(r => {
+    return uploadGcode(path, toUpload).then(r => {
       switch (r.status) {
         case 201:
           this.setState({
-            submitting: false,
             message: "File uploaded",
             path: "",
             messageOk: true,
@@ -47,28 +45,19 @@ class AddGcode extends React.Component {
           break;
         case 415:
           this.setState({
-            message: "This does not seem like a G-Code file.",
-            submitting: false
+            message: "This does not seem like a G-Code file."
           });
           break;
         default:
           this.setState({
-            message: "Cannot upload G-Code, check server logs",
-            submitting: false
+            message: "Cannot upload G-Code, check server logs"
           });
       }
     });
   }
 
   render() {
-    const {
-      message,
-      messageOk,
-      redirect,
-      submitting,
-      path,
-      gcodeId
-    } = this.state;
+    const { message, messageOk, redirect, path, gcodeId } = this.state;
     if (redirect) {
       return <Redirect to={`/gcodes/${gcodeId}`} />;
     }
@@ -111,14 +100,16 @@ class AddGcode extends React.Component {
               <span></span>
             </div>
             <div className="cta-box text-center">
-              <button
+              <BusyButton
                 className="btn"
                 type="submit"
-                onClick={e => this.addCode(e)}
-                disabled={submitting}
+                onClick={this.addCode}
+                makeDisabled={true}
+                busyChildren="Uploading..."
               >
-                {submitting ? "Uploading..." : "Upload G-Code"}
-              </button>{" "}
+                Upload G-Code
+              </BusyButton>{" "}
+              {/* TODO this should actually work as a cancel button and cancel the upload if in progress */}
               <BackLink to="/gcodes" />
             </div>
           </form>

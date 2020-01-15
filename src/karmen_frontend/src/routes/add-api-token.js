@@ -5,13 +5,13 @@ import { BackLink } from "../components/back";
 import { FormInputs } from "../components/form-utils";
 import { addUserApiToken } from "../actions/users";
 import FreshTokenRequiredCheck from "../components/fresh-token-required-check";
+import BusyButton from "../components/busy-button";
 
 class AddApiToken extends React.Component {
   state = {
     showToken: false,
     createdToken: null,
     redirect: false,
-    submitting: false,
     message: null,
     messageOk: false,
     form: {
@@ -35,7 +35,6 @@ class AddApiToken extends React.Component {
     this.setState({
       message: null,
       messageOk: false,
-      submitting: true,
       showToken: false,
       createdToken: null
     });
@@ -51,25 +50,19 @@ class AddApiToken extends React.Component {
     });
     const { addApiToken } = this.props;
     if (!hasErrors) {
-      addApiToken(form.name.val).then(r => {
+      return addApiToken(form.name.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
-              submitting: false,
               showToken: true,
               createdToken: r.data.access_token
             });
             break;
           default:
             this.setState({
-              message: "Cannot add API token, check server logs",
-              submitting: false
+              message: "Cannot add API token, check server logs"
             });
         }
-      });
-    } else {
-      this.setState({
-        submitting: false
       });
     }
   }
@@ -83,7 +76,6 @@ class AddApiToken extends React.Component {
       message,
       messageOk,
       redirect,
-      submitting,
       form,
       showToken,
       createdToken
@@ -167,13 +159,14 @@ class AddApiToken extends React.Component {
               }}
             />
             <div className="form-actions">
-              <button
+              <BusyButton
                 type="submit"
                 onClick={this.addApiToken}
-                disabled={submitting}
+                makeDisabled={true}
+                busyChildren="Creating..."
               >
                 Create token
-              </button>
+              </BusyButton>
               <BackLink to="/users/me" />
             </div>
           </form>

@@ -6,11 +6,11 @@ import { FormInputs } from "../components/form-utils";
 import { addUser } from "../actions/users";
 import RoleBasedGateway from "../components/role-based-gateway";
 import FreshUserRequiredCheck from "../components/fresh-token-required-check";
+import BusyButton from "../components/busy-button";
 
 class AddUser extends React.Component {
   state = {
     redirect: false,
-    submitting: false,
     message: null,
     messageOk: false,
     form: {
@@ -55,8 +55,7 @@ class AddUser extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false,
-      submitting: true
+      messageOk: false
     });
     const { form } = this.state;
     let hasErrors = false;
@@ -79,49 +78,40 @@ class AddUser extends React.Component {
     }
     if (hasErrors) {
       this.setState({
-        form: Object.assign({}, form),
-        submitting: false
+        form: Object.assign({}, form)
       });
       return;
     }
     const { createUser } = this.props;
     if (!hasErrors) {
-      createUser(
+      return createUser(
         form.username.val,
         form.role.val,
         form.password.val,
         form.password_confirmation.val
       ).then(r => {
-        console.log(r);
         switch (r.status) {
           case 201:
             this.setState({
-              submitting: false,
               redirect: true
             });
             break;
           case 409:
             this.setState({
-              message: "User with such username is already registered",
-              submitting: false
+              message: "User with such username is already registered"
             });
             break;
           default:
             this.setState({
-              message: "Cannot add user, check server logs",
-              submitting: false
+              message: "Cannot add user, check server logs"
             });
         }
-      });
-    } else {
-      this.setState({
-        submitting: false
       });
     }
   }
 
   render() {
-    const { form, message, messageOk, redirect, submitting } = this.state;
+    const { form, message, messageOk, redirect } = this.state;
     const { hasFreshUser } = this.props;
     if (!hasFreshUser) {
       return (
@@ -162,14 +152,15 @@ class AddUser extends React.Component {
                 }}
               />
               <div className="cta-box text-center">
-                <button
+                <BusyButton
                   className="btn"
                   type="submit"
                   onClick={this.addUser}
-                  disabled={submitting}
+                  makeDisabled={true}
+                  busyChildren="Adding..."
                 >
                   Add user
-                </button>{" "}
+                </BusyButton>{" "}
                 <BackLink to="/settings" />
               </div>
             </form>
