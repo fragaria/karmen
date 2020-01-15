@@ -1,7 +1,9 @@
 import re
 import random
 import requests
+import redis
 import string
+import time
 
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -310,8 +312,11 @@ def printer_modify_job(host):
         return abort(make_response(jsonify(message=str(e)), 400))
 
 
-WEBCAM_MICROCACHE = {}
 FUTURES_MICROCACHE = {}
+
+redisinstance = redis.Redis(
+    host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"]
+)
 
 
 def _get_webcam_snapshot(snapshot_url):
@@ -337,7 +342,8 @@ def printer_webcam_snapshot(host):
     the video-like feature to the clients. This (in case of MJPEG) brings
     significant performance gains throughout the whole pipeline.
 
-    This endpoint serves as a microcache of latest captured image from any
+    This endpoint serves as a redis-backed (due to multithreaded production setup
+    with uwsgi) microcache of latest captured image from any
     given printer. New snapshot is requested, but the old one is served to
     the client. In case of the first request, a 202 is returned and the client
     should ask again. By asking periodically for new snapshots, the client
@@ -351,9 +357,24 @@ def printer_webcam_snapshot(host):
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
     if snapshot_url is None:
         return abort(make_response("", 404))
+
+    response_cache_key = "WEBCAM_PIC_%s_RESPONSE" % host
+    response_type_cache_key = "WEBCAM_PIC_%s_TYPE" % host
+    timestamp_cache_key = "WEBCAM_PIC_%s_TIMESTAMP"
+
     # process current future if done
-    if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host).done():
-        WEBCAM_MICROCACHE[host] = FUTURES_MICROCACHE[host].result()
+    if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host)["future"].done():
+        result = FUTURES_MICROCACHE[host]["future"].result()
+        result_timestamp = FUTURES_MICROCACHE[host]["timestamp"]
+        last_pic_timestamp = float(redisinstance.get(timestamp_cache_key))
+        if last_pic_timestamp is None or (result_timestamp > last_pic_timestamp):
+            app.logger.debug("saving pic")
+            redisinstance.set(response_cache_key, result.content)
+            redisinstance.set(
+                response_type_cache_key,
+                result.headers.get("content-type", "image/jpeg"),
+            )
+            redisinstance.set(timestamp_cache_key, result_timestamp)
         try:
             del FUTURES_MICROCACHE[host]
         except Exception:
@@ -361,14 +382,18 @@ def printer_webcam_snapshot(host):
             pass
     # issue a new future if not present
     if not FUTURES_MICROCACHE.get(host):
-        FUTURES_MICROCACHE[host] = executor.submit(_get_webcam_snapshot, snapshot_url)
+        FUTURES_MICROCACHE[host] = {
+            "future": executor.submit(_get_webcam_snapshot, snapshot_url),
+            "timestamp": time.time(),
+        }
+    cached_response = redisinstance.get(response_cache_key)
 
-    if WEBCAM_MICROCACHE.get(host) is not None:
-        response = WEBCAM_MICROCACHE.get(host)
+    if cached_response is not None:
+        content_type = redisinstance.get(response_type_cache_key)
         return (
-            response.content,
+            cached_response,
             200,
-            {"Content-Type": response.headers.get("content-type", "image/jpeg")},
+            {"Content-Type": content_type or "image/jpeg"},
         )
     # There should be a future running, if the client retries, they should
     # eventually get a snapshot.
