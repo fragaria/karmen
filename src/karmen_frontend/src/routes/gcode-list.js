@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import { DebounceInput } from "react-debounce-input";
 
 import { getGcodes, deleteGcode, printGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
@@ -330,7 +331,6 @@ class GcodeList extends React.Component {
     ],
     orderBy: "-uploaded",
     filter: "",
-    willBeFilter: "",
     message: null,
     printedOn: []
   };
@@ -405,7 +405,6 @@ class GcodeList extends React.Component {
       pages,
       orderBy,
       filter,
-      willBeFilter,
       printedOn
     } = this.state;
     const { getAvailablePrinters } = this.props;
@@ -446,44 +445,17 @@ class GcodeList extends React.Component {
           <form className="input-group">
             <label htmlFor="filter">
               <span className="input-label-icon icon-search"></span>
-              <input
+              <DebounceInput
                 type="search"
                 name="filter"
                 id="filter"
-                value={willBeFilter}
+                minLength={3}
+                debounceTimeout={300}
                 onChange={e => {
-                  this.setState({
-                    willBeFilter: e.target.value
-                  });
+                  this.loadPage(currentPage, orderBy, e.target.value);
                 }}
               />
             </label>
-            <div>
-              <button
-                className="btn-reset"
-                type="submit"
-                onClick={e => {
-                  e.preventDefault();
-                  const { willBeFilter } = this.state;
-                  this.loadPage(currentPage, orderBy, willBeFilter);
-                }}
-              >
-                Filter
-              </button>
-              <button
-                className="btn-reset"
-                type="reset"
-                onClick={e => {
-                  e.preventDefault();
-                  this.setState({
-                    willBeFilter: ""
-                  });
-                  this.loadPage(currentPage, orderBy, null);
-                }}
-              >
-                Reset
-              </button>
-            </div>
           </form>
         </div>
 

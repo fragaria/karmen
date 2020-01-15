@@ -1,4 +1,5 @@
 import React from "react";
+import { DebounceInput } from "react-debounce-input";
 import formatters from "../services/formatters";
 
 class UsersTableRow extends React.Component {
@@ -154,8 +155,7 @@ class UsersTable extends React.Component {
     super(props);
     this.state = {
       usersLoaded: false,
-      currentPageIndex: 0,
-      willBeFilter: ""
+      currentPageIndex: 0
     };
     this.reloadTableWith = this.reloadTableWith.bind(this);
   }
@@ -205,8 +205,7 @@ class UsersTable extends React.Component {
   reloadTableWith(nextStart, orderBy, usernameFilter, limit, currentPageIndex) {
     const { loadUsersPage } = this.props;
     this.setState({
-      usersLoaded: false,
-      willBeFilter: usernameFilter
+      usersLoaded: false
     });
     loadUsersPage(nextStart, orderBy, usernameFilter, limit).then(() => {
       this.setState({
@@ -217,7 +216,7 @@ class UsersTable extends React.Component {
   }
 
   render() {
-    const { usersLoaded, currentPageIndex, willBeFilter } = this.state;
+    const { usersLoaded, currentPageIndex } = this.state;
     const { currentUuid, userList, onUserChange } = this.props;
     const currentPage = userList.pages[currentPageIndex];
     const users = currentPage && currentPage.data.items;
@@ -261,56 +260,23 @@ class UsersTable extends React.Component {
           <form className="input-group">
             <label htmlFor="filter">
               <span className="input-label-icon icon-search"></span>
-              <input
+              <DebounceInput
                 type="search"
                 name="filter"
                 id="filter"
-                value={willBeFilter}
+                minLength={3}
+                debounceTimeout={300}
                 onChange={e => {
-                  this.setState({
-                    willBeFilter: e.target.value
-                  });
+                  const { userList } = this.props;
+                  this.reloadTableWith(
+                    null,
+                    userList.orderBy,
+                    e.target.value,
+                    userList.limit
+                  );
                 }}
               />
             </label>
-            <div>
-              <button
-                className="btn-reset"
-                type="submit"
-                onClick={e => {
-                  e.preventDefault();
-                  const { willBeFilter } = this.state;
-                  const { userList } = this.props;
-                  this.reloadTableWith(
-                    null,
-                    userList.orderBy,
-                    willBeFilter,
-                    userList.limit
-                  );
-                }}
-              >
-                Filter
-              </button>
-              <button
-                className="btn-reset"
-                type="reset"
-                onClick={e => {
-                  e.preventDefault();
-                  const { userList } = this.props;
-                  this.setState({
-                    willBeFilter: ""
-                  });
-                  this.reloadTableWith(
-                    null,
-                    userList.orderBy,
-                    "",
-                    userList.limit
-                  );
-                }}
-              >
-                Reset
-              </button>
-            </div>
           </form>
         </div>
 
