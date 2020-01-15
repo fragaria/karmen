@@ -1,5 +1,6 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
+import TableActionRow from "./table-action-row";
 import formatters from "../services/formatters";
 
 class UsersTableRow extends React.Component {
@@ -14,85 +15,48 @@ class UsersTableRow extends React.Component {
 
     if (showSuspendRow) {
       return (
-        <div className="list-item list-item-inverse">
-          <div className="list-item-content">
-            <span className="list-item-title">
-              Do you really want to {user.suspended ? "allow" : "disallow"}{" "}
-              <strong>{user.username}</strong>?
-            </span>
-          </div>
-
-          <div className="list-item-cta">
-            <button
-              className="btn-reset"
-              title="Cancel"
-              onClick={() => {
-                this.setState({
-                  showSuspendRow: false
-                });
-              }}
-            >
-              <i className="icon-close"></i>
-            </button>
-            <button
-              className="btn-reset"
-              title="Confirm"
-              onClick={() => {
-                onUserChange(user.uuid, user.role, !user.suspended).then(() => {
-                  this.setState({
-                    showSuspendRow: false
-                  });
-                });
-              }}
-            >
-              <i className="icon-check"></i>
-            </button>
-          </div>
-        </div>
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showSuspendRow: false
+            });
+          }}
+          onConfirm={() => {
+            onUserChange(user.uuid, user.role, !user.suspended).then(() => {
+              this.setState({
+                showSuspendRow: false
+              });
+            });
+          }}
+        >
+          Do you really want to {user.suspended ? "allow" : "disallow"}{" "}
+          <strong>{user.username}</strong>?
+        </TableActionRow>
       );
     }
 
     if (showChangeRoleRow) {
       return (
-        <div className="list-item list-item-inverse">
-          <div className="list-item-content">
-            <span className="list-item-title">
-              Do you really want to{" "}
-              {user.role === "admin" ? "demote" : "promote"}{" "}
-              <strong>{user.username}</strong> to{" "}
-              {user.role === "admin" ? "user" : "admin"}?
-            </span>
-          </div>
-
-          <div className="list-item-cta">
-            <button
-              className="btn-reset"
-              title="Cancel"
-              onClick={() => {
-                this.setState({
-                  showChangeRoleRow: false
-                });
-              }}
-            >
-              <i className="icon-close"></i>
-            </button>
-            <button
-              className="btn-reset"
-              title="Confirm"
-              onClick={() => {
-                // this will get more complicated, obviously
-                const newRole = user.role === "user" ? "admin" : "user";
-                onUserChange(user.uuid, newRole, user.suspended).then(() => {
-                  this.setState({
-                    showChangeRoleRow: false
-                  });
-                });
-              }}
-            >
-              <i className="icon-check"></i>
-            </button>
-          </div>
-        </div>
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showChangeRoleRow: false
+            });
+          }}
+          onConfirm={() => {
+            // this will get more complicated, obviously
+            const newRole = user.role === "user" ? "admin" : "user";
+            onUserChange(user.uuid, newRole, user.suspended).then(() => {
+              this.setState({
+                showChangeRoleRow: false
+              });
+            });
+          }}
+        >
+          Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
+          <strong>{user.username}</strong> to{" "}
+          {user.role === "admin" ? "user" : "admin"}?
+        </TableActionRow>
       );
     }
 
@@ -319,7 +283,7 @@ class UsersTable extends React.Component {
               <div className="list-pagination">
                 {currentPageIndex > 0 ? (
                   <button
-                    className="plain"
+                    className="btn btn-sm"
                     onClick={() => {
                       this.setState({
                         currentPageIndex: Math.max(0, currentPageIndex - 1)
@@ -333,7 +297,7 @@ class UsersTable extends React.Component {
                 )}
                 {currentPage.data.next ? (
                   <button
-                    className="plain"
+                    className="btn btn-sm"
                     onClick={() => {
                       this.setState({
                         currentPageIndex: currentPageIndex + 1

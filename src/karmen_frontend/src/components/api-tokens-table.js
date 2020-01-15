@@ -1,5 +1,6 @@
 import React from "react";
 import formatters from "../services/formatters";
+import TableActionRow from "./table-action-row";
 
 class ApiTokensTableRow extends React.Component {
   constructor(props) {
@@ -15,36 +16,19 @@ class ApiTokensTableRow extends React.Component {
 
     if (showDeleteRow) {
       return (
-        <div className="list-item list-item-inverse">
-          <div className="list-item-content">
-            <span className="list-item-title">
-              Do you really want to revoke <strong>{token.name}</strong>? This
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showDeleteRow: false
+            });
+          }}
+          onConfirm={() => {
+            onTokenDelete(token.jti);
+          }}
+        >
+          Do you really want to revoke <strong>{token.name}</strong>? This
               cannot be undone.
-            </span>
-          </div>
-          <div className="list-item-cta">
-            <button
-              className="btn-reset"
-              title="Cancel"
-              onClick={() => {
-                this.setState({
-                  showDeleteRow: false
-                });
-              }}
-            >
-              <i className="icon-close"></i>
-            </button>
-            <button
-              className="btn-reset"
-              title="Confirm revoke"
-              onClick={() => {
-                onTokenDelete(token.jti);
-              }}
-            >
-              <i className="icon-check"></i>
-            </button>
-          </div>
-        </div>
+        </TableActionRow>
       );
     }
 

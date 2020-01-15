@@ -3,11 +3,12 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 
+import TableActionRow from "../components/table-action-row";
 import { getGcodes, deleteGcode, printGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 
-class GcodeRow extends React.Component {
+class GcodeTableRow extends React.Component {
   state = {
     showDeleteRow: false,
     showPrinterSelectRow: false,
@@ -73,116 +74,78 @@ class GcodeRow extends React.Component {
       analysis,
       availablePrinters
     } = this.props;
+
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
-        <div className="list-item">
+        <TableActionRow
+          inverse={false}
+          showCancel={canCancelPrintStatusRow}
+          onCancel={() => {
+            this.setState({
+              showPrintStatusRow: false
+            });
+          }}
+          showConfirm={false}
+        >
           {message && (
             <p className={messageOk ? "message-success" : "message-error"}>
               {message}
             </p>
           )}
-
-          {canCancelPrintStatusRow && (
-            <button
-              className="btn-reset"
-              onClick={() => {
-                this.setState({
-                  showPrintStatusRow: false
-                });
-              }}
-            >
-              <i className="icon-close"></i>
-            </button>
-          )}
-        </div>
+        </TableActionRow>
       );
     }
+
     if (showDeleteRow) {
       return (
-        <div className="list-item list-item-inverse">
-          <div className="list-item-content">
-            <span className="list-item-title">
-              Do you really want to delete{" "}
-              <strong>
-                {path}
-                {path ? "/" : ""}
-                {display}
-              </strong>
-              ? This cannot be undone.
-            </span>
-          </div>
-
-          <div className="list-item-cta">
-            <button
-              className="btn-reset"
-              title="Cancel"
-              onClick={() => {
-                this.setState({
-                  showDeleteRow: false
-                });
-              }}
-            >
-              <i className="icon-close"></i>
-            </button>
-            <button
-              className="btn-reset"
-              title="Confirm delete"
-              onClick={() => {
-                onRowDelete();
-              }}
-            >
-              <i className="icon-check"></i>
-            </button>
-          </div>
-        </div>
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showDeleteRow: false
+            });
+          }}
+          onConfirm={() => {
+            onRowDelete();
+          }}
+        >
+          Do you really want to delete{" "}
+          <strong>
+            {path}
+            {path ? "/" : ""}
+            {display}
+          </strong>
+          ? This cannot be undone.
+        </TableActionRow>
       );
     }
 
     if (showFilamentTypeWarningRow) {
       const { printerFilamentType, gcodeFilamentType } = this.state;
       return (
-        <div className="list-item list-item-inverse">
-          <div className="list-item-content">
-            <span className="list-item-title">
-              Are you sure? There seems to be a filament mismatch: Printer has{" "}
-              <strong>{printerFilamentType}</strong> configured, but this gcode
-              was sliced for <strong>{gcodeFilamentType}</strong>.
-            </span>
-          </div>
-
-          <div className="list-item-cta">
-            <button
-              className="btn-reset"
-              title="Cancel"
-              onClick={() => {
-                this.setState({
-                  showFilamentTypeWarningRow: false
-                });
-              }}
-            >
-              <i className="icon-close"></i>
-            </button>
-            <button
-              className="btn-reset"
-              title="Print"
-              onClick={() => {
-                const { selectedPrinter } = this.state;
-                this.setState({
-                  showPrinterSelectRow: false,
-                  canCancelPrintStatusRow: false,
-                  showFilamentTypeWarningRow: false,
-                  showPrintStatusRow: true,
-                  message: "Scheduling a print",
-                  messageOk: true
-                });
-                this.schedulePrint(id, selectedPrinter);
-              }}
-            >
-              <i className="icon-check"></i>
-            </button>
-          </div>
-        </div>
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showFilamentTypeWarningRow: false
+            });
+          }}
+          onConfirm={() => {
+            const { selectedPrinter } = this.state;
+            this.setState({
+              showPrinterSelectRow: false,
+              canCancelPrintStatusRow: false,
+              showFilamentTypeWarningRow: false,
+              showPrintStatusRow: true,
+              message: "Scheduling a print",
+              messageOk: true
+            });
+            this.schedulePrint(id, selectedPrinter);
+          }}
+        >
+          Are you sure? There seems to be a filament mismatch: Printer has{" "}
+          <strong>{printerFilamentType}</strong> configured, but this gcode was
+          sliced for <strong>{gcodeFilamentType}</strong>.
+        </TableActionRow>
       );
     }
 
@@ -193,86 +156,69 @@ class GcodeRow extends React.Component {
         );
       });
       return (
-        <div className="list-item">
-          <div className="list-item-content">
-            <span className="list-item-title">
-              {!!availablePrinters.length ? (
-                <>
-                  Select printer to print on:{" "}
-                  <select
-                    id="selectedPrinter"
-                    name="selectedPrinter"
-                    value={selectedPrinter}
-                    onChange={e =>
-                      this.setState({
-                        selectedPrinter: e.target.value
-                      })
-                    }
-                  >
-                    {availablePrinterOpts}
-                  </select>
-                </>
-              ) : (
-                <p>No available printers found.</p>
-              )}
-            </span>
-          </div>
-
-          <div className="list-item-cta">
-            <button
-              className="btn-reset"
-              onClick={() => {
-                this.setState({
-                  showPrinterSelectRow: false,
-                  selectedPrinter: null
-                });
-              }}
-            >
-              <i className="icon-close text-secondary"></i>
-            </button>
-            {!!availablePrinters.length && (
-              <button
-                className="btn-reset"
-                onClick={e => {
-                  e.preventDefault();
-                  const { selectedPrinter } = this.state;
-                  const selected = availablePrinters.find(
-                    p => p.host === selectedPrinter
-                  );
-                  if (
-                    selected &&
-                    selected.printer_props &&
-                    selected.printer_props.filament_type &&
-                    analysis &&
-                    analysis.filament &&
-                    analysis.filament.type &&
-                    analysis.filament.type !==
-                      selected.printer_props.filament_type
-                  ) {
-                    this.setState({
-                      showPrinterSelectRow: false,
-                      showFilamentTypeWarningRow: true,
-                      printerFilamentType: selected.printer_props.filament_type,
-                      gcodeFilamentType: analysis.filament.type
-                    });
-                    return;
-                  }
+        <TableActionRow
+          inverse={false}
+          onCancel={() => {
+            this.setState({
+              showPrinterSelectRow: false,
+              selectedPrinter: null
+            });
+          }}
+          showConfirm={!!availablePrinters.length}
+          onConfirm={e => {
+            e.preventDefault();
+            const { selectedPrinter } = this.state;
+            const selected = availablePrinters.find(
+              p => p.host === selectedPrinter
+            );
+            if (
+              selected &&
+              selected.printer_props &&
+              selected.printer_props.filament_type &&
+              analysis &&
+              analysis.filament &&
+              analysis.filament.type &&
+              analysis.filament.type !== selected.printer_props.filament_type
+            ) {
+              this.setState({
+                showPrinterSelectRow: false,
+                showFilamentTypeWarningRow: true,
+                printerFilamentType: selected.printer_props.filament_type,
+                gcodeFilamentType: analysis.filament.type
+              });
+              return;
+            }
+            this.setState({
+              showPrinterSelectRow: false,
+              canCancelPrintStatusRow: false,
+              showFilamentTypeWarningRow: false,
+              showPrintStatusRow: true,
+              message: "Scheduling a print",
+              messageOk: true
+            });
+            this.schedulePrint(id, selectedPrinter);
+          }}
+        >
+          {!!availablePrinters.length ? (
+            <>
+              Select printer to print on:{" "}
+              <select
+                id="selectedPrinter"
+                name="selectedPrinter"
+                value={selectedPrinter}
+                onChange={e =>
                   this.setState({
-                    showPrinterSelectRow: false,
-                    canCancelPrintStatusRow: false,
-                    showFilamentTypeWarningRow: false,
-                    showPrintStatusRow: true,
-                    message: "Scheduling a print",
-                    messageOk: true
-                  });
-                  this.schedulePrint(id, selectedPrinter);
-                }}
+                    selectedPrinter: e.target.value
+                  })
+                }
               >
-                <i className="icon-check text-success"></i>
-              </button>
-            )}
-          </div>
-        </div>
+                {availablePrinterOpts}
+              </select>
+            </>
+          ) : (
+            <p>No available printers found.</p>
+          )}
+        </TableActionRow>
       );
     }
 
@@ -408,11 +354,11 @@ class GcodeList extends React.Component {
       printedOn
     } = this.state;
     const { getAvailablePrinters } = this.props;
-    const gcodeRows =
+    const GcodeTableRows =
       gcodes &&
       gcodes.map(g => {
         return (
-          <GcodeRow
+          <GcodeTableRow
             key={g.id}
             {...g}
             history={this.props.history}
@@ -462,7 +408,7 @@ class GcodeList extends React.Component {
         <div className="list">
           {gcodes === null ? (
             <p className="list-item list-item-message">Loading...</p>
-          ) : !gcodeRows || gcodeRows.length === 0 ? (
+          ) : !GcodeTableRows || GcodeTableRows.length === 0 ? (
             <p className="list-item list-item-message">No G-Codes found!</p>
           ) : (
             <>
@@ -515,12 +461,12 @@ class GcodeList extends React.Component {
                 </button>
               </div>
 
-              {gcodeRows}
+              {GcodeTableRows}
 
               <div className="list-pagination">
                 {currentPage > 0 ? (
                   <button
-                    className="btn-reset"
+                    className="btn btn-sm"
                     onClick={() =>
                       this.loadPage(
                         Math.max(0, currentPage - 1),
@@ -536,7 +482,7 @@ class GcodeList extends React.Component {
                 )}
                 {pages[currentPage + 1] ? (
                   <button
-                    className="btn-reset"
+                    className="btn btn-sm"
                     onClick={() =>
                       this.loadPage(currentPage + 1, orderBy, filter)
                     }
