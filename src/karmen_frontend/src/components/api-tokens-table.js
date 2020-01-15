@@ -15,14 +15,16 @@ class ApiTokensTableRow extends React.Component {
 
     if (showDeleteRow) {
       return (
-        <tr className="inverse">
-          <td colSpan="3">
-            Do you really want to revoke <strong>{token.name}</strong>? This
-            cannot be undone.
-          </td>
-          <td className="action-cell">
+        <div className="list-item list-item-inverse">
+          <div className="list-item-content">
+            <span className="list-item-title">
+              Do you really want to revoke <strong>{token.name}</strong>? This
+              cannot be undone.
+            </span>
+          </div>
+          <div className="list-item-cta">
             <button
-              className="plain"
+              className="btn-reset"
               title="Cancel"
               onClick={() => {
                 this.setState({
@@ -30,40 +32,40 @@ class ApiTokensTableRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-cross"></i>
+              <i className="icon-close"></i>
             </button>
             <button
-              className="plain"
+              className="btn-reset"
               title="Confirm revoke"
               onClick={() => {
                 onTokenDelete(token.jti);
               }}
             >
-              <i className="icon icon-checkmark"></i>
+              <i className="icon-check"></i>
             </button>
-          </td>
-        </tr>
+          </div>
+        </div>
       );
     }
 
     return (
-      <tr>
-        <td>{token.jti}</td>
-        <td>{token.name}</td>
-        <td>{formatters.datetime(token.created)}</td>
-        <td className="action-cell">
+      <div className="list-item">
+        <span>{token.jti}</span>
+        <span>{token.name}</span>
+        <span>{formatters.datetime(token.created)}</span>
+        <div className="list-item-cta">
           <button
-            className="plain icon-link"
+            className="btn-reset"
             onClick={() => {
               this.setState({
                 showDeleteRow: true
               });
             }}
           >
-            <i className="icon icon-bin"></i>
+            <i className="icon-trash text-secondary"></i>
           </button>
-        </td>
-      </tr>
+        </div>
+      </div>
     );
   }
 }
@@ -139,50 +141,42 @@ class ApiTokensTable extends React.Component {
       };
     };
     return (
-      <div>
+      <div className="list">
         {!tokensLoaded ? (
-          <p className="message-block">Loading...</p>
+          <p className="list-item list-item-message">Loading...</p>
         ) : !tokensRows || tokensRows.length === 0 ? (
-          <p className="message-error message-block">No API tokens found!</p>
+          <p className="list-item list-item-message">No G-Codes found!</p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <button
-                    className={`plain sorting-button ${
-                      orderBy.indexOf("jti") > -1 ? "active" : ""
-                    }`}
-                    onClick={sortFactory("jti")}
-                  >
-                    Token ID
-                  </button>
-                </th>
-                <th>
-                  <button
-                    className={`plain sorting-button ${
-                      orderBy.indexOf("name") > -1 ? "active" : ""
-                    }`}
-                    onClick={sortFactory("name")}
-                  >
-                    Name
-                  </button>
-                </th>
-                <th>
-                  <button
-                    className={`plain sorting-button ${
-                      orderBy.indexOf("created") > -1 ? "active" : ""
-                    }`}
-                    onClick={sortFactory("created")}
-                  >
-                    Created
-                  </button>
-                </th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>{tokensRows}</tbody>
-          </table>
+          <>
+            <div className="list-header">
+              <button
+                className={`plain sorting-button ${
+                  orderBy.indexOf("jti") > -1 ? "active" : ""
+                }`}
+                onClick={sortFactory("jti")}
+              >
+                Token ID
+              </button>
+              <button
+                className={`plain sorting-button ${
+                  orderBy.indexOf("name") > -1 ? "active" : ""
+                }`}
+                onClick={sortFactory("name")}
+              >
+                Name
+              </button>
+              <button
+                className={`plain sorting-button ${
+                  orderBy.indexOf("created") > -1 ? "active" : ""
+                }`}
+                onClick={sortFactory("created")}
+              >
+                Created
+              </button>
+            </div>
+
+            {tokensRows}
+          </>
         )}
       </div>
     );

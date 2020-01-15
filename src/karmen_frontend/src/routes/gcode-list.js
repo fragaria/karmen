@@ -160,7 +160,7 @@ class GcodeRow extends React.Component {
                 });
               }}
             >
-              <i className="icon icon-cross icon-state-cancel"></i>
+              <i className="icon-close"></i>
             </button>
             <button
               className="btn-reset"
@@ -178,7 +178,7 @@ class GcodeRow extends React.Component {
                 this.schedulePrint(id, selectedPrinter);
               }}
             >
-              <i className="icon icon-checkmark icon-state-confirm"></i>
+              <i className="icon-check"></i>
             </button>
           </div>
         </div>

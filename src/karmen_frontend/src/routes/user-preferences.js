@@ -22,36 +22,30 @@ const UserPreferences = ({
     return <FreshTokenRequiredCheck />;
   }
   return (
-    <div className="standalone-page">
-      <header>
-        <h1 className="title">User preferences</h1>
-      </header>
-      <div>
-        <div className="content-section">
-          <header>
-            <h2 className="title">API tokens</h2>
-            <Link to="/users/me/tokens" className="plain action link">
-              <i className="icon icon-plus"></i>&nbsp;
-              <span>Add a token</span>
-            </Link>
-          </header>
-          <ApiTokensTable
-            loadTokens={loadApiTokens}
-            tokens={apiTokens}
-            tokensLoaded={apiTokensLoaded}
-            onTokenDelete={onTokenDelete}
-          />
-        </div>
-        <div className="content-section">
-          <h2>Change password</h2>
-          <ChangePasswordForm
-            onUserStateChanged={() => {
-              return loadUser().then(() => {
-                return loadApiTokens();
-              });
-            }}
-          />
-        </div>
+    <div className="content">
+      <div className="container">
+        <h1 className="main-title">
+          API tokens
+          <Link to="/users/me/tokens" className="btn btn-sm">
+            <span>+ Add a token</span>
+          </Link>
+        </h1>
+        <ApiTokensTable
+          loadTokens={loadApiTokens}
+          tokens={apiTokens}
+          tokensLoaded={apiTokensLoaded}
+          onTokenDelete={onTokenDelete}
+        />
+      </div>
+      <div className="container">
+        <h1 className="main-title">Change password</h1>
+        <ChangePasswordForm
+          onUserStateChanged={() => {
+            return loadUser().then(() => {
+              return loadApiTokens();
+            });
+          }}
+        />
       </div>
     </div>
   );

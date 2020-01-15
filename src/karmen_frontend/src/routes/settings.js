@@ -33,15 +33,14 @@ const Settings = ({
               <span>+ Add a user</span>
             </Link>
           </h1>
+          <UsersTable
+            currentUuid={currentUuid}
+            userList={userList}
+            loadUsersPage={loadUsersPage}
+            clearUsersPages={clearUsersPages}
+            onUserChange={onUserChange}
+          />
         </div>
-
-        <UsersTable
-          currentUuid={currentUuid}
-          userList={userList}
-          loadUsersPage={loadUsersPage}
-          clearUsersPages={clearUsersPages}
-          onUserChange={onUserChange}
-        />
         <div className="container">
           <h1 className="main-title">Network scan</h1>
           <NetworkScan />
