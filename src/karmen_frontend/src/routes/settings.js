@@ -44,7 +44,6 @@ const Settings = ({
         />
         <div className="container">
           <h1 className="main-title">Network scan</h1>
-
           <NetworkScan />
         </div>
       </div>

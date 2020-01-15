@@ -162,7 +162,6 @@ class AddApiToken extends React.Component {
               <BusyButton
                 type="submit"
                 onClick={this.addApiToken}
-                makeDisabled={true}
                 busyChildren="Creating..."
               >
                 Create token

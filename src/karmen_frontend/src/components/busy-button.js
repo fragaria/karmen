@@ -13,8 +13,7 @@ class BusyButton extends React.Component {
       type,
       children,
       busyChildren,
-      disabled,
-      makeDisabled
+      disabled
     } = this.props;
     const { isBusy, isDisabled } = this.state;
     let isInDisabledState = isDisabled !== undefined ? isDisabled : disabled;
@@ -33,7 +32,7 @@ class BusyButton extends React.Component {
         onClick={e => {
           this.setState({
             isBusy: true,
-            isDisabled: makeDisabled ? true : undefined
+            isDisabled: true
           });
           return Promise.resolve(onClick(e)).then(r => {
             this.setState({ isBusy: false, isDisabled: undefined });

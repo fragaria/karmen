@@ -2,12 +2,12 @@ import React from "react";
 import { connect } from "react-redux";
 import { changePassword } from "../actions/users";
 import { FormInputs } from "../components/form-utils";
+import BusyButton from "../components/busy-button";
 
 class ChangePasswordForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      submitting: false,
       message: null,
       messageOk: false,
       changePwdForm: {
@@ -65,19 +65,15 @@ class ChangePasswordForm extends React.Component {
       });
       return;
     }
-    this.setState({
-      submitting: true
-    });
-    doChangePassword(
+    return doChangePassword(
       changePwdForm.password.val,
       changePwdForm.new_password.val,
       changePwdForm.new_password_confirmation.val
-    ).then(async code => {
+    ).then(code => {
       if (code !== 200) {
         this.setState({
           messageOk: false,
           message: "Password change unsuccessful, try again, please.",
-          submitting: false,
           changePwdForm: Object.assign({}, changePwdForm, {
             password: Object.assign({}, changePwdForm.password, { val: "" }),
             new_password: Object.assign({}, changePwdForm.new_password, {
@@ -91,30 +87,34 @@ class ChangePasswordForm extends React.Component {
           })
         });
       } else {
-        onUserStateChanged().then(() => {
-          this.setState({
-            submitting: false,
-            message: "Password changed successfully.",
-            messageOk: true,
-            changePwdForm: Object.assign({}, changePwdForm, {
-              password: Object.assign({}, changePwdForm.password, { val: "" }),
-              new_password: Object.assign({}, changePwdForm.new_password, {
-                val: ""
-              }),
-              new_password_confirmation: Object.assign(
-                {},
-                changePwdForm.new_password_confirmation,
-                { val: "" }
-              )
-            })
-          });
-        });
+        return (
+          onUserStateChanged &&
+          onUserStateChanged().then(() => {
+            this.setState({
+              message: "Password changed successfully.",
+              messageOk: true,
+              changePwdForm: Object.assign({}, changePwdForm, {
+                password: Object.assign({}, changePwdForm.password, {
+                  val: ""
+                }),
+                new_password: Object.assign({}, changePwdForm.new_password, {
+                  val: ""
+                }),
+                new_password_confirmation: Object.assign(
+                  {},
+                  changePwdForm.new_password_confirmation,
+                  { val: "" }
+                )
+              })
+            });
+          })
+        );
       }
     });
   }
 
   render() {
-    const { message, messageOk, submitting, changePwdForm } = this.state;
+    const { message, messageOk, changePwdForm } = this.state;
     const updateValue = (name, value) => {
       const { changePwdForm } = this.state;
       this.setState({
@@ -135,14 +135,14 @@ class ChangePasswordForm extends React.Component {
         )}
         <FormInputs definition={changePwdForm} updateValue={updateValue} />
         <div className="cta-box text-center">
-          <button
+          <BusyButton
             className="btn"
             type="submit"
             onClick={this.changePwd}
-            disabled={submitting}
+            busyChildren="Changing password..."
           >
             Change password
-          </button>
+          </BusyButton>
         </div>
       </form>
     );

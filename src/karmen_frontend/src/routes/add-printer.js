@@ -5,11 +5,11 @@ import { BackLink } from "../components/back";
 import { FormInputs } from "../components/form-utils";
 import { addPrinter } from "../actions/printers";
 import RoleBasedGateway from "../components/role-based-gateway";
+import BusyButton from "../components/busy-button";
 
 class AddPrinter extends React.Component {
   state = {
     redirect: false,
-    submitting: false,
     message: null,
     messageOk: false,
     form: {
@@ -46,8 +46,7 @@ class AddPrinter extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false,
-      submitting: true
+      messageOk: false
     });
     const { form } = this.state;
     let hasErrors = false;
@@ -78,36 +77,31 @@ class AddPrinter extends React.Component {
         protocol = url.protocol.replace(":", "");
         host = url.host;
       }
-      createPrinter(protocol, host, form.name.val, form.apiKey.val).then(r => {
-        switch (r.status) {
-          case 201:
-            this.setState({
-              submitting: false,
-              redirect: true
-            });
-            break;
-          case 409:
-            this.setState({
-              message: "Printer on this address is already registered",
-              submitting: false
-            });
-            break;
-          default:
-            this.setState({
-              message: "Cannot add printer, check server logs",
-              submitting: false
-            });
+      return createPrinter(protocol, host, form.name.val, form.apiKey.val).then(
+        r => {
+          switch (r.status) {
+            case 201:
+              this.setState({
+                redirect: true
+              });
+              break;
+            case 409:
+              this.setState({
+                message: "Printer on this address is already registered"
+              });
+              break;
+            default:
+              this.setState({
+                message: "Cannot add printer, check server logs"
+              });
+          }
         }
-      });
-    } else {
-      this.setState({
-        submitting: false
-      });
+      );
     }
   }
 
   render() {
-    const { form, message, messageOk, redirect, submitting } = this.state;
+    const { form, message, messageOk, redirect } = this.state;
     if (redirect) {
       return <Redirect to="/" />;
     }
@@ -136,14 +130,14 @@ class AddPrinter extends React.Component {
                 }}
               />
               <div className="cta-box text-center">
-                <button
+                <BusyButton
                   className="btn"
                   type="submit"
                   onClick={this.addPrinter}
-                  disabled={submitting}
+                  busyChildren="Adding..."
                 >
                   Add printer
-                </button>{" "}
+                </BusyButton>{" "}
                 <BackLink to="/" />
               </div>
             </form>

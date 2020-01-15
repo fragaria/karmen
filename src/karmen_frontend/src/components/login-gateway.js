@@ -11,7 +11,6 @@ class LoginGateway extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      submitting: false,
       message: null,
       messageOk: false,
       loginForm: {
@@ -67,26 +66,21 @@ class LoginGateway extends React.Component {
       });
       return;
     }
-    this.setState({
-      submitting: true
-    });
     return doAuthenticate(loginForm.username.val, loginForm.password.val).then(
-      async r => {
+      r => {
         if (r.status !== 200) {
           this.setState({
             messageOk: false,
             message:
               (r.data && r.data.message) ||
               "Login unsuccessful, try again, please.",
-            submitting: false,
             loginForm: Object.assign({}, loginForm, {
               password: Object.assign({}, loginForm.password, { val: "" })
             })
           });
         } else {
-          onUserStateChanged().then(() => {
+          return onUserStateChanged().then(() => {
             this.setState({
-              submitting: false,
               message: "",
               messageOk: true,
               loginForm: Object.assign({}, loginForm, {
@@ -102,7 +96,7 @@ class LoginGateway extends React.Component {
 
   render() {
     const { children, userState, setCurrentUserState, history } = this.props;
-    const { message, messageOk, submitting, loginForm } = this.state;
+    const { message, messageOk, loginForm } = this.state;
     if (!userState || userState === "unknown") {
       return (
         <div>
@@ -150,23 +144,21 @@ class LoginGateway extends React.Component {
                   className="btn"
                   type="submit"
                   onClick={this.login}
-                  makeDisabled={true}
                   busyChildren="Logging in..."
                 >
                   Login
                 </BusyButton>{" "}
                 {userState === "fresh-token-required" && (
-                  <button
+                  <BusyButton
                     className={"btn btn-plain"}
                     type="reset"
                     onClick={() => {
                       setCurrentUserState("logged-in");
                       history.push("/");
                     }}
-                    disabled={submitting}
                   >
                     Cancel
-                  </button>
+                  </BusyButton>
                 )}
               </div>
             </form>

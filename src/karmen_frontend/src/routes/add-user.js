@@ -156,7 +156,6 @@ class AddUser extends React.Component {
                   className="btn"
                   type="submit"
                   onClick={this.addUser}
-                  makeDisabled={true}
                   busyChildren="Adding..."
                 >
                   Add user

@@ -2,12 +2,13 @@ import React from "react";
 
 import Loader from "../components/loader";
 import { FormInputs } from "../components/form-utils";
+import BusyButton from "../components/busy-button";
+
 import { getSettings, changeSettings, enqueueTask } from "../services/backend";
 
 class NetworkScan extends React.Component {
   state = {
     init: true,
-    submitting: false,
     settings: {
       network_interface: {
         name: "On which network interface should we be looking for printers?",
@@ -51,8 +52,7 @@ class NetworkScan extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false,
-      submitting: true
+      messageOk: false
     });
     const { settings } = this.state;
     let hasErrors = false;
@@ -77,45 +77,37 @@ class NetworkScan extends React.Component {
       settings: updatedSettings
     });
     if (!hasErrors) {
-      changeSettings(changedSettings).then(r => {
+      return changeSettings(changedSettings).then(r => {
         switch (r) {
           case 201:
-            enqueueTask("scan_network").then(r => {
+            return enqueueTask("scan_network").then(r => {
               switch (r) {
                 case 202:
                   this.setState({
                     message:
                       "Network scan initiated, the printers should start popping up at any moment",
-                    messageOk: true,
-                    submitting: false
+                    messageOk: true
                   });
                   break;
                 case 400:
                 default:
                   this.setState({
-                    message: "Cannot scan the network, check server logs",
-                    submitting: false
+                    message: "Cannot scan the network, check server logs"
                   });
               }
             });
-            break;
           case 400:
           default:
             this.setState({
-              message: "Cannot scan the network, check server logs",
-              submitting: false
+              message: "Cannot scan the network, check server logs"
             });
         }
-      });
-    } else {
-      this.setState({
-        submitting: false
       });
     }
   }
 
   render() {
-    const { init, submitting, settings, message, messageOk } = this.state;
+    const { init, settings, message, messageOk } = this.state;
     if (init) {
       return (
         <div>
@@ -141,14 +133,14 @@ class NetworkScan extends React.Component {
           )}
           <FormInputs definition={settings} updateValue={updateValue} />
           <div className="cta-box text-center">
-            <button
+            <BusyButton
               className="btn"
               type="submit"
               onClick={this.startNetworkScan}
-              disabled={submitting}
+              busyChildren="Enqueing scan..."
             >
               Scan the network for printers
-            </button>
+            </BusyButton>
           </div>
         </fieldset>
       </form>

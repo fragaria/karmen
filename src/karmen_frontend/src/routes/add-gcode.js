@@ -104,7 +104,6 @@ class AddGcode extends React.Component {
                 className="btn"
                 type="submit"
                 onClick={this.addCode}
-                makeDisabled={true}
                 busyChildren="Uploading..."
               >
                 Upload G-Code
