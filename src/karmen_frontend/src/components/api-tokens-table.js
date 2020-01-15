@@ -145,7 +145,7 @@ class ApiTokensTable extends React.Component {
         {!tokensLoaded ? (
           <p className="list-item list-item-message">Loading...</p>
         ) : !tokensRows || tokensRows.length === 0 ? (
-          <p className="list-item list-item-message">No G-Codes found!</p>
+          <p className="list-item list-item-message">No API tokens found!</p>
         ) : (
           <>
             <div className="list-header">

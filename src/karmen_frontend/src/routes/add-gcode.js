@@ -62,7 +62,7 @@ class AddGcode extends React.Component {
       return <Redirect to={`/gcodes/${gcodeId}`} />;
     }
     return (
-      <div className="content printer-list">
+      <div className="content">
         <div className="container">
           <h1 className="main-title text-center">Add a G-Code</h1>
 

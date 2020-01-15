@@ -125,7 +125,7 @@ class AddUser extends React.Component {
     }
     return (
       <RoleBasedGateway requiredRole="admin">
-        <div className="content printer-list">
+        <div className="content">
           <div className="container">
             <h1 className="main-title text-center">Add a new user</h1>
             <p className="text-center">

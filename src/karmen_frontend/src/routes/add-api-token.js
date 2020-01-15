@@ -85,91 +85,93 @@ class AddApiToken extends React.Component {
     }
 
     return (
-      <div className="standalone-page">
-        <header>
-          <h1 className="title">Create new API token</h1>
-        </header>
-        {showToken ? (
-          <>
-            <div className="content-section">
-              <ul>
-                <li>
-                  This is the token that is required to talk to Karmen API
-                </li>
-                <li>
-                  It has to be used with every API request in the Authorization
-                  header like this{" "}
-                  <code>Authorization: Bearer &lt;token&gt;</code>
-                </li>
-                <li>
-                  This token also does not have an expiration date and can be
-                  used forever
-                </li>
-                <li>
-                  If you need to disable it, you have to revoke it on the User
-                  preferences screen
-                </li>
-                <li>
-                  This token is not authorized to modify your password and
-                  cannot be used for administrative tasks like user management
-                </li>
-                <li>
-                  <strong>
-                    You will never see this token again, so be sure that you
-                    have a secure copy of it
-                  </strong>
-                </li>
-              </ul>
-              <pre>{createdToken}</pre>
-            </div>
-            <div className="content-section">
-              <button
-                type="submit"
-                onClick={e => {
-                  e.preventDefault();
+      <div className="content">
+        <div className="container">
+          <h1 className="main-title text-center">Create new API token</h1>
+          {showToken ? (
+            <>
+              <div className="content-section">
+                <ul>
+                  <li>
+                    This is the token that is required to talk to Karmen API
+                  </li>
+                  <li>
+                    It has to be used with every API request in the
+                    Authorization header like this{" "}
+                    <code>Authorization: Bearer &lt;token&gt;</code>
+                  </li>
+                  <li>
+                    This token also does not have an expiration date and can be
+                    used forever
+                  </li>
+                  <li>
+                    If you need to disable it, you have to revoke it on the User
+                    preferences screen
+                  </li>
+                  <li>
+                    This token is not authorized to modify your password and
+                    cannot be used for administrative tasks like user management
+                  </li>
+                  <li>
+                    <strong>
+                      You will never see this token again, so be sure that you
+                      have a secure copy of it
+                    </strong>
+                  </li>
+                </ul>
+                <pre>{createdToken}</pre>
+              </div>
+              <div className="cta-box text-center">
+                <button
+                  className="btn"
+                  type="submit"
+                  onClick={e => {
+                    e.preventDefault();
+                    this.setState({
+                      showToken: false,
+                      createdToken: null,
+                      redirect: true
+                    });
+                  }}
+                >
+                  Dismiss
+                </button>
+              </div>
+            </>
+          ) : (
+            <form>
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
+              <FormInputs
+                definition={form}
+                updateValue={(name, value) => {
                   this.setState({
-                    showToken: false,
-                    createdToken: null,
-                    redirect: true
+                    form: Object.assign({}, form, {
+                      [name]: Object.assign({}, form[name], {
+                        val: value,
+                        error: null
+                      })
+                    })
                   });
                 }}
-              >
-                Dismiss
-              </button>
-            </div>
-          </>
-        ) : (
-          <form>
-            {message && (
-              <p className={messageOk ? "message-success" : "message-error"}>
-                {message}
-              </p>
-            )}
-            <FormInputs
-              definition={form}
-              updateValue={(name, value) => {
-                this.setState({
-                  form: Object.assign({}, form, {
-                    [name]: Object.assign({}, form[name], {
-                      val: value,
-                      error: null
-                    })
-                  })
-                });
-              }}
-            />
-            <div className="form-actions">
-              <BusyButton
-                type="submit"
-                onClick={this.addApiToken}
-                busyChildren="Creating..."
-              >
-                Create token
-              </BusyButton>
-              <BackLink to="/users/me" />
-            </div>
-          </form>
-        )}
+              />
+              <div className="cta-box text-center">
+                <BusyButton
+                  className="btn"
+                  type="submit"
+                  onClick={this.addApiToken}
+                  busyChildren="Creating..."
+                >
+                  Create token
+                </BusyButton>{" "}
+                <BackLink to="/users/me" />
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     );
   }
