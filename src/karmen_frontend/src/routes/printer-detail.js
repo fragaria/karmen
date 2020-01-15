@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/loader";
 import RoleBasedGateway from "../components/role-based-gateway";
@@ -449,6 +449,9 @@ class PrinterDetail extends React.Component {
           <Loader />
         </div>
       );
+    }
+    if (!printer) {
+      return <Redirect to="/page-404" />;
     }
     const jobsRows =
       jobs &&

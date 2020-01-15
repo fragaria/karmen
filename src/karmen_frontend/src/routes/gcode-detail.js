@@ -1,4 +1,5 @@
 import React from "react";
+import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import Loader from "../components/loader";
 import { getGcode, printGcode, downloadGcode } from "../services/backend";
@@ -8,6 +9,7 @@ import formatters from "../services/formatters";
 class GcodeDetail extends React.Component {
   state = {
     gcode: null,
+    gcodeLoaded: false,
     selectedPrinter: "",
     printedOn: [],
     submitting: false,
@@ -28,7 +30,8 @@ class GcodeDetail extends React.Component {
     const { match } = this.props;
     getGcode(match.params.id, []).then(gcode => {
       this.setState({
-        gcode
+        gcode,
+        gcodeLoaded: true
       });
     });
   }
@@ -69,6 +72,7 @@ class GcodeDetail extends React.Component {
   render() {
     const {
       gcode,
+      gcodeLoaded,
       message,
       messageOk,
       submitting,
@@ -78,12 +82,15 @@ class GcodeDetail extends React.Component {
       gcodeFilamentType
     } = this.state;
 
-    if (!gcode) {
+    if (!gcodeLoaded) {
       return (
         <div>
           <Loader />
         </div>
       );
+    }
+    if (!gcode) {
+      return <Redirect to="/page-404" />;
     }
     const { getAvailablePrinters } = this.props;
     const availablePrinters = getAvailablePrinters(printedOn);
