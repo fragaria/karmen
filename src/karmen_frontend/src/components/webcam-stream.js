@@ -5,7 +5,7 @@ export class WebcamStream extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isOnline: false,
+      isOnline: true,
       isMaximized: false,
       timer: null,
       snapshotPromise: null,
@@ -15,8 +15,8 @@ export class WebcamStream extends React.Component {
 
   getSnapshot() {
     const { url } = this.props;
-    const { snapshotPromise } = this.state;
-    if (snapshotPromise) {
+    const { isOnline, snapshotPromise } = this.state;
+    if (snapshotPromise || !isOnline) {
       return;
     }
     const newSnapshotPromise = getWebcamSnapshot(url).then((r) => {
@@ -84,7 +84,7 @@ export class WebcamStream extends React.Component {
         })
       }}
     >
-      {isOnline
+      {isOnline && source
         ?
           <img
             className={klass.join(' ')}
