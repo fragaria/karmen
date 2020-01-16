@@ -272,7 +272,7 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.return_value.json.return_value = {"text": "OctoPrint"}
         printer = Octoprint("192.168.1.15", protocol="https")
         printer.sniff()
-        mock_get_uri.assert_called_with("https://192.168.1.15/api/version")
+        mock_get_uri.assert_called_with("https://192.168.1.15/api/version", timeout=2)
         self.assertEqual(printer.client_info.connected, True)
         self.assertEqual(printer.client_info.version, {"text": "OctoPrint"})
         self.assertEqual(

@@ -64,7 +64,9 @@ class CachedOctoprint(Octoprint):
 
     def _perform_http_get(self, uri):
         try:
-            req = self.http_session.get(uri)
+            req = self.http_session.get(
+                uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
+            )
             if req is None:
                 self.client_info.connected = False
             elif bool(self.client_info.api_key):

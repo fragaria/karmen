@@ -43,7 +43,6 @@ class Octoprint(PrinterClient):
             webcam=client_props.get("webcam", None),
         )
         self.http_session = requests.Session()
-        self.http_session.timeout = app.config.get("NETWORK_TIMEOUT", 10)
         self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
         if self.client_info.api_key:
             self.http_session.headers.update({"X-Api-Key": self.client_info.api_key})
@@ -63,7 +62,9 @@ class Octoprint(PrinterClient):
             return None
         uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
         try:
-            req = self.http_session.get(uri)
+            req = self.http_session.get(
+                uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
+            )
             if req is None:
                 self.client_info.connected = False
             elif bool(self.client_info.api_key):
@@ -85,7 +86,13 @@ class Octoprint(PrinterClient):
             return None
         uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
         try:
-            req = self.http_session.post(uri, data=data, files=files, json=json)
+            req = self.http_session.post(
+                uri,
+                data=data,
+                files=files,
+                json=json,
+                timeout=app.config.get("NETWORK_TIMEOUT", 10),
+            )
             if req is None:
                 self.client_info.connected = False
             elif bool(self.client_info.api_key):
