@@ -76,25 +76,44 @@ export class WebcamStream extends React.Component {
       klass.push("rotate-90");
     }
     return (
-      <div
-        className={`webcam-stream ${isMaximized ? "maximized" : ""}`}
-        onClick={() => {
-          const { isMaximized } = this.state;
-          this.setState({
-            isMaximized: !isMaximized
-          });
-        }}
-      >
-        {isOnline && source ? (
-          <img
-            className={klass.join(" ")}
-            alt={`Current state from ${url}`}
-            src={source}
-          />
-        ) : (
-          <div className="webcam-stream">Stream unavailable</div>
+      <>
+        <div
+          className={`webcam-stream ${isOnline && source ? "" : "unavailable"}`}
+          onClick={() => {
+            if (!isOnline || !source) {
+              return;
+            }
+            this.setState({
+              isMaximized: true
+            });
+          }}
+        >
+          {isOnline && source ? (
+            <img
+              className={klass.join(" ")}
+              alt={`Current state from ${url}`}
+              src={source}
+            />
+          ) : (
+            <div>Stream unavailable</div>
+          )}
+        </div>
+        {isMaximized && (
+          <div
+            className="webcam-stream maximized"
+            onClick={() => {
+              this.setState({
+                isMaximized: false
+              });
+            }}
+          >
+            <div
+              className="overlay"
+              style={{ backgroundImage: `url(${source})` }}
+            ></div>
+          </div>
         )}
-      </div>
+      </>
     );
   }
 }

@@ -27,7 +27,7 @@ class ApiTokensTableRow extends React.Component {
           }}
         >
           Do you really want to revoke <strong>{token.name}</strong>? This
-              cannot be undone.
+          cannot be undone.
         </TableActionRow>
       );
     }

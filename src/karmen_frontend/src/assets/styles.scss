@@ -541,6 +541,32 @@ select {
   background: #adadad;
   color: map-get($palette, "gray-light");
   font-size: 2rem;
+  cursor: pointer;
+
+  &.unavailable {
+    cursor: auto;
+  }
+
+  &.maximized {
+    position: fixed;
+    z-index: 4;
+    top: 0;
+    left: 0;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, .8);
+
+    .overlay {
+      height: 90%;
+      width: 90%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+  }
 
   img {
     width: 100%
