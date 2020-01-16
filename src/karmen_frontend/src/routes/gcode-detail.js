@@ -1,6 +1,7 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
+import { BackLink } from "../components/back";
 import Loader from "../components/loader";
 import { getGcode, printGcode, downloadGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
@@ -121,20 +122,6 @@ class GcodeDetail extends React.Component {
 
             <dt className="term">Size: </dt>
             <dd className="description">{formatters.bytes(gcode.size)}</dd>
-
-            <dt className="term">Download: </dt>
-            <dd className="description">
-              <button
-                className="btn-reset anchor"
-                onClick={() => {
-                  downloadGcode(gcode.data, gcode.filename);
-                }}
-              >
-                {gcode.path}
-                {gcode.path ? "/" : ""}
-                {gcode.filename}
-              </button>
-            </dd>
 
             {gcode.analysis && (
               <>
@@ -325,6 +312,21 @@ class GcodeDetail extends React.Component {
                 )}
               </form>
             )}
+          </div>
+
+          <div className="cta-box text-center">
+            <button
+              className="btn"
+              onClick={() => {
+                downloadGcode(gcode.data, gcode.filename);
+              }}
+            >
+              Download G-code
+            </button>
+          </div>
+
+          <div className="cta-box text-center">
+            <BackLink to="/gcodes" text="Back to listing" />
           </div>
         </div>
       </section>
