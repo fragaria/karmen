@@ -387,80 +387,81 @@ class GcodeList extends React.Component {
               + Upload a g-code
             </Link>
           </h1>
-
-          <form className="input-group">
-            <label htmlFor="filter">
-              <span className="input-label-icon icon-search"></span>
-              <DebounceInput
-                type="search"
-                name="filter"
-                id="filter"
-                minLength={3}
-                debounceTimeout={300}
-                onChange={e => {
-                  this.loadPage(currentPage, orderBy, e.target.value);
-                }}
-              />
-            </label>
-          </form>
         </div>
 
         <div className="list">
+          <div className="list-header">
+            <div className="list-search">
+              <label htmlFor="filter">
+                <span className="icon icon-search"></span>
+                <DebounceInput
+                  type="search"
+                  name="filter"
+                  id="filter"
+                  minLength={3}
+                  debounceTimeout={300}
+                  onChange={e => {
+                    this.loadPage(currentPage, orderBy, e.target.value);
+                  }}
+                />
+              </label>
+            </div>
+            <div className="list-filter">
+              <button
+                className={`plain sorting-button ${
+                  orderBy.indexOf("filename") > -1 ? "active" : ""
+                }`}
+                onClick={() => {
+                  let order = "+filename";
+                  if (orderBy === "+filename") {
+                    order = "-filename";
+                  } else if (orderBy === "-filename") {
+                    order = "-uploaded";
+                  }
+                  this.loadPage(currentPage, order, filter);
+                }}
+              >
+                Filename
+              </button>
+              <button
+                className={`plain sorting-button ${
+                  orderBy.indexOf("size") > -1 ? "active" : ""
+                }`}
+                onClick={() => {
+                  let order = "+size";
+                  if (orderBy === "+size") {
+                    order = "-size";
+                  } else if (orderBy === "-size") {
+                    order = "-uploaded";
+                  }
+                  this.loadPage(currentPage, order, filter);
+                }}
+              >
+                Size
+              </button>
+              <button
+                className={`plain sorting-button ${
+                  orderBy.indexOf("uploaded") > -1 ? "active" : ""
+                }`}
+                onClick={() => {
+                  let order = "+uploaded";
+                  if (orderBy === "+uploaded") {
+                    order = "-uploaded";
+                  }
+                  this.loadPage(currentPage, order, filter);
+                }}
+              >
+                Uploaded at
+              </button>
+            </div>
+          </div>
+
           {gcodes === null ? (
             <p className="list-item list-item-message">Loading...</p>
           ) : !GcodeTableRows || GcodeTableRows.length === 0 ? (
             <p className="list-item list-item-message">No G-Codes found!</p>
           ) : (
             <>
-              <div className="list-header">
-                <button
-                  className={`plain sorting-button ${
-                    orderBy.indexOf("filename") > -1 ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    let order = "+filename";
-                    if (orderBy === "+filename") {
-                      order = "-filename";
-                    } else if (orderBy === "-filename") {
-                      order = "-uploaded";
-                    }
-                    this.loadPage(currentPage, order, filter);
-                  }}
-                >
-                  Filename
-                </button>
-                <button
-                  className={`plain sorting-button ${
-                    orderBy.indexOf("size") > -1 ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    let order = "+size";
-                    if (orderBy === "+size") {
-                      order = "-size";
-                    } else if (orderBy === "-size") {
-                      order = "-uploaded";
-                    }
-                    this.loadPage(currentPage, order, filter);
-                  }}
-                >
-                  Size
-                </button>
-                <button
-                  className={`plain sorting-button ${
-                    orderBy.indexOf("uploaded") > -1 ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    let order = "+uploaded";
-                    if (orderBy === "+uploaded") {
-                      order = "-uploaded";
-                    }
-                    this.loadPage(currentPage, order, filter);
-                  }}
-                >
-                  Uploaded at
-                </button>
-              </div>
-
               {GcodeTableRows}
 
               <div className="list-pagination">

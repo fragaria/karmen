@@ -219,11 +219,11 @@ class UsersTable extends React.Component {
     };
 
     return (
-      <>
-        <div className="container">
-          <form className="input-group">
+      <div className="list">
+        <div className="list-header">
+          <div className="list-search">
             <label htmlFor="filter">
-              <span className="input-label-icon icon-search"></span>
+              <span className="icon icon-search"></span>
               <DebounceInput
                 type="search"
                 name="filter"
@@ -241,79 +241,75 @@ class UsersTable extends React.Component {
                 }}
               />
             </label>
-          </form>
+          </div>
+          <div className="list-filter">
+            <button
+              className={`plain sorting-button ${
+                userList.orderBy.indexOf("uuid") > -1 ? "active" : ""
+              }`}
+              onClick={sortFactory("uuid")}
+            >
+              UUID
+            </button>
+            <button
+              className={`plain sorting-button ${
+                userList.orderBy.indexOf("username") > -1 ? "active" : ""
+              }`}
+              onClick={sortFactory("username")}
+            >
+              Username
+            </button>
+            <button
+              className={`plain sorting-button ${
+                userList.orderBy.indexOf("role") > -1 ? "active" : ""
+              }`}
+              onClick={sortFactory("role")}
+            >
+              Role
+            </button>
+          </div>
         </div>
 
-        <div className="list">
-          {!usersLoaded ? (
-            <p className="list-item list-item-message">Loading...</p>
-          ) : !usersRows || usersRows.length === 0 ? (
-            <p className="list-item list-item-message">No users found!</p>
-          ) : (
-            <>
-              <div className="list-header">
+        {!usersLoaded ? (
+          <p className="list-item list-item-message">Loading...</p>
+        ) : !usersRows || usersRows.length === 0 ? (
+          <p className="list-item list-item-message">No users found!</p>
+        ) : (
+          <>
+            {usersRows}
+            <div className="list-pagination">
+              {currentPageIndex > 0 ? (
                 <button
-                  className={`plain sorting-button ${
-                    userList.orderBy.indexOf("uuid") > -1 ? "active" : ""
-                  }`}
-                  onClick={sortFactory("uuid")}
+                  className="btn btn-sm"
+                  onClick={() => {
+                    this.setState({
+                      currentPageIndex: Math.max(0, currentPageIndex - 1)
+                    });
+                  }}
                 >
-                  UUID
+                  Previous
                 </button>
+              ) : (
+                <span></span>
+              )}
+              {currentPage.data.next ? (
                 <button
-                  className={`plain sorting-button ${
-                    userList.orderBy.indexOf("username") > -1 ? "active" : ""
-                  }`}
-                  onClick={sortFactory("username")}
+                  className="btn btn-sm"
+                  onClick={() => {
+                    this.setState({
+                      currentPageIndex: currentPageIndex + 1
+                    });
+                  }}
                 >
-                  Username
+                  Next
                 </button>
-                <button
-                  className={`plain sorting-button ${
-                    userList.orderBy.indexOf("role") > -1 ? "active" : ""
-                  }`}
-                  onClick={sortFactory("role")}
-                >
-                  Role
-                </button>
-              </div>
-
-              {usersRows}
-
-              <div className="list-pagination">
-                {currentPageIndex > 0 ? (
-                  <button
-                    className="btn btn-sm"
-                    onClick={() => {
-                      this.setState({
-                        currentPageIndex: Math.max(0, currentPageIndex - 1)
-                      });
-                    }}
-                  >
-                    Previous
-                  </button>
-                ) : (
-                  <span></span>
-                )}
-                {currentPage.data.next ? (
-                  <button
-                    className="btn btn-sm"
-                    onClick={() => {
-                      this.setState({
-                        currentPageIndex: currentPageIndex + 1
-                      });
-                    }}
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <span></span>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </>
+              ) : (
+                <span></span>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     );
   }
 }
