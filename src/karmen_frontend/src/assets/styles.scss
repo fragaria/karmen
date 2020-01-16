@@ -225,6 +225,18 @@ footer {
   }
 }
 
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    font-size: $spacing-default * 2;
+    padding-top: $spacing-default * 6;
+    font-size: $spacing-default * 2;
+  }
+}
+
 .btn {
   display: inline-block;
   outline: none;
