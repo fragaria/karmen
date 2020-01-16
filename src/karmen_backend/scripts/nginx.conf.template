@@ -20,6 +20,8 @@ http {
   include             mime.types;
   default_type        application/octet-stream;
   client_max_body_size 256M;
+  client_body_buffer_size 1M;
+  client_body_temp_path /tmp 1 2;
 
   server {
     listen       ${SERVICE_HOST}:${SERVICE_PORT} default_server;
