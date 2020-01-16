@@ -297,7 +297,7 @@ class GcodeList extends React.Component {
       ];
       page = 0;
     }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter, 3, [
+    getGcodes(pages[page].startWith, newOrderBy, newFilter, 15, [
       "id",
       "display",
       "filename",
