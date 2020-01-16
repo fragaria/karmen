@@ -47,6 +47,7 @@ http {
         application/x-font-ttf
         font/opentype
         image/svg+xml
+        image/jpeg
         image/x-icon;
 
 

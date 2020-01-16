@@ -51,6 +51,7 @@ http {
       application/vnd.ms-fontobject
       application/x-font-ttf
       font/opentype
+      image/jpeg
       image/svg+xml
       image/x-icon;
 
