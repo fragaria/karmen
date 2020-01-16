@@ -31,6 +31,27 @@ http {
       server ${FRONTEND_HOST}:${FRONTEND_PORT};
   }
 
+  gzip on;
+  gzip_proxied any;
+  gzip_comp_level 6;
+  gzip_buffers 16 8k;
+  gzip_min_length 1000;
+  gzip_types
+      text/plain
+      text/css
+      application/json
+      application/javascript
+      application/x-javascript
+      text/xml
+      application/xml
+      application/xml+rss
+      text/javascript
+      application/vnd.ms-fontobject
+      application/x-font-ttf
+      font/opentype
+      image/svg+xml
+      image/x-icon;
+
   server {
     listen       ${SERVICE_HOST}:${SERVICE_PORT} default_server;
     resolver     127.0.0.11 valid=5m;
