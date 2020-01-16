@@ -58,7 +58,7 @@ class AddPrinter extends React.Component {
     if (
       !form.address.val ||
       form.address.val.match(
-        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?$/
+        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/?:?\d{0,5}?$/
       ) === null
     ) {
       hasErrors = true;
