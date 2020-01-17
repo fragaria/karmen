@@ -50,13 +50,25 @@ class Sorting extends React.Component {
 
     return (
       <div className="list-filter">
-        <button
-          className="list-filter-toggle btn-reset"
-          onClick={toggle}
-        >
-          {active.replace("+", "").replace("-", "")}
-          <span className={`icon-${active.indexOf("+") > -1 ? "up" : "down"}`}></span>
-        </button>
+        {collection.length > 1 && (
+          <button
+            className="list-filter-toggle btn-reset"
+            onClick={toggle}
+          >
+            {active.replace("+", "").replace("-", "")}
+            <span className={`icon-${active.indexOf("+") > -1 ? "up" : "down"}`}></span>
+          </button>
+        )}
+
+        {collection.length === 1 && (
+          <button
+            className="list-filter-toggle btn-reset"
+            onClick={onChange}
+          >
+            {active.replace("+", "").replace("-", "")}
+            <span className={`icon-${active.indexOf("+") > -1 ? "up" : "down"}`}></span>
+          </button>
+        )}
 
         {show && (
           <div className="list-filter-options">
