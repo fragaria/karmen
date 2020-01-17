@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 
 import TableActionRow from "../components/table-action-row";
+import Sorting from "../components/sorting";
 import { getGcodes, deleteGcode, printGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
@@ -406,54 +407,26 @@ class GcodeList extends React.Component {
                 />
               </label>
             </div>
-            <div className="list-filter">
-              <button
-                className={`plain sorting-button ${
-                  orderBy.indexOf("filename") > -1 ? "active" : ""
-                }`}
-                onClick={() => {
-                  let order = "+filename";
-                  if (orderBy === "+filename") {
-                    order = "-filename";
-                  } else if (orderBy === "-filename") {
-                    order = "-uploaded";
+
+            <Sorting
+              active={orderBy}
+              collection={["filename", "size", "uploaded"]}
+              onChange={column => {
+                  return () => {
+                    let order = `+${column}`;
+                    if (orderBy === `+${column}`) {
+                      order = `-${column}`;
+                    } else if (
+                      orderBy === `-${column}` &&
+                      orderBy !== "+filename"
+                    ) {
+                      order = "+filename";
+                    }
+                    this.loadPage(currentPage, order, filter);
                   }
-                  this.loadPage(currentPage, order, filter);
-                }}
-              >
-                Filename
-              </button>
-              <button
-                className={`plain sorting-button ${
-                  orderBy.indexOf("size") > -1 ? "active" : ""
-                }`}
-                onClick={() => {
-                  let order = "+size";
-                  if (orderBy === "+size") {
-                    order = "-size";
-                  } else if (orderBy === "-size") {
-                    order = "-uploaded";
-                  }
-                  this.loadPage(currentPage, order, filter);
-                }}
-              >
-                Size
-              </button>
-              <button
-                className={`plain sorting-button ${
-                  orderBy.indexOf("uploaded") > -1 ? "active" : ""
-                }`}
-                onClick={() => {
-                  let order = "+uploaded";
-                  if (orderBy === "+uploaded") {
-                    order = "-uploaded";
-                  }
-                  this.loadPage(currentPage, order, filter);
-                }}
-              >
-                Uploaded at
-              </button>
-            </div>
+                }
+              }
+             />
           </div>
 
           {gcodes === null ? (
