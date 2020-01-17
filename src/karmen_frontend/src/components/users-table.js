@@ -1,6 +1,7 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
 import TableActionRow from "./table-action-row";
+import Sorting from "./sorting";
 import formatters from "../services/formatters";
 
 class UsersTableRow extends React.Component {
@@ -242,32 +243,12 @@ class UsersTable extends React.Component {
               />
             </label>
           </div>
-          <div className="list-filter">
-            <button
-              className={`plain sorting-button ${
-                userList.orderBy.indexOf("uuid") > -1 ? "active" : ""
-              }`}
-              onClick={sortFactory("uuid")}
-            >
-              UUID
-            </button>
-            <button
-              className={`plain sorting-button ${
-                userList.orderBy.indexOf("username") > -1 ? "active" : ""
-              }`}
-              onClick={sortFactory("username")}
-            >
-              Username
-            </button>
-            <button
-              className={`plain sorting-button ${
-                userList.orderBy.indexOf("role") > -1 ? "active" : ""
-              }`}
-              onClick={sortFactory("role")}
-            >
-              Role
-            </button>
-          </div>
+
+          <Sorting
+            active={userList.orderBy}
+            collection={["uuid", "username", "role"]}
+            onChange={sortFactory}
+           />
         </div>
 
         {!usersLoaded ? (
