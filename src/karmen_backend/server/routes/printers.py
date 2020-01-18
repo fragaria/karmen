@@ -4,6 +4,7 @@ import requests
 import redis
 import string
 import time
+import uuid as uuidmodule
 
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -21,6 +22,7 @@ def make_printer_response(printer, fields):
     else:
         printer_inst = printer
     data = {
+        "uuid": printer_inst.uuid,
         "client": {
             "name": printer_inst.client_name(),
             "version": printer_inst.client_info.version,
@@ -34,7 +36,8 @@ def make_printer_response(printer, fields):
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
         "hostname": printer_inst.hostname,
-        "host": printer_inst.host,
+        "ip": printer_inst.ip,
+        "port": printer_inst.port,
         "protocol": printer_inst.protocol,
     }
     if "status" in fields:
@@ -42,7 +45,7 @@ def make_printer_response(printer, fields):
     if "webcam" in fields:
         webcam_data = printer_inst.client_info.webcam or {}
         data["webcam"] = {
-            "url": "/printers/%s/webcam-snapshot" % (printer_inst.host,),
+            "url": "/printers/%s/webcam-snapshot" % (printer_inst.network_host,),
             "flipHorizontal": webcam_data.get("flipHorizontal"),
             "flipVertical": webcam_data.get("flipVertical"),
             "rotate90": webcam_data.get("rotate90"),
@@ -69,7 +72,7 @@ def printers_list():
         try:
             futures.append(
                 executor.submit_stored(
-                    "%s:%s" % (uqid, printer["host"]),
+                    "%s:%s" % (uqid, printer["uuid"]),
                     make_printer_response,
                     printer,
                     fields,
@@ -87,17 +90,21 @@ def printers_list():
             app.logger.error("Exception %s" % e)
         else:
             device_list.append(data)
-            executor.futures.pop("%s:%s" % (uqid, data["host"]))
+            executor.futures.pop("%s:%s" % (uqid, data["uuid"]))
 
     return jsonify({"items": device_list}), 200
 
 
-@app.route("/printers/<host>", methods=["GET"])
+@app.route("/printers/<uuid>", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
-def printer_detail(host):
+def printer_detail(uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
-    printer = printers.get_printer(host)
+    printer = printers.get_printer(uuid)
     if printer is None:
         return abort(make_response("", 404))
     return jsonify(make_printer_response(printer, fields))
@@ -110,46 +117,40 @@ def printer_create():
     data = request.json
     if not data:
         return abort(make_response("", 400))
-    host = data.get("host", None)
+    uuid = uuidmodule.uuid4()
+    ip = data.get("ip", None)
+    port = data.get("port", None)
+    hostname = data.get("hostname", None)
     name = data.get("name", None)
     api_key = data.get("api_key", None)
     protocol = data.get("protocol", "http")
-    hostname = None
+
     if (
-        not host
+        (not ip and not hostname)
         or not name
         or protocol not in ["http", "https"]
-        or re.match(
-            r"^([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?$",
-            host,
-        )
-        is None
+        or (hostname and re.match(r"^[0-9a-zA-Z.-]+\.local$", hostname) is None)
+        or (ip and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip) is None)
+        or (port and re.match(r"^\d{0,5}$", str(port)) is None)
     ):
         return abort(make_response("", 400))
 
-    # we got a hostname, not IP
-    if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:?\d{0,5}$", host) is None:
-        # take out the port number
-        m = re.search(r"^([0-9a-zA-Z.-]+):?(\d{0,5}?)$", host)
-        if m is None:
-            return abort(make_response("", 400))
-        hostname = m.group(1)
-        port = m.group(2)
-        # resolve hostname with mDNS
-        host = network.get_avahi_address(hostname)
-        if not host:
+    if hostname and not ip:
+        ip = network.get_avahi_address(hostname)
+        if not ip:
             return abort(make_response("Cannot resolve %s with mDNS" % hostname, 500))
-        if port:
-            host = "%s:%s" % (host, port)
+    if ip and not hostname:
+        hostname = network.get_avahi_hostname(ip)
 
-    if printers.get_printer(host) is not None:
+    if printers.get_printer_by_network_props(hostname, ip, port) is not None:
         return abort(make_response("", 409))
-    if not hostname:
-        hostname = network.get_avahi_hostname(host)
+
     printer = clients.get_printer_instance(
         {
+            "uuid": uuid,
             "hostname": hostname,
-            "host": host,
+            "ip": ip,
+            "port": port,
             "name": name,
             "protocol": protocol,
             "client": "octoprint",  # TODO make this more generic
@@ -158,9 +159,11 @@ def printer_create():
     printer.add_api_key(api_key)
     printer.sniff()
     printers.add_printer(
+        uuid=uuid,
         name=name,
         hostname=hostname,
-        host=host,
+        ip=ip,
+        port=port,
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
@@ -175,22 +178,30 @@ def printer_create():
     return jsonify(make_printer_response(printer, ["status", "webcam", "job"])), 201
 
 
-@app.route("/printers/<host>", methods=["DELETE"])
+@app.route("/printers/<uuid>", methods=["DELETE"])
 @jwt_requires_role("admin")
 @cross_origin()
-def printer_delete(host):
-    printer = printers.get_printer(host)
+def printer_delete(uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printer = printers.get_printer(uuid)
     if printer is None:
         return abort(make_response("", 404))
-    printers.delete_printer(host)
+    printers.delete_printer(uuid)
     return "", 204
 
 
-@app.route("/printers/<host>", methods=["PATCH"])
+@app.route("/printers/<uuid>", methods=["PATCH"])
 @jwt_requires_role("admin")
 @cross_origin()
-def printer_patch(host):
-    printer = printers.get_printer(host)
+def printer_patch(uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printer = printers.get_printer(uuid)
     if printer is None:
         return abort(make_response("", 404))
     data = request.json
@@ -224,9 +235,11 @@ def printer_patch(host):
             }
         )
     printers.update_printer(
+        uuid=printer_inst.uuid,
         name=name,
         hostname=printer_inst.hostname,
-        host=printer_inst.host,
+        ip=printer_inst.ip,
+        port=printer_inst.port,
         protocol=protocol,
         client=printer_inst.client_name(),
         client_props={
@@ -245,12 +258,17 @@ def printer_patch(host):
     )
 
 
-@app.route("/printers/<host>/connection", methods=["POST"])
+@app.route("/printers/<uuid>/connection", methods=["POST"])
 @jwt_requires_role("admin")
 @cross_origin()
-def printer_change_connection(host):
+def printer_change_connection(uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
-    printer = printers.get_printer(host)
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printer = printers.get_printer(uuid)
+    print(printer)
     if printer is None:
         return abort(make_response("", 404))
     data = request.json
@@ -277,17 +295,21 @@ def printer_change_connection(host):
     return "", 204
 
 
-@app.route("/printers/<host>/current-job", methods=["POST"])
+@app.route("/printers/<uuid>/current-job", methods=["POST"])
 @jwt_force_password_change
 @cross_origin()
-def printer_modify_job(host):
+def printer_modify_job(uuid):
     # TODO allow users to pause/cancel only their own prints via printjob_id
     # And allow admins to pause/cancel anything
     # but that means creating a new tracking of current jobs on each printer
     # and does not handle prints issued by bypassing Karmen Hub
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
-    printer = printers.get_printer(host)
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printer = printers.get_printer(uuid)
     if printer is None:
         return abort(make_response("", 404))
     data = request.json
@@ -301,10 +323,10 @@ def printer_modify_job(host):
         if printer_inst.modify_current_job(action):
             user = get_current_user()
             app.logger.info(
-                "User %s successfully issued a modification (%s) of current job on printer %s ",
+                "User %s successfully issued a modification (%s) of current job on printer %s",
                 user["uuid"],
                 action,
-                host,
+                uuid,
             )
             return "", 204
         return abort(make_response("", 409))
@@ -333,7 +355,7 @@ def _get_webcam_snapshot(snapshot_url):
 @app.route("/printers/<host>/webcam-snapshot", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
-def printer_webcam_snapshot(host):
+def printer_webcam_snapshot(uuid):
     """
     Instead of direct streaming from the end-devices, we are deferring
     the video-like feature to the clients. This (in case of MJPEG) brings
@@ -347,7 +369,11 @@ def printer_webcam_snapshot(host):
     can emulate a video-like experience. Since we have no sound, this should be
     fine.
     """
-    printer = printers.get_printer(host)
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printer = printers.get_printer(uuid)
     if printer is None:
         return abort(make_response("", 404))
     printer_inst = clients.get_printer_instance(printer)
@@ -356,19 +382,19 @@ def printer_webcam_snapshot(host):
         return abort(make_response("", 404))
 
     # process current future if done
-    if FUTURES_MICROCACHE.get(host) and FUTURES_MICROCACHE.get(host).done():
-        WEBCAM_MICROCACHE[host] = FUTURES_MICROCACHE[host].result()
+    if FUTURES_MICROCACHE.get(uuid) and FUTURES_MICROCACHE.get(uuid).done():
+        WEBCAM_MICROCACHE[uuid] = FUTURES_MICROCACHE[uuid].result()
         try:
-            del FUTURES_MICROCACHE[host]
+            del FUTURES_MICROCACHE[uuid]
         except Exception:
             # that's ok, probably a race condition
             pass
     # issue a new future if not present
-    if not FUTURES_MICROCACHE.get(host):
-        FUTURES_MICROCACHE[host] = executor.submit(_get_webcam_snapshot, snapshot_url)
+    if not FUTURES_MICROCACHE.get(uuid):
+        FUTURES_MICROCACHE[uuid] = executor.submit(_get_webcam_snapshot, snapshot_url)
 
-    if WEBCAM_MICROCACHE.get(host) is not None:
-        response = WEBCAM_MICROCACHE.get(host)
+    if WEBCAM_MICROCACHE.get(uuid) is not None:
+        response = WEBCAM_MICROCACHE.get(uuid)
         return (
             response.content,
             200,

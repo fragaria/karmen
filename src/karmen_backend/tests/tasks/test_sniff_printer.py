@@ -9,22 +9,26 @@ from ..utils import Response
 class SavePrinterDataTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.database.printers.add_printer")
-    @mock.patch("server.database.printers.get_printer", return_value=None)
+    @mock.patch(
+        "server.database.printers.get_printer_by_network_props", return_value=None
+    )
     def test_not_update_inactive_unknown_printer(
         self, mock_get_printer, mock_add_printer, mock_update_printer
     ):
-        save_printer_data(host="1.2.3.4", client_props={"connected": False})
+        save_printer_data(ip="1.2.3.4", client_props={"connected": False})
         self.assertEqual(mock_get_printer.call_count, 0)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 0)
 
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.database.printers.add_printer")
-    @mock.patch("server.database.printers.get_printer", return_value=None)
+    @mock.patch(
+        "server.database.printers.get_printer_by_network_props", return_value=None
+    )
     def test_add_active_unknown_printer(
         self, mock_get_printer, mock_add_printer, mock_update_printer
     ):
-        save_printer_data(host="1.2.3.4", client_props={"connected": True})
+        save_printer_data(ip="1.2.3.4", client_props={"connected": True})
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 0)
@@ -32,10 +36,10 @@ class SavePrinterDataTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.database.printers.add_printer")
     @mock.patch(
-        "server.database.printers.get_printer",
+        "server.database.printers.get_printer_by_network_props",
         return_value={
             "name": "1234",
-            "host": "1.2.3.4.",
+            "ip": "1.2.3.4.",
             "client_props": {"api_key": "5678"},
         },
     )
@@ -43,7 +47,7 @@ class SavePrinterDataTest(unittest.TestCase):
         self, mock_get_printer, mock_add_printer, mock_update_printer
     ):
         save_printer_data(
-            host="1.2.3.4", client_props={"connected": True}, name="1.2.3.4"
+            ip="1.2.3.4", client_props={"connected": True}, name="1.2.3.4"
         )
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 0)
@@ -83,7 +87,7 @@ class SniffPrinterTest(unittest.TestCase):
         mock_update_printer.assert_called_with(
             **{
                 "hostname": "octopi.local",
-                "host": "192.168.1.12",
+                "ip": "192.168.1.12",
                 "protocol": "http",
                 "name": "octopi.local",
                 "client": "octoprint",
@@ -114,7 +118,7 @@ class SniffPrinterTest(unittest.TestCase):
         mock_update_printer.assert_called_with(
             **{
                 "hostname": "octopi.local",
-                "host": "192.168.1.12",
+                "ip": "192.168.1.12",
                 "protocol": "https",
                 "name": "octopi.local",
                 "client": "octoprint",

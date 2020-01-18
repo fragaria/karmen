@@ -10,11 +10,13 @@ def check_printers():
     for raw_printer in printers.get_printers():
         printer = clients.get_printer_instance(raw_printer)
         printer.is_alive()
-        current_hostname = network.get_avahi_hostname(printer.host)
+        current_hostname = network.get_avahi_hostname(printer.ip)
         printers.update_printer(
+            uuid=printer.uuid,
             name=printer.name,
             hostname=current_hostname or printer.hostname,
-            host=printer.host,
+            ip=printer.ip,
+            port=printer.port,
             protocol=printer.protocol,
             client=printer.client_name(),
             client_props={

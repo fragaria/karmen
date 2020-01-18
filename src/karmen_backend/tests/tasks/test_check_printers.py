@@ -11,8 +11,9 @@ class CheckPrintersTest(unittest.TestCase):
         "server.database.printers.get_printers",
         return_value=[
             {
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
                 "hostname": "a",
-                "host": "1234",
+                "ip": "1234",
                 "client_props": {
                     "connected": True,
                     "version": {},
@@ -23,8 +24,9 @@ class CheckPrintersTest(unittest.TestCase):
                 "printer_props": {"filament_type": "PETG"},
             },
             {
+                "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
                 "hostname": "b",
-                "host": "5678",
+                "ip": "5678",
                 "client_props": {
                     "connected": True,
                     "version": {},
@@ -51,8 +53,10 @@ class CheckPrintersTest(unittest.TestCase):
             [
                 mock.call(
                     **{
+                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
                         "hostname": "router.asus.com",
-                        "host": "1234",
+                        "ip": "1234",
+                        "port": None,
                         "name": None,
                         "client": "octoprint",
                         "protocol": "https",
@@ -68,8 +72,10 @@ class CheckPrintersTest(unittest.TestCase):
                 ),
                 mock.call(
                     **{
+                        "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
                         "hostname": "router.asus.com",
-                        "host": "5678",
+                        "ip": "5678",
+                        "port": None,
                         "protocol": "http",
                         "name": None,
                         "client": "octoprint",
@@ -90,8 +96,9 @@ class CheckPrintersTest(unittest.TestCase):
         "server.database.printers.get_printers",
         return_value=[
             {
-                "hostname": "a",
-                "host": "1234",
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "hostname": "a.local",
+                "ip": "1234",
                 "client_props": {
                     "connected": False,
                     "version": {},
@@ -103,8 +110,9 @@ class CheckPrintersTest(unittest.TestCase):
                 "protocol": "https",
             },
             {
-                "hostname": "b",
-                "host": "5678",
+                "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
+                "hostname": "b.local",
+                "ip": "5678",
                 "client_props": {
                     "connected": True,
                     "version": {},
@@ -130,7 +138,8 @@ class CheckPrintersTest(unittest.TestCase):
         mock_get_printers,
     ):
         def mock_call(uri, **kwargs):
-            if "5678" in uri and "/api/settings" in uri:
+            print(uri)
+            if "b.local" in uri and "/api/settings" in uri:
                 return Response(
                     200,
                     {
@@ -143,7 +152,7 @@ class CheckPrintersTest(unittest.TestCase):
                         }
                     },
                 )
-            if "1234" in uri and "/api/version" in uri:
+            if "a.local" in uri and "/api/version" in uri:
                 return Response(200, {"text": "octoprint"})
             return Response(200)
 
@@ -159,8 +168,10 @@ class CheckPrintersTest(unittest.TestCase):
             [
                 mock.call(
                     **{
+                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
                         "hostname": "router.asus.com",
-                        "host": "1234",
+                        "ip": "1234",
+                        "port": None,
                         "name": None,
                         "client": "octoprint",
                         "protocol": "https",
@@ -176,8 +187,10 @@ class CheckPrintersTest(unittest.TestCase):
                 ),
                 mock.call(
                     **{
+                        "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
                         "hostname": "router.asus.com",
-                        "host": "5678",
+                        "ip": "5678",
+                        "port": None,
                         "protocol": "http",
                         "name": None,
                         "client": "octoprint",
@@ -188,7 +201,7 @@ class CheckPrintersTest(unittest.TestCase):
                             "api_key": None,
                             "webcam": {
                                 "message": "OK",
-                                "stream": "http://5678/webcam/?action=stream",
+                                "stream": "http://b.local/webcam/?action=stream",
                                 "snapshot": None,
                                 "flipHorizontal": False,
                                 "flipVertical": True,
@@ -205,8 +218,9 @@ class CheckPrintersTest(unittest.TestCase):
         "server.database.printers.get_printers",
         return_value=[
             {
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
                 "hostname": "a",
-                "host": "1234",
+                "ip": "1234",
                 "client_props": {
                     "connected": True,
                     "version": {},
@@ -236,8 +250,10 @@ class CheckPrintersTest(unittest.TestCase):
             [
                 mock.call(
                     **{
+                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
                         "hostname": "router.asus.com",
-                        "host": "1234",
+                        "ip": "1234",
+                        "port": None,
                         "name": None,
                         "client": "octoprint",
                         "protocol": "https",

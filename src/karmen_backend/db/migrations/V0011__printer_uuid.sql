@@ -99,8 +99,11 @@ ALTER TABLE public.printjobs
 ALTER TABLE public.printjobs
   ADD CONSTRAINT printjobs_printer_uuid_fk FOREIGN KEY (printer_uuid) REFERENCES public.printers (uuid)
    ON UPDATE NO ACTION ON DELETE SET NULL;
-CREATE INDEX fki_printjobs_printer_uuid_fk
+CREATE INDEX IF NOT EXISTS fki_printjobs_printer_uuid_fk 
   ON public.printjobs(printer_uuid);
+
+CREATE UNIQUE INDEX IF NOT EXISTS printer_hostname_ip_port 
+  ON public.printers(hostname, ip, port);
 
 
 DROP FUNCTION IF EXISTS public.column_exists(text,text);

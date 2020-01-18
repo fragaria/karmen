@@ -8,7 +8,15 @@ from flask_jwt_extended import get_current_user
 
 
 def make_printjob_response(printjob, fields=None, user_mapping=None):
-    flist = ["id", "started", "gcode_data", "printer_data", "user_uuid", "username"]
+    flist = [
+        "id",
+        "started",
+        "gcode_data",
+        "printer_data",
+        "printer_uuid",
+        "user_uuid",
+        "username",
+    ]
     fields = fields if fields else flist
     response = {}
     for field in flist:
@@ -30,10 +38,10 @@ def printjob_create():
     if not data:
         return abort(make_response("", 400))
     gcode_id = data.get("gcode", None)
-    printer_host = data.get("printer", None)
-    if not gcode_id or not printer_host:
+    printer_uuid = data.get("printer", None)
+    if not gcode_id or not printer_uuid:
         return abort(make_response("", 400))
-    printer = printers.get_printer(printer_host)
+    printer = printers.get_printer(printer_uuid)
     if printer is None:
         return abort(make_response("", 404))
     gcode = gcodes.get_gcode(gcode_id)
@@ -52,7 +60,7 @@ def printjob_create():
             )
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode["id"],
-            printer_host=printer["host"],
+            printer_uuid=printer["uuid"],
             user_uuid=get_current_user()["uuid"],
             gcode_data={
                 "id": gcode["id"],
@@ -61,7 +69,9 @@ def printjob_create():
                 "available": True,
             },
             printer_data={
-                "host": printer["host"],
+                "ip": printer["ip"],
+                "port": printer["port"],
+                "hostname": printer["hostname"],
                 "name": printer["name"],
                 "client": printer["client"],
             },
