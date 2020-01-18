@@ -39,13 +39,21 @@ const Settings = ({
               <span>+ Add a printer</span>
             </Link>
           </h1>
-          <PrintersTable
-            loadPrinters={loadPrinters}
-            printersList={printersList}
-            printersLoaded={printersLoaded}
-            onPrinterDelete={onPrinterDelete}
-          />
         </div>
+        <PrintersTable
+          loadPrinters={loadPrinters}
+          printersList={printersList}
+          printersLoaded={printersLoaded}
+          onPrinterDelete={onPrinterDelete}
+        />
+
+        <div className="container">
+          <br/>
+          <br/>
+          <strong>Network scan</strong>
+          <NetworkScan />
+        </div>
+
         <div className="container">
           <h1 className="main-title">
             Users
@@ -53,18 +61,15 @@ const Settings = ({
               <span>+ Add a user</span>
             </Link>
           </h1>
-          <UsersTable
-            currentUuid={currentUuid}
-            userList={userList}
-            loadUsersPage={loadUsersPage}
-            clearUsersPages={clearUsersPages}
-            onUserChange={onUserChange}
-          />
         </div>
-        <div className="container">
-          <h1 className="main-title">Network scan</h1>
-          <NetworkScan />
-        </div>
+
+        <UsersTable
+          currentUuid={currentUuid}
+          userList={userList}
+          loadUsersPage={loadUsersPage}
+          clearUsersPages={clearUsersPages}
+          onUserChange={onUserChange}
+        />
       </div>
     </RoleBasedGateway>
   );

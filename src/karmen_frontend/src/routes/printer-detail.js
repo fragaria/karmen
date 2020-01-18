@@ -4,6 +4,7 @@ import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/loader";
 import RoleBasedGateway from "../components/role-based-gateway";
+import Sorting from "../components/sorting";
 import Progress from "../components/progress";
 import { WebcamStream } from "../components/webcam-stream";
 import formatters from "../services/formatters";
@@ -486,22 +487,19 @@ class PrinterDetail extends React.Component {
                       </ul>
 
                       <div className="tabs-content">
-                        <button
-                          className={`plain ${
-                            jobsTable.orderBy.indexOf("started") > -1
-                              ? "active"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            let order = "+started";
-                            if (jobsTable.orderBy === "+started") {
-                              order = "-started";
+                        <Sorting
+                          active={jobsTable.orderBy}
+                          collection={["started"]}
+                          onChange={() => {
+                              let order = "+started";
+                              if (jobsTable.orderBy === "+started") {
+                                order = "-started";
+                              }
+                              this.loadJobsPage(jobsTable.currentPage, order);
                             }
-                            this.loadJobsPage(jobsTable.currentPage, order);
-                          }}
-                        >
-                          Started
-                        </button>
+                          }
+                        />
+
                         <div className="list">{jobsRows}</div>
                       </div>
 
