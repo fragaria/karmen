@@ -425,7 +425,10 @@ class CreateRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    def test_cannot_upload(self):
+    @mock.patch(
+        "server.routes.printjobs.clients.get_printer_instance", return_value=None
+    )
+    def test_cannot_upload_to_printer(self, mock_get_printer):
         with app.test_client() as c:
             response = c.post(
                 "/printjobs",

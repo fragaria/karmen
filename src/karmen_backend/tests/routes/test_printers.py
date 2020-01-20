@@ -23,7 +23,7 @@ class ListRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             # coming from db fixtures
             self.assertTrue("items" in response.json)
-            self.assertEqual(len(response.json["items"]), 2)
+            self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("client" in response.json["items"][0])
             self.assertTrue("webcam" not in response.json["items"][0])
             self.assertTrue("status" not in response.json["items"][0])
@@ -43,7 +43,7 @@ class ListRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             # coming from db fixtures
             self.assertTrue("items" in response.json)
-            self.assertEqual(len(response.json["items"]), 2)
+            self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("client" in response.json["items"][0])
             self.assertTrue("webcam" in response.json["items"][0])
             self.assertTrue("status" in response.json["items"][0])
@@ -70,6 +70,14 @@ class DetailRoute(unittest.TestCase):
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
             self.assertTrue(response.json["client"]["api_key"] is None)
+
+    def test_detail_bad_uuid(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printers/not-anuuid",
+                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+            )
+            self.assertEqual(response.status_code, 400)
 
     @mock.patch("server.routes.printers.printers.get_printer")
     def test_no_api_key_leak(self, mock_get_printer):
@@ -117,11 +125,14 @@ class CreateRoute(unittest.TestCase):
     def test_create(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
+                ip = "192.168.%s" % ".".join(
+                    [str(random.randint(0, 255)) for _ in range(2)]
+                )
                 response = c.post(
                     "/printers",
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                     json={
-                        "ip": "172.16.236.200",
+                        "ip": ip,
                         "name": "random-test-printer-name",
                         "protocol": "https",
                     },
@@ -133,7 +144,7 @@ class CreateRoute(unittest.TestCase):
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 )
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(response.json["ip"], "172.16.236.200")
+                self.assertEqual(response.json["ip"], ip)
                 self.assertEqual(response.json["protocol"], "https")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
@@ -246,11 +257,14 @@ class CreateRoute(unittest.TestCase):
     def test_create_with_port(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
+                ip = "192.168.%s" % ".".join(
+                    [str(random.randint(0, 255)) for _ in range(2)]
+                )
                 response = c.post(
                     "/printers",
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                     json={
-                        "ip": "172.16.236.200",
+                        "ip": ip,
                         "port": 81,
                         "name": "random-test-printer-name",
                         "protocol": "https",
@@ -262,7 +276,7 @@ class CreateRoute(unittest.TestCase):
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 )
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(response.json["ip"], "172.16.236.200")
+                self.assertEqual(response.json["ip"], ip)
                 self.assertEqual(response.json["port"], 81)
                 self.assertEqual(response.json["protocol"], "https")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
@@ -280,13 +294,12 @@ class CreateRoute(unittest.TestCase):
     def test_create_default_protocol(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
+                ip = "192.168.%s" % ".".join(
+                    [str(random.randint(0, 255)) for _ in range(2)]
+                )
                 response = c.post(
                     "/printers",
-                    json={
-                        "ip": "172.16.236.200",
-                        "port": 81,
-                        "name": "random-test-printer-name",
-                    },
+                    json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 )
                 uuid = response.json["uuid"]
@@ -296,7 +309,7 @@ class CreateRoute(unittest.TestCase):
                     headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
                 )
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(response.json["ip"], "172.16.236.200")
+                self.assertEqual(response.json["ip"], ip)
                 self.assertEqual(response.json["port"], 81)
                 self.assertEqual(response.json["protocol"], "http")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
@@ -535,6 +548,19 @@ class PatchRoute(unittest.TestCase):
             self.assertEqual(p["printer_props"]["filament_color"], "žluťoučká")
             self.assertTrue("random" not in p["printer_props"])
 
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_patch_api_keychange(self, mock_session_get):
+        with app.test_client() as c:
+            response = c.patch(
+                "/printers/%s" % self.uuid,
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                json={"name": "random-test-printer-name", "api_key": "1234",},
+            )
+            self.assertEqual(response.status_code, 200)
+            p = printers.get_printer(self.uuid)
+            self.assertEqual(p["client_props"]["api_key"], "1234")
+            self.assertEqual(mock_session_get.call_count, 1)
+
     def test_patch_no_token(self):
         with app.test_client() as c:
             response = c.patch(
@@ -587,7 +613,7 @@ class PatchRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_patch_empty_bad_protocol(self):
+    def test_patch_bad_protocol(self):
         with app.test_client() as c:
             response = c.patch(
                 "/printers/%s" % self.uuid,
@@ -840,3 +866,29 @@ class PrinterConnectionRoute(unittest.TestCase):
                 json={"state": ""},
             )
             self.assertEqual(response.status_code, 400)
+
+
+class WebcamSnapshotRoute(unittest.TestCase):
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printers/notuuid/webcam-snapshot",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/webcam-snapshot",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    def test_no_webcam_info(self):
+        with app.test_client() as c:
+            response = c.get(
+                "/printers/20e91c14-c3e4-4fe9-a066-e69d53324a20/webcam-snapshot",
+                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+            )
+            self.assertEqual(response.status_code, 404)

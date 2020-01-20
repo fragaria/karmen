@@ -210,6 +210,9 @@ def printer_patch(uuid):
     name = data.get("name", printer["name"])
     protocol = data.get("protocol", printer["protocol"])
     api_key = data.get("api_key", printer["client_props"].get("api_key", None))
+    printer_props = data.get("printer_props", {})
+
+    # TODO it might be necessary to update ip, hostname, port as well eventually
     if not name or protocol not in ["http", "https"]:
         return abort(make_response("", 400))
     printer_inst = clients.get_printer_instance(printer)
@@ -217,8 +220,7 @@ def printer_patch(uuid):
     if data.get("api_key", "-1") != "-1" and data.get("api_key", "-1") != printer[
         "client_props"
     ].get("api_key", None):
-        printer_inst.sniff()  # this can be offloaded to check_printer task
-    printer_props = data.get("printer_props", {})
+        printer_inst.sniff()  # this can probably be offloaded to check_printer task
     if printer_props:
         if not printer_inst.get_printer_props():
             printer_inst.printer_props = {}
@@ -352,7 +354,7 @@ def _get_webcam_snapshot(snapshot_url):
         return None
 
 
-@app.route("/printers/<host>/webcam-snapshot", methods=["GET"])
+@app.route("/printers/<uuid>/webcam-snapshot", methods=["GET"])
 @jwt_force_password_change
 @cross_origin()
 def printer_webcam_snapshot(uuid):
@@ -377,6 +379,8 @@ def printer_webcam_snapshot(uuid):
     if printer is None:
         return abort(make_response("", 404))
     printer_inst = clients.get_printer_instance(printer)
+    if printer_inst.client_info.webcam is None:
+        return abort(make_response("", 404))
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
     if snapshot_url is None:
         return abort(make_response("", 404))
