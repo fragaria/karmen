@@ -287,6 +287,7 @@ class GcodeList extends React.Component {
     this.loadPage = this.loadPage.bind(this);
   }
 
+  // TODO move this to redux, reuse TableWrapper
   loadPage(page, newOrderBy, newFilter) {
     let { pages, orderBy, filter } = this.state;
     // reset pages if orderBy has changed

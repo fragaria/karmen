@@ -78,7 +78,7 @@ class TableWrapper extends React.Component {
     return (
       <div className="list">
         <div className="list-header">
-          {!!enableFiltering && (
+          {enableFiltering !== false && (
             <div className="list-search">
               <label htmlFor="filter">
                 <span className="icon icon-search"></span>

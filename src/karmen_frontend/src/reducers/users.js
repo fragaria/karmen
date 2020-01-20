@@ -11,7 +11,7 @@ export default (
     list: {
       pages: [],
       orderBy: "+username",
-      usernameFilter: "",
+      filter: "",
       limit: 10
     }
   },
@@ -87,7 +87,7 @@ export default (
       let currentPages = state.list.pages;
       // continue only with the same conditions
       if (
-        state.list.usernameFilter === action.payload.usernameFilter &&
+        state.list.filter === action.payload.filter &&
         state.list.orderBy === action.payload.orderBy &&
         state.list.limit === action.payload.limit
       ) {
@@ -121,7 +121,7 @@ export default (
         list: Object.assign({}, state.list, {
           pages: [].concat(currentPages),
           orderBy: action.payload.orderBy,
-          usernameFilter: action.payload.usernameFilter,
+          filter: action.payload.filter,
           limit: action.payload.limit
         })
       });
@@ -151,7 +151,7 @@ export default (
         list: {
           pages: [],
           orderBy: "+username",
-          usernameFilter: "",
+          filter: "",
           limit: 10
         }
       });

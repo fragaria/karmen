@@ -84,19 +84,17 @@ export const clearUsersPages = () => dispatch => {
 
 export const getUsersPage = createActionThunk(
   "USERS_LOAD_PAGE",
-  (startWith = null, orderBy = null, usernameFilter = null, limit = 15) => {
-    return backend
-      .getUsers(startWith, orderBy, usernameFilter, limit)
-      .then(r => {
-        return {
-          status: r.status,
-          data: r.data,
-          startWith,
-          orderBy,
-          usernameFilter,
-          limit
-        };
-      });
+  (startWith = null, orderBy = null, filter = null, limit = 15) => {
+    return backend.getUsers(startWith, orderBy, filter, limit).then(r => {
+      return {
+        status: r.status,
+        data: r.data,
+        startWith,
+        orderBy,
+        filter,
+        limit
+      };
+    });
   }
 );
 

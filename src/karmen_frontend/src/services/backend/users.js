@@ -5,7 +5,7 @@ const BASE_URL = window.env.BACKEND_BASE;
 export const getUsers = (
   startWith = null,
   orderBy = null,
-  usernameFilter = null,
+  filter = null,
   limit = 15
 ) => {
   let uri = `${BASE_URL}/users?limit=${limit}`;
@@ -15,8 +15,8 @@ export const getUsers = (
   if (orderBy) {
     uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
-  if (usernameFilter) {
-    uri += `&filter=username:${encodeURIComponent(usernameFilter)}`;
+  if (filter) {
+    uri += `&filter=username:${encodeURIComponent(filter)}`;
   }
   return fetch(uri, {
     headers: getHeaders()
