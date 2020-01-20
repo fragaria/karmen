@@ -652,3 +652,25 @@ select {
   height: 100%;
   @include button-reset;
 }
+
+.printer-detail {
+  @media (min-width: $screen-sm-min) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "meta stream"
+    "jobs jobs";
+    grid-gap: $spacing-default;
+
+    .printer-detail-stream {
+      grid-area: stream;
+    }
+
+    .printer-detail-meta {
+      grid-area: meta;
+    }
+
+    .printer-detail-jobs {
+      grid-area: jobs;
+    }
+  }
+}

@@ -462,87 +462,89 @@ class PrinterDetail extends React.Component {
     return (
       <RoleBasedGateway requiredRole="admin">
         <section className="content">
-          <WebcamStream {...printer.webcam} />
-          <Progress {...printer.job} />
+          <div className="printer-detail">
+            <div className="printer-detail-stream">
+              <WebcamStream {...printer.webcam} />
+              <Progress {...printer.job} />
+            </div>
 
-          <div className="container">
-            <h1 className="main-title">{printer.name}</h1>
-
-            <div className="printer-info">
-              <div>
+            <div className="printer-detail-meta">
+              <div className="container">
+                <h1 className="main-title">{printer.name}</h1>
                 <PrinterConnectionStatus
                   printer={printer}
                   onPrinterAuthorizationChanged={this.changePrinter}
                   onPrinterConnectionChanged={setPrinterConnection}
                 />
-                <div>
-                  {!jobsRows || jobsRows.length === 0 ? (
-                    <></>
-                  ) : (
-                    <>
-                      <ul className="tabs-navigation">
-                        <li className="tab active">
-                          <h2>Jobs</h2>
-                        </li>
-                      </ul>
+              </div>
+            </div>
 
-                      <div className="tabs-content">
-                        <Sorting
-                          active={jobsTable.orderBy}
-                          collection={["started"]}
-                          onChange={() => {
-                              let order = "+started";
-                              if (jobsTable.orderBy === "+started") {
-                                order = "-started";
-                              }
-                              this.loadJobsPage(jobsTable.currentPage, order);
-                            }
+            <div className="printer-detail-jobs">
+              {!jobsRows || jobsRows.length === 0 ? (
+                <></>
+              ) : (
+                <>
+                  <ul className="tabs-navigation">
+                    <li className="tab active">
+                      <h2>Jobs</h2>
+                    </li>
+                  </ul>
+
+                  <div className="tabs-content">
+                    <Sorting
+                      active={jobsTable.orderBy}
+                      collection={["started"]}
+                      onChange={() => {
+                          let order = "+started";
+                          if (jobsTable.orderBy === "+started") {
+                            order = "-started";
                           }
-                        />
+                          this.loadJobsPage(jobsTable.currentPage, order);
+                        }
+                      }
+                    />
 
-                        <div className="list">{jobsRows}</div>
-                      </div>
-
-                      <div className="table-pagination">
-                        {jobsTable.currentPage > 0 ? (
-                          <button
-                            className="btn btn-sm"
-                            onClick={() =>
-                              this.loadJobsPage(
-                                Math.max(0, jobsTable.currentPage - 1),
-                                jobsTable.orderBy
-                              )
-                            }
-                          >
-                            Previous
-                          </button>
-                        ) : (
-                          <span></span>
-                        )}
-                        {jobsTable.pages[jobsTable.currentPage + 1] ? (
-                          <button
-                            className="btn btn-sm"
-                            onClick={() =>
-                              this.loadJobsPage(
-                                jobsTable.currentPage + 1,
-                                jobsTable.orderBy
-                              )
-                            }
-                          >
-                            Next
-                          </button>
-                        ) : (
-                          <span></span>
-                        )}
-                      </div>
-                    </>
-                  )}
-                  <div className="cta-box text-center">
-                    <Link to={`/printers/${printer.host}/settings`}>
-                      <button className="btn">Printer settings</button>
-                    </Link>
+                    <div className="list">{jobsRows}</div>
                   </div>
-                </div>
+
+                  <div className="table-pagination">
+                    {jobsTable.currentPage > 0 ? (
+                      <button
+                        className="btn btn-sm"
+                        onClick={() =>
+                          this.loadJobsPage(
+                            Math.max(0, jobsTable.currentPage - 1),
+                            jobsTable.orderBy
+                          )
+                        }
+                      >
+                        Previous
+                      </button>
+                    ) : (
+                      <span></span>
+                    )}
+                    {jobsTable.pages[jobsTable.currentPage + 1] ? (
+                      <button
+                        className="btn btn-sm"
+                        onClick={() =>
+                          this.loadJobsPage(
+                            jobsTable.currentPage + 1,
+                            jobsTable.orderBy
+                          )
+                        }
+                      >
+                        Next
+                      </button>
+                    ) : (
+                      <span></span>
+                    )}
+                  </div>
+                </>
+              )}
+              <div className="cta-box text-center">
+                <Link to={`/printers/${printer.host}/settings`}>
+                  <button className="btn">Printer settings</button>
+                </Link>
               </div>
             </div>
           </div>
