@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 
 import TableActionRow from "../components/table-action-row";
-import Sorting from "../components/sorting";
+import TableSorting from "../components/table-sorting";
 import { getGcodes, deleteGcode, printGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
@@ -408,7 +408,7 @@ class GcodeList extends React.Component {
               </label>
             </div>
 
-            <Sorting
+            <TableSorting
               active={orderBy}
               collection={["filename", "size", "uploaded"]}
               onChange={column => {

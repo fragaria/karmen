@@ -1,7 +1,7 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
 import TableActionRow from "./table-action-row";
-import Sorting from "./sorting";
+import TableSorting from "./table-sorting";
 import formatters from "../services/formatters";
 
 class UsersTableRow extends React.Component {
@@ -244,7 +244,7 @@ class UsersTable extends React.Component {
             </label>
           </div>
 
-          <Sorting
+          <TableSorting
             active={userList.orderBy}
             collection={["uuid", "username", "role"]}
             onChange={sortFactory}

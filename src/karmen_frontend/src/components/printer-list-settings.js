@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 import TableActionRow from "./table-action-row";
-import Sorting from "./sorting";
+import TableSorting from "./table-sorting";
 
 class PrintersTableRow extends React.Component {
   state = {
@@ -129,7 +129,7 @@ class PrintersTable extends React.Component {
             </label>
           </div>
 
-          <Sorting
+          <TableSorting
             active={sort}
             collection={["name"]}
             onChange={() => {

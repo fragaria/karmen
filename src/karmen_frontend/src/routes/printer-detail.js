@@ -4,7 +4,7 @@ import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/loader";
 import RoleBasedGateway from "../components/role-based-gateway";
-import Sorting from "../components/sorting";
+import TableSorting from "../components/table-sorting";
 import Progress from "../components/progress";
 import { WebcamStream } from "../components/webcam-stream";
 import formatters from "../services/formatters";
@@ -491,7 +491,7 @@ class PrinterDetail extends React.Component {
                   </ul>
 
                   <div className="tabs-content">
-                    <Sorting
+                    <TableSorting
                       active={jobsTable.orderBy}
                       collection={["started"]}
                       onChange={() => {
