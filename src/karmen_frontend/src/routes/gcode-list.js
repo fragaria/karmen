@@ -413,16 +413,12 @@ class GcodeList extends React.Component {
               columns={["filename", "size", "uploaded"]}
               onChange={column => {
                 return () => {
-                  let order = `+${column}`;
-                  if (orderBy === `+${column}`) {
-                    order = `-${column}`;
-                  } else if (
-                    orderBy === `-${column}` &&
-                    orderBy !== "+filename"
-                  ) {
-                    order = "+filename";
-                  }
-                  this.loadPage(currentPage, order, filter);
+                  const { orderBy } = this.state;
+                  this.loadPage(
+                    currentPage,
+                    orderBy === `+${column}` ? `-${column}` : `+${column}`,
+                    filter
+                  );
                 };
               }}
             />

@@ -491,19 +491,23 @@ class PrinterDetail extends React.Component {
                   </ul>
 
                   <div className="tabs-content">
-                    <TableSorting
-                      active={jobsTable.orderBy}
-                      columns={["started"]}
-                      onChange={() => {
-                        let order = "+started";
-                        if (jobsTable.orderBy === "+started") {
-                          order = "-started";
-                        }
-                        this.loadJobsPage(jobsTable.currentPage, order);
-                      }}
-                    />
-
-                    <div className="list">{jobsRows}</div>
+                    <div className="list">
+                      <div className="list-header">
+                        <TableSorting
+                          active={jobsTable.orderBy}
+                          columns={["started"]}
+                          onChange={() => {
+                            this.loadJobsPage(
+                              jobsTable.currentPage,
+                              jobsTable.orderBy === "+started"
+                                ? "-started"
+                                : "+started"
+                            );
+                          }}
+                        />
+                      </div>
+                      {jobsRows}
+                    </div>
                   </div>
 
                   <div className="table-pagination">

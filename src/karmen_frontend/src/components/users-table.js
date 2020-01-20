@@ -198,27 +198,6 @@ class UsersTable extends React.Component {
         );
       });
 
-    const sortFactory = column => {
-      return () => {
-        const { userList } = this.props;
-        let order = `+${column}`;
-        if (userList.orderBy === `+${column}`) {
-          order = `-${column}`;
-        } else if (
-          userList.orderBy === `-${column}` &&
-          userList.orderBy !== "+username"
-        ) {
-          order = "+username";
-        }
-        this.reloadTableWith(
-          null,
-          order,
-          userList.usernameFilter,
-          userList.limit
-        );
-      };
-    };
-
     return (
       <div className="list">
         <div className="list-header">
@@ -247,7 +226,19 @@ class UsersTable extends React.Component {
           <TableSorting
             active={userList.orderBy}
             columns={["uuid", "username", "role"]}
-            onChange={sortFactory}
+            onChange={column => {
+              return () => {
+                const { userList } = this.props;
+                this.reloadTableWith(
+                  null,
+                  userList.orderBy === `+${column}`
+                    ? `-${column}`
+                    : `+${column}`,
+                  userList.usernameFilter,
+                  userList.limit
+                );
+              };
+            }}
           />
         </div>
 
