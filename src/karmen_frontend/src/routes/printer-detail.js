@@ -493,7 +493,7 @@ class PrinterDetail extends React.Component {
                   <div className="tabs-content">
                     <TableSorting
                       active={jobsTable.orderBy}
-                      collection={["started"]}
+                      columns={["started"]}
                       onChange={() => {
                         let order = "+started";
                         if (jobsTable.orderBy === "+started") {

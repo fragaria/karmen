@@ -1,27 +1,28 @@
 import React from "react";
 
-class Sorting extends React.Component {
+class TableSorting extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { show: false };
+    this.state = { expand: false };
   }
   render() {
-    const { active, collection, onChange } = this.props;
+    const { active, columns, onChange } = this.props;
 
     const toggle = () => {
+      const { expand } = this.state;
       this.setState({
-        show: !this.state.show
+        expand: !expand
       });
     };
 
     const handleClick = sortBy => {
       return () => {
         toggle();
-        onChange(sortBy)();
+        return onChange(sortBy)();
       };
     };
 
-    const list = collection.map(item => {
+    const list = columns.map(item => {
       return (
         <button
           key={item}
@@ -42,29 +43,21 @@ class Sorting extends React.Component {
       );
     });
 
-    const { show } = this.state;
+    const { expand } = this.state;
 
     return (
       <div className="list-filter">
-        {collection.length > 1 && (
-          <button className="list-filter-toggle btn-reset" onClick={toggle}>
-            {active.replace("+", "").replace("-", "")}
-            <span
-              className={`icon-${active.indexOf("+") > -1 ? "up" : "down"}`}
-            ></span>
-          </button>
-        )}
+        <button
+          className="list-filter-toggle btn-reset"
+          onClick={columns.length === 1 ? onChange : toggle}
+        >
+          {active.replace("+", "").replace("-", "")}
+          <span
+            className={`icon-${active.indexOf("+") > -1 ? "up" : "down"}`}
+          ></span>
+        </button>
 
-        {collection.length === 1 && (
-          <button className="list-filter-toggle btn-reset" onClick={onChange}>
-            {active.replace("+", "").replace("-", "")}
-            <span
-              className={`icon-${active.indexOf("+") > -1 ? "up" : "down"}`}
-            ></span>
-          </button>
-        )}
-
-        {show && (
+        {expand && (
           <div className="list-filter-options">
             <div className="list-filter-backdrop" onClick={toggle}></div>
             {list}
@@ -75,4 +68,4 @@ class Sorting extends React.Component {
   }
 }
 
-export default Sorting;
+export default TableSorting;

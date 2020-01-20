@@ -131,7 +131,7 @@ class PrintersTable extends React.Component {
 
           <TableSorting
             active={sort}
-            collection={["name"]}
+            columns={["name"]}
             onChange={() => {
               const { sort } = this.state;
               this.setState({

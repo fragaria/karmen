@@ -410,7 +410,7 @@ class GcodeList extends React.Component {
 
             <TableSorting
               active={orderBy}
-              collection={["filename", "size", "uploaded"]}
+              columns={["filename", "size", "uploaded"]}
               onChange={column => {
                 return () => {
                   let order = `+${column}`;
