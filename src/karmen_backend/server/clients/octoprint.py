@@ -307,11 +307,14 @@ class Octoprint(PrinterClient):
                             snapshot_url,
                         )
                     host_without_port = re.sub(r":(\d+)", "", self.host)
-                    if re.match(r"127.0.0.1", snapshot_url, re.IGNORECASE) is None:
+                    if (
+                        re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
+                        is not None
+                    ):
                         snapshot_url = snapshot_url.replace(
                             "127.0.0.1", host_without_port
                         )
-                    if re.match(r"localhost", snapshot_url, re.IGNORECASE) is None:
+                    if re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None:
                         snapshot_url = snapshot_url.replace(
                             "localhost", host_without_port
                         )
