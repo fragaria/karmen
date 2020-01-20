@@ -15,12 +15,14 @@ class ForcePwdChangeGateway extends React.Component {
     }
     if (userState === "pwd-change-required") {
       return (
-        <div className="standalone-page">
-          <header>
-            <h1 className="title">Your password needs to be changed</h1>
-          </header>
-          <ChangePasswordForm onUserStateChanged={onUserStateChanged} />
-        </div>
+        <section className="content">
+          <div className="container">
+            <h1 className="main-title text-center">
+              Your password needs to be changed
+            </h1>
+            <ChangePasswordForm onUserStateChanged={onUserStateChanged} />
+          </div>
+        </section>
       );
     } else {
       return <React.Fragment>{children}</React.Fragment>;

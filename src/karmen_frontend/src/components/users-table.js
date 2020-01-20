@@ -248,7 +248,7 @@ class UsersTable extends React.Component {
             active={userList.orderBy}
             collection={["uuid", "username", "role"]}
             onChange={sortFactory}
-           />
+          />
         </div>
 
         {!usersLoaded ? (

@@ -495,13 +495,12 @@ class PrinterDetail extends React.Component {
                       active={jobsTable.orderBy}
                       collection={["started"]}
                       onChange={() => {
-                          let order = "+started";
-                          if (jobsTable.orderBy === "+started") {
-                            order = "-started";
-                          }
-                          this.loadJobsPage(jobsTable.currentPage, order);
+                        let order = "+started";
+                        if (jobsTable.orderBy === "+started") {
+                          order = "-started";
                         }
-                      }
+                        this.loadJobsPage(jobsTable.currentPage, order);
+                      }}
                     />
 
                     <div className="list">{jobsRows}</div>

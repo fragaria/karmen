@@ -298,7 +298,7 @@ class GcodeList extends React.Component {
       ];
       page = 0;
     }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter, 15, [
+    getGcodes(pages[page].startWith, newOrderBy, newFilter, 4, [
       "id",
       "display",
       "filename",
@@ -412,21 +412,20 @@ class GcodeList extends React.Component {
               active={orderBy}
               collection={["filename", "size", "uploaded"]}
               onChange={column => {
-                  return () => {
-                    let order = `+${column}`;
-                    if (orderBy === `+${column}`) {
-                      order = `-${column}`;
-                    } else if (
-                      orderBy === `-${column}` &&
-                      orderBy !== "+filename"
-                    ) {
-                      order = "+filename";
-                    }
-                    this.loadPage(currentPage, order, filter);
+                return () => {
+                  let order = `+${column}`;
+                  if (orderBy === `+${column}`) {
+                    order = `-${column}`;
+                  } else if (
+                    orderBy === `-${column}` &&
+                    orderBy !== "+filename"
+                  ) {
+                    order = "+filename";
                   }
-                }
-              }
-             />
+                  this.loadPage(currentPage, order, filter);
+                };
+              }}
+            />
           </div>
 
           {gcodes === null ? (

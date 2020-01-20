@@ -8,26 +8,28 @@ export const loadAndQueuePrinters = fields => (dispatch, getState) => {
   return dispatch(loadPrinters(fields)).then(result => {
     const { printers } = getState();
     // eslint-disable-next-line no-unused-vars
-    for (let printer of result.data.items) {
-      if (printers.checkQueue) {
-        const existing = printers.checkQueue[printer.host];
-        if (existing === null || existing === undefined) {
-          const poll =
-            ["Printing", "Paused"].indexOf(printer.status.state) > -1
-              ? PRINTER_RUNNING_POLL
-              : PRINTER_IDLE_POLL;
-          dispatch(setPrinterPollInterval(printer.host, poll));
-          queueLoadPrinter(
-            dispatch,
-            getState,
-            printer.host,
-            ["job", "status", "webcam"],
-            poll
-          );
+    if (result && result.data && result.data.items) {
+      for (let printer of result.data.items) {
+        if (printers.checkQueue) {
+          const existing = printers.checkQueue[printer.host];
+          if (existing === null || existing === undefined) {
+            const poll =
+              ["Printing", "Paused"].indexOf(printer.status.state) > -1
+                ? PRINTER_RUNNING_POLL
+                : PRINTER_IDLE_POLL;
+            dispatch(setPrinterPollInterval(printer.host, poll));
+            queueLoadPrinter(
+              dispatch,
+              getState,
+              printer.host,
+              ["job", "status", "webcam"],
+              poll
+            );
+          }
         }
       }
+      return result;
     }
-    return result;
   });
 };
 

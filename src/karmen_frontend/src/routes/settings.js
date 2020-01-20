@@ -48,8 +48,8 @@ const Settings = ({
         />
 
         <div className="container">
-          <br/>
-          <br/>
+          <br />
+          <br />
           <strong>Network scan</strong>
           <NetworkScan />
         </div>

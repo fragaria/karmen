@@ -133,12 +133,12 @@ class PrintersTable extends React.Component {
             active={sort}
             collection={["name"]}
             onChange={() => {
-                const { sort } = this.state;
-                this.setState({
-                  sort: sort === "+name" ? "-name" : "+name"
-                });
-              }}
-           />
+              const { sort } = this.state;
+              this.setState({
+                sort: sort === "+name" ? "-name" : "+name"
+              });
+            }}
+          />
         </div>
 
         {!printersLoaded ? (
