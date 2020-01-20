@@ -1,4 +1,6 @@
 import React from "react";
+import { DebounceInput } from "react-debounce-input";
+
 import formatters from "../services/formatters";
 import TableActionRow from "./table-action-row";
 import TableSorting from "./table-sorting";
@@ -35,9 +37,14 @@ class ApiTokensTableRow extends React.Component {
 
     return (
       <div className="list-item">
-        <span>{token.name}</span>
-        <span>{token.jti}</span>
-        <span>{formatters.datetime(token.created)}</span>
+        <div className="list-item-content">
+          <span className="list-item-title">{token.name}</span>
+          <span className="list-item-subtitle">
+            <span>created on {formatters.datetime(token.created)}</span>
+          </span>
+          <span>{token.jti}</span>
+        </div>
+
         <div className="list-item-cta">
           <button
             className="btn-reset"
@@ -56,55 +63,34 @@ class ApiTokensTableRow extends React.Component {
 }
 
 class ApiTokensTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.sortTable = this.sortTable.bind(this);
-    this.state = {
-      sortedTokens: [],
-      orderBy: "-created"
-    };
-  }
+  state = {
+    filter: "",
+    orderBy: "-created"
+  };
 
   componentDidMount() {
     const { tokensLoaded, loadTokens } = this.props;
     if (!tokensLoaded) {
       loadTokens();
     }
-    const { orderBy } = this.state;
-    this.sortTable(orderBy);
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.tokens !== this.props.tokens) {
-      const { orderBy } = this.state;
-      this.sortTable(orderBy);
-    }
-  }
-
-  sortTable(orderBy) {
-    const { tokens } = this.props;
-    const sortedTokens =
-      tokens &&
-      tokens.sort((a, b) => {
+  render() {
+    const { tokensLoaded, onTokenDelete, tokens } = this.props;
+    const { orderBy, filter } = this.state;
+    const tokensRows = tokens
+      .filter(
+        t => t.name.indexOf(filter) !== -1 || t.jti.indexOf(filter) !== -1
+      )
+      .sort((a, b) => {
         const columnName = orderBy.substring(1);
         if (orderBy[0] === "+") {
           return a[columnName] < b[columnName] ? -1 : 1;
         } else {
           return a[columnName] > b[columnName] ? -1 : 1;
         }
-      });
-    this.setState({
-      sortedTokens,
-      orderBy
-    });
-  }
-
-  render() {
-    const { tokensLoaded, onTokenDelete } = this.props;
-    const { orderBy, sortedTokens } = this.state;
-    const tokensRows =
-      sortedTokens &&
-      sortedTokens.map(t => {
+      })
+      .map(t => {
         return (
           <ApiTokensTableRow
             onTokenDelete={onTokenDelete}
@@ -122,15 +108,33 @@ class ApiTokensTable extends React.Component {
         ) : (
           <>
             <div className="list-header">
+              <div className="list-search">
+                <label htmlFor="filter">
+                  <span className="icon icon-search"></span>
+                  <DebounceInput
+                    type="search"
+                    name="filter"
+                    id="filter"
+                    minLength={3}
+                    debounceTimeout={300}
+                    onChange={e => {
+                      this.setState({
+                        filter: e.target.value
+                      });
+                    }}
+                  />
+                </label>
+              </div>
               <TableSorting
                 active={orderBy}
-                columns={["name", "jti", "created"]}
+                columns={["name", "created"]}
                 onChange={column => {
                   return () => {
                     const { orderBy } = this.state;
-                    this.sortTable(
-                      orderBy === `+${column}` ? `-${column}` : `+${column}`
-                    );
+                    this.setState({
+                      orderBy:
+                        orderBy === `+${column}` ? `-${column}` : `+${column}`
+                    });
                   };
                 }}
               />

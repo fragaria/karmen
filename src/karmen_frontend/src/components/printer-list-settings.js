@@ -75,8 +75,9 @@ class PrintersTableRow extends React.Component {
 class PrintersTable extends React.Component {
   state = {
     filter: "",
-    sort: "+name"
+    orderBy: "+name"
   };
+
   componentDidMount() {
     // TODO this might be more efficient
     const { loadPrinters } = this.props;
@@ -84,7 +85,7 @@ class PrintersTable extends React.Component {
   }
 
   render() {
-    const { filter, sort } = this.state;
+    const { filter, orderBy } = this.state;
     const { printersLoaded, printersList, onPrinterDelete } = this.props;
     const printersRows = printersList
       .filter(p => p.name.indexOf(filter) !== -1)
@@ -93,7 +94,7 @@ class PrintersTable extends React.Component {
         if (p.name > r.name) {
           result = 1;
         }
-        if (sort === "-name") {
+        if (orderBy === "-name") {
           return -result;
         }
         return result;
@@ -130,12 +131,12 @@ class PrintersTable extends React.Component {
           </div>
 
           <TableSorting
-            active={sort}
+            active={orderBy}
             columns={["name"]}
             onChange={() => {
-              const { sort } = this.state;
+              const { orderBy } = this.state;
               this.setState({
-                sort: sort === "+name" ? "-name" : "+name"
+                orderBy: orderBy === "+name" ? "-name" : "+name"
               });
             }}
           />
