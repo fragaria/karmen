@@ -116,12 +116,12 @@ class UsersTableRow extends React.Component {
 }
 
 class UsersTable extends React.Component {
+  state = {
+    usersLoaded: false,
+    currentPageIndex: 0
+  };
   constructor(props) {
     super(props);
-    this.state = {
-      usersLoaded: false,
-      currentPageIndex: 0
-    };
     this.reloadTableWith = this.reloadTableWith.bind(this);
   }
 

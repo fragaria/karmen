@@ -45,16 +45,13 @@ export const getPrinterJobs = (
     .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get list of printjobs: ${response.status}`);
-        return {
-          items: []
-        };
       }
-      return response.json();
+      return response.json().then(data => {
+        return { status: response.status, data };
+      });
     })
     .catch(e => {
       console.error(`Cannot get list of printjobs: ${e}`);
-      return {
-        items: []
-      };
+      return {};
     });
 };

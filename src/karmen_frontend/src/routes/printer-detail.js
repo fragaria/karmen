@@ -3,13 +3,12 @@ import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/loader";
-import RoleBasedGateway from "../components/role-based-gateway";
-import TableSorting from "../components/table-sorting";
+import TableWrapper from "../components/table-wrapper";
 import Progress from "../components/progress";
 import { WebcamStream } from "../components/webcam-stream";
 import formatters from "../services/formatters";
 
-import { getPrinterJobs } from "../services/backend";
+import { getJobsPage, clearJobsPages } from "../actions/printjobs";
 import {
   loadPrinter,
   patchPrinter,
@@ -208,7 +207,7 @@ class PrinterAuthorizationForm extends React.Component {
   }
 }
 
-const PrinterConnectionStatus = ({
+const PrinterStatus = ({
   printer,
   onPrinterConnectionChanged,
   onPrinterAuthorizationChanged
@@ -341,67 +340,12 @@ class PrintJobRow extends React.Component {
 
 class PrinterDetail extends React.Component {
   state = {
-    printerLoaded: false,
-    jobs: [],
-    jobsTable: {
-      currentPage: 0,
-      pages: [
-        {
-          startWith: null
-        }
-      ],
-      orderBy: "-started"
-    }
+    printerLoaded: false
   };
 
   constructor(props) {
     super(props);
-    this.loadJobsPage = this.loadJobsPage.bind(this);
     this.changePrinter = this.changePrinter.bind(this);
-  }
-
-  loadJobsPage(page, newOrderBy) {
-    const { match } = this.props;
-    const { jobsTable } = this.state;
-    // reset pages if orderBy has changed
-    if (newOrderBy !== jobsTable.orderBy) {
-      jobsTable.pages = [
-        {
-          startWith: null
-        }
-      ];
-      page = 0;
-    }
-    return getPrinterJobs(
-      jobsTable.pages[page].startWith,
-      newOrderBy,
-      match.params.host
-    ).then(jobs => {
-      if (!jobs.next && jobs.items.length === 0 && page - 1 >= 0) {
-        this.loadJobsPage(page - 1, newOrderBy);
-        return;
-      }
-      let nextStartWith;
-      if (jobs.next) {
-        const uri = new URL(formatters.absoluteUrl(jobs.next));
-        nextStartWith = uri.searchParams.get("start_with");
-      }
-      if (nextStartWith) {
-        jobsTable.pages.push({
-          startWith: nextStartWith
-        });
-      } else {
-        jobsTable.pages = [].concat(jobsTable.pages.slice(0, page + 1));
-      }
-
-      this.setState({
-        jobs: jobs.items,
-        jobsTable: Object.assign({}, jobsTable, {
-          currentPage: page,
-          orderBy: newOrderBy
-        })
-      });
-    });
   }
 
   changePrinter(newParameters) {
@@ -423,9 +367,8 @@ class PrinterDetail extends React.Component {
   }
 
   componentDidMount() {
-    const { jobsTable } = this.state;
-    const { match, loadPrinter, getPrinter } = this.props;
-    if (!getPrinter(match.params.host)) {
+    const { match, loadPrinter, printer } = this.props;
+    if (!printer) {
       loadPrinter(match.params.host).then(() => {
         this.setState({
           printerLoaded: true
@@ -436,14 +379,18 @@ class PrinterDetail extends React.Component {
         printerLoaded: true
       });
     }
-    // TODO drop this in favour of redux
-    this.loadJobsPage(0, jobsTable.orderBy);
   }
 
   render() {
-    const { printerLoaded, jobs, jobsTable } = this.state;
-    const { getPrinter, match, setPrinterConnection } = this.props;
-    const printer = getPrinter(match.params.host);
+    const { printerLoaded } = this.state;
+    const {
+      printer,
+      setPrinterConnection,
+      role,
+      jobList,
+      loadJobsPage,
+      clearJobsPages
+    } = this.props;
     if (!printerLoaded) {
       return (
         <div>
@@ -454,118 +401,82 @@ class PrinterDetail extends React.Component {
     if (!printer) {
       return <Redirect to="/page-404" />;
     }
-    const jobsRows =
-      jobs &&
-      jobs.map(j => {
-        return <PrintJobRow key={j.id} {...j} />;
-      });
     return (
-      <RoleBasedGateway requiredRole="admin">
-        <section className="content">
-          <div className="printer-detail">
-            <div className="printer-detail-stream">
-              <WebcamStream {...printer.webcam} />
-              <Progress {...printer.job} />
-            </div>
+      <section className="content">
+        <div className="printer-detail">
+          <div className="printer-detail-stream">
+            <WebcamStream {...printer.webcam} />
+            <Progress {...printer.job} />
+          </div>
 
-            <div className="printer-detail-meta">
-              <div className="container">
-                <h1 className="main-title">{printer.name}</h1>
-                <PrinterConnectionStatus
-                  printer={printer}
-                  onPrinterAuthorizationChanged={this.changePrinter}
-                  onPrinterConnectionChanged={setPrinterConnection}
-                />
-              </div>
-            </div>
-
-            <div className="printer-detail-jobs">
-              {!jobsRows || jobsRows.length === 0 ? (
-                <></>
-              ) : (
-                <>
-                  <ul className="tabs-navigation">
-                    <li className="tab active">
-                      <h2>Jobs</h2>
-                    </li>
-                  </ul>
-
-                  <div className="tabs-content">
-                    <div className="list">
-                      <div className="list-header">
-                        <TableSorting
-                          active={jobsTable.orderBy}
-                          columns={["started"]}
-                          onChange={() => {
-                            this.loadJobsPage(
-                              jobsTable.currentPage,
-                              jobsTable.orderBy === "+started"
-                                ? "-started"
-                                : "+started"
-                            );
-                          }}
-                        />
-                      </div>
-                      {jobsRows}
-                    </div>
-                  </div>
-
-                  <div className="table-pagination">
-                    {jobsTable.currentPage > 0 ? (
-                      <button
-                        className="btn btn-sm"
-                        onClick={() =>
-                          this.loadJobsPage(
-                            Math.max(0, jobsTable.currentPage - 1),
-                            jobsTable.orderBy
-                          )
-                        }
-                      >
-                        Previous
-                      </button>
-                    ) : (
-                      <span></span>
-                    )}
-                    {jobsTable.pages[jobsTable.currentPage + 1] ? (
-                      <button
-                        className="btn btn-sm"
-                        onClick={() =>
-                          this.loadJobsPage(
-                            jobsTable.currentPage + 1,
-                            jobsTable.orderBy
-                          )
-                        }
-                      >
-                        Next
-                      </button>
-                    ) : (
-                      <span></span>
-                    )}
-                  </div>
-                </>
-              )}
-              <div className="cta-box text-center">
-                <Link to={`/printers/${printer.host}/settings`}>
-                  <button className="btn">Printer settings</button>
-                </Link>
-              </div>
+          <div className="printer-detail-meta">
+            <div className="container">
+              <h1 className="main-title">{printer.name}</h1>
+              <PrinterStatus
+                printer={printer}
+                onPrinterAuthorizationChanged={this.changePrinter}
+                onPrinterConnectionChanged={setPrinterConnection}
+              />
             </div>
           </div>
-        </section>
-      </RoleBasedGateway>
+
+          <div className="printer-detail-jobs">
+            <ul className="tabs-navigation">
+              <li className="tab active">
+                <h2>Jobs</h2>
+              </li>
+            </ul>
+            <div className="tabs-content">
+              <TableWrapper
+                enableFiltering={false}
+                itemList={jobList}
+                loadPage={(startWith, orderBy) => {
+                  return loadJobsPage(printer.host, startWith, orderBy);
+                }}
+                rowFactory={j => {
+                  return <PrintJobRow key={j.id} {...j} />;
+                }}
+                sortByColumns={["started"]}
+                clearItemsPages={() => {
+                  return clearJobsPages(printer.host);
+                }}
+              />
+            </div>
+          </div>
+          {role === "admin" && (
+            <div className="cta-box text-center">
+              <Link to={`/printers/${printer.host}/settings`}>
+                <button className="btn">Printer settings</button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
     );
   }
 }
 
 export default connect(
-  state => ({
-    getPrinter: host => state.printers.printers.find(p => p.host === host)
+  (state, ownProps) => ({
+    printer: state.printers.printers.find(
+      p => p.host === ownProps.match.params.host
+    ),
+    role: state.users.me.role,
+    jobList: state.printjobs[ownProps.match.params.host] || {
+      pages: [],
+      orderBy: "-started",
+      filter: null,
+      limit: 10
+    }
   }),
   dispatch => ({
     loadPrinter: host =>
       dispatch(loadPrinter(host, ["job", "status", "webcam"])),
     patchPrinter: (host, data) => dispatch(patchPrinter(host, data)),
     setPrinterConnection: (host, state) =>
-      dispatch(setPrinterConnection(host, state))
+      dispatch(setPrinterConnection(host, state)),
+    loadJobsPage: (printerHost, startWith, orderBy, filter, limit) =>
+      dispatch(getJobsPage(printerHost, startWith, orderBy, filter, limit)),
+    clearJobsPages: printerHost => dispatch(clearJobsPages(printerHost))
   })
 )(PrinterDetail);

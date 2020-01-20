@@ -7,7 +7,6 @@ class TableSorting extends React.Component {
   }
   render() {
     const { active, columns, onChange } = this.props;
-
     const toggle = () => {
       const { expand } = this.state;
       this.setState({
@@ -49,7 +48,14 @@ class TableSorting extends React.Component {
       <div className="list-filter">
         <button
           className="list-filter-toggle btn-reset"
-          onClick={columns.length === 1 ? onChange : toggle}
+          onClick={e => {
+            e.preventDefault();
+            if (columns.length === 1) {
+              return onChange(columns[0])();
+            } else {
+              return toggle();
+            }
+          }}
         >
           {active.replace("+", "").replace("-", "")}
           <span
