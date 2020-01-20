@@ -18,9 +18,9 @@ class PrinterSettings extends React.Component {
   }
 
   changePrinter(newParameters) {
-    const { match, getPrinter, patchPrinter } = this.props;
-    const printer = getPrinter(match.params.host);
-    return patchPrinter(match.params.host, newParameters).then(r => {
+    const { patchPrinter, printer } = this.props;
+    // TODO reflect this optimistically into redux
+    return patchPrinter(newParameters).then(r => {
       switch (r.status) {
         case 200:
           this.props.history.push(`/printers/${printer.host}`);
@@ -38,9 +38,9 @@ class PrinterSettings extends React.Component {
   }
 
   componentDidMount() {
-    const { match, loadPrinter, getPrinter } = this.props;
-    if (!getPrinter(match.params.host)) {
-      loadPrinter(match.params.host).then(() => {
+    const { loadPrinter, printer } = this.props;
+    if (!printer) {
+      loadPrinter().then(() => {
         this.setState({
           printerLoaded: true
         });
@@ -54,8 +54,7 @@ class PrinterSettings extends React.Component {
 
   render() {
     const { printerLoaded } = this.state;
-    const { getPrinter, match } = this.props;
-    const printer = getPrinter(match.params.host);
+    const { printer } = this.props;
     if (!printerLoaded) {
       return (
         <div>
@@ -102,12 +101,17 @@ class PrinterSettings extends React.Component {
 }
 
 export default connect(
-  state => ({
-    getPrinter: host => state.printers.printers.find(p => p.host === host)
+  (state, ownProps) => ({
+    printer: state.printers.printers.find(
+      p => p.host === ownProps.match.params.host
+    )
   }),
-  dispatch => ({
-    loadPrinter: host =>
-      dispatch(loadPrinter(host, ["job", "status", "webcam"])),
-    patchPrinter: (host, data) => dispatch(patchPrinter(host, data))
+  (dispatch, ownProps) => ({
+    loadPrinter: () =>
+      dispatch(
+        loadPrinter(ownProps.match.params.host, ["job", "status", "webcam"])
+      ),
+    patchPrinter: data =>
+      dispatch(patchPrinter(ownProps.match.params.host, data))
   })
 )(PrinterSettings);

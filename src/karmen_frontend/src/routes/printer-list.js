@@ -3,11 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Loader from "../components/loader";
 import PrinterState from "../components/printer-state";
-import {
-  loadAndQueuePrinters,
-  deletePrinter,
-  changeCurrentJob
-} from "../actions/printers";
+import { loadAndQueuePrinters, deletePrinter } from "../actions/printers";
 import formatters from "../services/formatters";
 
 class PrinterList extends React.Component {
@@ -114,8 +110,6 @@ export default connect(
   }),
   dispatch => ({
     loadPrinters: fields => dispatch(loadAndQueuePrinters(fields)),
-    changeCurrentJobState: (host, action) =>
-      dispatch(changeCurrentJob(host, action)),
     deletePrinter: host => dispatch(deletePrinter(host))
   })
 )(PrinterList);

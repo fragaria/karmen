@@ -12,7 +12,8 @@ import { getJobsPage, clearJobsPages } from "../actions/printjobs";
 import {
   loadPrinter,
   patchPrinter,
-  setPrinterConnection
+  setPrinterConnection,
+  changeCurrentJob
 } from "../actions/printers";
 
 class PrinterConnectionForm extends React.Component {
@@ -29,8 +30,8 @@ class PrinterConnectionForm extends React.Component {
 
   changePrinterConnection() {
     const { targetState } = this.state;
-    const { printer, onPrinterConnectionChanged } = this.props;
-    onPrinterConnectionChanged(printer.host, targetState).then(r => {
+    const { onPrinterConnectionChanged } = this.props;
+    onPrinterConnectionChanged(targetState).then(r => {
       this.setState({
         submitting: false,
         showConnectionWarningRow: false,
@@ -207,6 +208,78 @@ class PrinterAuthorizationForm extends React.Component {
   }
 }
 
+class PrinterCurrentPrintControl extends React.Component {
+  state = {
+    showCancelWarning: false
+  };
+  render() {
+    const { showCancelWarning } = this.state;
+    const { printer, onCurrentJobStateChange } = this.props;
+    if (
+      !printer.status ||
+      ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
+      printer.client.access_level !== "unlocked"
+    ) {
+      return <></>;
+    }
+    if (showCancelWarning) {
+      return (
+        <div className="cta-box text-center">
+          <p className="message-warning">
+            Are you sure? You are about to cancel the whole print!
+          </p>
+          <button
+            className="btn"
+            onClick={() => {
+              onCurrentJobStateChange("cancel").then(() => {
+                this.setState({
+                  showCancelWarning: false
+                });
+              });
+            }}
+          >
+            Cancel the print!
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="cta-box text-center">
+        {printer.status.state === "Paused" ? (
+          <button
+            className="btn"
+            onClick={() => {
+              onCurrentJobStateChange("resume");
+            }}
+          >
+            Resume print
+          </button>
+        ) : (
+          <button
+            className="btn"
+            onClick={() => {
+              onCurrentJobStateChange("pause");
+            }}
+          >
+            Pause print
+          </button>
+        )}
+        <button
+          className="btn"
+          onClick={() => {
+            this.setState({
+              showCancelWarning: true
+            });
+          }}
+        >
+          Cancel print
+        </button>
+      </div>
+    );
+  }
+}
+
 const PrinterStatus = ({
   printer,
   onPrinterConnectionChanged,
@@ -343,33 +416,10 @@ class PrinterDetail extends React.Component {
     printerLoaded: false
   };
 
-  constructor(props) {
-    super(props);
-    this.changePrinter = this.changePrinter.bind(this);
-  }
-
-  changePrinter(newParameters) {
-    const { match, patchPrinter } = this.props;
-    return patchPrinter(match.params.host, newParameters).then(r => {
-      switch (r.status) {
-        case 200:
-          return {
-            ok: true,
-            message: "Changes saved successfully"
-          };
-        default:
-          return {
-            ok: false,
-            message: "Cannot save your changes, check server logs"
-          };
-      }
-    });
-  }
-
   componentDidMount() {
-    const { match, loadPrinter, printer } = this.props;
+    const { loadPrinter, printer } = this.props;
     if (!printer) {
-      loadPrinter(match.params.host).then(() => {
+      loadPrinter().then(() => {
         this.setState({
           printerLoaded: true
         });
@@ -386,6 +436,8 @@ class PrinterDetail extends React.Component {
     const {
       printer,
       setPrinterConnection,
+      changeCurrentJobState,
+      patchPrinter,
       role,
       jobList,
       loadJobsPage,
@@ -414,8 +466,12 @@ class PrinterDetail extends React.Component {
               <h1 className="main-title">{printer.name}</h1>
               <PrinterStatus
                 printer={printer}
-                onPrinterAuthorizationChanged={this.changePrinter}
+                onPrinterAuthorizationChanged={patchPrinter}
                 onPrinterConnectionChanged={setPrinterConnection}
+              />
+              <PrinterCurrentPrintControl
+                printer={printer}
+                onCurrentJobStateChange={changeCurrentJobState}
               />
             </div>
           </div>
@@ -430,16 +486,12 @@ class PrinterDetail extends React.Component {
               <TableWrapper
                 enableFiltering={false}
                 itemList={jobList}
-                loadPage={(startWith, orderBy) => {
-                  return loadJobsPage(printer.host, startWith, orderBy);
-                }}
+                loadPage={loadJobsPage}
                 rowFactory={j => {
                   return <PrintJobRow key={j.id} {...j} />;
                 }}
                 sortByColumns={["started"]}
-                clearItemsPages={() => {
-                  return clearJobsPages(printer.host);
-                }}
+                clearItemsPages={clearJobsPages}
               />
             </div>
           </div>
@@ -469,14 +521,27 @@ export default connect(
       limit: 10
     }
   }),
-  dispatch => ({
-    loadPrinter: host =>
-      dispatch(loadPrinter(host, ["job", "status", "webcam"])),
-    patchPrinter: (host, data) => dispatch(patchPrinter(host, data)),
-    setPrinterConnection: (host, state) =>
-      dispatch(setPrinterConnection(host, state)),
-    loadJobsPage: (printerHost, startWith, orderBy, filter, limit) =>
-      dispatch(getJobsPage(printerHost, startWith, orderBy, filter, limit)),
-    clearJobsPages: printerHost => dispatch(clearJobsPages(printerHost))
+  (dispatch, ownProps) => ({
+    loadPrinter: () =>
+      dispatch(
+        loadPrinter(ownProps.match.params.host, ["job", "status", "webcam"])
+      ),
+    changeCurrentJobState: action =>
+      dispatch(changeCurrentJob(ownProps.match.params.host, action)),
+    patchPrinter: data =>
+      dispatch(patchPrinter(ownProps.match.params.host, data)),
+    setPrinterConnection: state =>
+      dispatch(setPrinterConnection(ownProps.match.params.host, state)),
+    loadJobsPage: (startWith, orderBy, filter, limit) =>
+      dispatch(
+        getJobsPage(
+          ownProps.match.params.host,
+          startWith,
+          orderBy,
+          filter,
+          limit
+        )
+      ),
+    clearJobsPages: () => dispatch(clearJobsPages(ownProps.match.params.host))
   })
 )(PrinterDetail);
