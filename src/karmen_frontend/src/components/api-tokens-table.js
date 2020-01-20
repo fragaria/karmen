@@ -101,46 +101,44 @@ class ApiTokensTable extends React.Component {
       });
     return (
       <div className="list">
+        <div className="list-header">
+          <div className="list-search">
+            <label htmlFor="filter">
+              <span className="icon icon-search"></span>
+              <DebounceInput
+                type="search"
+                name="filter"
+                id="filter"
+                minLength={3}
+                debounceTimeout={300}
+                onChange={e => {
+                  this.setState({
+                    filter: e.target.value
+                  });
+                }}
+              />
+            </label>
+          </div>
+          <TableSorting
+            active={orderBy}
+            columns={["name", "created"]}
+            onChange={column => {
+              return () => {
+                const { orderBy } = this.state;
+                this.setState({
+                  orderBy:
+                    orderBy === `+${column}` ? `-${column}` : `+${column}`
+                });
+              };
+            }}
+          />
+        </div>
         {!tokensLoaded ? (
           <p className="list-item list-item-message">Loading...</p>
         ) : !tokensRows || tokensRows.length === 0 ? (
           <p className="list-item list-item-message">No API tokens found!</p>
         ) : (
-          <>
-            <div className="list-header">
-              <div className="list-search">
-                <label htmlFor="filter">
-                  <span className="icon icon-search"></span>
-                  <DebounceInput
-                    type="search"
-                    name="filter"
-                    id="filter"
-                    minLength={3}
-                    debounceTimeout={300}
-                    onChange={e => {
-                      this.setState({
-                        filter: e.target.value
-                      });
-                    }}
-                  />
-                </label>
-              </div>
-              <TableSorting
-                active={orderBy}
-                columns={["name", "created"]}
-                onChange={column => {
-                  return () => {
-                    const { orderBy } = this.state;
-                    this.setState({
-                      orderBy:
-                        orderBy === `+${column}` ? `-${column}` : `+${column}`
-                    });
-                  };
-                }}
-              />
-            </div>
-            {tokensRows}
-          </>
+          <>{tokensRows}</>
         )}
       </div>
     );

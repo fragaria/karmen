@@ -134,10 +134,12 @@ class PrintersTable extends React.Component {
             active={orderBy}
             columns={["name"]}
             onChange={() => {
-              const { orderBy } = this.state;
-              this.setState({
-                orderBy: orderBy === "+name" ? "-name" : "+name"
-              });
+              return () => {
+                const { orderBy } = this.state;
+                this.setState({
+                  orderBy: orderBy === "+name" ? "-name" : "+name"
+                });
+              };
             }}
           />
         </div>
