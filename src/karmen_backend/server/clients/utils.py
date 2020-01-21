@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class PrinterClientAccessLevel(str, Enum):
-    UNKNOWN = "uknown"
+    UNKNOWN = "unknown"
     PROTECTED = "protected"
     READ_ONLY = "read_only"
     UNLOCKED = "unlocked"
