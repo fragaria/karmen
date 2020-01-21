@@ -673,3 +673,16 @@ select {
     }
   }
 }
+
+// API TOKEN PAGE
+
+pre {
+  padding: $spacing-default;
+  margin-top: $spacing-default;
+  background: map-get($palette, gray-light);
+}
+
+ul.ul-styled {
+  list-style-type: square;
+  margin-left: $spacing-default/1.5;
+}

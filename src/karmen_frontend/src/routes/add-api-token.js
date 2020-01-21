@@ -91,7 +91,7 @@ class AddApiToken extends React.Component {
           {showToken ? (
             <>
               <div className="content-section">
-                <ul>
+                <ul class="ul-styled">
                   <li>
                     This is the token that is required to talk to Karmen API
                   </li>

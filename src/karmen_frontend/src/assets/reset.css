@@ -38,6 +38,11 @@ ol, ul {
   list-style: none;
 }
 
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 blockquote, q {
   quotes: none;
 }
