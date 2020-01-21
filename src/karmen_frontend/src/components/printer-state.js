@@ -13,7 +13,7 @@ export const PrinterState = ({ printer }) => {
   return (
     <>
       {printer.client.access_level === "protected" ? (
-        <span className={`text-secondary`}>Authorization required</span>
+        <strong className={`text-secondary`}>Authorization required</strong>
       ) : (
         <>
           <span>is </span>

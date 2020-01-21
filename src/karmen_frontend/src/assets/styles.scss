@@ -596,6 +596,19 @@ select {
   }
 }
 
+.inline-form {
+  display: inline-flex;
+
+  &.inline-form-sm {
+    input[type=text],
+    input[type=search],
+    input[type=password],
+    select {
+      height: $form-elements-height-sm;
+    }
+  }
+}
+
 .message-error {
   text-align: center;
   font-weight: bold;
@@ -671,6 +684,15 @@ select {
 
     .printer-detail-meta {
       grid-area: meta;
+
+      .main-title {
+        margin-bottom: 0;
+      }
+
+      .dl-horizontal {
+        grid-template-columns: 35% 1fr;
+      }
+
     }
 
     .printer-detail-jobs {

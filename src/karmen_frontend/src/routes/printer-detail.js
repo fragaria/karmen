@@ -86,12 +86,13 @@ class PrinterConnectionForm extends React.Component {
             </button>
           </div>
         ) : (
-          <dd className="description">
+          <>
+            &nbsp;
             {printer.client.access_level === "unlocked" &&
               (["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
               printer.status.state.match(/printer is not/i) ? (
                 <button
-                  className="btn-reset anchor"
+                  className="btn btn-sm"
                   type="submit"
                   onClick={e => {
                     e.preventDefault();
@@ -101,7 +102,7 @@ class PrinterConnectionForm extends React.Component {
                     });
                   }}
                 >
-                  Connect printer
+                  Connect
                 </button>
               ) : (
                 <button
@@ -115,10 +116,10 @@ class PrinterConnectionForm extends React.Component {
                     });
                   }}
                 >
-                  Disconnect printer
+                  Disconnect
                 </button>
               ))}
-          </dd>
+          </>
         )}
       </form>
     );
@@ -167,31 +168,34 @@ class PrinterAuthorizationForm extends React.Component {
       return <></>;
     }
     return (
-      <form className="inline-form">
-        <dd className="description">
+      <>
+        <p></p>
+        <p>
           {getAccessLevelString(printer.client.access_level)}
-        </dd>
-        <input
-          type="text"
-          id="apiKey"
-          name="apiKey"
-          value={apiKey || ""}
-          onChange={e => {
-            this.setState({
-              apiKey: e.target.value
-            });
-          }}
-        />
-        <BusyButton
-          className="btn btn-sm"
-          type="submit"
-          onClick={this.setApiKey}
-          busyChildren="Working..."
-          disabled={!apiKey}
-        >
-          Set API key
-        </BusyButton>
-      </form>
+        </p>
+        <form className="inline-form inline-form-sm">
+          <input
+            type="text"
+            id="apiKey"
+            name="apiKey"
+            value={apiKey || ""}
+            onChange={e => {
+              this.setState({
+                apiKey: e.target.value
+              });
+            }}
+          />
+          <BusyButton
+            className="btn btn-sm"
+            type="submit"
+            onClick={this.setApiKey}
+            busyChildren="Working..."
+            disabled={!apiKey}
+          >
+            Set API key
+          </BusyButton>
+        </form>
+      </>
     );
   }
 }
@@ -212,12 +216,12 @@ class PrinterCurrentPrintControl extends React.Component {
     }
     if (showCancelWarning) {
       return (
-        <div className="cta-box text-center">
+        <div className="cta-box">
           <p className="message-warning">
             Are you sure? You are about to cancel the whole print!
           </p>
           <button
-            className="btn"
+            className="btn btn-sm"
             onClick={() => {
               onCurrentJobStateChange("cancel").then(() => {
                 this.setState({
@@ -228,6 +232,17 @@ class PrinterCurrentPrintControl extends React.Component {
           >
             Cancel the print!
           </button>
+          {" "}
+          <button
+            className="btn btn-plain btn-sm"
+            onClick={() => {
+              this.setState({
+                showCancelWarning: false
+              });
+            }}
+           >
+            Close
+          </button>
         </div>
       );
     }
@@ -236,7 +251,7 @@ class PrinterCurrentPrintControl extends React.Component {
       <div className="cta-box text-center">
         {printer.status.state === "Paused" ? (
           <button
-            className="btn"
+            className="btn btn-sm"
             onClick={() => {
               onCurrentJobStateChange("resume");
             }}
@@ -245,16 +260,16 @@ class PrinterCurrentPrintControl extends React.Component {
           </button>
         ) : (
           <button
-            className="btn"
+            className="btn btn-sm"
             onClick={() => {
               onCurrentJobStateChange("pause");
             }}
           >
             Pause print
           </button>
-        )}
+        )}{" "}
         <button
-          className="btn"
+          className="btn btn-sm"
           onClick={() => {
             this.setState({
               showCancelWarning: true
@@ -270,7 +285,7 @@ class PrinterCurrentPrintControl extends React.Component {
 
 const PrinterConnectionStatus = ({ printer }) => {
   return (
-    <dl className="dl-horizontal">
+    <>
       <dt className="term">Client: </dt>
       <dd className="description">
         {printer.client.name} (
@@ -302,52 +317,50 @@ const PrinterConnectionStatus = ({ printer }) => {
       </dd>
       {printer.client.api_key && (
         <>
-          <dt className="term">API Key</dt>
+          <dt className="term">API Key: </dt>
           <dd className="decription">{printer.client.api_key}</dd>
         </>
       )}
-    </dl>
+    </>
   );
 };
 
 const PrinterProperties = ({ printer }) => {
   const props = printer.printer_props;
   return (
-    <div className="printer-connection">
-      <dl className="dl-horizontal">
-        {props &&
-          (props.filament_type ||
-            props.filament_color ||
-            props.bed_type ||
-            props.tool0_diameter) && (
-            <>
-              <dt className="term">Filament type:</dt>
-              <dd className="description">{props.filament_type}</dd>
+    <>
+      {props &&
+        (props.filament_type ||
+          props.filament_color ||
+          props.bed_type ||
+          props.tool0_diameter) && (
+          <>
+            <dt className="term">Filament type:</dt>
+            <dd className="description">{props.filament_type}</dd>
 
-              {props.filament_color && (
-                <>
-                  <dt className="term">Filament color:</dt>
-                  <dd className="description">{props.filament_color}</dd>
-                </>
-              )}
+            {props.filament_color && (
+              <>
+                <dt className="term">Filament color:</dt>
+                <dd className="description">{props.filament_color}</dd>
+              </>
+            )}
 
-              {props.bed_type && (
-                <>
-                  <dt className="term">Bed type:</dt>
-                  <dd className="description">{props.bed_type}</dd>
-                </>
-              )}
+            {props.bed_type && (
+              <>
+                <dt className="term">Bed type:</dt>
+                <dd className="description">{props.bed_type}</dd>
+              </>
+            )}
 
-              {props.tool0_diameter && (
-                <>
-                  <dt className="term">Nozzle:</dt>
-                  <dd className="description">{props.tool0_diameter} mm</dd>
-                </>
-              )}
-            </>
-          )}
-      </dl>
-    </div>
+            {props.tool0_diameter && (
+              <>
+                <dt className="term">Nozzle:</dt>
+                <dd className="description">{props.tool0_diameter} mm</dd>
+              </>
+            )}
+          </>
+        )}
+    </>
   );
 };
 
@@ -437,28 +450,33 @@ class PrinterDetail extends React.Component {
           <div className="printer-detail-meta">
             <div className="container">
               <h1 className="main-title">{printer.name}</h1>
+
               <PrinterState printer={printer} />
+
               <PrinterConnectionForm
                 printer={printer}
                 onPrinterConnectionChanged={setPrinterConnection}
               />
+
               {role === "admin" && (
                 <PrinterAuthorizationForm
                   printer={printer}
                   onPrinterAuthorizationChanged={patchPrinter}
                 />
               )}
-              <PrinterProperties printer={printer} />
-              <PrinterConnectionStatus printer={printer} />
+
+              <dl className="dl-horizontal">
+                <PrinterProperties printer={printer} />
+                <PrinterConnectionStatus printer={printer} />
+              </dl>
+
+              <PrinterCurrentPrintControl
+                printer={printer}
+                onCurrentJobStateChange={changeCurrentJobState}
+              />
             </div>
           </div>
 
-          <div className="printer-detail-troubleshooting">
-            <PrinterCurrentPrintControl
-              printer={printer}
-              onCurrentJobStateChange={changeCurrentJobState}
-            />
-          </div>
 
           <div className="printer-detail-jobs">
             <ul className="tabs-navigation">
@@ -478,14 +496,15 @@ class PrinterDetail extends React.Component {
                 clearItemsPages={clearJobsPages}
               />
             </div>
+
+            {role === "admin" && (
+              <div className="cta-box text-center">
+                <Link to={`/printers/${printer.host}/settings`}>
+                  <button className="btn">Printer settings</button>
+                </Link>
+              </div>
+            )}
           </div>
-          {role === "admin" && (
-            <div className="cta-box text-center">
-              <Link to={`/printers/${printer.host}/settings`}>
-                <button className="btn">Printer settings</button>
-              </Link>
-            </div>
-          )}
         </div>
       </section>
     );
