@@ -27,7 +27,7 @@ def make_printer_response(printer, fields):
             "connected": bool(printer_inst.client_info.connected),
             "access_level": printer_inst.client_info.access_level,
             "api_key": printer_inst.client_info.api_key[0:2]
-            + "*" * (len(printer_inst.client_info.api_key) - 2)
+            + "*" * 30  # Add star padding to 32 characters
             if printer_inst.client_info.api_key
             else None,
         },

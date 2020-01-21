@@ -85,7 +85,7 @@ class DetailRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
             self.assertTrue("webcam" not in response.json)
-            self.assertEqual(response.json["client"]["api_key"], "12****")
+            self.assertEqual(response.json["client"]["api_key"], "12" + "*" * 30)
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_fields(self, mock_get_uri):
