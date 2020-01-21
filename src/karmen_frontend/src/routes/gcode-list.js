@@ -29,9 +29,9 @@ class GcodeTableRow extends React.Component {
     this.schedulePrint = this.schedulePrint.bind(this);
   }
 
-  schedulePrint(gcodeId, printerHost) {
+  schedulePrint(gcodeId, printerUuid) {
     const { onSchedulePrint } = this.props;
-    printGcode(gcodeId, printerHost).then(r => {
+    printGcode(gcodeId, printerUuid).then(r => {
       switch (r) {
         case 201:
           this.setState({
@@ -41,7 +41,7 @@ class GcodeTableRow extends React.Component {
             message: "Print was scheduled",
             messageOk: true
           });
-          onSchedulePrint && onSchedulePrint(gcodeId, printerHost);
+          onSchedulePrint && onSchedulePrint(gcodeId, printerUuid);
           break;
         default:
           this.setState({
@@ -152,9 +152,7 @@ class GcodeTableRow extends React.Component {
 
     if (showPrinterSelectRow) {
       const availablePrinterOpts = availablePrinters.map(p => {
-        return (
-          <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>
-        );
+        return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
       });
       return (
         <TableActionRow
@@ -170,7 +168,7 @@ class GcodeTableRow extends React.Component {
             e.preventDefault();
             const { selectedPrinter } = this.state;
             const selected = availablePrinters.find(
-              p => p.host === selectedPrinter
+              p => p.uuid === selectedPrinter
             );
             if (
               selected &&
@@ -242,7 +240,7 @@ class GcodeTableRow extends React.Component {
             onClick={() => {
               this.setState({
                 selectedPrinter: availablePrinters.length
-                  ? availablePrinters[0].host
+                  ? availablePrinters[0].uuid
                   : null,
                 showPrinterSelectRow: true
               });
@@ -480,7 +478,7 @@ export default connect(
         .filter(p => p.status && p.status.state === "Operational")
         .filter(p => p.client && p.client.connected)
         .filter(p => p.client && p.client.access_level === "unlocked")
-        .filter(p => without.indexOf(p.host) === -1)
+        .filter(p => without.indexOf(p.uuid) === -1)
   }),
   dispatch => ({
     loadPrinters: () => dispatch(loadPrinters(["status"]))

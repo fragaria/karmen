@@ -21,11 +21,15 @@ class PrintersTableRow extends React.Component {
             });
           }}
           onConfirm={() => {
-            onPrinterDelete(printer.host);
+            onPrinterDelete(printer.uuid);
           }}
         >
           Are you sure? You can add the printer back later by adding{" "}
-          <code>{printer.host}</code>.
+          <code>
+            {printer.hostname || printer.ip}
+            {printer.port ? `:${printer.port}` : ""}
+          </code>
+          .
         </TableActionRow>
       );
     }
@@ -36,22 +40,24 @@ class PrintersTableRow extends React.Component {
           <span className="list-item-title">{printer.name}</span>
           <span>
             {printer.hostname
-              ? `${printer.hostname} (${printer.host})`
-              : printer.host}
+              ? `${printer.hostname}${
+                  printer.port ? `:${printer.port}` : ""
+                } (${printer.ip}${printer.port ? `:${printer.port}` : ""})`
+              : `${printer.ip}${printer.port ? `:${printer.port}` : ""}`}
           </span>
         </div>
         <div className="list-item-cta">
           <Link
             className="btn-reset"
             title="Settings"
-            to={`/printers/${printer.host}`}
+            to={`/printers/${printer.uuid}`}
           >
             <i className="icon-printer"></i>
           </Link>
           <Link
             className="btn-reset"
             title="Settings"
-            to={`/printers/${printer.host}/settings`}
+            to={`/printers/${printer.uuid}/settings`}
           >
             <i className="icon-edit"></i>
           </Link>
@@ -102,7 +108,7 @@ class PrintersTable extends React.Component {
       .map(p => {
         return (
           <PrintersTableRow
-            key={p.host}
+            key={p.uuid}
             printer={p}
             onPrinterDelete={onPrinterDelete}
           />

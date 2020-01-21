@@ -207,7 +207,7 @@ export default connect(
   }),
   dispatch => ({
     loadPrinters: fields => dispatch(loadPrinters(fields)),
-    onPrinterDelete: host => dispatch(deletePrinter(host)),
+    onPrinterDelete: uuid => dispatch(deletePrinter(uuid)),
     loadUsersPage: (startWith, orderBy, filter, limit) =>
       dispatch(getUsersPage(startWith, orderBy, filter, limit)),
     clearUsersPages: () => dispatch(clearUsersPages()),

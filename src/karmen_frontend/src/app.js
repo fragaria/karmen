@@ -87,12 +87,12 @@ class App extends React.Component {
                   <Route path="/gcodes" exact component={GcodeList} />
                   <Route path="/gcodes/:id" exact component={GcodeDetail} />
                   <Route
-                    path="/printers/:host/settings"
+                    path="/printers/:uuid/settings"
                     exact
                     component={PrinterSettings}
                   />
                   <Route
-                    path="/printers/:host"
+                    path="/printers/:uuid"
                     exact
                     component={PrinterDetail}
                   />

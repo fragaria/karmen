@@ -11,17 +11,17 @@ export const loadAndQueuePrinters = fields => (dispatch, getState) => {
     if (result && result.data && result.data.items) {
       for (let printer of result.data.items) {
         if (printers.checkQueue) {
-          const existing = printers.checkQueue[printer.host];
+          const existing = printers.checkQueue[printer.uuid];
           if (existing === null || existing === undefined) {
             const poll =
               ["Printing", "Paused"].indexOf(printer.status.state) > -1
                 ? PRINTER_RUNNING_POLL
                 : PRINTER_IDLE_POLL;
-            dispatch(setPrinterPollInterval(printer.host, poll));
+            dispatch(setPrinterPollInterval(printer.uuid, poll));
             queueLoadPrinter(
               dispatch,
               getState,
-              printer.host,
+              printer.uuid,
               ["job", "status", "webcam"],
               poll
             );
@@ -33,25 +33,25 @@ export const loadAndQueuePrinters = fields => (dispatch, getState) => {
   });
 };
 
-export const setPrinterPollInterval = (host, interval) => {
+export const setPrinterPollInterval = (uuid, interval) => {
   return {
     type: "PRINTERS_POLL_INTERVAL_SET",
     payload: {
-      host,
+      uuid,
       interval
     }
   };
 };
 
-export const queueLoadPrinter = (dispatch, getState, host, fields, delay) => {
+export const queueLoadPrinter = (dispatch, getState, uuid, fields, delay) => {
   setTimeout(() => {
     const { printers } = getState();
     const previousInfo =
-      printers.printers && printers.printers.find(p => p.host === host);
-    dispatch(loadPrinter(host, fields)).then(result => {
+      printers.printers && printers.printers.find(p => p.uuid === uuid);
+    dispatch(loadPrinter(uuid, fields)).then(result => {
       const { printers } = getState();
-      if (printers.checkQueue[host] > 0) {
-        let interval = printers.checkQueue[host];
+      if (printers.checkQueue[uuid] > 0) {
+        let interval = printers.checkQueue[uuid];
         // detect if state change and we need to adjust interval
         if (
           previousInfo &&
@@ -65,19 +65,19 @@ export const queueLoadPrinter = (dispatch, getState, host, fields, delay) => {
             ["Printing", "Paused"].indexOf(result.data.status.state) > -1
               ? PRINTER_RUNNING_POLL
               : PRINTER_IDLE_POLL;
-          dispatch(setPrinterPollInterval(host, interval));
+          dispatch(setPrinterPollInterval(uuid, interval));
         }
         // enqueue next check if result is ok
         if (result.status === 200) {
           queueLoadPrinter(
             dispatch,
             getState,
-            host,
+            uuid,
             ["job", "status", "webcam"],
             interval
           );
         } else {
-          dispatch(setPrinterPollInterval(host, -1));
+          dispatch(setPrinterPollInterval(uuid, -1));
         }
       }
       return result;
@@ -94,29 +94,29 @@ export const loadPrinters = createActionThunk(
 
 export const loadPrinter = createActionThunk(
   "PRINTERS_LOAD_DETAIL",
-  (host, fields = []) => {
-    return backend.getPrinter(host, fields);
+  (uuid, fields = []) => {
+    return backend.getPrinter(uuid, fields);
   }
 );
 
 export const addPrinter = createActionThunk(
   "PRINTERS_ADD",
-  (protocol, host, name, apiKey) => {
-    return backend.addPrinter(protocol, host, name, apiKey);
+  (protocol, hostname, ip, port, name, apiKey) => {
+    return backend.addPrinter(protocol, hostname, ip, port, name, apiKey);
   }
 );
 
 export const patchPrinter = createActionThunk(
   "PRINTERS_PATCH",
-  (host, data) => {
-    return backend.patchPrinter(host, data);
+  (uuid, data) => {
+    return backend.patchPrinter(uuid, data);
   }
 );
 
-export const deletePrinter = createActionThunk("PRINTERS_DELETE", host => {
-  return backend.deletePrinter(host).then(r => {
+export const deletePrinter = createActionThunk("PRINTERS_DELETE", uuid => {
+  return backend.deletePrinter(uuid).then(r => {
     if (r.status !== 204) {
-      r.data.host = null;
+      r.data.uuid = null;
     }
     return r;
   });
@@ -124,14 +124,14 @@ export const deletePrinter = createActionThunk("PRINTERS_DELETE", host => {
 
 export const setPrinterConnection = createActionThunk(
   "PRINTERS_SET_CONNECTION",
-  (host, state) => {
-    return backend.setPrinterConnection(host, state);
+  (uuid, state) => {
+    return backend.setPrinterConnection(uuid, state);
   }
 );
 
 export const changeCurrentJob = createActionThunk(
   "PRINTERS_CHANGE_JOB",
-  (host, action) => {
-    return backend.changeCurrentJob(host, action);
+  (uuid, action) => {
+    return backend.changeCurrentJob(uuid, action);
   }
 );

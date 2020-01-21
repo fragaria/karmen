@@ -13,7 +13,7 @@ export default (
     case "PRINTERS_POLL_INTERVAL_SET":
       return Object.assign({}, state, {
         checkQueue: Object.assign({}, state.checkQueue, {
-          [action.payload.host]: action.payload.interval
+          [action.payload.uuid]: action.payload.interval
         })
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
@@ -22,7 +22,7 @@ export default (
         return state;
       }
       // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.host === newPrinter.host);
+      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
       if (!origPrinter && newPrinter) {
         printers.push(newPrinter);
       }
@@ -39,7 +39,7 @@ export default (
         return state;
       }
       // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.host === newPrinter.host);
+      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
       if (!origPrinter && newPrinter) {
         printers.push(newPrinter);
       }
@@ -56,7 +56,7 @@ export default (
         return state;
       }
       // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.host === newPrinter.host);
+      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
       if (!origPrinter && newPrinter) {
         return state;
       }
@@ -84,7 +84,7 @@ export default (
         return state;
       }
       // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.host === newPrinter.host);
+      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
       if (!origPrinter && newPrinter) {
         return state;
       }
@@ -114,7 +114,7 @@ export default (
         });
       }
       const newPrinters = action.payload.data.items.map(newPrinter => {
-        origPrinter = printers.find(p => p.host === newPrinter.host);
+        origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
         if (origPrinter) {
           return Object.assign({}, origPrinter, newPrinter);
         } else {
@@ -124,7 +124,7 @@ export default (
       return Object.assign({}, state, {
         printers: newPrinters
           .sort((p, r) => (p.name > r.name ? 1 : -1))
-          .filter(p => state.toBeDeleted.indexOf(p.host) === -1),
+          .filter(p => state.toBeDeleted.indexOf(p.uuid) === -1),
         printersLoaded: true
       });
     case "PRINTERS_ADD_SUCCEEDED":
@@ -139,10 +139,10 @@ export default (
     case "PRINTERS_DELETE_SUCCEEDED":
       return Object.assign({}, state, {
         printers: printers.filter(p => {
-          return p.host !== action.payload.data.host;
+          return p.uuid !== action.payload.data.uuid;
         }),
         toBeDeleted: state.toBeDeleted.filter(
-          d => d !== action.payload.data.host
+          d => d !== action.payload.data.uuid
         )
       });
     default:

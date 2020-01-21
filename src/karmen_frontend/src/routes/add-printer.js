@@ -57,7 +57,7 @@ class AddPrinter extends React.Component {
     if (
       !form.address.val ||
       form.address.val.match(
-        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/?:?\d{0,5}?$/
+        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?\/?$/
       ) === null
     ) {
       hasErrors = true;
@@ -70,32 +70,47 @@ class AddPrinter extends React.Component {
     const { createPrinter } = this.props;
     if (!hasErrors) {
       let protocol = "http";
-      let host = form.address.val;
-      if (form.address.val.indexOf("//") > -1) {
-        const url = new URL(form.address.val);
-        protocol = url.protocol.replace(":", "");
-        host = url.host;
+      let hostname, ip, port;
+      let raw = form.address.val;
+      if (raw.indexOf("//") === -1) {
+        raw = `${protocol}://${raw}`;
       }
-      return createPrinter(protocol, host, form.name.val, form.apiKey.val).then(
-        r => {
-          switch (r.status) {
-            case 201:
-              this.setState({
-                redirect: true
-              });
-              break;
-            case 409:
-              this.setState({
-                message: "Printer on this address is already registered"
-              });
-              break;
-            default:
-              this.setState({
-                message: "Cannot add printer, check server logs"
-              });
-          }
+      const url = new URL(raw);
+      protocol = url.protocol.replace(":", "");
+      port = url.port || null;
+      if (
+        url.hostname &&
+        url.hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null
+      ) {
+        hostname = url.hostname;
+      } else {
+        ip = url.hostname;
+      }
+      return createPrinter(
+        protocol,
+        hostname,
+        ip,
+        port,
+        form.name.val,
+        form.apiKey.val
+      ).then(r => {
+        switch (r.status) {
+          case 201:
+            this.setState({
+              redirect: true
+            });
+            break;
+          case 409:
+            this.setState({
+              message: "Printer on this address is already registered"
+            });
+            break;
+          default:
+            this.setState({
+              message: "Cannot add printer, check server logs"
+            });
         }
-      );
+      });
     }
   }
 
@@ -150,6 +165,6 @@ class AddPrinter extends React.Component {
 }
 
 export default connect(null, dispatch => ({
-  createPrinter: (protocol, host, name, apiKey) =>
-    dispatch(addPrinter(protocol, host, name, apiKey))
+  createPrinter: (protocol, hostname, ip, port, name, apiKey) =>
+    dispatch(addPrinter(protocol, hostname, ip, port, name, apiKey))
 }))(AddPrinter);

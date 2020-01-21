@@ -24,8 +24,8 @@ export const getPrinters = (fields = []) => {
     });
 };
 
-export const getPrinter = (host, fields = []) => {
-  let uri = `${BASE_URL}/printers/${host}`;
+export const getPrinter = (uuid, fields = []) => {
+  let uri = `${BASE_URL}/printers/${uuid}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -46,13 +46,15 @@ export const getPrinter = (host, fields = []) => {
     });
 };
 
-export const addPrinter = (protocol, host, name, apiKey) => {
+export const addPrinter = (protocol, hostname, ip, port, name, apiKey) => {
   return fetch(`${BASE_URL}/printers`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
       protocol,
-      host,
+      hostname,
+      ip,
+      port,
       name,
       api_key: apiKey
     })
@@ -74,8 +76,8 @@ export const addPrinter = (protocol, host, name, apiKey) => {
     });
 };
 
-export const patchPrinter = (host, data) => {
-  return fetch(`${BASE_URL}/printers/${host}`, {
+export const patchPrinter = (uuid, data) => {
+  return fetch(`${BASE_URL}/printers/${uuid}`, {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify(data)
@@ -94,8 +96,8 @@ export const patchPrinter = (host, data) => {
     });
 };
 
-export const setPrinterConnection = (host, state) => {
-  return fetch(`${BASE_URL}/printers/${host}/connection`, {
+export const setPrinterConnection = (uuid, state) => {
+  return fetch(`${BASE_URL}/printers/${uuid}/connection`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ state: state })
@@ -104,7 +106,7 @@ export const setPrinterConnection = (host, state) => {
       if (response.status !== 204) {
         console.error(`Cannot connect a printer: ${response.status}`);
       }
-      return { status: response.status, data: { host, state: state } };
+      return { status: response.status, data: { uuid, state: state } };
     })
     .catch(e => {
       console.error(`Cannot connect a printer: ${e}`);
@@ -112,8 +114,8 @@ export const setPrinterConnection = (host, state) => {
     });
 };
 
-export const deletePrinter = host => {
-  return fetch(`${BASE_URL}/printers/${host}`, {
+export const deletePrinter = uuid => {
+  return fetch(`${BASE_URL}/printers/${uuid}`, {
     method: "DELETE",
     headers: getHeaders()
   })
@@ -121,7 +123,7 @@ export const deletePrinter = host => {
       if (response.status !== 204) {
         console.error(`Cannot remove a printer: ${response.status}`);
       }
-      return { status: response.status, data: { host: host } };
+      return { status: response.status, data: { uuid } };
     })
     .catch(e => {
       console.error(`Cannot remove a printer: ${e}`);
@@ -129,8 +131,8 @@ export const deletePrinter = host => {
     });
 };
 
-export const changeCurrentJob = (host, action) => {
-  return fetch(`${BASE_URL}/printers/${host}/current-job`, {
+export const changeCurrentJob = (uuid, action) => {
+  return fetch(`${BASE_URL}/printers/${uuid}/current-job`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
@@ -141,7 +143,7 @@ export const changeCurrentJob = (host, action) => {
       if (response.status !== 204) {
         console.error(`Cannot change current job: ${response.status}`);
       }
-      return { status: response.status, data: { host: host, action: action } };
+      return { status: response.status, data: { uuid, action: action } };
     })
     .catch(e => {
       console.error(`Cannot change current job: ${e}`);

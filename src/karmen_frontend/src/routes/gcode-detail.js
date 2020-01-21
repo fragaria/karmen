@@ -36,10 +36,10 @@ class GcodeDetail extends React.Component {
     });
   }
 
-  schedulePrint(gcodeId, printerHost) {
-    printGcode(gcodeId, printerHost).then(r => {
+  schedulePrint(gcodeId, printerUuid) {
+    printGcode(gcodeId, printerUuid).then(r => {
       const { printedOn } = this.state;
-      printedOn.push(printerHost);
+      printedOn.push(printerUuid);
       switch (r) {
         case 201:
           this.setState({
@@ -97,14 +97,12 @@ class GcodeDetail extends React.Component {
     let { selectedPrinter } = this.state;
     if (!selectedPrinter) {
       selectedPrinter = availablePrinters.length
-        ? availablePrinters[0].host
+        ? availablePrinters[0].uuid
         : "";
     }
 
     const availablePrinterOpts = availablePrinters.map(p => {
-      return (
-        <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>
-      );
+      return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
     });
     return (
       <section className="content">
@@ -269,7 +267,7 @@ class GcodeDetail extends React.Component {
                       onClick={e => {
                         e.preventDefault();
                         const selected = availablePrinters.find(
-                          p => p.host === selectedPrinter
+                          p => p.uuid === selectedPrinter
                         );
                         if (
                           selected &&
@@ -343,7 +341,7 @@ export default connect(
         .filter(p => p.status && p.status.state === "Operational")
         .filter(p => p.client && p.client.connected)
         .filter(p => p.client && p.client.access_level === "unlocked")
-        .filter(p => without.indexOf(p.host) === -1)
+        .filter(p => without.indexOf(p.uuid) === -1)
   }),
   dispatch => ({
     loadPrinters: () => dispatch(loadPrinters(["status"]))

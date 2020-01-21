@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Loader from "../components/loader";
 import PrinterState from "../components/printer-state";
-import { loadAndQueuePrinters, deletePrinter } from "../actions/printers";
+import { loadAndQueuePrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 
 class PrinterList extends React.Component {
@@ -58,8 +58,8 @@ class PrinterList extends React.Component {
         return (
           <Link
             className="list-item"
-            key={printer.host}
-            to={`/printers/${printer.host}`}
+            key={printer.uuid}
+            to={`/printers/${printer.uuid}`}
           >
             <div className="list-item-content">
               <span className="list-item-title">{printer.name}</span>
@@ -109,7 +109,6 @@ export default connect(
     userRole: state.users.me.role
   }),
   dispatch => ({
-    loadPrinters: fields => dispatch(loadAndQueuePrinters(fields)),
-    deletePrinter: host => dispatch(deletePrinter(host))
+    loadPrinters: fields => dispatch(loadAndQueuePrinters(fields))
   })
 )(PrinterList);

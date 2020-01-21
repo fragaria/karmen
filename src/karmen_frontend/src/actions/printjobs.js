@@ -1,11 +1,11 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
 
-export const clearJobsPages = printerHost => dispatch => {
+export const clearJobsPages = printerUuid => dispatch => {
   return dispatch({
     type: "JOBS_CLEAR_PAGES",
     payload: {
-      printer: printerHost
+      printer: printerUuid
     }
   });
 };
@@ -14,19 +14,19 @@ export const getJobsPage = createActionThunk(
   "JOBS_LOAD_PAGE",
   // TODO Reflect the actual filter attribute
   (
-    printerHost,
+    printerUuid,
     startWith = null,
     orderBy = null,
     filter = null,
     limit = 15
   ) => {
     return backend
-      .getPrinterJobs(startWith, orderBy, printerHost, limit)
+      .getPrinterJobs(startWith, orderBy, printerUuid, limit)
       .then(r => {
         return {
           status: r.status,
           data: r.data,
-          printer: printerHost,
+          printer: printerUuid,
           startWith,
           orderBy,
           filter: null, // TODO filter is ignored for now
