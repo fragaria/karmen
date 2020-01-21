@@ -1,0 +1,78 @@
+$color-primary: #292728;
+$color-secondary: #ea272e;
+$color-light: #898587;
+
+$color-success: #0b0;
+$color-warning: #ff9900;
+
+$txt-color: $color-primary;
+$txt-color-accented: #000;
+$anchor-color: $color-secondary;
+$bg-color: #fff;
+$border-color: lighten($color-primary, 55%);
+
+$border-default: 1px solid $border-color;
+
+$palette: (
+  black: #000,
+  white: #fff,
+  red: #ea272e,
+  dark-red: #9f1c21,
+  olive-green: #8fa13b,
+  gray-light: #f5f5f5,
+  gray-semilight: #ddd,
+  gray-medium: #ccc,
+  gray-dark: #888,
+  gray-very-dark: #333,
+);
+
+// $sans-serif: "Monoid", sans-serif;
+$sans-serif: "Monoid", sans-serif;
+
+$base-unit: 8px;
+$spacing-default: $base-unit*4;
+
+$navigation-font-size: 1.2rem;
+$navigation-font-size-xs: 3rem;
+
+$navigation-height-xs: $base-unit*8;
+$navigation-height: $base-unit*12;
+
+$logo-height: 75px;
+$logo-height-xs: 45px;
+
+$form-elements-height: 45px;
+$form-elements-height-sm: 27px;
+
+$list-border-color: lighten($color-primary, 75%);
+
+// ------------- MEDIA QUERY BREAKPOINTS -------------
+//## Define the breakpoints at which your layout will change, adapting to different screen sizes.
+
+// Super Extra small screen / iPhone SE
+$screen-xxxs-min:              330px;
+
+$screen-xxs-min:              400px;
+
+// Extra small screen / phone
+$screen-xs-min:              480px;
+
+// Small screen / tablet
+$screen-sm-min:              768px;
+
+// Medium screen / desktop
+$screen-md-min:              992px;
+
+// Large screen / wide desktop
+$screen-lg-min:              1280px;
+
+// So media queries don't overlap when required, provide a maximum
+$screen-xxs-max:              ($screen-xs-min - 1);
+$screen-xs-max:              ($screen-sm-min - 1);
+$screen-sm-max:              ($screen-md-min - 1);
+$screen-md-max:              ($screen-lg-min - 1);
+// ------------- MEDIA QUERY BREAKPOINTS END -------------
+
+$animation-default: cubic-bezier(0.2, 1, 0.2, 1);
+$shadow-default: 0 4px 12px 0 rgba(37, 42, 49, 0.3);
+

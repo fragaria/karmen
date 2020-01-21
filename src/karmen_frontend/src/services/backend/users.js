@@ -1,8 +1,13 @@
-import { getHeaders } from './utils';
+import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const getUsers = (startWith = null, orderBy = null, usernameFilter = null, limit = 15) => {
+export const getUsers = (
+  startWith = null,
+  orderBy = null,
+  filter = null,
+  limit = 15
+) => {
   let uri = `${BASE_URL}/users?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${encodeURIComponent(startWith)}`;
@@ -10,77 +15,83 @@ export const getUsers = (startWith = null, orderBy = null, usernameFilter = null
   if (orderBy) {
     uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
-  if (usernameFilter) {
-    uri += `&filter=username:${encodeURIComponent(usernameFilter)}`;
+  if (filter) {
+    uri += `&filter=username:${encodeURIComponent(filter)}`;
   }
   return fetch(uri, {
-      headers: getHeaders()
-    })
-    .then((response) => {
+    headers: getHeaders()
+  })
+    .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get list of users: ${response.status}`);
       }
-      return response.json()
-        .then((data) => {
-          return {status: response.status, data}
-        })
-    }).catch((e) => {
+      return response.json().then(data => {
+        return { status: response.status, data };
+      });
+    })
+    .catch(e => {
       console.error(`Cannot get list of users: ${e}`);
       return {};
     });
-}
+};
 
 export const addUser = (username, role, password, passwordConfirmation) => {
   return fetch(`${BASE_URL}/users`, {
-    method: 'POST',
+    method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
       username,
       role,
       password,
       password_confirmation: passwordConfirmation
-    }),
+    })
   })
-    .then((response) => {
+    .then(response => {
       if (response.status !== 201) {
         console.error(`Cannot add a user: ${response.status}`);
       }
-      return response.json()
-        .then((data) => {
-          return {
-            status: response.status, data
-          }
-        })
-        // no JSON in response
-        .catch((e) => {
-          return {
-            status: response.status
-          }
-        })
-    }).catch((e) => {
+      return (
+        response
+          .json()
+          .then(data => {
+            return {
+              status: response.status,
+              data
+            };
+          })
+          // no JSON in response
+          .catch(e => {
+            return {
+              status: response.status
+            };
+          })
+      );
+    })
+    .catch(e => {
       console.error(`Cannot add a user: ${e}`);
       return {};
-    })
-}
+    });
+};
 
 export const patchUser = (uuid, role, suspended) => {
   return fetch(`${BASE_URL}/users/${uuid}`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify({
-      role, suspended
-    }),
+      role,
+      suspended
+    })
   })
-    .then((response) => {
+    .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot patch a user: ${response.status}`);
       }
-      return response.json()
-        .then((data) => {
-          return {status: response.status, data}
-        })
-    }).catch((e) => {
+      return response.json().then(data => {
+        return { status: response.status, data };
+      });
+    })
+    .catch(e => {
       console.error(`Cannot patch a user: ${e}`);
       return {};
-    })
-}
+    });
+};

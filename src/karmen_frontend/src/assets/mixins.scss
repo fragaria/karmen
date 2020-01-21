@@ -1,0 +1,13 @@
+@import "./variables";
+
+@mixin blurred-bg ($aplha: .75) {
+  backdrop-filter: saturate(180%) blur(10px);
+  background: rgba($bg-color, $aplha);
+}
+
+@mixin button-reset () {
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+}

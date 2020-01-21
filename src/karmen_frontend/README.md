@@ -16,6 +16,8 @@ npm start
 
 Visit `http://localhost:3000`.
 
+To make the code more readable, apply the automatic formatting by running `npm run lint -- --fix`.
+
 ### Docker
  
 ```sh

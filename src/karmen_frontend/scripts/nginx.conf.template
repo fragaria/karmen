@@ -50,5 +50,18 @@ http {
       root /usr/src/app/build;
       try_files $uri /index.html;
     }
+    
+    # This section is for development only and should not respond in the production env
+    location /sockjs-node {
+      proxy_pass http://${SERVICE_HOST}:3000;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "Upgrade";
+
+      # This fixes a bug in create-react-app that disconnects after 60s
+      proxy_read_timeout 86400s;
+      proxy_send_timeout 86400s;
+    }
+
   }
 }

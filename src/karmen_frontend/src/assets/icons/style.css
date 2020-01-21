@@ -1,10 +1,10 @@
 @font-face {
-  font-family: 'karmen-icons';
-  src:  url('fonts/karmen-icons.eot?lv8c8e');
-  src:  url('fonts/karmen-icons.eot?lv8c8e#iefix') format('embedded-opentype'),
-    url('fonts/karmen-icons.ttf?lv8c8e') format('truetype'),
-    url('fonts/karmen-icons.woff?lv8c8e') format('woff'),
-    url('fonts/karmen-icons.svg?lv8c8e#karmen-icons') format('svg');
+  font-family: 'karmen';
+  src:  url('fonts/karmen.eot?lna7hz');
+  src:  url('fonts/karmen.eot?lna7hz#iefix') format('embedded-opentype'),
+    url('fonts/karmen.ttf?lna7hz') format('truetype'),
+    url('fonts/karmen.woff?lna7hz') format('woff'),
+    url('fonts/karmen.svg?lna7hz#karmen') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -12,7 +12,7 @@
 
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'karmen-icons' !important;
+  font-family: 'karmen' !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -25,75 +25,42 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-exit:before {
-  content: "\e90c";
-}
-.icon-stop:before {
-  content: "\e909";
-}
-.icon-pause:before {
+.icon-edit:before {
   content: "\e90a";
 }
+.icon-stop:before {
+  content: "\e905";
+}
 .icon-play:before {
+  content: "\e904";
+}
+.icon-refresh:before {
+  content: "\e903";
+}
+.icon-pause:before {
+  content: "\e902";
+}
+.icon-down:before {
+  content: "\e90c";
+}
+.icon-up:before {
   content: "\e90b";
 }
-.icon-file-text2:before {
-  content: "\e926";
+.icon-check:before {
+  content: "\e909";
 }
-.icon-display:before {
-  content: "\e956";
-}
-.icon-cog:before {
-  content: "\e994";
-}
-.icon-bin:before {
-  content: "\e9ac";
-}
-.icon-plus:before {
-  content: "\ea0a";
-}
-.icon-checkmark:before {
+.icon-search:before {
   content: "\e908";
 }
-.icon-cross:before {
-  content: "\e907";
-}
-.icon-cancel:before {
-  content: "\e907";
-}
-.icon-close:before {
-  content: "\e907";
-}
-.icon-remove:before {
-  content: "\e907";
-}
-.icon-dismiss:before {
+.icon-trash:before {
   content: "\e907";
 }
 .icon-printer:before {
-  content: "\e904";
-}
-.icon-chronometer:before {
-  content: "\e905";
-}
-.icon-timer:before {
-  content: "\e905";
-}
-.icon-clock:before {
-  content: "\e905";
-}
-.icon-thermometer:before {
   content: "\e906";
 }
-.icon-github:before {
+.icon-close:before {
   content: "\e900";
 }
-.icon-twitter:before {
+.icon-menu:before {
   content: "\e901";
-}
-.icon-youtube:before {
-  content: "\e902";
-}
-.icon-readthedocs:before {
-  content: "\e903";
 }

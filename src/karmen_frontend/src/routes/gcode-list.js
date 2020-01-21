@@ -1,207 +1,268 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import { DebounceInput } from "react-debounce-input";
 
-import { getGcodes, deleteGcode, printGcode } from '../services/backend';
-import { loadPrinters } from '../actions/printers';
-import formatters from '../services/formatters';
+import TableActionRow from "../components/table-action-row";
+import TableSorting from "../components/table-sorting";
+import { getGcodes, deleteGcode, printGcode } from "../services/backend";
+import { loadPrinters } from "../actions/printers";
+import formatters from "../services/formatters";
 
-class GcodeRow extends React.Component {
+class GcodeTableRow extends React.Component {
   state = {
     showDeleteRow: false,
     showPrinterSelectRow: false,
     showPrintStatusRow: false,
     canCancelPrintStatusRow: true,
-    message: '',
+    message: "",
     messageOk: false,
     selectedPrinter: null,
     availablePrinters: [],
     showFilamentTypeWarningRow: false,
-    printerFilamentType: '',
-    gcodeFilamentType: '',
-  }
+    printerFilamentType: "",
+    gcodeFilamentType: ""
+  };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.schedulePrint = this.schedulePrint.bind(this);
   }
 
   schedulePrint(gcodeId, printerHost) {
     const { onSchedulePrint } = this.props;
-    printGcode(gcodeId, printerHost)
-      .then((r) => {
-        switch(r) {
-          case 201:
-            this.setState({
-              showPrinterSelectRow: false,
-              canCancelPrintStatusRow: true,
-              showPrintStatusRow: true,
-              message: 'Print was scheduled',
-              messageOk: true,
-            });
-            onSchedulePrint && onSchedulePrint(gcodeId, printerHost);
-            break;
-          default:
-            this.setState({
-              showPrinterSelectRow: false,
-              canCancelPrintStatusRow: true,
-              showPrintStatusRow: true,
-              message: 'Print was not scheduled',
-              messageOk: false,
-            });
-        }
-      });
+    printGcode(gcodeId, printerHost).then(r => {
+      switch (r) {
+        case 201:
+          this.setState({
+            showPrinterSelectRow: false,
+            canCancelPrintStatusRow: true,
+            showPrintStatusRow: true,
+            message: "Print was scheduled",
+            messageOk: true
+          });
+          onSchedulePrint && onSchedulePrint(gcodeId, printerHost);
+          break;
+        default:
+          this.setState({
+            showPrinterSelectRow: false,
+            canCancelPrintStatusRow: true,
+            showPrintStatusRow: true,
+            message: "Print was not scheduled",
+            messageOk: false
+          });
+      }
+    });
   }
 
   render() {
-    const { showDeleteRow, showPrinterSelectRow, canCancelPrintStatusRow, showPrintStatusRow,
-      showFilamentTypeWarningRow, selectedPrinter} = this.state;
-    const { display, path, size, uploaded, onRowDelete, id, username, analysis, availablePrinters } = this.props;
+    const {
+      showDeleteRow,
+      showPrinterSelectRow,
+      canCancelPrintStatusRow,
+      showPrintStatusRow,
+      showFilamentTypeWarningRow,
+      selectedPrinter
+    } = this.state;
+    const {
+      display,
+      path,
+      size,
+      uploaded,
+      onRowDelete,
+      id,
+      username,
+      analysis,
+      availablePrinters
+    } = this.props;
+
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
-        <tr>
-          <td colSpan="4">
-            {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-          </td>
-          <td className="action-cell">
-            {canCancelPrintStatusRow && <button className="plain" onClick={() => {
-              this.setState({
-                showPrintStatusRow: false,
-              })
-            }}><i className="icon icon-cross icon-state-cancel"></i></button>}
-          </td>
-        </tr>
+        <TableActionRow
+          inverse={false}
+          showCancel={canCancelPrintStatusRow}
+          onCancel={() => {
+            this.setState({
+              showPrintStatusRow: false
+            });
+          }}
+          showConfirm={false}
+        >
+          {message && (
+            <p className={messageOk ? "message-success" : "message-error"}>
+              {message}
+            </p>
+          )}
+        </TableActionRow>
       );
     }
+
     if (showDeleteRow) {
       return (
-        <tr className="inverse">
-          <td colSpan="4">
-            Do you really want to delete <strong>{path}{path ? '/' : ''}{display}</strong>? This cannot be undone.
-          </td>
-          <td className="action-cell">
-            <button className="plain" title="Cancel" onClick={() => {
-              this.setState({
-                showDeleteRow: false,
-              })
-            }}><i className="icon icon-cross"></i></button>
-            <button className="plain" title="Confirm delete" onClick={() => {
-              onRowDelete();
-            }}><i className="icon icon-checkmark"></i></button>
-          </td>
-        </tr>
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showDeleteRow: false
+            });
+          }}
+          onConfirm={() => {
+            onRowDelete();
+          }}
+        >
+          Do you really want to delete{" "}
+          <strong>
+            {path}
+            {path ? "/" : ""}
+            {display}
+          </strong>
+          ? This cannot be undone.
+        </TableActionRow>
       );
     }
 
     if (showFilamentTypeWarningRow) {
-      const {printerFilamentType, gcodeFilamentType } = this.state;
+      const { printerFilamentType, gcodeFilamentType } = this.state;
       return (
-        <tr>
-          <td colSpan="4">
-            Are you sure? There seems to be a filament mismatch: Printer has <strong>{printerFilamentType}</strong> configured, but this gcode was sliced for <strong>{gcodeFilamentType}</strong>.
-          </td>
-          <td className="action-cell">
-            <button className="plain" title="Cancel" onClick={() => {
-              this.setState({
-                showFilamentTypeWarningRow: false,
-              })
-            }}><i className="icon icon-cross icon-state-cancel"></i></button>
-            <button className="plain" title="Print" onClick={() => {
-              const { selectedPrinter } = this.state;
-              this.setState({
-                  showPrinterSelectRow: false,
-                  canCancelPrintStatusRow: false,
-                  showFilamentTypeWarningRow: false,
-                  showPrintStatusRow: true,
-                  message: 'Scheduling a print',
-                  messageOk: true,
-                });
-              this.schedulePrint(id, selectedPrinter);
-            }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
-          </td>
-        </tr>
+        <TableActionRow
+          onCancel={() => {
+            this.setState({
+              showFilamentTypeWarningRow: false
+            });
+          }}
+          onConfirm={() => {
+            const { selectedPrinter } = this.state;
+            this.setState({
+              showPrinterSelectRow: false,
+              canCancelPrintStatusRow: false,
+              showFilamentTypeWarningRow: false,
+              showPrintStatusRow: true,
+              message: "Scheduling a print",
+              messageOk: true
+            });
+            this.schedulePrint(id, selectedPrinter);
+          }}
+        >
+          Are you sure? There seems to be a filament mismatch: Printer has{" "}
+          <strong>{printerFilamentType}</strong> configured, but this gcode was
+          sliced for <strong>{gcodeFilamentType}</strong>.
+        </TableActionRow>
       );
     }
 
     if (showPrinterSelectRow) {
-      const availablePrinterOpts = availablePrinters.map((p) => {
-        return <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>;
-      })
+      const availablePrinterOpts = availablePrinters.map(p => {
+        return (
+          <option key={p.host} value={p.host}>{`${p.name} (${p.host})`}</option>
+        );
+      });
       return (
-        <tr>
-          <td colSpan="4">
-          {!!availablePrinters.length
-            ? <>On which printer would you like to print?{' '}
-            <select id="selectedPrinter" name="selectedPrinter" value={selectedPrinter} onChange={(e) => this.setState({
-              selectedPrinter: e.target.value,
-            })}>
-              {availablePrinterOpts}
-            </select>
-            </>
-            : <p>No available printers found.</p>
-          }
-          </td>
-          <td className="action-cell">
-            <button className="plain" onClick={() => {
+        <TableActionRow
+          inverse={false}
+          onCancel={() => {
+            this.setState({
+              showPrinterSelectRow: false,
+              selectedPrinter: null
+            });
+          }}
+          showConfirm={!!availablePrinters.length}
+          onConfirm={e => {
+            e.preventDefault();
+            const { selectedPrinter } = this.state;
+            const selected = availablePrinters.find(
+              p => p.host === selectedPrinter
+            );
+            if (
+              selected &&
+              selected.printer_props &&
+              selected.printer_props.filament_type &&
+              analysis &&
+              analysis.filament &&
+              analysis.filament.type &&
+              analysis.filament.type !== selected.printer_props.filament_type
+            ) {
               this.setState({
                 showPrinterSelectRow: false,
-                selectedPrinter: null,
-              })
-            }}><i className="icon icon-cross icon-state-cancel"></i></button>
-            {!!availablePrinters.length &&
-              <button className="plain" onClick={(e) => {
-                e.preventDefault();
-                const { selectedPrinter } = this.state;
-                const selected = availablePrinters.find((p) => p.host === selectedPrinter);
-                if (selected && selected.printer_props && selected.printer_props.filament_type &&
-                    analysis && analysis.filament && analysis.filament.type &&
-                    analysis.filament.type !== selected.printer_props.filament_type
-                  ) {
-                  this.setState({
-                    showPrinterSelectRow: false,
-                    showFilamentTypeWarningRow: true,
-                    printerFilamentType: selected.printer_props.filament_type,
-                    gcodeFilamentType: analysis.filament.type,
-                  });
-                  return;
-                }
-                this.setState({
-                  showPrinterSelectRow: false,
-                  canCancelPrintStatusRow: false,
-                  showFilamentTypeWarningRow: false,
-                  showPrintStatusRow: true,
-                  message: 'Scheduling a print',
-                  messageOk: true,
-                });
-                this.schedulePrint(id, selectedPrinter);
-              }}><i className="icon icon-checkmark icon-state-confirm"></i></button>
+                showFilamentTypeWarningRow: true,
+                printerFilamentType: selected.printer_props.filament_type,
+                gcodeFilamentType: analysis.filament.type
+              });
+              return;
             }
-          </td>
-        </tr>
+            this.setState({
+              showPrinterSelectRow: false,
+              canCancelPrintStatusRow: false,
+              showFilamentTypeWarningRow: false,
+              showPrintStatusRow: true,
+              message: "Scheduling a print",
+              messageOk: true
+            });
+            this.schedulePrint(id, selectedPrinter);
+          }}
+        >
+          {!!availablePrinters.length ? (
+            <>
+              Select printer to print on:{" "}
+              <select
+                id="selectedPrinter"
+                name="selectedPrinter"
+                value={selectedPrinter}
+                onChange={e =>
+                  this.setState({
+                    selectedPrinter: e.target.value
+                  })
+                }
+              >
+                {availablePrinterOpts}
+              </select>
+            </>
+          ) : (
+            <p>No available printers found.</p>
+          )}
+        </TableActionRow>
       );
     }
 
     return (
-      <tr>
-        <td><Link to={`/gcodes/${id}`}>{path}{path ? '/' : ''}{display}</Link></td>
-        <td>{formatters.bytes(size)}</td>
-        <td>{formatters.datetime(uploaded)}</td>
-        <td>{username}</td>
-        <td className="action-cell">
-          <button className="plain icon-link" onClick={() => {
-            this.setState({
-              selectedPrinter: availablePrinters.length ? availablePrinters[0].host : null,
-              showPrinterSelectRow: true,
-            });
-          }}><i className="icon icon-printer"></i></button>
-          <button className="plain icon-link" onClick={() => {
-            this.setState({
-              showDeleteRow: true,
-            })
-          }}><i className="icon icon-bin"></i></button>
-        </td>
-      </tr>
+      <div className="list-item">
+        <Link className="list-item-content" to={`/gcodes/${id}`}>
+          <span className="list-item-subtitle">
+            {path}
+            {path ? "/" : ""}
+            {display}
+          </span>
+          <span>{formatters.bytes(size)}, </span>
+          <span>{formatters.datetime(uploaded)}, </span>
+          <span>{username}</span>
+        </Link>
+
+        <div className="list-item-cta">
+          <button
+            className="btn-reset"
+            onClick={() => {
+              this.setState({
+                selectedPrinter: availablePrinters.length
+                  ? availablePrinters[0].host
+                  : null,
+                showPrinterSelectRow: true
+              });
+            }}
+          >
+            <i className="icon-printer"></i>
+          </button>
+
+          <button
+            className="btn-reset"
+            onClick={() => {
+              this.setState({
+                showDeleteRow: true
+              });
+            }}
+          >
+            <i className="icon-trash text-secondary"></i>
+          </button>
+        </div>
+      </div>
     );
   }
 }
@@ -210,31 +271,45 @@ class GcodeList extends React.Component {
   state = {
     gcodes: null,
     currentPage: 0,
-    pages: [{
-      startWith: null,
-    }],
-    orderBy: '-uploaded',
-    filter: '',
-    willBeFilter: '',
+    pages: [
+      {
+        startWith: null
+      }
+    ],
+    orderBy: "-uploaded",
+    filter: "",
     message: null,
-    printedOn: [],
-  }
+    printedOn: []
+  };
 
   constructor(props) {
     super(props);
     this.loadPage = this.loadPage.bind(this);
   }
 
+  // TODO move this to redux, reuse TableWrapper
   loadPage(page, newOrderBy, newFilter) {
     let { pages, orderBy, filter } = this.state;
     // reset pages if orderBy has changed
     if (newOrderBy !== orderBy || newFilter !== filter) {
-      pages = [{
-        startWith: null,
-      }];
+      pages = [
+        {
+          startWith: null
+        }
+      ];
       page = 0;
     }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter, 15, ['id', 'display', 'filename', 'path', 'size', 'uploaded', 'analysis', 'user_uuid', 'username']).then((gcodes) => {
+    getGcodes(pages[page].startWith, newOrderBy, newFilter, 10, [
+      "id",
+      "display",
+      "filename",
+      "path",
+      "size",
+      "uploaded",
+      "analysis",
+      "user_uuid",
+      "username"
+    ]).then(gcodes => {
       // Handles deleting of the last row on a non-zero page
       if (!gcodes.next && gcodes.items.length === 0 && page - 1 >= 0) {
         this.loadPage(page - 1, newOrderBy);
@@ -243,11 +318,11 @@ class GcodeList extends React.Component {
       let nextStartWith;
       if (gcodes.next) {
         const uri = new URL(formatters.absoluteUrl(gcodes.next));
-        nextStartWith = uri.searchParams.get('start_with');
+        nextStartWith = uri.searchParams.get("start_with");
       }
       if (nextStartWith) {
         pages.push({
-          startWith: nextStartWith,
+          startWith: nextStartWith
         });
       } else {
         pages = [].concat(pages.slice(0, page + 1));
@@ -257,13 +332,13 @@ class GcodeList extends React.Component {
         currentPage: page,
         pages: pages,
         orderBy: newOrderBy,
-        filter: newFilter,
+        filter: newFilter
       });
     });
   }
 
   componentDidMount() {
-    const { printersLoaded, loadPrinters } = this.props
+    const { printersLoaded, loadPrinters } = this.props;
     if (!printersLoaded) {
       loadPrinters();
     }
@@ -271,120 +346,128 @@ class GcodeList extends React.Component {
     this.loadPage(0, orderBy);
   }
 
-  render () {
-    const { gcodes, currentPage, pages, orderBy, filter, willBeFilter, printedOn } = this.state;
+  render() {
+    const {
+      gcodes,
+      currentPage,
+      pages,
+      orderBy,
+      filter,
+      printedOn
+    } = this.state;
     const { getAvailablePrinters } = this.props;
-    const gcodeRows = gcodes && gcodes.map((g) => {
-      return <GcodeRow
-        key={g.id}
-        {...g}
-        history={this.props.history}
-        onSchedulePrint={(gcode, printer) => {
-          printedOn.push(printer);
-          this.setState({
-            printedOn: [].concat(printedOn),
-          })
-        }}
-        availablePrinters={getAvailablePrinters(printedOn)}
-        onRowDelete={() => {
-          deleteGcode(g.id)
-            .then(() => {
-              this.loadPage(currentPage, orderBy);
-            });
-        }} />
-    });
+    const GcodeTableRows =
+      gcodes &&
+      gcodes.map(g => {
+        return (
+          <GcodeTableRow
+            key={g.id}
+            {...g}
+            history={this.props.history}
+            onSchedulePrint={(gcode, printer) => {
+              printedOn.push(printer);
+              this.setState({
+                printedOn: [].concat(printedOn)
+              });
+            }}
+            availablePrinters={getAvailablePrinters(printedOn)}
+            onRowDelete={() => {
+              deleteGcode(g.id).then(() => {
+                this.loadPage(currentPage, orderBy);
+              });
+            }}
+          />
+        );
+      });
 
     return (
-      <div className="gcode-list standalone-page">
-        <header>
-          <h1 className="title">G-Codes</h1>
-          <Link to="/add-gcode" className="action">
-            <i className="icon icon-plus"></i>&nbsp;
-            <span>Add a g-code</span>
-          </Link>
-        </header>
+      <section className="content">
+        <div className="container">
+          <h1 className="main-title">
+            G-Codes
+            <Link to="/add-gcode" className="btn btn-sm">
+              + Upload a g-code
+            </Link>
+          </h1>
+        </div>
 
-        <div>
-          <form className="inline-form">
-            <label htmlFor="filter">Filter by filename</label>
-            <input type="text" name="filter" id="filter" value={willBeFilter} onChange={(e) => {
-              this.setState({
-                willBeFilter: e.target.value,
-              });
-            }} />
-            <button type="submit" onClick={(e) => {
-              e.preventDefault();
-              const { willBeFilter } = this.state;
-              this.loadPage(currentPage, orderBy, willBeFilter);
-            }}>Filter</button>
-            <button type="reset" onClick={(e) => {
-              e.preventDefault();
-              this.setState({
-                willBeFilter: ''
-              })
-              this.loadPage(currentPage, orderBy, null);
-            }}>Reset</button>
-          </form>
-          {gcodes === null
-            ? <p className="message-block">Loading...</p>
-            : (!gcodeRows || gcodeRows.length === 0)
-              ? <p className="message-error message-block">No G-Codes found!</p>
-              : (
-                <>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th style={{"width": "50%"}}>
-                          <button className={`plain sorting-button ${orderBy.indexOf('filename') > -1 ? 'active' : ''}`} onClick={() => {
-                            let order = '+filename';
-                            if (orderBy === '+filename') {
-                              order = '-filename';
-                            } else if (orderBy === '-filename') {
-                              order = '-uploaded';
-                            }
-                            this.loadPage(currentPage, order, filter);
-                          }}>Filename</button>
-                        </th>
-                        <th>
-                          <button className={`plain sorting-button ${orderBy.indexOf('size') > -1 ? 'active' : ''}`} onClick={() => {
-                            let order = '+size';
-                            if (orderBy === '+size') {
-                              order = '-size';
-                            } else if (orderBy === '-size') {
-                              order = '-uploaded';
-                            }
-                            this.loadPage(currentPage, order, filter);
-                          }}>Size</button>
-                        </th>
-                        <th>
-                          <button className={`plain sorting-button ${orderBy.indexOf('uploaded') > -1 ? 'active' : ''}`} onClick={() => {
-                            let order = '+uploaded';
-                            if (orderBy === '+uploaded') {
-                              order = '-uploaded';
-                            }
-                            this.loadPage(currentPage, order, filter);
-                          }}>Uploaded at</button>
-                        </th>
-                        <th>User</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {gcodeRows}
-                    </tbody>
-                  </table>
-                  <div className="table-pagination">
-                    {currentPage > 0
-                      ? <button className="plain" onClick={() => this.loadPage(Math.max(0, currentPage - 1), orderBy, filter)}>Previous</button>
-                      : <span></span>}
-                    {pages[currentPage + 1]
-                      ? <button className="plain" onClick={() => this.loadPage(currentPage + 1, orderBy, filter)}>Next</button>
-                      : <span></span>}
-                  </div>
-                </>
-              )}
+        <div className="list">
+          <div className="list-header">
+            <div className="list-search">
+              <label htmlFor="filter">
+                <span className="icon icon-search"></span>
+                <DebounceInput
+                  type="search"
+                  name="filter"
+                  id="filter"
+                  minLength={3}
+                  debounceTimeout={300}
+                  onChange={e => {
+                    this.loadPage(currentPage, orderBy, e.target.value);
+                  }}
+                />
+              </label>
+            </div>
+
+            <TableSorting
+              active={orderBy}
+              columns={["filename", "size", "uploaded"]}
+              onChange={column => {
+                return () => {
+                  const { orderBy } = this.state;
+                  this.loadPage(
+                    currentPage,
+                    orderBy === `+${column}` ? `-${column}` : `+${column}`,
+                    filter
+                  );
+                };
+              }}
+            />
           </div>
-      </div>
+
+          {gcodes === null ? (
+            <p className="list-item list-item-message">Loading...</p>
+          ) : !GcodeTableRows || GcodeTableRows.length === 0 ? (
+            <p className="list-item list-item-message">No G-Codes found!</p>
+          ) : (
+            <>
+              {GcodeTableRows}
+
+              <div className="list-pagination">
+                {currentPage > 0 ? (
+                  <button
+                    className="btn btn-sm"
+                    onClick={() =>
+                      this.loadPage(
+                        Math.max(0, currentPage - 1),
+                        orderBy,
+                        filter
+                      )
+                    }
+                  >
+                    Previous
+                  </button>
+                ) : (
+                  <span></span>
+                )}
+                {currentPage > 0 && pages[currentPage + 1] && " "}
+                {pages[currentPage + 1] ? (
+                  <button
+                    className="btn btn-sm"
+                    onClick={() =>
+                      this.loadPage(currentPage + 1, orderBy, filter)
+                    }
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <span></span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </section>
     );
   }
 }
@@ -392,13 +475,14 @@ class GcodeList extends React.Component {
 export default connect(
   state => ({
     printersLoaded: state.printers.printersLoaded,
-    getAvailablePrinters: (without=[]) => state.printers.printers
-        .filter((p) => p.status && p.status.state === 'Operational')
-        .filter((p) => p.client && p.client.connected)
-        .filter((p) => p.client && p.client.access_level === 'unlocked')
-        .filter((p) => without.indexOf(p.host) === -1)
+    getAvailablePrinters: (without = []) =>
+      state.printers.printers
+        .filter(p => p.status && p.status.state === "Operational")
+        .filter(p => p.client && p.client.connected)
+        .filter(p => p.client && p.client.access_level === "unlocked")
+        .filter(p => without.indexOf(p.host) === -1)
   }),
   dispatch => ({
-    loadPrinters: () => (dispatch(loadPrinters(['status']))),
+    loadPrinters: () => dispatch(loadPrinters(["status"]))
   })
 )(GcodeList);

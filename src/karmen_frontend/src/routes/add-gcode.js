@@ -1,18 +1,17 @@
-import React from 'react';
-import { Redirect } from 'react-router-dom';
+import React from "react";
+import { Redirect, Link } from "react-router-dom";
 
-import { BackLink } from '../components/back';
-import { uploadGcode } from '../services/backend';
+import { uploadGcode } from "../services/backend";
+import BusyButton from "../components/busy-button";
 
 class AddGcode extends React.Component {
   state = {
     toUpload: null,
-    path: '',
-    submitting: false,
+    path: "",
     message: null,
     messageOk: false,
-    gcodeId: null,
-  }
+    gcodeId: null
+  };
 
   constructor(props) {
     super(props);
@@ -24,79 +23,97 @@ class AddGcode extends React.Component {
     const { toUpload, path } = this.state;
     if (!toUpload) {
       this.setState({
-        message: 'You need to select a file!',
+        message: "You need to select a file!"
       });
       return;
     }
     this.setState({
-      submitting: true,
       message: null,
-      messageOk: false,
+      messageOk: false
     });
-    uploadGcode(path, toUpload)
-      .then((r) => {
-          switch(r.status) {
-            case 201:
-              this.setState({
-                submitting: false,
-                message: 'File uploaded',
-                path: '',
-                messageOk: true,
-                redirect: true,
-                gcodeId: r.data.id
-              });
-              break;
-            case 415:
-              this.setState({
-                message: 'This does not seem like a G-Code file.',
-                submitting: false,
-              });
-              break;
-            default:
-              this.setState({
-                message: 'Cannot upload G-Code, check server logs',
-                submitting: false,
-              });
-          }
-        });
+    return uploadGcode(path, toUpload).then(r => {
+      switch (r.status) {
+        case 201:
+          this.setState({
+            message: "File uploaded",
+            path: "",
+            messageOk: true,
+            redirect: true,
+            gcodeId: r.data.id
+          });
+          break;
+        case 415:
+          this.setState({
+            message: "This does not seem like a G-Code file."
+          });
+          break;
+        default:
+          this.setState({
+            message: "Cannot upload G-Code, check server logs"
+          });
+      }
+    });
   }
 
-  render () {
-    const { message, messageOk, redirect, submitting, path, gcodeId } = this.state;
+  render() {
+    const { message, messageOk, redirect, path, gcodeId } = this.state;
     if (redirect) {
-      return <Redirect to={`/gcodes/${gcodeId}`} />
+      return <Redirect to={`/gcodes/${gcodeId}`} />;
     }
     return (
-      <div className="standalone-page">
-        <header>
-          <h1 className="title">Add a G-Code</h1>
-        </header>
-        <form>
-          {message && <p className={messageOk ? "message-success" : "message-error"}>{message}</p>}
-          <p>
-            <label htmlFor="file">Select your gcode</label>
-            <input type="file" name="file" onChange={(e) => {
-              this.setState({
-                toUpload: e.target.files[0]
-              });
-            }} />
-          </p>
-          <p>
-            <label htmlFor="path">Path (optional)</label>
-            <input type="text" id="path" name="path" value={path} onChange={(e) => this.setState({
-              path: e.target.value
-            })} />
-          </p>
-          <div className="form-actions">
-            <button type="submit" onClick={(e) => this.addCode(e)} disabled={submitting}>
-              {submitting
-                ? 'Uploading...'
-                : 'Upload G-Code'
-              }
-            </button>
-            <BackLink to="/gcodes" />
-          </div>
-        </form>
+      <div className="content">
+        <div className="container">
+          <h1 className="main-title text-center">Add a G-Code</h1>
+
+          <form>
+            {message && (
+              <p className={messageOk ? "message-success" : "message-error"}>
+                {message}
+              </p>
+            )}
+            <div className="input-group">
+              <label htmlFor="file">Select your gcode</label>
+              <input
+                type="file"
+                name="file"
+                onChange={e => {
+                  this.setState({
+                    toUpload: e.target.files[0]
+                  });
+                }}
+              />
+              <span></span>
+
+              <label htmlFor="path">Path (optional)</label>
+              <input
+                type="text"
+                id="path"
+                name="path"
+                value={path}
+                onChange={e =>
+                  this.setState({
+                    path: e.target.value
+                  })
+                }
+              />
+              <span></span>
+            </div>
+            <div className="cta-box text-center">
+              <BusyButton
+                className="btn"
+                type="submit"
+                onClick={this.addCode}
+                busyChildren="Uploading..."
+              >
+                Upload G-Code
+              </BusyButton>{" "}
+              {/* TODO this should actually work as a cancel button and cancel the upload if in progress */}
+              <Link to="/gcodes" className="btn btn-plain">
+                Cancel
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
     );
   }

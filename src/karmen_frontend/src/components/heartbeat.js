@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
-import { heartbeat } from '../services/backend';
+import { heartbeat } from "../services/backend";
 
 class Heartbeat extends React.Component {
   state = {
     isOnline: true,
-    timer: null,
-  }
+    timer: null
+  };
 
   constructor(props) {
     super(props);
@@ -14,10 +14,10 @@ class Heartbeat extends React.Component {
   }
 
   checkBackend() {
-    heartbeat().then((result) => {
+    heartbeat().then(result => {
       this.setState({
         isOnline: result,
-        timer: setTimeout(this.checkBackend, 5000),
+        timer: setTimeout(this.checkBackend, 5000)
       });
     });
   }
@@ -36,7 +36,13 @@ class Heartbeat extends React.Component {
   render() {
     const { isOnline } = this.state;
     if (!isOnline) {
-      return (<p className="heartbeat">Karmen's local API is not responding. Check the server logs, please.</p>);
+      return (
+        <p className="heartbeat text-center">
+          <strong className="text-secondary">
+            Karmen's local API is not responding. Check the server logs, please.
+          </strong>
+        </p>
+      );
     }
     return null;
   }
