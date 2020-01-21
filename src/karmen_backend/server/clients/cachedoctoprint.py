@@ -32,16 +32,26 @@ class CachedOctoprint(Octoprint):
 
     def __init__(
         self,
-        host,
+        uuid,
         protocol="http",
         hostname=None,
+        ip=None,
+        port=None,
         name=None,
         client_props=None,
         printer_props=None,
         **kwargs
     ):
         super(CachedOctoprint, self).__init__(
-            host, protocol, hostname, name, client_props, printer_props, **kwargs
+            uuid,
+            protocol,
+            hostname,
+            ip,
+            port,
+            name,
+            client_props,
+            printer_props,
+            **kwargs
         )
         # We can't use the flask executor as that cannot work in a low-level place like this
         self.executor = ThreadPoolExecutor(max_workers=4)
@@ -56,10 +66,10 @@ class CachedOctoprint(Octoprint):
         self.delete_cache_key("/api/job")
 
     def get_cache_key(self, path):
-        return "cache_octoprint_api_%s_%s" % (self.host, path)
+        return "cache_octoprint_api_%s_%s" % (self.uuid, path)
 
     def delete_cache_key(self, path):
-        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
+        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.network_host), path)
         redisinstance.delete(self.get_cache_key(uri))
 
     def _perform_http_get(self, uri):
@@ -89,7 +99,7 @@ class CachedOctoprint(Octoprint):
         """
         if not self.client_info.connected and not force:
             return None
-        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.host), path)
+        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.network_host), path)
         if force:
             return self._perform_http_get(uri)
         cache_key = self.get_cache_key(uri)

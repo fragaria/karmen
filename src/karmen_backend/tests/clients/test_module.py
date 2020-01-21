@@ -17,6 +17,11 @@ class GetWithFallbackTest(unittest.TestCase):
 
     def test_returns_octoprint_instance(self):
         octoprinter = get_printer_instance(
-            {"client": "octoprint", "hostname": "octoprinter", "host": "1.2.3.4"}
+            {
+                "uuid": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                "client": "octoprint",
+                "hostname": "octoprinter",
+                "host": "1.2.3.4",
+            }
         )
         self.assertTrue(isinstance(octoprinter, Octoprint))

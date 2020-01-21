@@ -449,13 +449,13 @@ class DeleteRoute(unittest.TestCase):
         printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_host="172.16.236.11:8080",
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"host": "172.16.236.11:8080"},
         )
         printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_host="172.16.236.11:8080",
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"host": "172.16.236.11:8080"},
         )
         with app.test_client() as c:

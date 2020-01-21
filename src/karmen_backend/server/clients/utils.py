@@ -27,6 +27,10 @@ class PrinterClientInfo:
 
 class PrinterClient(abc.ABC):
     @abc.abstractmethod
+    def update_network_host(self):
+        pass
+
+    @abc.abstractmethod
     def client_name(self):
         pass
 

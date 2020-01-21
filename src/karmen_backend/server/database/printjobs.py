@@ -8,7 +8,7 @@ def get_printjobs(order_by=None, limit=None, start_with=None, filter=None):
     columns = [
         "id",
         "gcode_id",
-        "printer_host",
+        "printer_uuid",
         "started",
         "gcode_data",
         "printer_data",
@@ -40,7 +40,7 @@ def get_printjob(id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, gcode_id, printer_host, started, gcode_data, printer_data, user_uuid from printjobs where id = %s",
+            "SELECT id, gcode_id, printer_uuid, started, gcode_data, printer_data, user_uuid from printjobs where id = %s",
             (id,),
         )
         data = cursor.fetchone()
@@ -52,10 +52,10 @@ def add_printjob(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printjobs (gcode_id, printer_host, gcode_data, printer_data, user_uuid) values (%s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO printjobs (gcode_id, printer_uuid, gcode_data, printer_data, user_uuid) values (%s, %s, %s, %s, %s) RETURNING id",
             (
                 kwargs["gcode_id"],
-                kwargs["printer_host"],
+                kwargs["printer_uuid"],
                 psycopg2.extras.Json(kwargs.get("gcode_data", None)),
                 psycopg2.extras.Json(kwargs.get("printer_data", None)),
                 kwargs.get("user_uuid", None),

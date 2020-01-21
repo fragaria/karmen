@@ -12,7 +12,8 @@ from ..utils import Response
 class OctoprintConstructor(unittest.TestCase):
     def test_parse_client_props(self):
         printer = Octoprint(
-            "192.168.1.15",
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
             hostname="octopi.local",
             client_props={
                 "connected": True,
@@ -29,7 +30,7 @@ class OctoprintConstructor(unittest.TestCase):
 class OctoprintIsAliveTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertFalse(printer.client_info.connected)
         self.assertFalse(printer.is_alive())
         self.assertFalse(printer.client_info.connected)
@@ -39,7 +40,7 @@ class OctoprintIsAliveTest(unittest.TestCase):
         "server.clients.octoprint.requests.Session.get", return_value=Response(200)
     )
     def test_connected_printer(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertFalse(printer.client_info.connected)
         self.assertTrue(printer.is_alive())
         self.assertTrue(printer.client_info.connected)
@@ -49,7 +50,11 @@ class OctoprintIsAliveTest(unittest.TestCase):
         "server.clients.octoprint.requests.Session.get", return_value=Response(200)
     )
     def test_already_connected_printer(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.client_info.connected)
         self.assertTrue(printer.is_alive())
         self.assertTrue(printer.client_info.connected)
@@ -60,7 +65,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertFalse(printer.connect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -73,7 +78,11 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Closed"}}),
     )
     def test_reachable_disconnected_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.connect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
@@ -84,7 +93,11 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Offline"}}),
     )
     def test_reachable_offline_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertFalse(printer.connect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
@@ -97,7 +110,11 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Operational"}}),
     )
     def test_already_connected_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.connect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -107,7 +124,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertTrue(printer.disconnect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -120,7 +137,11 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Closed"}}),
     )
     def test_reachable_disconnected_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.disconnect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -131,7 +152,11 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Offline"}}),
     )
     def test_reachable_offline_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.disconnect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -144,7 +169,11 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Operational"}}),
     )
     def test_connected_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.disconnect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
@@ -157,7 +186,11 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         return_value=Response(200, {"state": {"text": "Operational"}}),
     )
     def test_not_disconnectable_printer(self, mock_get_uri, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertFalse(printer.disconnect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
@@ -166,7 +199,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
 class OctoprintSniffTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_deactivate_non_responding_printer(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertFalse(printer.client_info.connected)
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
@@ -181,7 +214,7 @@ class OctoprintSniffTest(unittest.TestCase):
 
         mock_get_uri.side_effect = mock_call
 
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, True)
         self.assertEqual(
@@ -198,7 +231,7 @@ class OctoprintSniffTest(unittest.TestCase):
 
         mock_get_uri.side_effect = mock_call
 
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(
@@ -209,7 +242,7 @@ class OctoprintSniffTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_access_protected_octoprint_forcelogin(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 403
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, True)
         self.assertEqual(
@@ -220,7 +253,7 @@ class OctoprintSniffTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_deactivate_non_200_responding_printer(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 404
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {})
@@ -234,7 +267,7 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
             "msg", "aa", 123
         )
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {})
@@ -246,7 +279,7 @@ class OctoprintSniffTest(unittest.TestCase):
     def test_deactivate_bad_data_responding_printer(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {"text": "Fumbleprint"}
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {"text": "Fumbleprint"})
@@ -258,7 +291,7 @@ class OctoprintSniffTest(unittest.TestCase):
     def test_no_crash_on_different_response(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {"random": "field"}
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
         self.assertEqual(printer.client_info.version, {"random": "field"})
@@ -270,7 +303,9 @@ class OctoprintSniffTest(unittest.TestCase):
     def test_activate_responding_printer(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {"text": "OctoPrint"}
-        printer = Octoprint("192.168.1.15", protocol="https")
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15", protocol="https"
+        )
         printer.sniff()
         mock_get_uri.assert_called_with("https://192.168.1.15/api/version", timeout=2)
         self.assertEqual(printer.client_info.connected, True)
@@ -291,7 +326,11 @@ class OctoprintStatusTest(unittest.TestCase):
                 "tool0": {"actual": 240.4, "offset": 0, "target": 240.0},
             },
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.status()
         self.assertEqual(
             result,
@@ -310,7 +349,11 @@ class OctoprintStatusTest(unittest.TestCase):
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
             "msg", "aa", 123
         )
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.status()
         self.assertEqual(
             result,
@@ -320,7 +363,11 @@ class OctoprintStatusTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_status_conflict(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 409
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.status()
         self.assertEqual(
             result,
@@ -329,7 +376,11 @@ class OctoprintStatusTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_status_unreachable(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.status()
         self.assertEqual(
             result, {"state": "Printer is not responding", "temperature": {}}
@@ -339,7 +390,8 @@ class OctoprintStatusTest(unittest.TestCase):
     def test_status_protected(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 403
         printer = Octoprint(
-            "192.168.1.15",
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
             client_props={
                 "connected": True,
                 "api_key": "1234",
@@ -359,7 +411,7 @@ class OctoprintStatusTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_status_disconnected(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.status()
         self.assertEqual(mock_get_uri.call_count, 0)
 
@@ -387,7 +439,11 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": True,
             }
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(
             result,
@@ -414,7 +470,11 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": True,
             }
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(
             result,
@@ -450,7 +510,11 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": True,
             }
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(
             result,
@@ -486,7 +550,12 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": True,
             }
         }
-        printer = Octoprint("192.168.1.15:1234", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            port=1234,
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(
             result,
@@ -502,14 +571,18 @@ class OctoprintWebcamTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_webcam_disconnect(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.client_info.connected)
         printer.webcam()
         self.assertFalse(printer.client_info.connected)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_webcam_disconnected(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.webcam()
         self.assertEqual(mock_get_uri.call_count, 0)
 
@@ -525,7 +598,11 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "webcamEnabled": False,
             }
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(result, {"message": "Webcam disabled in octoprint"})
 
@@ -535,19 +612,27 @@ class OctoprintWebcamTest(unittest.TestCase):
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
             "msg", "aa", 123
         )
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(result, {"message": "Cannot decode JSON"})
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_webcam_no_response(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.webcam()
         self.assertEqual(result, {"message": "Webcam not accessible"})
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_webcam_inactive_printer(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.webcam()
         self.assertEqual(result, {"message": "Webcam not accessible"})
@@ -562,7 +647,11 @@ class OctoprintJobTest(unittest.TestCase):
             "progress": {"completion": 12, "printTimeLeft": 35, "printTime": 10},
             "state": "Printing",
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.job()
         self.assertEqual(
             result,
@@ -582,7 +671,11 @@ class OctoprintJobTest(unittest.TestCase):
             "progress": {"completion": 100, "printTimeLeft": 0, "printTime": 10},
             "state": "Operational",
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.job()
         self.assertEqual(result, {})
 
@@ -594,7 +687,11 @@ class OctoprintJobTest(unittest.TestCase):
             "progress": {"completion": 100, "printTimeLeft": 0, "printTime": 10},
             "state": "Offline (Error: Too many consecutive timeouts, printer still connected and alive?)",
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.job()
         self.assertEqual(result, {})
 
@@ -604,32 +701,44 @@ class OctoprintJobTest(unittest.TestCase):
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
             "msg", "aa", 123
         )
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.job()
         self.assertEqual(result, {})
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_job_disconnect(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.client_info.connected)
         printer.job()
         self.assertFalse(printer.client_info.connected)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_job_disconnected(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         printer.job()
         self.assertEqual(mock_get_uri.call_count, 0)
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_job_no_response(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.job()
         self.assertEqual(result, {})
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_job_inactive_printer(self, mock_get_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.job()
         self.assertEqual(result, {})
@@ -665,7 +774,11 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             },
             "done": True,
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertTrue(result)
         args, kwargs = mock_post_uri.call_args
@@ -694,7 +807,11 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             },
             "done": True,
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.upload_and_start_job(
             self.file_mock.name, path="sub/path/on/disk"
         )
@@ -714,7 +831,11 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             "temperature": {},
         }
         with self.assertRaises(PrinterClientException) as context:
-            printer = Octoprint("192.168.1.15", client_props={"connected": True})
+            printer = Octoprint(
+                "900c73b8-1f12-4027-941a-e4b29531e8e3",
+                ip="192.168.1.15",
+                client_props={"connected": True},
+            )
             printer.upload_and_start_job(self.file_mock.name)
         self.assertTrue("Printer is printing" in str(context.exception))
 
@@ -726,7 +847,11 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             "state": {"text": "Operational"},
             "temperature": {},
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.client_info.connected)
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertFalse(result)
@@ -742,7 +867,8 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             "temperature": {},
         }
         printer = Octoprint(
-            "192.168.1.15",
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
             client_props={
                 "connected": True,
                 "api_key": "1234",
@@ -778,7 +904,11 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             "state": {"text": "Operational"},
             "temperature": {},
         }
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertFalse(result)
 
@@ -797,7 +927,8 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         mock_get_uri.return_value.json.return_value = {"state": {"text": "Operational"}}
         mock_post_uri.return_value.status_code = 403
         printer = Octoprint(
-            "192.168.1.15",
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
             client_props={
                 "connected": True,
                 "api_key": "1234",
@@ -816,7 +947,11 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.post")
     def test_modify_job_start_ok(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 204
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.modify_current_job("start")
         self.assertTrue(result)
         args, kwargs = mock_post_uri.call_args
@@ -825,7 +960,11 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.post")
     def test_modify_job_cancel_ok(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 204
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.modify_current_job("cancel")
         self.assertTrue(result)
         args, kwargs = mock_post_uri.call_args
@@ -834,7 +973,11 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.post")
     def test_modify_job_toggle_ok(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 204
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.modify_current_job("toggle")
         self.assertTrue(result)
         args, kwargs = mock_post_uri.call_args
@@ -842,7 +985,11 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     def test_modify_job_disconnect(self, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         self.assertTrue(printer.client_info.connected)
         result = printer.modify_current_job("toggle")
         self.assertFalse(result)
@@ -850,26 +997,34 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.post")
     def test_modify_job_disconnected(self, mock_post_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         result = printer.modify_current_job("toggle")
         self.assertEqual(mock_post_uri.call_count, 0)
         self.assertFalse(result)
 
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     def test_modify_job_no_response(self, mock_post_uri):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         result = printer.modify_current_job("toggle")
         self.assertFalse(result)
 
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     def test_modify_job_inactive_printer(self, mock_post_uri):
-        printer = Octoprint("192.168.1.15")
+        printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertEqual(mock_post_uri.call_count, 0)
         result = printer.modify_current_job("toggle")
         self.assertFalse(result)
 
     def test_unknown_actino(self):
-        printer = Octoprint("192.168.1.15", client_props={"connected": True})
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
         with self.assertRaises(Exception) as ctx:
             printer.modify_current_job("random")
 

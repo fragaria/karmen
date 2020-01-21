@@ -1,3 +1,5 @@
+import uuid
+
 from server import app, celery
 from server.database import printers
 from server import clients
@@ -5,13 +7,17 @@ from server import clients
 
 def save_printer_data(**kwargs):
     if not kwargs["client_props"]["connected"]:
-        app.logger.info("Printer on %s is not responding as connected" % kwargs["host"])
+        app.logger.info(
+            "Printer on %s is not responding as connected" % kwargs.get("ip")
+        )
         return
-    has_record = printers.get_printer(kwargs["host"])
+    has_record = printers.get_printer_by_network_props(
+        kwargs.get("hostname"), kwargs.get("ip"), kwargs.get("port")
+    )
     # No need to update registered printers
     if has_record is not None:
         app.logger.info(
-            "Printer on %s is already registered within karmen" % kwargs["host"]
+            "Printer on %s is already registered within karmen" % kwargs.get("ip")
         )
         return
     printers.add_printer(
@@ -28,12 +34,13 @@ def save_printer_data(**kwargs):
 
 
 @celery.task(name="sniff_printer")
-def sniff_printer(hostname, host):
-    app.logger.info("Sniffing printer on %s (%s) - trying http" % (host, hostname))
+def sniff_printer(hostname, ip):
+    app.logger.info("Sniffing printer on %s (%s) - trying http" % (ip, hostname))
     printer = clients.get_printer_instance(
         {
+            "uuid": uuid.uuid4(),
             "hostname": hostname,
-            "host": host,
+            "ip": ip,
             "client": "octoprint",  # TODO not only octoprint
             "protocol": "http",
         }
@@ -43,19 +50,19 @@ def sniff_printer(hostname, host):
     # Let's try a secured connection
     if not printer.client_info.connected:
         printer.protocol = "https"
-        app.logger.info("Sniffing printer on %s (%s) - trying https" % (host, hostname))
+        app.logger.info("Sniffing printer on %s (%s) - trying https" % (ip, hostname))
         printer.sniff()
 
     # Not even on https, no reason to do anything
     if not printer.client_info.connected:
-        app.logger.info("Sniffing printer on %s (%s) - no luck" % (host, hostname))
+        app.logger.info("Sniffing printer on %s (%s) - no luck" % (ip, hostname))
         return
 
-    app.logger.info("Sniffing printer on %s (%s) - success" % (host, hostname))
+    app.logger.info("Sniffing printer on %s (%s) - success" % (ip, hostname))
     save_printer_data(
-        name=hostname or host,
+        name=hostname or ip,
         hostname=hostname,
-        host=host,
+        ip=ip,
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={

@@ -31,8 +31,8 @@ class ListRoute(unittest.TestCase):
                 printjobs.add_printjob(
                     gcode_id=self.gcode_id,
                     gcode_data={"id": self.gcode_id},
-                    printer_host="172.16.236.11:8080",
-                    printer_data={"host": "172.16.236.11:8080"},
+                    printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                    printer_data={"ip": "172.16.236.11", "port": 8080},
                     user_uuid=UUID_USER,
                 )
             )
@@ -41,8 +41,8 @@ class ListRoute(unittest.TestCase):
                 printjobs.add_printjob(
                     gcode_id=self.gcode_id2,
                     gcode_data={"id": self.gcode_id2},
-                    printer_host="172.16.236.12:8080",
-                    printer_data={"host": "172.16.236.12:8080"},
+                    printer_uuid="e24a9711-aabc-48f0-b790-eac056c43f07",
+                    printer_data={"ip": "172.16.236.12", "port": 8080},
                     user_uuid=UUID_USER,
                 )
             )
@@ -205,7 +205,7 @@ class ListRoute(unittest.TestCase):
     def test_filter_absent(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_host:completely-absent%printer",
+                "/printjobs?filter=printer_uuid:completely-absent%printer",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
@@ -215,26 +215,28 @@ class ListRoute(unittest.TestCase):
     def test_filter(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_host:172.16.236.12:8080&order_by=id",
+                "/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&order_by=id",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
-            for printer in response.json["items"]:
-                self.assertTrue(printer["printer_data"]["host"], "172.16.236.12:8080")
+            for job in response.json["items"]:
+                self.assertTrue(
+                    job["printer_uuid"], "e24a9711-aabc-48f0-b790-eac056c43f07"
+                )
             response = c.get(
                 "/printjobs?filter=gcode_id:3:8080&order_by=id",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
-            for printer in response.json["items"]:
-                self.assertTrue(printer["gcode_data"]["id"], "3")
+            for job in response.json["items"]:
+                self.assertTrue(job["gcode_data"]["id"], "3")
 
     def test_filter_next(self):
         with app.test_client() as c:
             response = c.get(
-                "/printjobs?filter=printer_host:172.16.236.12:8080&limit=10&order_by=-id",
+                "/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&limit=10&order_by=-id",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
@@ -285,8 +287,8 @@ class DetailRoute(unittest.TestCase):
         self.printjob_id = printjobs.add_printjob(
             gcode_id=self.gcode_id,
             gcode_data={"id": self.gcode_id},
-            printer_host="172.16.236.11:8080",
-            printer_data={"host": "172.16.236.11:8080"},
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
+            printer_data={"ip": "172.16.236.11", "port": 8080},
             user_uuid=UUID_USER,
         )
 
@@ -336,7 +338,10 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/printjobs",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"printer": "172.16.236.11:8080", "gcode": self.gcode_id},
+                json={
+                    "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                    "gcode": self.gcode_id,
+                },
             )
             self.assertEqual(response.status_code, 201)
             self.assertEqual(response.json["user_uuid"], UUID_USER)
@@ -344,7 +349,7 @@ class CreateRoute(unittest.TestCase):
             pj = printjobs.get_printjob(pid)
             self.assertEqual(pj["gcode_id"], self.gcode_id)
             self.assertEqual(pj["user_uuid"], UUID_USER)
-            self.assertEqual(pj["printer_host"], "172.16.236.11:8080")
+            self.assertEqual(pj["printer_uuid"], "20e91c14-c3e4-4fe9-a066-e69d53324a20")
             self.assertFalse(pj["printer_data"] is None)
             self.assertFalse(pj["gcode_data"] is None)
             self.assertTrue("name" in pj["printer_data"])
@@ -367,7 +372,10 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/printjobs",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"printer": "172.16.236.11:8080", "gcode": self.gcode_id},
+                json={
+                    "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                    "gcode": self.gcode_id,
+                },
             )
             self.assertEqual(response.status_code, 409)
 
@@ -383,7 +391,7 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/printjobs",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"printer": "172.16.236.11:8080"},
+                json={"printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -401,7 +409,10 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/printjobs",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"gcode": self.gcode_id, "printer": "123"},
+                json={
+                    "gcode": self.gcode_id,
+                    "printer": "225b4a63-d94a-4231-87dc-f1bff717e5da",
+                },
             )
             self.assertEqual(response.status_code, 404)
 
@@ -410,16 +421,22 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/printjobs",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"gcode": -3, "printer": "172.16.236.11:8080"},
+                json={"gcode": -3, "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20"},
             )
             self.assertEqual(response.status_code, 404)
 
-    def test_cannot_upload(self):
+    @mock.patch(
+        "server.routes.printjobs.clients.get_printer_instance", return_value=None
+    )
+    def test_cannot_upload_to_printer(self, mock_get_printer):
         with app.test_client() as c:
             response = c.post(
                 "/printjobs",
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
-                json={"gcode": self.gcode_id, "printer": "172.16.236.11:8080"},
+                json={
+                    "gcode": self.gcode_id,
+                    "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                },
             )
             self.assertEqual(response.status_code, 500)
 
@@ -437,8 +454,8 @@ class DeleteRoute(unittest.TestCase):
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_host="172.16.236.11:8080",
-            printer_data={"host": "172.16.236.11:8080"},
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
+            printer_data={"ip": "172.16.236.11", "port": 8080},
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:
@@ -457,8 +474,8 @@ class DeleteRoute(unittest.TestCase):
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_host="172.16.236.11:8080",
-            printer_data={"host": "172.16.236.11:8080"},
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
+            printer_data={"ip": "172.16.236.11", "port": 8080},
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:
@@ -481,8 +498,8 @@ class DeleteRoute(unittest.TestCase):
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_host="172.16.236.11:8080",
-            printer_data={"host": "172.16.236.11:8080"},
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
+            printer_data={"host": "172.16.236.11", "port": 8080},
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:
@@ -505,8 +522,8 @@ class DeleteRoute(unittest.TestCase):
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
-            printer_host="172.16.236.11:8080",
-            printer_data={"host": "172.16.236.11:8080"},
+            printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
+            printer_data={"host": "172.16.236.11", "port": 8080},
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:

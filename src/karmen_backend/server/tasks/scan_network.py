@@ -8,7 +8,7 @@ from server.tasks.sniff_printer import sniff_printer
 def scan_network():
     app.logger.info("Scanning network for printers...")
     for line in do_arp_scan(settings.get_val("network_interface")):
-        (host, _) = line
-        hostname = get_avahi_hostname(host)
+        (ip, _) = line
+        hostname = get_avahi_hostname(ip)
         # it's communicating, let's sniff it for a printer
-        sniff_printer.delay(hostname, host)
+        sniff_printer.delay(hostname, ip)
