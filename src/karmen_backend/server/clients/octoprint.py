@@ -54,10 +54,13 @@ class Octoprint(PrinterClient):
             self.http_session.headers.update({"X-Api-Key": self.client_info.api_key})
 
     def update_network_host(self):
+        # TODO adapt requests to support custom DNS resolving that speaks mDNS/bonjour/avahi
+        # https://stackoverflow.com/questions/22609385/python-requests-library-define-specific-dns
+        # until then, we're stuck with IP addresses
         if self.port is not None:
-            self.network_host = "%s:%s" % (self.hostname or self.ip, self.port)
+            self.network_host = "%s:%s" % (self.ip, self.port)
         else:
-            self.network_host = self.hostname or self.ip
+            self.network_host = self.ip
 
     def get_printer_props(self):
         return self.printer_props
@@ -123,6 +126,8 @@ class Octoprint(PrinterClient):
 
     def is_alive(self):
         request = self._http_get("/api/version", force=True)
+        if request:
+            print(request.status_code)
         if request is not None and request.status_code in [200, 403]:
             if not self.client_info.connected or request.status_code == 403:
                 self.sniff()

@@ -60,6 +60,7 @@ def sniff_printer(hostname, ip):
 
     app.logger.info("Sniffing printer on %s (%s) - success" % (ip, hostname))
     save_printer_data(
+        uuid=printer.uuid,
         name=hostname or ip,
         hostname=hostname,
         ip=ip,

@@ -11,13 +11,14 @@ def check_printers():
         printer = clients.get_printer_instance(raw_printer)
         if printer.hostname is not None:
             current_ip = network.get_avahi_address(printer.hostname)
-            if current_ip != printer.ip:
+            if current_ip is not None and current_ip != printer.ip:
                 printer.ip = current_ip
                 printer.update_network_host()
         else:
-            printer.hostname = network.get_avahi_hostname(printer.ip)
-            printer.update_network_host()
-
+            hostname = network.get_avahi_hostname(printer.ip)
+            if hostname is not None:
+                printer.hostname = hostname
+                printer.update_network_host()
         printer.is_alive()
         printers.update_printer(
             uuid=printer.uuid,
