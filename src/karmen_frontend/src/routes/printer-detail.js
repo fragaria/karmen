@@ -442,10 +442,12 @@ class PrinterDetail extends React.Component {
                 printer={printer}
                 onPrinterConnectionChanged={setPrinterConnection}
               />
-              <PrinterAuthorizationForm
-                printer={printer}
-                onPrinterAuthorizationChanged={patchPrinter}
-              />
+              {role === "admin" && (
+                <PrinterAuthorizationForm
+                  printer={printer}
+                  onPrinterAuthorizationChanged={patchPrinter}
+                />
+              )}
               <PrinterProperties printer={printer} />
               <PrinterConnectionStatus printer={printer} />
             </div>
