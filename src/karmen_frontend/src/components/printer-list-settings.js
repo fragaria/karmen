@@ -36,7 +36,11 @@ class PrintersTableRow extends React.Component {
 
     return (
       <div className="list-item">
-        <div className="list-item-content">
+        <Link
+          className="list-item-content"
+          key={printer.uuid}
+          to={`/printers/${printer.uuid}`}
+        >
           <span className="list-item-title">{printer.name}</span>
           <span>
             {printer.hostname
@@ -45,7 +49,7 @@ class PrintersTableRow extends React.Component {
                 } (${printer.ip}${printer.port ? `:${printer.port}` : ""})`
               : `${printer.ip}${printer.port ? `:${printer.port}` : ""}`}
           </span>
-        </div>
+        </Link>
         <div className="list-item-cta">
           <button
             className="btn-reset"
@@ -58,13 +62,6 @@ class PrintersTableRow extends React.Component {
           >
             <i className="icon-trash text-secondary"></i>
           </button>
-          <Link
-            className="btn-reset"
-            title="Printer detail"
-            to={`/printers/${printer.uuid}`}
-          >
-            <i className="icon-printer"></i>
-          </Link>
           <Link
             className="btn-reset"
             title="Printer settings"
