@@ -38,7 +38,7 @@ class UsersTableRow extends React.Component {
             });
           }}
         >
-          Do you really want to {user.suspended ? "allow" : "disallow"}{" "}
+          Do you really want to {user.suspended ? "enable" : "disable"}{" "}
           <strong>{user.username}</strong>?
         </TableActionRow>
       );

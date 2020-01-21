@@ -54,34 +54,36 @@ class PrinterList extends React.Component {
     }
     const printerElements =
       printers &&
-      printers.map(printer => {
-        return (
-          <Link
-            className="list-item"
-            key={printer.uuid}
-            to={`/printers/${printer.uuid}`}
-          >
-            <div className="list-item-content">
-              <span className="list-item-title">{printer.name}</span>
-              <span className="list-item-subtitle">
-                <PrinterState printer={printer} />
-              </span>
+      printers
+        .filter(p => !!p)
+        .map(printer => {
+          return (
+            <Link
+              className="list-item"
+              key={printer.uuid}
+              to={`/printers/${printer.uuid}`}
+            >
+              <div className="list-item-content">
+                <span className="list-item-title">{printer.name}</span>
+                <span className="list-item-subtitle">
+                  <PrinterState printer={printer} />
+                </span>
 
-              {printer.job && printer.job.name && (
-                <>
-                  <div className="list-item-subtitle">
-                    <span>{printer.job.completion.toFixed(2)}% done, </span>
-                    <span>
-                      ETA: {formatters.timespan(printer.job.printTimeLeft)}
-                    </span>
-                  </div>
-                  <span>{printer.job.name}</span>
-                </>
-              )}
-            </div>
-          </Link>
-        );
-      });
+                {printer.job && printer.job.name && (
+                  <>
+                    <div className="list-item-subtitle">
+                      <span>{printer.job.completion.toFixed(2)}% done, </span>
+                      <span>
+                        ETA: {formatters.timespan(printer.job.printTimeLeft)}
+                      </span>
+                    </div>
+                    <span>{printer.job.name}</span>
+                  </>
+                )}
+              </div>
+            </Link>
+          );
+        });
 
     return (
       <div className="content printer-list">

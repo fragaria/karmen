@@ -170,9 +170,7 @@ class PrinterAuthorizationForm extends React.Component {
     return (
       <>
         <p></p>
-        <p>
-          {getAccessLevelString(printer.client.access_level)}
-        </p>
+        <p>{getAccessLevelString(printer.client.access_level)}</p>
         <form className="inline-form inline-form-sm">
           <input
             type="text"
@@ -231,8 +229,7 @@ class PrinterCurrentPrintControl extends React.Component {
             }}
           >
             Cancel the print!
-          </button>
-          {" "}
+          </button>{" "}
           <button
             className="btn btn-plain btn-sm"
             onClick={() => {
@@ -240,7 +237,7 @@ class PrinterCurrentPrintControl extends React.Component {
                 showCancelWarning: false
               });
             }}
-           >
+          >
             Close
           </button>
         </div>
@@ -297,21 +294,27 @@ const PrinterConnectionStatus = ({ printer }) => {
         {printer.hostname && (
           <a
             className="anchor"
-            href={`${printer.protocol}://${printer.hostname}`}
+            href={`${printer.protocol}://${printer.hostname}${
+              printer.port ? `:${printer.port}` : ""
+            }`}
             target="_blank"
             rel="noopener noreferrer"
           >
             {printer.hostname}
+            {printer.port ? `:${printer.port}` : ""}
           </a>
         )}
         {printer.hostname && " ("}
         <a
           className="anchor"
-          href={`${printer.protocol}://${printer.host}`}
+          href={`${printer.protocol}://${printer.ip}${
+            printer.port ? `:${printer.port}` : ""
+          }`}
           target="_blank"
           rel="noopener noreferrer"
         >
-          {printer.host}
+          {printer.ip}
+          {printer.port ? `:${printer.port}` : ""}
         </a>
         {printer.hostname && ")"}
       </dd>
@@ -477,7 +480,6 @@ class PrinterDetail extends React.Component {
             </div>
           </div>
 
-
           <div className="printer-detail-jobs">
             <ul className="tabs-navigation">
               <li className="tab active">
@@ -499,7 +501,7 @@ class PrinterDetail extends React.Component {
 
             {role === "admin" && (
               <div className="cta-box text-center">
-                <Link to={`/printers/${printer.host}/settings`}>
+                <Link to={`/printers/${printer.uuid}/settings`}>
                   <button className="btn">Printer settings</button>
                 </Link>
               </div>
@@ -514,10 +516,10 @@ class PrinterDetail extends React.Component {
 export default connect(
   (state, ownProps) => ({
     printer: state.printers.printers.find(
-      p => p.host === ownProps.match.params.host
+      p => p.uuid === ownProps.match.params.uuid
     ),
     role: state.users.me.role,
-    jobList: state.printjobs[ownProps.match.params.host] || {
+    jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
       orderBy: "-started",
       filter: null,
@@ -527,24 +529,24 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinter: () =>
       dispatch(
-        loadPrinter(ownProps.match.params.host, ["job", "status", "webcam"])
+        loadPrinter(ownProps.match.params.uuid, ["job", "status", "webcam"])
       ),
     changeCurrentJobState: action =>
-      dispatch(changeCurrentJob(ownProps.match.params.host, action)),
+      dispatch(changeCurrentJob(ownProps.match.params.uuid, action)),
     patchPrinter: data =>
-      dispatch(patchPrinter(ownProps.match.params.host, data)),
+      dispatch(patchPrinter(ownProps.match.params.uuid, data)),
     setPrinterConnection: state =>
-      dispatch(setPrinterConnection(ownProps.match.params.host, state)),
+      dispatch(setPrinterConnection(ownProps.match.params.uuid, state)),
     loadJobsPage: (startWith, orderBy, filter, limit) =>
       dispatch(
         getJobsPage(
-          ownProps.match.params.host,
+          ownProps.match.params.uuid,
           startWith,
           orderBy,
           filter,
           limit
         )
       ),
-    clearJobsPages: () => dispatch(clearJobsPages(ownProps.match.params.host))
+    clearJobsPages: () => dispatch(clearJobsPages(ownProps.match.params.uuid))
   })
 )(PrinterDetail);
