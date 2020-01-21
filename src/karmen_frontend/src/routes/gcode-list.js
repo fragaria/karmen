@@ -299,7 +299,7 @@ class GcodeList extends React.Component {
       ];
       page = 0;
     }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter, 4, [
+    getGcodes(pages[page].startWith, newOrderBy, newFilter, 10, [
       "id",
       "display",
       "filename",
@@ -450,6 +450,7 @@ class GcodeList extends React.Component {
                 ) : (
                   <span></span>
                 )}
+                {currentPage > 0 && pages[currentPage + 1] && " "}
                 {pages[currentPage + 1] ? (
                   <button
                     className="btn btn-sm"

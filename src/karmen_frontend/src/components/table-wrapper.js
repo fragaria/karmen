@@ -143,6 +143,7 @@ class TableWrapper extends React.Component {
               ) : (
                 <span></span>
               )}
+              {currentPageIndex > 0 && currentPage.data.next && " "}
               {currentPage.data.next ? (
                 <button
                   className="btn btn-sm"
