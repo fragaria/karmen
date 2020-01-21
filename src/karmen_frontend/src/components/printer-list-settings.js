@@ -99,6 +99,8 @@ class PrintersTable extends React.Component {
         let result = -1;
         if (p.name > r.name) {
           result = 1;
+        } else if (p.name === r.name) {
+          result = p.ip > r.ip ? 1 : -1;
         }
         if (orderBy === "-name") {
           return -result;

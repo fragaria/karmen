@@ -84,6 +84,9 @@ class ApiTokensTable extends React.Component {
       )
       .sort((a, b) => {
         const columnName = orderBy.substring(1);
+        if (a[columnName] === b[columnName]) {
+          return a.created > b.created ? -1 : 1;
+        }
         if (orderBy[0] === "+") {
           return a[columnName] < b[columnName] ? -1 : 1;
         } else {

@@ -1,3 +1,15 @@
+const getSortedPrinters = printers => {
+  return [].concat(printers).sort((p, r) => {
+    let result = -1;
+    if (p.name > r.name) {
+      result = 1;
+    } else if (p.name === r.name) {
+      result = p.ip > r.ip ? 1 : -1;
+    }
+    return result;
+  });
+};
+
 export default (
   state = {
     printersLoaded: false,
@@ -31,7 +43,7 @@ export default (
         printers[origIndex] = Object.assign({}, origPrinter, newPrinter);
       }
       return Object.assign({}, state, {
-        printers: [].concat(printers).sort((p, r) => (p.name > r.name ? 1 : -1))
+        printers: getSortedPrinters(printers)
       });
     case "PRINTERS_PATCH_SUCCEEDED":
       newPrinter = action.payload.data;
@@ -48,7 +60,7 @@ export default (
         printers[origIndex] = Object.assign({}, origPrinter, newPrinter);
       }
       return Object.assign({}, state, {
-        printers: [].concat(printers).sort((p, r) => (p.name > r.name ? 1 : -1))
+        printers: getSortedPrinters(printers)
       });
     case "PRINTERS_CHANGE_JOB_SUCCEEDED":
       newPrinter = action.payload.data;
@@ -76,7 +88,7 @@ export default (
         });
       }
       return Object.assign({}, state, {
-        printers: [].concat(printers).sort((p, r) => (p.name > r.name ? 1 : -1))
+        printers: getSortedPrinters(printers)
       });
     case "PRINTERS_SET_CONNECTION_SUCCEEDED":
       newPrinter = action.payload.data;
@@ -104,7 +116,7 @@ export default (
         });
       }
       return Object.assign({}, state, {
-        printers: [].concat(printers).sort((p, r) => (p.name > r.name ? 1 : -1))
+        printers: getSortedPrinters(printers)
       });
     case "PRINTERS_LOAD_SUCCEEDED":
       if (!action.payload.data.items) {
@@ -122,15 +134,15 @@ export default (
         }
       });
       return Object.assign({}, state, {
-        printers: newPrinters
-          .sort((p, r) => (p.name > r.name ? 1 : -1))
-          .filter(p => state.toBeDeleted.indexOf(p.uuid) === -1),
+        printers: getSortedPrinters(newPrinters).filter(
+          p => state.toBeDeleted.indexOf(p.uuid) === -1
+        ),
         printersLoaded: true
       });
     case "PRINTERS_ADD_SUCCEEDED":
       printers.push(action.payload.data);
       return Object.assign({}, state, {
-        printers: printers.sort((p, r) => (p.name > r.name ? 1 : -1))
+        printers: getSortedPrinters(printers)
       });
     case "PRINTERS_DELETE_STARTED":
       return Object.assign({}, state, {
