@@ -1,7 +1,6 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { BackLink } from "../components/back";
 import { FormInputs } from "../components/form-utils";
 import { addUser } from "../actions/users";
 import RoleBasedGateway from "../components/role-based-gateway";
@@ -160,7 +159,9 @@ class AddUser extends React.Component {
                 >
                   Add user
                 </BusyButton>{" "}
-                <BackLink to="/settings" />
+                <Link to="/settings" className="btn btn-plain">
+                  Cancel
+                </Link>
               </div>
             </form>
           </div>

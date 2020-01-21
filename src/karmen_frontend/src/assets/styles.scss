@@ -257,8 +257,13 @@ footer {
     font-size: 1.1rem;
   }
 
-  &.btn-secondary {
+  &:disabled {
     background: #adadad;
+
+    &:hover {
+      cursor: auto;
+      background: #adadad;
+    }
   }
 
   &.btn-plain {

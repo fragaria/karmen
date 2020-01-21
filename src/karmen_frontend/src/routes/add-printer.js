@@ -1,7 +1,6 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { BackLink } from "../components/back";
 import { FormInputs } from "../components/form-utils";
 import { addPrinter } from "../actions/printers";
 import RoleBasedGateway from "../components/role-based-gateway";
@@ -138,7 +137,9 @@ class AddPrinter extends React.Component {
                 >
                   Add printer
                 </BusyButton>{" "}
-                <BackLink to="/" />
+                <Link to="/" className="btn btn-plain">
+                  Cancel
+                </Link>
               </div>
             </form>
           </div>

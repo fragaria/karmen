@@ -71,7 +71,7 @@ class PrinterConnectionForm extends React.Component {
             </BusyButton>{" "}
             <button
               type="reset"
-              className={submitting ? "hidden" : "btn btn-sm btn-secondary"}
+              className={submitting ? "hidden" : "btn btn-sm btn-plain"}
               onClick={e => {
                 e.preventDefault();
                 this.setState({

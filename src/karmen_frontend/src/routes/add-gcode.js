@@ -1,7 +1,6 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 
-import { BackLink } from "../components/back";
 import { uploadGcode } from "../services/backend";
 import BusyButton from "../components/busy-button";
 
@@ -109,7 +108,9 @@ class AddGcode extends React.Component {
                 Upload G-Code
               </BusyButton>{" "}
               {/* TODO this should actually work as a cancel button and cancel the upload if in progress */}
-              <BackLink to="/gcodes" />
+              <Link to="/gcodes" className="btn btn-plain">
+                Cancel
+              </Link>
             </div>
           </form>
         </div>

@@ -1,10 +1,10 @@
 import React from "react";
 import { FormInputs } from "../components/form-utils";
+import BusyButton from "../components/busy-button";
 
 export class PrinterEditForm extends React.Component {
   state = {
     initialized: false,
-    submitting: false,
     message: null,
     messageOk: false,
     form: {
@@ -77,7 +77,6 @@ export class PrinterEditForm extends React.Component {
   submit(e) {
     e.preventDefault();
     this.setState({
-      submitting: true,
       messageOk: false,
       message: null
     });
@@ -85,7 +84,6 @@ export class PrinterEditForm extends React.Component {
     const { onSubmit } = this.props;
     if (!form.name.val) {
       this.setState({
-        submitting: false,
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
             error: "Name cannot be empty"
@@ -96,7 +94,6 @@ export class PrinterEditForm extends React.Component {
     }
     if (form.tool0_diameter.val && isNaN(parseFloat(form.tool0_diameter.val))) {
       this.setState({
-        submitting: false,
         form: Object.assign({}, form, {
           tool0_diameter: Object.assign({}, form.tool0_diameter, {
             error: "Tool 0 diameter has to be a decimal number"
@@ -117,21 +114,19 @@ export class PrinterEditForm extends React.Component {
       .then(result => {
         this.setState({
           message: result.message,
-          messageOk: result.ok,
-          submitting: false
+          messageOk: result.ok
         });
       })
       .catch(e => {
         this.setState({
           message: e,
-          messageOk: false,
-          submitting: false
+          messageOk: false
         });
       });
   }
 
   render() {
-    const { message, messageOk, form, submitting } = this.state;
+    const { message, messageOk, form } = this.state;
     const { onCancel } = this.props;
     const updateValue = (name, value) => {
       const { form } = this.state;
@@ -150,20 +145,15 @@ export class PrinterEditForm extends React.Component {
         )}
         <FormInputs definition={form} updateValue={updateValue} />
         <div className="cta-box text-center">
-          <button
+          <BusyButton
             className="btn"
             type="submit"
             onClick={this.submit}
-            disabled={submitting}
+            busyChildren="Saving..."
           >
             Save
-          </button>{" "}
-          <button
-            className="btn btn-secondary"
-            type="reset"
-            onClick={onCancel}
-            disabled={submitting}
-          >
+          </BusyButton>{" "}
+          <button className="btn btn-plain" type="reset" onClick={onCancel}>
             Cancel
           </button>
         </div>

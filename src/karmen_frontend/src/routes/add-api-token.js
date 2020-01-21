@@ -1,7 +1,6 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { BackLink } from "../components/back";
 import { FormInputs } from "../components/form-utils";
 import { addUserApiToken } from "../actions/users";
 import FreshTokenRequiredCheck from "../components/fresh-token-required-check";
@@ -167,7 +166,9 @@ class AddApiToken extends React.Component {
                 >
                   Create token
                 </BusyButton>{" "}
-                <BackLink to="/users/me" />
+                <Link to="/users/me" className="btn btn-plain">
+                  Cancel
+                </Link>
               </div>
             </form>
           )}

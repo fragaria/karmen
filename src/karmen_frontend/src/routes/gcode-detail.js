@@ -1,7 +1,6 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { BackLink } from "../components/back";
 import Loader from "../components/loader";
 import { getGcode, printGcode, downloadGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
@@ -326,7 +325,9 @@ class GcodeDetail extends React.Component {
           </div>
 
           <div className="cta-box text-center">
-            <BackLink to="/gcodes" text="Back to listing" />
+            <Link to="/gcodes" className="btn btn-plain">
+              Back to listing
+            </Link>
           </div>
         </div>
       </section>
