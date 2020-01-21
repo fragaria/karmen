@@ -47,20 +47,6 @@ class PrintersTableRow extends React.Component {
           </span>
         </div>
         <div className="list-item-cta">
-          <Link
-            className="btn-reset"
-            title="Settings"
-            to={`/printers/${printer.uuid}`}
-          >
-            <i className="icon-printer"></i>
-          </Link>
-          <Link
-            className="btn-reset"
-            title="Settings"
-            to={`/printers/${printer.uuid}/settings`}
-          >
-            <i className="icon-edit"></i>
-          </Link>
           <button
             className="btn-reset"
             title="Delete printer"
@@ -72,6 +58,20 @@ class PrintersTableRow extends React.Component {
           >
             <i className="icon-trash text-secondary"></i>
           </button>
+          <Link
+            className="btn-reset"
+            title="Printer detail"
+            to={`/printers/${printer.uuid}`}
+          >
+            <i className="icon-printer"></i>
+          </Link>
+          <Link
+            className="btn-reset"
+            title="Printer settings"
+            to={`/printers/${printer.uuid}/settings`}
+          >
+            <i className="icon-edit"></i>
+          </Link>
         </div>
       </div>
     );

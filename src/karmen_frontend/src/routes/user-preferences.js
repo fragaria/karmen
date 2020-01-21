@@ -30,13 +30,13 @@ const UserPreferences = ({
             <span>+ Add a token</span>
           </Link>
         </h1>
-        <ApiTokensTable
-          loadTokens={loadApiTokens}
-          tokens={apiTokens}
-          tokensLoaded={apiTokensLoaded}
-          onTokenDelete={onTokenDelete}
-        />
       </div>
+      <ApiTokensTable
+        loadTokens={loadApiTokens}
+        tokens={apiTokens}
+        tokensLoaded={apiTokensLoaded}
+        onTokenDelete={onTokenDelete}
+      />
       <div className="container">
         <h1 className="main-title">Change password</h1>
         <ChangePasswordForm

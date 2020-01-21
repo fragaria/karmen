@@ -6,6 +6,7 @@
 }
 
 @mixin button-reset () {
+  padding: 0;
   border: none;
   outline: none;
   background: transparent;

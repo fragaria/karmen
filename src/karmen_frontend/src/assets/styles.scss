@@ -162,6 +162,7 @@ footer {
     font-size: 3rem;
     z-index: 1;
     outline: none;
+    padding: 0;
     @include button-reset;
 
     &:hover {
@@ -178,12 +179,6 @@ footer {
   padding: 0 $spacing-default/2;
 }
 
-.content {
-  max-width: $screen-md-min;
-  margin: 0 auto;
-  padding: $navigation-height-xs 0 $spacing-default;
-}
-
 .main-title {
   display: flex;
   width: 100%;
@@ -194,6 +189,20 @@ footer {
   &.text-center {
     display: block;
   }
+}
+
+.content {
+  max-width: $screen-md-min;
+  margin: 0 auto;
+  padding: $navigation-height-xs 0 $spacing-default;
+
+  .container .main-title{
+    margin-top: $spacing-default*2;
+  }
+
+  .container:first-child .main-title {
+      margin-top: $base-unit*2
+    }
 }
 
 .cta-box {
@@ -241,7 +250,6 @@ footer {
   outline: none;
   border: none;
   padding: $base-unit*2 $base-unit*3;
-  line-height: 1;
   background: $color-secondary;
   color: #fff;
   font-weight: bold;
@@ -352,12 +360,10 @@ footer {
 .list {
   margin-top: $base-unit;
 
-  .list-header {
-    padding: $base-unit $base-unit*2;
-
-  }
+  .list-header {}
 
   .list-search {
+    padding: $base-unit $base-unit*2;
     margin-bottom: $base-unit*2;
 
     label {
@@ -385,13 +391,20 @@ footer {
 
   .list-filter {
     position: relative;
+    // padding: $base-unit $base-unit*2;
 
     .list-filter-options {
       position: absolute;
-      top: $base-unit*3;
-      left: -$spacing-default;
+      top: $spacing-default;
+      left: 0;
+      width: 100%;
       background: #fff;
       box-shadow: $shadow-default;
+
+      @media (min-width: $screen-sm-min) {
+        left: -$spacing-default/2;
+        width: auto;
+      }
     }
 
     .list-filter-option {
@@ -404,6 +417,10 @@ footer {
       z-index: 1;
       text-transform: capitalize;
       @include button-reset();
+
+      @media (min-width: $screen-sm-min) {
+        padding: $base-unit*2 $spacing-default/2;
+      }
 
       &:hover {
         background:darken($bg-color, 5%);
@@ -425,7 +442,7 @@ footer {
     }
 
     .list-filter-toggle {
-      padding: 0;
+      padding: $base-unit $spacing-default/2;
       font-size: 1.3rem;
       text-transform: capitalize;
 
@@ -552,8 +569,11 @@ select {
   textarea {
     width: 100%;
     max-width: 100%;
-    min-width: 300px;
     margin: 0 0 $base-unit*2;
+
+    @media (min-width: $screen-sm-min) {
+      min-width: 300px;
+    }
   }
 
 
@@ -625,7 +645,7 @@ select {
 
 .webcam-stream {
   display: flex;
-  min-height: 300px;
+  min-height: 200px;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -671,6 +691,10 @@ select {
 }
 
 .printer-detail {
+  .printer-detail-meta .main-title {
+    margin-bottom: 0;
+  }
+
   @media (min-width: $screen-sm-min) {
     display: grid;
     grid-template-columns: 1fr 1fr;

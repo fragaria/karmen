@@ -101,7 +101,7 @@ class UsersTableRow extends React.Component {
                 {user.suspended ? (
                   <i className="icon-check text-success"></i>
                 ) : (
-                  <i className="icon-close text-secondary"></i>
+                  <i className="icon-trash text-secondary"></i>
                 )}
               </button>
               <button
