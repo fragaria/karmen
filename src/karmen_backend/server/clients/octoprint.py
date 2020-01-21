@@ -35,10 +35,8 @@ class Octoprint(PrinterClient):
         self.protocol = protocol
         self.printer_props = printer_props
         self.client = Octoprint.__client_name__
-        if self.port is not None:
-            self.network_host = "%s:%s" % (self.hostname or self.ip, self.port)
-        else:
-            self.network_host = self.hostname or self.ip
+        self.update_network_host()
+
         if not client_props:
             client_props = {}
         self.client_info = PrinterClientInfo(
@@ -54,6 +52,12 @@ class Octoprint(PrinterClient):
         self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
         if self.client_info.api_key:
             self.http_session.headers.update({"X-Api-Key": self.client_info.api_key})
+
+    def update_network_host(self):
+        if self.port is not None:
+            self.network_host = "%s:%s" % (self.hostname or self.ip, self.port)
+        else:
+            self.network_host = self.hostname or self.ip
 
     def get_printer_props(self):
         return self.printer_props
