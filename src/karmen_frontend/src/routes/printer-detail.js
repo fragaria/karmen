@@ -3,9 +3,11 @@ import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/loader";
+import BusyButton from "../components/busy-button";
 import TableWrapper from "../components/table-wrapper";
 import Progress from "../components/progress";
 import { WebcamStream } from "../components/webcam-stream";
+import PrinterState from "../components/printer-state";
 import formatters from "../services/formatters";
 
 import { getJobsPage, clearJobsPages } from "../actions/printjobs";
@@ -31,7 +33,7 @@ class PrinterConnectionForm extends React.Component {
   changePrinterConnection() {
     const { targetState } = this.state;
     const { onPrinterConnectionChanged } = this.props;
-    onPrinterConnectionChanged(targetState).then(r => {
+    return onPrinterConnectionChanged(targetState).then(r => {
       this.setState({
         submitting: false,
         showConnectionWarningRow: false,
@@ -43,6 +45,9 @@ class PrinterConnectionForm extends React.Component {
   render() {
     const { printer } = this.props;
     const { showConnectionWarningRow, submitting } = this.state;
+    if (["Connecting"].indexOf(printer.status.state) > -1) {
+      return <></>;
+    }
     return (
       <form className="inline-form">
         {showConnectionWarningRow ? (
@@ -50,7 +55,7 @@ class PrinterConnectionForm extends React.Component {
             <p className="message-warning">
               Are you sure? This might affect any current printer operation.
             </p>
-            <button
+            <BusyButton
               className="btn btn-sm"
               type="submit"
               onClick={e => {
@@ -58,12 +63,12 @@ class PrinterConnectionForm extends React.Component {
                 this.setState({
                   submitting: true
                 });
-                this.changePrinterConnection();
+                return this.changePrinterConnection();
               }}
-              disabled={submitting}
+              busyChildren="Working..."
             >
-              {submitting ? "Working..." : "Yes, please"}
-            </button>{" "}
+              Yes, please
+            </BusyButton>{" "}
             <button
               type="reset"
               className={submitting ? "hidden" : "btn btn-sm btn-secondary"}
@@ -82,47 +87,37 @@ class PrinterConnectionForm extends React.Component {
           </div>
         ) : (
           <dd className="description">
-            {printer.status.state}{" "}
-            {printer.client.access_level === "unlocked" && (
-              <>
-                {(["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
-                  printer.status.state.match(/printer is not connected/i)) && (
-                  <button
-                    className="btn btn-sm"
-                    type="submit"
-                    onClick={e => {
-                      e.preventDefault();
-                      this.setState({
-                        showConnectionWarningRow: true,
-                        targetState: "online"
-                      });
-                    }}
-                    disabled={submitting}
-                  >
-                    Connect
-                  </button>
-                )}
-                {["Offline", "Closed", "Printer is not responding"].indexOf(
-                  printer.status.state
-                ) === -1 &&
-                  !printer.status.state.match(/printer is not connected/i) && (
-                    <button
-                      className="btn-reset anchor"
-                      type="submit"
-                      onClick={e => {
-                        e.preventDefault();
-                        this.setState({
-                          showConnectionWarningRow: true,
-                          targetState: "offline"
-                        });
-                      }}
-                      disabled={submitting}
-                    >
-                      Disconnect
-                    </button>
-                  )}
-              </>
-            )}
+            {printer.client.access_level === "unlocked" &&
+              (["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
+              printer.status.state.match(/printer is not/i) ? (
+                <button
+                  className="btn-reset anchor"
+                  type="submit"
+                  onClick={e => {
+                    e.preventDefault();
+                    this.setState({
+                      showConnectionWarningRow: true,
+                      targetState: "online"
+                    });
+                  }}
+                >
+                  Connect printer
+                </button>
+              ) : (
+                <button
+                  className="btn-reset anchor"
+                  type="submit"
+                  onClick={e => {
+                    e.preventDefault();
+                    this.setState({
+                      showConnectionWarningRow: true,
+                      targetState: "offline"
+                    });
+                  }}
+                >
+                  Disconnect printer
+                </button>
+              ))}
           </dd>
         )}
       </form>
@@ -132,8 +127,7 @@ class PrinterConnectionForm extends React.Component {
 
 class PrinterAuthorizationForm extends React.Component {
   state = {
-    apiKey: "",
-    submitting: false
+    apiKey: ""
   };
 
   constructor(props) {
@@ -143,16 +137,12 @@ class PrinterAuthorizationForm extends React.Component {
 
   setApiKey(e) {
     e.preventDefault();
-    this.setState({
-      submitting: true
-    });
     const { apiKey } = this.state;
     const { onPrinterAuthorizationChanged } = this.props;
     return onPrinterAuthorizationChanged({
       api_key: apiKey
     }).then(r => {
       this.setState({
-        submitting: false,
         apiKey: ""
       });
     });
@@ -160,13 +150,12 @@ class PrinterAuthorizationForm extends React.Component {
 
   render() {
     const { printer } = this.props;
-    const { submitting, apiKey } = this.state;
+    const { apiKey } = this.state;
     const getAccessLevelString = level => {
       switch (level) {
         case "read_only":
-          return "Read only, unlock with API key";
         case "protected":
-          return "Authorization required, unlock with a valid API key";
+          return "Unlock with API key";
         case "unlocked":
           return "Full access";
         case "unknown":
@@ -174,35 +163,34 @@ class PrinterAuthorizationForm extends React.Component {
           return "Unknown";
       }
     };
+    if (["unlocked", "unknown"].indexOf(printer.client.access_level) !== -1) {
+      return <></>;
+    }
     return (
       <form className="inline-form">
         <dd className="description">
           {getAccessLevelString(printer.client.access_level)}
         </dd>
-        {["unlocked", "unknown"].indexOf(printer.client.access_level) ===
-          -1 && (
-          <>
-            <input
-              type="text"
-              id={apiKey}
-              name={apiKey}
-              value={apiKey || printer.client.api_key || ""}
-              onChange={e => {
-                this.setState({
-                  apiKey: e.target.value
-                });
-              }}
-            />
-            <button
-              className="btn btn-sm"
-              type="submit"
-              onClick={this.setApiKey}
-              disabled={submitting || (!apiKey && !printer.client.api_key)}
-            >
-              {submitting ? "Working..." : "Set"}
-            </button>
-          </>
-        )}
+        <input
+          type="text"
+          id="apiKey"
+          name="apiKey"
+          value={apiKey || ""}
+          onChange={e => {
+            this.setState({
+              apiKey: e.target.value
+            });
+          }}
+        />
+        <BusyButton
+          className="btn btn-sm"
+          type="submit"
+          onClick={this.setApiKey}
+          busyChildren="Working..."
+          disabled={!apiKey}
+        >
+          Set API key
+        </BusyButton>
       </form>
     );
   }
@@ -280,75 +268,60 @@ class PrinterCurrentPrintControl extends React.Component {
   }
 }
 
-const PrinterStatus = ({
-  printer,
-  onPrinterConnectionChanged,
-  onPrinterAuthorizationChanged
-}) => {
-  const props = printer.printer_props;
-
+const PrinterConnectionStatus = ({ printer }) => {
   return (
-    <div className="printer-connection">
-      <h2 className="hidden">Connection</h2>
-      <dl className="dl-horizontal">
-        <dt className="term">Client status: </dt>
-        <dd className="description">
-          {printer.client.connected ? "Connected" : "Disconnected"}
-        </dd>
+    <dl className="dl-horizontal">
+      <dt className="term">Client: </dt>
+      <dd className="description">
+        {printer.client.name} (
+        <code>{JSON.stringify(printer.client.version)}</code>)
+      </dd>
 
-        <dt className="term">Client: </dt>
-        <dd className="description">
-          {printer.client.name} (
-          <code>{JSON.stringify(printer.client.version)}</code>)
-        </dd>
-
-        <dt className="term">Client host: </dt>
-        <dd className="decription">
+      <dt className="term">Client host: </dt>
+      <dd className="decription">
+        {printer.hostname && (
           <a
             className="anchor"
-            href={`${printer.protocol}://${printer.host}`}
+            href={`${printer.protocol}://${printer.hostname}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {printer.host}
+            {printer.hostname}
           </a>
-        </dd>
-
-        {printer.hostname && (
-          <>
-            <dt className="term">Hostname: </dt>
-            <dd className="decription">
-              <a
-                className="anchor"
-                href={`${printer.protocol}://${printer.hostname}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {printer.hostname}
-              </a>
-            </dd>
-          </>
         )}
+        {printer.hostname && " ("}
+        <a
+          className="anchor"
+          href={`${printer.protocol}://${printer.host}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {printer.host}
+        </a>
+        {printer.hostname && ")"}
+      </dd>
+      {printer.client.api_key && (
+        <>
+          <dt className="term">API Key</dt>
+          <dd className="decription">{printer.client.api_key}</dd>
+        </>
+      )}
+    </dl>
+  );
+};
 
-        <dt className="term">Printer status: </dt>
-        <PrinterConnectionForm
-          printer={printer}
-          onPrinterConnectionChanged={onPrinterConnectionChanged}
-        />
-
-        <dt className="term">Client availability: </dt>
-        <PrinterAuthorizationForm
-          printer={printer}
-          onPrinterAuthorizationChanged={onPrinterAuthorizationChanged}
-        />
-
+const PrinterProperties = ({ printer }) => {
+  const props = printer.printer_props;
+  return (
+    <div className="printer-connection">
+      <dl className="dl-horizontal">
         {props &&
           (props.filament_type ||
             props.filament_color ||
             props.bed_type ||
             props.tool0_diameter) && (
             <>
-              <dt className="term">Setup:</dt>
+              <dt className="term">Filament type:</dt>
               <dd className="description">{props.filament_type}</dd>
 
               {props.filament_color && (
@@ -464,16 +437,25 @@ class PrinterDetail extends React.Component {
           <div className="printer-detail-meta">
             <div className="container">
               <h1 className="main-title">{printer.name}</h1>
-              <PrinterStatus
+              <PrinterState printer={printer} />
+              <PrinterConnectionForm
                 printer={printer}
-                onPrinterAuthorizationChanged={patchPrinter}
                 onPrinterConnectionChanged={setPrinterConnection}
               />
-              <PrinterCurrentPrintControl
+              <PrinterAuthorizationForm
                 printer={printer}
-                onCurrentJobStateChange={changeCurrentJobState}
+                onPrinterAuthorizationChanged={patchPrinter}
               />
+              <PrinterProperties printer={printer} />
+              <PrinterConnectionStatus printer={printer} />
             </div>
+          </div>
+
+          <div className="printer-detail-troubleshooting">
+            <PrinterCurrentPrintControl
+              printer={printer}
+              onCurrentJobStateChange={changeCurrentJobState}
+            />
           </div>
 
           <div className="printer-detail-jobs">
