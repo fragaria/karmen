@@ -117,7 +117,8 @@ def gcode_detail(id):
         return abort(make_response("", 404))
     user = users.get_by_uuid(gcode.get("user_uuid"))
     user_mapping = {}
-    user_mapping[gcode.get("user_uuid")] = user.get("username")
+    if user is not None:
+        user_mapping[gcode.get("user_uuid")] = user.get("username")
     return jsonify(make_gcode_response(gcode, None, user_mapping))
 
 
