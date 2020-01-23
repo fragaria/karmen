@@ -88,9 +88,11 @@ class PrinterConnectionForm extends React.Component {
         ) : (
           <>
             &nbsp;
-            {printer.client.access_level === "unlocked" &&
-              (["Offline", "Closed"].indexOf(printer.status.state) > -1 ||
-              printer.status.state.match(/printer is not/i) ? (
+            {printer.client &&
+              printer.client.access_level === "unlocked" &&
+              (["Offline", "Closed"].indexOf(
+                printer.status && printer.status.state
+              ) > -1 || printer.status.state.match(/printer is not/i) ? (
                 <button
                   className="btn btn-sm"
                   type="submit"
@@ -164,7 +166,10 @@ class PrinterAuthorizationForm extends React.Component {
           return "Unknown";
       }
     };
-    if (["unlocked", "unknown"].indexOf(printer.client.access_level) !== -1) {
+    if (
+      !printer.client ||
+      ["unlocked", "unknown"].indexOf(printer.client.access_level) !== -1
+    ) {
       return <></>;
     }
     return (
@@ -207,6 +212,7 @@ class PrinterCurrentPrintControl extends React.Component {
     const { printer, onCurrentJobStateChange } = this.props;
     if (
       !printer.status ||
+      !printer.client ||
       ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
       printer.client.access_level !== "unlocked"
     ) {
@@ -283,11 +289,15 @@ class PrinterCurrentPrintControl extends React.Component {
 const PrinterConnectionStatus = ({ printer }) => {
   return (
     <>
-      <dt className="term">Client: </dt>
-      <dd className="description">
-        {printer.client.name} (
-        <code>{JSON.stringify(printer.client.version)}</code>)
-      </dd>
+      {printer.client && (
+        <>
+          <dt className="term">Client: </dt>
+          <dd className="description">
+            {printer.client.name} (
+            <code>{JSON.stringify(printer.client.version)}</code>)
+          </dd>
+        </>
+      )}
 
       <dt className="term">Client host: </dt>
       <dd className="decription">
@@ -318,7 +328,7 @@ const PrinterConnectionStatus = ({ printer }) => {
         </a>
         {printer.hostname && ")"}
       </dd>
-      {printer.client.api_key && (
+      {printer.client && printer.client.api_key && (
         <>
           <dt className="term">API Key: </dt>
           <dd className="decription">{printer.client.api_key}</dd>
