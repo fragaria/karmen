@@ -43,11 +43,7 @@ http {
         application/xml
         application/xml+rss
         text/javascript
-        application/vnd.ms-fontobject
-        application/x-font-ttf
-        font/opentype
         image/svg+xml
-        image/jpeg
         image/x-icon;
 
 
