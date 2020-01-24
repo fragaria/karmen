@@ -286,7 +286,7 @@ class PrinterCurrentPrintControl extends React.Component {
   }
 }
 
-const clientVersion = (printerObject) => {
+const ClientVersion = (printerObject) => {
   if (printerObject) {
     const objectLength = Object.keys(printerObject).length
     return Object.keys(printerObject).map((key, idx) => {
@@ -311,7 +311,7 @@ const PrinterConnectionStatus = ({ printer }) => {
           <dd className="description">
             {printer.client.name}
             <div className="text-reset">
-              <small>{clientVersion(printer.client.version)}</small>
+              <small>{ClientVersion(printer.client.version)}</small>
             </div>
           </dd>
         </>
@@ -355,6 +355,22 @@ const PrinterConnectionStatus = ({ printer }) => {
     </>
   );
 };
+
+const PrinterProgress = ({ printer }) => {
+  const progress = printer.job;
+  return (
+    <>
+      <dt className="term">Printing file:</dt>
+      <dd className="description">{progress.name}</dd>
+      <dt className="term">Completed:</dt>
+      <dd className="description">{progress.completion.toFixed(2)}%</dd>
+      <dt className="term">Time elapsed:</dt>
+      <dd className="description">{formatters.timespan(progress.printTime)}</dd>
+      <dt className="term">ETA:</dt>
+      <dd className="description">{formatters.timespan(progress.printTimeLeft)}</dd>
+    </>
+  )
+}
 
 const PrinterProperties = ({ printer }) => {
   const props = printer.printer_props;
@@ -497,6 +513,7 @@ class PrinterDetail extends React.Component {
               )}
 
               <dl className="dl-horizontal">
+                <PrinterProgress printer={printer} />
                 <PrinterProperties printer={printer} />
                 <PrinterConnectionStatus printer={printer} />
               </dl>
