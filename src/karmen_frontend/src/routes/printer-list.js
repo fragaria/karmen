@@ -88,14 +88,7 @@ class PrinterList extends React.Component {
     return (
       <div className="content printer-list">
         <div className="container">
-          <h1 className="main-title">
-            Printers
-            {userRole === "admin" && (
-              <Link to="/add-printer" className="btn btn-sm">
-                <span>+ Add a printer</span>
-              </Link>
-            )}
-          </h1>
+          <h1 className="main-title">Printers</h1>
         </div>
 
         <div className="list">{printerElements}</div>
