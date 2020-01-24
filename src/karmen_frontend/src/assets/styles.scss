@@ -414,6 +414,7 @@ footer {
     }
 
     .list-filter-option {
+      @include button-reset();
       position: relative;
       display: flex;
       min-width: 300px;
@@ -422,7 +423,6 @@ footer {
       text-align: left;
       z-index: 1;
       text-transform: capitalize;
-      @include button-reset();
 
       @media (min-width: $screen-sm-min) {
         padding: $base-unit*2 $spacing-default/2;
