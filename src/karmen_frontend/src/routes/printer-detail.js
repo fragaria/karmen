@@ -365,12 +365,17 @@ const PrinterConnectionStatus = ({ printer }) => {
 
 const PrinterProgress = ({ printer }) => {
   const progress = printer.job;
+  if (!progress || !progress.name) {
+    return <></>;
+  }
   return (
     <>
       <dt className="term">Printing file:</dt>
       <dd className="description">{progress.name}</dd>
       <dt className="term">Completed:</dt>
-      <dd className="description">{progress.completion.toFixed(2)}%</dd>
+      <dd className="description">
+        {progress.completion && `${progress.completion.toFixed(2)}%`}
+      </dd>
       <dt className="term">Time elapsed:</dt>
       <dd className="description">{formatters.timespan(progress.printTime)}</dd>
       <dt className="term">ETA:</dt>
