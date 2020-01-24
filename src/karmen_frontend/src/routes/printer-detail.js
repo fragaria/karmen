@@ -286,6 +286,22 @@ class PrinterCurrentPrintControl extends React.Component {
   }
 }
 
+const clientVersion = (printerObject) => {
+  if (printerObject) {
+    const objectLength = Object.keys(printerObject).length
+    return Object.keys(printerObject).map((key, idx) => {
+      return <>
+        {key}{": "}{printerObject[key]}
+        {(objectLength-1 > idx) && (
+          <>{objectLength-1}{", "}</>
+        )}
+      </>;
+    });
+  } else {
+    return <>-</>;
+  }
+}
+
 const PrinterConnectionStatus = ({ printer }) => {
   return (
     <>
@@ -293,8 +309,10 @@ const PrinterConnectionStatus = ({ printer }) => {
         <>
           <dt className="term">Client: </dt>
           <dd className="description">
-            {printer.client.name} (
-            <code>{JSON.stringify(printer.client.version)}</code>)
+            {printer.client.name}
+            <div className="text-reset">
+              <small>{clientVersion(printer.client.version)}</small>
+            </div>
           </dd>
         </>
       )}
