@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 import TableActionRow from "./table-action-row";
 import TableSorting from "./table-sorting";
+import ListCta from "./list-cta";
 
 class PrintersTableRow extends React.Component {
   state = {
@@ -50,26 +51,27 @@ class PrintersTableRow extends React.Component {
               : `${printer.ip}${printer.port ? `:${printer.port}` : ""}`}
           </span>
         </Link>
-        <div className="list-item-cta">
+
+        <ListCta>
+          <Link
+            className="list-dropdown-item"
+            to={`/printers/${printer.uuid}/settings`}
+          >
+            <i className="icon-edit"></i>
+            Printer settings
+          </Link>
           <button
-            className="btn-reset"
-            title="Delete printer"
+            className="list-dropdown-item text-secondary"
             onClick={() => {
               this.setState({
                 showDeletePrinterRow: true
               });
             }}
           >
-            <i className="icon-trash text-secondary"></i>
+            <i className="icon-trash"></i>
+            Delete printer
           </button>
-          <Link
-            className="btn-reset"
-            title="Printer settings"
-            to={`/printers/${printer.uuid}/settings`}
-          >
-            <i className="icon-edit"></i>
-          </Link>
-        </div>
+        </ListCta>
       </div>
     );
   }

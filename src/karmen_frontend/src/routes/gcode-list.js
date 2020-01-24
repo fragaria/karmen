@@ -5,6 +5,7 @@ import { DebounceInput } from "react-debounce-input";
 
 import TableActionRow from "../components/table-action-row";
 import TableSorting from "../components/table-sorting";
+import ListCta from "../components/list-cta";
 import { getGcodes, deleteGcode, printGcode } from "../services/backend";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
@@ -234,9 +235,9 @@ class GcodeTableRow extends React.Component {
           <span>{username}</span>
         </Link>
 
-        <div className="list-item-cta">
+        <ListCta>
           <button
-            className="btn-reset"
+            className="list-dropdown-item"
             onClick={() => {
               this.setState({
                 selectedPrinter: availablePrinters.length
@@ -247,19 +248,21 @@ class GcodeTableRow extends React.Component {
             }}
           >
             <i className="icon-printer"></i>
+            Print g-code
           </button>
 
           <button
-            className="btn-reset"
+            className="list-dropdown-item text-secondary"
             onClick={() => {
               this.setState({
                 showDeleteRow: true
               });
             }}
           >
-            <i className="icon-trash text-secondary"></i>
+            <i className="icon-trash"></i>
+            Delete g-code
           </button>
-        </div>
+        </ListCta>
       </div>
     );
   }

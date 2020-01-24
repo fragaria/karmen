@@ -8,6 +8,7 @@ import TableWrapper from "../components/table-wrapper";
 import TableActionRow from "../components/table-action-row";
 import NetworkScan from "../components/network-scan";
 import PrintersTable from "../components/printer-list-settings";
+import ListCta from "../components/list-cta";
 import { getUsersPage, clearUsersPages, patchUser } from "../actions/users";
 import { loadPrinters, deletePrinter } from "../actions/printers";
 import formatters from "../services/formatters";
@@ -86,27 +87,11 @@ class UsersTableRow extends React.Component {
           <span>{user.uuid}</span>
         </div>
 
-        <div className="list-item-cta">
+
           {currentUuid !== user.uuid && (
-            <>
+            <ListCta>
               <button
-                className="btn-reset"
-                title={user.suspended ? "Allow" : "Disallow"}
-                onClick={() => {
-                  this.setState({
-                    showSuspendRow: true
-                  });
-                }}
-              >
-                {user.suspended ? (
-                  <i className="icon-check text-success"></i>
-                ) : (
-                  <i className="icon-trash text-secondary"></i>
-                )}
-              </button>
-              <button
-                className="btn-reset"
-                title="Change role"
+                className="list-dropdown-item"
                 onClick={() => {
                   this.setState({
                     showChangeRoleRow: true
@@ -114,10 +99,31 @@ class UsersTableRow extends React.Component {
                 }}
               >
                 <i className="icon-edit"></i>
+                Change role
               </button>
-            </>
+              <button
+                className={user.suspended ? "list-dropdown-item text-success" : "list-dropdown-item text-secondary"}
+                onClick={() => {
+                  this.setState({
+                    showSuspendRow: true
+                  });
+                }}
+              >
+                {user.suspended ? (
+                  <>
+                    <i className="icon-check"></i>
+                    Allow
+                  </>
+                ) : (
+                  <>
+                    <i className="icon-trash"></i>
+                    Disallow
+                  </>
+                )}
+              </button>
+            </ListCta>
           )}
-        </div>
+
       </div>
     );
   }

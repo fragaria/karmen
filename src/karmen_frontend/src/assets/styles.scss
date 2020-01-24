@@ -198,6 +198,7 @@ footer {
 }
 
 .content {
+  position: relative;
   max-width: $screen-md-min;
   margin: 0 auto;
   padding: $navigation-height-xs 0 $spacing-default;
@@ -395,25 +396,38 @@ footer {
     }
   }
 
-  .list-filter {
-    position: relative;
-    // padding: $base-unit $base-unit*2;
+  .list-dropdown {
+    .list-dropdown-toggle {
+      padding: $base-unit $spacing-default/2;
+      font-size: 1.3rem;
+      text-transform: capitalize;
 
-    .list-filter-options {
+      [class^="icon-"] {
+        margin-left: 2px;
+        font-size: 1.5rem;
+      }
+    }
+
+    .list-dropdown-items {
       position: absolute;
-      top: $spacing-default;
-      left: 0;
       width: 100%;
       background: #fff;
       box-shadow: $shadow-default;
 
       @media (min-width: $screen-sm-min) {
-        left: -$spacing-default/2;
+        left: -$base-unit*3;
         width: auto;
       }
     }
 
-    .list-filter-option {
+    &.list-cta {
+      .list-dropdown-items {
+        left: auto;
+        right: 0;
+      }
+    }
+
+    .list-dropdown-item {
       @include button-reset();
       position: relative;
       display: flex;
@@ -423,6 +437,7 @@ footer {
       text-align: left;
       z-index: 1;
       text-transform: capitalize;
+      z-index: 200;
 
       @media (min-width: $screen-sm-min) {
         padding: $base-unit*2 $spacing-default/2;
@@ -436,29 +451,15 @@ footer {
         color: $color-secondary;
       }
 
-      .icon {
+      [class^="icon-"] {
         display: block;
         width: $base-unit*2;
-        padding-right: $base-unit*2;
+        margin-right: $base-unit;
+        font-size: 1.6rem;
       }
     }
 
-    .sorting-button.active {
-      background: #ff0000
-    }
-
-    .list-filter-toggle {
-      padding: $base-unit $spacing-default/2;
-      font-size: 1.3rem;
-      text-transform: capitalize;
-
-      [class^="icon-"] {
-        margin-left: 2px;
-        font-size: 1.5rem;
-      }
-    }
-
-    .list-filter-backdrop {
+    .list-dropdown-backdrop {
       position: fixed;
       top: 0;
       left: 0;
@@ -471,7 +472,6 @@ footer {
     padding: $spacing-default 0 $spacing-default*2;
     text-align: center;
   }
-
 
   .list-item {
     display: flex;

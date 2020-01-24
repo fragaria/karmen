@@ -25,18 +25,16 @@ class TableSorting extends React.Component {
       return (
         <button
           key={item}
-          className={`list-filter-option ${
+          className={`list-dropdown-item ${
             active.indexOf(item) > -1 ? "active" : ""
           }`}
           onClick={handleClick(item)}
         >
-          <span className="icon">
-            <span
-              className={`icon-${active.indexOf(`+${item}`) > -1 ? "up" : ""}${
-                active.indexOf(`-${item}`) > -1 ? "down" : ""
-              }`}
-            ></span>
-          </span>
+          <span
+            className={`icon-${active.indexOf(`+${item}`) > -1 ? "up" : ""}${
+              active.indexOf(`-${item}`) > -1 ? "down" : ""
+            }`}
+          ></span>
           {item}
         </button>
       );
@@ -45,9 +43,9 @@ class TableSorting extends React.Component {
     const { expand } = this.state;
 
     return (
-      <div className="list-filter">
+      <div className="list-dropdown">
         <button
-          className="list-filter-toggle btn-reset"
+          className="list-dropdown-toggle btn-reset"
           onClick={e => {
             e.preventDefault();
             if (columns.length === 1) {
@@ -64,8 +62,8 @@ class TableSorting extends React.Component {
         </button>
 
         {expand && (
-          <div className="list-filter-options">
-            <div className="list-filter-backdrop" onClick={toggle}></div>
+          <div className="list-dropdown-items">
+            <div className="list-dropdown-backdrop" onClick={toggle}></div>
             {list}
           </div>
         )}
