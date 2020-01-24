@@ -286,21 +286,28 @@ class PrinterCurrentPrintControl extends React.Component {
   }
 }
 
-const ClientVersion = (printerObject) => {
+const ClientVersion = printerObject => {
   if (printerObject) {
-    const objectLength = Object.keys(printerObject).length
+    const objectLength = Object.keys(printerObject).length;
     return Object.keys(printerObject).map((key, idx) => {
-      return <>
-        {key}{": "}{printerObject[key]}
-        {(objectLength-1 > idx) && (
-          <>{objectLength-1}{", "}</>
-        )}
-      </>;
+      return (
+        <React.Fragment key={key}>
+          {key}
+          {": "}
+          {printerObject[key]}
+          {objectLength - 1 > idx && (
+            <>
+              {objectLength - 1}
+              {", "}
+            </>
+          )}
+        </React.Fragment>
+      );
     });
   } else {
     return <>-</>;
   }
-}
+};
 
 const PrinterConnectionStatus = ({ printer }) => {
   return (
@@ -367,10 +374,12 @@ const PrinterProgress = ({ printer }) => {
       <dt className="term">Time elapsed:</dt>
       <dd className="description">{formatters.timespan(progress.printTime)}</dd>
       <dt className="term">ETA:</dt>
-      <dd className="description">{formatters.timespan(progress.printTimeLeft)}</dd>
+      <dd className="description">
+        {formatters.timespan(progress.printTimeLeft)}
+      </dd>
     </>
-  )
-}
+  );
+};
 
 const PrinterProperties = ({ printer }) => {
   const props = printer.printer_props;

@@ -44,7 +44,7 @@ class PrinterList extends React.Component {
   }
 
   render() {
-    const { userRole, printersLoaded, printers } = this.props;
+    const { printersLoaded, printers } = this.props;
     if (!printersLoaded) {
       return (
         <div>
@@ -100,8 +100,7 @@ class PrinterList extends React.Component {
 export default connect(
   state => ({
     printers: state.printers.printers,
-    printersLoaded: state.printers.printersLoaded,
-    userRole: state.users.me.role
+    printersLoaded: state.printers.printersLoaded
   }),
   dispatch => ({
     loadPrinters: fields => dispatch(loadAndQueuePrinters(fields))

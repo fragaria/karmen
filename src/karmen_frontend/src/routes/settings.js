@@ -87,43 +87,45 @@ class UsersTableRow extends React.Component {
           <span>{user.uuid}</span>
         </div>
 
-
-          {currentUuid !== user.uuid && (
-            <ListCta>
-              <button
-                className="list-dropdown-item"
-                onClick={() => {
-                  this.setState({
-                    showChangeRoleRow: true
-                  });
-                }}
-              >
-                <i className="icon-edit"></i>
-                Change role
-              </button>
-              <button
-                className={user.suspended ? "list-dropdown-item text-success" : "list-dropdown-item text-secondary"}
-                onClick={() => {
-                  this.setState({
-                    showSuspendRow: true
-                  });
-                }}
-              >
-                {user.suspended ? (
-                  <>
-                    <i className="icon-check"></i>
-                    Allow
-                  </>
-                ) : (
-                  <>
-                    <i className="icon-trash"></i>
-                    Disallow
-                  </>
-                )}
-              </button>
-            </ListCta>
-          )}
-
+        {currentUuid !== user.uuid && (
+          <ListCta>
+            <button
+              className="list-dropdown-item"
+              onClick={() => {
+                this.setState({
+                  showChangeRoleRow: true
+                });
+              }}
+            >
+              <i className="icon-edit"></i>
+              Change role
+            </button>
+            <button
+              className={
+                user.suspended
+                  ? "list-dropdown-item text-success"
+                  : "list-dropdown-item text-secondary"
+              }
+              onClick={() => {
+                this.setState({
+                  showSuspendRow: true
+                });
+              }}
+            >
+              {user.suspended ? (
+                <>
+                  <i className="icon-check"></i>
+                  Allow
+                </>
+              ) : (
+                <>
+                  <i className="icon-trash"></i>
+                  Disallow
+                </>
+              )}
+            </button>
+          </ListCta>
+        )}
       </div>
     );
   }
