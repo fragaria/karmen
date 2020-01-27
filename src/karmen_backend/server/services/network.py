@@ -5,6 +5,7 @@ from server import app
 
 
 def do_arp_scan(network_interface):
+    # TODO replace with check_output
     proc = subprocess.Popen(
         ["arp-scan", "--interface", network_interface, "--localnet", "-q"],
         stdout=subprocess.PIPE,
@@ -30,6 +31,7 @@ def do_arp_scan(network_interface):
 
 
 def get_avahi_hostname(ip_address):
+    # TODO replace with check_output
     proc = subprocess.Popen(
         ["avahi-resolve-address", ip_address],
         stdout=subprocess.PIPE,

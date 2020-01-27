@@ -270,7 +270,6 @@ def printer_change_connection(uuid):
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    print(printer)
     if printer is None:
         return abort(make_response("", 404))
     data = request.json
