@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 export FLASK_APP=fakeprinter
 export FLASK_DEBUG=true
