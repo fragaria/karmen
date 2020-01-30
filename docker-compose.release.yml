@@ -2,6 +2,7 @@ version: "3.4"
 services:
   proxy:
     image: fragaria/karmen-proxy
+    restart: unless-stopped
     network_mode: host
     environment:
       SERVICE_HOST: ${KARMEN_HOST:-0.0.0.0}
