@@ -9,66 +9,124 @@ import TableActionRow from "../components/table-action-row";
 import NetworkScan from "../components/network-scan";
 import PrintersTable from "../components/printer-list-settings";
 import ListCta from "../components/list-cta";
+import { useMyModal } from "../components/modal";
 import { getUsersPage, clearUsersPages, patchUser } from "../actions/users";
 import { loadPrinters, deletePrinter } from "../actions/printers";
 import formatters from "../services/formatters";
 
-class UsersTableRow extends React.Component {
-  state = {
-    showChangeRoleRow: false,
-    showSuspendRow: false
-  };
+const ChangeUserRole = ({ user, onUserChange }) => {
+  const { openModal, closeModal, isOpen, Modal } = useMyModal(); 
 
+  return (
+    <>
+      <button
+        className="list-dropdown-item"
+        onClick={openModal}
+      >
+        <i className="icon-edit"></i>
+        Change role
+      </button>
+       
+      {isOpen && (
+        <Modal>
+          <h1 className="modal-title text-center">Change user role</h1>
+          <h2 className="text-center">
+            Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
+            <strong>{user.username}</strong> to{" "}
+            {user.role === "admin" ? "user" : "admin"}?
+          </h2>
+
+          <div className="cta-box text-center">
+            <button 
+              className="btn"
+              onClick={() => {
+                const newRole = user.role === "user" ? "admin" : "user";
+                onUserChange(user.uuid, newRole, user.suspended).then(() => {
+                  closeModal()
+                });
+              }}
+            >
+              Yes, change it
+            </button>
+
+            <button 
+              className="btn btn-plain"
+              onClick={closeModal}
+            >
+              Cancel
+            </button>
+          </div>          
+        </Modal>
+      )}
+    </>
+  )
+}
+
+const ToggleUserSuspend = ({ user, onUserChange }) => {
+  const { openModal, closeModal, isOpen, Modal } = useMyModal(); 
+
+  return (
+    <>
+
+      <button
+        className={
+          user.suspended
+            ? "list-dropdown-item text-success"
+            : "list-dropdown-item text-secondary"
+        }
+        onClick={openModal}
+      >
+        {user.suspended ? (
+          <>
+            <i className="icon-check"></i>
+            Allow
+          </>
+        ) : (
+          <>
+            <i className="icon-trash"></i>
+            Disallow
+          </>
+        )}
+      </button>
+       
+      {isOpen && (
+        <Modal>
+          <h1 className="modal-title text-center">{user.suspended ? "Enable " : "Disable "} user role</h1>
+          <h2 className="text-center">
+            Do you really want to {user.suspended ? "enable" : "disable"}{" "}
+            <strong>{user.username}</strong>?
+          </h2>
+
+          <div className="cta-box text-center">
+
+
+            <button 
+              className="btn"
+              onClick={() => {
+                onUserChange(user.uuid, user.role, !user.suspended).then(() => {
+                  closeModal()
+                });
+              }}
+            >
+              Yes, change it
+            </button>
+
+            <button 
+              className="btn btn-plain"
+              onClick={closeModal}
+            >
+              Cancel
+            </button>
+          </div>          
+        </Modal>
+      )}
+    </>
+  )
+}
+
+class UsersTableRow extends React.Component {
   render() {
     const { currentUuid, user, onUserChange } = this.props;
-    const { showChangeRoleRow, showSuspendRow } = this.state;
-
-    if (showSuspendRow) {
-      return (
-        <TableActionRow
-          onCancel={() => {
-            this.setState({
-              showSuspendRow: false
-            });
-          }}
-          onConfirm={() => {
-            onUserChange(user.uuid, user.role, !user.suspended).then(() => {
-              this.setState({
-                showSuspendRow: false
-              });
-            });
-          }}
-        >
-          Do you really want to {user.suspended ? "enable" : "disable"}{" "}
-          <strong>{user.username}</strong>?
-        </TableActionRow>
-      );
-    }
-
-    if (showChangeRoleRow) {
-      return (
-        <TableActionRow
-          onCancel={() => {
-            this.setState({
-              showChangeRoleRow: false
-            });
-          }}
-          onConfirm={() => {
-            // this will get more complicated, obviously
-            const newRole = user.role === "user" ? "admin" : "user";
-            onUserChange(user.uuid, newRole, user.suspended).then(() => {
-              this.setState({
-                showChangeRoleRow: false
-              });
-            });
-          }}
-        >
-          Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
-          <strong>{user.username}</strong> to{" "}
-          {user.role === "admin" ? "user" : "admin"}?
-        </TableActionRow>
-      );
-    }
 
     return (
       <div className="list-item">
@@ -89,41 +147,15 @@ class UsersTableRow extends React.Component {
 
         {currentUuid !== user.uuid && (
           <ListCta>
-            <button
-              className="list-dropdown-item"
-              onClick={() => {
-                this.setState({
-                  showChangeRoleRow: true
-                });
-              }}
-            >
-              <i className="icon-edit"></i>
-              Change role
-            </button>
-            <button
-              className={
-                user.suspended
-                  ? "list-dropdown-item text-success"
-                  : "list-dropdown-item text-secondary"
-              }
-              onClick={() => {
-                this.setState({
-                  showSuspendRow: true
-                });
-              }}
-            >
-              {user.suspended ? (
-                <>
-                  <i className="icon-check"></i>
-                  Allow
-                </>
-              ) : (
-                <>
-                  <i className="icon-trash"></i>
-                  Disallow
-                </>
-              )}
-            </button>
+            <ChangeUserRole
+              user={user}
+              onUserChange={onUserChange}
+            />
+              
+            <ToggleUserSuspend  
+              user={user}
+              onUserChange={onUserChange}
+            />
           </ListCta>
         )}
       </div>

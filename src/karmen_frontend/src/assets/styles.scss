@@ -431,7 +431,7 @@ footer {
       @include button-reset();
       position: relative;
       display: flex;
-      min-width: 300px;
+      width: 100%;
       padding: $base-unit*2 $spacing-default/2;
       background: #fff;
       text-align: left;
@@ -440,6 +440,8 @@ footer {
       z-index: 200;
 
       @media (min-width: $screen-sm-min) {
+        width: auto;
+        min-width: 300px;
         padding: $base-unit*2 $spacing-default/2;
       }
 
@@ -690,12 +692,53 @@ select {
   }
 }
 
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  padding: $spacing-default*2 $spacing-default $spacing-default;
+  background: #fff;
+  box-shadow: $shadow-default;
+
+  @media (min-width: $screen-sm-min) {
+    width: 100%;
+    height: auto;
+  }
+
+  .modal-title {
+    font-size: 2.4rem;
+    margin-bottom: $spacing-default;
+  }
+}
+
+.modal-close {
+  @include button-reset;
+  position: absolute;
+  top: $spacing-default/2;
+  right: $spacing-default/2;
+  text-align: right;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  @include blurred-bg(.4);
+}
 
 #passphrase-reveal {
   height: 100%;
   @include button-reset;
 }
 
+// PRINTER DETAIL PAGE
 .printer-detail {
   .printer-detail-meta .main-title {
     margin-bottom: 0;

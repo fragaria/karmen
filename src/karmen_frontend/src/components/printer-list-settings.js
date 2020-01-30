@@ -1,39 +1,59 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
-import TableActionRow from "./table-action-row";
+
 import TableSorting from "./table-sorting";
 import ListCta from "./list-cta";
+import { useMyModal } from "./modal";
 
-class PrintersTableRow extends React.Component {
-  state = {
-    showDeletePrinterRow: false
-  };
-  render() {
-    const { showDeletePrinterRow } = this.state;
-    const { printer, onPrinterDelete } = this.props;
+const DeletePrinter = ({ printer, onPrinterDelete }) => {
+  const { openModal, closeModal, isOpen, Modal } = useMyModal(); 
 
-    if (showDeletePrinterRow) {
-      return (
-        <TableActionRow
-          onCancel={() => {
-            this.setState({
-              showDeletePrinterRow: false
-            });
-          }}
-          onConfirm={() => {
-            onPrinterDelete(printer.uuid);
-          }}
-        >
-          Are you sure? You can add the printer back later by adding{" "}
+  return (
+    <>
+      <button
+        className="list-dropdown-item text-secondary"
+        onClick={openModal}
+      >
+        <i className="icon-trash"></i>
+        Delete printer
+      </button>
+      
+      {isOpen && (
+        <Modal>
+          <h1 className="modal-title text-center">Are you sure?</h1>
+          <h2 className="text-center">You can add the printer back later by adding</h2>
           <code>
             {printer.hostname || printer.ip}
             {printer.port ? `:${printer.port}` : ""}
           </code>
-          .
-        </TableActionRow>
-      );
-    }
+
+          <div className="cta-box text-center">
+            <button 
+              className="btn"
+              onClick={() => {
+                onPrinterDelete(printer.uuid);
+              }}
+            >
+              Yes, delete it
+            </button>
+
+            <button 
+              className="btn btn-plain"
+              onClick={closeModal}
+            >
+              Cancel
+            </button>
+          </div>          
+        </Modal>
+      )}
+    </>
+  )
+}
+
+class PrintersTableRow extends React.Component {
+  render() {
+    const { printer, onPrinterDelete } = this.props;
 
     return (
       <div className="list-item">
@@ -60,17 +80,10 @@ class PrintersTableRow extends React.Component {
             <i className="icon-edit"></i>
             Printer settings
           </Link>
-          <button
-            className="list-dropdown-item text-secondary"
-            onClick={() => {
-              this.setState({
-                showDeletePrinterRow: true
-              });
-            }}
-          >
-            <i className="icon-trash"></i>
-            Delete printer
-          </button>
+          <DeletePrinter 
+            printer={printer} 
+            onPrinterDelete={onPrinterDelete}
+          />
         </ListCta>
       </div>
     );
