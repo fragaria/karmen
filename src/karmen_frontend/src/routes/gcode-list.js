@@ -12,6 +12,7 @@ import formatters from "../services/formatters";
 
 class GcodeTableRow extends React.Component {
   state = {
+    ctaListExpanded: false,
     showDeleteRow: false,
     showPrinterSelectRow: false,
     showPrintStatusRow: false,
@@ -63,7 +64,8 @@ class GcodeTableRow extends React.Component {
       canCancelPrintStatusRow,
       showPrintStatusRow,
       showFilamentTypeWarningRow,
-      selectedPrinter
+      selectedPrinter,
+      ctaListExpanded
     } = this.state;
     const {
       display,
@@ -235,7 +237,12 @@ class GcodeTableRow extends React.Component {
           <span>{username}</span>
         </Link>
 
-        <ListCta>
+        <ListCta
+          expanded={ctaListExpanded}
+          onToggle={() => {
+            this.setState({ ctaListExpanded: !ctaListExpanded });
+          }}
+        >
           <button
             className="list-dropdown-item"
             onClick={() => {
@@ -243,7 +250,8 @@ class GcodeTableRow extends React.Component {
                 selectedPrinter: availablePrinters.length
                   ? availablePrinters[0].uuid
                   : null,
-                showPrinterSelectRow: true
+                showPrinterSelectRow: true,
+                ctaListExpanded: false
               });
             }}
           >
@@ -255,7 +263,8 @@ class GcodeTableRow extends React.Component {
             className="list-dropdown-item text-secondary"
             onClick={() => {
               this.setState({
-                showDeleteRow: true
+                showDeleteRow: true,
+                ctaListExpanded: false
               });
             }}
           >

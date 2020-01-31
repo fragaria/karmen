@@ -423,27 +423,25 @@ const PrinterProperties = ({ printer }) => {
           </>
         )}
 
-        {status && (
-          <>
-            {status.tool0 && (
-              <>
-                <dt className="term">Tool temperature:</dt>
-                <dd className="term">{status.tool0}</dd>
-              </>
-            )}
-            {status.bed && (
-              <>
-                <dt className="term">Bed temperature:</dt>
-                <dd className="term">{status.bed}</dd>
-              </>
-            )}
-          </>
-        )}
+      {status && (
+        <>
+          {status.tool0 && (
+            <>
+              <dt className="term">Tool temperature:</dt>
+              <dd className="term">{status.tool0}</dd>
+            </>
+          )}
+          {status.bed && (
+            <>
+              <dt className="term">Bed temperature:</dt>
+              <dd className="term">{status.bed}</dd>
+            </>
+          )}
+        </>
+      )}
     </>
   );
 };
-
-
 
 class PrintJobRow extends React.Component {
   render() {

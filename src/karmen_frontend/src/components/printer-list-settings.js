@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 
@@ -6,30 +6,22 @@ import TableSorting from "./table-sorting";
 import ListCta from "./list-cta";
 import { useMyModal } from "./modal";
 
-const DeletePrinter = ({ printer, onPrinterDelete }) => {
-  const { openModal, closeModal, isOpen, Modal } = useMyModal(); 
-
+const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   return (
     <>
-      <button
-        className="list-dropdown-item text-secondary"
-        onClick={openModal}
-      >
-        <i className="icon-trash"></i>
-        Delete printer
-      </button>
-      
-      {isOpen && (
-        <Modal>
+      {modal.isOpen && (
+        <modal.Modal>
           <h1 className="modal-title text-center">Are you sure?</h1>
-          <h2 className="text-center">You can add the printer back later by adding</h2>
+          <h2 className="text-center">
+            You can add the printer back later by adding
+          </h2>
           <code>
             {printer.hostname || printer.ip}
             {printer.port ? `:${printer.port}` : ""}
           </code>
 
           <div className="cta-box text-center">
-            <button 
+            <button
               className="btn"
               onClick={() => {
                 onPrinterDelete(printer.uuid);
@@ -38,57 +30,68 @@ const DeletePrinter = ({ printer, onPrinterDelete }) => {
               Yes, delete it
             </button>
 
-            <button 
-              className="btn btn-plain"
-              onClick={closeModal}
-            >
+            <button className="btn btn-plain" onClick={modal.closeModal}>
               Cancel
             </button>
-          </div>          
-        </Modal>
+          </div>
+        </modal.Modal>
       )}
     </>
-  )
-}
+  );
+};
 
-class PrintersTableRow extends React.Component {
-  render() {
-    const { printer, onPrinterDelete } = this.props;
+const PrintersTableRow = ({ printer, onPrinterDelete }) => {
+  const deletePrinterModal = useMyModal();
+  const [ctaListExpanded, setCtaListExpanded] = useState();
+  return (
+    <div className="list-item">
+      <Link
+        className="list-item-content"
+        key={printer.uuid}
+        to={`/printers/${printer.uuid}`}
+      >
+        <span className="list-item-title">{printer.name}</span>
+        <span>
+          {printer.hostname
+            ? `${printer.hostname}${printer.port ? `:${printer.port}` : ""} (${
+                printer.ip
+              }${printer.port ? `:${printer.port}` : ""})`
+            : `${printer.ip}${printer.port ? `:${printer.port}` : ""}`}
+        </span>
+      </Link>
 
-    return (
-      <div className="list-item">
+      <ListCta
+        expanded={ctaListExpanded}
+        onToggle={() => {
+          setCtaListExpanded(!ctaListExpanded);
+        }}
+      >
         <Link
-          className="list-item-content"
-          key={printer.uuid}
-          to={`/printers/${printer.uuid}`}
+          className="list-dropdown-item"
+          to={`/printers/${printer.uuid}/settings`}
         >
-          <span className="list-item-title">{printer.name}</span>
-          <span>
-            {printer.hostname
-              ? `${printer.hostname}${
-                  printer.port ? `:${printer.port}` : ""
-                } (${printer.ip}${printer.port ? `:${printer.port}` : ""})`
-              : `${printer.ip}${printer.port ? `:${printer.port}` : ""}`}
-          </span>
+          <i className="icon-edit"></i>
+          Printer settings
         </Link>
-
-        <ListCta>
-          <Link
-            className="list-dropdown-item"
-            to={`/printers/${printer.uuid}/settings`}
-          >
-            <i className="icon-edit"></i>
-            Printer settings
-          </Link>
-          <DeletePrinter 
-            printer={printer} 
-            onPrinterDelete={onPrinterDelete}
-          />
-        </ListCta>
-      </div>
-    );
-  }
-}
+        <button
+          className="list-dropdown-item text-secondary"
+          onClick={e => {
+            setCtaListExpanded(false);
+            deletePrinterModal.openModal(e);
+          }}
+        >
+          <i className="icon-trash"></i>
+          Delete printer
+        </button>
+      </ListCta>
+      <DeletePrinterModal
+        printer={printer}
+        onPrinterDelete={onPrinterDelete}
+        modal={deletePrinterModal}
+      />
+    </div>
+  );
+};
 
 class PrintersTable extends React.Component {
   state = {
@@ -177,5 +180,3 @@ class PrintersTable extends React.Component {
 }
 
 export default PrintersTable;
-
-/* actions - inline delete, click leading to printers/<>, click leading to printers/<>/settings */
