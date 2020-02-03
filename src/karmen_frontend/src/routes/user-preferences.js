@@ -41,9 +41,7 @@ const UserPreferences = ({
         <h1 className="main-title">Change password</h1>
         <ChangePasswordForm
           onUserStateChanged={() => {
-            return loadUser().then(() => {
-              return loadApiTokens();
-            });
+            return loadApiTokens();
           }}
         />
       </div>

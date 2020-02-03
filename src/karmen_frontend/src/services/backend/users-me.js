@@ -150,9 +150,8 @@ export const refreshAccessToken = () => {
           setAccessToken(data.access_token);
           return response.status;
         });
-      } else {
-        console.error(`Cannot refresh access token: ${response.status}`);
       }
+      console.error(`Cannot refresh access token: ${response.status}`);
       return response.status;
     })
     .catch(e => {
@@ -214,6 +213,7 @@ export const checkCurrentLoginState = () => {
     });
   }
   const decodedAccess = jwt_decode(accessToken);
+  // Both access and refresh tokens are outdated, cannot recover
   if (accessToken && refreshToken) {
     const decodedRefresh = jwt_decode(refreshToken);
     if (decodedAccess.exp && decodedRefresh.exp) {
@@ -266,32 +266,23 @@ export const checkCurrentLoginState = () => {
                     state: "logged-in"
                   };
                 }
-                return {
-                  user: {},
-                  state: "logged-out"
-                };
+                throw new Error("Cannot refresh expired access token");
               });
             }
-            return {
-              user: {},
-              state: "logged-out"
-            };
+            throw new Error("Cannot refresh access token");
           });
         }
-        return {
-          user: {},
-          state: "logged-out"
-        };
+        throw new Error("Cannot refresh access token");
       })
       .catch(e => {
-        console.error(`Cannot get login state: ${e}`);
+        console.error(`User not logged in: ${e}`);
         return {
           user: {},
           state: "logged-out"
         };
       });
   }
-  return Promise.resolve("logged-out");
+  return Promise.resolve({ user: {}, state: "logged-out" });
 };
 
 export const loadApiTokens = () => {
