@@ -807,14 +807,32 @@ class PrinterConnectionRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 204)
 
-    def test_change_connection_bad_token(self):
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"state": {"text": "Operational"}}),
+    )
+    def test_change_connection_user_token(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
                 headers={"Authorization": "Bearer %s" % TOKEN_USER},
                 json={"state": "online"},
             )
-            self.assertEqual(response.status_code, 401)
+            self.assertEqual(response.status_code, 204)
+
+    def test_change_connection_bad_token(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/printers/%s/connection" % self.uuid,
+                headers={
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                },
+                json={"state": "online"},
+            )
+            self.assertEqual(response.status_code, 422)
 
     def test_change_connection_no_token(self):
         with app.test_client() as c:

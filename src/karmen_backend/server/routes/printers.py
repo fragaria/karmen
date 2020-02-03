@@ -261,7 +261,7 @@ def printer_patch(uuid):
 
 
 @app.route("/printers/<uuid>/connection", methods=["POST"])
-@jwt_requires_role("admin")
+@jwt_force_password_change
 @cross_origin()
 def printer_change_connection(uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
