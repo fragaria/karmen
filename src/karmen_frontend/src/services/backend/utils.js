@@ -9,7 +9,6 @@ const _removeStorage = key => {
 };
 
 const _setStorage = (key, value) => {
-  // TODO surround with try-catch block
   if (value === null) {
     return _removeStorage(key);
   }
@@ -21,7 +20,6 @@ const _setStorage = (key, value) => {
 };
 
 const _getStorage = key => {
-  // TODO surround with try-catch block
   if (window.localStorage && window.localStorage.getItem) {
     return window.localStorage.getItem(key);
   } else if (window.sessionStorage && window.sessionStorage.getItem) {

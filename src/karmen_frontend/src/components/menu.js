@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { clearUserIdentity, setCurrentState } from "../actions/users";
 
 class Menu extends React.Component {
@@ -14,6 +14,7 @@ class Menu extends React.Component {
 
   render() {
     const {
+      history,
       userState,
       username,
       role,
@@ -82,6 +83,8 @@ class Menu extends React.Component {
                     onClick={e => {
                       e.preventDefault();
                       logout();
+                      history.push("/");
+                      this.setState({ navigation: false });
                     }}
                   >
                     Logout
@@ -107,14 +110,16 @@ class Menu extends React.Component {
   }
 }
 
-export default connect(
-  state => ({
-    userState: state.users.me.currentState,
-    username: state.users.me.username,
-    role: state.users.me.role
-  }),
-  dispatch => ({
-    logout: () => dispatch(clearUserIdentity()),
-    setCurrentUserState: userState => dispatch(setCurrentState(userState))
-  })
-)(Menu);
+export default withRouter(
+  connect(
+    state => ({
+      userState: state.users.me.currentState,
+      username: state.users.me.username,
+      role: state.users.me.role
+    }),
+    dispatch => ({
+      logout: () => dispatch(clearUserIdentity()),
+      setCurrentUserState: userState => dispatch(setCurrentState(userState))
+    })
+  )(Menu)
+);
