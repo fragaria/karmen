@@ -1,17 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import {
-  loadUserState,
-  loadUserApiTokens,
-  deleteUserApiToken
-} from "../actions/users";
+import { loadUserApiTokens, deleteUserApiToken } from "../actions/users";
 import ChangePasswordForm from "../components/change-password-form";
 import ApiTokensTable from "../components/api-tokens-table";
 import FreshTokenRequiredCheck from "../components/fresh-token-required-check";
 
 const UserPreferences = ({
-  loadUser,
   hasFreshToken,
   loadApiTokens,
   apiTokens,
@@ -57,7 +52,6 @@ export default connect(
   }),
   dispatch => ({
     loadApiTokens: () => dispatch(loadUserApiTokens()),
-    loadUser: () => dispatch(loadUserState()),
     onTokenDelete: jti => dispatch(deleteUserApiToken(jti))
   })
 )(UserPreferences);

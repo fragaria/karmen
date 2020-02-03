@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link, withRouter } from "react-router-dom";
-import { clearUserIdentity, setCurrentState } from "../actions/users";
+import { clearUserIdentity } from "../actions/users";
 
 class Menu extends React.Component {
   constructor(props) {
@@ -13,14 +13,7 @@ class Menu extends React.Component {
   }
 
   render() {
-    const {
-      history,
-      userState,
-      username,
-      role,
-      logout,
-      setCurrentUserState
-    } = this.props;
+    const { history, userState, username, role, logout } = this.props;
 
     const { navigation } = this.state;
 
@@ -31,9 +24,7 @@ class Menu extends React.Component {
           to="/"
           className="navigation-brand"
           onClick={() => {
-            if (userState === "fresh-token-required") {
-              setCurrentUserState("logged-in");
-            }
+            this.setState({ navigation: false });
           }}
         >
           <img alt="Karmen logo" src="/karmen-logo.svg" />
@@ -118,8 +109,7 @@ export default withRouter(
       role: state.users.me.role
     }),
     dispatch => ({
-      logout: () => dispatch(clearUserIdentity()),
-      setCurrentUserState: userState => dispatch(setCurrentState(userState))
+      logout: () => dispatch(clearUserIdentity())
     })
   )(Menu)
 );

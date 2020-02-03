@@ -1,12 +1,34 @@
+import jwt_decode from "jwt-decode";
+import dayjs from "dayjs";
+import { setAccessToken, setRefreshToken } from "../services/backend/utils";
+
+const getUserDataFromToken = token => {
+  const decoded = jwt_decode(token);
+  return {
+    currentState: decoded.user_claims.force_pwd_change
+      ? "pwd-change-required"
+      : "logged-in",
+    identity: decoded.identity,
+    username: decoded.user_claims && decoded.user_claims.username,
+    role: decoded.user_claims && decoded.user_claims.role,
+    hasFreshToken: decoded.fresh,
+    accessTokenExpiresOn: dayjs(decoded.exp * 1000)
+  };
+};
+
 export default (
   state = {
     me: {
-      currentState: "unknown",
+      accessToken: null,
+      refreshToken: null,
+      hasFreshToken: false,
+      currentState: "logged-out",
       username: "",
       identity: null,
       role: null,
       apiTokens: [],
-      apiTokensLoaded: false
+      apiTokensLoaded: false,
+      accessTokenExpiresOn: null
     },
     list: {
       pages: [],
@@ -17,30 +39,77 @@ export default (
   },
   action
 ) => {
+  let userData;
   const { me } = state;
   switch (action.type) {
-    case "USER_LOAD_STATE_SUCCEEDED":
+    case "USER_LOADED_FROM_STORAGE":
+      userData = getUserDataFromToken(action.payload.access_token);
+      setAccessToken(action.payload.access_token);
       return Object.assign({}, state, {
         me: {
-          currentState: action.payload.state,
-          identity: action.payload.user.identity,
-          username: action.payload.user.username,
-          role: action.payload.user.role,
-          hasFreshToken: action.payload.user.hasFreshToken,
+          ...userData,
+          accessToken: action.payload.access_token,
+          refreshToken: action.payload.refresh_token,
           apiTokens: [],
           apiTokensLoaded: false
         }
       });
-    case "USER_SET_TOKEN_FRESHNESS_SUCCEEDED":
+    case "USER_AUTHENTICATE_SUCCEEDED":
+      if (action.payload.status !== 200) {
+        return state;
+      }
+      userData = getUserDataFromToken(action.payload.data.access_token);
+      setAccessToken(action.payload.data.access_token);
+      setRefreshToken(action.payload.data.refresh_token);
+      return Object.assign({}, state, {
+        me: {
+          ...userData,
+          accessToken: action.payload.data.access_token,
+          refreshToken: action.payload.data.refresh_token,
+          apiTokens: [],
+          apiTokensLoaded: false
+        }
+      });
+    case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
+      if (action.payload.status !== 200) {
+        return state;
+      }
+      userData = getUserDataFromToken(action.payload.data.access_token);
+      setAccessToken(action.payload.data.access_token);
       return Object.assign({}, state, {
         me: Object.assign({}, state.me, {
-          hasFreshToken: action.payload.isFresh
+          ...userData,
+          accessToken: action.payload.data.access_token
+        })
+      });
+    case "USER_CHANGE_PASSWORD_SUCCEEDED":
+      if (action.payload.status !== 200) {
+        return state;
+      }
+      userData = getUserDataFromToken(action.payload.data.access_token);
+      setAccessToken(action.payload.data.access_token);
+      return Object.assign({}, state, {
+        me: Object.assign({}, state.me, {
+          ...userData,
+          accessToken: action.payload.data.access_token
+        })
+      });
+    case "USER_SET_CURRENT_STATE":
+      return Object.assign({}, state, {
+        me: Object.assign({}, state.me, {
+          currentState: action.payload.currentState
         })
       });
     case "USER_CLEAR":
+      setRefreshToken(null);
+      setAccessToken(null);
       return Object.assign({}, state, {
         me: {
           currentState: "logged-out",
+          accessToken: null,
+          refreshToken: null,
+          hasFreshToken: false,
+          accessTokenExpiresOn: null,
           identity: null,
           username: "",
           role: null,
@@ -72,12 +141,6 @@ export default (
           apiTokens: me.apiTokens.filter(t => {
             return t.jti !== action.payload.jti;
           })
-        })
-      });
-    case "USER_SET_CURRENT_STATE":
-      return Object.assign({}, state, {
-        me: Object.assign({}, state.me, {
-          currentState: action.payload.currentState
         })
       });
     case "USERS_LOAD_PAGE_SUCCEEDED":

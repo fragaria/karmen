@@ -1,14 +1,6 @@
-import dayjs from "dayjs";
 import jwt_decode from "jwt-decode";
 
-import {
-  setAccessToken,
-  setRefreshToken,
-  getUser,
-  getHeaders,
-  getRefreshToken,
-  getAccessToken
-} from "./utils";
+import { getHeaders, getRefreshToken, getAccessToken } from "./utils";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const authenticate = (username, password) => {
@@ -23,13 +15,11 @@ export const authenticate = (username, password) => {
     })
   })
     .then(response => {
+      if (response.status !== 200) {
+        console.error(`Cannot authenticate: ${response.status}`);
+        return { status: response.status };
+      }
       return response.json().then(data => {
-        if (response.status === 200) {
-          setAccessToken(data.access_token);
-          setRefreshToken(data.refresh_token);
-        } else {
-          console.error(`Cannot authenticate: ${response.status}`);
-        }
         return {
           status: response.status,
           data: data
@@ -38,7 +28,7 @@ export const authenticate = (username, password) => {
     })
     .catch(e => {
       console.error(`Cannot authenticate: ${e}`);
-      return 500;
+      return { status: 500 };
     });
 };
 
@@ -56,23 +46,26 @@ export const authenticateFresh = (username, password) => {
     .then(response => {
       if (response.status === 200) {
         return response.json().then(data => {
-          setAccessToken(data.access_token);
-          return response.status;
+          return {
+            status: response.status,
+            data: data
+          };
         });
       } else {
         console.error(
           `Cannot authenticate for a fresh token: ${response.status}`
         );
       }
-      return response.status;
+      return { status: response.status };
     })
     .catch(e => {
       console.error(`Cannot authenticate for a fresh token: ${e}`);
-      return 500;
+      return { status: 500 };
     });
 };
 
 export const changePassword = (
+  username,
   password,
   new_password,
   new_password_confirmation
@@ -83,16 +76,13 @@ export const changePassword = (
     return Promise.resolve(401);
   }
   const decoded = jwt_decode(accessToken);
-  const user = getUser();
   let beforePwdChange = Promise.resolve();
-  if (decoded.fresh === false && user.username) {
-    beforePwdChange = authenticateFresh(user.username, password).then(
-      result => {
-        if (result !== 200) {
-          return Promise.reject("Cannot get a fresh token");
-        }
+  if (decoded.fresh === false && username) {
+    beforePwdChange = authenticateFresh(username, password).then(result => {
+      if (result !== 200) {
+        return Promise.reject("Cannot get a fresh token");
       }
-    );
+    });
   }
 
   return beforePwdChange
@@ -100,7 +90,7 @@ export const changePassword = (
       console.error(`Cannot change password: ${e}`);
       return 500;
     })
-    .then(() => {
+    .then(r => {
       return fetch(`${BASE_URL}/users/me`, {
         method: "PATCH",
         headers: getHeaders(),
@@ -111,178 +101,66 @@ export const changePassword = (
         })
       })
         .then(response => {
-          if (response.status === 200) {
-            return response.json().then(data => {
-              setAccessToken(data.access_token);
-              return response.status;
-            });
-          } else {
+          if (response.status !== 200) {
             console.error(`Cannot change password: ${response.status}`);
+            return { status: response.status };
           }
-          return response.status;
+          return response.json().then(data => {
+            return {
+              status: response.status,
+              data
+            };
+          });
         })
         .catch(e => {
           console.error(`Cannot change password: ${e}`);
-          return 500;
+          return { status: 500 };
         });
     });
 };
 
 export const refreshAccessToken = () => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    return Promise.resolve(401);
-  }
-  const decoded = jwt_decode(refreshToken);
-  if (decoded.exp && dayjs().isAfter(dayjs(decoded.exp * 1000))) {
-    return Promise.resolve(401);
-  }
   return fetch(`${BASE_URL}/users/me/authenticate-refresh`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${refreshToken}`
+      Authorization: `Bearer ${getRefreshToken()}`
     }
   })
     .then(response => {
       if (response.status === 200) {
         return response.json().then(data => {
-          setAccessToken(data.access_token);
-          return response.status;
+          return {
+            status: response.status,
+            data: data
+          };
         });
       }
       console.error(`Cannot refresh access token: ${response.status}`);
-      return response.status;
+      return { status: response.status };
     })
     .catch(e => {
       console.error(`Cannot refresh access token: ${e}`);
-      return 500;
+      return { status: 500 };
     });
-};
-
-// TODO move this to redux
-let accessTokenExpirationHandler = null;
-
-export const registerAccessTokenExpirationHandler = (
-  timeout = 60000,
-  onRefresh = () => {}
-) => {
-  const accessTokenCheck = () => {
-    const accessToken = getAccessToken();
-    if (!accessToken) {
-      return Promise.resolve();
-    }
-    const decoded = jwt_decode(accessToken);
-    // Probably an eternal token
-    if (!decoded.exp) {
-      return Promise.resolve();
-    }
-    let expiresAt = dayjs(decoded.exp * 1000);
-    expiresAt = expiresAt.subtract((3 * timeout) / 1000, "seconds");
-    if (dayjs().isAfter(expiresAt)) {
-      return refreshAccessToken().then(status => {
-        onRefresh && onRefresh(status === 200 ? getUser() : {});
-      });
-    }
-    return Promise.resolve();
-  };
-  const periodicAccessTokenCheck = () => {
-    accessTokenCheck().then(() => {
-      accessTokenExpirationHandler = setTimeout(
-        periodicAccessTokenCheck,
-        timeout
-      );
-    });
-  };
-  periodicAccessTokenCheck();
-};
-
-export const deregisterAccessTokenExpirationHandler = () => {
-  if (accessTokenExpirationHandler) {
-    clearTimeout(accessTokenExpirationHandler);
-  }
 };
 
 export const checkCurrentLoginState = () => {
-  const accessToken = getAccessToken();
-  const refreshToken = getRefreshToken();
-  if (!accessToken) {
-    return Promise.resolve({
-      user: {},
-      state: "logged-out"
-    });
-  }
-  const decodedAccess = jwt_decode(accessToken);
-  // Both access and refresh tokens are outdated, cannot recover
-  if (accessToken && refreshToken) {
-    const decodedRefresh = jwt_decode(refreshToken);
-    if (decodedAccess.exp && decodedRefresh.exp) {
-      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
-      let refreshExpiresAt = dayjs(decodedRefresh.exp * 1000);
-      if (
-        dayjs().isAfter(accessExpiresAt) &&
-        dayjs().isAfter(refreshExpiresAt)
-      ) {
-        setAccessToken(null);
-        setRefreshToken(null);
-        return Promise.resolve({
-          user: {},
-          state: "logged-out"
-        });
-      }
-    }
-  }
-  // TODO make this more efficient and do not probe if token had been obtained recently
-  if (accessToken) {
-    return fetch(`${BASE_URL}/users/me/probe`, {
-      headers: getHeaders()
-    })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json().then(data => {
-            if (
-              (decodedAccess &&
-                decodedAccess.user_claims &&
-                decodedAccess.user_claims.force_pwd_change) ||
-              (data && data.force_pwd_change)
-            ) {
-              return {
-                user: getUser(),
-                state: "pwd-change-required"
-              };
-            }
-            return {
-              user: getUser(),
-              state: "logged-in"
-            };
-          });
-        } else if (response.status === 401) {
-          return response.json().then(data => {
-            if (data.message && data.message.indexOf("expired") > -1) {
-              return refreshAccessToken().then(status => {
-                if (status === 200) {
-                  return {
-                    user: getUser(),
-                    state: "logged-in"
-                  };
-                }
-                throw new Error("Cannot refresh expired access token");
-              });
-            }
-            throw new Error("Cannot refresh access token");
-          });
-        }
-        throw new Error("Cannot refresh access token");
-      })
-      .catch(e => {
-        console.error(`User not logged in: ${e}`);
+  return fetch(`${BASE_URL}/users/me/probe`, {
+    headers: getHeaders()
+  }).then(response => {
+    if (response.status === 200) {
+      return response.json().then(data => {
         return {
-          user: {},
-          state: "logged-out"
+          status: response.status,
+          state:
+            data && data.force_pwd_change ? "pwd-change-required" : "logged-in"
         };
       });
-  }
-  return Promise.resolve({ user: {}, state: "logged-out" });
+    } else if (response.status === 401) {
+      return Promise.resolve({ status: 401, state: "logged-out" });
+    }
+  });
 };
 
 export const loadApiTokens = () => {
@@ -322,7 +200,7 @@ export const addApiToken = name => {
     })
     .catch(e => {
       console.error(`Cannot add an API token: ${e}`);
-      return 500;
+      return { status: 500 };
     });
 };
 

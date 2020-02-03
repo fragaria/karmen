@@ -1,5 +1,3 @@
-import jwt_decode from "jwt-decode";
-
 const _removeStorage = key => {
   if (window.localStorage && window.localStorage.removeItem) {
     window.localStorage.removeItem(key);
@@ -29,20 +27,6 @@ const _getStorage = key => {
 };
 
 export const setAccessToken = token => {
-  if (token) {
-    const decoded = jwt_decode(token);
-    _setStorage(
-      "karmen_user",
-      JSON.stringify({
-        identity: decoded.identity,
-        username: decoded.user_claims && decoded.user_claims.username,
-        role: decoded.user_claims && decoded.user_claims.role,
-        hasFreshToken: decoded.fresh
-      })
-    );
-  } else {
-    _setStorage("karmen_user", null);
-  }
   return _setStorage("karmen_accesst", token);
 };
 
@@ -56,14 +40,6 @@ export const setRefreshToken = token => {
 
 export const getRefreshToken = () => {
   return _getStorage("karmen_refresht");
-};
-
-export const getUser = () => {
-  const data = _getStorage("karmen_user");
-  if (data) {
-    return JSON.parse(data);
-  }
-  return {};
 };
 
 export const getHeaders = (withAuth = true) => {

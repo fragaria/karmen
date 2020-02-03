@@ -37,7 +37,7 @@ class ChangePasswordForm extends React.Component {
   changePwd(e) {
     e.preventDefault();
     const { changePwdForm } = this.state;
-    const { onUserStateChanged, doChangePassword } = this.props;
+    const { username, doChangePassword } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(changePwdForm)) {
@@ -66,11 +66,12 @@ class ChangePasswordForm extends React.Component {
       return;
     }
     return doChangePassword(
+      username,
       changePwdForm.password.val,
       changePwdForm.new_password.val,
       changePwdForm.new_password_confirmation.val
-    ).then(code => {
-      if (code !== 200) {
+    ).then(r => {
+      if (r.status !== 200) {
         this.setState({
           messageOk: false,
           message: "Password change unsuccessful, try again, please.",
@@ -87,28 +88,23 @@ class ChangePasswordForm extends React.Component {
           })
         });
       } else {
-        return (
-          onUserStateChanged &&
-          onUserStateChanged().then(() => {
-            this.setState({
-              message: "Password changed successfully.",
-              messageOk: true,
-              changePwdForm: Object.assign({}, changePwdForm, {
-                password: Object.assign({}, changePwdForm.password, {
-                  val: ""
-                }),
-                new_password: Object.assign({}, changePwdForm.new_password, {
-                  val: ""
-                }),
-                new_password_confirmation: Object.assign(
-                  {},
-                  changePwdForm.new_password_confirmation,
-                  { val: "" }
-                )
-              })
-            });
+        this.setState({
+          message: "Password changed successfully.",
+          messageOk: true,
+          changePwdForm: Object.assign({}, changePwdForm, {
+            password: Object.assign({}, changePwdForm.password, {
+              val: ""
+            }),
+            new_password: Object.assign({}, changePwdForm.new_password, {
+              val: ""
+            }),
+            new_password_confirmation: Object.assign(
+              {},
+              changePwdForm.new_password_confirmation,
+              { val: "" }
+            )
           })
-        );
+        });
       }
     });
   }
@@ -152,11 +148,23 @@ class ChangePasswordForm extends React.Component {
 }
 
 export default connect(
-  state => ({}),
+  state => ({
+    username: state.users.me.username
+  }),
   dispatch => ({
-    doChangePassword: (password, new_password, new_password_confirmation) =>
+    doChangePassword: (
+      username,
+      password,
+      new_password,
+      new_password_confirmation
+    ) =>
       dispatch(
-        changePassword(password, new_password, new_password_confirmation)
+        changePassword(
+          username,
+          password,
+          new_password,
+          new_password_confirmation
+        )
       )
   })
 )(ChangePasswordForm);

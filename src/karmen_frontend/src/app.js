@@ -1,4 +1,5 @@
 import React from "react";
+import dayjs from "dayjs";
 import { connect } from "react-redux";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 
@@ -7,6 +8,7 @@ import Heartbeat from "./components/heartbeat";
 import LoginGateway from "./components/login-gateway";
 import ForcePwdChangeGateway from "./components/force-pwd-change-gateway";
 import Loader from "./components/loader";
+import CatchTokenFromUrl from "./components/catch-token-from-url";
 
 import PrinterList from "./routes/printer-list";
 import GcodeList from "./routes/gcode-list";
@@ -21,42 +23,51 @@ import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
 import Page404 from "./routes/page404";
 
-import { loadUserState, setTokenFreshness } from "./actions/users";
-
-import {
-  registerAccessTokenExpirationHandler,
-  deregisterAccessTokenExpirationHandler
-} from "./services/backend";
+import { loadUserFromLocalStorage, refreshToken } from "./actions/users";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      initialized: false
+      initialized: false,
+      tokenTimer: null
     };
+    this.checkUserAccessToken = this.checkUserAccessToken.bind(this);
+  }
+
+  checkUserAccessToken() {
+    const { accessTokenExpiresOn, refreshToken } = this.props;
+    if (
+      accessTokenExpiresOn &&
+      dayjs().isAfter(accessTokenExpiresOn.subtract(3 * 60, "seconds"))
+    ) {
+      return refreshToken().then(r => {
+        this.setState({
+          timer: setTimeout(this.checkUserAccessToken, 60 * 1000)
+        });
+      });
+    }
   }
 
   componentDidMount() {
-    const { loadUser, setAccessTokenFreshness } = this.props;
+    const { loadUserFromStorage } = this.props;
     const { initialized } = this.state;
     if (!initialized) {
-      loadUser().then(() => {
+      loadUserFromStorage().then(() => {
         this.setState({
-          initialized: true
+          initialized: true,
+          timer: setTimeout(this.checkUserAccessToken, 60 * 1000)
         });
-      });
-      registerAccessTokenExpirationHandler(60 * 1000, r => {
-        setAccessTokenFreshness(r.hasFreshToken);
       });
     }
   }
 
   componentWillUnmount() {
-    deregisterAccessTokenExpirationHandler();
+    const { timer } = this.state;
+    timer && clearTimeout(timer);
   }
 
   render() {
-    const { loadUser } = this.props;
     const { initialized } = this.state;
     if (!initialized) {
       return (
@@ -68,11 +79,12 @@ class App extends React.Component {
     return (
       <>
         <BrowserRouter>
+          <CatchTokenFromUrl />
           <Menu />
           <Heartbeat />
           <main className="main">
-            <LoginGateway onUserStateChanged={loadUser}>
-              <ForcePwdChangeGateway onUserStateChanged={loadUser}>
+            <LoginGateway>
+              <ForcePwdChangeGateway>
                 <Switch>
                   <Route path="/users/me" exact component={UserPreferences} />
                   <Route
@@ -147,7 +159,12 @@ class App extends React.Component {
   }
 }
 
-export default connect(null, dispatch => ({
-  loadUser: () => dispatch(loadUserState()),
-  setAccessTokenFreshness: isFresh => dispatch(setTokenFreshness(isFresh))
-}))(App);
+export default connect(
+  state => ({
+    accessTokenExpiresOn: state.users.me.accessTokenExpiresOn
+  }),
+  dispatch => ({
+    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
+    refreshToken: () => dispatch(refreshToken())
+  })
+)(App);

@@ -2,7 +2,6 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { authenticate, setCurrentState } from "../actions/users";
-import { setAccessToken } from "../services/backend";
 import { FormInputs } from "./form-utils";
 import Loader from "./loader";
 import BusyButton from "./busy-button";
@@ -16,7 +15,7 @@ class LoginGateway extends React.Component {
       loginForm: {
         username: {
           name: "Username",
-          val: props.username || "",
+          val: "",
           type: "text",
           required: true
         },
@@ -31,25 +30,23 @@ class LoginGateway extends React.Component {
     this.login = this.login.bind(this);
   }
 
-  componentDidMount() {
-    const { history, location, userState, onUserStateChanged } = this.props;
-    const params = new URLSearchParams(location.search);
-    if (params.has("token")) {
-      if (userState !== "logged-in") {
-        setAccessToken(params.get("token"));
-        onUserStateChanged();
-      }
-      params.delete("token");
-      history.push({
-        search: `?${params.toString()}`
-      });
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.userState === "fresh-token-required") {
+      return {
+        loginForm: Object.assign({}, prevState.loginForm, {
+          username: Object.assign({}, prevState.loginForm.username, {
+            val: nextProps.username
+          })
+        })
+      };
     }
+    return null;
   }
 
   login(e) {
     e.preventDefault();
     const { loginForm } = this.state;
-    const { onUserStateChanged, doAuthenticate } = this.props;
+    const { doAuthenticate } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(loginForm)) {
@@ -79,15 +76,13 @@ class LoginGateway extends React.Component {
             })
           });
         } else {
-          return onUserStateChanged().then(() => {
-            this.setState({
-              message: "",
-              messageOk: true,
-              loginForm: Object.assign({}, loginForm, {
-                password: Object.assign({}, loginForm.password, { val: "" }),
-                username: Object.assign({}, loginForm.username, { val: "" })
-              })
-            });
+          this.setState({
+            message: "",
+            messageOk: true,
+            loginForm: Object.assign({}, loginForm, {
+              password: Object.assign({}, loginForm.password, { val: "" }),
+              username: Object.assign({}, loginForm.username, { val: "" })
+            })
           });
         }
       }
@@ -104,70 +99,69 @@ class LoginGateway extends React.Component {
         </div>
       );
     }
-    if (userState === "logged-out" || userState === "fresh-token-required") {
-      const updateValue = (name, value) => {
-        const { loginForm } = this.state;
-        this.setState({
-          loginForm: Object.assign({}, loginForm, {
-            [name]: Object.assign({}, loginForm[name], {
-              val: value,
-              error: null
-            })
-          })
-        });
-      };
-      return (
-        <section className="content">
-          <div className="container">
-            <h1 className="main-title text-center">Login required</h1>
-            {userState === "fresh-token-required" && (
-              <p className="text-center">
-                The actions you are about to take need to be authorized by your
-                password.
-              </p>
-            )}
-            <form>
-              {message && (
-                <p
-                  className={
-                    messageOk
-                      ? "text-success text-center"
-                      : "text-secondary text-center"
-                  }
-                >
-                  {message}
-                </p>
-              )}
-              <FormInputs definition={loginForm} updateValue={updateValue} />
-              <div className="cta-box text-center">
-                <BusyButton
-                  className="btn"
-                  type="submit"
-                  onClick={this.login}
-                  busyChildren="Logging in..."
-                >
-                  Login
-                </BusyButton>{" "}
-                {userState === "fresh-token-required" && (
-                  <BusyButton
-                    className={"btn btn-plain"}
-                    type="reset"
-                    onClick={() => {
-                      setCurrentUserState("logged-in");
-                      history.push("/");
-                    }}
-                  >
-                    Cancel
-                  </BusyButton>
-                )}
-              </div>
-            </form>
-          </div>
-        </section>
-      );
-    } else {
+    if (userState !== "logged-out" && userState !== "fresh-token-required") {
       return <React.Fragment>{children}</React.Fragment>;
     }
+    const updateValue = (name, value) => {
+      const { loginForm } = this.state;
+      this.setState({
+        loginForm: Object.assign({}, loginForm, {
+          [name]: Object.assign({}, loginForm[name], {
+            val: value,
+            error: null
+          })
+        })
+      });
+    };
+    return (
+      <section className="content">
+        <div className="container">
+          <h1 className="main-title text-center">Login required</h1>
+          {userState === "fresh-token-required" && (
+            <p className="text-center">
+              The actions you are about to take need to be authorized by your
+              password.
+            </p>
+          )}
+          <form>
+            {message && (
+              <p
+                className={
+                  messageOk
+                    ? "text-success text-center"
+                    : "text-secondary text-center"
+                }
+              >
+                {message}
+              </p>
+            )}
+            <FormInputs definition={loginForm} updateValue={updateValue} />
+            <div className="cta-box text-center">
+              <BusyButton
+                className="btn"
+                type="submit"
+                onClick={this.login}
+                busyChildren="Logging in..."
+              >
+                Login
+              </BusyButton>{" "}
+              {userState === "fresh-token-required" && (
+                <BusyButton
+                  className="btn btn-plain"
+                  type="reset"
+                  onClick={() => {
+                    setCurrentUserState("logged-in");
+                    history.push("/");
+                  }}
+                >
+                  Cancel
+                </BusyButton>
+              )}
+            </div>
+          </form>
+        </div>
+      </section>
+    );
   }
 }
 

@@ -1,12 +1,54 @@
+import dayjs from "dayjs";
+import jwt_decode from "jwt-decode";
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
 
-export const loadUserState = createActionThunk("USER_LOAD_STATE", () => {
-  return backend.checkCurrentLoginState();
-});
+export const loadUserFromToken = (accessToken, refreshToken) => dispatch => {
+  dispatch({
+    type: "USER_LOADED_FROM_STORAGE",
+    payload: {
+      access_token: accessToken,
+      refresh_token: refreshToken
+    }
+  });
+};
 
-export const setCurrentState = currentState => dispatch => {
-  const user = backend.getUser();
+export const loadUserFromLocalStorage = () => dispatch => {
+  const accessToken = backend.getAccessToken();
+  const refreshToken = backend.getRefreshToken();
+
+  if (accessToken && refreshToken) {
+    const decodedAccess = jwt_decode(accessToken);
+    const decodedRefresh = jwt_decode(refreshToken);
+    if (decodedAccess.exp && decodedRefresh.exp) {
+      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
+      let refreshExpiresAt = dayjs(decodedRefresh.exp * 1000);
+      if (
+        dayjs().isAfter(accessExpiresAt) &&
+        dayjs().isAfter(refreshExpiresAt)
+      ) {
+        return dispatch(clearUserIdentity());
+      } else if (dayjs().isAfter(accessExpiresAt.subtract(90, "seconds"))) {
+        return backend.refreshAccessToken().then(r => {
+          backend.setAccessToken(r.data.access_token);
+          return Promise.resolve(
+            dispatch(loadUserFromToken(r.data.access_token, refreshToken))
+          );
+        });
+      }
+    }
+  } else {
+    return Promise.resolve(dispatch(clearUserIdentity()));
+  }
+
+  return Promise.resolve(
+    dispatch(loadUserFromToken(accessToken, refreshToken))
+  );
+};
+
+export const setCurrentState = currentState => (dispatch, getState) => {
+  const { users } = getState();
+  const user = users.me;
   if (user.hasFreshToken && currentState === "fresh-token-required") {
     return;
   }
@@ -25,10 +67,18 @@ export const authenticate = createActionThunk(
   }
 );
 
+export const refreshToken = createActionThunk(
+  "USER_REFRESH_ACCESS_TOKEN",
+  (username, password) => {
+    return backend.refreshAccessToken();
+  }
+);
+
 export const changePassword = createActionThunk(
   "USER_CHANGE_PASSWORD",
-  (password, new_password, new_password_confirmation) => {
+  (username, password, new_password, new_password_confirmation) => {
     return backend.changePassword(
+      username,
       password,
       new_password,
       new_password_confirmation
@@ -37,21 +87,10 @@ export const changePassword = createActionThunk(
 );
 
 export const clearUserIdentity = () => dispatch => {
-  backend.setAccessToken(null);
-  backend.setRefreshToken(null);
   dispatch({
     type: "USER_CLEAR"
   });
 };
-
-export const setTokenFreshness = createActionThunk(
-  "USER_SET_TOKEN_FRESHNESS",
-  isFresh => {
-    return {
-      isFresh
-    };
-  }
-);
 
 export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
