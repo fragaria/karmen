@@ -23,8 +23,10 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
           <div className="cta-box text-center">
             <button
               className="btn"
-              onClick={() => {
-                onPrinterDelete(printer.uuid);
+              onClick={e => {
+                onPrinterDelete(printer.uuid).then(() => {
+                  modal.closeModal(e);
+                });
               }}
             >
               Yes, delete it
