@@ -17,6 +17,21 @@ export const loadUserFromLocalStorage = () => dispatch => {
   const accessToken = backend.getAccessToken();
   const refreshToken = backend.getRefreshToken();
 
+  if (accessToken) {
+    const decodedAccess = jwt_decode(accessToken);
+    if (decodedAccess.exp) {
+      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
+      if (dayjs().isAfter(accessExpiresAt)) {
+        return dispatch(clearUserIdentity());
+      }
+      // probably eternal token without expiration
+    } else {
+      return Promise.resolve(
+        dispatch(loadUserFromToken(accessToken, refreshToken))
+      );
+    }
+  }
+
   if (accessToken && refreshToken) {
     const decodedAccess = jwt_decode(accessToken);
     const decodedRefresh = jwt_decode(refreshToken);
