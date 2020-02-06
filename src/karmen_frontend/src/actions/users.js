@@ -16,33 +16,25 @@ export const loadUserFromToken = (accessToken, refreshToken) => dispatch => {
 export const loadUserFromLocalStorage = () => dispatch => {
   const accessToken = backend.getAccessToken();
   const refreshToken = backend.getRefreshToken();
-
-  if (accessToken) {
-    const decodedAccess = jwt_decode(accessToken);
-    if (decodedAccess.exp) {
-      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
-      if (dayjs().isAfter(accessExpiresAt)) {
-        return dispatch(clearUserIdentity());
-      }
-      // probably eternal token without expiration
-    } else {
-      return Promise.resolve(
-        dispatch(loadUserFromToken(accessToken, refreshToken))
-      );
-    }
+  // no tokens - bail
+  if (!accessToken && !refreshToken) {
+    return Promise.resolve(dispatch(clearUserIdentity()));
   }
 
+  // refresh AND access
   if (accessToken && refreshToken) {
     const decodedAccess = jwt_decode(accessToken);
     const decodedRefresh = jwt_decode(refreshToken);
     if (decodedAccess.exp && decodedRefresh.exp) {
       let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
       let refreshExpiresAt = dayjs(decodedRefresh.exp * 1000);
+      // both tokens are expired
       if (
         dayjs().isAfter(accessExpiresAt) &&
         dayjs().isAfter(refreshExpiresAt)
       ) {
-        return dispatch(clearUserIdentity());
+        return Promise.resolve(dispatch(clearUserIdentity()));
+        // access token will expire shortly - do refresh
       } else if (dayjs().isAfter(accessExpiresAt.subtract(90, "seconds"))) {
         return backend.refreshAccessToken().then(r => {
           backend.setAccessToken(r.data.access_token);
@@ -51,9 +43,25 @@ export const loadUserFromLocalStorage = () => dispatch => {
           );
         });
       }
+    } else {
+      return Promise.resolve(dispatch(clearUserIdentity()));
     }
-  } else {
-    return Promise.resolve(dispatch(clearUserIdentity()));
+  }
+
+  if (accessToken && !refreshToken) {
+    const decodedAccess = jwt_decode(accessToken);
+    // Having expirable access token and no refresh token should not happen - but we can handle a valid access token nonetheless
+    if (decodedAccess.exp) {
+      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
+      if (dayjs().isAfter(accessExpiresAt)) {
+        return Promise.resolve(dispatch(clearUserIdentity()));
+      }
+      // probably eternal token without expiration
+    } else {
+      return Promise.resolve(
+        dispatch(loadUserFromToken(accessToken, refreshToken))
+      );
+    }
   }
 
   return Promise.resolve(

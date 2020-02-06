@@ -37,16 +37,18 @@ class App extends React.Component {
 
   checkUserAccessToken() {
     const { accessTokenExpiresOn, refreshToken } = this.props;
+    let doingSomething = Promise.resolve();
     if (
       accessTokenExpiresOn &&
       dayjs().isAfter(accessTokenExpiresOn.subtract(3 * 60, "seconds"))
     ) {
-      return refreshToken().then(r => {
-        this.setState({
-          timer: setTimeout(this.checkUserAccessToken, 60 * 1000)
-        });
-      });
+      doingSomething = refreshToken();
     }
+    doingSomething.then(() => {
+      this.setState({
+        timer: setTimeout(this.checkUserAccessToken, 60 * 1000)
+      });
+    });
   }
 
   componentDidMount() {

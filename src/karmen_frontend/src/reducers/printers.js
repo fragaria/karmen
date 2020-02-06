@@ -30,7 +30,7 @@ export default (
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
       newPrinter = action.payload.data;
-      if (!newPrinter) {
+      if (!newPrinter || newPrinter.message) {
         return state;
       }
       // TODO possibly switch to findIndex
