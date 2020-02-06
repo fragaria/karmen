@@ -365,6 +365,7 @@ const PrinterConnectionStatus = ({ printer }) => {
 
 const PrinterProgress = ({ printer }) => {
   const progress = printer.job;
+  const temperatures = printer.status && printer.status.temperature;
   if (!progress || !progress.name) {
     return <></>;
   }
@@ -382,13 +383,34 @@ const PrinterProgress = ({ printer }) => {
       <dd className="description">
         {formatters.timespan(progress.printTimeLeft)}
       </dd>
+      {temperatures && (
+        <>
+          {temperatures.tool0 && (
+            <>
+              <dt className="term">Tool temperature:</dt>
+              <dd className="description">
+                {temperatures.tool0.actual}°&nbsp;C/{temperatures.tool0.target}
+                °&nbsp;C
+              </dd>
+            </>
+          )}
+          {temperatures.bed && (
+            <>
+              <dt className="term">Bed temperature:</dt>
+              <dd className="description">
+                {temperatures.bed.actual}°&nbsp;C/{temperatures.bed.target}
+                °&nbsp;C
+              </dd>
+            </>
+          )}
+        </>
+      )}
     </>
   );
 };
 
 const PrinterProperties = ({ printer }) => {
   const props = printer.printer_props;
-  const status = printer.status;
   return (
     <>
       {props &&
@@ -422,23 +444,6 @@ const PrinterProperties = ({ printer }) => {
             )}
           </>
         )}
-
-      {status && (
-        <>
-          {status.tool0 && (
-            <>
-              <dt className="term">Tool temperature:</dt>
-              <dd className="term">{status.tool0}</dd>
-            </>
-          )}
-          {status.bed && (
-            <>
-              <dt className="term">Bed temperature:</dt>
-              <dd className="term">{status.bed}</dd>
-            </>
-          )}
-        </>
-      )}
     </>
   );
 };
