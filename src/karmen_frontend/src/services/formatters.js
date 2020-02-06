@@ -15,6 +15,9 @@ export const datetime = isotime => {
 };
 
 export const timespan = seconds => {
+  if (seconds === null || seconds === undefined) {
+    return "N/A";
+  }
   const base = dayjs(0);
   const diffBase = base.add(seconds, "seconds");
   const hours = diffBase.diff(base, "hours");
