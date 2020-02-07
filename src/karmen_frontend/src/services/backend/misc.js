@@ -14,11 +14,11 @@ export const enqueueTask = task => {
       if (response.status !== 202) {
         console.error(`Cannot enqueue a task: ${response.status}`);
       }
-      return response.status;
+      return { status: response.status };
     })
     .catch(e => {
       console.error(`Cannot enqueue a task: ${e}`);
-      return 500;
+      return { status: 500 };
     });
 };
 

@@ -9,7 +9,13 @@ import NetworkScan from "../components/network-scan";
 import PrintersTable from "../components/printer-list-settings";
 import ListCta from "../components/list-cta";
 import { useMyModal } from "../components/modal";
-import { getUsersPage, clearUsersPages, patchUser } from "../actions/users";
+import {
+  getUsersPage,
+  clearUsersPages,
+  patchUser,
+  retryIfUnauthorized
+} from "../actions/users";
+import { getSettings, changeSettings, enqueueTask } from "../services/backend";
 import { loadPrinters, deletePrinter } from "../actions/printers";
 import formatters from "../services/formatters";
 
@@ -180,7 +186,10 @@ const Settings = ({
   loadPrinters,
   printersList,
   printersLoaded,
-  onPrinterDelete
+  onPrinterDelete,
+  getSettings,
+  changeSettings,
+  enqueueTask
 }) => {
   if (!hasFreshUser) {
     return (
@@ -211,7 +220,11 @@ const Settings = ({
           <br />
           <br />
           <strong>Network scan</strong>
-          <NetworkScan />
+          <NetworkScan
+            getSettings={getSettings}
+            changeSettings={changeSettings}
+            enqueueTask={enqueueTask}
+          />
         </div>
 
         <div className="container">
@@ -259,6 +272,11 @@ export default connect(
       dispatch(getUsersPage(startWith, orderBy, filter, limit)),
     clearUsersPages: () => dispatch(clearUsersPages()),
     onUserChange: (uuid, role, suspended) =>
-      dispatch(patchUser(uuid, role, suspended))
+      dispatch(patchUser(uuid, role, suspended)),
+    // TODO move this to actions
+    getSettings: () => retryIfUnauthorized(getSettings, dispatch)(),
+    changeSettings: settings =>
+      retryIfUnauthorized(changeSettings, dispatch)(settings),
+    enqueueTask: task => retryIfUnauthorized(enqueueTask, dispatch)(task)
   })
 )(Settings);

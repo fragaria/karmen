@@ -12,11 +12,11 @@ export const changeSettings = settings => {
       if (response.status !== 201) {
         console.error(`Cannot change a setting: ${response.status}`);
       }
-      return response.status;
+      return { status: response.status };
     })
     .catch(e => {
       console.error(`Cannot change a setting: ${e}`);
-      return 500;
+      return { status: 500 };
     });
 };
 
@@ -25,12 +25,13 @@ export const getSettings = settings => {
     .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get settings: ${response.status}`);
-        return [];
       }
-      return response.json();
+      return response.json().then(data => {
+        return { status: response.status, data };
+      });
     })
     .catch(e => {
       console.error(`Cannot get settings: ${e}`);
-      return [];
+      return {};
     });
 };

@@ -4,8 +4,6 @@ import Loader from "../components/loader";
 import { FormInputs } from "../components/form-utils";
 import BusyButton from "../components/busy-button";
 
-import { getSettings, changeSettings, enqueueTask } from "../services/backend";
-
 class NetworkScan extends React.Component {
   state = {
     init: true,
@@ -30,9 +28,10 @@ class NetworkScan extends React.Component {
 
   loadNetworkScan() {
     const { settings } = this.state;
-    getSettings().then(serverSide => {
+    const { getSettings } = this.props;
+    getSettings().then(r => {
       // eslint-disable-next-line no-unused-vars
-      for (let option of serverSide) {
+      for (let option of r.data) {
         if (settings[option.key]) {
           settings[option.key].val = option.val;
         }
@@ -55,6 +54,7 @@ class NetworkScan extends React.Component {
       messageOk: false
     });
     const { settings } = this.state;
+    const { changeSettings, enqueueTask } = this.props;
     let hasErrors = false;
     const updatedSettings = Object.assign({}, settings);
     const changedSettings = [];
@@ -78,10 +78,10 @@ class NetworkScan extends React.Component {
     });
     if (!hasErrors) {
       return changeSettings(changedSettings).then(r => {
-        switch (r) {
+        switch (r.status) {
           case 201:
             return enqueueTask("scan_network").then(r => {
-              switch (r) {
+              switch (r.status) {
                 case 202:
                   this.setState({
                     message:
