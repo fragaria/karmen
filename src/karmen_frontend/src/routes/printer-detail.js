@@ -388,19 +388,17 @@ const PrinterProgress = ({ printer }) => {
         <>
           {temperatures.tool0 && (
             <>
-              <dt className="term">Tool temperature:</dt>
+              <dt className="term">Tool:</dt>
               <dd className="description">
-                {temperatures.tool0.actual}°&nbsp;C/{temperatures.tool0.target}
-                °&nbsp;C
+                {temperatures.tool0.actual}°C/{temperatures.tool0.target}°C
               </dd>
             </>
           )}
           {temperatures.bed && (
             <>
-              <dt className="term">Bed temperature:</dt>
+              <dt className="term">Bed:</dt>
               <dd className="description">
-                {temperatures.bed.actual}°&nbsp;C/{temperatures.bed.target}
-                °&nbsp;C
+                {temperatures.bed.actual}°C/{temperatures.bed.target}°C
               </dd>
             </>
           )}
