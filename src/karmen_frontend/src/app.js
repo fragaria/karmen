@@ -1,5 +1,4 @@
 import React from "react";
-import dayjs from "dayjs";
 import { connect } from "react-redux";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 
@@ -23,7 +22,7 @@ import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
 import Page404 from "./routes/page404";
 
-import { loadUserFromLocalStorage, refreshToken } from "./actions/users";
+import { loadUserFromLocalStorage } from "./actions/users";
 
 class App extends React.Component {
   constructor(props) {
@@ -32,23 +31,6 @@ class App extends React.Component {
       initialized: false,
       tokenTimer: null
     };
-    this.checkUserAccessToken = this.checkUserAccessToken.bind(this);
-  }
-
-  checkUserAccessToken() {
-    const { accessTokenExpiresOn, refreshToken } = this.props;
-    let doingSomething = Promise.resolve();
-    if (
-      accessTokenExpiresOn &&
-      dayjs().isAfter(accessTokenExpiresOn.subtract(3 * 60, "seconds"))
-    ) {
-      doingSomething = refreshToken();
-    }
-    doingSomething.then(() => {
-      this.setState({
-        timer: setTimeout(this.checkUserAccessToken, 60 * 1000)
-      });
-    });
   }
 
   componentDidMount() {
@@ -57,8 +39,7 @@ class App extends React.Component {
     if (!initialized) {
       loadUserFromStorage().then(() => {
         this.setState({
-          initialized: true,
-          timer: setTimeout(this.checkUserAccessToken, 60 * 1000)
+          initialized: true
         });
       });
     }
@@ -167,6 +148,5 @@ export default connect(
   }),
   dispatch => ({
     loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
-    refreshToken: () => dispatch(refreshToken())
   })
 )(App);

@@ -92,7 +92,7 @@ export const authenticate = createActionThunk(
 
 export const refreshToken = createActionThunk(
   "USER_REFRESH_ACCESS_TOKEN",
-  (username, password) => {
+  () => {
     return backend.refreshAccessToken();
   }
 );
@@ -173,3 +173,23 @@ export const patchUser = createActionThunk(
     return backend.patchUser(uuid, role, suspended);
   }
 );
+
+export const retryIfUnauthorized = (func, dispatch) => {
+  return (...args) => {
+    return func(...args).then(r => {
+      if (r.status === 401) {
+        if (!dispatch) {
+          return Promise.reject();
+        }
+        return dispatch(refreshToken()).then(r => {
+          if (r.status === 200) {
+            return func(...args);
+          } else {
+            return dispatch(clearUserIdentity);
+          }
+        });
+      }
+      return r;
+    });
+  };
+};

@@ -1,7 +1,9 @@
 import React from "react";
+import { connect } from "react-redux";
 import { getWebcamSnapshot } from "../services/backend";
+import { refreshToken } from "../actions/users";
 
-export class WebcamStream extends React.Component {
+class WebcamStream extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,13 +16,24 @@ export class WebcamStream extends React.Component {
   }
 
   getSnapshot() {
-    const { url } = this.props;
+    const { url, refreshToken } = this.props;
     const { isOnline, snapshotPromise } = this.state;
     if (snapshotPromise || !isOnline) {
       return;
     }
     const newSnapshotPromise = getWebcamSnapshot(url).then(r => {
-      if (r === 202) {
+      if (r === 401) {
+        return refreshToken().then(r => {
+          if (r.status === 200) {
+            this.setState({
+              snapshotPromise: null,
+              isOnline: true
+            });
+            this.getSnapshot();
+            return;
+          }
+        });
+      } else if (r === 202) {
         this.setState({
           timer: setTimeout(this.getSnapshot, 1000),
           snapshotPromise: null
@@ -117,3 +130,7 @@ export class WebcamStream extends React.Component {
     );
   }
 }
+
+export default connect(null, dispatch => ({
+  refreshToken: () => dispatch(refreshToken())
+}))(WebcamStream);

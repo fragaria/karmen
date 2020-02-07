@@ -1,5 +1,6 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
+import { retryIfUnauthorized } from "./users";
 
 export const clearJobsPages = printerUuid => dispatch => {
   return dispatch({
@@ -18,20 +19,24 @@ export const getJobsPage = createActionThunk(
     startWith = null,
     orderBy = null,
     filter = null,
-    limit = 15
+    limit = 15,
+    { dispatch }
   ) => {
-    return backend
-      .getPrinterJobs(startWith, orderBy, printerUuid, limit)
-      .then(r => {
-        return {
-          status: r.status,
-          data: r.data,
-          printer: printerUuid,
-          startWith,
-          orderBy,
-          filter: null, // TODO filter is ignored for now
-          limit
-        };
-      });
+    return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
+      startWith,
+      orderBy,
+      printerUuid,
+      limit
+    ).then(r => {
+      return {
+        status: r.status,
+        data: r.data,
+        printer: printerUuid,
+        startWith,
+        orderBy,
+        filter: null, // TODO filter is ignored for now
+        limit
+      };
+    });
   }
 );

@@ -6,7 +6,7 @@ import Loader from "../components/loader";
 import BusyButton from "../components/busy-button";
 import TableWrapper from "../components/table-wrapper";
 import Progress from "../components/progress";
-import { WebcamStream } from "../components/webcam-stream";
+import WebcamStream from "../components/webcam-stream";
 import PrinterState from "../components/printer-state";
 import formatters from "../services/formatters";
 

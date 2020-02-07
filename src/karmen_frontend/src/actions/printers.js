@@ -1,5 +1,6 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
+import { retryIfUnauthorized } from "./users";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -87,51 +88,70 @@ export const queueLoadPrinter = (dispatch, getState, uuid, fields, delay) => {
 
 export const loadPrinters = createActionThunk(
   "PRINTERS_LOAD",
-  (fields = []) => {
-    return backend.getPrinters(fields);
+  (fields = [], { dispatch }) => {
+    return retryIfUnauthorized(backend.getPrinters, dispatch)(fields);
   }
 );
 
 export const loadPrinter = createActionThunk(
   "PRINTERS_LOAD_DETAIL",
-  (uuid, fields = []) => {
-    return backend.getPrinter(uuid, fields);
+  (uuid, fields = [], { dispatch }) => {
+    return retryIfUnauthorized(backend.getPrinter, dispatch)(uuid, fields);
   }
 );
 
 export const addPrinter = createActionThunk(
   "PRINTERS_ADD",
-  (protocol, hostname, ip, port, name, apiKey) => {
-    return backend.addPrinter(protocol, hostname, ip, port, name, apiKey);
+  (protocol, hostname, ip, port, name, apiKey, { dispatch }) => {
+    return retryIfUnauthorized(backend.addPrinter, dispatch)(
+      protocol,
+      hostname,
+      ip,
+      port,
+      name,
+      apiKey
+    );
   }
 );
 
 export const patchPrinter = createActionThunk(
   "PRINTERS_PATCH",
-  (uuid, data) => {
-    return backend.patchPrinter(uuid, data);
+  (uuid, data, { dispatch }) => {
+    return retryIfUnauthorized(backend.patchPrinter, dispatch)(uuid, data);
   }
 );
 
-export const deletePrinter = createActionThunk("PRINTERS_DELETE", uuid => {
-  return backend.deletePrinter(uuid).then(r => {
-    if (r.status !== 204) {
-      r.data.uuid = null;
-    }
-    return r;
-  });
-});
+export const deletePrinter = createActionThunk(
+  "PRINTERS_DELETE",
+  (uuid, { dispatch }) => {
+    return retryIfUnauthorized(
+      backend.deletePrinter,
+      dispatch
+    )(uuid).then(r => {
+      if (r.status !== 204) {
+        r.data.uuid = null;
+      }
+      return r;
+    });
+  }
+);
 
 export const setPrinterConnection = createActionThunk(
   "PRINTERS_SET_CONNECTION",
-  (uuid, state) => {
-    return backend.setPrinterConnection(uuid, state);
+  (uuid, state, { dispatch }) => {
+    return retryIfUnauthorized(backend.setPrinterConnection, dispatch)(
+      uuid,
+      state
+    );
   }
 );
 
 export const changeCurrentJob = createActionThunk(
   "PRINTERS_CHANGE_JOB",
-  (uuid, action) => {
-    return backend.changeCurrentJob(uuid, action);
+  (uuid, action, { dispatch }) => {
+    return retryIfUnauthorized(backend.changeCurrentJob, dispatch)(
+      uuid,
+      action
+    );
   }
 );

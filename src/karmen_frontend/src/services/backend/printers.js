@@ -177,9 +177,6 @@ export const getWebcamSnapshot = snapshotUrl => {
     }
   )
     .then(response => {
-      if (response.status === 202) {
-        return 202;
-      }
       if (response.status === 200) {
         let contentType = response.headers.get("content-type");
         return response.arrayBuffer().then(buffer => ({
@@ -187,7 +184,10 @@ export const getWebcamSnapshot = snapshotUrl => {
           data: arrayBufferToBase64(buffer)
         }));
       }
-      console.error(`Cannot get webcam snapshot: ${response.status}`);
+      if (response.status !== 202) {
+        console.error(`Cannot get webcam snapshot: ${response.status}`);
+      }
+      return response.status;
     })
     .catch(e => {
       console.error(`Cannot get webcam snapshot: ${e}`);
