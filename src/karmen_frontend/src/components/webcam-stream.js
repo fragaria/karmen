@@ -1,7 +1,4 @@
 import React from "react";
-import { connect } from "react-redux";
-import { getWebcamSnapshot } from "../services/backend";
-import { refreshToken } from "../actions/users";
 
 class WebcamStream extends React.Component {
   constructor(props) {
@@ -16,33 +13,22 @@ class WebcamStream extends React.Component {
   }
 
   getSnapshot() {
-    const { url, refreshToken } = this.props;
+    const { url, getWebcamSnapshot } = this.props;
     const { isOnline, snapshotPromise } = this.state;
     if (snapshotPromise || !isOnline) {
       return;
     }
     const newSnapshotPromise = getWebcamSnapshot(url).then(r => {
-      if (r === 401) {
-        return refreshToken().then(r => {
-          if (r.status === 200) {
-            this.setState({
-              snapshotPromise: null,
-              isOnline: true
-            });
-            this.getSnapshot();
-            return;
-          }
-        });
-      } else if (r === 202) {
+      if (r.status === 202) {
         this.setState({
           timer: setTimeout(this.getSnapshot, 1000),
           snapshotPromise: null
         });
-      } else if (r && r.prefix && r.data) {
+      } else if (r.data && r.data.prefix && r.data.data) {
         this.setState({
           isOnline: true,
           timer: setTimeout(this.getSnapshot, 1000 / 5), // 1000 / 5 = 5 FPS
-          source: `${r.prefix}${r.data}`,
+          source: `${r.data.prefix}${r.data.data}`,
           snapshotPromise: null
         });
       } else {
@@ -131,6 +117,4 @@ class WebcamStream extends React.Component {
   }
 }
 
-export default connect(null, dispatch => ({
-  refreshToken: () => dispatch(refreshToken())
-}))(WebcamStream);
+export default WebcamStream;

@@ -155,3 +155,10 @@ export const changeCurrentJob = createActionThunk(
     );
   }
 );
+
+export const getWebcamSnapshot = createActionThunk(
+  "PRINTERS_GET_WEBCAM_SNAPSHOT",
+  (url, { dispatch }) => {
+    return retryIfUnauthorized(backend.getWebcamSnapshot, dispatch)(url);
+  }
+);

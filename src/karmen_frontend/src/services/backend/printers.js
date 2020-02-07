@@ -162,7 +162,7 @@ function arrayBufferToBase64(buffer) {
 
 export const getWebcamSnapshot = snapshotUrl => {
   if (!snapshotUrl) {
-    return Promise.resolve();
+    return Promise.resolve({ status: 404 });
   }
   let headers = getHeaders();
   headers.set("pragma", "no-cache");
@@ -180,17 +180,20 @@ export const getWebcamSnapshot = snapshotUrl => {
       if (response.status === 200) {
         let contentType = response.headers.get("content-type");
         return response.arrayBuffer().then(buffer => ({
-          prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
-          data: arrayBufferToBase64(buffer)
+          status: 200,
+          data: {
+            prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
+            data: arrayBufferToBase64(buffer)
+          }
         }));
       }
       if (response.status !== 202) {
         console.error(`Cannot get webcam snapshot: ${response.status}`);
       }
-      return response.status;
+      return { status: response.status };
     })
     .catch(e => {
       console.error(`Cannot get webcam snapshot: ${e}`);
-      return 500;
+      return { status: 500 };
     });
 };

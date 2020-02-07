@@ -15,7 +15,8 @@ import {
   loadPrinter,
   patchPrinter,
   setPrinterConnection,
-  changeCurrentJob
+  changeCurrentJob,
+  getWebcamSnapshot
 } from "../actions/printers";
 
 class PrinterConnectionForm extends React.Component {
@@ -511,7 +512,8 @@ class PrinterDetail extends React.Component {
       role,
       jobList,
       loadJobsPage,
-      clearJobsPages
+      clearJobsPages,
+      getWebcamSnapshot
     } = this.props;
     if (!printerLoaded) {
       return (
@@ -527,7 +529,10 @@ class PrinterDetail extends React.Component {
       <section className="content">
         <div className="printer-detail">
           <div className="printer-detail-stream">
-            <WebcamStream {...printer.webcam} />
+            <WebcamStream
+              {...printer.webcam}
+              getWebcamSnapshot={getWebcamSnapshot}
+            />
             <Progress {...printer.job} />
           </div>
 
@@ -629,6 +634,7 @@ export default connect(
           limit
         )
       ),
-    clearJobsPages: () => dispatch(clearJobsPages(ownProps.match.params.uuid))
+    clearJobsPages: () => dispatch(clearJobsPages(ownProps.match.params.uuid)),
+    getWebcamSnapshot: url => dispatch(getWebcamSnapshot(url))
   })
 )(PrinterDetail);
