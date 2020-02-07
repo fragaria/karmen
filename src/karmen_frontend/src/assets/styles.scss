@@ -1,7 +1,6 @@
-// @import "fonts.css";
+// @import "fonts";
 @import "reset.css";
 @import "./icons/style.css";
-// @import "fonts";
 @import "variables";
 @import "mixins";
 
@@ -543,7 +542,7 @@ select {
   color: #000;
   border: $border-default;
   border-radius: 0;
-  font-family: "Monoid", sans-serif;
+  font-family: $sans-serif;
 }
 
 .input-group {
