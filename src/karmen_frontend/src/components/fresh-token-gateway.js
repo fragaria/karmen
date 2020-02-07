@@ -1,4 +1,5 @@
 import React from "react";
+import dayjs from "dayjs";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { authenticateFresh } from "../actions/users";
@@ -13,6 +14,7 @@ class FreshTokenGateway extends React.Component {
       username,
       doAuthenticate,
       hasFreshToken,
+      accessTokenExpiresOn,
       history
     } = this.props;
     if (!userState || userState === "unknown") {
@@ -22,7 +24,11 @@ class FreshTokenGateway extends React.Component {
         </div>
       );
     }
-    if (hasFreshToken) {
+    // Token I have is fresh and will last at least 5 more minutes
+    if (
+      hasFreshToken &&
+      dayjs().isBefore(accessTokenExpiresOn.subtract(5, "minutes"))
+    ) {
       return <React.Fragment>{children}</React.Fragment>;
     }
     return (
@@ -48,7 +54,8 @@ export default withRouter(
     state => ({
       userState: state.users.me.currentState,
       username: state.users.me.username,
-      hasFreshToken: state.users.me.hasFreshToken
+      hasFreshToken: state.users.me.hasFreshToken,
+      accessTokenExpiresOn: state.users.me.accessTokenExpiresOn
     }),
     dispatch => ({
       doAuthenticate: (username, password) =>
