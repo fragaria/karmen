@@ -106,7 +106,9 @@ class Octoprint(PrinterClient):
                 data=data,
                 files=files,
                 json=json,
-                timeout=app.config.get("NETWORK_TIMEOUT", 10),
+                timeout=app.config.get("NETWORK_TIMEOUT", 10)
+                if files is None and data is None
+                else None,
             )
             if req is None:
                 self.client_info.connected = False

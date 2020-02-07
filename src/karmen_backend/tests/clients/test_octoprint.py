@@ -784,6 +784,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         args, kwargs = mock_post_uri.call_args
         self.assertEqual(kwargs["data"], {"path": "karmen", "print": True})
         self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
+        self.assertEqual(kwargs["timeout"], None)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.clients.octoprint.requests.Session.post")
