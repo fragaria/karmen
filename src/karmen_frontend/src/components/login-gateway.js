@@ -14,7 +14,7 @@ class LoginGateway extends React.Component {
         </div>
       );
     }
-    if (userState === "logged-in") {
+    if (userState === "logged-in" || userState === "pwd-change-required") {
       return <React.Fragment>{children}</React.Fragment>;
     }
     return <LoginForm doAuthenticate={doAuthenticate} />;
