@@ -2,7 +2,10 @@ import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Loader from "../components/loader";
-import { getGcode, printGcode, downloadGcode } from "../services/backend";
+
+import { loadGcode, downloadGcode } from "../actions/gcodes";
+import { addPrintJob } from "../actions/printjobs";
+
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 
@@ -27,16 +30,17 @@ class GcodeDetail extends React.Component {
   }
 
   loadGcode() {
-    const { match } = this.props;
-    getGcode(match.params.id, []).then(gcode => {
+    const { match, getGcode } = this.props;
+    getGcode(match.params.id, []).then(r => {
       this.setState({
-        gcode,
+        gcode: r.data,
         gcodeLoaded: true
       });
     });
   }
 
   schedulePrint(gcodeId, printerUuid) {
+    const { printGcode } = this.props;
     printGcode(gcodeId, printerUuid).then(r => {
       const { printedOn } = this.state;
       printedOn.push(printerUuid);
@@ -81,7 +85,7 @@ class GcodeDetail extends React.Component {
       printerFilamentType,
       gcodeFilamentType
     } = this.state;
-
+    const { downloadGcode } = this.props;
     if (!gcodeLoaded) {
       return (
         <div>
@@ -208,7 +212,7 @@ class GcodeDetail extends React.Component {
             )}
           </dl>
           <div>
-            {!!availablePrinters.length && (
+            {(!!availablePrinters.length || message) && (
               <form className="inline-form">
                 {showFilamentTypeWarningMessage ? (
                   <div>
@@ -248,54 +252,58 @@ class GcodeDetail extends React.Component {
                   </div>
                 ) : (
                   <div>
-                    On which printer would you like to print?{" "}
-                    <select
-                      id="selectedPrinter"
-                      name="selectedPrinter"
-                      value={selectedPrinter}
-                      onChange={e =>
-                        this.setState({
-                          selectedPrinter: e.target.value
-                        })
-                      }
-                    >
-                      {availablePrinterOpts}
-                    </select>
-                    <button
-                      className="btn"
-                      type="submit"
-                      onClick={e => {
-                        e.preventDefault();
-                        const selected = availablePrinters.find(
-                          p => p.uuid === selectedPrinter
-                        );
-                        if (
-                          selected &&
-                          selected.printer_props &&
-                          selected.printer_props.filament_type &&
-                          gcode.analysis &&
-                          gcode.analysis.filament &&
-                          gcode.analysis.filament.type &&
-                          gcode.analysis.filament.type !==
-                            selected.printer_props.filament_type
-                        ) {
-                          this.setState({
-                            showFilamentTypeWarningMessage: true,
-                            printerFilamentType:
-                              selected.printer_props.filament_type,
-                            gcodeFilamentType: gcode.analysis.filament.type
-                          });
-                          return;
-                        }
-                        this.setState({
-                          submitting: true
-                        });
-                        this.schedulePrint(gcode.id, selectedPrinter);
-                      }}
-                      disabled={submitting}
-                    >
-                      {submitting ? "Uploading..." : "Print"}
-                    </button>
+                    {!message && (
+                      <>
+                        On which printer would you like to print?{" "}
+                        <select
+                          id="selectedPrinter"
+                          name="selectedPrinter"
+                          value={selectedPrinter}
+                          onChange={e =>
+                            this.setState({
+                              selectedPrinter: e.target.value
+                            })
+                          }
+                        >
+                          {availablePrinterOpts}
+                        </select>
+                        <button
+                          className="btn"
+                          type="submit"
+                          onClick={e => {
+                            e.preventDefault();
+                            const selected = availablePrinters.find(
+                              p => p.uuid === selectedPrinter
+                            );
+                            if (
+                              selected &&
+                              selected.printer_props &&
+                              selected.printer_props.filament_type &&
+                              gcode.analysis &&
+                              gcode.analysis.filament &&
+                              gcode.analysis.filament.type &&
+                              gcode.analysis.filament.type !==
+                                selected.printer_props.filament_type
+                            ) {
+                              this.setState({
+                                showFilamentTypeWarningMessage: true,
+                                printerFilamentType:
+                                  selected.printer_props.filament_type,
+                                gcodeFilamentType: gcode.analysis.filament.type
+                              });
+                              return;
+                            }
+                            this.setState({
+                              submitting: true
+                            });
+                            this.schedulePrint(gcode.id, selectedPrinter);
+                          }}
+                          disabled={submitting}
+                        >
+                          {submitting ? "Uploading..." : "Print"}
+                        </button>
+                      </>
+                    )}
                     {message && (
                       <p
                         className={
@@ -344,6 +352,9 @@ export default connect(
         .filter(p => without.indexOf(p.uuid) === -1)
   }),
   dispatch => ({
-    loadPrinters: () => dispatch(loadPrinters(["status"]))
+    loadPrinters: () => dispatch(loadPrinters(["status"])),
+    getGcode: id => dispatch(loadGcode(id, [])),
+    printGcode: (id, printer) => dispatch(addPrintJob(id, printer)),
+    downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename))
   })
 )(GcodeDetail);

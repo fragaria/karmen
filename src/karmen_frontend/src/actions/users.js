@@ -3,6 +3,26 @@ import jwt_decode from "jwt-decode";
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
 
+export const retryIfUnauthorized = (func, dispatch) => {
+  return (...args) => {
+    return func(...args).then(r => {
+      if (r.status === 401) {
+        if (!dispatch) {
+          return Promise.reject();
+        }
+        return dispatch(refreshToken()).then(r => {
+          if (r.status === 200) {
+            return func(...args);
+          } else {
+            return dispatch(clearUserIdentity);
+          }
+        });
+      }
+      return r;
+    });
+  };
+};
+
 export const loadUserFromToken = (accessToken, refreshToken) => dispatch => {
   dispatch({
     type: "USER_LOADED_FROM_STORAGE",
@@ -146,8 +166,19 @@ export const clearUsersPages = () => dispatch => {
 
 export const getUsersPage = createActionThunk(
   "USERS_LOAD_PAGE",
-  (startWith = null, orderBy = null, filter = null, limit = 15) => {
-    return backend.getUsers(startWith, orderBy, filter, limit).then(r => {
+  (
+    startWith = null,
+    orderBy = null,
+    filter = null,
+    limit = 15,
+    { dispatch }
+  ) => {
+    return retryIfUnauthorized(backend.getUsers, dispatch)(
+      startWith,
+      orderBy,
+      filter,
+      limit
+    ).then(r => {
       return {
         status: r.status,
         data: r.data,
@@ -162,34 +193,23 @@ export const getUsersPage = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (username, role, password, passwordConfirmation) => {
-    return backend.addUser(username, role, password, passwordConfirmation);
+  (username, role, password, passwordConfirmation, { dispatch }) => {
+    return retryIfUnauthorized(backend.addUser, dispatch)(
+      username,
+      role,
+      password,
+      passwordConfirmation
+    );
   }
 );
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (uuid, role, suspended) => {
-    return backend.patchUser(uuid, role, suspended);
+  (uuid, role, suspended, { dispatch }) => {
+    return retryIfUnauthorized(backend.patchUser, dispatch)(
+      uuid,
+      role,
+      suspended
+    );
   }
 );
-
-export const retryIfUnauthorized = (func, dispatch) => {
-  return (...args) => {
-    return func(...args).then(r => {
-      if (r.status === 401) {
-        if (!dispatch) {
-          return Promise.reject();
-        }
-        return dispatch(refreshToken()).then(r => {
-          if (r.status === 200) {
-            return func(...args);
-          } else {
-            return dispatch(clearUserIdentity);
-          }
-        });
-      }
-      return r;
-    });
-  };
-};

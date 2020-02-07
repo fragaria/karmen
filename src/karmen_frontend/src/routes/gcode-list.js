@@ -1,12 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { DebounceInput } from "react-debounce-input";
 
+import TableWrapper from "../components/table-wrapper";
 import TableActionRow from "../components/table-action-row";
-import TableSorting from "../components/table-sorting";
 import ListCta from "../components/list-cta";
-import { getGcodes, deleteGcode, printGcode } from "../services/backend";
+import {
+  getGcodesPage,
+  clearGcodesPages,
+  deleteGcode
+} from "../actions/gcodes";
+import { addPrintJob } from "../actions/printjobs";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 
@@ -33,7 +37,7 @@ class GcodeTableRow extends React.Component {
 
   schedulePrint(gcodeId, printerUuid) {
     const { onSchedulePrint } = this.props;
-    printGcode(gcodeId, printerUuid).then(r => {
+    onSchedulePrint(gcodeId, printerUuid).then(r => {
       switch (r) {
         case 201:
           this.setState({
@@ -43,7 +47,6 @@ class GcodeTableRow extends React.Component {
             message: "Print was scheduled",
             messageOk: true
           });
-          onSchedulePrint && onSchedulePrint(gcodeId, printerUuid);
           break;
         default:
           this.setState({
@@ -279,116 +282,26 @@ class GcodeTableRow extends React.Component {
 
 class GcodeList extends React.Component {
   state = {
-    gcodes: null,
-    currentPage: 0,
-    pages: [
-      {
-        startWith: null
-      }
-    ],
-    orderBy: "-uploaded",
-    filter: "",
-    message: null,
     printedOn: []
   };
-
-  constructor(props) {
-    super(props);
-    this.loadPage = this.loadPage.bind(this);
-  }
-
-  // TODO move this to redux, reuse TableWrapper
-  loadPage(page, newOrderBy, newFilter) {
-    let { pages, orderBy, filter } = this.state;
-    // reset pages if orderBy has changed
-    if (newOrderBy !== orderBy || newFilter !== filter) {
-      pages = [
-        {
-          startWith: null
-        }
-      ];
-      page = 0;
-    }
-    getGcodes(pages[page].startWith, newOrderBy, newFilter, 10, [
-      "id",
-      "display",
-      "filename",
-      "path",
-      "size",
-      "uploaded",
-      "analysis",
-      "user_uuid",
-      "username"
-    ]).then(gcodes => {
-      // Handles deleting of the last row on a non-zero page
-      if (!gcodes.next && gcodes.items.length === 0 && page - 1 >= 0) {
-        this.loadPage(page - 1, newOrderBy);
-        return;
-      }
-      let nextStartWith;
-      if (gcodes.next) {
-        const uri = new URL(formatters.absoluteUrl(gcodes.next));
-        nextStartWith = uri.searchParams.get("start_with");
-      }
-      if (nextStartWith) {
-        pages.push({
-          startWith: nextStartWith
-        });
-      } else {
-        pages = [].concat(pages.slice(0, page + 1));
-      }
-      this.setState({
-        gcodes: gcodes.items,
-        currentPage: page,
-        pages: pages,
-        orderBy: newOrderBy,
-        filter: newFilter
-      });
-    });
-  }
 
   componentDidMount() {
     const { printersLoaded, loadPrinters } = this.props;
     if (!printersLoaded) {
       loadPrinters();
     }
-    const { orderBy } = this.state;
-    this.loadPage(0, orderBy);
   }
 
   render() {
+    const { printedOn } = this.state;
     const {
-      gcodes,
-      currentPage,
-      pages,
-      orderBy,
-      filter,
-      printedOn
-    } = this.state;
-    const { getAvailablePrinters } = this.props;
-    const GcodeTableRows =
-      gcodes &&
-      gcodes.map(g => {
-        return (
-          <GcodeTableRow
-            key={g.id}
-            {...g}
-            history={this.props.history}
-            onSchedulePrint={(gcode, printer) => {
-              printedOn.push(printer);
-              this.setState({
-                printedOn: [].concat(printedOn)
-              });
-            }}
-            availablePrinters={getAvailablePrinters(printedOn)}
-            onRowDelete={() => {
-              deleteGcode(g.id).then(() => {
-                this.loadPage(currentPage, orderBy);
-              });
-            }}
-          />
-        );
-      });
+      getAvailablePrinters,
+      gcodesList,
+      loadGcodesPage,
+      clearGcodesPages,
+      deleteGcode,
+      printGcode
+    } = this.props;
 
     return (
       <section className="content">
@@ -401,82 +314,56 @@ class GcodeList extends React.Component {
           </h1>
         </div>
 
-        <div className="list">
-          <div className="list-header">
-            <div className="list-search">
-              <label htmlFor="filter">
-                <span className="icon icon-search"></span>
-                <DebounceInput
-                  type="search"
-                  name="filter"
-                  id="filter"
-                  minLength={3}
-                  debounceTimeout={300}
-                  onChange={e => {
-                    this.loadPage(currentPage, orderBy, e.target.value);
-                  }}
-                />
-              </label>
-            </div>
-
-            <TableSorting
-              active={orderBy}
-              columns={["filename", "size", "uploaded"]}
-              onChange={column => {
-                return () => {
-                  const { orderBy } = this.state;
-                  this.loadPage(
-                    currentPage,
-                    orderBy === `+${column}` ? `-${column}` : `+${column}`,
-                    filter
-                  );
-                };
-              }}
-            />
-          </div>
-
-          {gcodes === null ? (
-            <p className="list-item list-item-message">Loading...</p>
-          ) : !GcodeTableRows || GcodeTableRows.length === 0 ? (
-            <p className="list-item list-item-message">No G-Codes found!</p>
-          ) : (
-            <>
-              {GcodeTableRows}
-
-              <div className="list-pagination">
-                {currentPage > 0 ? (
-                  <button
-                    className="btn btn-sm"
-                    onClick={() =>
-                      this.loadPage(
-                        Math.max(0, currentPage - 1),
-                        orderBy,
-                        filter
-                      )
+        <TableWrapper
+          rowFactory={g => {
+            return (
+              <GcodeTableRow
+                key={g.id}
+                {...g}
+                history={this.props.history}
+                printGcode={printGcode}
+                onSchedulePrint={(gcodeId, printerUuid) => {
+                  return printGcode(gcodeId, printerUuid).then(r => {
+                    if (r === 201) {
+                      printedOn.push(printerUuid);
+                      this.setState({
+                        printedOn: [].concat(printedOn)
+                      });
                     }
-                  >
-                    Previous
-                  </button>
-                ) : (
-                  <span></span>
-                )}
-                {currentPage > 0 && pages[currentPage + 1] && " "}
-                {pages[currentPage + 1] ? (
-                  <button
-                    className="btn btn-sm"
-                    onClick={() =>
-                      this.loadPage(currentPage + 1, orderBy, filter)
-                    }
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <span></span>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+                    return r;
+                  });
+                }}
+                availablePrinters={getAvailablePrinters(printedOn)}
+                onRowDelete={() => {
+                  deleteGcode(g.id).then(() => {
+                    loadGcodesPage(
+                      gcodesList.startWith,
+                      gcodesList.orderBy,
+                      gcodesList.filter,
+                      gcodesList.limit,
+                      gcodesList.fields
+                    );
+                  });
+                }}
+              />
+            );
+          }}
+          itemList={gcodesList}
+          sortByColumns={["filename", "size", "uploaded"]}
+          loadPage={loadGcodesPage}
+          clearItemsPages={clearGcodesPages}
+          fields={[
+            "id",
+            "display",
+            "filename",
+            "path",
+            "size",
+            "uploaded",
+            "analysis",
+            "user_uuid",
+            "username"
+          ]}
+        />
       </section>
     );
   }
@@ -485,6 +372,7 @@ class GcodeList extends React.Component {
 export default connect(
   state => ({
     printersLoaded: state.printers.printersLoaded,
+    gcodesList: state.gcodes.list,
     getAvailablePrinters: (without = []) =>
       state.printers.printers
         .filter(p => p.status && p.status.state === "Operational")
@@ -493,6 +381,11 @@ export default connect(
         .filter(p => without.indexOf(p.uuid) === -1)
   }),
   dispatch => ({
-    loadPrinters: () => dispatch(loadPrinters(["status"]))
+    loadPrinters: () => dispatch(loadPrinters(["status"])),
+    loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>
+      dispatch(getGcodesPage(startWith, orderBy, filter, limit, fields)),
+    clearGcodesPages: () => dispatch(clearGcodesPages()),
+    deleteGcode: id => dispatch(deleteGcode(id)),
+    printGcode: (id, printer) => dispatch(addPrintJob(id, printer))
   })
 )(GcodeList);

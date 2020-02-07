@@ -147,6 +147,6 @@ export default connect(
     accessTokenExpiresOn: state.users.me.accessTokenExpiresOn
   }),
   dispatch => ({
-    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
+    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage())
   })
 )(App);

@@ -1,7 +1,8 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
 
-import { uploadGcode } from "../services/backend";
+import { uploadGcode } from "../actions/gcodes";
 import BusyButton from "../components/busy-button";
 
 class AddGcode extends React.Component {
@@ -20,6 +21,7 @@ class AddGcode extends React.Component {
 
   addCode(e) {
     e.preventDefault();
+    const { uploadGcode } = this.props;
     const { toUpload, path } = this.state;
     if (!toUpload) {
       this.setState({
@@ -119,4 +121,6 @@ class AddGcode extends React.Component {
   }
 }
 
-export default AddGcode;
+export default connect(null, dispatch => ({
+  uploadGcode: (path, toUpload) => dispatch(uploadGcode(path, toUpload))
+}))(AddGcode);

@@ -29,17 +29,14 @@ export const getGcodes = (
     .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get list of gcodes: ${response.status}`);
-        return {
-          items: []
-        };
       }
-      return response.json();
+      return response.json().then(data => {
+        return { status: response.status, data };
+      });
     })
     .catch(e => {
       console.error(`Cannot get list of gcodes: ${e}`);
-      return {
-        items: []
-      };
+      return {};
     });
 };
 
@@ -54,9 +51,10 @@ export const getGcode = (id, fields = []) => {
     .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get a gcode: ${response.status}`);
-        return;
       }
-      return response.json();
+      return response.json().then(data => {
+        return { status: response.status, data };
+      });
     })
     .catch(e => {
       console.error(`Cannot get a gcode: ${e}`);
@@ -73,7 +71,7 @@ export const deleteGcode = id => {
       if (response.status !== 204) {
         console.error(`Cannot remove a gcode: ${response.status}`);
       }
-      return response.status;
+      return { status: response.status, data: { id } };
     })
     .catch(e => {
       console.error(`Cannot remove a gcode: ${e}`);
@@ -118,12 +116,14 @@ export const downloadGcode = (dataLink, filename) => {
       if (response.status === 200) {
         return response.blob().then(d => {
           download(d, filename, d.type);
+          return { status: 200 };
         });
       }
       console.error(`Cannot download a gcode: ${response.status}`);
+      return { status: response.status };
     })
     .catch(e => {
       console.error(`Cannot download a gcode: ${e}`);
-      return false;
+      return { status: 500 };
     });
 };

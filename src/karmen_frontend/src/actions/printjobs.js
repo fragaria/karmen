@@ -40,3 +40,10 @@ export const getJobsPage = createActionThunk(
     });
   }
 );
+
+export const addPrintJob = createActionThunk(
+  "JOBS_ADD",
+  (id, printer, { dispatch }) => {
+    return retryIfUnauthorized(backend.printGcode, dispatch)(id, printer);
+  }
+);

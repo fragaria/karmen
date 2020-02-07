@@ -32,6 +32,23 @@ class TableWrapper extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    // renavigate if i'm on a page with no records - for example after a delete of the last item
+    const { itemList } = this.props;
+    const currentPage =
+      itemList.pages && itemList.pages[this.state.currentPageIndex];
+    if (
+      currentPage &&
+      currentPage.data &&
+      !currentPage.data.next &&
+      currentPage.data.items &&
+      currentPage.data.items.length === 0 &&
+      this.state.currentPageIndex - 1 >= 0
+    ) {
+      this.setState({
+        currentPageIndex: this.state.currentPageIndex - 1
+      });
+      return;
+    }
     if (prevState.currentPageIndex !== this.state.currentPageIndex) {
       const { itemList } = this.props;
       const prevPage = itemList.pages[prevState.currentPageIndex];
@@ -56,11 +73,11 @@ class TableWrapper extends React.Component {
   }
 
   reloadTableWith(nextStart, orderBy, filter, limit, currentPageIndex) {
-    const { loadPage } = this.props;
+    const { loadPage, fields } = this.props;
     this.setState({
       itemsLoaded: false
     });
-    return loadPage(nextStart, orderBy, filter, limit).then(() => {
+    return loadPage(nextStart, orderBy, filter, limit, fields).then(() => {
       this.setState({
         currentPageIndex: currentPageIndex || 0,
         itemsLoaded: true
