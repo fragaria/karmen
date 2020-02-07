@@ -7,7 +7,6 @@ services:
     environment:
       SERVICE_HOST: ${KARMEN_HOST:-0.0.0.0}
       SERVICE_PORT: ${KARMEN_PORT:-80}
-      REDIS_HOST: 127.0.0.1
       FRONTEND_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
       FRONTEND_PORT: ${KARMEN_FRONTEND_PORT:-9765}
       BACKEND_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
@@ -31,6 +30,10 @@ services:
     environment:
       ENV: production
       SERVICE: flask
+      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
+      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
+      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
+      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
       SERVICE_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
@@ -61,8 +64,10 @@ services:
     command: scripts/migrate.sh
     environment:
       ENV: production
-      POSTGRES_HOST: 127.0.0.1
-      POSTGRES_PORT: 5433
+      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
+      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
+      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
+      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
     depends_on:
       - postgres
   backend_celery_worker:
@@ -72,6 +77,10 @@ services:
     environment:
       ENV: production
       SERVICE: celery-worker
+      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
+      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
+      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
+      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
@@ -88,6 +97,10 @@ services:
     environment:
       ENV: production
       SERVICE: celery-beat
+      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
+      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
+      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
+      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
@@ -98,7 +111,7 @@ services:
   redis:
     image: redis:5
     ports:
-      - 127.0.0.1:6379:6379
+      - 127.0.0.1:${KARMEN_REDIS_PORT:-6379}:6379
   postgres:
     image: postgres:11
     user: '1000:1000'
@@ -112,4 +125,4 @@ services:
     depends_on:
       - dbfiles
     ports:
-      - 127.0.0.1:5433:5432
+      - 127.0.0.1:${KARMEN_POSTGRES_PORT:-5433}:5432

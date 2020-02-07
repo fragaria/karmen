@@ -1,9 +1,6 @@
 worker_processes auto;
 pid /run/nginx.pid;
 
-env REDIS_HOST;
-env REDIS_PORT;
-
 events {
     worker_connections 1024;
     use epoll;

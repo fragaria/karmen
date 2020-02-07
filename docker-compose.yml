@@ -32,6 +32,8 @@ services:
     build: ./src/karmen_backend
     environment:
       REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       ENV: develop
       SERVICE: flask
       FLASKR_SETTINGS: '../config.dev.cfg'
@@ -99,6 +101,8 @@ services:
     build: ./src/karmen_backend
     environment:
       REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       ENV: develop
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.dev.cfg'
@@ -117,6 +121,8 @@ services:
     build: ./src/karmen_backend
     environment:
       REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       ENV: develop
       SERVICE: celery-beat
       FLASKR_SETTINGS: '../config.dev.cfg'

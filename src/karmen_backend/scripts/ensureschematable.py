@@ -6,7 +6,7 @@ import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
 
-DSN = "host='%s' port=%s dbname='print3d' user='print3d' password='print3d'" % (os.environ.get("POSTGRES_HOST", "localhost"), os.environ.get("POSTGRES_PORT", "5432"))
+DSN = "host='%s' port=%s dbname='print3d' user='print3d' password='print3d'" % (os.environ.get("POSTGRES_HOST", "127.0.0.1"), os.environ.get("POSTGRES_PORT", "5433"))
 CONNECTION = None
 
 def connect():
