@@ -39,6 +39,14 @@ class LoginForm extends React.Component {
     return null;
   }
 
+  componentDidMount() {
+    this._ismounted = true;
+  }
+
+  componentWillUnmount() {
+    this._ismounted = false;
+  }
+
   login(e) {
     e.preventDefault();
     const { loginForm } = this.state;
@@ -62,24 +70,26 @@ class LoginForm extends React.Component {
     return doAuthenticate(loginForm.username.val, loginForm.password.val).then(
       r => {
         if (r.status !== 200) {
-          this.setState({
-            messageOk: false,
-            message:
-              (r.data && r.data.message) ||
-              "Login unsuccessful, try again, please.",
-            loginForm: Object.assign({}, loginForm, {
-              password: Object.assign({}, loginForm.password, { val: "" })
-            })
-          });
+          this._ismounted &&
+            this.setState({
+              messageOk: false,
+              message:
+                (r.data && r.data.message) ||
+                "Login unsuccessful, try again, please.",
+              loginForm: Object.assign({}, loginForm, {
+                password: Object.assign({}, loginForm.password, { val: "" })
+              })
+            });
         } else {
-          this.setState({
-            message: "",
-            messageOk: true,
-            loginForm: Object.assign({}, loginForm, {
-              password: Object.assign({}, loginForm.password, { val: "" }),
-              username: Object.assign({}, loginForm.username, { val: "" })
-            })
-          });
+          this._ismounted &&
+            this.setState({
+              message: "",
+              messageOk: true,
+              loginForm: Object.assign({}, loginForm, {
+                password: Object.assign({}, loginForm.password, { val: "" }),
+                username: Object.assign({}, loginForm.username, { val: "" })
+              })
+            });
         }
       }
     );

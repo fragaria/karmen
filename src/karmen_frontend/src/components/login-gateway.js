@@ -4,22 +4,19 @@ import { authenticate } from "../actions/users";
 import LoginForm from "./login-form";
 import Loader from "./loader";
 
-class LoginGateway extends React.Component {
-  render() {
-    const { children, userState, doAuthenticate } = this.props;
-    if (!userState || userState === "unknown") {
-      return (
-        <div>
-          <Loader />
-        </div>
-      );
-    }
-    if (userState === "logged-in" || userState === "pwd-change-required") {
-      return <React.Fragment>{children}</React.Fragment>;
-    }
-    return <LoginForm doAuthenticate={doAuthenticate} />;
+const LoginGateway = ({ children, userState, doAuthenticate }) => {
+  if (!userState || userState === "unknown") {
+    return (
+      <div>
+        <Loader />
+      </div>
+    );
   }
-}
+  if (userState === "logged-in" || userState === "pwd-change-required") {
+    return <React.Fragment>{children}</React.Fragment>;
+  }
+  return <LoginForm doAuthenticate={doAuthenticate} />;
+};
 
 export default connect(
   state => ({

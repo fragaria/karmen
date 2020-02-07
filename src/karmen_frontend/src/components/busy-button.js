@@ -6,6 +6,14 @@ class BusyButton extends React.Component {
     isBusy: false
   };
 
+  componentDidMount() {
+    this._ismounted = true;
+  }
+
+  componentWillUnmount() {
+    this._ismounted = false;
+  }
+
   render() {
     const {
       className,
@@ -35,7 +43,8 @@ class BusyButton extends React.Component {
             isDisabled: true
           });
           return Promise.resolve(onClick(e)).then(r => {
-            this.setState({ isBusy: false, isDisabled: undefined });
+            this._ismounted &&
+              this.setState({ isBusy: false, isDisabled: undefined });
             return r;
           });
         }}
