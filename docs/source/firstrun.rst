@@ -62,5 +62,5 @@ like this:
   configuration, they will stop working altogether.
 
 If you need to automate some administrative tasks, you should be successful if you copy your active
-session token (after you are prompted for password) from the browser's local storage. Such token has
+session token (after you are prompted for password) from a browser's session. Such token
 will expire in a few minutes, though, so you have to be quick.
