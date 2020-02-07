@@ -59,8 +59,10 @@ export default (
         return state;
       }
       userData = getUserDataFromToken(action.payload.data.access_token);
-      setAccessToken(action.payload.data.access_token);
-      setRefreshToken(action.payload.data.refresh_token);
+      action.payload.data.access_token &&
+        setAccessToken(action.payload.data.access_token);
+      action.payload.data.refresh_token &&
+        setRefreshToken(action.payload.data.refresh_token);
       return Object.assign({}, state, {
         me: {
           ...userData,
@@ -92,12 +94,6 @@ export default (
         me: Object.assign({}, state.me, {
           ...userData,
           accessToken: action.payload.data.access_token
-        })
-      });
-    case "USER_SET_CURRENT_STATE":
-      return Object.assign({}, state, {
-        me: Object.assign({}, state.me, {
-          currentState: action.payload.currentState
         })
       });
     case "USER_CLEAR":

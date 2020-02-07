@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { FormInputs } from "../components/form-utils";
 import { addUser } from "../actions/users";
 import RoleBasedGateway from "../components/role-based-gateway";
-import FreshUserRequiredCheck from "../components/fresh-token-required-check";
+import FreshTokenGateway from "../components/fresh-token-gateway";
 import BusyButton from "../components/busy-button";
 
 class AddUser extends React.Component {
@@ -111,72 +111,63 @@ class AddUser extends React.Component {
 
   render() {
     const { form, message, messageOk, redirect } = this.state;
-    const { hasFreshUser } = this.props;
-    if (!hasFreshUser) {
-      return (
-        <RoleBasedGateway requiredRole="admin">
-          <FreshUserRequiredCheck />
-        </RoleBasedGateway>
-      );
-    }
     if (redirect) {
       return <Redirect to="/settings" />;
     }
     return (
       <RoleBasedGateway requiredRole="admin">
-        <div className="content">
-          <div className="container">
-            <h1 className="main-title text-center">Add a new user</h1>
-            <p className="text-center">
-              The password is for the first login only and will have to be
-              changed afterwards.
-            </p>
-            <form>
-              {message && (
-                <p className={messageOk ? "message-success" : "message-error"}>
-                  {message}
-                </p>
-              )}
-              <FormInputs
-                definition={form}
-                updateValue={(name, value) => {
-                  this.setState({
-                    form: Object.assign({}, form, {
-                      [name]: Object.assign({}, form[name], {
-                        val: value,
-                        error: null
+        <FreshTokenGateway>
+          <div className="content">
+            <div className="container">
+              <h1 className="main-title text-center">Add a new user</h1>
+              <p className="text-center">
+                The password is for the first login only and will have to be
+                changed afterwards.
+              </p>
+              <form>
+                {message && (
+                  <p
+                    className={messageOk ? "message-success" : "message-error"}
+                  >
+                    {message}
+                  </p>
+                )}
+                <FormInputs
+                  definition={form}
+                  updateValue={(name, value) => {
+                    this.setState({
+                      form: Object.assign({}, form, {
+                        [name]: Object.assign({}, form[name], {
+                          val: value,
+                          error: null
+                        })
                       })
-                    })
-                  });
-                }}
-              />
-              <div className="cta-box text-center">
-                <BusyButton
-                  className="btn"
-                  type="submit"
-                  onClick={this.addUser}
-                  busyChildren="Adding..."
-                >
-                  Add user
-                </BusyButton>{" "}
-                <Link to="/settings" className="btn btn-plain">
-                  Cancel
-                </Link>
-              </div>
-            </form>
+                    });
+                  }}
+                />
+                <div className="cta-box text-center">
+                  <BusyButton
+                    className="btn"
+                    type="submit"
+                    onClick={this.addUser}
+                    busyChildren="Adding..."
+                  >
+                    Add user
+                  </BusyButton>{" "}
+                  <Link to="/settings" className="btn btn-plain">
+                    Cancel
+                  </Link>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </FreshTokenGateway>
       </RoleBasedGateway>
     );
   }
 }
 
-export default connect(
-  state => ({
-    hasFreshUser: state.users.me.hasFreshToken
-  }),
-  dispatch => ({
-    createUser: (username, role, password, passwordConfirmation) =>
-      dispatch(addUser(username, role, password, passwordConfirmation))
-  })
-)(AddUser);
+export default connect(null, dispatch => ({
+  createUser: (username, role, password, passwordConfirmation) =>
+    dispatch(addUser(username, role, password, passwordConfirmation))
+}))(AddUser);

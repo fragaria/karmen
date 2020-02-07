@@ -75,10 +75,10 @@ class App extends React.Component {
                     exact
                     component={AddApiToken}
                   />
+                  <Route path="/settings" exact component={Settings} />
                   <Route path="/add-user" exact component={AddUser} />
                   <Route path="/add-printer" exact component={AddPrinter} />
                   <Route path="/add-gcode" exact component={AddGcode} />
-                  <Route path="/settings" exact component={Settings} />
                   <Route path="/gcodes" exact component={GcodeList} />
                   <Route path="/gcodes/:id" exact component={GcodeDetail} />
                   <Route

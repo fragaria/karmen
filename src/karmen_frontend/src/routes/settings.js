@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import RoleBasedGateway from "../components/role-based-gateway";
-import FreshUserRequiredCheck from "../components/fresh-token-required-check";
+import FreshTokenGateway from "../components/fresh-token-gateway";
 import TableWrapper from "../components/table-wrapper";
 import NetworkScan from "../components/network-scan";
 import PrintersTable from "../components/printer-list-settings";
@@ -178,7 +178,6 @@ const UsersTableRow = ({ currentUuid, user, onUserChange }) => {
 
 const Settings = ({
   currentUuid,
-  hasFreshUser,
   loadUsersPage,
   clearUsersPages,
   userList,
@@ -191,75 +190,69 @@ const Settings = ({
   changeSettings,
   enqueueTask
 }) => {
-  if (!hasFreshUser) {
-    return (
-      <RoleBasedGateway requiredRole="admin">
-        <FreshUserRequiredCheck />
-      </RoleBasedGateway>
-    );
-  }
   return (
     <RoleBasedGateway requiredRole="admin">
-      <div className="content user-list">
-        <div className="container">
-          <h1 className="main-title">
-            Printers
-            <Link to="/add-printer" className="btn btn-sm">
-              <span>+ Add a printer</span>
-            </Link>
-          </h1>
-        </div>
-        <PrintersTable
-          loadPrinters={loadPrinters}
-          printersList={printersList}
-          printersLoaded={printersLoaded}
-          onPrinterDelete={onPrinterDelete}
-        />
+      <FreshTokenGateway>
+        <div className="content user-list">
+          <div className="container">
+            <h1 className="main-title">
+              Printers
+              <Link to="/add-printer" className="btn btn-sm">
+                <span>+ Add a printer</span>
+              </Link>
+            </h1>
+          </div>
+          <PrintersTable
+            loadPrinters={loadPrinters}
+            printersList={printersList}
+            printersLoaded={printersLoaded}
+            onPrinterDelete={onPrinterDelete}
+          />
 
-        <div className="container">
-          <br />
-          <br />
-          <strong>Network scan</strong>
-          <NetworkScan
-            getSettings={getSettings}
-            changeSettings={changeSettings}
-            enqueueTask={enqueueTask}
+          <div className="container">
+            <br />
+            <br />
+            <strong>Network scan</strong>
+            <NetworkScan
+              getSettings={getSettings}
+              changeSettings={changeSettings}
+              enqueueTask={enqueueTask}
+            />
+          </div>
+
+          <div className="container">
+            <h1 className="main-title">
+              Users
+              <Link to="/add-user" className="btn btn-sm">
+                <span>+ Add a user</span>
+              </Link>
+            </h1>
+          </div>
+
+          <TableWrapper
+            rowFactory={u => {
+              return (
+                <UsersTableRow
+                  key={u.uuid}
+                  user={u}
+                  onUserChange={onUserChange}
+                  currentUuid={currentUuid}
+                />
+              );
+            }}
+            itemList={userList}
+            sortByColumns={["username", "uuid", "role"]}
+            loadPage={loadUsersPage}
+            clearItemsPages={clearUsersPages}
           />
         </div>
-
-        <div className="container">
-          <h1 className="main-title">
-            Users
-            <Link to="/add-user" className="btn btn-sm">
-              <span>+ Add a user</span>
-            </Link>
-          </h1>
-        </div>
-
-        <TableWrapper
-          rowFactory={u => {
-            return (
-              <UsersTableRow
-                key={u.uuid}
-                user={u}
-                onUserChange={onUserChange}
-                currentUuid={currentUuid}
-              />
-            );
-          }}
-          itemList={userList}
-          sortByColumns={["username", "uuid", "role"]}
-          loadPage={loadUsersPage}
-          clearItemsPages={clearUsersPages}
-        />
-      </div>
+      </FreshTokenGateway>
     </RoleBasedGateway>
   );
 };
 
 export default connect(
   state => ({
-    hasFreshUser: state.users.me.hasFreshToken,
     userList: state.users.list,
     printersList: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,

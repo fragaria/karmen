@@ -89,24 +89,17 @@ export const loadUserFromLocalStorage = () => dispatch => {
   );
 };
 
-export const setCurrentState = currentState => (dispatch, getState) => {
-  const { users } = getState();
-  const user = users.me;
-  if (user.hasFreshToken && currentState === "fresh-token-required") {
-    return;
-  }
-  dispatch({
-    type: "USER_SET_CURRENT_STATE",
-    payload: {
-      currentState: currentState
-    }
-  });
-};
-
 export const authenticate = createActionThunk(
   "USER_AUTHENTICATE",
   (username, password) => {
     return backend.authenticate(username, password);
+  }
+);
+
+export const authenticateFresh = createActionThunk(
+  "USER_AUTHENTICATE",
+  (username, password) => {
+    return backend.authenticateFresh(username, password);
   }
 );
 
