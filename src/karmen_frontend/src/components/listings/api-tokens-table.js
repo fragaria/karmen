@@ -42,7 +42,7 @@ class ApiTokensTableRow extends React.Component {
           <span className="list-item-subtitle">
             <span>created on {formatters.datetime(token.created)}</span>
           </span>
-          <span>{token.jti}</span>
+          <span className="text-mono">{token.jti}</span>
         </div>
 
         <div className="list-item-cta">

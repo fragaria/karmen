@@ -89,6 +89,10 @@ footer {
   font-variant: normal;
 }
 
+.text-mono {
+  font-family: $mono;
+}
+
 .hidden {
   display: none;
 }
@@ -190,6 +194,7 @@ footer {
   margin: $base-unit*2 0 $spacing-default;
   align-items: center;
   justify-content: space-between;
+  font-family: $mono;
 
   &.text-center {
     display: block;
@@ -502,6 +507,10 @@ footer {
     display: block;
     color: $color-light;
     word-break: break-all;
+
+    .text-mono {
+      font-size: 1.3rem
+    }
   }
 
   .list-item-title,

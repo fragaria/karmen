@@ -53,7 +53,7 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
         to={`/printers/${printer.uuid}`}
       >
         <span className="list-item-title">{printer.name}</span>
-        <span>
+        <span className="text-mono">
           {printer.hostname
             ? `${printer.hostname}${printer.port ? `:${printer.port}` : ""} (${
                 printer.ip

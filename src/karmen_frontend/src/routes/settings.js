@@ -133,7 +133,7 @@ const UsersTableRow = ({ currentUuid, user, onUserChange }) => {
             <strong className="text-success">enabled</strong>
           )}
         </span>
-        <span>{user.uuid}</span>
+        <span className="text-mono">{user.uuid}</span>
       </div>
 
       {currentUuid !== user.uuid && (
