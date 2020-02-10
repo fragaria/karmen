@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import { authenticate } from "../actions/users";
-import LoginForm from "./login-form";
-import Loader from "./loader";
+import { authenticate } from "../../actions/users";
+import LoginForm from "../forms/login-form";
+import Loader from "../utils/loader";
 
 const LoginGateway = ({ children, userState, doAuthenticate }) => {
   if (!userState || userState === "unknown") {

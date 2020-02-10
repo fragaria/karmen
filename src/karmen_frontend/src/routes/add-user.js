@@ -1,11 +1,11 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { FormInputs } from "../components/form-utils";
 import { addUser } from "../actions/users";
-import RoleBasedGateway from "../components/role-based-gateway";
-import FreshTokenGateway from "../components/fresh-token-gateway";
-import BusyButton from "../components/busy-button";
+import { FormInputs } from "../components/forms/form-utils";
+import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
+import BusyButton from "../components/utils/busy-button";
 
 class AddUser extends React.Component {
   state = {

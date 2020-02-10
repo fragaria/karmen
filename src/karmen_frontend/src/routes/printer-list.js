@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import Loader from "../components/loader";
-import PrinterState from "../components/printer-state";
+import Loader from "../components/utils/loader";
+import PrinterState from "../components/printers/printer-state";
 import { loadAndQueuePrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 

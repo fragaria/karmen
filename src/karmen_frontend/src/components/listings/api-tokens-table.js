@@ -1,7 +1,7 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
 
-import formatters from "../services/formatters";
+import formatters from "../../services/formatters";
 import TableActionRow from "./table-action-row";
 import TableSorting from "./table-sorting";
 

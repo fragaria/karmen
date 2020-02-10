@@ -2,9 +2,9 @@ import React from "react";
 import dayjs from "dayjs";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { authenticateFresh } from "../actions/users";
-import LoginForm from "./login-form";
-import Loader from "./loader";
+import LoginForm from "../forms/login-form";
+import Loader from "../utils/loader";
+import { authenticateFresh } from "../../actions/users";
 
 const FreshTokenGateway = ({
   children,

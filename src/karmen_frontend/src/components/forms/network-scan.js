@@ -1,8 +1,8 @@
 import React from "react";
 
-import Loader from "../components/loader";
-import { FormInputs } from "../components/form-utils";
-import BusyButton from "../components/busy-button";
+import Loader from "../utils/loader";
+import BusyButton from "../utils/busy-button";
+import { FormInputs } from "./form-utils";
 
 class NetworkScan extends React.Component {
   state = {

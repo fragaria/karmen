@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import { changePassword } from "../actions/users";
-import { FormInputs } from "../components/form-utils";
-import BusyButton from "../components/busy-button";
+import { changePassword } from "../../actions/users";
+import { FormInputs } from "../forms/form-utils";
+import BusyButton from "../utils/busy-button";
 
 class ChangePasswordForm extends React.Component {
   constructor(props) {

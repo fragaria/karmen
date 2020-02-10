@@ -1,10 +1,10 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { FormInputs } from "../components/form-utils";
 import { addPrinter } from "../actions/printers";
-import RoleBasedGateway from "../components/role-based-gateway";
-import BusyButton from "../components/busy-button";
+import { FormInputs } from "../components/forms/form-utils";
+import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import BusyButton from "../components/utils/busy-button";
 
 class AddPrinter extends React.Component {
   state = {

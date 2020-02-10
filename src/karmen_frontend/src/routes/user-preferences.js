@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { loadUserApiTokens, deleteUserApiToken } from "../actions/users";
-import ChangePasswordForm from "../components/change-password-form";
-import ApiTokensTable from "../components/api-tokens-table";
-import FreshTokenGateway from "../components/fresh-token-gateway";
+import ChangePasswordForm from "../components/forms/change-password-form";
+import ApiTokensTable from "../components/listings/api-tokens-table";
+import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 
 const UserPreferences = ({
   loadApiTokens,

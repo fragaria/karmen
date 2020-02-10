@@ -3,11 +3,11 @@ import { connect } from "react-redux";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import Menu from "./components/menu";
-import Heartbeat from "./components/heartbeat";
-import LoginGateway from "./components/login-gateway";
-import ForcePwdChangeGateway from "./components/force-pwd-change-gateway";
-import Loader from "./components/loader";
-import CatchTokenFromUrl from "./components/catch-token-from-url";
+import Heartbeat from "./components/utils/heartbeat";
+import Loader from "./components/utils/loader";
+import LoginGateway from "./components/gateways/login-gateway";
+import ForcePwdChangeGateway from "./components/gateways/force-pwd-change-gateway";
+import CatchTokenFromUrl from "./components/gateways/catch-token-from-url";
 
 import PrinterList from "./routes/printer-list";
 import GcodeList from "./routes/gcode-list";

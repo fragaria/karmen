@@ -1,6 +1,6 @@
 import React from "react";
 import { FormInputs } from "./form-utils";
-import BusyButton from "./busy-button";
+import BusyButton from "../utils/busy-button";
 
 class LoginForm extends React.Component {
   constructor(props) {

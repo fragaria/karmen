@@ -4,7 +4,7 @@ import { DebounceInput } from "react-debounce-input";
 
 import TableSorting from "./table-sorting";
 import ListCta from "./list-cta";
-import { useMyModal } from "./modal";
+import { useMyModal } from "../utils/modal";
 
 const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   return (

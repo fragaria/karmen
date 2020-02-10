@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import ChangePasswordForm from "./change-password-form";
-import Loader from "./loader";
+import ChangePasswordForm from "../forms/change-password-form";
+import Loader from "../utils/loader";
 
 const ForcePwdChangeGateway = ({ children, userState, onUserStateChanged }) => {
   if (!userState || userState === "unknown") {

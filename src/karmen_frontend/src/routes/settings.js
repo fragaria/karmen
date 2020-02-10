@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import RoleBasedGateway from "../components/role-based-gateway";
-import FreshTokenGateway from "../components/fresh-token-gateway";
-import TableWrapper from "../components/table-wrapper";
-import NetworkScan from "../components/network-scan";
-import PrintersTable from "../components/printer-list-settings";
-import ListCta from "../components/list-cta";
-import { useMyModal } from "../components/modal";
+import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
+import TableWrapper from "../components/listings/table-wrapper";
+import NetworkScan from "../components/forms/network-scan";
+import PrintersTable from "../components/listings/printer-list-settings";
+import ListCta from "../components/listings/list-cta";
+import { useMyModal } from "../components/utils/modal";
 import {
   getUsersPage,
   clearUsersPages,
   patchUser,
   retryIfUnauthorized
 } from "../actions/users";
-import { getSettings, changeSettings, enqueueTask } from "../services/backend";
 import { loadPrinters, deletePrinter } from "../actions/printers";
+import { getSettings, changeSettings, enqueueTask } from "../services/backend";
 import formatters from "../services/formatters";
 
 const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {

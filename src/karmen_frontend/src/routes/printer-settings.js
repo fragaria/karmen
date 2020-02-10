@@ -1,9 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import Loader from "../components/loader";
-import RoleBasedGateway from "../components/role-based-gateway";
-import { PrinterEditForm } from "../components/printer-edit-form";
+import Loader from "../components/utils/loader";
+import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import { PrinterEditForm } from "../components/forms/printer-edit-form";
 
 import { loadPrinter, patchPrinter } from "../actions/printers";
 

@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
 
 import { uploadGcode } from "../actions/gcodes";
-import BusyButton from "../components/busy-button";
+import BusyButton from "../components/utils/busy-button";
 
 class AddGcode extends React.Component {
   state = {

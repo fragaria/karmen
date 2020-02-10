@@ -2,12 +2,12 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
 
-import Loader from "../components/loader";
-import BusyButton from "../components/busy-button";
-import TableWrapper from "../components/table-wrapper";
-import Progress from "../components/progress";
-import WebcamStream from "../components/webcam-stream";
-import PrinterState from "../components/printer-state";
+import Loader from "../components/utils/loader";
+import BusyButton from "../components/utils/busy-button";
+import TableWrapper from "../components/listings/table-wrapper";
+import Progress from "../components/printers/progress";
+import WebcamStream from "../components/printers/webcam-stream";
+import PrinterState from "../components/printers/printer-state";
 import formatters from "../services/formatters";
 
 import { getJobsPage, clearJobsPages } from "../actions/printjobs";

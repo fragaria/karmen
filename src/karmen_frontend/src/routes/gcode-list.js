@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import TableWrapper from "../components/table-wrapper";
-import TableActionRow from "../components/table-action-row";
-import ListCta from "../components/list-cta";
+import TableWrapper from "../components/listings/table-wrapper";
+import TableActionRow from "../components/listings/table-action-row";
+import ListCta from "../components/listings/list-cta";
 import {
   getGcodesPage,
   clearGcodesPages,

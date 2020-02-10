@@ -1,5 +1,5 @@
 import React from "react";
-import formatters from "../services/formatters";
+import formatters from "../../services/formatters";
 
 export const Progress = ({
   completion,

@@ -1,11 +1,10 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import Loader from "../components/loader";
+import Loader from "../components/utils/loader";
 
 import { loadGcode, downloadGcode } from "../actions/gcodes";
 import { addPrintJob } from "../actions/printjobs";
-
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 

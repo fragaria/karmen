@@ -1,7 +1,7 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
 import TableSorting from "./table-sorting";
-import formatters from "../services/formatters";
+import formatters from "../../services/formatters";
 
 class TableWrapper extends React.Component {
   state = {

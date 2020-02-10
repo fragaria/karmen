@@ -1,6 +1,6 @@
 import React from "react";
-import { FormInputs } from "../components/form-utils";
-import BusyButton from "../components/busy-button";
+import { FormInputs } from "./form-utils";
+import BusyButton from "../utils/busy-button";
 
 export class PrinterEditForm extends React.Component {
   state = {
