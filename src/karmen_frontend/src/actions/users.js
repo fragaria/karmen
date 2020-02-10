@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
@@ -14,7 +15,8 @@ export const retryIfUnauthorized = (func, dispatch) => {
           if (r.status === 200) {
             return func(...args);
           } else {
-            return dispatch(clearUserIdentity);
+            dispatch(clearUserIdentity());
+            return Promise.reject();
           }
         });
       }
@@ -23,70 +25,49 @@ export const retryIfUnauthorized = (func, dispatch) => {
   };
 };
 
-export const loadUserFromToken = (accessToken, refreshToken) => dispatch => {
+export const loadUserFromToken = token => dispatch => {
+  const decoded = jwt_decode(token);
+  Cookies.set("access_token_cookie", token);
+  Cookies.set("csrf_access_token", decoded.csrf);
+  dispatch(
+    loadUserData({
+      identity: decoded.identity,
+      username: decoded.user_claims && decoded.user_claims.username,
+      role: decoded.user_claims && decoded.user_claims.role,
+      hasFreshToken: decoded.fresh,
+      accessTokenExpiresOn: undefined
+    })
+  );
+};
+
+export const loadUserData = userData => dispatch => {
   dispatch({
-    type: "USER_LOADED_FROM_STORAGE",
+    type: "USER_DATA_LOADED",
     payload: {
-      access_token: accessToken,
-      refresh_token: refreshToken
+      data: userData
     }
   });
 };
 
 export const loadUserFromLocalStorage = () => dispatch => {
-  const accessToken = backend.getAccessToken();
-  const refreshToken = backend.getRefreshToken();
-  // no tokens - bail
-  if (!accessToken && !refreshToken) {
+  const profile = backend.getUserProfile();
+  // no profile - bail
+  if (!profile) {
     return Promise.resolve(dispatch(clearUserIdentity()));
   }
-
-  // refresh AND access
-  if (accessToken && refreshToken) {
-    const decodedAccess = jwt_decode(accessToken);
-    const decodedRefresh = jwt_decode(refreshToken);
-    if (decodedAccess.exp && decodedRefresh.exp) {
-      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
-      let refreshExpiresAt = dayjs(decodedRefresh.exp * 1000);
-      // both tokens are expired
-      if (
-        dayjs().isAfter(accessExpiresAt) &&
-        dayjs().isAfter(refreshExpiresAt)
-      ) {
-        return Promise.resolve(dispatch(clearUserIdentity()));
-        // access token will expire shortly - do refresh
-      } else if (dayjs().isAfter(accessExpiresAt.subtract(90, "seconds"))) {
-        return backend.refreshAccessToken().then(r => {
-          backend.setAccessToken(r.data.access_token);
-          return Promise.resolve(
-            dispatch(loadUserFromToken(r.data.access_token, refreshToken))
-          );
-        });
+  // try refresh if the expiration is set and near
+  if (
+    profile.accessTokenExpiresOn &&
+    dayjs().isAfter(profile.accessTokenExpiresOn.subtract(90, "seconds"))
+  ) {
+    return backend.refreshAccessToken().then(r => {
+      if (r.status === 200) {
+        return Promise.resolve(dispatch(loadUserData(r.data)));
       }
-    } else {
       return Promise.resolve(dispatch(clearUserIdentity()));
-    }
+    });
   }
-
-  if (accessToken && !refreshToken) {
-    const decodedAccess = jwt_decode(accessToken);
-    // Having expirable access token and no refresh token should not happen - but we can handle a valid access token nonetheless
-    if (decodedAccess.exp) {
-      let accessExpiresAt = dayjs(decodedAccess.exp * 1000);
-      if (dayjs().isAfter(accessExpiresAt)) {
-        return Promise.resolve(dispatch(clearUserIdentity()));
-      }
-      // probably eternal token without expiration
-    } else {
-      return Promise.resolve(
-        dispatch(loadUserFromToken(accessToken, refreshToken))
-      );
-    }
-  }
-
-  return Promise.resolve(
-    dispatch(loadUserFromToken(accessToken, refreshToken))
-  );
+  return Promise.resolve(dispatch(loadUserData(profile)));
 };
 
 export const authenticate = createActionThunk(
@@ -97,7 +78,7 @@ export const authenticate = createActionThunk(
 );
 
 export const authenticateFresh = createActionThunk(
-  "USER_AUTHENTICATE",
+  "USER_AUTHENTICATE_FRESH",
   (username, password) => {
     return backend.authenticateFresh(username, password);
   }
@@ -122,16 +103,14 @@ export const changePassword = createActionThunk(
   }
 );
 
-export const clearUserIdentity = () => dispatch => {
-  dispatch({
-    type: "USER_CLEAR"
-  });
-};
+export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
+  return backend.logout();
+});
 
 export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
-  () => {
-    return backend.loadApiTokens();
+  ({ dispatch }) => {
+    return retryIfUnauthorized(backend.loadApiTokens, dispatch)();
   }
 );
 

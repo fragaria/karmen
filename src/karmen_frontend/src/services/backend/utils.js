@@ -1,3 +1,6 @@
+import dayjs from "dayjs";
+import Cookies from "js-cookie";
+
 const _removeStorage = key => {
   if (window.localStorage && window.localStorage.removeItem) {
     window.localStorage.removeItem(key);
@@ -26,28 +29,27 @@ const _getStorage = key => {
   return null;
 };
 
-export const setAccessToken = token => {
-  return _setStorage("karmen_accesst", token);
+export const persistUserProfile = data => {
+  _setStorage("karmen_profile", JSON.stringify(data));
 };
 
-export const getAccessToken = () => {
-  return _getStorage("karmen_accesst");
+export const dropUserProfile = () => {
+  _setStorage("karmen_profile", null);
 };
 
-export const setRefreshToken = token => {
-  return _setStorage("karmen_refresht", token);
-};
-
-export const getRefreshToken = () => {
-  return _getStorage("karmen_refresht");
+export const getUserProfile = () => {
+  const profile = JSON.parse(_getStorage("karmen_profile"));
+  if (profile) {
+    profile.accessTokenExpiresOn = dayjs(profile.accessTokenExpiresOn);
+  }
+  return profile;
 };
 
 export const getHeaders = (withAuth = true) => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
-  let token = getAccessToken();
-  if (token && withAuth) {
-    headers.set("Authorization", `Bearer ${token}`);
+  if (withAuth) {
+    headers.set("X-CSRF-TOKEN", Cookies.get("csrf_access_token"));
   }
   return headers;
 };

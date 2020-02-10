@@ -1,26 +1,20 @@
-import jwt_decode from "jwt-decode";
 import dayjs from "dayjs";
-import { setAccessToken, setRefreshToken } from "../services/backend/utils";
+import { persistUserProfile, dropUserProfile } from "../services/backend";
 
-const getUserDataFromToken = token => {
-  const decoded = jwt_decode(token);
+const getUserDataFromApiResponse = data => {
   return {
-    currentState: decoded.user_claims.force_pwd_change
-      ? "pwd-change-required"
-      : "logged-in",
-    identity: decoded.identity,
-    username: decoded.user_claims && decoded.user_claims.username,
-    role: decoded.user_claims && decoded.user_claims.role,
-    hasFreshToken: decoded.fresh,
-    accessTokenExpiresOn: dayjs(decoded.exp * 1000)
+    currentState: data.force_pwd_change ? "pwd-change-required" : "logged-in",
+    identity: data.identity,
+    username: data.username,
+    role: data.role,
+    hasFreshToken: data.fresh,
+    accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined
   };
 };
 
 export default (
   state = {
     me: {
-      accessToken: null,
-      refreshToken: null,
       hasFreshToken: false,
       currentState: "logged-out",
       username: "",
@@ -42,14 +36,25 @@ export default (
   let userData;
   const { me } = state;
   switch (action.type) {
-    case "USER_LOADED_FROM_STORAGE":
-      userData = getUserDataFromToken(action.payload.access_token);
-      setAccessToken(action.payload.access_token);
+    case "USER_DATA_LOADED":
+      userData = getUserDataFromApiResponse(action.payload.data);
+      persistUserProfile(userData);
       return Object.assign({}, state, {
         me: {
           ...userData,
-          accessToken: action.payload.access_token,
-          refreshToken: action.payload.refresh_token,
+          apiTokens: [],
+          apiTokensLoaded: false
+        }
+      });
+    case "USER_AUTHENTICATE_FRESH_SUCCEEDED":
+      if (action.payload.status !== 200) {
+        return state;
+      }
+      userData = getUserDataFromApiResponse(action.payload.data);
+      persistUserProfile(userData);
+      return Object.assign({}, state, {
+        me: {
+          ...userData,
           apiTokens: [],
           apiTokensLoaded: false
         }
@@ -58,16 +63,11 @@ export default (
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromToken(action.payload.data.access_token);
-      action.payload.data.access_token &&
-        setAccessToken(action.payload.data.access_token);
-      action.payload.data.refresh_token &&
-        setRefreshToken(action.payload.data.refresh_token);
+      userData = getUserDataFromApiResponse(action.payload.data);
+      persistUserProfile(userData);
       return Object.assign({}, state, {
         me: {
           ...userData,
-          accessToken: action.payload.data.access_token,
-          refreshToken: action.payload.data.refresh_token,
           apiTokens: [],
           apiTokensLoaded: false
         }
@@ -76,34 +76,25 @@ export default (
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromToken(action.payload.data.access_token);
-      setAccessToken(action.payload.data.access_token);
+      userData = getUserDataFromApiResponse(action.payload.data);
+      persistUserProfile(userData);
       return Object.assign({}, state, {
-        me: Object.assign({}, state.me, {
-          ...userData,
-          accessToken: action.payload.data.access_token
-        })
+        me: Object.assign({}, state.me, userData)
       });
     case "USER_CHANGE_PASSWORD_SUCCEEDED":
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromToken(action.payload.data.access_token);
-      setAccessToken(action.payload.data.access_token);
+      userData = getUserDataFromApiResponse(action.payload.data);
+      persistUserProfile(userData);
       return Object.assign({}, state, {
-        me: Object.assign({}, state.me, {
-          ...userData,
-          accessToken: action.payload.data.access_token
-        })
+        me: Object.assign({}, state.me, userData)
       });
-    case "USER_CLEAR":
-      setRefreshToken(null);
-      setAccessToken(null);
+    case "USER_CLEAR_ENDED":
+      dropUserProfile();
       return Object.assign({}, state, {
         me: {
           currentState: "logged-out",
-          accessToken: null,
-          refreshToken: null,
           hasFreshToken: false,
           accessTokenExpiresOn: null,
           identity: null,

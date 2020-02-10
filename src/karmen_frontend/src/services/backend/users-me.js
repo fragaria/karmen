@@ -1,6 +1,5 @@
-import jwt_decode from "jwt-decode";
-
-import { getHeaders, getRefreshToken, getAccessToken } from "./utils";
+import Cookies from "js-cookie";
+import { getHeaders } from "./utils";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const authenticate = (username, password) => {
@@ -70,52 +69,30 @@ export const changePassword = (
   new_password,
   new_password_confirmation
 ) => {
-  // pwd change always needs a fresh token - since we know password here, we can always get one
-  const accessToken = getAccessToken();
-  if (!accessToken) {
-    return Promise.resolve(401);
-  }
-  const decoded = jwt_decode(accessToken);
-  let beforePwdChange = Promise.resolve();
-  if (decoded.fresh === false && username) {
-    beforePwdChange = authenticateFresh(username, password).then(result => {
-      if (result !== 200) {
-        return Promise.reject("Cannot get a fresh token");
+  return fetch(`${BASE_URL}/users/me`, {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      password,
+      new_password,
+      new_password_confirmation
+    })
+  })
+    .then(response => {
+      if (response.status !== 200) {
+        console.error(`Cannot change password: ${response.status}`);
+        return { status: response.status };
       }
-    });
-  }
-
-  return beforePwdChange
+      return response.json().then(data => {
+        return {
+          status: response.status,
+          data
+        };
+      });
+    })
     .catch(e => {
       console.error(`Cannot change password: ${e}`);
-      return 500;
-    })
-    .then(r => {
-      return fetch(`${BASE_URL}/users/me`, {
-        method: "PATCH",
-        headers: getHeaders(),
-        body: JSON.stringify({
-          password,
-          new_password,
-          new_password_confirmation
-        })
-      })
-        .then(response => {
-          if (response.status !== 200) {
-            console.error(`Cannot change password: ${response.status}`);
-            return { status: response.status };
-          }
-          return response.json().then(data => {
-            return {
-              status: response.status,
-              data
-            };
-          });
-        })
-        .catch(e => {
-          console.error(`Cannot change password: ${e}`);
-          return { status: 500 };
-        });
+      return { status: 500 };
     });
 };
 
@@ -124,7 +101,7 @@ export const refreshAccessToken = () => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getRefreshToken()}`
+      "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token")
     }
   })
     .then(response => {
@@ -141,6 +118,26 @@ export const refreshAccessToken = () => {
     })
     .catch(e => {
       console.error(`Cannot refresh access token: ${e}`);
+      return { status: 500 };
+    });
+};
+
+export const logout = () => {
+  return fetch(`${BASE_URL}/users/me/logout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+    .then(response => {
+      Cookies.remove("csrf_refresh_token");
+      Cookies.remove("refresh_token_cookie");
+      Cookies.remove("csrf_access_token");
+      Cookies.remove("access_token_cookie");
+      return { status: response.status };
+    })
+    .catch(e => {
+      console.error(`Cannot logout: ${e}`);
       return { status: 500 };
     });
 };

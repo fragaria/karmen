@@ -119,7 +119,7 @@ export default (
         printers: getSortedPrinters(printers)
       });
     case "PRINTERS_LOAD_SUCCEEDED":
-      if (!action.payload.data.items) {
+      if (!action.payload.data || !action.payload.data.items) {
         return Object.assign({}, state, {
           printers: [],
           printersLoaded: true
