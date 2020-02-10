@@ -212,7 +212,7 @@ class GcodeDetail extends React.Component {
           </dl>
           <div>
             {(!!availablePrinters.length || message) && (
-              <form className="inline-form">
+              <form className="inline-form inline-form-sm">
                 {showFilamentTypeWarningMessage ? (
                   <div>
                     <p className="message-warning">
@@ -221,7 +221,7 @@ class GcodeDetail extends React.Component {
                       configured, but this gcode was sliced for{" "}
                       <strong>{gcodeFilamentType}</strong>.
                       <button
-                        className="plain"
+                        className="btn btn-sm"
                         type="submit"
                         onClick={e => {
                           e.preventDefault();
@@ -235,6 +235,7 @@ class GcodeDetail extends React.Component {
                         {submitting ? "Uploading..." : "Yes, print"}
                       </button>
                       <button
+                        className="btn btn-plain btn-sm"
                         type="reset"
                         onClick={e => {
                           e.preventDefault();
@@ -252,56 +253,59 @@ class GcodeDetail extends React.Component {
                 ) : (
                   <div>
                     {!message && (
-                      <>
-                        On which printer would you like to print?{" "}
-                        <select
-                          id="selectedPrinter"
-                          name="selectedPrinter"
-                          value={selectedPrinter}
-                          onChange={e =>
-                            this.setState({
-                              selectedPrinter: e.target.value
-                            })
-                          }
-                        >
-                          {availablePrinterOpts}
-                        </select>
-                        <button
-                          className="btn"
-                          type="submit"
-                          onClick={e => {
-                            e.preventDefault();
-                            const selected = availablePrinters.find(
-                              p => p.uuid === selectedPrinter
-                            );
-                            if (
-                              selected &&
-                              selected.printer_props &&
-                              selected.printer_props.filament_type &&
-                              gcode.analysis &&
-                              gcode.analysis.filament &&
-                              gcode.analysis.filament.type &&
-                              gcode.analysis.filament.type !==
-                                selected.printer_props.filament_type
-                            ) {
+                      <form className="inline-form inline-form-sm">
+                        <div>
+                          On which printer would you like to print?{" "}
+                          <select
+                            id="selectedPrinter"
+                            name="selectedPrinter"
+                            value={selectedPrinter}
+                            onChange={e =>
                               this.setState({
-                                showFilamentTypeWarningMessage: true,
-                                printerFilamentType:
-                                  selected.printer_props.filament_type,
-                                gcodeFilamentType: gcode.analysis.filament.type
-                              });
-                              return;
+                                selectedPrinter: e.target.value
+                              })
                             }
-                            this.setState({
-                              submitting: true
-                            });
-                            this.schedulePrint(gcode.id, selectedPrinter);
-                          }}
-                          disabled={submitting}
-                        >
-                          {submitting ? "Uploading..." : "Print"}
-                        </button>
-                      </>
+                          >
+                            {availablePrinterOpts}
+                          </select>{" "}
+                          <button
+                            className="btn btn-sm"
+                            type="submit"
+                            onClick={e => {
+                              e.preventDefault();
+                              const selected = availablePrinters.find(
+                                p => p.uuid === selectedPrinter
+                              );
+                              if (
+                                selected &&
+                                selected.printer_props &&
+                                selected.printer_props.filament_type &&
+                                gcode.analysis &&
+                                gcode.analysis.filament &&
+                                gcode.analysis.filament.type &&
+                                gcode.analysis.filament.type !==
+                                  selected.printer_props.filament_type
+                              ) {
+                                this.setState({
+                                  showFilamentTypeWarningMessage: true,
+                                  printerFilamentType:
+                                    selected.printer_props.filament_type,
+                                  gcodeFilamentType:
+                                    gcode.analysis.filament.type
+                                });
+                                return;
+                              }
+                              this.setState({
+                                submitting: true
+                              });
+                              this.schedulePrint(gcode.id, selectedPrinter);
+                            }}
+                            disabled={submitting}
+                          >
+                            {submitting ? "Uploading..." : "Print"}
+                          </button>
+                        </div>
+                      </form>
                     )}
                     {message && (
                       <p
