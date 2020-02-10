@@ -1,6 +1,6 @@
 import React from "react";
 
-const TableActionRow = ({
+const ActionRow = ({
   children,
   onConfirm,
   onCancel,
@@ -29,4 +29,4 @@ const TableActionRow = ({
   );
 };
 
-export default TableActionRow;
+export default ActionRow;

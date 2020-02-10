@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 
 import RoleBasedGateway from "../components/gateways/role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
-import TableWrapper from "../components/listings/table-wrapper";
 import NetworkScan from "../components/forms/network-scan";
-import PrintersTable from "../components/listings/printer-list-settings";
-import ListCta from "../components/listings/list-cta";
+import Listing from "../components/listings/wrapper";
+import PrintersTable from "../components/listings/printers-table";
+import CtaDropdown from "../components/listings/cta-dropdown";
 import { useMyModal } from "../components/utils/modal";
 import {
   getUsersPage,
@@ -137,7 +137,7 @@ const UsersTableRow = ({ currentUuid, user, onUserChange }) => {
       </div>
 
       {currentUuid !== user.uuid && (
-        <ListCta
+        <CtaDropdown
           expanded={ctaListExpanded}
           onToggle={() => {
             setCtaListExpanded(!ctaListExpanded);
@@ -160,7 +160,7 @@ const UsersTableRow = ({ currentUuid, user, onUserChange }) => {
               toggleUserModal.openModal(e);
             }}
           />
-        </ListCta>
+        </CtaDropdown>
       )}
       <ToggleUserSuspendModal
         user={user}
@@ -229,7 +229,7 @@ const Settings = ({
             </h1>
           </div>
 
-          <TableWrapper
+          <Listing
             rowFactory={u => {
               return (
                 <UsersTableRow

@@ -2,9 +2,9 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import TableWrapper from "../components/listings/table-wrapper";
-import TableActionRow from "../components/listings/table-action-row";
-import ListCta from "../components/listings/list-cta";
+import Listing from "../components/listings/wrapper";
+import ActionRow from "../components/listings/action-row";
+import CtaDropdown from "../components/listings/cta-dropdown";
 import {
   getGcodesPage,
   clearGcodesPages,
@@ -85,7 +85,7 @@ class GcodeTableRow extends React.Component {
     if (showPrintStatusRow) {
       const { message, messageOk } = this.state;
       return (
-        <TableActionRow
+        <ActionRow
           inverse={false}
           showCancel={canCancelPrintStatusRow}
           onCancel={() => {
@@ -100,13 +100,13 @@ class GcodeTableRow extends React.Component {
               {message}
             </p>
           )}
-        </TableActionRow>
+        </ActionRow>
       );
     }
 
     if (showDeleteRow) {
       return (
-        <TableActionRow
+        <ActionRow
           onCancel={() => {
             this.setState({
               showDeleteRow: false
@@ -123,14 +123,14 @@ class GcodeTableRow extends React.Component {
             {display}
           </strong>
           ? This cannot be undone.
-        </TableActionRow>
+        </ActionRow>
       );
     }
 
     if (showFilamentTypeWarningRow) {
       const { printerFilamentType, gcodeFilamentType } = this.state;
       return (
-        <TableActionRow
+        <ActionRow
           onCancel={() => {
             this.setState({
               showFilamentTypeWarningRow: false
@@ -152,7 +152,7 @@ class GcodeTableRow extends React.Component {
           Are you sure? There seems to be a filament mismatch: Printer has{" "}
           <strong>{printerFilamentType}</strong> configured, but this gcode was
           sliced for <strong>{gcodeFilamentType}</strong>.
-        </TableActionRow>
+        </ActionRow>
       );
     }
 
@@ -161,7 +161,7 @@ class GcodeTableRow extends React.Component {
         return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
       });
       return (
-        <TableActionRow
+        <ActionRow
           inverse={false}
           onCancel={() => {
             this.setState({
@@ -223,7 +223,7 @@ class GcodeTableRow extends React.Component {
           ) : (
             <p>No available printers found.</p>
           )}
-        </TableActionRow>
+        </ActionRow>
       );
     }
 
@@ -240,7 +240,7 @@ class GcodeTableRow extends React.Component {
           <span>{username}</span>
         </Link>
 
-        <ListCta
+        <CtaDropdown
           expanded={ctaListExpanded}
           onToggle={() => {
             this.setState({ ctaListExpanded: !ctaListExpanded });
@@ -274,7 +274,7 @@ class GcodeTableRow extends React.Component {
             <i className="icon-trash"></i>
             Delete g-code
           </button>
-        </ListCta>
+        </CtaDropdown>
       </div>
     );
   }
@@ -314,7 +314,7 @@ class GcodeList extends React.Component {
           </h1>
         </div>
 
-        <TableWrapper
+        <Listing
           rowFactory={g => {
             return (
               <GcodeTableRow

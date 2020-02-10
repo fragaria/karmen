@@ -4,7 +4,7 @@ import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/utils/loader";
 import BusyButton from "../components/utils/busy-button";
-import TableWrapper from "../components/listings/table-wrapper";
+import Listing from "../components/listings/wrapper";
 import Progress from "../components/printers/progress";
 import WebcamStream from "../components/printers/webcam-stream";
 import PrinterState from "../components/printers/printer-state";
@@ -572,7 +572,7 @@ class PrinterDetail extends React.Component {
               </li>
             </ul>
             <div className="tabs-content">
-              <TableWrapper
+              <Listing
                 enableFiltering={false}
                 itemList={jobList}
                 loadPage={loadJobsPage}

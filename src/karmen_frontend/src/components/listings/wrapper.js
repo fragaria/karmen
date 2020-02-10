@@ -1,9 +1,9 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
-import TableSorting from "./table-sorting";
+import Sorting from "./sorting";
 import formatters from "../../services/formatters";
 
-class TableWrapper extends React.Component {
+class Wrapper extends React.Component {
   state = {
     itemsLoaded: false,
     currentPageIndex: 0
@@ -119,7 +119,7 @@ class TableWrapper extends React.Component {
             </div>
           )}
 
-          <TableSorting
+          <Sorting
             active={itemList.orderBy || ""}
             columns={sortByColumns || []}
             onChange={column => {
@@ -183,4 +183,4 @@ class TableWrapper extends React.Component {
   }
 }
 
-export default TableWrapper;
+export default Wrapper;

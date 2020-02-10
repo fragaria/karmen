@@ -1,6 +1,6 @@
 import React from "react";
 
-class TableSorting extends React.Component {
+class Sorting extends React.Component {
   constructor(props) {
     super(props);
     this.state = { expand: false };
@@ -72,4 +72,4 @@ class TableSorting extends React.Component {
   }
 }
 
-export default TableSorting;
+export default Sorting;

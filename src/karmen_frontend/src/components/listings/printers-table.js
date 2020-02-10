@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 
-import TableSorting from "./table-sorting";
-import ListCta from "./list-cta";
+import Sorting from "./sorting";
+import CtaDropdown from "./cta-dropdown";
 import { useMyModal } from "../utils/modal";
 
 const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
@@ -62,7 +62,7 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
         </span>
       </Link>
 
-      <ListCta
+      <CtaDropdown
         expanded={ctaListExpanded}
         onToggle={() => {
           setCtaListExpanded(!ctaListExpanded);
@@ -85,7 +85,7 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
           <i className="icon-trash"></i>
           Delete printer
         </button>
-      </ListCta>
+      </CtaDropdown>
       <DeletePrinterModal
         printer={printer}
         onPrinterDelete={onPrinterDelete}
@@ -155,7 +155,7 @@ class PrintersTable extends React.Component {
             </label>
           </div>
 
-          <TableSorting
+          <Sorting
             active={orderBy}
             columns={["name"]}
             onChange={() => {

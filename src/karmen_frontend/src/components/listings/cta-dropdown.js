@@ -1,6 +1,6 @@
 import React from "react";
 
-const ListCta = ({ children, onToggle, expanded }) => {
+const CtaDropdown = ({ children, onToggle, expanded }) => {
   return (
     <div className="list-dropdown list-cta">
       <button
@@ -23,4 +23,4 @@ const ListCta = ({ children, onToggle, expanded }) => {
   );
 };
 
-export default ListCta;
+export default CtaDropdown;

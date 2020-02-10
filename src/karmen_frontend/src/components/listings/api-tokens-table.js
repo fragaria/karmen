@@ -2,8 +2,8 @@ import React from "react";
 import { DebounceInput } from "react-debounce-input";
 
 import formatters from "../../services/formatters";
-import TableActionRow from "./table-action-row";
-import TableSorting from "./table-sorting";
+import ActionRow from "./action-row";
+import Sorting from "./sorting";
 
 class ApiTokensTableRow extends React.Component {
   constructor(props) {
@@ -19,7 +19,7 @@ class ApiTokensTableRow extends React.Component {
 
     if (showDeleteRow) {
       return (
-        <TableActionRow
+        <ActionRow
           onCancel={() => {
             this.setState({
               showDeleteRow: false
@@ -31,7 +31,7 @@ class ApiTokensTableRow extends React.Component {
         >
           Do you really want to revoke <strong>{token.name}</strong>? This
           cannot be undone.
-        </TableActionRow>
+        </ActionRow>
       );
     }
 
@@ -122,7 +122,7 @@ class ApiTokensTable extends React.Component {
               />
             </label>
           </div>
-          <TableSorting
+          <Sorting
             active={orderBy}
             columns={["name", "created"]}
             onChange={column => {
