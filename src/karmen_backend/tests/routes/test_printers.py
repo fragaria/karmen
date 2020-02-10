@@ -6,7 +6,15 @@ import uuid
 from server import app
 from server.database import printers
 from ..utils import Response
-from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2
+from ..utils import (
+    TOKEN_ADMIN,
+    TOKEN_ADMIN_CSRF,
+    TOKEN_USER,
+    TOKEN_USER_CSRF,
+    TOKEN_USER2,
+    TOKEN_USER2_CSRF,
+    UUID_USER,
+)
 
 
 class ListRoute(unittest.TestCase):
@@ -17,9 +25,8 @@ class ListRoute(unittest.TestCase):
 
     def test_list(self):
         with app.test_client() as c:
-            response = c.get(
-                "/printers", headers={"Authorization": "Bearer %s" % TOKEN_USER}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get("/printers", headers={"x-csrf-token": TOKEN_USER_CSRF})
             self.assertEqual(response.status_code, 200)
             # coming from db fixtures
             self.assertTrue("items" in response.json)
@@ -36,9 +43,10 @@ class ListRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_list_fields(self, mock_get_uri):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printers?fields=webcam,status,job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             # coming from db fixtures
@@ -62,9 +70,10 @@ class DetailRoute(unittest.TestCase):
 
     def test_detail(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printers/20e91c14-c3e4-4fe9-a066-e69d53324a20",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
@@ -73,9 +82,9 @@ class DetailRoute(unittest.TestCase):
 
     def test_detail_bad_uuid(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/printers/not-anuuid",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "/printers/not-anuuid", headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -88,9 +97,10 @@ class DetailRoute(unittest.TestCase):
             "ip": "1.2.3.4",
         }
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printers/20e91c14-c3e4-4fe9-a066-e69d53324a20",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
@@ -100,9 +110,10 @@ class DetailRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_fields(self, mock_get_uri):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printers/20e91c14-c3e4-4fe9-a066-e69d53324a20?fields=webcam,status,job",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("client" in response.json)
@@ -112,9 +123,10 @@ class DetailRoute(unittest.TestCase):
 
     def test_404(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printers/b0cfd3b1-d602-4556-917a-6cf39576cbbc",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -125,12 +137,13 @@ class CreateRoute(unittest.TestCase):
     def test_create(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
+                c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 ip = "192.168.%s" % ".".join(
                     [str(random.randint(0, 255)) for _ in range(2)]
                 )
                 response = c.post(
                     "/printers",
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                     json={
                         "ip": ip,
                         "name": "random-test-printer-name",
@@ -140,8 +153,7 @@ class CreateRoute(unittest.TestCase):
                 uuid = response.json["uuid"]
                 self.assertEqual(response.status_code, 201)
                 response = c.get(
-                    "/printers/%s" % uuid,
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], ip)
@@ -152,8 +164,7 @@ class CreateRoute(unittest.TestCase):
             raise e
         finally:
             c.delete(
-                "/printers/%s" % uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
 
     @mock.patch(
@@ -164,9 +175,10 @@ class CreateRoute(unittest.TestCase):
     def test_create_hostname(self, mock_get_uri, mock_avahi, mock_avahi_address):
         try:
             with app.test_client() as c:
+                c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 response = c.post(
                     "/printers",
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                     json={
                         "hostname": "random-address.local",
                         "name": "random-test-printer-name",
@@ -176,8 +188,7 @@ class CreateRoute(unittest.TestCase):
                 uuid = response.json["uuid"]
                 self.assertEqual(response.status_code, 201)
                 response = c.get(
-                    "/printers/%s" % uuid,
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], "172.16.236.220")
@@ -189,8 +200,7 @@ class CreateRoute(unittest.TestCase):
             raise e
         finally:
             c.delete(
-                "/printers/%s" % uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
 
     @mock.patch(
@@ -201,10 +211,11 @@ class CreateRoute(unittest.TestCase):
     def test_create_hostname_port(self, mock_get_uri, mock_avahi, mock_avahi_address):
         uuid = None
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             try:
                 response = c.post(
                     "/printers",
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                     json={
                         "hostname": "random-address.local",
                         "port": 8080,
@@ -215,8 +226,7 @@ class CreateRoute(unittest.TestCase):
                 self.assertEqual(response.status_code, 201)
                 uuid = response.json["uuid"]
                 response = c.get(
-                    "/printers/%s" % uuid,
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], "172.16.236.220")
@@ -231,7 +241,7 @@ class CreateRoute(unittest.TestCase):
                 if uuid is not None:
                     c.delete(
                         "/printers/%s" % uuid,
-                        headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                        headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                     )
 
     @mock.patch("server.services.network.get_avahi_address", return_value=None)
@@ -241,9 +251,10 @@ class CreateRoute(unittest.TestCase):
         self, mock_get_uri, mock_avahi, mock_avahi_address
     ):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "hostname": "random-address.local",
                     "name": "random-test-printer-name",
@@ -257,12 +268,13 @@ class CreateRoute(unittest.TestCase):
     def test_create_with_port(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
+                c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 ip = "192.168.%s" % ".".join(
                     [str(random.randint(0, 255)) for _ in range(2)]
                 )
                 response = c.post(
                     "/printers",
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                     json={
                         "ip": ip,
                         "port": 81,
@@ -273,7 +285,7 @@ class CreateRoute(unittest.TestCase):
                 self.assertEqual(response.status_code, 201)
                 response = c.get(
                     "/printers/%s" % response.json["uuid"],
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], ip)
@@ -286,7 +298,7 @@ class CreateRoute(unittest.TestCase):
         finally:
             c.delete(
                 "/printers/172.16.236.200:81",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
@@ -294,19 +306,19 @@ class CreateRoute(unittest.TestCase):
     def test_create_default_protocol(self, mock_get_uri, mock_avahi):
         try:
             with app.test_client() as c:
+                c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 ip = "192.168.%s" % ".".join(
                     [str(random.randint(0, 255)) for _ in range(2)]
                 )
                 response = c.post(
                     "/printers",
                     json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 uuid = response.json["uuid"]
                 self.assertEqual(response.status_code, 201)
                 response = c.get(
-                    "/printers/%s" % uuid,
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], ip)
@@ -318,17 +330,17 @@ class CreateRoute(unittest.TestCase):
             raise e
         finally:
             c.delete(
-                "/printers/%s" % uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_http(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "host": "http://172.16.236.200:81",
                     "name": "random-test-printer-name",
@@ -341,9 +353,10 @@ class CreateRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_dotcom(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "host": "http://printer.example.com",
                     "name": "random-test-printer-name",
@@ -354,9 +367,10 @@ class CreateRoute(unittest.TestCase):
 
     def test_bad_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "host": "172.16.236.200:81",
                     "name": "random-test-printer-name",
@@ -379,43 +393,46 @@ class CreateRoute(unittest.TestCase):
 
     def test_empty_req(self):
         with app.test_client() as c:
-            response = c.post(
-                "/printers", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post("/printers", headers={"x-csrf-token": TOKEN_ADMIN_CSRF})
             self.assertEqual(response.status_code, 400)
 
     def test_bad_protocol(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"host": "172.16.236.200", "name": "something", "protocol": "ftp"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_name(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"host": "172.16.236.200"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_ip(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "172.16.236.200"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_bad_ip(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "name...", "host": "bad-ip-address"},
             )
             self.assertEqual(response.status_code, 400)
@@ -428,24 +445,24 @@ class CreateRoute(unittest.TestCase):
                 [str(random.randint(0, 255)) for _ in range(2)]
             )
             with app.test_client() as c:
+                c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 response = c.post(
                     "/printers",
                     json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 201)
                 response = c.post(
                     "/printers",
                     json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
-                    headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                    headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
                 self.assertEqual(response.status_code, 409)
         except Exception as e:
             raise e
         finally:
             c.delete(
-                "/printers/%s" % uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/printers/%s" % uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
 
 
@@ -454,26 +471,28 @@ class DeleteRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_delete(self, mock_get_uri, mock_avahi):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             ip = "192.168.%s" % ".".join(
                 [str(random.randint(0, 255)) for _ in range(2)]
             )
             response = c.post(
                 "/printers",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"ip": ip, "name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 201)
             response = c.delete(
                 "/printers/%s" % response.json["uuid"],
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 204)
 
     def test_delete_bad_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.delete(
                 "/printers/6d01e8f0-275e-4389-bdcd-7ff0db8e371d",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -484,17 +503,18 @@ class DeleteRoute(unittest.TestCase):
 
     def test_delete_bad_uuid(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.delete(
-                "/printers/172.16.236.213",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/printers/172.16.236.213", headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_delete_unknown(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.delete(
                 "/printers/6d01e8f0-275e-4389-bdcd-7ff0db8e371d",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -518,9 +538,10 @@ class PatchRoute(unittest.TestCase):
 
     def test_patch(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
             self.assertEqual(response.status_code, 200)
@@ -530,9 +551,10 @@ class PatchRoute(unittest.TestCase):
 
     def test_patch_printer_props(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "name": "random-test-printer-name",
                     "printer_props": {
@@ -551,9 +573,10 @@ class PatchRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_patch_api_keychange(self, mock_session_get):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "random-test-printer-name", "api_key": "1234",},
             )
             self.assertEqual(response.status_code, 200)
@@ -571,53 +594,58 @@ class PatchRoute(unittest.TestCase):
 
     def test_patch_bad_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.patch(
                 "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"name": "random-test-printer-name", "protocol": "https"},
             )
             self.assertEqual(response.status_code, 401)
 
     def test_patch_bad_uuid(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/random-unknown-printer",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_patch_unknown(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/4d303a17-5310-4515-ba6e-997d297e7e64",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_patch_no_data(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/printers/%s" % self.uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_patch_empty_name(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": ""},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_patch_bad_protocol(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/printers/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": "some", "protocol": "ftp"},
             )
             self.assertEqual(response.status_code, 400)
@@ -651,9 +679,10 @@ class CurrentJobRoute(unittest.TestCase):
     )
     def test_current_job_admin(self, post_uri_mock):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/current-job" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 204)
@@ -663,9 +692,10 @@ class CurrentJobRoute(unittest.TestCase):
     )
     def test_current_job_user(self, post_uri_mock):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printers/%s/current-job" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 204)
@@ -673,53 +703,59 @@ class CurrentJobRoute(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
     def test_current_job_unable_to_call_printer(self, post_uri_mock):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/current-job" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 409)
 
     def test_current_job_bad_action(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/current-job" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "random"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_current_job_unknown_printer(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/4d378856-8f57-4a91-804b-e862784719e4/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_current_job_bad_uuid(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/random-unknown-printer/current-job",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_current_job_no_data(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/current-job" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_current_job_empty_action(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/current-job" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": ""},
             )
             self.assertEqual(response.status_code, 400)
@@ -750,9 +786,10 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_to_online(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"state": "online"},
             )
             self.assertEqual(response.status_code, 204)
@@ -766,9 +803,10 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_to_online_already_on(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"state": "online"},
             )
             self.assertEqual(response.status_code, 204)
@@ -784,9 +822,10 @@ class PrinterConnectionRoute(unittest.TestCase):
         self, mock_get_uri, mock_post_uri
     ):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"state": "offline"},
             )
             self.assertEqual(response.status_code, 204)
@@ -800,9 +839,10 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_to_offline(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"state": "offline"},
             )
             self.assertEqual(response.status_code, 204)
@@ -816,20 +856,24 @@ class PrinterConnectionRoute(unittest.TestCase):
     )
     def test_change_connection_user_token(self, mock_get_uri, mock_post_uri):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"state": "online"},
             )
             self.assertEqual(response.status_code, 204)
 
     def test_change_connection_bad_token(self):
         with app.test_client() as c:
+            c.set_cookie(
+                "localhost",
+                "access_token_cookie",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+            )
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={
-                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                },
+                headers={"x-csrf-token": "387c0717-648d-4967-a732-9515af7f34d9"},
                 json={"state": "online"},
             )
             self.assertEqual(response.status_code, 422)
@@ -843,44 +887,49 @@ class PrinterConnectionRoute(unittest.TestCase):
 
     def test_change_connection_bad_state(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"state": "random"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_change_connection_bad_uuid(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/random-unknown-printer/connection",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_change_connection_unknown_printer(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/2a7d5416-9f49-4bec-8b80-f9a45e5bf3b4/connection",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"action": "cancel"},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_change_connection_no_data(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_change_connection_empty_state(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/printers/%s/connection" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"state": ""},
             )
             self.assertEqual(response.status_code, 400)
@@ -889,24 +938,27 @@ class PrinterConnectionRoute(unittest.TestCase):
 class WebcamSnapshotRoute(unittest.TestCase):
     def test_bad_uuid(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/printers/notuuid/webcam-snapshot",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_nonexistent_printer(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/webcam-snapshot",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 404)
 
     def test_no_webcam_info(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/printers/20e91c14-c3e4-4fe9-a066-e69d53324a20/webcam-snapshot",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 404)

@@ -15,37 +15,79 @@ UUID_ADMIN = "6480fa7d-ce18-4ae2-818b-f1d200050806"
 UUID_USER = "77315957-8ebb-4a44-976c-758dbf28bb9f"
 UUID_USER2 = "e076b705-a484-4d24-844d-02594ac40b12"
 
-# Expired at 1573656402, tied to 6480fa7d-ce18-4ae2-818b-f1d200050806 account
-TOKEN_ADMIN_EXPIRED = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NzM2NTU1MDIsIm5iZiI6MTU3MzY1NTUwMiwianRpIjoiMWIyYThkYTEtYzZmYy00YjJmLWI5NzItYzI3NjNiY2E0NzE2IiwiZXhwIjoxNTczNjU2NDAyLCJpZGVudGl0eSI6IjY0ODBmYTdkLWNlMTgtNGFlMi04MThiLWYxZDIwMDA1MDgwNiIsImZyZXNoIjp0cnVlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsicm9sZSI6ImFkbWluIiwiZm9yY2VfcHdkX2NoYW5nZSI6ZmFsc2V9fQ.QzVBK9_0t3jcK_aUq9swMWEyl3u6pZtRZDFv-JiH9pI"
+TOKEN_ADMIN_EXPIRED = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODEzNDU4OTEsIm5iZiI6MTU4MTM0NTg5MSwianRpIjoiMDFmZTRkMGYtNWY3ZS00ZWE1LWI2ZTYtMTdkZjJhYWRhOGQ5IiwiZXhwIjoxNTgxMzQ2NzkxLCJpZGVudGl0eSI6IjY0ODBmYTdkLWNlMTgtNGFlMi04MThiLWYxZDIwMDA1MDgwNiIsImZyZXNoIjp0cnVlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJ0ZXN0LWFkbWluIiwiZm9yY2VfcHdkX2NoYW5nZSI6ZmFsc2V9LCJjc3JmIjoiODdkYzNhNWMtNzQ0Zi00ZDBlLTliYjItNjhlMjE0MzIwYjNmIn0.f2-SAlaSiBuPtwYUV1vz7Ax7vlaHgFlBu1XAOirtldc"
+TOKEN_ADMIN_EXPIRED_CSRF = "387c0717-648d-4967-a732-9515af7f34d9"
 TOKEN_ADMIN = None
+TOKEN_ADMIN_CSRF = None
 TOKEN_ADMIN_REFRESH = None
+TOKEN_ADMIN_REFRESH_CSRF = None
 TOKEN_ADMIN_NONFRESH = None
+TOKEN_ADMIN_NONFRESH_CSRF = None
 TOKEN_USER = None
+TOKEN_USER_CSRF = None
 TOKEN_USER_REFRESH = None
+TOKEN_USER_REFRESH_CSRF = None
 TOKEN_USER2 = None
 TOKEN_USER2_REFRESH = None
+TOKEN_USER2_CSRF = None
 
 with app.test_client() as c:
     response = c.post(
         "/users/me/authenticate",
         json={"username": "test-admin", "password": "admin-password"},
     )
-    TOKEN_ADMIN = response.json["access_token"]
-    TOKEN_ADMIN_REFRESH = response.json["refresh_token"]
+    TOKEN_ADMIN = [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][
+        0
+    ].value
+    TOKEN_ADMIN_CSRF = [ck for ck in c.cookie_jar if ck.name == "csrf_access_token"][
+        0
+    ].value
+    TOKEN_ADMIN_REFRESH = [
+        ck for ck in c.cookie_jar if ck.name == "refresh_token_cookie"
+    ][0].value
+    TOKEN_ADMIN_REFRESH_CSRF = [
+        ck for ck in c.cookie_jar if ck.name == "csrf_refresh_token"
+    ][0].value
+    c.cookie_jar.clear()
+    c.set_cookie("localhost", "refresh_token_cookie", TOKEN_ADMIN_REFRESH)
     response = c.post(
         "/users/me/authenticate-refresh",
-        headers={"Authorization": "Bearer %s" % (response.json["refresh_token"],)},
+        headers={"x-csrf-token": TOKEN_ADMIN_REFRESH_CSRF},
     )
-    TOKEN_ADMIN_NONFRESH = response.json["access_token"]
+    TOKEN_ADMIN_NONFRESH = [
+        ck for ck in c.cookie_jar if ck.name == "access_token_cookie"
+    ][0].value
+    TOKEN_ADMIN_NONFRESH_CSRF = [
+        ck for ck in c.cookie_jar if ck.name == "csrf_access_token"
+    ][0].value
+    c.cookie_jar.clear()
     response = c.post(
         "/users/me/authenticate",
         json={"username": "test-user", "password": "user-password"},
     )
-    TOKEN_USER = response.json["access_token"]
-    TOKEN_USER_REFRESH = response.json["refresh_token"]
+    TOKEN_USER = [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][
+        0
+    ].value
+    TOKEN_USER_CSRF = [ck for ck in c.cookie_jar if ck.name == "csrf_access_token"][
+        0
+    ].value
+    TOKEN_USER_REFRESH = [
+        ck for ck in c.cookie_jar if ck.name == "refresh_token_cookie"
+    ][0].value
+    TOKEN_USER_REFRESH_CSRF = [
+        ck for ck in c.cookie_jar if ck.name == "csrf_refresh_token"
+    ][0].value
+    c.cookie_jar.clear()
     response = c.post(
         "/users/me/authenticate",
         json={"username": "test-user-2", "password": "user-password"},
     )
-    TOKEN_USER2 = response.json["access_token"]
-    TOKEN_USER2_REFRESH = response.json["refresh_token"]
+    TOKEN_USER2 = [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][
+        0
+    ].value
+    TOKEN_USER2_CSRF = [ck for ck in c.cookie_jar if ck.name == "csrf_access_token"][
+        0
+    ].value
+    TOKEN_USER2_REFRESH = [
+        ck for ck in c.cookie_jar if ck.name == "refresh_token_cookie"
+    ][0].value

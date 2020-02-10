@@ -8,9 +8,13 @@ from server import app
 from server.database import users, local_users
 from ..utils import (
     TOKEN_ADMIN_EXPIRED,
+    TOKEN_ADMIN_EXPIRED_CSRF,
     TOKEN_ADMIN,
+    TOKEN_ADMIN_CSRF,
     TOKEN_ADMIN_NONFRESH,
+    TOKEN_ADMIN_NONFRESH_CSRF,
     TOKEN_USER,
+    TOKEN_USER_CSRF,
     UUID_ADMIN,
     UUID_USER,
 )
@@ -37,9 +41,10 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_expired_jwt(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_EXPIRED)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % (TOKEN_ADMIN_EXPIRED,)},
+                headers={"x-csrf-token": TOKEN_ADMIN_EXPIRED_CSRF},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -48,13 +53,13 @@ class CreateUserRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(response.status_code, 401)
-            self.assertTrue("has expired" in response.json["message"])
 
     def test_no_admin_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -66,9 +71,10 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_nonfresh_admin_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_NONFRESH)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
+                headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -80,16 +86,16 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_no_data(self):
         with app.test_client() as c:
-            response = c.post(
-                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post("/users", headers={"x-csrf-token": TOKEN_ADMIN_CSRF})
             self.assertEqual(response.status_code, 400)
 
     def test_no_username(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "role": "user",
                     "password": "temp-one",
@@ -100,9 +106,10 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_no_role(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": "username",
                     "password": "temp-one",
@@ -113,9 +120,10 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_unknown_role(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": get_random_username(),
                     "role": "doesnotexist",
@@ -127,9 +135,10 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_password_mismatch(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -142,9 +151,10 @@ class CreateUserRoute(unittest.TestCase):
     def test_create_user(self):
         with app.test_client() as c:
             username = get_random_username()
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": username,
                     "role": "user",
@@ -172,10 +182,11 @@ class CreateUserRoute(unittest.TestCase):
 
     def test_conflict_usernames(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             username = get_random_username()
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": username,
                     "role": "user",
@@ -186,7 +197,7 @@ class CreateUserRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 201)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": username,
                     "role": "user",
@@ -200,9 +211,10 @@ class CreateUserRoute(unittest.TestCase):
 class UpdateUserRoute(unittest.TestCase):
     def setUp(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/users",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": get_random_username(),
                     "role": "user",
@@ -219,35 +231,38 @@ class UpdateUserRoute(unittest.TestCase):
 
     def test_no_admin_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.patch(
                 "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"role": "user"},
             )
             self.assertEqual(response.status_code, 401)
 
     def test_no_fresh_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_NONFRESH)
             response = c.patch(
                 "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH},
+                headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
                 json={"role": "user"},
             )
             self.assertEqual(response.status_code, 401)
 
     def test_no_data(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/users/%s" % self.uuid, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_no_role(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"suspended": True},
             )
             self.assertEqual(response.status_code, 200)
@@ -262,9 +277,10 @@ class UpdateUserRoute(unittest.TestCase):
 
     def test_no_suspended(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"role": "admin"},
             )
             self.assertEqual(response.status_code, 200)
@@ -279,18 +295,20 @@ class UpdateUserRoute(unittest.TestCase):
 
     def test_unknown_role(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"role": "doesnotexist"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_update_user(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/users/%s" % self.uuid,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 200)
@@ -305,18 +323,20 @@ class UpdateUserRoute(unittest.TestCase):
 
     def test_self_lockout(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/users/%s" % UUID_ADMIN,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 409)
 
     def test_nonexisting_user(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"role": "user", "suspended": False},
             )
             self.assertEqual(response.status_code, 404)
@@ -330,23 +350,22 @@ class ListRoute(unittest.TestCase):
 
     def test_no_admin_token(self):
         with app.test_client() as c:
-            response = c.get(
-                "/users", headers={"Authorization": "Bearer %s" % TOKEN_USER}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get("/users", headers={"x-csrf-token": TOKEN_USER_CSRF})
             self.assertEqual(response.status_code, 401)
 
     def test_nonfresh_token(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_NONFRESH)
             response = c.get(
-                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN_NONFRESH}
+                "/users", headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF}
             )
             self.assertEqual(response.status_code, 401)
 
     def test_list(self):
         with app.test_client() as c:
-            response = c.get(
-                "/users", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.get("/users", headers={"x-csrf-token": TOKEN_ADMIN_CSRF})
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             if len(response.json["items"]) < 200:
@@ -359,9 +378,9 @@ class ListRoute(unittest.TestCase):
 
     def test_order_by(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
-                "/users?order_by=username",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/users?order_by=username", headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -377,9 +396,10 @@ class ListRoute(unittest.TestCase):
 
     def test_order_by_with_plus(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?order_by=%2Busername&limit=2",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(
                 response.json.get("next"),
@@ -388,9 +408,10 @@ class ListRoute(unittest.TestCase):
 
     def test_limit(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=1&order_by=username",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -400,17 +421,19 @@ class ListRoute(unittest.TestCase):
 
     def test_no_multi_order_by(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=3&order_by=uuid,username",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_start_with(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=2&start_with=%s&order_by=-uuid" % UUID_USER,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -426,9 +449,10 @@ class ListRoute(unittest.TestCase):
 
     def test_start_with_non_existent(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=1&start_with=00005957-8ebb-4a44-1234-758dbf28bb9f&order_by=-username",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -436,44 +460,49 @@ class ListRoute(unittest.TestCase):
 
     def test_ignore_start_with_str(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=3&start_with=asdfasdf",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_ignore_negative_limit(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
-                "/users?limit=-3", headers={"Authorization": "Bearer %s" % TOKEN_ADMIN}
+                "/users?limit=-3", headers={"x-csrf-token": TOKEN_ADMIN_CSRF}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_start_with_negative(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=3&start_with=-1",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_limit_str(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?limit=asdfasdf&start_with=5",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_filter_absent(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?filter=username:unknown-username",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -481,9 +510,10 @@ class ListRoute(unittest.TestCase):
 
     def test_filter(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?filter=username:admin&order_by=uuid",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -492,17 +522,17 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_next(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?filter=username:user&limit=1&order_by=-uuid",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 1)
             response2 = c.get(
-                response.json["next"],
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                response.json["next"], headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertTrue("items" in response2.json)
             self.assertTrue(
@@ -511,9 +541,10 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_ignore_bad_column(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
                 "/users?filter=random:file1",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -521,9 +552,9 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_ignore_bad_format(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.get(
-                "/users?filter=file1",
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                "/users?filter=file1", headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)

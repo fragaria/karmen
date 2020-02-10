@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -11,9 +11,15 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_current_user,
     decode_token,
+    set_access_cookies,
+    set_refresh_cookies,
+    unset_jwt_cookies,
 )
 from server import app
 from server.database import users, local_users, api_tokens
+
+ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
+REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
 
 
 def authenticate_base(include_refresh_token):
@@ -40,10 +46,26 @@ def authenticate_base(include_refresh_token):
 
     userdata = dict(user)
     userdata.update(local)
-    response = {"access_token": create_access_token(identity=userdata, fresh=True)}
+    response = jsonify(
+        {
+            "identity": userdata.get("uuid", None),
+            "role": userdata.get("role", "user"),
+            "username": userdata.get("username"),
+            "force_pwd_change": userdata.get("force_pwd_change", False),
+            "fresh": True,
+            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
+        }
+    )
+    access_token = create_access_token(
+        identity=userdata, fresh=True, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
+    )
+    set_access_cookies(response, access_token)
     if include_refresh_token:
-        response["refresh_token"] = create_refresh_token(identity=userdata)
-    return jsonify(response), 200
+        refresh_token = create_refresh_token(
+            identity=userdata, expires_delta=REFRESH_TOKEN_EXPIRES_AFTER
+        )
+        set_refresh_cookies(response, refresh_token, 7 * 24 * 60 * 60)
+    return response, 200
 
 
 # This is intentionally not called login as we might use that for the OAuth process in the future
@@ -74,7 +96,28 @@ def refresh():
         return abort(make_response("", 401))
     userdata = dict(user)
     userdata.update(local)
-    return jsonify({"access_token": create_access_token(identity=userdata)}), 200
+    response = jsonify(
+        {
+            "identity": userdata.get("uuid", None),
+            "role": userdata.get("role", "user"),
+            "username": userdata.get("username"),
+            "force_pwd_change": userdata.get("force_pwd_change", False),
+            "fresh": False,
+            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
+        }
+    )
+    access_token = create_access_token(
+        identity=userdata, fresh=False, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
+    )
+    set_access_cookies(response, access_token)
+    return response, 200
+
+
+@app.route("/users/me/logout", methods=["POST"])
+def logout():
+    response = jsonify({"logout": True})
+    unset_jwt_cookies(response)
+    return response, 200
 
 
 @app.route("/users/me/probe", methods=["GET"])
@@ -127,13 +170,23 @@ def change_password():
     local_users.update_local_user(
         pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=False, user_uuid=user["uuid"]
     )
-
     userdata = dict(user)
-    userdata.update({"force_pwd_change": False, "user_uuid": user["uuid"]})
-    return (
-        jsonify({"access_token": create_access_token(identity=userdata, fresh=True)}),
-        200,
+
+    response = jsonify(
+        {
+            "identity": userdata.get("uuid", None),
+            "role": userdata.get("role", "user"),
+            "username": userdata.get("username"),
+            "force_pwd_change": userdata.get("force_pwd_change", False),
+            "fresh": True,
+            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
+        }
     )
+    access_token = create_access_token(
+        identity=userdata, fresh=True, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
+    )
+    set_access_cookies(response, access_token)
+    return response, 200
 
 
 @app.route("/users/me/tokens", methods=["GET"])

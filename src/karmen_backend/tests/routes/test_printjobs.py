@@ -4,7 +4,15 @@ import mock
 from server import app
 from server.database import gcodes, printjobs
 from server.clients.utils import PrinterClientException
-from ..utils import TOKEN_ADMIN, TOKEN_USER, TOKEN_USER2, UUID_USER
+from ..utils import (
+    TOKEN_ADMIN,
+    TOKEN_ADMIN_CSRF,
+    TOKEN_USER,
+    TOKEN_USER_CSRF,
+    TOKEN_USER2,
+    TOKEN_USER2_CSRF,
+    UUID_USER,
+)
 
 
 class ListRoute(unittest.TestCase):
@@ -54,9 +62,8 @@ class ListRoute(unittest.TestCase):
 
     def test_list(self):
         with app.test_client() as c:
-            response = c.get(
-                "/printjobs", headers={"Authorization": "Bearer %s" % TOKEN_USER}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get("/printjobs", headers={"x-csrf-token": TOKEN_USER_CSRF})
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             if len(response.json["items"]) < 200:
@@ -71,9 +78,10 @@ class ListRoute(unittest.TestCase):
 
     def test_order_by(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?order_by=started",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -89,9 +97,10 @@ class ListRoute(unittest.TestCase):
 
     def test_limit(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=3&order_by=started&fields=id,started",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -104,17 +113,19 @@ class ListRoute(unittest.TestCase):
 
     def test_no_multi_order_by(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=3&order_by=id,started",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_start_with(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=2&start_with=2",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -132,9 +143,10 @@ class ListRoute(unittest.TestCase):
 
     def test_start_with_non_existent(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=3&start_with=99999&order_by=started",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -142,9 +154,10 @@ class ListRoute(unittest.TestCase):
 
     def test_start_with_order_by(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=3&start_with=1&order_by=-id",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -153,7 +166,7 @@ class ListRoute(unittest.TestCase):
 
             response = c.get(
                 "/printjobs?limit=3&start_with=1&order_by=id",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -168,45 +181,49 @@ class ListRoute(unittest.TestCase):
 
     def test_ignore_start_with_str(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=3&start_with=asdfasdf",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_ignore_negative_limit(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/printjobs?limit=-3",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "/printjobs?limit=-3", headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_start_with_negative(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=3&start_with=-1",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_survive_ignore_limit_str(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?limit=asdfasdf&start_with=5",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
     def test_filter_absent(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?filter=printer_uuid:completely-absent%printer",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -214,9 +231,10 @@ class ListRoute(unittest.TestCase):
 
     def test_filter(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&order_by=id",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -226,7 +244,7 @@ class ListRoute(unittest.TestCase):
                 )
             response = c.get(
                 "/printjobs?filter=gcode_id:3:8080&order_by=id",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -235,17 +253,17 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_next(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&limit=10&order_by=-id",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 10)
             response2 = c.get(
-                response.json["next"],
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                response.json["next"], headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response2.status_code, 200)
             self.assertTrue("items" in response2.json)
@@ -255,9 +273,10 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_ignore_bad_column(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs?filter=random:file1",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -265,9 +284,9 @@ class ListRoute(unittest.TestCase):
 
     def test_filter_ignore_bad_format(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/printjobs?filter=file1",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                "/printjobs?filter=file1", headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -299,9 +318,10 @@ class DetailRoute(unittest.TestCase):
 
     def test_detail(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/printjobs/%s" % self.printjob_id,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("id" in response.json)
@@ -311,8 +331,9 @@ class DetailRoute(unittest.TestCase):
 
     def test_404(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/printjobs/172.16", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+                "/printjobs/172.16", headers={"x-csrf-token": TOKEN_USER_CSRF}
             )
             self.assertEqual(response.status_code, 404)
 
@@ -330,14 +351,15 @@ class CreateRoute(unittest.TestCase):
 
     @mock.patch(
         "server.routes.printjobs.clients.get_printer_instance",
-        headers={"Authorization": "Bearer %s" % TOKEN_USER},
+        headers={"x-csrf-token": TOKEN_USER_CSRF},
     )
     def test_create(self, mock_print_inst):
         mock_print_inst.return_value.upload_and_start_job.return_value = True
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
                     "gcode": self.gcode_id,
@@ -369,9 +391,10 @@ class CreateRoute(unittest.TestCase):
             "Printer is printing"
         )
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
                     "gcode": self.gcode_id,
@@ -381,34 +404,36 @@ class CreateRoute(unittest.TestCase):
 
     def test_empty_req(self):
         with app.test_client() as c:
-            response = c.post(
-                "/printjobs", headers={"Authorization": "Bearer %s" % TOKEN_USER}
-            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post("/printjobs", headers={"x-csrf-token": TOKEN_USER_CSRF})
             self.assertEqual(response.status_code, 400)
 
     def test_missing_gcode(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20"},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_printer(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"gcode": self.gcode_id},
             )
             self.assertEqual(response.status_code, 400)
 
     def test_bad_printer(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "gcode": self.gcode_id,
                     "printer": "225b4a63-d94a-4231-87dc-f1bff717e5da",
@@ -418,9 +443,10 @@ class CreateRoute(unittest.TestCase):
 
     def test_bad_gcode(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"gcode": -3, "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20"},
             )
             self.assertEqual(response.status_code, 404)
@@ -430,9 +456,10 @@ class CreateRoute(unittest.TestCase):
     )
     def test_cannot_upload_to_printer(self, mock_get_printer):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "/printjobs",
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "gcode": self.gcode_id,
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -479,9 +506,10 @@ class DeleteRoute(unittest.TestCase):
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.delete(
                 "/printjobs/%s" % printjob_id,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER},
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 204)
         self.assertEqual(printjobs.get_printjob(printjob_id), None)
@@ -503,9 +531,10 @@ class DeleteRoute(unittest.TestCase):
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.delete(
                 "/printjobs/%s" % printjob_id,
-                headers={"Authorization": "Bearer %s" % TOKEN_ADMIN},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 204)
         self.assertEqual(printjobs.get_printjob(printjob_id), None)
@@ -527,15 +556,17 @@ class DeleteRoute(unittest.TestCase):
             user_uuid=UUID_USER,
         )
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
             response = c.delete(
                 "/printjobs/%s" % printjob_id,
-                headers={"Authorization": "Bearer %s" % TOKEN_USER2},
+                headers={"x-csrf-token": TOKEN_USER2_CSRF},
             )
             self.assertEqual(response.status_code, 401)
 
     def test_delete_unknown(self):
         with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.delete(
-                "/printjobs/172.16", headers={"Authorization": "Bearer %s" % TOKEN_USER}
+                "/printjobs/172.16", headers={"x-csrf-token": TOKEN_USER_CSRF}
             )
             self.assertEqual(response.status_code, 404)
