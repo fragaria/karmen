@@ -91,6 +91,7 @@ footer {
 
 .text-mono {
   font-family: $mono;
+  // font-size: 1.3rem
 }
 
 .hidden {
@@ -195,6 +196,7 @@ footer {
   align-items: center;
   justify-content: space-between;
   font-family: $mono;
+  font-size: 3.5rem;
 
   &.text-center {
     display: block;
@@ -273,7 +275,7 @@ footer {
 
   &.btn-sm {
     padding: $base-unit $base-unit*2;
-    font-size: 1.1rem;
+    font-size: 1.4rem;
   }
 
   &:disabled {
@@ -507,10 +509,6 @@ footer {
     display: block;
     color: $color-light;
     word-break: break-all;
-
-    .text-mono {
-      font-size: 1.3rem
-    }
   }
 
   .list-item-title,

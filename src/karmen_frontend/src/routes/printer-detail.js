@@ -326,7 +326,7 @@ const PrinterConnectionStatus = ({ printer }) => {
       )}
 
       <dt className="term">Client host: </dt>
-      <dd className="decription">
+      <dd className="decription text-mono">
         {printer.hostname && (
           <a
             className="anchor"
