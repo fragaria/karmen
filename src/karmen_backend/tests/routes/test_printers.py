@@ -675,7 +675,7 @@ class CurrentJobRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 401)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     def test_current_job_admin(self, post_uri_mock):
         with app.test_client() as c:
@@ -688,7 +688,7 @@ class CurrentJobRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     def test_current_job_user(self, post_uri_mock):
         with app.test_client() as c:
@@ -700,7 +700,7 @@ class CurrentJobRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 204)
 
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_current_job_unable_to_call_printer(self, post_uri_mock):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -778,7 +778,7 @@ class PrinterConnectionRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -795,7 +795,7 @@ class PrinterConnectionRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -812,7 +812,7 @@ class PrinterConnectionRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -831,7 +831,7 @@ class PrinterConnectionRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -848,7 +848,7 @@ class PrinterConnectionRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 204)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",

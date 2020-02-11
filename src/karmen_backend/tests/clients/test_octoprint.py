@@ -62,7 +62,7 @@ class OctoprintIsAliveTest(unittest.TestCase):
 
 
 class OctoprintConnectPrinterTest(unittest.TestCase):
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
@@ -71,7 +71,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_post_uri.call_count, 0)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -87,7 +87,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
 
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Offline"}}),
@@ -103,7 +103,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_post_uri.call_count, 1)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -121,7 +121,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
 
 
 class OctoprintDisconnectPrinterTest(unittest.TestCase):
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
@@ -130,7 +130,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_post_uri.call_count, 0)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -146,7 +146,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Offline"}}),
@@ -162,7 +162,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_post_uri.call_count, 0)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(204)
+        "server.clients.octoprint.requests.post", return_value=Response(204)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -179,7 +179,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_post_uri.call_count, 1)
 
     @mock.patch(
-        "server.clients.octoprint.requests.Session.post", return_value=Response(500)
+        "server.clients.octoprint.requests.post", return_value=Response(500)
     )
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -753,7 +753,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         os.remove(self.file_mock.name)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_upload_job_ok(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -787,7 +787,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertEqual(kwargs["timeout"], 200)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_upload_job_path_ok(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -824,7 +824,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertEqual(kwargs["files"]["file"].name, self.file_mock.name)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_upload_job_printing(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -841,7 +841,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertTrue("Printer is printing" in str(context.exception))
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_upload_job_disconnect(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -859,7 +859,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertFalse(printer.client_info.connected)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_upload_job_disconnect(self, mock_post_uri, mock_get_uri):
         mock_post_uri.return_value.status_code = 200
         mock_get_uri.return_value.status_code = 200
@@ -885,7 +885,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_upload_job_disconnected(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -898,7 +898,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertFalse(result)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_upload_job_no_response(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -914,7 +914,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertFalse(result)
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_upload_job_inactive_printer(self, mock_post_uri, mock_get_uri):
         printer = Octoprint("192.168.1.15")
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -922,7 +922,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         self.assertFalse(result)
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_upload_job_no_api_access(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {"state": {"text": "Operational"}}
@@ -945,7 +945,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
 
 
 class OctoprintModifyCurrentJobTest(unittest.TestCase):
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_modify_job_start_ok(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 204
         printer = Octoprint(
@@ -958,7 +958,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         args, kwargs = mock_post_uri.call_args
         self.assertEqual(kwargs["json"], {"command": "start"})
 
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_modify_job_cancel_ok(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 204
         printer = Octoprint(
@@ -971,7 +971,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         args, kwargs = mock_post_uri.call_args
         self.assertEqual(kwargs["json"], {"command": "cancel"})
 
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_modify_job_toggle_ok(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 204
         printer = Octoprint(
@@ -984,7 +984,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         args, kwargs = mock_post_uri.call_args
         self.assertEqual(kwargs["json"], {"command": "pause", "action": "toggle"})
 
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_modify_job_disconnect(self, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
@@ -996,14 +996,14 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         self.assertFalse(result)
         self.assertFalse(printer.client_info.connected)
 
-    @mock.patch("server.clients.octoprint.requests.Session.post")
+    @mock.patch("server.clients.octoprint.requests.post")
     def test_modify_job_disconnected(self, mock_post_uri):
         printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         result = printer.modify_current_job("toggle")
         self.assertEqual(mock_post_uri.call_count, 0)
         self.assertFalse(result)
 
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_modify_job_no_response(self, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
@@ -1013,7 +1013,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         result = printer.modify_current_job("toggle")
         self.assertFalse(result)
 
-    @mock.patch("server.clients.octoprint.requests.Session.post", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_modify_job_inactive_printer(self, mock_post_uri):
         printer = Octoprint("900c73b8-1f12-4027-941a-e4b29531e8e3", ip="192.168.1.15")
         self.assertEqual(mock_post_uri.call_count, 0)

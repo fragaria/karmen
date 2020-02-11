@@ -101,12 +101,20 @@ class Octoprint(PrinterClient):
             return None
         uri = urlparse.urljoin("%s://%s" % (self.protocol, self.network_host), path)
         try:
-            req = self.http_session.post(
+            headers = {}
+            if self.client_info.api_key:
+                headers.update({"X-Api-Key": self.client_info.api_key})
+            # Because requests session shares the connection pool, timeout actually
+            # does not get updated in the underlying reused socket.
+            # That's why we're using a different connection with custom timeout.
+            req = requests.post(
                 uri,
                 data=data,
                 files=files,
                 json=json,
-                timeout=app.config.get("NETWORK_TIMEOUT", 10) * 100,
+                headers=headers,
+                timeout=int(app.config.get("NETWORK_TIMEOUT", 10)) * 100,
+                verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
             )
             if req is None:
                 self.client_info.connected = False
@@ -120,7 +128,7 @@ class Octoprint(PrinterClient):
             requests.exceptions.ConnectionError,
             requests.exceptions.ReadTimeout,
         ) as e:
-            app.logger.error("Cannot call %s because %s" % (uri, e))
+            app.logger.debug("Cannot call %s because %s" % (uri, e))
             self.client_info.connected = False
             return None
 

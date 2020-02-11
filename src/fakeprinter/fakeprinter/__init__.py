@@ -155,9 +155,6 @@ def upload():
     if not re.search(r"\.gco(de)?$", incoming.filename):
         return abort(415)
 
-    import time
-    time.sleep(10)
-
     original_filename = incoming.filename
     filename = secure_filename(original_filename)
     path = request.form.get("path", "/")
