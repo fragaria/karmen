@@ -12,9 +12,9 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
       {modal.isOpen && (
         <modal.Modal>
           <h1 className="modal-title text-center">Are you sure?</h1>
-          <h2 className="text-center">
+          <h3 className="text-center">
             You can add the printer back later by adding
-          </h2>
+          </h3>
           <code>
             {printer.hostname || printer.ip}
             {printer.port ? `:${printer.port}` : ""}

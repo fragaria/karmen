@@ -25,11 +25,11 @@ const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
       {modal.isOpen && (
         <modal.Modal>
           <h1 className="modal-title text-center">Change user role</h1>
-          <h2 className="text-center">
+          <h3 className="text-center">
             Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
             <strong>{user.username}</strong> to{" "}
             {user.role === "admin" ? "user" : "admin"}?
-          </h2>
+          </h3>
 
           <div className="cta-box text-center">
             <button
@@ -87,10 +87,10 @@ const ToggleUserSuspendModal = ({ modal, user, onUserChange }) => {
           <h1 className="modal-title text-center">
             {user.suspended ? "Enable " : "Disable "} user role
           </h1>
-          <h2 className="text-center">
+          <h3 className="text-center">
             Do you really want to {user.suspended ? "enable" : "disable"}{" "}
             <strong>{user.username}</strong>?
-          </h2>
+          </h3>
 
           <div className="cta-box text-center">
             <button

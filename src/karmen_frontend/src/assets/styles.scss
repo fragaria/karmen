@@ -278,6 +278,12 @@ footer {
     font-size: 1.4rem;
   }
 
+  &.btn-xs {
+    padding: $base-unit/2 $base-unit;
+    font-size: 1.2rem;
+    vertical-align: middle;
+  }
+
   &:disabled {
     background: #adadad;
 

@@ -4,6 +4,7 @@ import { Link, Redirect } from "react-router-dom";
 
 import Loader from "../components/utils/loader";
 import BusyButton from "../components/utils/busy-button";
+import { useMyModal } from "../components/utils/modal";
 import Listing from "../components/listings/wrapper";
 import Progress from "../components/printers/progress";
 import WebcamStream from "../components/printers/webcam-stream";
@@ -19,114 +20,43 @@ import {
   getWebcamSnapshot
 } from "../actions/printers";
 
-class PrinterConnectionForm extends React.Component {
-  state = {
-    showConnectionWarningRow: false,
-    targetState: null,
-    submitting: false
-  };
+const ChangeConnectionModal = ({ onPrinterConnectionChanged, printer, modal }) => {
+  const printerTargetState = printer.client && printer.client.access_level === "unlocked" && (
+    ["Offline", "Closed"].indexOf(
+      printer.status && printer.status.state
+    ) > -1 || printer.status.state.match(/printer is not/i) ? "online" : "offline"
+  )
 
-  constructor(props) {
-    super(props);
-    this.changePrinterConnection = this.changePrinterConnection.bind(this);
-  }
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">Change printer connection status to {printerTargetState}</h1>
+          <h3 className="text-center">
+            Are you sure? This might affect any current printer operation.
+          </h3>
 
-  changePrinterConnection() {
-    const { targetState } = this.state;
-    const { onPrinterConnectionChanged } = this.props;
-    return onPrinterConnectionChanged(targetState).then(r => {
-      this.setState({
-        submitting: false,
-        showConnectionWarningRow: false,
-        targetState: null
-      });
-    });
-  }
-
-  render() {
-    const { printer } = this.props;
-    const { showConnectionWarningRow, submitting } = this.state;
-    if (["Connecting"].indexOf(printer.status.state) > -1) {
-      return <></>;
-    }
-    return (
-      <form className="inline-form">
-        {showConnectionWarningRow ? (
-          <div>
-            <p className="message-warning">
-              Are you sure? This might affect any current printer operation.
-            </p>
+          <div className="cta-box text-center">
             <BusyButton
-              className="btn btn-sm"
-              type="submit"
-              onClick={e => {
-                e.preventDefault();
-                this.setState({
-                  submitting: true
-                });
-                return this.changePrinterConnection();
-              }}
-              busyChildren="Working..."
-            >
-              Yes, please
-            </BusyButton>{" "}
-            <button
-              type="reset"
-              className={submitting ? "hidden" : "btn btn-sm btn-plain"}
-              onClick={e => {
-                e.preventDefault();
-                this.setState({
-                  submitting: false,
-                  showConnectionWarningRow: false,
-                  targetState: null
-                });
-              }}
-              disabled={submitting}
-            >
+                className="btn btn-sm"
+                type="submit"
+                onClick={e => {
+                  e.preventDefault();
+                  onPrinterConnectionChanged(printerTargetState);
+                  modal.closeModal();
+                }}
+                busyChildren="Working..."
+              >
+                Yes, please
+            </BusyButton>
+            <button className="btn btn-plain" onClick={modal.closeModal}>
               Cancel
             </button>
           </div>
-        ) : (
-          <>
-            &nbsp;
-            {printer.client &&
-              printer.client.access_level === "unlocked" &&
-              (["Offline", "Closed"].indexOf(
-                printer.status && printer.status.state
-              ) > -1 || printer.status.state.match(/printer is not/i) ? (
-                <button
-                  className="btn btn-sm"
-                  type="submit"
-                  onClick={e => {
-                    e.preventDefault();
-                    this.setState({
-                      showConnectionWarningRow: true,
-                      targetState: "online"
-                    });
-                  }}
-                >
-                  Connect
-                </button>
-              ) : (
-                <button
-                  className="btn-reset anchor"
-                  type="submit"
-                  onClick={e => {
-                    e.preventDefault();
-                    this.setState({
-                      showConnectionWarningRow: true,
-                      targetState: "offline"
-                    });
-                  }}
-                >
-                  Disconnect
-                </button>
-              ))}
-          </>
-        )}
-      </form>
-    );
-  }
+        </modal.Modal>
+      )}
+    </>
+  )
 }
 
 class PrinterAuthorizationForm extends React.Component {
@@ -498,10 +428,9 @@ class PrinterDetail extends React.Component {
         printerLoaded: true
       });
     }
-  }
+  }  
 
-  render() {
-    const { printerLoaded } = this.state;
+  render () {
     const {
       printer,
       setPrinterConnection,
@@ -513,6 +442,8 @@ class PrinterDetail extends React.Component {
       clearJobsPages,
       getWebcamSnapshot
     } = this.props;
+    const { printerLoaded } = this.state;
+
     if (!printerLoaded) {
       return (
         <div>
@@ -522,7 +453,35 @@ class PrinterDetail extends React.Component {
     }
     if (!printer) {
       return <Redirect to="/page-404" />;
-    }
+    }    
+
+    return <PrinterDetailInner
+      printer={printer}
+      setPrinterConnection={setPrinterConnection}
+      changeCurrentJobState={changeCurrentJobState}
+      patchPrinter={patchPrinter}
+      role={role}
+      jobList={jobList}
+      loadJobsPage={loadJobsPage}
+      clearJobsPages={clearJobsPages}
+      getWebcamSnapshot={getWebcamSnapshot}
+    />
+  }
+}
+
+const PrinterDetailInner = ({
+    printer,
+    setPrinterConnection,
+    changeCurrentJobState,
+    patchPrinter,
+    role,
+    jobList,
+    loadJobsPage,
+    clearJobsPages,
+    getWebcamSnapshot
+  }) => {
+  
+  const changeConnectionModal = useMyModal();
     return (
       <section className="content">
         <div className="printer-detail">
@@ -539,8 +498,33 @@ class PrinterDetail extends React.Component {
               <h1 className="main-title">{printer.name}</h1>
 
               <PrinterState printer={printer} />
+              {" "}
+              <button
+                className="btn btn-xs"
+                type="submit"
+                onClick={e => {
+                  e.preventDefault();
+                  changeConnectionModal.openModal(e);
+                }}
+              >
+              {printer.client &&
+                printer.client.access_level === "unlocked" &&
+                (["Offline", "Closed"].indexOf(
+                  printer.status && printer.status.state
+                ) > -1 || printer.status.state.match(/printer is not/i) ? (
+                  <>
+                    Connect
+                  </>
+                ) : (
+                  <>
+                    Disconnect
+                  </>
+                ))
+              }
+              </button>
 
-              <PrinterConnectionForm
+              <ChangeConnectionModal
+                modal={changeConnectionModal}
                 printer={printer}
                 onPrinterConnectionChanged={setPrinterConnection}
               />
@@ -596,7 +580,7 @@ class PrinterDetail extends React.Component {
       </section>
     );
   }
-}
+
 
 export default connect(
   (state, ownProps) => ({
