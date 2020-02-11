@@ -120,7 +120,7 @@ class Octoprint(PrinterClient):
             requests.exceptions.ConnectionError,
             requests.exceptions.ReadTimeout,
         ) as e:
-            app.logger.debug("Cannot call %s because %s" % (uri, e))
+            app.logger.error("Cannot call %s because %s" % (uri, e))
             self.client_info.connected = False
             return None
 
