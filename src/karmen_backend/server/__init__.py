@@ -5,7 +5,7 @@ from celery import Celery
 from flask_jwt_extended import JWTManager
 from flask_executor import Executor
 
-__version__ = "0.5.0-rc8"
+__version__ = "0.5.0-rc9"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
