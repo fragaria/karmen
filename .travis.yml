@@ -10,6 +10,8 @@ addons:
     - docker-ce
     - jq
 matrix:
+  allow_failures:
+    - python: '3.8-dev'
   include:
   - stage: test
     language: python
