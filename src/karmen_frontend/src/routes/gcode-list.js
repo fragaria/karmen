@@ -381,7 +381,7 @@ export default connect(
         .filter(p => without.indexOf(p.uuid) === -1)
   }),
   dispatch => ({
-    loadPrinters: () => dispatch(loadPrinters(["status"])),
+    loadPrinters: () => dispatch(loadPrinters(["job", "status", "webcam"])),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>
       dispatch(getGcodesPage(startWith, orderBy, filter, limit, fields)),
     clearGcodesPages: () => dispatch(clearGcodesPages()),

@@ -355,7 +355,7 @@ export default connect(
         .filter(p => without.indexOf(p.uuid) === -1)
   }),
   dispatch => ({
-    loadPrinters: () => dispatch(loadPrinters(["status"])),
+    loadPrinters: () => dispatch(loadPrinters(["job", "status", "webcam"])),
     getGcode: id => dispatch(loadGcode(id, [])),
     printGcode: (id, printer) => dispatch(addPrintJob(id, printer)),
     downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename))
