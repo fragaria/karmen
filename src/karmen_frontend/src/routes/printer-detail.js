@@ -20,34 +20,42 @@ import {
   getWebcamSnapshot
 } from "../actions/printers";
 
-const ChangeConnectionModal = ({ onPrinterConnectionChanged, printer, modal }) => {
-  const printerTargetState = printer.client && printer.client.access_level === "unlocked" && (
-    ["Offline", "Closed"].indexOf(
-      printer.status && printer.status.state
-    ) > -1 || printer.status.state.match(/printer is not/i) ? "online" : "offline"
-  )
+const ChangeConnectionModal = ({
+  onPrinterConnectionChanged,
+  printer,
+  modal
+}) => {
+  const printerTargetState =
+    printer.client &&
+    printer.client.access_level === "unlocked" &&
+    (["Offline", "Closed"].indexOf(printer.status && printer.status.state) >
+      -1 || printer.status.state.match(/printer is not/i)
+      ? "online"
+      : "offline");
 
   return (
     <>
       {modal.isOpen && (
         <modal.Modal>
-          <h1 className="modal-title text-center">Change printer connection status to {printerTargetState}</h1>
+          <h1 className="modal-title text-center">
+            Change printer connection status to {printerTargetState}
+          </h1>
           <h3 className="text-center">
             Are you sure? This might affect any current printer operation.
           </h3>
 
           <div className="cta-box text-center">
             <BusyButton
-                className="btn btn-sm"
-                type="submit"
-                onClick={e => {
-                  e.preventDefault();
-                  onPrinterConnectionChanged(printerTargetState);
-                  modal.closeModal();
-                }}
-                busyChildren="Working..."
-              >
-                Yes, please
+              className="btn btn-sm"
+              type="submit"
+              onClick={e => {
+                e.preventDefault();
+                onPrinterConnectionChanged(printerTargetState);
+                modal.closeModal();
+              }}
+              busyChildren="Working..."
+            >
+              Yes, please
             </BusyButton>
             <button className="btn btn-plain" onClick={modal.closeModal}>
               Cancel
@@ -56,8 +64,8 @@ const ChangeConnectionModal = ({ onPrinterConnectionChanged, printer, modal }) =
         </modal.Modal>
       )}
     </>
-  )
-}
+  );
+};
 
 class PrinterAuthorizationForm extends React.Component {
   state = {
@@ -428,9 +436,9 @@ class PrinterDetail extends React.Component {
         printerLoaded: true
       });
     }
-  }  
+  }
 
-  render () {
+  render() {
     const {
       printer,
       setPrinterConnection,
@@ -453,134 +461,123 @@ class PrinterDetail extends React.Component {
     }
     if (!printer) {
       return <Redirect to="/page-404" />;
-    }    
+    }
 
-    return <PrinterDetailInner
-      printer={printer}
-      setPrinterConnection={setPrinterConnection}
-      changeCurrentJobState={changeCurrentJobState}
-      patchPrinter={patchPrinter}
-      role={role}
-      jobList={jobList}
-      loadJobsPage={loadJobsPage}
-      clearJobsPages={clearJobsPages}
-      getWebcamSnapshot={getWebcamSnapshot}
-    />
+    return (
+      <PrinterDetailInner
+        printer={printer}
+        setPrinterConnection={setPrinterConnection}
+        changeCurrentJobState={changeCurrentJobState}
+        patchPrinter={patchPrinter}
+        role={role}
+        jobList={jobList}
+        loadJobsPage={loadJobsPage}
+        clearJobsPages={clearJobsPages}
+        getWebcamSnapshot={getWebcamSnapshot}
+      />
+    );
   }
 }
 
 const PrinterDetailInner = ({
-    printer,
-    setPrinterConnection,
-    changeCurrentJobState,
-    patchPrinter,
-    role,
-    jobList,
-    loadJobsPage,
-    clearJobsPages,
-    getWebcamSnapshot
-  }) => {
-  
+  printer,
+  setPrinterConnection,
+  changeCurrentJobState,
+  patchPrinter,
+  role,
+  jobList,
+  loadJobsPage,
+  clearJobsPages,
+  getWebcamSnapshot
+}) => {
   const changeConnectionModal = useMyModal();
-    return (
-      <section className="content">
-        <div className="printer-detail">
-          <div className="printer-detail-stream">
-            <WebcamStream
-              {...printer.webcam}
-              getWebcamSnapshot={getWebcamSnapshot}
-            />
-            <Progress {...printer.job} />
-          </div>
+  return (
+    <section className="content">
+      <div className="printer-detail">
+        <div className="printer-detail-stream">
+          <WebcamStream
+            {...printer.webcam}
+            getWebcamSnapshot={getWebcamSnapshot}
+          />
+          <Progress {...printer.job} />
+        </div>
 
-          <div className="printer-detail-meta">
-            <div className="container">
-              <h1 className="main-title">{printer.name}</h1>
-
-              <PrinterState printer={printer} />
-              {" "}
-              <button
-                className="btn btn-xs"
-                type="submit"
-                onClick={e => {
-                  e.preventDefault();
-                  changeConnectionModal.openModal(e);
-                }}
-              >
+        <div className="printer-detail-meta">
+          <div className="container">
+            <h1 className="main-title">{printer.name}</h1>
+            <PrinterState printer={printer} />{" "}
+            <button
+              className="btn btn-xs"
+              type="submit"
+              onClick={e => {
+                e.preventDefault();
+                changeConnectionModal.openModal(e);
+              }}
+            >
               {printer.client &&
                 printer.client.access_level === "unlocked" &&
                 (["Offline", "Closed"].indexOf(
                   printer.status && printer.status.state
                 ) > -1 || printer.status.state.match(/printer is not/i) ? (
-                  <>
-                    Connect
-                  </>
+                  <>Connect</>
                 ) : (
-                  <>
-                    Disconnect
-                  </>
-                ))
-              }
-              </button>
-
-              <ChangeConnectionModal
-                modal={changeConnectionModal}
-                printer={printer}
-                onPrinterConnectionChanged={setPrinterConnection}
-              />
-
-              {role === "admin" && (
-                <PrinterAuthorizationForm
-                  printer={printer}
-                  onPrinterAuthorizationChanged={patchPrinter}
-                />
-              )}
-
-              <dl className="dl-horizontal">
-                <PrinterProgress printer={printer} />
-                <PrinterProperties printer={printer} />
-                <PrinterConnectionStatus printer={printer} />
-              </dl>
-
-              <PrinterCurrentPrintControl
-                printer={printer}
-                onCurrentJobStateChange={changeCurrentJobState}
-              />
-            </div>
-          </div>
-
-          <div className="printer-detail-jobs">
-            <ul className="tabs-navigation">
-              <li className="tab active">
-                <h2>Jobs</h2>
-              </li>
-            </ul>
-            <div className="tabs-content">
-              <Listing
-                enableFiltering={false}
-                itemList={jobList}
-                loadPage={loadJobsPage}
-                rowFactory={j => {
-                  return <PrintJobRow key={j.id} {...j} />;
-                }}
-                sortByColumns={["started"]}
-                clearItemsPages={clearJobsPages}
-              />
-            </div>
-
+                  <>Disconnect</>
+                ))}
+            </button>
+            <ChangeConnectionModal
+              modal={changeConnectionModal}
+              printer={printer}
+              onPrinterConnectionChanged={setPrinterConnection}
+            />
             {role === "admin" && (
-              <div className="cta-box text-center">
-                <Link to={`/printers/${printer.uuid}/settings`}>
-                  <button className="btn">Printer settings</button>
-                </Link>
-              </div>
+              <PrinterAuthorizationForm
+                printer={printer}
+                onPrinterAuthorizationChanged={patchPrinter}
+              />
             )}
+            <dl className="dl-horizontal">
+              <PrinterProgress printer={printer} />
+              <PrinterProperties printer={printer} />
+              <PrinterConnectionStatus printer={printer} />
+            </dl>
+            <PrinterCurrentPrintControl
+              printer={printer}
+              onCurrentJobStateChange={changeCurrentJobState}
+            />
           </div>
         </div>
-      </section>
-    );
-  }
 
+        <div className="printer-detail-jobs">
+          <ul className="tabs-navigation">
+            <li className="tab active">
+              <h2>Jobs</h2>
+            </li>
+          </ul>
+          <div className="tabs-content">
+            <Listing
+              enableFiltering={false}
+              itemList={jobList}
+              loadPage={loadJobsPage}
+              rowFactory={j => {
+                return <PrintJobRow key={j.id} {...j} />;
+              }}
+              sortByColumns={["started"]}
+              clearItemsPages={clearJobsPages}
+            />
+          </div>
+
+          {role === "admin" && (
+            <div className="cta-box text-center">
+              <Link to={`/printers/${printer.uuid}/settings`}>
+                <button className="btn">Printer settings</button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default connect(
   (state, ownProps) => ({
