@@ -8,7 +8,7 @@ from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 
-__version__ = "0.5.0-rc7"
+__version__ = "0.5.0-rc8"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
@@ -154,6 +154,9 @@ def upload():
 
     if not re.search(r"\.gco(de)?$", incoming.filename):
         return abort(415)
+
+    import time
+    time.sleep(10)
 
     original_filename = incoming.filename
     filename = secure_filename(original_filename)
