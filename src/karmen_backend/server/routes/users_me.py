@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from werkzeug.exceptions import BadRequest, Unauthorized
 import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -29,20 +30,20 @@ def authenticate_base(include_refresh_token):
     username = data.get("username", None)
     password = data.get("password", None)
     if not username or not password:
-        return abort(make_response("", 400))
+        raise BadRequest("Missing username or password in request body.")
 
     user = users.get_by_username(username)
     if not user:
-        return abort(make_response("", 401))
+        raise Unauthorized("Invalid credentials.")
 
     if user["suspended"]:
-        return abort(make_response(jsonify(message="Account suspended"), 401))
+        raise Unauthorized("Account suspended")
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(make_response("", 401))
+        raise Unauthorized("Invalid credentials.")
     if not bcrypt.checkpw(password.encode("utf8"), local["pwd_hash"].encode("utf8")):
-        return abort(make_response("", 401))
+        raise Unauthorized("Invalid credentials.")
 
     userdata = dict(user)
     userdata.update(local)
