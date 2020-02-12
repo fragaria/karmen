@@ -2,7 +2,7 @@ import uuid
 import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
-from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
+from flask_jwt_extended import get_jwt_identity, fresh_jwt_required, get_current_user
 from server import app
 from server.database import users, local_users
 from . import jwt_requires_role, jwt_force_password_change
@@ -124,6 +124,7 @@ def list_users():
         start_with = None
     filter_crit = request.args.get("filter", None)
     users_record_set = users.get_users(
+        get_current_user()["site_id"],
         order_by=order_by, limit=limit, start_with=start_with, filter=filter_crit
     )
     response = {"items": user_list}

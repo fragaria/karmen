@@ -3,6 +3,7 @@ import datetime
 
 from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
+from werkzeug.exceptions import NotFound
 from server import app, __version__
 from server.database import gcodes, printjobs, users
 from server.services import files
@@ -24,6 +25,7 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
         "analysis",
         "user_uuid",
         "username",
+        "site_id",
     ]
     fields = fields if fields else flist
     response = {}
@@ -68,6 +70,7 @@ def gcodes_list():
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
     gcodes_record_set = gcodes.get_gcodes(
+        site_id=get_current_user()["site_id"],
         order_by=order_by, limit=limit, start_with=start_with, filter=filter_crit
     )
     response = {"items": gcode_list}
@@ -144,6 +147,7 @@ def gcode_create():
             absolute_path=saved["absolute_path"],
             size=saved["size"],
             user_uuid=get_current_user()["uuid"],
+            site_id=get_current_user()['site_id'],
         )
         analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
@@ -193,6 +197,8 @@ def gcode_delete(id):
     if gcode is None:
         return abort(make_response("", 404))
     user = get_current_user()
+    if user['site_id'] != gcode['site_id']:
+        raise NotFound()
     if user["uuid"] != gcode["user_uuid"] and user["role"] not in ["admin"]:
         return abort(
             make_response(
@@ -206,6 +212,7 @@ def gcode_delete(id):
     finally:
         gcodes.delete_gcode(id)
         printjobs.update_gcode_data(
+            get_current_user()['site_id'],
             gcode["id"],
             {
                 "id": gcode["id"],

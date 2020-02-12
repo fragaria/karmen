@@ -15,19 +15,19 @@ def normalize_val(val):
     return val
 
 
-def get_all_settings():
+def get_all_settings(site_id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT key, val FROM settings")
+        cursor.execute("SELECT key, val FROM settings WHERE site_id = %s", (site_id,))
         data = cursor.fetchall()
         cursor.close()
         return data
 
 
-def get_val(key):
+def get_val(site_id, key):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("SELECT key, val FROM settings where key = %s", (key,))
+        cursor.execute("SELECT key, val FROM settings WHERE key = %s AND site_id = %s", (key, site_id))
         data = cursor.fetchone()
         cursor.close()
         if data and data["val"] is not None:
@@ -38,11 +38,11 @@ def get_val(key):
             return None
 
 
-def upsert_val(key, val):
+def upsert_val(site_id, key, val):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO settings (key, val) values (%s, %s) ON CONFLICT ON CONSTRAINT settings_key_uqc DO UPDATE SET val = %s",
-            (key.lower(), val, val),
+            "INSERT INTO settings (key, val, site_id) values (%s, %s, %s) ON CONFLICT ON CONSTRAINT settings_key_uqc DO UPDATE SET val = %s, site_id = %s",
+            (key.lower(), val, site_id, val, site_id),
         )
         cursor.close()

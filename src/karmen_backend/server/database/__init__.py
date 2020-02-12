@@ -49,9 +49,10 @@ def prepare_list_statement(
     limit=None,
     start_with=None,
     filter=None,
+    where=None,
     pk_column="id",
 ):
-    where_clause = sql.SQL("")
+    where_clause = []
     limit_clause = sql.SQL("")
     order_by_clause = sql.SQL("ORDER BY {}").format(sql.Identifier(pk_column))
     order_by_column = pk_column
@@ -83,55 +84,55 @@ def prepare_list_statement(
             data = cursor.fetchone()
             cursor.close()
             if data:
-                where_clause = sql.SQL("WHERE {} {} {}").format(
+                where_clause.append(sql.SQL("{} {} {}").format(
                     sql.Identifier(order_by_column),
                     sql.SQL("<=" if order_by_direction == "DESC" else ">="),
                     sql.Literal(data[order_by_column]),
-                )
+                ))
             else:
-                where_clause = sql.SQL("WHERE {} {} {}").format(
+                where_clause.append(sql.SQL("{} {} {}").format(
                     sql.Identifier(pk_column),
                     sql.SQL("<=" if order_by_direction == "DESC" else ">="),
                     sql.Literal(start_with),
-                )
+                ))
         else:
-            where_clause = sql.SQL("WHERE {} >= {}").format(
+            where_clause.append(sql.SQL("{} >= {}").format(
                 sql.Identifier(pk_column), sql.Literal(start_with)
-            )
+            ))
 
     if filter:
         filter_splitted = filter.split(":", 1)
         if len(filter_splitted) == 2 and filter_splitted[0] in columns:
-            if start_with:
-                # TODO filter can work only with strings, the cast is slow
-                where_clause = sql.SQL(" ").join(
-                    [
-                        where_clause,
-                        sql.SQL(
-                            "AND cast({} as varchar) ~* cast({} as varchar)"
-                        ).format(
-                            sql.Identifier(filter_splitted[0]),
-                            sql.Literal(filter_splitted[1]),
-                        ),
-                    ]
-                )
-            else:
-                where_clause = sql.SQL(" ").join(
-                    [
-                        where_clause,
-                        sql.SQL(
-                            "WHERE cast({} as varchar) ~* cast({} as varchar)"
-                        ).format(
-                            sql.Identifier(filter_splitted[0]),
-                            sql.Literal(filter_splitted[1]),
-                        ),
-                    ]
-                )
+            # TODO filter can work only with strings, the cast is slow
+            where_clause.append(sql.SQL(
+                    "cast({} as varchar) ~* cast({} as varchar)"
+                ).format(
+                    sql.Identifier(filter_splitted[0]),
+                    sql.Literal(filter_splitted[1]),
+            ))
+        else:
+            raise ValueError("Invalid filter.")
+
+    if where:
+        if isinstance(where, tuple):
+            where = list(where)
+        if isinstance(where, list):
+            where_clause.extend(where)
+        else:
+            where_clause.append(where)
+
 
     if limit:
         limit_clause = sql.SQL(" ").join(
-            [sql.SQL("limit"), sql.Literal(int(limit + 1))]
+            [sql.SQL("LIMIT"), sql.Literal(int(limit + 1))]
         )
+
+    if where_clause:
+        where_clause = sql.SQL(" ").join(
+            (sql.SQL('WHERE'), sql.SQL(" AND ").join(where_clause))
+        )
+    else:
+        where_clause = sql.SQL(" ")
 
     return sql.SQL(" ").join(
         [

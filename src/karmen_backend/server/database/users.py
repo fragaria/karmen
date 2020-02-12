@@ -1,10 +1,11 @@
 import psycopg2
+from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
 
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
-def get_users(order_by=None, limit=None, start_with=None, filter=None):
+def get_users(site_id, order_by=None, limit=None, start_with=None, filter=None):
     columns = [
         "uuid",
         "username",
@@ -20,6 +21,7 @@ def get_users(order_by=None, limit=None, start_with=None, filter=None):
             connection,
             "users",
             columns,
+            where=sql.SQL('site_id = {}').format(sql.Literal(site_id)),
             order_by=order_by,
             limit=limit,
             start_with=start_with,

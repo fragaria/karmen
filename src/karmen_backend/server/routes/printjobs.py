@@ -59,6 +59,7 @@ def printjob_create():
                 )
             )
         printjob_id = printjobs.add_printjob(
+            site_id=get_current_user()['site_id'],
             gcode_id=gcode["id"],
             printer_uuid=printer["uuid"],
             user_uuid=get_current_user()["uuid"],
@@ -113,6 +114,7 @@ def printjobs_list():
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
     printjobs_record_set = printjobs.get_printjobs(
+        site_id=get_current_user()['site_id'],
         order_by=order_by, limit=limit, start_with=start_with, filter=filter_crit
     )
     response = {"items": printjob_list}
@@ -156,7 +158,7 @@ def printjobs_list():
 @jwt_force_password_change
 @cross_origin()
 def printjob_detail(id):
-    printjob = printjobs.get_printjob(id)
+    printjob = printjobs.get_printjob(get_current_user()['site_id'], id)
     if printjob is None:
         return abort(make_response("", 404))
     user = users.get_by_uuid(printjob.get("user_uuid"))
@@ -169,10 +171,10 @@ def printjob_detail(id):
 @jwt_force_password_change
 @cross_origin()
 def printjob_delete(id):
-    printjob = printjobs.get_printjob(id)
+    user = get_current_user()
+    printjob = printjobs.get_printjob(user['site_id'], id)
     if printjob is None:
         return abort(make_response("", 404))
-    user = get_current_user()
     if user["uuid"] != printjob["user_uuid"] and user["role"] not in ["admin"]:
         return abort(
             make_response(
