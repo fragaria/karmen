@@ -1,283 +1,286 @@
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import Listing from "../components/listings/wrapper";
-import ActionRow from "../components/listings/action-row";
 import CtaDropdown from "../components/listings/cta-dropdown";
 import {
   getGcodesPage,
   clearGcodesPages,
   deleteGcode
 } from "../actions/gcodes";
+import { useMyModal } from "../components/utils/modal";
 import { addPrintJob } from "../actions/printjobs";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 
-class GcodeTableRow extends React.Component {
-  state = {
-    ctaListExpanded: false,
-    showDeleteRow: false,
-    showPrinterSelectRow: false,
-    showPrintStatusRow: false,
-    canCancelPrintStatusRow: true,
-    message: "",
-    messageOk: false,
-    selectedPrinter: null,
-    availablePrinters: [],
-    showFilamentTypeWarningRow: false,
-    printerFilamentType: "",
-    gcodeFilamentType: ""
-  };
+const DeleteModal = ({ modal, path, display, onRowDelete }) => {
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">
+            Delete G-Code
+          </h1>
 
-  constructor(props) {
-    super(props);
-    this.schedulePrint = this.schedulePrint.bind(this);
+          <h3 className="text-center">
+            Do you really want to delete{" "}
+            <strong>
+              {path}
+              {path ? "/" : ""}
+              {display}
+            </strong>
+            ? This cannot be undone.
+          </h3>
+
+          <div className="cta-box text-center">
+            <button
+              className="btn"
+              onClick={() => {
+                onRowDelete();
+              }}
+            >
+              Yes, delete it
+            </button>
+
+            <button className="btn btn-plain" onClick={modal.closeModal}>
+              Cancel
+            </button>
+          </div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
+
+const GcodeTableRow = ({ 
+  analysis,
+  id, 
+  size, 
+  uploaded, 
+  username, 
+  path,
+  display, 
+  history, 
+  printGcode, 
+  onSchedulePrint, 
+  availablePrinters, 
+  onRowDelete 
+}) => {
+  const deleteModal = useMyModal();
+  const printModal = useMyModal();
+  
+  const [ctaListExpanded, setCtaListExpanded] = useState();
+  const [showFilamentTypeWarning, setShowFilamentTypeWarning] = useState();
+  const [printerFilamentType, setPrinterFilamentType] = useState();
+  const [gcodeFilamentType, setGcodeFilamentType] = useState();
+  const [canCancelPrintStatus, setCanCancelPrintStatus] = useState();
+  const [message, setMessage] = useState();
+  const [messageOk, setMessageOk] = useState();
+  const [selectedPrinter, setSelectedPrinter] = useState();
+  const [showPrinterSelect, setShowPrinterSelect] = useState();
+
+  const SelectPrinter = () => {
+    const availablePrinterOpts = availablePrinters.map(p => {
+        return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
+      });
+    return (
+      <div className="text-center">
+        {!!availablePrinters.length ? (
+          <label>
+            Please, select the printer to print on:
+            <select
+              id="selectedPrinter"
+              name="selectedPrinter"
+              value={selectedPrinter}
+              onChange={e =>
+                this.setState({
+                  selectedPrinter: e.target.value
+                })
+              }
+            >
+              {availablePrinterOpts}
+            </select>
+          </label>
+        ) : (
+          <p className="message-error">No available printers found.</p>
+        )}
+      </div>
+    );
   }
 
-  schedulePrint(gcodeId, printerUuid) {
-    const { onSchedulePrint } = this.props;
+  const schedulePrint = (gcodeId, printerUuid) => {
     onSchedulePrint(gcodeId, printerUuid).then(r => {
       switch (r) {
         case 201:
-          this.setState({
-            showPrinterSelectRow: false,
-            canCancelPrintStatusRow: true,
-            showPrintStatusRow: true,
-            message: "Print was scheduled",
-            messageOk: true
-          });
+          setCanCancelPrintStatus(true);
+          setMessage("Print was scheduled");
+          setMessageOk(true);
           break;
         default:
-          this.setState({
-            showPrinterSelectRow: false,
-            canCancelPrintStatusRow: true,
-            showPrintStatusRow: true,
-            message: "Print was not scheduled",
-            messageOk: false
-          });
+          setCanCancelPrintStatus(true);
+          setMessage("Print was not scheduled");
+          setMessageOk(false);
       }
     });
   }
 
-  render() {
-    const {
-      showDeleteRow,
-      showPrinterSelectRow,
-      canCancelPrintStatusRow,
-      showPrintStatusRow,
-      showFilamentTypeWarningRow,
-      selectedPrinter,
-      ctaListExpanded
-    } = this.state;
-    const {
-      display,
-      path,
-      size,
-      uploaded,
-      onRowDelete,
-      id,
-      username,
-      analysis,
-      availablePrinters
-    } = this.props;
+  return (
+    <div className="list-item">
+      <Link className="list-item-content" to={`/gcodes/${id}`}>
+        <span className="list-item-subtitle">
+          {path}
+          {path ? "/" : ""}
+          {display}
+        </span>
+        <span>{formatters.bytes(size)}, </span>
+        <span>{formatters.datetime(uploaded)}, </span>
+        <span>{username}</span>
+      </Link>
 
-    if (showPrintStatusRow) {
-      const { message, messageOk } = this.state;
-      return (
-        <ActionRow
-          inverse={false}
-          showCancel={canCancelPrintStatusRow}
-          onCancel={() => {
-            this.setState({
-              showPrintStatusRow: false
-            });
+      <CtaDropdown
+        expanded={ctaListExpanded}
+        onToggle={() => {
+          setCtaListExpanded(!ctaListExpanded);
+        }}
+      >
+        <button
+          className="list-dropdown-item"
+          onClick={(e) => {
+            setCtaListExpanded(false);
+            setSelectedPrinter(availablePrinters.length ? availablePrinters[0].uuid : null);
+            setShowPrinterSelect(true);
+            printModal.openModal(e);
           }}
-          showConfirm={false}
         >
+          <i className="icon-printer"></i>
+          Print g-code
+        </button>
+
+        <button
+          className="list-dropdown-item text-secondary"
+          onClick={(e) => {
+            setCtaListExpanded(false);
+            deleteModal.openModal(e);
+          }}
+        >
+          <i className="icon-trash"></i>
+          Delete g-code
+        </button>
+      </CtaDropdown>
+
+      <printModal.Modal>
+        <>
+          <h1 className="modal-title text-center">
+            Print G-Code
+          </h1>
+          
+          {showPrinterSelect && (
+            <SelectPrinter />
+          )}
+
           {message && (
             <p className={messageOk ? "message-success" : "message-error"}>
               {message}
             </p>
           )}
-        </ActionRow>
-      );
-    }
 
-    if (showDeleteRow) {
-      return (
-        <ActionRow
-          onCancel={() => {
-            this.setState({
-              showDeleteRow: false
-            });
-          }}
-          onConfirm={() => {
-            onRowDelete();
-          }}
-        >
-          Do you really want to delete{" "}
-          <strong>
-            {path}
-            {path ? "/" : ""}
-            {display}
-          </strong>
-          ? This cannot be undone.
-        </ActionRow>
-      );
-    }
+          {showFilamentTypeWarning && (
+          <>
+            <div className="message-error">
+              Are you sure? There seems to be a filament mismatch: Printer has{" "}
+              <strong>{printerFilamentType}</strong> configured, but this gcode was
+              sliced for <strong>{gcodeFilamentType}</strong>.
+            </div>
 
-    if (showFilamentTypeWarningRow) {
-      const { printerFilamentType, gcodeFilamentType } = this.state;
-      return (
-        <ActionRow
-          onCancel={() => {
-            this.setState({
-              showFilamentTypeWarningRow: false
-            });
-          }}
-          onConfirm={() => {
-            const { selectedPrinter } = this.state;
-            this.setState({
-              showPrinterSelectRow: false,
-              canCancelPrintStatusRow: false,
-              showFilamentTypeWarningRow: false,
-              showPrintStatusRow: true,
-              message: "Scheduling a print",
-              messageOk: true
-            });
-            this.schedulePrint(id, selectedPrinter);
-          }}
-        >
-          Are you sure? There seems to be a filament mismatch: Printer has{" "}
-          <strong>{printerFilamentType}</strong> configured, but this gcode was
-          sliced for <strong>{gcodeFilamentType}</strong>.
-        </ActionRow>
-      );
-    }
-
-    if (showPrinterSelectRow) {
-      const availablePrinterOpts = availablePrinters.map(p => {
-        return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
-      });
-      return (
-        <ActionRow
-          inverse={false}
-          onCancel={() => {
-            this.setState({
-              showPrinterSelectRow: false,
-              selectedPrinter: null
-            });
-          }}
-          showConfirm={!!availablePrinters.length}
-          onConfirm={e => {
-            e.preventDefault();
-            const { selectedPrinter } = this.state;
-            const selected = availablePrinters.find(
-              p => p.uuid === selectedPrinter
-            );
-            if (
-              selected &&
-              selected.printer_props &&
-              selected.printer_props.filament_type &&
-              analysis &&
-              analysis.filament &&
-              analysis.filament.type &&
-              analysis.filament.type !== selected.printer_props.filament_type
-            ) {
-              this.setState({
-                showPrinterSelectRow: false,
-                showFilamentTypeWarningRow: true,
-                printerFilamentType: selected.printer_props.filament_type,
-                gcodeFilamentType: analysis.filament.type
-              });
-              return;
-            }
-            this.setState({
-              showPrinterSelectRow: false,
-              canCancelPrintStatusRow: false,
-              showFilamentTypeWarningRow: false,
-              showPrintStatusRow: true,
-              message: "Scheduling a print",
-              messageOk: true
-            });
-            this.schedulePrint(id, selectedPrinter);
-          }}
-        >
-          {!!availablePrinters.length ? (
-            <>
-              Select printer to print on:{" "}
-              <select
-                id="selectedPrinter"
-                name="selectedPrinter"
-                value={selectedPrinter}
-                onChange={e =>
-                  this.setState({
-                    selectedPrinter: e.target.value
-                  })
-                }
+            <div className="cta-box text-center">  
+              <button
+                className="btn"
+                onClick={() => {
+                  setShowPrinterSelect(false);
+                  setShowFilamentTypeWarning(false);
+                  setCanCancelPrintStatus(false);
+                  setMessage("Scheduling a print");
+                  setMessageOk(true);
+                  schedulePrint(id, selectedPrinter);
+                }}
               >
-                {availablePrinterOpts}
-              </select>
-            </>
-          ) : (
-            <p>No available printers found.</p>
+                Print anyway
+              </button>{" "}
+              <button 
+                className="btn btn-plain"
+                onClick={() => {
+                  setShowPrinterSelect(true);
+                  setShowFilamentTypeWarning(false);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
           )}
-        </ActionRow>
-      );
-    }
 
-    return (
-      <div className="list-item">
-        <Link className="list-item-content" to={`/gcodes/${id}`}>
-          <span className="list-item-subtitle">
-            {path}
-            {path ? "/" : ""}
-            {display}
-          </span>
-          <span>{formatters.bytes(size)}, </span>
-          <span>{formatters.datetime(uploaded)}, </span>
-          <span>{username}</span>
-        </Link>
+          {!showFilamentTypeWarning && !message && !!availablePrinters.length && (
+          <div className="cta-box text-center">
+            <button
+              className="btn"
+              onClick={e => {
+                e.preventDefault();
+                const selected = availablePrinters.find(
+                  p => p.uuid === selectedPrinter
+                );
+                if (
+                  selected &&
+                  selected.printer_props &&
+                  selected.printer_props.filament_type &&
+                  analysis &&
+                  analysis.filament &&
+                  analysis.filament.type &&
+                  analysis.filament.type !== selected.printer_props.filament_type
+                ) {
+                  setShowPrinterSelect(false);
+                  setShowFilamentTypeWarning(true);
+                  setPrinterFilamentType(selected.printer_props.filament_type);
+                  setGcodeFilamentType(analysis.filament.type)
+                  return;
+                }
 
-        <CtaDropdown
-          expanded={ctaListExpanded}
-          onToggle={() => {
-            this.setState({ ctaListExpanded: !ctaListExpanded });
-          }}
-        >
-          <button
-            className="list-dropdown-item"
-            onClick={() => {
-              this.setState({
-                selectedPrinter: availablePrinters.length
-                  ? availablePrinters[0].uuid
-                  : null,
-                showPrinterSelectRow: true,
-                ctaListExpanded: false
-              });
-            }}
-          >
-            <i className="icon-printer"></i>
-            Print g-code
-          </button>
+                setShowPrinterSelect(false);
+                setCanCancelPrintStatus(false);
+                setShowFilamentTypeWarning(false);
+                setMessage("Scheduling a print");
+                setMessageOk(true);
 
-          <button
-            className="list-dropdown-item text-secondary"
-            onClick={() => {
-              this.setState({
-                showDeleteRow: true,
-                ctaListExpanded: false
-              });
-            }}
-          >
-            <i className="icon-trash"></i>
-            Delete g-code
-          </button>
-        </CtaDropdown>
-      </div>
-    );
-  }
+                schedulePrint(id, selectedPrinter);
+              }}
+            >
+              Print
+            </button>
+
+            <button className="btn btn-plain" onClick={printModal.closeModal}>
+              Cancel
+            </button>
+          </div>
+          )}
+
+          {!!!availablePrinters.length && (
+            <div className="cta-box text-center">
+              <button className="btn" onClick={printModal.closeModal}>
+                Close
+              </button>
+            </div>
+          )}
+        </>
+      </printModal.Modal>      
+    
+      <DeleteModal
+        path={path}
+        display={display}
+        modal={deleteModal}
+        onRowDelete={onRowDelete}
+      />
+    </div>
+  );
 }
 
 class GcodeList extends React.Component {

@@ -654,9 +654,17 @@ select {
   }
 }
 
+.message-success,
 .message-error {
   text-align: center;
   font-weight: bold;
+}
+
+.message-success {
+  color: $color-success;
+}
+
+.message-error {
   color: $color-secondary;
 }
 
@@ -721,12 +729,17 @@ select {
 
   @media (min-width: $screen-sm-min) {
     width: 100%;
+    min-width: 80rem;
     height: auto;
   }
 
   .modal-title {
     font-size: 2.4rem;
     margin-bottom: $spacing-default;
+  }
+
+  .cta-box {
+    padding: $spacing-default*2 0 $spacing-default;
   }
 }
 
