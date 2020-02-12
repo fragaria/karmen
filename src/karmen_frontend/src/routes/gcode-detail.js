@@ -2,6 +2,7 @@ import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import Loader from "../components/utils/loader";
+import BusyButton from "../components/utils/busy-button";
 
 import { loadGcode, downloadGcode } from "../actions/gcodes";
 import { addPrintJob } from "../actions/printjobs";
@@ -323,14 +324,15 @@ class GcodeDetail extends React.Component {
           </div>
 
           <div className="cta-box text-center">
-            <button
+            <BusyButton
               className="btn"
               onClick={() => {
-                downloadGcode(gcode.data, gcode.filename);
+                return downloadGcode(gcode.data, gcode.filename);
               }}
+              busyChildren="Downloading..."
             >
               Download G-code
-            </button>
+            </BusyButton>
           </div>
 
           <div className="cta-box text-center">
