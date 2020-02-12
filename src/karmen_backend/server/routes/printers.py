@@ -68,7 +68,7 @@ def printers_list():
         return "".join(random.choice(letters) for i in range(10))
 
     uqid = reqid()
-    for printer in printers.get_printers():
+    for printer in printers.get_printers(site_id=get_current_user()["site_id"]):
         try:
             futures.append(
                 executor.submit_stored(
@@ -243,6 +243,7 @@ def printer_patch(uuid):
         ip=printer_inst.ip,
         port=printer_inst.port,
         protocol=protocol,
+	site_id=printer_inst.site_id,
         client=printer_inst.client_name(),
         client_props={
             "version": printer_inst.client_info.version,
