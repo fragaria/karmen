@@ -38,8 +38,6 @@ CREATE TABLE public.gcodes (
 );
 
 
-ALTER TABLE public.gcodes OWNER TO print3d;
-
 --
 -- TOC entry 197 (class 1259 OID 16392)
 -- Name: gcodes_id_seq; Type: SEQUENCE; Schema: public; Owner: print3d
@@ -54,7 +52,6 @@ CREATE SEQUENCE public.gcodes_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.gcodes_id_seq OWNER TO print3d;
 
 --
 -- TOC entry 2905 (class 0 OID 0)
@@ -77,7 +74,6 @@ CREATE TABLE public.network_devices (
 );
 
 
-ALTER TABLE public.network_devices OWNER TO print3d;
 
 --
 -- TOC entry 199 (class 1259 OID 16398)
@@ -93,7 +89,6 @@ CREATE TABLE public.printers (
 );
 
 
-ALTER TABLE public.printers OWNER TO print3d;
 
 --
 -- TOC entry 200 (class 1259 OID 16404)
@@ -108,7 +103,6 @@ CREATE TABLE public.printjobs (
 );
 
 
-ALTER TABLE public.printjobs OWNER TO print3d;
 
 --
 -- TOC entry 201 (class 1259 OID 16407)
@@ -124,7 +118,6 @@ CREATE SEQUENCE public.printjobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.printjobs_id_seq OWNER TO print3d;
 
 --
 -- TOC entry 2906 (class 0 OID 0)
@@ -146,7 +139,6 @@ CREATE TABLE public.settings (
 );
 
 
-ALTER TABLE public.settings OWNER TO print3d;
 
 --
 -- TOC entry 2762 (class 2604 OID 16415)
