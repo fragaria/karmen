@@ -5,6 +5,26 @@ import { retryIfUnauthorized } from "./users";
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
 
+export const loadAndQueuePrinter = (uuid, fields) => (dispatch, getState) => {
+  return dispatch(loadPrinter(uuid, fields)).then(result => {
+    const { printers } = getState();
+    if (result && result.data && printers.checkQueue) {
+      const existing = printers.checkQueue[uuid];
+      if (existing === null || existing === undefined) {
+        const poll =
+          ["Printing", "Paused"].indexOf(
+            result.data.status && result.data.status.state
+          ) > -1
+            ? PRINTER_RUNNING_POLL
+            : PRINTER_IDLE_POLL;
+        dispatch(setPrinterPollInterval(uuid, poll));
+        dispatch(queueLoadPrinter(uuid, ["job", "status", "webcam"], poll));
+      }
+      return result;
+    }
+  });
+};
+
 export const loadAndQueuePrinters = fields => (dispatch, getState) => {
   return dispatch(loadPrinters(fields)).then(result => {
     const { printers } = getState();
@@ -19,12 +39,8 @@ export const loadAndQueuePrinters = fields => (dispatch, getState) => {
                 ? PRINTER_RUNNING_POLL
                 : PRINTER_IDLE_POLL;
             dispatch(setPrinterPollInterval(printer.uuid, poll));
-            queueLoadPrinter(
-              dispatch,
-              getState,
-              printer.uuid,
-              ["job", "status", "webcam"],
-              poll
+            dispatch(
+              queueLoadPrinter(printer.uuid, ["job", "status", "webcam"], poll)
             );
           }
         }
@@ -44,7 +60,10 @@ export const setPrinterPollInterval = (uuid, interval) => {
   };
 };
 
-export const queueLoadPrinter = (dispatch, getState, uuid, fields, delay) => {
+export const queueLoadPrinter = (uuid, fields, delay) => (
+  dispatch,
+  getState
+) => {
   setTimeout(() => {
     const { printers } = getState();
     const previousInfo =
@@ -70,12 +89,8 @@ export const queueLoadPrinter = (dispatch, getState, uuid, fields, delay) => {
         }
         // enqueue next check if result is ok
         if (result.status === 200) {
-          queueLoadPrinter(
-            dispatch,
-            getState,
-            uuid,
-            ["job", "status", "webcam"],
-            interval
+          dispatch(
+            queueLoadPrinter(uuid, ["job", "status", "webcam"], interval)
           );
         } else {
           dispatch(setPrinterPollInterval(uuid, -1));

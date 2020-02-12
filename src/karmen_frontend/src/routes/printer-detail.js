@@ -13,7 +13,7 @@ import formatters from "../services/formatters";
 
 import { getJobsPage, clearJobsPages } from "../actions/printjobs";
 import {
-  loadPrinter,
+  loadAndQueuePrinter,
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
@@ -602,7 +602,11 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinter: () =>
       dispatch(
-        loadPrinter(ownProps.match.params.uuid, ["job", "status", "webcam"])
+        loadAndQueuePrinter(ownProps.match.params.uuid, [
+          "job",
+          "status",
+          "webcam"
+        ])
       ),
     changeCurrentJobState: action =>
       dispatch(changeCurrentJob(ownProps.match.params.uuid, action)),
