@@ -24,7 +24,7 @@ export const timespan = seconds => {
   const minutes = diffBase.diff(base, "minutes") % 60;
   const secs = diffBase.diff(base, "seconds") % 60;
   const makePlural = (value, base) => {
-    return value > 1 ? `${base}s` : base;
+    return value === 0 || value > 1 ? `${base}s` : base;
   };
   let result = "";
   if (hours > 0) {
