@@ -2,7 +2,7 @@ import io
 import os
 import re
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from PIL import Image, ImageFont, ImageDraw
 from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
@@ -15,6 +15,7 @@ __copyright__ = (
 )
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 
+STARTED = datetime.now()
 app = Flask(__name__)
 
 CORS(app)
@@ -97,15 +98,15 @@ def printer():
         }
     )
 
-
 @app.route("/api/job", methods=["GET", "OPTIONS"])
 @cross_origin()
 def job():
     global job_name
+    next_day = (STARTED + timedelta(days=1)).replace(hour=11,minute=59)
     return jsonify(
         {
             "job": {"file": {"display": job_name}},
-            "progress": {"completion": 66.666, "printTimeLeft": 7685, "printTime": 532},
+            "progress": {"completion": 66.666, "printTimeLeft": abs((next_day - datetime.now()).seconds), "printTime": abs((datetime.now() - STARTED).seconds)},
             "state": job_state,
         }
     )
