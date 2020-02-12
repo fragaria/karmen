@@ -224,6 +224,7 @@ def printer_patch(uuid):
     if printer_props:
         if not printer_inst.get_printer_props():
             printer_inst.printer_props = {}
+        # This is effectively the only place where printer_props "validation" happens
         printer_inst.get_printer_props().update(
             {
                 k: printer_props[k]
@@ -232,6 +233,7 @@ def printer_patch(uuid):
                     "filament_color",
                     "bed_type",
                     "tool0_diameter",
+                    "note",
                 ]
                 if k in printer_props
             }

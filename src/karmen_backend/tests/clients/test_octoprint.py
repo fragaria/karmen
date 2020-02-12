@@ -70,9 +70,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204)
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Closed"}}),
@@ -102,9 +100,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204)
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Operational"}}),
@@ -129,9 +125,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204)
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Closed"}}),
@@ -161,9 +155,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204)
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Operational"}}),
@@ -178,9 +170,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 1)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(500)
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(500))
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
         return_value=Response(200, {"state": {"text": "Operational"}}),

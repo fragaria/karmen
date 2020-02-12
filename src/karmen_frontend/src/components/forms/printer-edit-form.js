@@ -30,9 +30,14 @@ export class PrinterEditForm extends React.Component {
         type: "text"
       },
       tool0_diameter: {
-        name: "Tool 0 diameter",
+        name: "Tool diameter",
         val: "",
         type: "text"
+      },
+      note: {
+        name: "Note",
+        val: "",
+        type: "textarea"
       }
     }
   };
@@ -68,6 +73,10 @@ export class PrinterEditForm extends React.Component {
           tool0_diameter: Object.assign({}, form.tool0_diameter, {
             val: defaults.tool0_diameter,
             error: null
+          }),
+          note: Object.assign({}, form.note, {
+            val: defaults.note,
+            error: null
           })
         })
       });
@@ -96,7 +105,7 @@ export class PrinterEditForm extends React.Component {
       this.setState({
         form: Object.assign({}, form, {
           tool0_diameter: Object.assign({}, form.tool0_diameter, {
-            error: "Tool 0 diameter has to be a decimal number"
+            error: "Tool diameter has to be a decimal number"
           })
         })
       });
@@ -108,7 +117,8 @@ export class PrinterEditForm extends React.Component {
         filament_type: form.filament_type.val,
         filament_color: form.filament_color.val,
         bed_type: form.bed_type.val,
-        tool0_diameter: form.tool0_diameter.val
+        tool0_diameter: form.tool0_diameter.val,
+        note: form.note.val
       }
     })
       .then(result => {

@@ -86,7 +86,9 @@ class PrinterSettings extends React.Component {
                 tool0_diameter:
                   (printer.printer_props &&
                     printer.printer_props.tool0_diameter) ||
-                  ""
+                  "",
+                note:
+                  (printer.printer_props && printer.printer_props.note) || ""
               }}
               onSubmit={this.changePrinter}
               onCancel={() => {

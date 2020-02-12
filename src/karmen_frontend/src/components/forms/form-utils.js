@@ -22,6 +22,23 @@ export const FormInputs = ({ definition, updateValue }) => {
             </span>
           </React.Fragment>
         );
+      case "textarea":
+        return (
+          <React.Fragment key={name}>
+            <label htmlFor={name}>{definition[name].name}</label>
+            <textarea
+              id={name}
+              name={name}
+              value={definition[name].val}
+              onChange={e => updateValue(name, e.target.value)}
+            ></textarea>
+            <span>
+              {definition[name].error && (
+                <small>{definition[name].error}</small>
+              )}
+            </span>
+          </React.Fragment>
+        );
       case "checkbox":
         return (
           <React.Fragment key={name}>
