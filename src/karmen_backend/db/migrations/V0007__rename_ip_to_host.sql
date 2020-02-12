@@ -11,7 +11,7 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
-# props to https://stackoverflow.com/questions/48102295/rename-column-only-if-exists
+-- props to https://stackoverflow.com/questions/48102295/rename-column-only-if-exists
 DROP FUNCTION IF EXISTS public.column_exists(text,text);
 CREATE OR REPLACE FUNCTION public.column_exists(ptable TEXT, pcolumn TEXT)
   RETURNS BOOLEAN AS $BODY$
