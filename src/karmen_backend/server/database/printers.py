@@ -78,12 +78,12 @@ def get_printer_by_network_props(hostname, ip, port):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         basequery = sql.SQL(
-            "SELECT uuid, name, hostname, ip, port, client, client_props, printer_props, protocol FROM printers where"
+            "SELECT uuid, name, hostname, ip, port, client, client_props, printer_props, protocol FROM printers WHERE"
         )
         query = sql.SQL(" ").join(
             [
                 basequery,
-                sql.SQL(" and ").join(
+                sql.SQL(" AND ").join(
                     [
                         _is_or_equal("hostname", hostname),
                         _is_or_equal("ip", ip),
