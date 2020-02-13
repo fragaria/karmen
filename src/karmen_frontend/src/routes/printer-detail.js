@@ -142,87 +142,85 @@ class PrinterAuthorizationForm extends React.Component {
   }
 }
 
-class PrinterCurrentPrintControl extends React.Component {
-  state = {
-    showCancelWarning: false
-  };
-  render() {
-    const { showCancelWarning } = this.state;
-    const { printer, onCurrentJobStateChange } = this.props;
-    if (
-      !printer.status ||
-      !printer.client ||
-      ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
-      printer.client.access_level !== "unlocked"
-    ) {
-      return <></>;
-    }
-    if (showCancelWarning) {
-      return (
-        <div className="cta-box">
-          <p className="message-warning">
+const CancelPrintModal = ({ modal, onCurrentJobStateChange }) => {
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">
             Are you sure? You are about to cancel the whole print!
-          </p>
-          <button
-            className="btn btn-sm"
-            onClick={() => {
-              onCurrentJobStateChange("cancel").then(() => {
-                this.setState({
-                  showCancelWarning: false
+          </h1>
+          <div className="cta-box text-center">
+            <button
+              className="btn"
+              onClick={() => {
+                onCurrentJobStateChange("cancel").then(() => {
+                  modal.closeModal();
                 });
-              });
-            }}
-          >
-            Cancel the print!
-          </button>{" "}
-          <button
-            className="btn btn-plain btn-sm"
-            onClick={() => {
-              this.setState({
-                showCancelWarning: false
-              });
-            }}
-          >
-            Close
-          </button>
-        </div>
-      );
-    }
+              }}
+            >
+              Cancel the print!
+            </button>{" "}
+            <button
+              className="btn btn-plain"
+              onClick={modal.closeModal}
+            >
+              Close
+            </button>
+          </div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
 
-    return (
-      <div className="cta-box text-center">
-        {printer.status.state === "Paused" ? (
-          <button
-            className="btn btn-sm"
-            onClick={() => {
-              onCurrentJobStateChange("resume");
-            }}
-          >
-            Resume print
-          </button>
-        ) : (
-          <button
-            className="btn btn-sm"
-            onClick={() => {
-              onCurrentJobStateChange("pause");
-            }}
-          >
-            Pause print
-          </button>
-        )}{" "}
+const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
+  const cancelPrintModal = useMyModal();
+
+  if (
+    !printer.status ||
+    !printer.client ||
+    ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
+    printer.client.access_level !== "unlocked"
+  ) {
+    return <></>;
+  }
+
+  return (
+    <div className="cta-box text-center">
+      {printer.status.state === "Paused" ? (
         <button
           className="btn btn-sm"
           onClick={() => {
-            this.setState({
-              showCancelWarning: true
-            });
+            onCurrentJobStateChange("resume");
           }}
         >
-          Cancel print
+          Resume print
         </button>
-      </div>
-    );
-  }
+      ) : (
+        <button
+          className="btn btn-sm"
+          onClick={() => {
+            onCurrentJobStateChange("pause");
+          }}
+        >
+          Pause print
+        </button>
+      )}{" "}
+      <button
+        className="btn btn-sm"
+        onClick={cancelPrintModal.openModal}
+      >
+        Cancel print
+      </button>
+
+      <CancelPrintModal 
+        modal={cancelPrintModal}
+        printer={printer} 
+        onCurrentJobStateChange={onCurrentJobStateChange}
+      />
+    </div>
+  );
 }
 
 const ClientVersion = printerObject => {

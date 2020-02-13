@@ -1,65 +1,76 @@
 import React from "react";
 import { DebounceInput } from "react-debounce-input";
 
+import { useMyModal } from "../../components/utils/modal";
+import BusyButton from "../../components/utils/busy-button";
 import formatters from "../../services/formatters";
-import ActionRow from "./action-row";
 import Sorting from "./sorting";
 
-class ApiTokensTableRow extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showDeleteRow: false
-    };
-  }
-
-  render() {
-    const { token, onTokenDelete } = this.props;
-    const { showDeleteRow } = this.state;
-
-    if (showDeleteRow) {
-      return (
-        <ActionRow
-          onCancel={() => {
-            this.setState({
-              showDeleteRow: false
-            });
-          }}
-          onConfirm={() => {
-            onTokenDelete(token.jti);
-          }}
-        >
-          Do you really want to revoke <strong>{token.name}</strong>? This
+const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">
+            Revoke the token
+          </h1>
+          <h3 className="text-center">
+            Do you really want to revoke token <strong>"{token.name}"</strong>? This
           cannot be undone.
-        </ActionRow>
-      );
-    }
+          </h3>
 
-    return (
-      <div className="list-item">
-        <div className="list-item-content">
-          <span className="list-item-title">{token.name}</span>
-          <span className="list-item-subtitle">
-            <span>created on {formatters.datetime(token.created)}</span>
-          </span>
-          <span className="text-mono">{token.jti}</span>
-        </div>
+          <div className="cta-box text-center">
+            <BusyButton
+              className="btn"
+              type="submit"
+              onClick={e => {
+                e.preventDefault();
+                onTokenDelete(token.jti);
+                modal.closeModal();
+              }}
+              busyChildren="Working..."
+            >
+              Yes, revoke this token
+            </BusyButton>
+            <button className="btn btn-plain" onClick={modal.closeModal}>
+              Cancel
+            </button>
+          </div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
 
-        <div className="list-item-cta">
-          <button
-            className="btn-reset"
-            onClick={() => {
-              this.setState({
-                showDeleteRow: true
-              });
-            }}
-          >
-            <i className="icon-trash text-secondary"></i>
-          </button>
-        </div>
+const ApiTokensTableRow = ({ token, onTokenDelete }) => {
+  const deleteTokenModal = useMyModal();
+
+  return (
+    <div className="list-item">
+      <div className="list-item-content">
+        <span className="list-item-title">{token.name}</span>
+        <span className="list-item-subtitle">
+          <span>created on {formatters.datetime(token.created)}</span>
+        </span>
+        <span className="text-mono">{token.jti}</span>
       </div>
-    );
-  }
+
+      <div className="list-item-cta">
+        <button
+          className="btn-reset"
+          onClick={deleteTokenModal.openModal}
+        >
+          <i className="icon-trash text-secondary"></i>
+        </button>
+      </div>
+
+      <DeleteTokenModal 
+        modal={deleteTokenModal}
+        token={token}
+        onTokenDelete={onTokenDelete}
+      />
+    </div>
+  );
 }
 
 class ApiTokensTable extends React.Component {

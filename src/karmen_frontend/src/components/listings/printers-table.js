@@ -14,11 +14,12 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
           <h1 className="modal-title text-center">Are you sure?</h1>
           <h3 className="text-center">
             You can add the printer back later by adding
+            <br/>
+            <strong>
+              {printer.hostname || printer.ip}
+              {printer.port ? `:${printer.port}` : ""}
+            </strong>
           </h3>
-          <code>
-            {printer.hostname || printer.ip}
-            {printer.port ? `:${printer.port}` : ""}
-          </code>
 
           <div className="cta-box text-center">
             <button
