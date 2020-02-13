@@ -1,10 +1,11 @@
 import psycopg2
+from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
 
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
-def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
+def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None):
     columns = [
         "id",
         "path",
@@ -26,6 +27,7 @@ def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
             limit=limit,
             start_with=start_with,
             filter=filter,
+            where=sql.SQL("organization_uuid = {}").format(sql.Literal(org_uuid)),
         )
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(statement)
