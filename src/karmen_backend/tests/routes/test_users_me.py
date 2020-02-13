@@ -88,6 +88,15 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertTrue("expires_on" in response.json)
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
+            self.assertTrue("organizations" in response.json)
+            self.assertTrue(len(response.json["organizations"]) == 1)
+            self.assertTrue(
+                response.json["organizations"][0]["name"] == "Default organization"
+            )
+            self.assertTrue(
+                response.json["organizations"][0]["slug"] == "default-organization"
+            )
+            self.assertTrue(response.json["organizations"][0]["role"] == "admin")
 
 
 class AuthenticateFreshRoute(unittest.TestCase):
@@ -155,6 +164,8 @@ class AuthenticateFreshRoute(unittest.TestCase):
             self.assertTrue("expires_on" in response.json)
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
+            self.assertTrue("organizations" in response.json)
+            self.assertTrue(len(response.json["organizations"]) == 1)
 
 
 class AuthenticateRefreshRoute(unittest.TestCase):
@@ -198,6 +209,8 @@ class AuthenticateRefreshRoute(unittest.TestCase):
             self.assertTrue("expires_on" in response.json)
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
+            self.assertTrue("organizations" in response.json)
+            self.assertTrue(len(response.json["organizations"]) == 1)
             data = get_token_data(
                 [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][0].value
             )

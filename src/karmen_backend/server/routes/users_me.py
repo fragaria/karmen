@@ -17,20 +17,31 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 from server import app
-from server.database import users, local_users, api_tokens
+from server.database import users, local_users, api_tokens, organizations
 
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
 
 
 def get_user_identity(userdata, token_freshness):
+    membership = []
+    for org in organizations.get_by_user_uuid(userdata.get("uuid")):
+        membership.append(
+            {
+                "uuid": org.get("uuid"),
+                "name": org.get("name"),
+                "slug": org.get("slug"),
+                "role": org.get("role"),
+            }
+        )
     return {
-        "identity": userdata.get("uuid", None),
+        "identity": userdata.get("uuid"),
         "system_role": userdata.get("system_role", "user"),
         "username": userdata.get("username"),
         "force_pwd_change": userdata.get("force_pwd_change", False),
         "fresh": token_freshness,
         "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
+        "organizations": membership,
     }
 
 
