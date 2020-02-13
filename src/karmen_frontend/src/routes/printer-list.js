@@ -10,7 +10,8 @@ class PrinterList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      timer: null
+      timer: null,
+      gridView: false
     };
     this.getPrinters = this.getPrinters.bind(this);
   }
@@ -45,6 +46,8 @@ class PrinterList extends React.Component {
 
   render() {
     const { printersLoaded, printers } = this.props;
+    const { gridView } = this.state;
+
     if (!printersLoaded) {
       return (
         <div>
@@ -52,6 +55,38 @@ class PrinterList extends React.Component {
         </div>
       );
     }
+
+    const SwitchView = () => {
+      const changeView = (e) => {
+        e.preventDefault();
+        
+        if (e.target.className.indexOf('active') < 0) {
+          this.setState(prevState => ({
+            gridView: !prevState.gridView
+          }));
+        }
+      }
+
+      return (
+        <div className="list-header">
+          <div className="list-view-switch">
+            <button 
+              className={gridView ? "btn-reset icon-list" : "btn-reset icon-list active"}
+              onClick={(e) => {
+                changeView(e)
+              }}
+            ></button>
+            <button 
+              className={gridView ? "btn-reset icon-grid active" : "btn-reset icon-grid"}
+              onClick={(e) => {
+                changeView(e)
+              }}
+            ></button>
+          </div>
+        </div>
+       )
+    };
+
     const printerElements =
       printers &&
       printers
@@ -64,6 +99,11 @@ class PrinterList extends React.Component {
               to={`/printers/${printer.uuid}`}
             >
               <div className="list-item-content">
+              
+              {gridView && (
+                <div className="list-item-illustration"></div>
+              )}
+              
                 <span className="list-item-title">{printer.name}</span>
                 <span className="list-item-subtitle">
                   <PrinterState printer={printer} />
@@ -93,7 +133,12 @@ class PrinterList extends React.Component {
           <h1 className="main-title">Printers</h1>
         </div>
 
-        <div className="list">{printerElements}</div>
+        <div className={gridView ? "list grid" : "list"}>
+          <SwitchView />
+          <div className="list-items">
+            {printerElements}
+          </div>
+        </div>
       </div>
     );
   }

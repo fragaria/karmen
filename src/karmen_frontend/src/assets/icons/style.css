@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'karmen';
-  src:  url('fonts/karmen.eot?br7qug');
-  src:  url('fonts/karmen.eot?br7qug#iefix') format('embedded-opentype'),
-    url('fonts/karmen.ttf?br7qug') format('truetype'),
-    url('fonts/karmen.woff?br7qug') format('woff'),
-    url('fonts/karmen.svg?br7qug#karmen') format('svg');
+  src:  url('fonts/karmen.eot?9r0rq9');
+  src:  url('fonts/karmen.eot?9r0rq9#iefix') format('embedded-opentype'),
+    url('fonts/karmen.ttf?9r0rq9') format('truetype'),
+    url('fonts/karmen.woff?9r0rq9') format('woff'),
+    url('fonts/karmen.svg?9r0rq9#karmen') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,23 +25,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-list:before {
+  content: "\e90f";
+}
+.icon-grid:before {
+  content: "\e90e";
+}
+.icon-icons:before {
+  content: "\e90e";
+}
 .icon-kebab:before {
   content: "\e90d";
 }
 .icon-edit:before {
   content: "\e90a";
-}
-.icon-stop:before {
-  content: "\e905";
-}
-.icon-play:before {
-  content: "\e904";
-}
-.icon-refresh:before {
-  content: "\e903";
-}
-.icon-pause:before {
-  content: "\e902";
 }
 .icon-down:before {
   content: "\e90c";
