@@ -19,7 +19,7 @@ def enqueue_task():
         return abort(make_response("", 400))
     if data["task"] == "scan_network":
         try:
-            scan_network.delay()
+            scan_network.delay(data.get("network_interface"))
         except Exception as e:
             app.logger.error("Cannot enqueue a task: %s", e)
             abort(500)

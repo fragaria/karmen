@@ -63,8 +63,9 @@ class TasksRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/tasks",
-                json={"task": "scan_network"},
+                json={"task": "scan_network", "network_interface": "wlp4s0"},
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(mocked_delay.call_count, 1)
+            mocked_delay.assert_called_with("wlp4s0")
             self.assertEqual(response.status_code, 500)

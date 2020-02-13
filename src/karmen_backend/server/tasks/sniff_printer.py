@@ -34,6 +34,7 @@ def save_printer_data(**kwargs):
 
 
 @celery.task(name="sniff_printer")
+# TODO organization_uuid
 def sniff_printer(hostname, ip):
     app.logger.info("Sniffing printer on %s (%s) - trying http" % (ip, hostname))
     printer = clients.get_printer_instance(

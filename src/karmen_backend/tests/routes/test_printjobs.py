@@ -68,6 +68,7 @@ class ListRoute(unittest.TestCase):
             user_uuid=UUID_USER,
             organization_uuid=UUID_ORG2,
         )
+
     def test_list_no_token(self):
         with app.test_client() as c:
             response = c.get("/organizations/%s/printjobs" % UUID_ORG)

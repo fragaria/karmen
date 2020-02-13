@@ -154,6 +154,5 @@ import server.routes.octoprintemulator
 import server.routes.gcodes
 import server.routes.printers
 import server.routes.printjobs
-import server.routes.settings
 import server.routes.tasks
 import server.routes.users

@@ -16,6 +16,7 @@ from ..utils import (
     TOKEN_USER_REFRESH_CSRF,
     UUID_ADMIN,
     UUID_USER,
+    UUID_ORG,
 )
 from server.database import api_tokens
 
@@ -521,7 +522,10 @@ class RevokeApiTokenRoute(unittest.TestCase):
             db_token = api_tokens.get_token(self.token_jti)
             self.assertFalse(db_token["revoked"])
             c.set_cookie("localhost", "access_token_cookie", self.token)
-            response = c.get("/settings", headers={"x-csrf-token": self.token_csrf})
+            response = c.get(
+                "/organizations/%s/printers" % UUID_ORG,
+                headers={"x-csrf-token": self.token_csrf},
+            )
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             self.assertEqual(response.status_code, 200)
             response = c.delete(
@@ -537,5 +541,8 @@ class RevokeApiTokenRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
             c.set_cookie("localhost", "access_token_cookie", self.token)
-            response = c.get("/settings", headers={"x-csrf-token": self.token_csrf})
+            response = c.get(
+                "/organizations/%s/printers" % UUID_ORG,
+                headers={"x-csrf-token": self.token_csrf},
+            )
             self.assertEqual(response.status_code, 401)
