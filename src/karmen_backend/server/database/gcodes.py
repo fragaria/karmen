@@ -10,6 +10,7 @@ def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
         "path",
         "filename",
         "display",
+        "organization_uuid",
         "absolute_path",
         "uploaded",
         "size",
@@ -42,7 +43,7 @@ def get_gcode(id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid from gcodes where id = %s",
+            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid, organization_uuid from gcodes where id = %s",
             (id,),
         )
         data = cursor.fetchone()
@@ -54,7 +55,7 @@ def add_gcode(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis, user_uuid) values (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis, user_uuid, organization_uuid) values (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
             (
                 kwargs["path"],
                 kwargs["filename"],
@@ -62,7 +63,8 @@ def add_gcode(**kwargs):
                 kwargs["absolute_path"],
                 kwargs["size"],
                 psycopg2.extras.Json(kwargs.get("analysis", {})),
-                kwargs.get("user_uuid", None),
+                kwargs["user_uuid"],
+                kwargs["organization_uuid"],
             ),
         )
         data = cursor.fetchone()

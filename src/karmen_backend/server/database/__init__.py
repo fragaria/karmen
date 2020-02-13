@@ -139,8 +139,6 @@ def prepare_list_statement(
     else:
         where_clause = sql.SQL(" ")
 
-    print(where_clause)
-
     return sql.SQL(" ").join(
         [
             sql.SQL("SELECT {} FROM {}").format(
