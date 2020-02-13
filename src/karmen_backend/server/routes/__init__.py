@@ -1,9 +1,51 @@
 import functools
+import uuid as uuidmodule
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_current_user
 from server import app, jwt, __version__
-from server.database import users as db_users, local_users as db_local_users, api_tokens
+from server.database import (
+    users as db_users,
+    local_users as db_local_users,
+    api_tokens,
+    organizations,
+)
+
+
+def validate_org_access(required_role=None):
+    def validate_org_decorator(func):
+        @functools.wraps(func)
+        @jwt_required
+        def wrap(org_uuid, *args, **kwargs):
+            try:
+                uuidmodule.UUID(org_uuid, version=4)
+            except ValueError:
+                return abort(make_response("", 400))
+            user = get_current_user()
+            if not user:
+                return abort(make_response("", 401))
+            role = organizations.get_organization_role(org_uuid, user["uuid"])
+            if role is None:
+                return abort(
+                    make_response(
+                        jsonify(message="Cannot access this organization"), 403
+                    )
+                )
+            if required_role is not None and role["role"] != required_role:
+                return abort(
+                    make_response(
+                        jsonify(
+                            message="User does not have the required system role of %s"
+                            % required_role
+                        ),
+                        403,
+                    )
+                )
+            return func(org_uuid, *args, **kwargs)
+
+        return wrap
+
+    return validate_org_decorator
 
 
 def jwt_requires_system_role(required_role):

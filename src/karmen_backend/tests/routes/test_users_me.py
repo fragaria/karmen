@@ -210,7 +210,7 @@ class AuthenticateRefreshRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue(len(response.json["organizations"]) == 1)
+            self.assertTrue(len(response.json["organizations"]) == 2)
             data = get_token_data(
                 [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][0].value
             )

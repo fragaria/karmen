@@ -12,7 +12,7 @@ from server import app, __version__
 from server.database import printers
 from server import clients, executor
 from server.services import network
-from . import jwt_force_password_change, jwt_requires_system_role
+from . import jwt_force_password_change, jwt_requires_system_role, validate_org_access
 from flask_jwt_extended import get_current_user
 
 
@@ -55,10 +55,11 @@ def make_printer_response(printer, fields):
     return data
 
 
-@app.route("/printers", methods=["GET"])
+@app.route("/organizations/<org_uuid>/printers", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printers_list():
+def printers_list(org_uuid):
     device_list = []
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     futures = []
@@ -68,7 +69,7 @@ def printers_list():
         return "".join(random.choice(letters) for i in range(10))
 
     uqid = reqid()
-    for printer in printers.get_printers():
+    for printer in printers.get_printers(organization_uuid=org_uuid):
         try:
             futures.append(
                 executor.submit_stored(
@@ -95,25 +96,27 @@ def printers_list():
     return jsonify({"items": device_list}), 200
 
 
-@app.route("/printers/<uuid>", methods=["GET"])
+@app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printer_detail(uuid):
+def printer_detail(org_uuid, uuid):
     try:
         uuidmodule.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
     printer = printers.get_printer(uuid)
-    if printer is None:
+    if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     return jsonify(make_printer_response(printer, fields))
 
 
-@app.route("/printers", methods=["POST"])
-@jwt_requires_system_role("admin")
+@app.route("/organizations/<org_uuid>/printers", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access("admin")
 @cross_origin()
-def printer_create():
+def printer_create(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))
@@ -161,6 +164,7 @@ def printer_create():
     printers.add_printer(
         uuid=uuid,
         name=name,
+        organization_uuid=org_uuid,
         hostname=hostname,
         ip=ip,
         port=port,
@@ -174,35 +178,37 @@ def printer_create():
             "webcam": printer.webcam(),
         },
     )
-    # TODO cache webcam, job, status for a small amount of time in client
+    # TODO cache webcam, job, status for a small amount of time in this client
     return jsonify(make_printer_response(printer, ["status", "webcam", "job"])), 201
 
 
-@app.route("/printers/<uuid>", methods=["DELETE"])
-@jwt_requires_system_role("admin")
+@app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["DELETE"])
+@jwt_force_password_change
+@validate_org_access("admin")
 @cross_origin()
-def printer_delete(uuid):
+def printer_delete(org_uuid, uuid):
     try:
         uuidmodule.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    if printer is None:
+    if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     printers.delete_printer(uuid)
     return "", 204
 
 
-@app.route("/printers/<uuid>", methods=["PATCH"])
-@jwt_requires_system_role("admin")
+@app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["PATCH"])
+@jwt_force_password_change
+@validate_org_access("admin")
 @cross_origin()
-def printer_patch(uuid):
+def printer_patch(org_uuid, uuid):
     try:
         uuidmodule.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    if printer is None:
+    if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     data = request.json
     if not data:
@@ -262,17 +268,18 @@ def printer_patch(uuid):
     )
 
 
-@app.route("/printers/<uuid>/connection", methods=["POST"])
+@app.route("/organizations/<org_uuid>/printers/<uuid>/connection", methods=["POST"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printer_change_connection(uuid):
+def printer_change_connection(org_uuid, uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
     try:
         uuidmodule.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    if printer is None:
+    if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     data = request.json
     if not data:
@@ -298,10 +305,11 @@ def printer_change_connection(uuid):
     return "", 204
 
 
-@app.route("/printers/<uuid>/current-job", methods=["POST"])
+@app.route("/organizations/<org_uuid>/printers/<uuid>/current-job", methods=["POST"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printer_modify_job(uuid):
+def printer_modify_job(org_uuid, uuid):
     # TODO allow users to pause/cancel only their own prints via printjob_id
     # And allow admins to pause/cancel anything
     # but that means creating a new tracking of current jobs on each printer
@@ -313,7 +321,7 @@ def printer_modify_job(uuid):
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    if printer is None:
+    if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     data = request.json
     if not data:
@@ -355,10 +363,11 @@ def _get_webcam_snapshot(snapshot_url):
         return None
 
 
-@app.route("/printers/<uuid>/webcam-snapshot", methods=["GET"])
+@app.route("/organizations/<org_uuid>/printers/<uuid>/webcam-snapshot", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printer_webcam_snapshot(uuid):
+def printer_webcam_snapshot(org_uuid, uuid):
     """
     Instead of direct streaming from the end-devices, we are deferring
     the video-like feature to the clients. This (in case of MJPEG) brings
@@ -377,7 +386,7 @@ def printer_webcam_snapshot(uuid):
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    if printer is None:
+    if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     printer_inst = clients.get_printer_instance(printer)
     if printer_inst.client_info.webcam is None:

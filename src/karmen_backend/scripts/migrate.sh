@@ -16,6 +16,7 @@ else
   cat << EOF > "${MYDIR}/../db/migrations.yml"
 callbacks:
   afterAll:
+      - test-organizations.sql
       - fake-printers.sql
       - test-users.sql
 conn: "host='${POSTGRES_HOST}' port=${POSTGRES_PORT} dbname='print3d' user='print3d' password='print3d'"
