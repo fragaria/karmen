@@ -32,7 +32,7 @@ class CreateUserRoute(unittest.TestCase):
                 "/users",
                 json={
                     "username": get_random_username(),
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -47,7 +47,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_EXPIRED_CSRF},
                 json={
                     "username": get_random_username(),
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -62,7 +62,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "username": get_random_username(),
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -77,7 +77,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
                 json={
                     "username": get_random_username(),
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -97,7 +97,7 @@ class CreateUserRoute(unittest.TestCase):
                 "/users",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -126,7 +126,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": get_random_username(),
-                    "role": "doesnotexist",
+                    "system_role": "doesnotexist",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -141,7 +141,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": get_random_username(),
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one-mismatch",
                 },
@@ -157,7 +157,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": username,
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -165,12 +165,12 @@ class CreateUserRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 201)
             self.assertTrue("uuid" in response.json)
             self.assertTrue("username" in response.json)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("suspended" in response.json)
             user = users.get_by_username(username)
             self.assertTrue(user is not None)
             self.assertEqual(user["username"], username)
-            self.assertEqual(user["role"], "user")
+            self.assertEqual(user["system_role"], "user")
             luser = local_users.get_local_user(user["uuid"])
             self.assertTrue(luser is not None)
             self.assertEqual(luser["force_pwd_change"], True)
@@ -189,7 +189,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": username,
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -200,7 +200,7 @@ class CreateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": username,
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -217,7 +217,7 @@ class UpdateUserRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "username": get_random_username(),
-                    "role": "user",
+                    "system_role": "user",
                     "password": "temp-one",
                     "password_confirmation": "temp-one",
                 },
@@ -226,7 +226,7 @@ class UpdateUserRoute(unittest.TestCase):
 
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.patch("/users/%s" % self.uuid, json={"role": "user"})
+            response = c.patch("/users/%s" % self.uuid, json={"system_role": "user"})
             self.assertEqual(response.status_code, 401)
 
     def test_no_admin_token(self):
@@ -235,7 +235,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/%s" % self.uuid,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"role": "user"},
+                json={"system_role": "user"},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -245,7 +245,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/%s" % self.uuid,
                 headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
-                json={"role": "user"},
+                json={"system_role": "user"},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -266,13 +266,13 @@ class UpdateUserRoute(unittest.TestCase):
                 json={"suspended": True},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("suspended" in response.json)
-            self.assertEqual(response.json["role"], "user")
+            self.assertEqual(response.json["system_role"], "user")
             self.assertEqual(response.json["suspended"], True)
             user = users.get_by_uuid(self.uuid)
             self.assertTrue(user is not None)
-            self.assertEqual(user["role"], "user")
+            self.assertEqual(user["system_role"], "user")
             self.assertEqual(user["suspended"], True)
 
     def test_no_suspended(self):
@@ -281,16 +281,16 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/%s" % self.uuid,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"role": "admin"},
+                json={"system_role": "admin"},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("suspended" in response.json)
-            self.assertEqual(response.json["role"], "admin")
+            self.assertEqual(response.json["system_role"], "admin")
             self.assertEqual(response.json["suspended"], False)
             user = users.get_by_uuid(self.uuid)
             self.assertTrue(user is not None)
-            self.assertEqual(user["role"], "admin")
+            self.assertEqual(user["system_role"], "admin")
             self.assertEqual(user["suspended"], False)
 
     def test_unknown_role(self):
@@ -299,7 +299,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/%s" % self.uuid,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"role": "doesnotexist"},
+                json={"system_role": "doesnotexist"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -309,16 +309,16 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/%s" % self.uuid,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"role": "admin", "suspended": True},
+                json={"system_role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("suspended" in response.json)
-            self.assertEqual(response.json["role"], "admin")
+            self.assertEqual(response.json["system_role"], "admin")
             self.assertEqual(response.json["suspended"], True)
             user = users.get_by_uuid(self.uuid)
             self.assertTrue(user is not None)
-            self.assertEqual(user["role"], "admin")
+            self.assertEqual(user["system_role"], "admin")
             self.assertEqual(user["suspended"], True)
 
     def test_self_lockout(self):
@@ -327,7 +327,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/%s" % UUID_ADMIN,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"role": "admin", "suspended": True},
+                json={"system_role": "admin", "suspended": True},
             )
             self.assertEqual(response.status_code, 409)
 
@@ -337,7 +337,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.patch(
                 "/users/6480fa7d-ce18-4ae2-1234-f1d200050806",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"role": "user", "suspended": False},
+                json={"system_role": "user", "suspended": False},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -373,7 +373,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("uuid" in response.json["items"][0])
             self.assertTrue("username" in response.json["items"][0])
-            self.assertTrue("role" in response.json["items"][0])
+            self.assertTrue("system_role" in response.json["items"][0])
             self.assertTrue("suspended" in response.json["items"][0])
 
     def test_order_by(self):

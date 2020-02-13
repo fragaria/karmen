@@ -41,8 +41,9 @@ def get_val(key):
 def upsert_val(key, val):
     with get_connection() as connection:
         cursor = connection.cursor()
+        # TODO refactor
         cursor.execute(
-            "INSERT INTO settings (key, val) values (%s, %s) ON CONFLICT ON CONSTRAINT settings_key_uqc DO UPDATE SET val = %s",
+            "INSERT INTO settings (key, val, organization_uuid) values (%s, %s, 'b3060e41-e319-4a9b-8ac4-e0936c75f275') ON CONFLICT ON CONSTRAINT settings_uq_key_org DO UPDATE SET val = %s",
             (key.lower(), val, val),
         )
         cursor.close()

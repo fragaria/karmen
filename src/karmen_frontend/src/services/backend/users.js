@@ -35,13 +35,18 @@ export const getUsers = (
     });
 };
 
-export const addUser = (username, role, password, passwordConfirmation) => {
+export const addUser = (
+  username,
+  systemRole,
+  password,
+  passwordConfirmation
+) => {
   return fetch(`${BASE_URL}/users`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
       username,
-      role,
+      system_role: systemRole,
       password,
       password_confirmation: passwordConfirmation
     })
@@ -73,12 +78,12 @@ export const addUser = (username, role, password, passwordConfirmation) => {
     });
 };
 
-export const patchUser = (uuid, role, suspended) => {
+export const patchUser = (uuid, systemRole, suspended) => {
   return fetch(`${BASE_URL}/users/${uuid}`, {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify({
-      role,
+      system_role: systemRole,
       suspended
     })
   })

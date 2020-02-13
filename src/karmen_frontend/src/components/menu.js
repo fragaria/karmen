@@ -13,8 +13,7 @@ class Menu extends React.Component {
   }
 
   render() {
-    const { history, userState, username, role, logout } = this.props;
-
+    const { history, userState, username, systemRole, logout } = this.props;
     const { navigation } = this.state;
 
     return (
@@ -50,7 +49,7 @@ class Menu extends React.Component {
                       G-Codes
                     </Link>
                   </li>
-                  {role === "admin" && (
+                  {systemRole === "admin" && (
                     <li>
                       <Link
                         to="/settings"
@@ -110,7 +109,7 @@ export default withRouter(
     state => ({
       userState: state.users.me.currentState,
       username: state.users.me.username,
-      role: state.users.me.role
+      systemRole: state.users.me.systemRole
     }),
     dispatch => ({
       logout: () => dispatch(clearUserIdentity())

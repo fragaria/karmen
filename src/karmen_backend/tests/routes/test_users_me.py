@@ -86,7 +86,7 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertEqual(response.json["fresh"], True)
             self.assertEqual(response.json["identity"], UUID_ADMIN)
             self.assertTrue("expires_on" in response.json)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
 
 
@@ -153,7 +153,7 @@ class AuthenticateFreshRoute(unittest.TestCase):
             self.assertEqual(response.json["fresh"], True)
             self.assertEqual(response.json["identity"], UUID_ADMIN)
             self.assertTrue("expires_on" in response.json)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
 
 
@@ -196,7 +196,7 @@ class AuthenticateRefreshRoute(unittest.TestCase):
             self.assertEqual(response.json["fresh"], False)
             self.assertEqual(response.json["identity"], UUID_USER)
             self.assertTrue("expires_on" in response.json)
-            self.assertTrue("role" in response.json)
+            self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             data = get_token_data(
                 [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][0].value
@@ -205,7 +205,7 @@ class AuthenticateRefreshRoute(unittest.TestCase):
             self.assertEqual(data["type"], "access")
             self.assertEqual(data["identity"], UUID_USER)
             self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
+            self.assertTrue("system_role" in data["user_claims"])
             self.assertTrue("force_pwd_change" in data["user_claims"])
 
 
@@ -435,9 +435,9 @@ class CreateApiTokenRoute(unittest.TestCase):
             self.assertEqual(data["identity"], UUID_USER)
             self.assertTrue("exp" not in data)
             self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
+            self.assertTrue("system_role" in data["user_claims"])
             self.assertTrue("force_pwd_change" not in data["user_claims"])
-            self.assertEqual(data["user_claims"]["role"], "user")
+            self.assertEqual(data["user_claims"]["system_role"], "user")
             token = api_tokens.get_token(data["jti"])
             self.assertTrue(token is not None)
             self.assertEqual(token["user_uuid"], UUID_USER)
@@ -461,9 +461,9 @@ class CreateApiTokenRoute(unittest.TestCase):
             self.assertEqual(data["identity"], UUID_ADMIN)
             self.assertTrue("exp" not in data)
             self.assertTrue("user_claims" in data)
-            self.assertTrue("role" in data["user_claims"])
+            self.assertTrue("system_role" in data["user_claims"])
             self.assertTrue("force_pwd_change" not in data["user_claims"])
-            self.assertEqual(data["user_claims"]["role"], "user")
+            self.assertEqual(data["user_claims"]["system_role"], "user")
             token = api_tokens.get_token(data["jti"])
             self.assertTrue(token is not None)
             self.assertEqual(token["user_uuid"], UUID_ADMIN)

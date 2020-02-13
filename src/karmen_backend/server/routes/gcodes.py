@@ -193,7 +193,7 @@ def gcode_delete(id):
     if gcode is None:
         return abort(make_response("", 404))
     user = get_current_user()
-    if user["uuid"] != gcode["user_uuid"] and user["role"] not in ["admin"]:
+    if user["uuid"] != gcode["user_uuid"] and user["system_role"] not in ["admin"]:
         return abort(
             make_response(
                 jsonify(message="G-Code does not belong to %s" % user["uuid"]), 401

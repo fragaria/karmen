@@ -5,12 +5,12 @@ from flask_cors import cross_origin
 from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
 from server import app
 from server.database import users, local_users
-from . import jwt_requires_role, jwt_force_password_change
+from . import jwt_requires_system_role, jwt_force_password_change
 
 
 @app.route("/users", methods=["POST"])
 @cross_origin()
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @fresh_jwt_required
 @jwt_force_password_change
 def create_user():
@@ -18,21 +18,23 @@ def create_user():
     if not data:
         return abort(make_response("", 400))
     username = data.get("username", None)
-    role = data.get("role", None)
+    system_role = data.get("system_role", None)
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
-    if not username or not password or not role:
+    if not username or not password or not system_role:
         return abort(make_response("", 400))
     if password != password_confirmation:
         return abort(make_response("", 400))
-    if role not in ["admin", "user"]:
+    if system_role not in ["admin", "user"]:
         return abort(make_response("", 400))
     if users.get_by_username(username) is not None:
         return abort(make_response("", 409))
 
     pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
     new_uuid = uuid.uuid4()
-    users.add_user(uuid=new_uuid, username=username, role=role, providers=["local"])
+    users.add_user(
+        uuid=new_uuid, username=username, system_role=system_role, providers=["local"]
+    )
     local_users.add_local_user(
         user_uuid=new_uuid, pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=True
     )
@@ -41,7 +43,7 @@ def create_user():
             {
                 "uuid": str(new_uuid),
                 "username": username,
-                "role": role,
+                "system_role": system_role,
                 "suspended": False,
             }
         ),
@@ -51,7 +53,7 @@ def create_user():
 
 @app.route("/users/<uuid>", methods=["PATCH"])
 @cross_origin()
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @fresh_jwt_required
 @jwt_force_password_change
 def update_user(uuid):
@@ -66,12 +68,12 @@ def update_user(uuid):
     if not data:
         return abort(make_response("", 400))
 
-    role = data.get("role", user["role"])
+    system_role = data.get("system_role", user["system_role"])
     suspended = data.get("suspended", user["suspended"])
-    if role not in ["admin", "user"]:
+    if system_role not in ["admin", "user"]:
         return abort(make_response("", 400))
 
-    user["role"] = role
+    user["system_role"] = system_role
     user["suspended"] = suspended
     users.update_user(**user)
     return (
@@ -79,7 +81,7 @@ def update_user(uuid):
             {
                 "uuid": user["uuid"],
                 "username": user["username"],
-                "role": role,
+                "system_role": system_role,
                 "suspended": suspended,
             }
         ),
@@ -91,14 +93,14 @@ def make_user_response(user):
     return {
         "uuid": user["uuid"],
         "username": user["username"],
-        "role": user["role"],
+        "system_role": user["system_role"],
         "suspended": user["suspended"],
     }
 
 
 @app.route("/users", methods=["GET"])
 @cross_origin()
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @fresh_jwt_required
 @jwt_force_password_change
 def list_users():

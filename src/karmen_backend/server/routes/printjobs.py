@@ -173,7 +173,7 @@ def printjob_delete(id):
     if printjob is None:
         return abort(make_response("", 404))
     user = get_current_user()
-    if user["uuid"] != printjob["user_uuid"] and user["role"] not in ["admin"]:
+    if user["uuid"] != printjob["user_uuid"] and user["system_role"] not in ["admin"]:
         return abort(
             make_response(
                 jsonify(message="Printjob does not belong to %s" % user["uuid"]), 401

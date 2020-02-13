@@ -6,7 +6,7 @@ const getUserDataFromApiResponse = data => {
     currentState: data.force_pwd_change ? "pwd-change-required" : "logged-in",
     identity: data.identity,
     username: data.username,
-    role: data.role,
+    systemRole: data.system_role,
     hasFreshToken: data.fresh,
     accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined
   };
@@ -19,7 +19,7 @@ export default (
       currentState: "logged-out",
       username: "",
       identity: null,
-      role: null,
+      systemRole: null,
       apiTokens: [],
       apiTokensLoaded: false,
       accessTokenExpiresOn: null
@@ -99,7 +99,7 @@ export default (
           accessTokenExpiresOn: null,
           identity: null,
           username: "",
-          role: null,
+          systemRole: null,
           apiTokens: [],
           apiTokensLoaded: false
         }
@@ -186,7 +186,7 @@ export default (
             );
             if (user) {
               user.suspended = action.payload.data.suspended;
-              user.role = action.payload.data.role;
+              user.systemRole = action.payload.data.system_role;
             }
           }
         }

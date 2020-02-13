@@ -33,7 +33,7 @@ export const loadUserFromToken = token => dispatch => {
     loadUserData({
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
-      role: decoded.user_claims && decoded.user_claims.role,
+      systemRole: decoded.user_claims && decoded.user_claims.system_role,
       hasFreshToken: decoded.fresh,
       accessTokenExpiresOn: undefined
     })
@@ -165,10 +165,10 @@ export const getUsersPage = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (username, role, password, passwordConfirmation, { dispatch }) => {
+  (username, systemRole, password, passwordConfirmation, { dispatch }) => {
     return retryIfUnauthorized(backend.addUser, dispatch)(
       username,
-      role,
+      systemRole,
       password,
       passwordConfirmation
     );
@@ -177,10 +177,10 @@ export const addUser = createActionThunk(
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (uuid, role, suspended, { dispatch }) => {
+  (uuid, systemRole, suspended, { dispatch }) => {
     return retryIfUnauthorized(backend.patchUser, dispatch)(
       uuid,
-      role,
+      systemRole,
       suspended
     );
   }

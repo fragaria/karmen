@@ -26,16 +26,17 @@ const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
         <modal.Modal>
           <h1 className="modal-title text-center">Change user role</h1>
           <h3 className="text-center">
-            Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
+            Do you really want to{" "}
+            {user.system_role === "admin" ? "demote" : "promote"}{" "}
             <strong>{user.username}</strong> to{" "}
-            {user.role === "admin" ? "user" : "admin"}?
+            {user.system_role === "admin" ? "user" : "admin"}?
           </h3>
 
           <div className="cta-box text-center">
             <button
               className="btn"
               onClick={() => {
-                const newRole = user.role === "user" ? "admin" : "user";
+                const newRole = user.system_role === "user" ? "admin" : "user";
                 onUserChange(user.uuid, newRole, user.suspended).then(() => {
                   modal.closeModal();
                 });
@@ -96,9 +97,11 @@ const ToggleUserSuspendModal = ({ modal, user, onUserChange }) => {
             <button
               className="btn"
               onClick={() => {
-                onUserChange(user.uuid, user.role, !user.suspended).then(() => {
-                  modal.closeModal();
-                });
+                onUserChange(user.uuid, user.system_role, !user.suspended).then(
+                  () => {
+                    modal.closeModal();
+                  }
+                );
               }}
             >
               Yes, change it
@@ -125,7 +128,7 @@ const UsersTableRow = ({ currentUuid, user, onUserChange }) => {
         <span className="list-item-title">{user.username}</span>
         <span className="list-item-subtitle">
           <span>is </span>
-          <strong>{user.role} </strong>
+          <strong>{user.system_role} </strong>
           <span>and </span>
           {formatters.bool(user.suspended) ? (
             <strong className="text-secondary">disabled</strong>

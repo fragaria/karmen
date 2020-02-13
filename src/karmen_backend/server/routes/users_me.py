@@ -50,7 +50,7 @@ def authenticate_base(include_refresh_token):
     response = jsonify(
         {
             "identity": userdata.get("uuid", None),
-            "role": userdata.get("role", "user"),
+            "system_role": userdata.get("system_role", "user"),
             "username": userdata.get("username"),
             "force_pwd_change": userdata.get("force_pwd_change", False),
             "fresh": True,
@@ -100,7 +100,7 @@ def refresh():
     response = jsonify(
         {
             "identity": userdata.get("uuid", None),
-            "role": userdata.get("role", "user"),
+            "system_role": userdata.get("system_role", "user"),
             "username": userdata.get("username"),
             "force_pwd_change": userdata.get("force_pwd_change", False),
             "fresh": False,
@@ -176,7 +176,7 @@ def change_password():
     response = jsonify(
         {
             "identity": userdata.get("uuid", None),
-            "role": userdata.get("role", "user"),
+            "system_role": userdata.get("system_role", "user"),
             "username": userdata.get("username"),
             "force_pwd_change": userdata.get("force_pwd_change", False),
             "fresh": True,
@@ -225,7 +225,7 @@ def create_api_token():
     token = create_access_token(
         identity=user,
         expires_delta=False,
-        user_claims={"role": "user", "username": user.get("username")},
+        user_claims={"system_role": "user", "username": user.get("username")},
     )
     jti = decode_token(token)["jti"]
     api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)

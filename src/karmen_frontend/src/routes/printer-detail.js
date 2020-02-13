@@ -186,7 +186,7 @@ const PrinterDetail = ({
   setPrinterConnection,
   changeCurrentJobState,
   patchPrinter,
-  role,
+  systemRole,
   jobList,
   loadJobsPage,
   clearJobsPages,
@@ -265,7 +265,7 @@ const PrinterDetail = ({
               printer={printer}
               onPrinterConnectionChanged={setPrinterConnection}
             />
-            {role === "admin" && (
+            {systemRole === "admin" && (
               <PrinterAuthorizationForm
                 printer={printer}
                 onPrinterAuthorizationChanged={patchPrinter}
@@ -302,7 +302,7 @@ const PrinterDetail = ({
             />
           </div>
 
-          {role === "admin" && (
+          {systemRole === "admin" && (
             <div className="cta-box text-center">
               <Link to={`/printers/${printer.uuid}/settings`}>
                 <button className="btn">Printer settings</button>
@@ -320,7 +320,7 @@ export default connect(
     printer: state.printers.printers.find(
       p => p.uuid === ownProps.match.params.uuid
     ),
-    role: state.users.me.role,
+    systemRole: state.users.me.systemRole,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
       orderBy: "-started",

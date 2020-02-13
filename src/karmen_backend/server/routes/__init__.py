@@ -6,7 +6,7 @@ from server import app, jwt, __version__
 from server.database import users as db_users, local_users as db_local_users, api_tokens
 
 
-def jwt_requires_role(required_role):
+def jwt_requires_system_role(required_role):
     def jwt_token_decorator(func):
         @functools.wraps(func)
         @jwt_required
@@ -14,12 +14,16 @@ def jwt_requires_role(required_role):
             if request.method == "OPTIONS":
                 return func(*args, **kwargs)
             claims = get_jwt_claims()
-            role = claims.get("role", None)
-            if not role or role != required_role or role != "admin":
+            system_role = claims.get("system_role", None)
+            if (
+                not system_role
+                or system_role != required_role
+                or system_role != "admin"
+            ):
                 return abort(
                     make_response(
                         jsonify(
-                            message="Token does not match the required role of %s"
+                            message="Token does not match the required system role of %s"
                             % required_role
                         ),
                         401,
@@ -29,11 +33,11 @@ def jwt_requires_role(required_role):
             user = get_current_user()
             if not user:
                 return abort(make_response("", 401))
-            if user["role"] != required_role or role != "admin":
+            if user["system_role"] != required_role or system_role != "admin":
                 return abort(
                     make_response(
                         jsonify(
-                            message="User does not have the required role of %s or admin"
+                            message="User does not have the required system role of %s or admin"
                             % required_role
                         ),
                         401,
@@ -74,7 +78,7 @@ def jwt_force_password_change(func):
 @jwt.user_claims_loader
 def add_claims_to_access_token(user):
     return {
-        "role": user.get("role", "user"),
+        "system_role": user.get("system_role", "user"),
         "username": user.get("username"),
         "force_pwd_change": user.get("force_pwd_change", False),
     }

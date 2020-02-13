@@ -2,7 +2,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app
 from server.database import settings
-from . import jwt_force_password_change, jwt_requires_role
+from . import jwt_force_password_change, jwt_requires_system_role
 
 CONFIGURABLE_SETTINGS = ["NETWORK_INTERFACE"]
 
@@ -22,7 +22,7 @@ def settings_list():
 
 
 @app.route("/settings", methods=["POST"])
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @jwt_force_password_change
 @cross_origin()
 def settings_change():

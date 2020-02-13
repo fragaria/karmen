@@ -12,7 +12,7 @@ from server import app, __version__
 from server.database import printers
 from server import clients, executor
 from server.services import network
-from . import jwt_force_password_change, jwt_requires_role
+from . import jwt_force_password_change, jwt_requires_system_role
 from flask_jwt_extended import get_current_user
 
 
@@ -111,7 +111,7 @@ def printer_detail(uuid):
 
 
 @app.route("/printers", methods=["POST"])
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @cross_origin()
 def printer_create():
     data = request.json
@@ -179,7 +179,7 @@ def printer_create():
 
 
 @app.route("/printers/<uuid>", methods=["DELETE"])
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @cross_origin()
 def printer_delete(uuid):
     try:
@@ -194,7 +194,7 @@ def printer_delete(uuid):
 
 
 @app.route("/printers/<uuid>", methods=["PATCH"])
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @cross_origin()
 def printer_patch(uuid):
     try:

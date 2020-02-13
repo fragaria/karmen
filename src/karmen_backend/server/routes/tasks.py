@@ -2,11 +2,11 @@ from flask import request, abort, make_response
 from flask_cors import cross_origin
 from server import app
 from server.tasks.scan_network import scan_network
-from . import jwt_force_password_change, jwt_requires_role
+from . import jwt_force_password_change, jwt_requires_system_role
 
 
 @app.route("/tasks", methods=["POST"])
-@jwt_requires_role("admin")
+@jwt_requires_system_role("admin")
 @jwt_force_password_change
 @cross_origin()
 def enqueue_task():
