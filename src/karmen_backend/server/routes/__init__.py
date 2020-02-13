@@ -13,27 +13,10 @@ def jwt_requires_system_role(required_role):
         def wrap(*args, **kwargs):
             if request.method == "OPTIONS":
                 return func(*args, **kwargs)
-            claims = get_jwt_claims()
-            system_role = claims.get("system_role", None)
-            if (
-                not system_role
-                or system_role != required_role
-                or system_role != "admin"
-            ):
-                return abort(
-                    make_response(
-                        jsonify(
-                            message="Token does not match the required system role of %s"
-                            % required_role
-                        ),
-                        401,
-                    )
-                )
-            # check current situation, the token might be from a role-change or user delete period
             user = get_current_user()
             if not user:
                 return abort(make_response("", 401))
-            if user["system_role"] != required_role or system_role != "admin":
+            if user["system_role"] != required_role or user["system_role"] != "admin":
                 return abort(
                     make_response(
                         jsonify(
@@ -78,7 +61,6 @@ def jwt_force_password_change(func):
 @jwt.user_claims_loader
 def add_claims_to_access_token(user):
     return {
-        "system_role": user.get("system_role", "user"),
         "username": user.get("username"),
         "force_pwd_change": user.get("force_pwd_change", False),
     }
@@ -122,13 +104,14 @@ def index():
     )
 
 
-import server.routes.gcodes
+# me has to come before users
+import server.routes.users_me
+
+
 import server.routes.octoprintemulator
+import server.routes.gcodes
 import server.routes.printers
 import server.routes.printjobs
 import server.routes.settings
 import server.routes.tasks
-
-# me has to come before users
-import server.routes.users_me
 import server.routes.users

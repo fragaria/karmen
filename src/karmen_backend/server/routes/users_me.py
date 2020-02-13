@@ -23,6 +23,17 @@ ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
 
 
+def get_user_identity(userdata, token_freshness):
+    return {
+        "identity": userdata.get("uuid", None),
+        "system_role": userdata.get("system_role", "user"),
+        "username": userdata.get("username"),
+        "force_pwd_change": userdata.get("force_pwd_change", False),
+        "fresh": token_freshness,
+        "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
+    }
+
+
 def authenticate_base(include_refresh_token):
     data = request.json
     if not data:
@@ -47,16 +58,7 @@ def authenticate_base(include_refresh_token):
 
     userdata = dict(user)
     userdata.update(local)
-    response = jsonify(
-        {
-            "identity": userdata.get("uuid", None),
-            "system_role": userdata.get("system_role", "user"),
-            "username": userdata.get("username"),
-            "force_pwd_change": userdata.get("force_pwd_change", False),
-            "fresh": True,
-            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
-        }
-    )
+    response = jsonify(get_user_identity(userdata, True))
     access_token = create_access_token(
         identity=userdata, fresh=True, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
     )
@@ -97,16 +99,7 @@ def refresh():
         return abort(make_response("", 401))
     userdata = dict(user)
     userdata.update(local)
-    response = jsonify(
-        {
-            "identity": userdata.get("uuid", None),
-            "system_role": userdata.get("system_role", "user"),
-            "username": userdata.get("username"),
-            "force_pwd_change": userdata.get("force_pwd_change", False),
-            "fresh": False,
-            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
-        }
-    )
+    response = jsonify(get_user_identity(userdata, False))
     access_token = create_access_token(
         identity=userdata, fresh=False, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
     )
@@ -173,16 +166,7 @@ def change_password():
     )
     userdata = dict(user)
 
-    response = jsonify(
-        {
-            "identity": userdata.get("uuid", None),
-            "system_role": userdata.get("system_role", "user"),
-            "username": userdata.get("username"),
-            "force_pwd_change": userdata.get("force_pwd_change", False),
-            "fresh": True,
-            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
-        }
-    )
+    response = jsonify(get_user_identity(userdata, True))
     access_token = create_access_token(
         identity=userdata, fresh=True, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
     )
@@ -225,7 +209,7 @@ def create_api_token():
     token = create_access_token(
         identity=user,
         expires_delta=False,
-        user_claims={"system_role": "user", "username": user.get("username")},
+        user_claims={"username": user.get("username")},
     )
     jti = decode_token(token)["jti"]
     api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)

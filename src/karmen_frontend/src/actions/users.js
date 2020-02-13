@@ -33,7 +33,7 @@ export const loadUserFromToken = token => dispatch => {
     loadUserData({
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
-      systemRole: decoded.user_claims && decoded.user_claims.system_role,
+      systemRole: "user",
       hasFreshToken: decoded.fresh,
       accessTokenExpiresOn: undefined
     })
