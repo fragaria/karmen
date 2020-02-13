@@ -37,14 +37,6 @@ class ListRoute(unittest.TestCase):
             user_uuid=UUID_USER,
             organization_uuid=UUID_ORG,
         )
-        printjobs.add_printjob(
-            gcode_id=self.gcode_id2,
-            gcode_data={"id": self.gcode_id2},
-            printer_uuid="7e5129ad-08d0-42d1-b65c-847d3c636157",
-            printer_data={"ip": "172.16.236.12", "port": 8080},
-            user_uuid=UUID_USER,
-            organization_uuid=UUID_ORG2,
-        )
         self.printjob_ids = []
         for i in range(0, 3):
             self.printjob_ids.append(
@@ -68,7 +60,14 @@ class ListRoute(unittest.TestCase):
                     organization_uuid=UUID_ORG,
                 )
             )
-
+        printjobs.add_printjob(
+            gcode_id=self.gcode_id2,
+            gcode_data={"id": self.gcode_id2},
+            printer_uuid="7e5129ad-08d0-42d1-b65c-847d3c636157",
+            printer_data={"ip": "172.16.236.12", "port": 8080},
+            user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG2,
+        )
     def test_list_no_token(self):
         with app.test_client() as c:
             response = c.get("/organizations/%s/printjobs" % UUID_ORG)
