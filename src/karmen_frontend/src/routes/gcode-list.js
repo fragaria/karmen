@@ -19,9 +19,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
     <>
       {modal.isOpen && (
         <modal.Modal>
-          <h1 className="modal-title text-center">
-            Delete G-Code
-          </h1>
+          <h1 className="modal-title text-center">Delete G-Code</h1>
 
           <h3 className="text-center">
             Do you really want to delete{" "}
@@ -53,28 +51,27 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
   );
 };
 
-const GcodeTableRow = ({ 
+const GcodeTableRow = ({
   analysis,
-  id, 
-  size, 
-  uploaded, 
-  username, 
+  id,
+  size,
+  uploaded,
+  username,
   path,
-  display, 
-  history, 
-  printGcode, 
-  onSchedulePrint, 
-  availablePrinters, 
-  onRowDelete 
+  display,
+  history,
+  printGcode,
+  onSchedulePrint,
+  availablePrinters,
+  onRowDelete
 }) => {
   const deleteModal = useMyModal();
   const printModal = useMyModal();
-  
+
   const [ctaListExpanded, setCtaListExpanded] = useState();
   const [showFilamentTypeWarning, setShowFilamentTypeWarning] = useState();
   const [printerFilamentType, setPrinterFilamentType] = useState();
   const [gcodeFilamentType, setGcodeFilamentType] = useState();
-  const [canCancelPrintStatus, setCanCancelPrintStatus] = useState();
   const [message, setMessage] = useState();
   const [messageOk, setMessageOk] = useState();
   const [selectedPrinter, setSelectedPrinter] = useState();
@@ -82,8 +79,8 @@ const GcodeTableRow = ({
 
   const SelectPrinter = () => {
     const availablePrinterOpts = availablePrinters.map(p => {
-        return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
-      });
+      return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
+    });
     return (
       <div className="text-center">
         {!!availablePrinters.length ? (
@@ -107,23 +104,21 @@ const GcodeTableRow = ({
         )}
       </div>
     );
-  }
+  };
 
   const schedulePrint = (gcodeId, printerUuid) => {
     onSchedulePrint(gcodeId, printerUuid).then(r => {
       switch (r) {
         case 201:
-          setCanCancelPrintStatus(true);
           setMessage("Print was scheduled");
           setMessageOk(true);
           break;
         default:
-          setCanCancelPrintStatus(true);
           setMessage("Print was not scheduled");
           setMessageOk(false);
       }
     });
-  }
+  };
 
   return (
     <div className="list-item">
@@ -146,9 +141,11 @@ const GcodeTableRow = ({
       >
         <button
           className="list-dropdown-item"
-          onClick={(e) => {
+          onClick={e => {
             setCtaListExpanded(false);
-            setSelectedPrinter(availablePrinters.length ? availablePrinters[0].uuid : null);
+            setSelectedPrinter(
+              availablePrinters.length ? availablePrinters[0].uuid : null
+            );
             setShowPrinterSelect(true);
             printModal.openModal(e);
           }}
@@ -159,7 +156,7 @@ const GcodeTableRow = ({
 
         <button
           className="list-dropdown-item text-secondary"
-          onClick={(e) => {
+          onClick={e => {
             setCtaListExpanded(false);
             deleteModal.openModal(e);
           }}
@@ -171,13 +168,9 @@ const GcodeTableRow = ({
 
       <printModal.Modal>
         <>
-          <h1 className="modal-title text-center">
-            Print G-Code
-          </h1>
-          
-          {showPrinterSelect && (
-            <SelectPrinter />
-          )}
+          <h1 className="modal-title text-center">Print G-Code</h1>
+
+          {showPrinterSelect && <SelectPrinter />}
 
           {message && (
             <p className={messageOk ? "message-success" : "message-error"}>
@@ -186,81 +179,82 @@ const GcodeTableRow = ({
           )}
 
           {showFilamentTypeWarning && (
-          <>
-            <div className="message-error">
-              Are you sure? There seems to be a filament mismatch: Printer has{" "}
-              <strong>{printerFilamentType}</strong> configured, but this gcode was
-              sliced for <strong>{gcodeFilamentType}</strong>.
-            </div>
+            <>
+              <div className="message-error">
+                Are you sure? There seems to be a filament mismatch: Printer has{" "}
+                <strong>{printerFilamentType}</strong> configured, but this
+                gcode was sliced for <strong>{gcodeFilamentType}</strong>.
+              </div>
 
-            <div className="cta-box text-center">  
-              <button
-                className="btn"
-                onClick={() => {
-                  setShowPrinterSelect(false);
-                  setShowFilamentTypeWarning(false);
-                  setCanCancelPrintStatus(false);
-                  setMessage("Scheduling a print");
-                  setMessageOk(true);
-                  schedulePrint(id, selectedPrinter);
-                }}
-              >
-                Print anyway
-              </button>{" "}
-              <button 
-                className="btn btn-plain"
-                onClick={() => {
-                  setShowPrinterSelect(true);
-                  setShowFilamentTypeWarning(false);
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </>
+              <div className="cta-box text-center">
+                <button
+                  className="btn"
+                  onClick={() => {
+                    setShowPrinterSelect(false);
+                    setShowFilamentTypeWarning(false);
+                    setMessage("Scheduling a print");
+                    setMessageOk(true);
+                    schedulePrint(id, selectedPrinter);
+                  }}
+                >
+                  Print anyway
+                </button>{" "}
+                <button
+                  className="btn btn-plain"
+                  onClick={() => {
+                    setShowPrinterSelect(true);
+                    setShowFilamentTypeWarning(false);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
           )}
 
           {!showFilamentTypeWarning && !message && !!availablePrinters.length && (
-          <div className="cta-box text-center">
-            <button
-              className="btn"
-              onClick={e => {
-                e.preventDefault();
-                const selected = availablePrinters.find(
-                  p => p.uuid === selectedPrinter
-                );
-                if (
-                  selected &&
-                  selected.printer_props &&
-                  selected.printer_props.filament_type &&
-                  analysis &&
-                  analysis.filament &&
-                  analysis.filament.type &&
-                  analysis.filament.type !== selected.printer_props.filament_type
-                ) {
+            <div className="cta-box text-center">
+              <button
+                className="btn"
+                onClick={e => {
+                  e.preventDefault();
+                  const selected = availablePrinters.find(
+                    p => p.uuid === selectedPrinter
+                  );
+                  if (
+                    selected &&
+                    selected.printer_props &&
+                    selected.printer_props.filament_type &&
+                    analysis &&
+                    analysis.filament &&
+                    analysis.filament.type &&
+                    analysis.filament.type !==
+                      selected.printer_props.filament_type
+                  ) {
+                    setShowPrinterSelect(false);
+                    setShowFilamentTypeWarning(true);
+                    setPrinterFilamentType(
+                      selected.printer_props.filament_type
+                    );
+                    setGcodeFilamentType(analysis.filament.type);
+                    return;
+                  }
+
                   setShowPrinterSelect(false);
-                  setShowFilamentTypeWarning(true);
-                  setPrinterFilamentType(selected.printer_props.filament_type);
-                  setGcodeFilamentType(analysis.filament.type)
-                  return;
-                }
+                  setShowFilamentTypeWarning(false);
+                  setMessage("Scheduling a print");
+                  setMessageOk(true);
 
-                setShowPrinterSelect(false);
-                setCanCancelPrintStatus(false);
-                setShowFilamentTypeWarning(false);
-                setMessage("Scheduling a print");
-                setMessageOk(true);
+                  schedulePrint(id, selectedPrinter);
+                }}
+              >
+                Print
+              </button>
 
-                schedulePrint(id, selectedPrinter);
-              }}
-            >
-              Print
-            </button>
-
-            <button className="btn btn-plain" onClick={printModal.closeModal}>
-              Cancel
-            </button>
-          </div>
+              <button className="btn btn-plain" onClick={printModal.closeModal}>
+                Cancel
+              </button>
+            </div>
           )}
 
           {!!!availablePrinters.length && (
@@ -271,8 +265,8 @@ const GcodeTableRow = ({
             </div>
           )}
         </>
-      </printModal.Modal>      
-    
+      </printModal.Modal>
+
       <DeleteModal
         path={path}
         display={display}
@@ -281,7 +275,7 @@ const GcodeTableRow = ({
       />
     </div>
   );
-}
+};
 
 class GcodeList extends React.Component {
   state = {

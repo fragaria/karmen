@@ -350,7 +350,7 @@ const PrinterProperties = ({ printer }) => {
   const props = printer.printer_props;
   return (
     <>
-      {Object.keys(props) && (
+      {props && Object.keys(props) && (
         <>
           {props.filament_type && (
             <>
