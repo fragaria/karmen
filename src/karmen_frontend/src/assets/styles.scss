@@ -139,13 +139,23 @@ footer {
   top: 0;
   left: 0;
   width: 100%;
-  height: $navigation-height-xs;
-  padding: 0 $spacing-default/2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 1;
+  padding: 0 $base-unit*2;
+  z-index: 1;    
   @include blurred-bg;
+
+
+  .navigation-content {
+    display: flex;
+    height: $navigation-height-xs;
+    max-width: $screen-md-min;
+    margin: 0 auto;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (min-width: $screen-sm-min) {
+      padding: 0 $spacing-default/2;
+    }
+  }
 
   .navigation-brand {
     display: inherit;
@@ -179,6 +189,10 @@ footer {
       cursor: pointer;
     }
   }
+
+  .navigation-toggle-label {
+    font-size: 2.4rem;
+  }
 }
 
 .main {
@@ -192,7 +206,7 @@ footer {
 .main-title {
   display: flex;
   width: 100%;
-  margin: $base-unit*2 0 $spacing-default;
+  margin: $spacing-default*2 0 $spacing-default;
   align-items: center;
   justify-content: space-between;
   font-family: $mono;
@@ -208,14 +222,6 @@ footer {
   max-width: $screen-md-min;
   margin: 0 auto;
   padding: $navigation-height-xs 0 $spacing-default;
-
-  .container .main-title{
-    margin-top: $spacing-default*2;
-  }
-
-  .container:first-child .main-title {
-      margin-top: $base-unit*2
-    }
 }
 
 .cta-box {
@@ -267,6 +273,7 @@ footer {
   color: #fff;
   font-weight: bold;
   text-transform: uppercase;
+  white-space: nowrap;
 
   &:hover {
     cursor: pointer;
@@ -386,8 +393,9 @@ footer {
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr;
       align-items: start;
-      grid-gap: $base-unit*2;
       padding: 0 $base-unit*2;
+      grid-column-gap: $base-unit*2;
+      grid-row-gap: $base-unit*4;
 
       @media (min-width: $screen-sm-min) {
         grid-template-columns: 1fr 1fr 1fr;

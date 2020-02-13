@@ -19,83 +19,85 @@ class Menu extends React.Component {
 
     return (
       <nav className="navigation">
-        <h2 className="hidden">Navigation</h2>
-        <Link
-          to="/"
-          className="navigation-brand"
-          onClick={() => {
-            this.setState({ navigation: false });
-          }}
-        >
-          <img alt="Karmen logo" src="/karmen-logo.svg" />
-        </Link>
-        {userState === "logged-in" && (
-          <>
-            {navigation && (
-              <ul className="navigation-items">
-                <li>
-                  <Link
-                    to="/"
-                    onClick={() => this.setState({ navigation: false })}
-                  >
-                    Printers
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/gcodes"
-                    onClick={() => this.setState({ navigation: false })}
-                  >
-                    G-Codes
-                  </Link>
-                </li>
-                {role === "admin" && (
+        <div className="navigation-content">
+          <h2 className="hidden">Navigation</h2>
+          <Link
+            to="/"
+            className="navigation-brand"
+            onClick={() => {
+              this.setState({ navigation: false });
+            }}
+          >
+            <img alt="Karmen logo" src="/karmen-logo.svg" />
+          </Link>
+          {userState === "logged-in" && (
+            <>
+              {navigation && (
+                <ul className="navigation-items">
                   <li>
                     <Link
-                      to="/settings"
+                      to="/"
                       onClick={() => this.setState({ navigation: false })}
                     >
-                      Settings
+                      Printers
                     </Link>
                   </li>
-                )}
-                <li>
-                  <Link
-                    to="/users/me"
-                    onClick={() => this.setState({ navigation: false })}
-                  >
-                    {username}
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    className="btn-reset"
-                    title="Logout"
-                    onClick={e => {
-                      e.preventDefault();
-                      logout();
-                      history.push("/");
-                      this.setState({ navigation: false });
-                    }}
-                  >
-                    Logout
-                  </button>
-                </li>
-              </ul>
-            )}
-            <button
-              className="navigation-toggle"
-              onClick={e => {
-                e.preventDefault();
-                const { navigation } = this.state;
-                this.setState({ navigation: !navigation });
-              }}
-            >
-              {navigation && <span className="icon-close"></span>}
-              {!navigation && <span className="icon-menu"></span>}
-            </button>
-          </>
-        )}
+                  <li>
+                    <Link
+                      to="/gcodes"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      G-Codes
+                    </Link>
+                  </li>
+                  {role === "admin" && (
+                    <li>
+                      <Link
+                        to="/settings"
+                        onClick={() => this.setState({ navigation: false })}
+                      >
+                        Settings
+                      </Link>
+                    </li>
+                  )}
+                  <li>
+                    <Link
+                      to="/users/me"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      {username}
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      className="btn-reset"
+                      title="Logout"
+                      onClick={e => {
+                        e.preventDefault();
+                        logout();
+                        history.push("/");
+                        this.setState({ navigation: false });
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </ul>
+              )}
+              <button
+                className="navigation-toggle"
+                onClick={e => {
+                  e.preventDefault();
+                  const { navigation } = this.state;
+                  this.setState({ navigation: !navigation });
+                }}
+              >
+                {navigation && <span className="icon-close"></span>}
+                {!navigation && <span className="navigation-toggle-label">Menu</span>}
+              </button>
+            </>
+          )}
+        </div>        
       </nav>
     );
   }
