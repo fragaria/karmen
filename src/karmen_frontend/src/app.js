@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Switch, Route, useLocation } from "react-router-dom";
 
 import Menu from "./components/menu";
 import Heartbeat from "./components/utils/heartbeat";
@@ -24,6 +24,16 @@ import Page404 from "./routes/page404";
 
 import { loadUserFromLocalStorage } from "./actions/users";
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -31,6 +41,7 @@ class App extends React.Component {
       initialized: false,
       tokenTimer: null
     };
+    this.myRef = React.createRef()
   }
 
   componentDidMount() {
@@ -42,6 +53,8 @@ class App extends React.Component {
           initialized: true
         });
       });
+    } else {
+      this.myRef.current.scrollTo(0, 0);
     }
   }
 
@@ -60,8 +73,9 @@ class App extends React.Component {
       );
     }
     return (
-      <>
+      <div ref={this.myRef}>
         <BrowserRouter>
+          <ScrollToTop />
           <CatchTokenFromUrl />
           <Menu />
           <Heartbeat />
@@ -137,7 +151,7 @@ class App extends React.Component {
             </a>
           </small>
         </footer>
-      </>
+      </div>
     );
   }
 }
