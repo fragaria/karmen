@@ -21,14 +21,12 @@ export const useMyModal = () => {
 
 export const ModalWrapper = ({ closeFunc, children }) => {
   return (
-    <>
-      <div className="modal-content">
-        <button className="modal-close" onClick={closeFunc}>
-          <span className="icon-close"></span>
-        </button>
-        {children}
-      </div>
-    </>
+    <div className="modal-content">
+      <button className="modal-close" onClick={closeFunc}>
+        <span className="icon-close"></span>
+      </button>
+      {children}
+    </div>
   );
 };
 

@@ -1,11 +1,44 @@
 import React from "react";
+import useModal from "use-react-modal";
+// import { useMyModal } from "../../components/utils/modal";
+
+const WebcamModal = ({ classNames, source, url }) => {
+  const { closeModal, isOpen, Modal, openModal } = useModal({
+    background: "rgba(0, 0, 0, .95)"
+  });
+
+  return (
+    <>
+      <img
+        className={classNames.join(" ")}
+        alt={`Current state from ${url}`}
+        src={source}
+        onClick={openModal}
+      />
+
+      {isOpen && (
+        <Modal>
+          <div className="webcam-modal">
+            <button className="modal-close" onClick={closeModal}>
+              <span className="icon-close"></span>
+            </button>
+            <div
+              className="webcam-modal-stream"
+              style={{ backgroundImage: `url(${source})` }}
+              onClick={closeModal}
+            ></div>            
+          </div>
+        </Modal>
+      )}
+    </>
+  )
+}
 
 class WebcamStream extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isOnline: true,
-      isMaximized: false,
       timer: null,
       snapshotPromise: null
     };
@@ -61,7 +94,7 @@ class WebcamStream extends React.Component {
 
   render() {
     const { url, flipHorizontal, flipVertical, rotate90 } = this.props;
-    const { isOnline, isMaximized, source } = this.state;
+    const { isOnline, source } = this.state;
     let klass = [];
     if (flipHorizontal) {
       klass.push("flip-horizontal");
@@ -75,43 +108,20 @@ class WebcamStream extends React.Component {
       klass.push("rotate-90");
     }
     return (
-      <>
+      <>        
         <div
           className={`webcam-stream ${isOnline && source ? "" : "unavailable"}`}
-          onClick={() => {
-            if (!isOnline || !source) {
-              return;
-            }
-            this.setState({
-              isMaximized: true
-            });
-          }}
         >
           {isOnline && source ? (
-            <img
-              className={klass.join(" ")}
-              alt={`Current state from ${url}`}
-              src={source}
+            <WebcamModal
+              classNames={klass}
+              source={source}
+              url={url}
             />
           ) : (
             <div>Stream unavailable</div>
           )}
         </div>
-        {isMaximized && (
-          <div
-            className="webcam-stream maximized"
-            onClick={() => {
-              this.setState({
-                isMaximized: false
-              });
-            }}
-          >
-            <div
-              className="overlay"
-              style={{ backgroundImage: `url(${source})` }}
-            ></div>
-          </div>
-        )}
       </>
     );
   }
