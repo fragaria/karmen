@@ -778,6 +778,23 @@ select {
     background-repeat: no-repeat;
     background-position: center;
   }
+
+  img.flip-horizontal {
+    transform: scaleX(-1);
+  }
+
+  img.flip-vertical {
+    transform: scaleY(-1);
+  }
+
+  img.rotate-90 {
+    transform: rotate(90deg);
+  }
+
+  img.flip-horizontal.flip-vertical {
+    transform: scaleX(-1) scaleY(-1);
+  }
+
 }
 
 .modal-content {
