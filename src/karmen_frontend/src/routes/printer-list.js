@@ -8,14 +8,49 @@ import {
   loadAndQueuePrinters,
   setWebcamRefreshInterval
 } from "../actions/printers";
+import { setPrinterViewType } from "../actions/preferences";
 import formatters from "../services/formatters";
+
+const SwitchView = ({ viewType, onViewTypeChange }) => {
+  return (
+    <div className="list-header">
+      <div className="list-view-switch">
+        <button
+          className={
+            viewType === "grid"
+              ? "btn-reset icon-list"
+              : "btn-reset icon-list active"
+          }
+          onClick={e => {
+            e.preventDefault();
+            if (e.target.className.indexOf("active") < 0) {
+              onViewTypeChange("list");
+            }
+          }}
+        ></button>
+        <button
+          className={
+            viewType === "grid"
+              ? "btn-reset icon-grid active"
+              : "btn-reset icon-grid"
+          }
+          onClick={e => {
+            e.preventDefault();
+            if (e.target.className.indexOf("active") < 0) {
+              onViewTypeChange("grid");
+            }
+          }}
+        ></button>
+      </div>
+    </div>
+  );
+};
 
 class PrinterList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      timer: null,
-      gridView: false
+      timer: null
     };
     this.getPrinters = this.getPrinters.bind(this);
   }
@@ -49,9 +84,13 @@ class PrinterList extends React.Component {
   }
 
   render() {
-    const { printersLoaded, printers, setWebcamRefreshInterval } = this.props;
-    const { gridView } = this.state;
-
+    const {
+      printersLoaded,
+      printers,
+      setWebcamRefreshInterval,
+      viewType,
+      setPrinterViewType
+    } = this.props;
     if (!printersLoaded) {
       return (
         <div>
@@ -59,41 +98,6 @@ class PrinterList extends React.Component {
         </div>
       );
     }
-
-    const SwitchView = () => {
-      const changeView = e => {
-        e.preventDefault();
-
-        if (e.target.className.indexOf("active") < 0) {
-          this.setState(prevState => ({
-            gridView: !prevState.gridView
-          }));
-        }
-      };
-
-      return (
-        <div className="list-header">
-          <div className="list-view-switch">
-            <button
-              className={
-                gridView ? "btn-reset icon-list" : "btn-reset icon-list active"
-              }
-              onClick={e => {
-                changeView(e);
-              }}
-            ></button>
-            <button
-              className={
-                gridView ? "btn-reset icon-grid active" : "btn-reset icon-grid"
-              }
-              onClick={e => {
-                changeView(e);
-              }}
-            ></button>
-          </div>
-        </div>
-      );
-    };
 
     const printerElements =
       printers &&
@@ -107,7 +111,7 @@ class PrinterList extends React.Component {
               to={`/printers/${printer.uuid}`}
             >
               <div className="list-item-content">
-                {gridView && (
+                {viewType === "grid" && (
                   <div className="list-item-illustration">
                     <WebcamStream
                       {...printer.webcam}
@@ -151,8 +155,11 @@ class PrinterList extends React.Component {
           <h1 className="main-title">Printers</h1>
         </div>
 
-        <div className={gridView ? "list grid" : "list"}>
-          <SwitchView />
+        <div className={viewType === "grid" ? "list grid" : "list"}>
+          <SwitchView
+            viewType={viewType}
+            onViewTypeChange={setPrinterViewType}
+          />
           <div className="list-items">{printerElements}</div>
         </div>
       </div>
@@ -162,12 +169,14 @@ class PrinterList extends React.Component {
 
 export default connect(
   state => ({
+    viewType: state.preferences.printerViewType,
     printers: state.printers.printers,
     printersLoaded: state.printers.printersLoaded
   }),
   dispatch => ({
     loadPrinters: fields => dispatch(loadAndQueuePrinters(fields)),
     setWebcamRefreshInterval: (uuid, interval) =>
-      dispatch(setWebcamRefreshInterval(uuid, interval))
+      dispatch(setWebcamRefreshInterval(uuid, interval)),
+    setPrinterViewType: viewType => dispatch(setPrinterViewType(viewType))
   })
 )(PrinterList);
