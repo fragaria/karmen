@@ -151,6 +151,7 @@ def printer_create(org_uuid):
     printer = clients.get_printer_instance(
         {
             "uuid": uuid,
+            "organization_uuid": org_uuid,
             "hostname": hostname,
             "ip": ip,
             "port": port,
@@ -246,6 +247,7 @@ def printer_patch(org_uuid, uuid):
         )
     printers.update_printer(
         uuid=printer_inst.uuid,
+        organization_uuid=printer_inst.organization_uuid,
         name=name,
         hostname=printer_inst.hostname,
         ip=printer_inst.ip,

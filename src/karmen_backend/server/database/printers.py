@@ -29,9 +29,10 @@ def update_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE printers SET name = %s, hostname = %s, ip = %s, port = %s, client = %s, client_props = %s, printer_props = %s, protocol = %s where uuid = %s",
+            "UPDATE printers SET name = %s, organization_uuid = %s, hostname = %s, ip = %s, port = %s, client = %s, client_props = %s, printer_props = %s, protocol = %s where uuid = %s",
             (
                 kwargs["name"],
+                kwargs["organization_uuid"],
                 kwargs["hostname"],
                 kwargs["ip"],
                 kwargs.get("port"),
