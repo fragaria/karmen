@@ -176,14 +176,7 @@ export const setWebcamRefreshInterval = (uuid, interval) => (
   getState
 ) => {
   const { printers } = getState();
-  if (
-    printers.webcamQueue &&
-    (printers.webcamQueue[uuid] === undefined ||
-      printers.webcamQueue[uuid].interval !== interval)
-  ) {
-    if (printers.webcamQueue[uuid] && printers.webcamQueue[uuid].timeout) {
-      clearTimeout(printers.webcamQueue[uuid].timeout);
-    }
+  if (printers.webcamQueue && printers.webcamQueue[uuid] === undefined) {
     // we need to delay this so interval_set is run before
     const timeout = setTimeout(() => dispatch(getWebcamSnapshot(uuid)), 300);
     return dispatch({
@@ -195,13 +188,28 @@ export const setWebcamRefreshInterval = (uuid, interval) => (
       }
     });
   }
-  return dispatch({
-    type: "PRINTERS_WEBCAM_INTERVAL_SET",
-    payload: {
-      uuid,
-      interval: interval > 0 ? interval : 60 * 1000
-    }
-  });
+  if (printers.webcamQueue[uuid].interval > interval) {
+    clearTimeout(printers.webcamQueue[uuid].timeout);
+    // we need to delay this so interval_set is run before
+    const timeout = setTimeout(() => dispatch(getWebcamSnapshot(uuid)), 300);
+    return dispatch({
+      type: "PRINTERS_WEBCAM_TIMEOUT_SET",
+      payload: {
+        uuid,
+        interval: interval > 0 ? interval : 60 * 1000,
+        timeout
+      }
+    });
+  }
+  if (printers.webcamQueue[uuid].interval !== interval) {
+    return dispatch({
+      type: "PRINTERS_WEBCAM_INTERVAL_SET",
+      payload: {
+        uuid,
+        interval: interval > 0 ? interval : 60 * 1000
+      }
+    });
+  }
 };
 
 export const getWebcamSnapshot = createActionThunk(
@@ -218,7 +226,7 @@ export const getWebcamSnapshot = createActionThunk(
     )(printer.webcam.url).then(r => {
       if (r.status === 202 || r.status === 200) {
         let { printers } = getState();
-        if (printers.webcamQueue) {
+        if (printers.webcamQueue && printers.webcamQueue[uuid]) {
           const timeoutData = printers.webcamQueue[uuid];
           if (timeoutData.interval > 0) {
             const timeout = setTimeout(
