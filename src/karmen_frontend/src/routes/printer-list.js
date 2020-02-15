@@ -3,7 +3,11 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Loader from "../components/utils/loader";
 import PrinterState from "../components/printers/printer-state";
-import { loadAndQueuePrinters } from "../actions/printers";
+import WebcamStream from "../components/printers/webcam-stream";
+import {
+  loadAndQueuePrinters,
+  setWebcamRefreshInterval
+} from "../actions/printers";
 import formatters from "../services/formatters";
 
 class PrinterList extends React.Component {
@@ -45,7 +49,7 @@ class PrinterList extends React.Component {
   }
 
   render() {
-    const { printersLoaded, printers } = this.props;
+    const { printersLoaded, printers, setWebcamRefreshInterval } = this.props;
     const { gridView } = this.state;
 
     if (!printersLoaded) {
@@ -57,34 +61,38 @@ class PrinterList extends React.Component {
     }
 
     const SwitchView = () => {
-      const changeView = (e) => {
+      const changeView = e => {
         e.preventDefault();
-        
-        if (e.target.className.indexOf('active') < 0) {
+
+        if (e.target.className.indexOf("active") < 0) {
           this.setState(prevState => ({
             gridView: !prevState.gridView
           }));
         }
-      }
+      };
 
       return (
         <div className="list-header">
           <div className="list-view-switch">
-            <button 
-              className={gridView ? "btn-reset icon-list" : "btn-reset icon-list active"}
-              onClick={(e) => {
-                changeView(e)
+            <button
+              className={
+                gridView ? "btn-reset icon-list" : "btn-reset icon-list active"
+              }
+              onClick={e => {
+                changeView(e);
               }}
             ></button>
-            <button 
-              className={gridView ? "btn-reset icon-grid active" : "btn-reset icon-grid"}
-              onClick={(e) => {
-                changeView(e)
+            <button
+              className={
+                gridView ? "btn-reset icon-grid active" : "btn-reset icon-grid"
+              }
+              onClick={e => {
+                changeView(e);
               }}
             ></button>
           </div>
         </div>
-       )
+      );
     };
 
     const printerElements =
@@ -99,11 +107,21 @@ class PrinterList extends React.Component {
               to={`/printers/${printer.uuid}`}
             >
               <div className="list-item-content">
-              
-              {gridView && (
-                <div className="list-item-illustration"></div>
-              )}
-              
+                {gridView && (
+                  <div className="list-item-illustration">
+                    <WebcamStream
+                      {...printer.webcam}
+                      isPrinting={
+                        printer.status && printer.status.state === "Printing"
+                      }
+                      image={printer.image}
+                      setWebcamRefreshInterval={interval =>
+                        setWebcamRefreshInterval(printer.uuid, interval)
+                      }
+                    />
+                  </div>
+                )}
+
                 <span className="list-item-title">{printer.name}</span>
                 <span className="list-item-subtitle">
                   <PrinterState printer={printer} />
@@ -135,9 +153,7 @@ class PrinterList extends React.Component {
 
         <div className={gridView ? "list grid" : "list"}>
           <SwitchView />
-          <div className="list-items">
-            {printerElements}
-          </div>
+          <div className="list-items">{printerElements}</div>
         </div>
       </div>
     );
@@ -150,6 +166,8 @@ export default connect(
     printersLoaded: state.printers.printersLoaded
   }),
   dispatch => ({
-    loadPrinters: fields => dispatch(loadAndQueuePrinters(fields))
+    loadPrinters: fields => dispatch(loadAndQueuePrinters(fields)),
+    setWebcamRefreshInterval: (uuid, interval) =>
+      dispatch(setWebcamRefreshInterval(uuid, interval))
   })
 )(PrinterList);

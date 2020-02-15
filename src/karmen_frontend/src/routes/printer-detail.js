@@ -17,7 +17,7 @@ import {
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
-  getWebcamSnapshot
+  setWebcamRefreshInterval
 } from "../actions/printers";
 
 const ChangeConnectionModal = ({
@@ -161,10 +161,7 @@ const CancelPrintModal = ({ modal, onCurrentJobStateChange }) => {
             >
               Cancel the print!
             </button>{" "}
-            <button
-              className="btn btn-plain"
-              onClick={modal.closeModal}
-            >
+            <button className="btn btn-plain" onClick={modal.closeModal}>
               Close
             </button>
           </div>
@@ -207,21 +204,17 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
           Pause print
         </button>
       )}{" "}
-      <button
-        className="btn btn-sm"
-        onClick={cancelPrintModal.openModal}
-      >
+      <button className="btn btn-sm" onClick={cancelPrintModal.openModal}>
         Cancel print
       </button>
-
-      <CancelPrintModal 
+      <CancelPrintModal
         modal={cancelPrintModal}
-        printer={printer} 
+        printer={printer}
         onCurrentJobStateChange={onCurrentJobStateChange}
       />
     </div>
   );
-}
+};
 
 const ClientVersion = printerObject => {
   if (printerObject) {
@@ -453,7 +446,7 @@ class PrinterDetail extends React.Component {
       jobList,
       loadJobsPage,
       clearJobsPages,
-      getWebcamSnapshot
+      setWebcamRefreshInterval
     } = this.props;
     const { printerLoaded } = this.state;
 
@@ -478,7 +471,7 @@ class PrinterDetail extends React.Component {
         jobList={jobList}
         loadJobsPage={loadJobsPage}
         clearJobsPages={clearJobsPages}
-        getWebcamSnapshot={getWebcamSnapshot}
+        setWebcamRefreshInterval={setWebcamRefreshInterval}
       />
     );
   }
@@ -493,31 +486,18 @@ const PrinterDetailInner = ({
   jobList,
   loadJobsPage,
   clearJobsPages,
-  getWebcamSnapshot
+  setWebcamRefreshInterval
 }) => {
   const changeConnectionModal = useMyModal();
-  const changePrinterStatusBtn = (
-
-
-            <button
-              className="btn btn-xs"
-              type="submit"
-              onClick={e => {
-                e.preventDefault();
-                changeConnectionModal.openModal(e);
-              }}
-            >
-            </button>
-
-  )
-
   return (
     <section className="content">
       <div className="printer-detail">
         <div className="printer-detail-stream">
           <WebcamStream
             {...printer.webcam}
-            getWebcamSnapshot={getWebcamSnapshot}
+            isPrinting={printer.status && printer.status.state === "Printing"}
+            image={printer.image}
+            setWebcamRefreshInterval={setWebcamRefreshInterval}
           />
           <Progress {...printer.job} />
         </div>
@@ -526,7 +506,6 @@ const PrinterDetailInner = ({
           <div className="container">
             <h1 className="main-title">{printer.name}</h1>
             <PrinterState printer={printer} />{" "}
-
             {printer.client &&
               printer.client.access_level === "unlocked" &&
               (["Offline", "Closed"].indexOf(
@@ -539,7 +518,9 @@ const PrinterDetailInner = ({
                     e.preventDefault();
                     changeConnectionModal.openModal(e);
                   }}
-                >Connect</button>
+                >
+                  Connect
+                </button>
               ) : (
                 <button
                   className="btn btn-xs"
@@ -552,7 +533,6 @@ const PrinterDetailInner = ({
                   Disconnect
                 </button>
               ))}
-          
             <ChangeConnectionModal
               modal={changeConnectionModal}
               printer={printer}
@@ -647,6 +627,7 @@ export default connect(
         )
       ),
     clearJobsPages: () => dispatch(clearJobsPages(ownProps.match.params.uuid)),
-    getWebcamSnapshot: url => dispatch(getWebcamSnapshot(url))
+    setWebcamRefreshInterval: interval =>
+      dispatch(setWebcamRefreshInterval(ownProps.match.params.uuid, interval))
   })
 )(PrinterDetail);

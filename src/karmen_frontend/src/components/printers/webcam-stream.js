@@ -1,6 +1,5 @@
 import React from "react";
 import useModal from "use-react-modal";
-// import { useMyModal } from "../../components/utils/modal";
 
 const WebcamModal = ({ classNames, source, url }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
@@ -26,75 +25,45 @@ const WebcamModal = ({ classNames, source, url }) => {
               className="webcam-modal-stream"
               style={{ backgroundImage: `url(${source})` }}
               onClick={closeModal}
-            ></div>            
+            ></div>
           </div>
         </Modal>
       )}
     </>
-  )
-}
+  );
+};
 
 class WebcamStream extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isOnline: true,
-      timer: null,
-      snapshotPromise: null
-    };
-    this.getSnapshot = this.getSnapshot.bind(this);
-  }
-
-  getSnapshot() {
-    const { url, getWebcamSnapshot } = this.props;
-    const { isOnline, snapshotPromise } = this.state;
-    if (snapshotPromise || !isOnline) {
-      return;
-    }
-    const newSnapshotPromise = getWebcamSnapshot(url).then(r => {
-      if (r.status === 202) {
-        this.setState({
-          timer: setTimeout(this.getSnapshot, 1000),
-          snapshotPromise: null
-        });
-      } else if (r.data && r.data.prefix && r.data.data) {
-        this.setState({
-          isOnline: true,
-          timer: setTimeout(this.getSnapshot, 1000 / 5), // 1000 / 5 = 5 FPS
-          source: `${r.data.prefix}${r.data.data}`,
-          snapshotPromise: null
-        });
-      } else {
-        this.setState({
-          isOnline: false,
-          timer: null,
-          source: null,
-          snapshotPromise: null
-        });
-      }
-    });
-    this.setState({
-      snapshotPromise: newSnapshotPromise
-    });
-  }
+  state = {
+    isPrinting: false
+  };
 
   componentDidMount() {
-    this.getSnapshot();
+    const { setWebcamRefreshInterval, isPrinting } = this.props;
+    this.setState({
+      isPrinting
+    });
+    setWebcamRefreshInterval(isPrinting ? 1000 / 5 : 5000);
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.isPrinting !== prevState.isPrinting) {
+      nextProps.setWebcamRefreshInterval(
+        nextProps.isPrinting ? 1000 / 5 : 5000
+      );
+    }
+    return {
+      isPrinting: nextProps.isPrinting
+    };
   }
 
   componentWillUnmount() {
-    const { timer } = this.state;
-    timer && clearTimeout(timer);
-    this.setState({
-      isOnline: false,
-      source: null,
-      timer: null
-    });
+    const { setWebcamRefreshInterval } = this.props;
+    setWebcamRefreshInterval(-1);
   }
 
   render() {
-    const { url, flipHorizontal, flipVertical, rotate90 } = this.props;
-    const { isOnline, source } = this.state;
+    const { url, image, flipHorizontal, flipVertical, rotate90 } = this.props;
     let klass = [];
     if (flipHorizontal) {
       klass.push("flip-horizontal");
@@ -108,16 +77,10 @@ class WebcamStream extends React.Component {
       klass.push("rotate-90");
     }
     return (
-      <>        
-        <div
-          className={`webcam-stream ${isOnline && source ? "" : "unavailable"}`}
-        >
-          {isOnline && source ? (
-            <WebcamModal
-              classNames={klass}
-              source={source}
-              url={url}
-            />
+      <>
+        <div className={`webcam-stream ${image ? "" : "unavailable"}`}>
+          {image ? (
+            <WebcamModal classNames={klass} source={image} url={url} />
           ) : (
             <div>Stream unavailable</div>
           )}

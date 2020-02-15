@@ -171,9 +171,82 @@ export const changeCurrentJob = createActionThunk(
   }
 );
 
+export const setWebcamRefreshInterval = (uuid, interval) => (
+  dispatch,
+  getState
+) => {
+  const { printers } = getState();
+  if (
+    printers.webcamQueue &&
+    (printers.webcamQueue[uuid] === undefined ||
+      printers.webcamQueue[uuid].interval !== interval)
+  ) {
+    if (printers.webcamQueue[uuid] && printers.webcamQueue[uuid].timeout) {
+      clearTimeout(printers.webcamQueue[uuid].timeout);
+    }
+    // we need to delay this so interval_set is run before
+    const timeout = setTimeout(() => dispatch(getWebcamSnapshot(uuid)), 300);
+    return dispatch({
+      type: "PRINTERS_WEBCAM_TIMEOUT_SET",
+      payload: {
+        uuid,
+        interval: interval > 0 ? interval : 60 * 1000,
+        timeout
+      }
+    });
+  }
+  return dispatch({
+    type: "PRINTERS_WEBCAM_INTERVAL_SET",
+    payload: {
+      uuid,
+      interval: interval > 0 ? interval : 60 * 1000
+    }
+  });
+};
+
 export const getWebcamSnapshot = createActionThunk(
   "PRINTERS_GET_WEBCAM_SNAPSHOT",
-  (url, { dispatch }) => {
-    return retryIfUnauthorized(backend.getWebcamSnapshot, dispatch)(url);
+  (uuid, { dispatch, getState }) => {
+    let { printers } = getState();
+    const printer = printers.printers.find(p => p.uuid === uuid);
+    if (!printer || !printer.webcam || !printer.webcam.url) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(
+      backend.getWebcamSnapshot,
+      dispatch
+    )(printer.webcam.url).then(r => {
+      if (r.status === 202 || r.status === 200) {
+        let { printers } = getState();
+        if (printers.webcamQueue) {
+          const timeoutData = printers.webcamQueue[uuid];
+          if (timeoutData.interval > 0) {
+            const timeout = setTimeout(
+              () => dispatch(getWebcamSnapshot(uuid)),
+              timeoutData.interval
+            );
+            dispatch({
+              type: "PRINTERS_WEBCAM_TIMEOUT_SET",
+              payload: {
+                uuid,
+                interval: timeoutData.interval,
+                timeout
+              }
+            });
+          }
+        }
+      }
+      if (r.data && r.data.prefix && r.data.data) {
+        return {
+          uuid,
+          status: r.status,
+          ...r.data
+        };
+      }
+      return {
+        uuid,
+        status: r.status
+      };
+    });
   }
 );

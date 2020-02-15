@@ -10,7 +10,12 @@ import { addPrintJob } from "../actions/printjobs";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
 
-const GcodePrint = ({ gcode, printGcode, onSchedulePrint, availablePrinters }) => {
+const GcodePrint = ({
+  gcode,
+  printGcode,
+  onSchedulePrint,
+  availablePrinters
+}) => {
   const printModal = useMyModal();
 
   const [showFilamentTypeWarning, setShowFilamentTypeWarning] = useState();
@@ -63,7 +68,7 @@ const GcodePrint = ({ gcode, printGcode, onSchedulePrint, availablePrinters }) =
       }
     });
   };
-  
+
   return (
     <>
       <button
@@ -178,10 +183,10 @@ const GcodePrint = ({ gcode, printGcode, onSchedulePrint, availablePrinters }) =
             </div>
           )}
         </>
-      </printModal.Modal>      
+      </printModal.Modal>
     </>
-  )  
-}
+  );
+};
 
 class GcodeDetail extends React.Component {
   state = {
@@ -221,11 +226,7 @@ class GcodeDetail extends React.Component {
   }
 
   render() {
-    const {
-      gcode,
-      gcodeLoaded,
-      printedOn
-    } = this.state;
+    const { gcode, gcodeLoaded, printedOn } = this.state;
     const { downloadGcode, printGcode } = this.props;
 
     if (!gcodeLoaded) {
@@ -351,9 +352,8 @@ class GcodeDetail extends React.Component {
             )}
           </dl>
 
-
           <div className="cta-box text-center">
-            <GcodePrint 
+            <GcodePrint
               gcode={gcode}
               printGcode={printGcode}
               onSchedulePrint={(gcodeId, printerUuid) => {
@@ -368,7 +368,7 @@ class GcodeDetail extends React.Component {
                 });
               }}
               availablePrinters={getAvailablePrinters(printedOn)}
-           />
+            />
           </div>
 
           <div className="cta-box text-center">

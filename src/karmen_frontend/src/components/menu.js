@@ -93,11 +93,13 @@ class Menu extends React.Component {
                 }}
               >
                 {navigation && <span className="icon-close"></span>}
-                {!navigation && <span className="navigation-toggle-label">Menu</span>}
+                {!navigation && (
+                  <span className="navigation-toggle-label">Menu</span>
+                )}
               </button>
             </>
           )}
-        </div>        
+        </div>
       </nav>
     );
   }

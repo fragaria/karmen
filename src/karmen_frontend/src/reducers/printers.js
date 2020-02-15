@@ -15,7 +15,8 @@ export default (
     printersLoaded: false,
     printers: [],
     toBeDeleted: [],
-    checkQueue: {}
+    checkQueue: {},
+    webcamQueue: {}
   },
   action
 ) => {
@@ -26,6 +27,27 @@ export default (
       return Object.assign({}, state, {
         checkQueue: Object.assign({}, state.checkQueue, {
           [action.payload.uuid]: action.payload.interval
+        })
+      });
+    case "PRINTERS_WEBCAM_INTERVAL_SET":
+      return Object.assign({}, state, {
+        webcamQueue: Object.assign({}, state.webcamQueue, {
+          [action.payload.uuid]: Object.assign(
+            {},
+            state.webcamQueue[action.payload.uuid],
+            {
+              interval: action.payload.interval
+            }
+          )
+        })
+      });
+    case "PRINTERS_WEBCAM_TIMEOUT_SET":
+      return Object.assign({}, state, {
+        webcamQueue: Object.assign({}, state.webcamQueue, {
+          [action.payload.uuid]: {
+            interval: action.payload.interval,
+            timeout: action.payload.timeout
+          }
         })
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
@@ -156,6 +178,25 @@ export default (
         toBeDeleted: state.toBeDeleted.filter(
           d => d !== action.payload.data.uuid
         )
+      });
+    case "PRINTERS_GET_WEBCAM_SNAPSHOT_SUCCEEDED":
+      let newImage = action.payload;
+      if (!newImage || newImage.status !== 200) {
+        return state;
+      }
+      // TODO possibly switch to findIndex
+      origPrinter = printers.find(p => p.uuid === newImage.uuid);
+      if (!origPrinter) {
+        return state;
+      }
+      if (origPrinter && newImage) {
+        const origIndex = printers.indexOf(origPrinter);
+        printers[origIndex] = Object.assign({}, origPrinter, {
+          image: `${newImage.prefix}${newImage.data}`
+        });
+      }
+      return Object.assign({}, state, {
+        printers: getSortedPrinters(printers)
       });
     default:
       return state;

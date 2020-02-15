@@ -11,12 +11,10 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
     <>
       {modal.isOpen && (
         <modal.Modal>
-          <h1 className="modal-title text-center">
-            Revoke the token
-          </h1>
+          <h1 className="modal-title text-center">Revoke the token</h1>
           <h3 className="text-center">
-            Do you really want to revoke token <strong>"{token.name}"</strong>? This
-          cannot be undone.
+            Do you really want to revoke token <strong>"{token.name}"</strong>?
+            This cannot be undone.
           </h3>
 
           <div className="cta-box text-center">
@@ -56,22 +54,19 @@ const ApiTokensTableRow = ({ token, onTokenDelete }) => {
       </div>
 
       <div className="list-item-cta">
-        <button
-          className="btn-reset"
-          onClick={deleteTokenModal.openModal}
-        >
+        <button className="btn-reset" onClick={deleteTokenModal.openModal}>
           <i className="icon-trash text-secondary"></i>
         </button>
       </div>
 
-      <DeleteTokenModal 
+      <DeleteTokenModal
         modal={deleteTokenModal}
         token={token}
         onTokenDelete={onTokenDelete}
       />
     </div>
   );
-}
+};
 
 class ApiTokensTable extends React.Component {
   state = {
