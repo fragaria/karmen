@@ -78,6 +78,9 @@ const GcodePrint = ({
             availablePrinters.length ? availablePrinters[0].uuid : null
           );
           setShowPrinterSelect(true);
+          setShowFilamentTypeWarning(false);
+          setMessage(undefined);
+          setMessageOk(undefined);
           printModal.openModal(e);
         }}
       >
@@ -162,14 +165,22 @@ const GcodePrint = ({
                   setShowFilamentTypeWarning(false);
                   setMessage("Scheduling a print");
                   setMessageOk(true);
-
                   schedulePrint(gcode.id, selectedPrinter);
                 }}
               >
                 Print
               </button>
 
-              <button className="btn btn-plain" onClick={printModal.closeModal}>
+              <button
+                className="btn btn-plain"
+                onClick={() => {
+                  setShowPrinterSelect(false);
+                  setShowFilamentTypeWarning(false);
+                  setMessage(undefined);
+                  setMessageOk(undefined);
+                  printModal.closeModal();
+                }}
+              >
                 Cancel
               </button>
             </div>
@@ -177,7 +188,16 @@ const GcodePrint = ({
 
           {!!!availablePrinters.length && (
             <div className="cta-box text-center">
-              <button className="btn" onClick={printModal.closeModal}>
+              <button
+                className="btn"
+                onClick={() => {
+                  setShowPrinterSelect(false);
+                  setShowFilamentTypeWarning(false);
+                  setMessage(undefined);
+                  setMessageOk(undefined);
+                  printModal.closeModal();
+                }}
+              >
                 Close
               </button>
             </div>

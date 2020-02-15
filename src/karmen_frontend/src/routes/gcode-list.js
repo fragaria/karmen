@@ -147,6 +147,9 @@ const GcodeTableRow = ({
               availablePrinters.length ? availablePrinters[0].uuid : null
             );
             setShowPrinterSelect(true);
+            setShowFilamentTypeWarning(false);
+            setMessage(undefined);
+            setMessageOk(undefined);
             printModal.openModal(e);
           }}
         >
