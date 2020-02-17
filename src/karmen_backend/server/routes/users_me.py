@@ -196,6 +196,7 @@ def list_api_tokens():
             {
                 "jti": token["jti"],
                 "name": token["name"],
+                "organization_uuid": token["organization_uuid"],
                 "created": token["created"].isoformat(),
             }
         )
@@ -214,20 +215,31 @@ def create_api_token():
     if not name:
         return abort(make_response("", 400))
 
+    org_uuid = data.get("organization_uuid", None)
+    if not org_uuid:
+        return abort(make_response("", 400))
+
     user = get_current_user()
     if not user:
         return abort(make_response("", 401))
+    is_member = organizations.get_organization_role(org_uuid, user["uuid"])
+    if not is_member:
+        return abort(make_response("", 401))
+
     token = create_access_token(
         identity=user,
         expires_delta=False,
-        user_claims={"username": user.get("username")},
+        user_claims={"username": user.get("username"), "organization_uuid": org_uuid},
     )
     jti = decode_token(token)["jti"]
-    api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)
+    api_tokens.add_token(
+        user_uuid=user["uuid"], jti=jti, name=name, organization_uuid=org_uuid
+    )
     response = {
         "access_token": token,
         "name": name,
         "jti": jti,
+        "organization_uuid": org_uuid,
         "created": datetime.now().isoformat(),
     }
     return jsonify(response), 201

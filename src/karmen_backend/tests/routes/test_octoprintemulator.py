@@ -3,7 +3,7 @@ import unittest
 import mock
 
 from server import app
-from ..utils import TOKEN_ADMIN_EXPIRED, TOKEN_USER, UUID_USER
+from ..utils import TOKEN_ADMIN_EXPIRED, API_TOKEN_USER, UUID_USER
 
 
 class VersionRoute(unittest.TestCase):
@@ -23,7 +23,7 @@ class VersionRoute(unittest.TestCase):
     def test_version(self):
         with app.test_client() as c:
             response = c.get(
-                "/octoprint-emulator/api/version", headers={"X-Api-Key": TOKEN_USER}
+                "/octoprint-emulator/api/version", headers={"X-Api-Key": API_TOKEN_USER}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("api" in response.json)
@@ -49,7 +49,8 @@ class SettingsRoute(unittest.TestCase):
     def test_settings(self):
         with app.test_client() as c:
             response = c.get(
-                "/octoprint-emulator/api/settings", headers={"X-Api-Key": TOKEN_USER}
+                "/octoprint-emulator/api/settings",
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue(len(response.json) == 0)
@@ -72,7 +73,7 @@ class JobRoute(unittest.TestCase):
     def test_job(self):
         with app.test_client() as c:
             response = c.get(
-                "/octoprint-emulator/api/job", headers={"X-Api-Key": TOKEN_USER}
+                "/octoprint-emulator/api/job", headers={"X-Api-Key": API_TOKEN_USER}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("job" in response.json)
@@ -96,7 +97,7 @@ class PrinterRoute(unittest.TestCase):
     def test_printer(self):
         with app.test_client() as c:
             response = c.get(
-                "/octoprint-emulator/api/printer", headers={"X-Api-Key": TOKEN_USER}
+                "/octoprint-emulator/api/printer", headers={"X-Api-Key": API_TOKEN_USER}
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("sd" in response.json)
@@ -126,7 +127,7 @@ class FilesLocalRoute(unittest.TestCase):
                 "/octoprint-emulator/api/files/local",
                 data=data,
                 content_type="multipart/form-data",
-                headers={"X-Api-Key": TOKEN_USER},
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
@@ -154,7 +155,7 @@ class FilesLocalRoute(unittest.TestCase):
                 "/octoprint-emulator/api/files/local",
                 data=data,
                 content_type="multipart/form-data",
-                headers={"X-Api-Key": TOKEN_USER},
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
@@ -177,7 +178,7 @@ class FilesLocalRoute(unittest.TestCase):
                 "/octoprint-emulator/api/files/local",
                 data=data,
                 content_type="multipart/form-data",
-                headers={"X-Api-Key": TOKEN_USER},
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 500)
 
@@ -209,7 +210,8 @@ class FilesLocalRoute(unittest.TestCase):
     def test_upload_no_file(self):
         with app.test_client() as c:
             response = c.post(
-                "/octoprint-emulator/api/files/local", headers={"X-Api-Key": TOKEN_USER}
+                "/octoprint-emulator/api/files/local",
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -220,7 +222,7 @@ class FilesLocalRoute(unittest.TestCase):
                 "/octoprint-emulator/api/files/local",
                 data=data,
                 content_type="multipart/form-data",
-                headers={"X-Api-Key": TOKEN_USER},
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -231,6 +233,6 @@ class FilesLocalRoute(unittest.TestCase):
                 "/octoprint-emulator/api/files/local",
                 data=data,
                 content_type="multipart/form-data",
-                headers={"X-Api-Key": TOKEN_USER},
+                headers={"X-Api-Key": API_TOKEN_USER},
             )
             self.assertEqual(response.status_code, 415)

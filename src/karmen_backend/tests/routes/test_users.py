@@ -5,7 +5,7 @@ import unittest
 import bcrypt
 
 from server import app
-from server.database import users, local_users, organizations
+from server.database import users, local_users, organizations, api_tokens
 from ..utils import (
     TOKEN_ADMIN_EXPIRED,
     TOKEN_ADMIN_EXPIRED_CSRF,
@@ -437,6 +437,12 @@ class DeleteUser(unittest.TestCase):
             self.assertEqual(response.status_code, 201)
             uuid = response.json["uuid"]
             user = users.get_by_username(username)
+            api_tokens.add_token(
+                user_uuid=uuid,
+                jti="69aad97d-40ad-418f-ab6d-21605bd4aa71",
+                organization_uuid=UUID_ORG,
+                name="jti",
+            )
             self.assertTrue(user["uuid"], uuid)
             response = c.delete(
                 "/organizations/%s/users/%s" % (UUID_ORG, uuid),
@@ -444,5 +450,11 @@ class DeleteUser(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 204)
             orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            tokens = api_tokens.get_tokens_for_user_uuid(
+                user["uuid"], org_uuid=UUID_ORG
+            )
             self.assertTrue(user is not None)
             self.assertTrue(orgrole is None)
+            for t in tokens:
+                self.assertTrue(t["revoked"])
+                self.assertTrue(t["organization_uuid"] == UUID_ORG)

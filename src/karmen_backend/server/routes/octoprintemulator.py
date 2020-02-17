@@ -89,6 +89,10 @@ def upload():
         user_uuid = decoded["identity"]
     except Exception as e:
         abort(403)
+
+    if decoded["user_claims"].get("organization_uuid") is None:
+        abort(403)
+
     if "file" not in request.files:
         return abort(400)
     incoming = request.files["file"]
@@ -104,7 +108,7 @@ def upload():
             filename=saved["filename"],
             display=saved["display"],
             absolute_path=saved["absolute_path"],
-            organization_uuid="b3060e41-e319-4a9b-8ac4-e0936c75f275",  # TODO organization_uuid
+            organization_uuid=decoded["user_claims"]["organization_uuid"],
             size=saved["size"],
             user_uuid=user_uuid,
         )

@@ -4,7 +4,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
 from server import app
-from server.database import users, local_users, organizations
+from server.database import users, local_users, organizations, api_tokens
 from . import jwt_requires_system_role, jwt_force_password_change, validate_org_access
 
 
@@ -91,7 +91,7 @@ def delete_user(org_uuid, uuid):
     user = users.get_by_uuid(uuid)
     if user is None or user_role is None:
         return abort(make_response("", 404))
-
+    api_tokens.revoke_all_tokens(uuid, org_uuid)
     organizations.drop_organization_role(org_uuid, uuid)
     return "", 204
 

@@ -14,6 +14,8 @@ from ..utils import (
     TOKEN_USER_CSRF,
     TOKEN_USER_REFRESH,
     TOKEN_USER_REFRESH_CSRF,
+    TOKEN_USER2,
+    TOKEN_USER2_CSRF,
     UUID_ADMIN,
     UUID_USER,
     UUID_ORG,
@@ -430,13 +432,23 @@ class CreateApiTokenRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
+    def test_bad_organization(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
+            response = c.post(
+                "users/me/tokens",
+                headers={"x-csrf-token": TOKEN_USER2_CSRF},
+                json={"name": "my-pretty-token", "organization_uuid": UUID_ORG},
+            )
+            self.assertEqual(response.status_code, 401)
+
     def test_returns_eternal_access_token(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
                 "users/me/tokens",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": "my-pretty-token"},
+                json={"name": "my-pretty-token", "organization_uuid": UUID_ORG},
             )
             self.assertEqual(response.status_code, 201)
             self.assertTrue("access_token" in response.json)
@@ -451,6 +463,8 @@ class CreateApiTokenRoute(unittest.TestCase):
             self.assertTrue("user_claims" in data)
             self.assertTrue("system_role" not in data["user_claims"])
             self.assertTrue("force_pwd_change" not in data["user_claims"])
+            self.assertTrue("organization_uuid" in data["user_claims"])
+            self.assertTrue(data["user_claims"]["organization_uuid"] == UUID_ORG)
             token = api_tokens.get_token(data["jti"])
             self.assertTrue(token is not None)
             self.assertEqual(token["user_uuid"], UUID_USER)
@@ -461,7 +475,7 @@ class CreateApiTokenRoute(unittest.TestCase):
             response = c.post(
                 "users/me/tokens",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"name": "my-pretty-token"},
+                json={"name": "my-pretty-token", "organization_uuid": UUID_ORG},
             )
             self.assertEqual(response.status_code, 201)
             self.assertTrue("access_token" in response.json)
@@ -476,6 +490,8 @@ class CreateApiTokenRoute(unittest.TestCase):
             self.assertTrue("user_claims" in data)
             self.assertTrue("system_role" not in data["user_claims"])
             self.assertTrue("force_pwd_change" not in data["user_claims"])
+            self.assertTrue("organization_uuid" in data["user_claims"])
+            self.assertTrue(data["user_claims"]["organization_uuid"] == UUID_ORG)
             token = api_tokens.get_token(data["jti"])
             self.assertTrue(token is not None)
             self.assertEqual(token["user_uuid"], UUID_ADMIN)
@@ -488,7 +504,7 @@ class RevokeApiTokenRoute(unittest.TestCase):
             response = c.post(
                 "users/me/tokens",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": "my-pretty-token"},
+                json={"name": "my-pretty-token", "organization_uuid": UUID_ORG},
             )
             self.token = response.json["access_token"]
             self.token_jti = get_token_data(self.token)["jti"]
