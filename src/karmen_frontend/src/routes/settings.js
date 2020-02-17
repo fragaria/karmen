@@ -9,6 +9,7 @@ import PrintersTable from "../components/listings/printers-table";
 import UsersTable from "../components/listings/users-table";
 import { getUsers, patchUser, deleteUser } from "../actions/users";
 import { enqueueTask } from "../actions/misc";
+import { setNetworkInterface } from "../actions/preferences";
 import { loadPrinters, deletePrinter } from "../actions/printers";
 
 const Settings = ({
@@ -22,6 +23,8 @@ const Settings = ({
   printersList,
   printersLoaded,
   onPrinterDelete,
+  networkInterface,
+  onNetworkInterfaceChange,
   scanNetwork
 }) => {
   return (
@@ -47,7 +50,11 @@ const Settings = ({
             <br />
             <br />
             <strong>Network scan</strong>
-            <NetworkScan scanNetwork={scanNetwork} />
+            <NetworkScan
+              networkInterface={networkInterface}
+              onNetworkInterfaceChange={onNetworkInterfaceChange}
+              scanNetwork={scanNetwork}
+            />
           </div>
 
           <div className="container">
@@ -78,7 +85,8 @@ export default connect(
     usersLoaded: state.users.listLoaded,
     printersList: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,
-    currentUuid: state.users.me.identity
+    currentUuid: state.users.me.identity,
+    networkInterface: state.preferences.networkInterface
   }),
   dispatch => ({
     loadPrinters: fields => dispatch(loadPrinters(fields)),
@@ -86,6 +94,8 @@ export default connect(
     loadUsers: fields => dispatch(getUsers(fields)),
     onUserChange: (uuid, role) => dispatch(patchUser(uuid, role)),
     onUserDelete: uuid => dispatch(deleteUser(uuid)),
+    onNetworkInterfaceChange: networkInterface =>
+      dispatch(setNetworkInterface(networkInterface)),
     scanNetwork: networkInterface =>
       dispatch(
         enqueueTask("scan_network", { network_interface: networkInterface })
