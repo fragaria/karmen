@@ -174,7 +174,7 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-export const getWebcamSnapshot = (orgUuid, snapshotUrl) => {
+export const getWebcamSnapshot = snapshotUrl => {
   if (!snapshotUrl) {
     return Promise.resolve({ status: 404 });
   }
@@ -183,7 +183,7 @@ export const getWebcamSnapshot = (orgUuid, snapshotUrl) => {
   headers.set("cache-control", "no-cache");
   // TODO test snapshotUrl
   return fetch(
-    `${BASE_URL}/organizations/${orgUuid}/${
+    `${BASE_URL}/${
       snapshotUrl[0] === "/" ? snapshotUrl.substr(1) : snapshotUrl
     }`,
     {

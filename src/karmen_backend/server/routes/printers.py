@@ -45,7 +45,8 @@ def make_printer_response(printer, fields):
     if "webcam" in fields:
         webcam_data = printer_inst.client_info.webcam or {}
         data["webcam"] = {
-            "url": "/printers/%s/webcam-snapshot" % (printer_inst.uuid,),
+            "url": "/organizations/%s/printers/%s/webcam-snapshot"
+            % (printer_inst.organization_uuid, printer_inst.uuid,),
             "flipHorizontal": webcam_data.get("flipHorizontal"),
             "flipVertical": webcam_data.get("flipVertical"),
             "rotate90": webcam_data.get("rotate90"),

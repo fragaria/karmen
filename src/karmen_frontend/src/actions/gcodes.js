@@ -55,13 +55,8 @@ export const loadGcode = createActionThunk(
 
 export const downloadGcode = createActionThunk(
   "GCODE_DOWNLOAD_DETAIL",
-  (data, filename, { dispatch, getState }) => {
-    const { users } = getState();
-    return retryIfUnauthorized(backend.downloadGcode, dispatch)(
-      users.me.activeOrganization.uuid,
-      data,
-      filename
-    );
+  (data, filename, { dispatch }) => {
+    return retryIfUnauthorized(backend.downloadGcode, dispatch)(data, filename);
   }
 );
 

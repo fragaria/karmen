@@ -236,15 +236,15 @@ export const setWebcamRefreshInterval = (uuid, interval) => (
 export const getWebcamSnapshot = createActionThunk(
   "PRINTERS_GET_WEBCAM_SNAPSHOT",
   (uuid, { dispatch, getState }) => {
-    let { users, printers } = getState();
+    let { printers } = getState();
     const printer = printers.printers.find(p => p.uuid === uuid);
     if (!printer || !printer.webcam || !printer.webcam.url) {
       return Promise.resolve({});
     }
-    return retryIfUnauthorized(backend.getWebcamSnapshot, dispatch)(
-      users.me.activeOrganization.uuid,
-      printer.webcam.url
-    ).then(r => {
+    return retryIfUnauthorized(
+      backend.getWebcamSnapshot,
+      dispatch
+    )(printer.webcam.url).then(r => {
       if (r.status === 202 || r.status === 200) {
         let { printers } = getState();
         if (printers.webcamQueue && printers.webcamQueue[uuid]) {

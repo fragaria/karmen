@@ -33,7 +33,8 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
                 response[field] = user_mapping.get(gcode.get("user_uuid"), None)
                 continue
             if field == "data":
-                response["data"] = "/organizations/<org_uuid>/gcodes/%s/data" % (
+                response["data"] = "/organizations/%s/gcodes/%s/data" % (
+                    gcode["organization_uuid"],
                     gcode["id"],
                 )
                 continue
@@ -47,7 +48,7 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcodes_list(org_uuid,):
+def gcodes_list(org_uuid):
     gcode_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
@@ -161,6 +162,7 @@ def gcode_create(org_uuid):
             make_gcode_response(
                 {
                     "id": gcode_id,
+                    "organization_uuid": org_uuid,
                     "user_uuid": get_current_user()["uuid"],
                     "username": get_current_user()["username"],
                     "path": saved["path"],

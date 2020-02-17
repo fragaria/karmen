@@ -109,7 +109,9 @@ export default withRouter(
     state => ({
       userState: state.users.me.currentState,
       username: state.users.me.username,
-      role: state.users.me.activeOrganization.role
+      role:
+        state.users.me.activeOrganization &&
+        state.users.me.activeOrganization.role
     }),
     dispatch => ({
       logout: () => dispatch(clearUserIdentity())

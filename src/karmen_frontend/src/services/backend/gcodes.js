@@ -105,12 +105,9 @@ export const uploadGcode = (orgUuid, path, file) => {
     });
 };
 
-export const downloadGcode = (orgUuid, dataLink, filename) => {
-  // TODO check dataLink on backend
+export const downloadGcode = (dataLink, filename) => {
   return fetch(
-    `${BASE_URL}/organizations/${orgUuid}/${
-      dataLink[0] === "/" ? dataLink.substr(1) : dataLink
-    }`,
+    `${BASE_URL}/${dataLink[0] === "/" ? dataLink.substr(1) : dataLink}`,
     {
       method: "GET",
       headers: getHeaders()
