@@ -59,11 +59,11 @@ ALTER TABLE public.api_tokens
   ADD COLUMN IF NOT EXISTS organization_uuid uuid;
 
 -- migrate
-update public.printers set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid = null;
-update public.settings set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid = null;
-update public.gcodes set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid = null;
-update public.printjobs set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid = null;
-update public.api_tokens set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid = null;
+update public.printers set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid is null;
+update public.settings set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid is null;
+update public.gcodes set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid is null;
+update public.printjobs set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid is null;
+update public.api_tokens set organization_uuid = 'b3060e41-e319-4a9b-8ac4-e0936c75f275' where organization_uuid is null;
 
 DROP FUNCTION IF EXISTS public.migrate_roles();
 CREATE OR REPLACE FUNCTION public.migrate_roles()
