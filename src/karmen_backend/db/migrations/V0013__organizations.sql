@@ -96,4 +96,8 @@ DROP INDEX IF EXISTS public.settings_key_uqc;
 ALTER TABLE public.settings
   ADD CONSTRAINT settings_uq_key_org UNIQUE(organization_uuid, key);
 
+-- drop settings
+DROP TABLE IF EXISTS public.settings;
+
 DROP FUNCTION IF EXISTS public.migrate_roles();
+

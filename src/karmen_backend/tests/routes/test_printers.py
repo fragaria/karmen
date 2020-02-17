@@ -653,7 +653,7 @@ class DeleteRoute(unittest.TestCase):
                 % UUID_ORG2,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     def test_delete_unknown(self):
         with app.test_client() as c:
@@ -776,7 +776,7 @@ class PatchRoute(unittest.TestCase):
                 "/organizations/%s/printers/%s" % (UUID_ORG2, self.uuid),
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     def test_patch_bad_uuid(self):
         with app.test_client() as c:

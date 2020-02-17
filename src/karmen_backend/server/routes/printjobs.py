@@ -137,9 +137,7 @@ def printjobs_list(org_uuid):
             ]
         )
     )
-    uuid_mapping = {
-        u["uuid"]: u["username"] for u in users.get_usernames_for_uuids(uuids)
-    }
+    uuid_mapping = {u["uuid"]: u["username"] for u in users.get_users_by_uuids(uuids)}
     for printjob in printjobs_record_set:
         printjob_list.append(make_printjob_response(printjob, fields, uuid_mapping))
     next_href = "/organizations/%s/printjobs" % org_uuid

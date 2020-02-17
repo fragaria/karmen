@@ -90,11 +90,12 @@ def update_user(**kwargs):
         cursor.close()
 
 
-def get_usernames_for_uuids(uuids):
+def get_users_by_uuids(uuids):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT uuid, username from users where uuid::text = any(%s)", (uuids,)
+            "SELECT uuid, username, system_role, suspended from users where uuid::text = any(%s)",
+            (uuids,),
         )
         data = cursor.fetchall()
         cursor.close()

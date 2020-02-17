@@ -92,9 +92,7 @@ def gcodes_list(org_uuid,):
             ]
         )
     )
-    uuid_mapping = {
-        u["uuid"]: u["username"] for u in users.get_usernames_for_uuids(uuids)
-    }
+    uuid_mapping = {u["uuid"]: u["username"] for u in users.get_users_by_uuids(uuids)}
     for gcode in gcodes_record_set:
         gcode_list.append(make_gcode_response(gcode, fields, uuid_mapping))
 

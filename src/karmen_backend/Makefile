@@ -11,7 +11,7 @@ run-docker-test-postgres:
 		-p 54350:5432 \
 		postgres:11 &
 	while ! pg_isready --port 54350 --host localhost > /dev/null 2>&1; do echo 'Waiting for postgres...'; sleep 1; done
-	ENV=develop POSTGRES_PORT=54350 POSTGRES_HOST=localhost sh ./scripts/migrate.sh
+	ENV=test POSTGRES_PORT=54350 POSTGRES_HOST=localhost sh ./scripts/migrate.sh
 
 run-docker-test-redis:
 	@-docker stop karmen_redis_test
