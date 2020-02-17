@@ -32,7 +32,7 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return null;
-}
+};
 
 class App extends React.Component {
   constructor(props) {
@@ -41,7 +41,7 @@ class App extends React.Component {
       initialized: false,
       tokenTimer: null
     };
-    this.myRef = React.createRef()
+    this.myRef = React.createRef();
   }
 
   componentDidMount() {
