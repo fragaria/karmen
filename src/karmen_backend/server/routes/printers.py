@@ -246,10 +246,11 @@ def printer_patch(org_uuid, uuid):
                 if k in printer_props
             }
         )
+    printer_inst.name = name
     printers.update_printer(
         uuid=printer_inst.uuid,
         organization_uuid=printer_inst.organization_uuid,
-        name=name,
+        name=printer_inst.name,
         hostname=printer_inst.hostname,
         ip=printer_inst.ip,
         port=printer_inst.port,

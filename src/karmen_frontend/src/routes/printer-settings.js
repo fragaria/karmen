@@ -19,7 +19,6 @@ class PrinterSettings extends React.Component {
 
   changePrinter(newParameters) {
     const { patchPrinter, printer } = this.props;
-    // TODO reflect this optimistically into redux
     return patchPrinter(newParameters).then(r => {
       switch (r.status) {
         case 200:
