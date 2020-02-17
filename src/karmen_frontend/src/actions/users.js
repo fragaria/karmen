@@ -33,11 +33,12 @@ export const loadUserFromToken = token => dispatch => {
     loadUserData({
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
-      activeOrganization: {
-        role: "user",
-        organization_uuid:
-          decoded.user_claims && decoded.user_claims.organization_uuid
-      },
+      organizations: [
+        {
+          role: "user",
+          uuid: decoded.user_claims && decoded.user_claims.organization_uuid
+        }
+      ],
       systemRole: "user",
       hasFreshToken: decoded.fresh,
       accessTokenExpiresOn: undefined
