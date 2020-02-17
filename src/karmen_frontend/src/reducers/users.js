@@ -28,12 +28,8 @@ export default (
       organizations: {},
       activeOrganization: null
     },
-    list: {
-      pages: [],
-      orderBy: "+username",
-      filter: "",
-      limit: 10
-    }
+    list: [],
+    listLoaded: false
   },
   action
 ) => {
@@ -134,80 +130,46 @@ export default (
           })
         })
       });
-    case "USERS_LOAD_PAGE_SUCCEEDED":
+    case "USERS_LOAD_SUCCEEDED":
       if (action.payload.status !== 200) {
         return state;
       }
-      let currentPages = state.list.pages;
-      // continue only with the same conditions
-      if (
-        state.list.filter === action.payload.filter &&
-        state.list.orderBy === action.payload.orderBy &&
-        state.list.limit === action.payload.limit
-      ) {
-        // TODO possibly switch to findIndex
-        const origPage = currentPages.find(
-          p => p.startWith === action.payload.startWith
-        );
-        if (!origPage && action.payload.data) {
-          currentPages.push({
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          });
-        }
-        if (origPage && action.payload.data) {
-          const origIndex = currentPages.indexOf(origPage);
-          currentPages[origIndex] = {
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          };
-        }
-        // if any option changes, reset pages
-      } else {
-        currentPages = [
-          {
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          }
-        ];
+      if (!action.payload.data || !action.payload.data.items) {
+        return state;
       }
       return Object.assign({}, state, {
-        list: Object.assign({}, state.list, {
-          pages: [].concat(currentPages),
-          orderBy: action.payload.orderBy,
-          filter: action.payload.filter,
-          limit: action.payload.limit
-        })
+        list: [].concat(action.payload.data.items),
+        listLoaded: true
       });
     case "USERS_EDIT_SUCCEEDED":
-      const pages = state.list.pages;
       if (action.payload.data) {
-        // eslint-disable-next-line no-unused-vars
-        for (let page of pages) {
-          if (page.data && page.data.items) {
-            const user = page.data.items.find(
-              u => u.uuid === action.payload.data.uuid
-            );
-            if (user) {
-              user.suspended = action.payload.data.suspended;
-              user.systemRole = action.payload.data.system_role;
-            }
-          }
+        const userIndex = state.list.findIndex(
+          u => u.uuid === action.payload.data.uuid
+        );
+        if (userIndex > -1) {
+          state.list[userIndex].role = action.payload.data.role;
         }
       }
       return Object.assign({}, state, {
-        list: Object.assign({}, state.list, {
-          pages: [].concat(pages)
-        })
+        list: [].concat(state.list)
       });
-    case "USERS_CLEAR_PAGES":
-      return Object.assign({}, state, {
-        list: {
-          pages: [],
-          orderBy: "+username",
-          filter: "",
-          limit: 10
+    case "USERS_DELETE_SUCCEEDED":
+      if (action.payload.data) {
+        const userIndex = state.list.findIndex(
+          u => u.uuid === action.payload.data.uuid
+        );
+        if (userIndex > -1) {
+          state.list = state.list
+            .slice(0, userIndex)
+            .concat(state.list.slice(userIndex + 1));
         }
+      }
+      return Object.assign({}, state, {
+        list: [].concat(state.list)
+      });
+    case "USERS_CLEAR":
+      return Object.assign({}, state, {
+        list: []
       });
     default:
       return state;

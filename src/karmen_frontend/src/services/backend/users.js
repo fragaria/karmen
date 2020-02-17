@@ -2,22 +2,10 @@ import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const getUsers = (
-  orgUuid,
-  startWith = null,
-  orderBy = null,
-  filter = null,
-  limit = 15
-) => {
-  let uri = `${BASE_URL}/organizations/${orgUuid}/users?limit=${limit}`;
-  if (startWith) {
-    uri += `&start_with=${encodeURIComponent(startWith)}`;
-  }
-  if (orderBy) {
-    uri += `&order_by=${encodeURIComponent(orderBy)}`;
-  }
-  if (filter) {
-    uri += `&filter=username:${encodeURIComponent(filter)}`;
+export const getUsers = (orgUuid, fields = []) => {
+  let uri = `${BASE_URL}/organizations/${orgUuid}/users`;
+  if (fields && fields.length) {
+    uri += `?fields=${fields.join(",")}`;
   }
   return fetch(uri, {
     headers: getHeaders()
@@ -99,5 +87,22 @@ export const patchUser = (orgUuid, uuid, role) => {
     .catch(e => {
       console.error(`Cannot patch a user: ${e}`);
       return {};
+    });
+};
+
+export const deleteUser = (orgUuid, uuid) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/users/${uuid}`, {
+    method: "DELETE",
+    headers: getHeaders()
+  })
+    .then(response => {
+      if (response.status !== 204) {
+        console.error(`Cannot delete user: ${response.status}`);
+      }
+      return { status: response.status, data: { uuid } };
+    })
+    .catch(e => {
+      console.error(`Cannot delete a user: ${e}`);
+      return { status: 500 };
     });
 };

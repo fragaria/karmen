@@ -149,36 +149,23 @@ export const deleteUserApiToken = createActionThunk(
   }
 );
 
-export const clearUsersPages = () => dispatch => {
+export const clearUsers = () => dispatch => {
   return dispatch({
-    type: "USERS_CLEAR_PAGES"
+    type: "USERS_CLEAR"
   });
 };
 
-export const getUsersPage = createActionThunk(
-  "USERS_LOAD_PAGE",
-  (
-    startWith = null,
-    orderBy = null,
-    filter = null,
-    limit = 15,
-    { dispatch, getState }
-  ) => {
+export const getUsers = createActionThunk(
+  "USERS_LOAD",
+  (fields = [], { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getUsers, dispatch)(
       users.me.activeOrganization.uuid,
-      startWith,
-      orderBy,
-      filter,
-      limit
+      fields
     ).then(r => {
       return {
         status: r.status,
-        data: r.data,
-        startWith,
-        orderBy,
-        filter,
-        limit
+        data: r.data
       };
     });
   }
@@ -200,13 +187,23 @@ export const addUser = createActionThunk(
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (uuid, role, suspended, { dispatch, getState }) => {
+  (uuid, role, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.patchUser, dispatch)(
       users.me.activeOrganization.uuid,
       uuid,
-      role,
-      suspended
+      role
+    );
+  }
+);
+
+export const deleteUser = createActionThunk(
+  "USERS_DELETE",
+  (uuid, { dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(backend.deleteUser, dispatch)(
+      users.me.activeOrganization.uuid,
+      uuid
     );
   }
 );
