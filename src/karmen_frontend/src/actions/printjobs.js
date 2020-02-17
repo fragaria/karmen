@@ -24,7 +24,7 @@ export const getJobsPage = createActionThunk(
   ) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       startWith,
       orderBy,
       printerUuid,
@@ -48,7 +48,7 @@ export const addPrintJob = createActionThunk(
   (id, printer, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.printGcode, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       id,
       printer
     );

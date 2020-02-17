@@ -3,7 +3,7 @@ import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { addPrinter } from "../actions/printers";
 import { FormInputs } from "../components/forms/form-utils";
-import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import BusyButton from "../components/utils/busy-button";
 
 class AddPrinter extends React.Component {
@@ -120,7 +120,7 @@ class AddPrinter extends React.Component {
       return <Redirect to="/" />;
     }
     return (
-      <RoleBasedGateway requiredRole="admin">
+      <OrgRoleBasedGateway requiredRole="admin">
         <div className="content">
           <div className="container">
             <h1 className="main-title text-center">Add a new printer</h1>
@@ -159,7 +159,7 @@ class AddPrinter extends React.Component {
             </form>
           </div>
         </div>
-      </RoleBasedGateway>
+      </OrgRoleBasedGateway>
     );
   }
 }

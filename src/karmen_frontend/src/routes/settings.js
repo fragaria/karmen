@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import NetworkScan from "../components/forms/network-scan";
 import Listing from "../components/listings/wrapper";
@@ -184,7 +184,7 @@ const Settings = ({
   scanNetwork
 }) => {
   return (
-    <RoleBasedGateway requiredRole="admin">
+    <OrgRoleBasedGateway requiredRole="admin">
       <FreshTokenGateway>
         <div className="content user-list">
           <div className="container">
@@ -236,7 +236,7 @@ const Settings = ({
           />
         </div>
       </FreshTokenGateway>
-    </RoleBasedGateway>
+    </OrgRoleBasedGateway>
   );
 };
 

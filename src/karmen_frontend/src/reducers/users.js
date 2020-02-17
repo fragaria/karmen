@@ -10,8 +10,7 @@ const getUserDataFromApiResponse = data => {
     hasFreshToken: data.fresh,
     accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
     organizations: data.organizations,
-    activeOrganization:
-      data.organizations && data.organizations[0] && data.organizations[0].uuid
+    activeOrganization: data.organizations && data.organizations[0]
   };
 };
 

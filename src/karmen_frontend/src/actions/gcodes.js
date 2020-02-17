@@ -21,7 +21,7 @@ export const getGcodesPage = createActionThunk(
   ) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getGcodes, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       startWith,
       orderBy,
       filter,
@@ -46,7 +46,7 @@ export const loadGcode = createActionThunk(
   (id, fields = [], { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getGcode, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       id,
       fields
     );
@@ -58,7 +58,7 @@ export const downloadGcode = createActionThunk(
   (data, filename, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.downloadGcode, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       data,
       filename
     );
@@ -70,7 +70,7 @@ export const deleteGcode = createActionThunk(
   (id, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.deleteGcode, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       id
     ).then(r => {
       if (r.status !== 204) {
@@ -86,7 +86,7 @@ export const uploadGcode = createActionThunk(
   (path, toUpload, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.uploadGcode, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       path,
       toUpload
     );

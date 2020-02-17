@@ -33,6 +33,11 @@ export const loadUserFromToken = token => dispatch => {
     loadUserData({
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
+      activeOrganization: {
+        role: "user",
+        organization_uuid:
+          decoded.user_claims && decoded.user_claims.organization_uuid
+      },
       systemRole: "user",
       hasFreshToken: decoded.fresh,
       accessTokenExpiresOn: undefined
@@ -114,7 +119,7 @@ export const loadUserApiTokens = createActionThunk(
     return retryIfUnauthorized(
       backend.loadApiTokens,
       dispatch
-    )(users.me.activeOrganization);
+    )(users.me.activeOrganization.uuid);
   }
 );
 
@@ -123,7 +128,7 @@ export const addUserApiToken = createActionThunk(
   (name, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.addApiToken, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       name
     );
   }
@@ -161,7 +166,7 @@ export const getUsersPage = createActionThunk(
   ) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getUsers, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       startWith,
       orderBy,
       filter,
@@ -181,18 +186,12 @@ export const getUsersPage = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (
-    username,
-    systemRole,
-    password,
-    passwordConfirmation,
-    { dispatch, getState }
-  ) => {
+  (username, role, password, passwordConfirmation, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.addUser, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       username,
-      systemRole,
+      role,
       password,
       passwordConfirmation
     );
@@ -201,12 +200,12 @@ export const addUser = createActionThunk(
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (uuid, systemRole, suspended, { dispatch, getState }) => {
+  (uuid, role, suspended, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.patchUser, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       uuid,
-      systemRole,
+      role,
       suspended
     );
   }

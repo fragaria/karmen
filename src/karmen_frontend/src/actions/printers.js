@@ -106,7 +106,7 @@ export const loadPrinters = createActionThunk(
   (fields = [], { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getPrinters, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       fields
     );
   }
@@ -117,7 +117,7 @@ export const loadPrinter = createActionThunk(
   (uuid, fields = [], { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.getPrinter, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       uuid,
       fields
     );
@@ -129,7 +129,7 @@ export const addPrinter = createActionThunk(
   (protocol, hostname, ip, port, name, apiKey, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.addPrinter, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       protocol,
       hostname,
       ip,
@@ -145,7 +145,7 @@ export const patchPrinter = createActionThunk(
   (uuid, data, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.patchPrinter, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       uuid,
       data
     );
@@ -157,7 +157,7 @@ export const deletePrinter = createActionThunk(
   (uuid, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.deletePrinter, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       uuid
     ).then(r => {
       if (r.status !== 204) {
@@ -173,7 +173,7 @@ export const setPrinterConnection = createActionThunk(
   (uuid, state, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.setPrinterConnection, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       uuid,
       state
     );
@@ -185,7 +185,7 @@ export const changeCurrentJob = createActionThunk(
   (uuid, action, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.changeCurrentJob, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       uuid,
       action
     );
@@ -242,7 +242,7 @@ export const getWebcamSnapshot = createActionThunk(
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getWebcamSnapshot, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       printer.webcam.url
     ).then(r => {
       if (r.status === 202 || r.status === 200) {

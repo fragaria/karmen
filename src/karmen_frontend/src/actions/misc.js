@@ -7,7 +7,7 @@ export const enqueueTask = createActionThunk(
   (task, opts, { dispatch, getState }) => {
     const { users } = getState();
     return retryIfUnauthorized(backend.enqueueTask, dispatch)(
-      users.me.activeOrganization,
+      users.me.activeOrganization.uuid,
       task,
       opts
     ).then(r => {
