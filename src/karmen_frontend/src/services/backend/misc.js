@@ -2,12 +2,13 @@ import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const enqueueTask = task => {
-  return fetch(`${BASE_URL}/tasks`, {
+export const enqueueTask = (orgUuid, task, opts) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/tasks`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
-      task: task
+      task,
+      ...opts
     })
   })
     .then(response => {

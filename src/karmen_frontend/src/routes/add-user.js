@@ -20,7 +20,7 @@ class AddUser extends React.Component {
         required: true,
         error: null
       },
-      system_role: {
+      role: {
         name: "Role",
         val: "user",
         type: "select",
@@ -85,7 +85,7 @@ class AddUser extends React.Component {
     if (!hasErrors) {
       return createUser(
         form.username.val,
-        form.system_role.val,
+        form.role.val,
         form.password.val,
         form.password_confirmation.val
       ).then(r => {
@@ -168,6 +168,6 @@ class AddUser extends React.Component {
 }
 
 export default connect(null, dispatch => ({
-  createUser: (username, system_role, password, passwordConfirmation) =>
-    dispatch(addUser(username, system_role, password, passwordConfirmation))
+  createUser: (username, role, password, passwordConfirmation) =>
+    dispatch(addUser(username, role, password, passwordConfirmation))
 }))(AddUser);

@@ -1,16 +1,13 @@
 import React from "react";
-
-import Loader from "../utils/loader";
 import BusyButton from "../utils/busy-button";
 import { FormInputs } from "./form-utils";
 
 class NetworkScan extends React.Component {
   state = {
-    init: true,
     settings: {
       network_interface: {
         name: "On which network interface should we be looking for printers?",
-        val: "",
+        val: "wlan0", // TODO move to redux preferences
         type: "text",
         required: true,
         error: null
@@ -23,28 +20,6 @@ class NetworkScan extends React.Component {
   constructor(props) {
     super(props);
     this.startNetworkScan = this.startNetworkScan.bind(this);
-    this.loadNetworkScan = this.loadNetworkScan.bind(this);
-  }
-
-  loadNetworkScan() {
-    const { settings } = this.state;
-    const { getSettings } = this.props;
-    getSettings().then(r => {
-      // eslint-disable-next-line no-unused-vars
-      for (let option of r.data) {
-        if (settings[option.key]) {
-          settings[option.key].val = option.val;
-        }
-      }
-      this.setState({
-        settings,
-        init: false
-      });
-    });
-  }
-
-  componentDidMount() {
-    this.loadNetworkScan();
   }
 
   startNetworkScan(e) {
@@ -54,7 +29,7 @@ class NetworkScan extends React.Component {
       messageOk: false
     });
     const { settings } = this.state;
-    const { changeSettings, enqueueTask } = this.props;
+    const { scanNetwork } = this.props;
     let hasErrors = false;
     const updatedSettings = Object.assign({}, settings);
     const changedSettings = [];
@@ -77,25 +52,15 @@ class NetworkScan extends React.Component {
       settings: updatedSettings
     });
     if (!hasErrors) {
-      return changeSettings(changedSettings).then(r => {
+      return scanNetwork(settings.network_interface.val).then(r => {
         switch (r.status) {
-          case 201:
-            return enqueueTask("scan_network").then(r => {
-              switch (r.status) {
-                case 202:
-                  this.setState({
-                    message:
-                      "Network scan initiated, the printers should start popping up at any moment",
-                    messageOk: true
-                  });
-                  break;
-                case 400:
-                default:
-                  this.setState({
-                    message: "Cannot scan the network, check server logs"
-                  });
-              }
+          case 202:
+            this.setState({
+              message:
+                "Network scan initiated, the printers should start popping up at any moment",
+              messageOk: true
             });
+            break;
           case 400:
           default:
             this.setState({
@@ -107,14 +72,7 @@ class NetworkScan extends React.Component {
   }
 
   render() {
-    const { init, settings, message, messageOk } = this.state;
-    if (init) {
-      return (
-        <div>
-          <Loader />
-        </div>
-      );
-    }
+    const { settings, message, messageOk } = this.state;
     const updateValue = (name, value) => {
       const { settings } = this.state;
       this.setState({

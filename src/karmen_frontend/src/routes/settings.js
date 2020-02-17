@@ -9,14 +9,9 @@ import Listing from "../components/listings/wrapper";
 import PrintersTable from "../components/listings/printers-table";
 import CtaDropdown from "../components/listings/cta-dropdown";
 import { useMyModal } from "../components/utils/modal";
-import {
-  getUsersPage,
-  clearUsersPages,
-  patchUser,
-  retryIfUnauthorized
-} from "../actions/users";
+import { getUsersPage, clearUsersPages, patchUser } from "../actions/users";
+import { enqueueTask } from "../actions/misc";
 import { loadPrinters, deletePrinter } from "../actions/printers";
-import { getSettings, changeSettings, enqueueTask } from "../services/backend";
 import formatters from "../services/formatters";
 
 const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
@@ -26,17 +21,16 @@ const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
         <modal.Modal>
           <h1 className="modal-title text-center">Change user role</h1>
           <h3 className="text-center">
-            Do you really want to{" "}
-            {user.system_role === "admin" ? "demote" : "promote"}{" "}
+            Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
             <strong>{user.username}</strong> to{" "}
-            {user.system_role === "admin" ? "user" : "admin"}?
+            {user.role === "admin" ? "user" : "admin"}?
           </h3>
 
           <div className="cta-box text-center">
             <button
               className="btn"
               onClick={() => {
-                const newRole = user.system_role === "user" ? "admin" : "user";
+                const newRole = user.role === "user" ? "admin" : "user";
                 onUserChange(user.uuid, newRole, user.suspended).then(() => {
                   modal.closeModal();
                 });
@@ -97,11 +91,9 @@ const ToggleUserSuspendModal = ({ modal, user, onUserChange }) => {
             <button
               className="btn"
               onClick={() => {
-                onUserChange(user.uuid, user.system_role, !user.suspended).then(
-                  () => {
-                    modal.closeModal();
-                  }
-                );
+                onUserChange(user.uuid, user.role, !user.suspended).then(() => {
+                  modal.closeModal();
+                });
               }}
             >
               Yes, change it
@@ -128,7 +120,7 @@ const UsersTableRow = ({ currentUuid, user, onUserChange }) => {
         <span className="list-item-title">{user.username}</span>
         <span className="list-item-subtitle">
           <span>is </span>
-          <strong>{user.system_role} </strong>
+          <strong>{user.role} </strong>
           <span>and </span>
           {formatters.bool(user.suspended) ? (
             <strong className="text-secondary">disabled</strong>
@@ -189,9 +181,7 @@ const Settings = ({
   printersList,
   printersLoaded,
   onPrinterDelete,
-  getSettings,
-  changeSettings,
-  enqueueTask
+  scanNetwork
 }) => {
   return (
     <RoleBasedGateway requiredRole="admin">
@@ -216,11 +206,7 @@ const Settings = ({
             <br />
             <br />
             <strong>Network scan</strong>
-            <NetworkScan
-              getSettings={getSettings}
-              changeSettings={changeSettings}
-              enqueueTask={enqueueTask}
-            />
+            <NetworkScan scanNetwork={scanNetwork} />
           </div>
 
           <div className="container">
@@ -269,10 +255,9 @@ export default connect(
     clearUsersPages: () => dispatch(clearUsersPages()),
     onUserChange: (uuid, role, suspended) =>
       dispatch(patchUser(uuid, role, suspended)),
-    // TODO move this to actions
-    getSettings: () => retryIfUnauthorized(getSettings, dispatch)(),
-    changeSettings: settings =>
-      retryIfUnauthorized(changeSettings, dispatch)(settings),
-    enqueueTask: task => retryIfUnauthorized(enqueueTask, dispatch)(task)
+    scanNetwork: networkInterface =>
+      dispatch(
+        enqueueTask("scan_network", { network_interface: networkInterface })
+      )
   })
 )(Settings);

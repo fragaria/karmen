@@ -2,8 +2,8 @@ import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const getPrinters = (fields = []) => {
-  let uri = `${BASE_URL}/printers`;
+export const getPrinters = (orgUuid, fields = []) => {
+  let uri = `${BASE_URL}/organizations/${orgUuid}/printers`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -24,8 +24,8 @@ export const getPrinters = (fields = []) => {
     });
 };
 
-export const getPrinter = (uuid, fields = []) => {
-  let uri = `${BASE_URL}/printers/${uuid}`;
+export const getPrinter = (orgUuid, uuid, fields = []) => {
+  let uri = `${BASE_URL}/organizations/${orgUuid}/printers/${uuid}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -46,8 +46,16 @@ export const getPrinter = (uuid, fields = []) => {
     });
 };
 
-export const addPrinter = (protocol, hostname, ip, port, name, apiKey) => {
-  return fetch(`${BASE_URL}/printers`, {
+export const addPrinter = (
+  orgUuid,
+  protocol,
+  hostname,
+  ip,
+  port,
+  name,
+  apiKey
+) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
@@ -77,8 +85,8 @@ export const addPrinter = (protocol, hostname, ip, port, name, apiKey) => {
     });
 };
 
-export const patchPrinter = (uuid, data) => {
-  return fetch(`${BASE_URL}/printers/${uuid}`, {
+export const patchPrinter = (orgUuid, uuid, data) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers/${uuid}`, {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify(data)
@@ -97,12 +105,15 @@ export const patchPrinter = (uuid, data) => {
     });
 };
 
-export const setPrinterConnection = (uuid, state) => {
-  return fetch(`${BASE_URL}/printers/${uuid}/connection`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({ state: state })
-  })
+export const setPrinterConnection = (orgUuid, uuid, state) => {
+  return fetch(
+    `${BASE_URL}/organizations/${orgUuid}/printers/${uuid}/connection`,
+    {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ state: state })
+    }
+  )
     .then(response => {
       if (response.status !== 204) {
         console.error(`Cannot connect a printer: ${response.status}`);
@@ -115,8 +126,8 @@ export const setPrinterConnection = (uuid, state) => {
     });
 };
 
-export const deletePrinter = uuid => {
-  return fetch(`${BASE_URL}/printers/${uuid}`, {
+export const deletePrinter = (orgUuid, uuid) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers/${uuid}`, {
     method: "DELETE",
     headers: getHeaders()
   })
@@ -132,14 +143,17 @@ export const deletePrinter = uuid => {
     });
 };
 
-export const changeCurrentJob = (uuid, action) => {
-  return fetch(`${BASE_URL}/printers/${uuid}/current-job`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({
-      action: action
-    })
-  })
+export const changeCurrentJob = (orgUuid, uuid, action) => {
+  return fetch(
+    `${BASE_URL}/organizations/${orgUuid}/printers/${uuid}/current-job`,
+    {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({
+        action: action
+      })
+    }
+  )
     .then(response => {
       if (response.status !== 204) {
         console.error(`Cannot change current job: ${response.status}`);
@@ -160,15 +174,16 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-export const getWebcamSnapshot = snapshotUrl => {
+export const getWebcamSnapshot = (orgUuid, snapshotUrl) => {
   if (!snapshotUrl) {
     return Promise.resolve({ status: 404 });
   }
   let headers = getHeaders();
   headers.set("pragma", "no-cache");
   headers.set("cache-control", "no-cache");
+  // TODO test snapshotUrl
   return fetch(
-    `${BASE_URL}/${
+    `${BASE_URL}/organizations/${orgUuid}/${
       snapshotUrl[0] === "/" ? snapshotUrl.substr(1) : snapshotUrl
     }`,
     {

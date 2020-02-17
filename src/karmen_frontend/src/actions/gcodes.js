@@ -17,9 +17,11 @@ export const getGcodesPage = createActionThunk(
     filter = null,
     limit = 15,
     fields = [],
-    { dispatch }
+    { dispatch, getState }
   ) => {
+    const { users } = getState();
     return retryIfUnauthorized(backend.getGcodes, dispatch)(
+      users.me.activeOrganization,
       startWith,
       orderBy,
       filter,
@@ -41,25 +43,36 @@ export const getGcodesPage = createActionThunk(
 
 export const loadGcode = createActionThunk(
   "GCODE_LOAD_DETAIL",
-  (id, fields = [], { dispatch }) => {
-    return retryIfUnauthorized(backend.getGcode, dispatch)(id, fields);
+  (id, fields = [], { dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(backend.getGcode, dispatch)(
+      users.me.activeOrganization,
+      id,
+      fields
+    );
   }
 );
 
 export const downloadGcode = createActionThunk(
   "GCODE_DOWNLOAD_DETAIL",
-  (data, filename, { dispatch }) => {
-    return retryIfUnauthorized(backend.downloadGcode, dispatch)(data, filename);
+  (data, filename, { dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(backend.downloadGcode, dispatch)(
+      users.me.activeOrganization,
+      data,
+      filename
+    );
   }
 );
 
 export const deleteGcode = createActionThunk(
   "GCODES_DELETE",
-  (id, { dispatch }) => {
-    return retryIfUnauthorized(
-      backend.deleteGcode,
-      dispatch
-    )(id).then(r => {
+  (id, { dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(backend.deleteGcode, dispatch)(
+      users.me.activeOrganization,
+      id
+    ).then(r => {
       if (r.status !== 204) {
         r.data.id = null;
       }
@@ -70,7 +83,12 @@ export const deleteGcode = createActionThunk(
 
 export const uploadGcode = createActionThunk(
   "GCODES_UPLOAD",
-  (path, toUpload, { dispatch }) => {
-    return retryIfUnauthorized(backend.uploadGcode, dispatch)(path, toUpload);
+  (path, toUpload, { dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(backend.uploadGcode, dispatch)(
+      users.me.activeOrganization,
+      path,
+      toUpload
+    );
   }
 );

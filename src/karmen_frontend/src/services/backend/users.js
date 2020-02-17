@@ -3,12 +3,13 @@ import { getHeaders } from "./utils";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getUsers = (
+  orgUuid,
   startWith = null,
   orderBy = null,
   filter = null,
   limit = 15
 ) => {
-  let uri = `${BASE_URL}/users?limit=${limit}`;
+  let uri = `${BASE_URL}/organizations/${orgUuid}/users?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${encodeURIComponent(startWith)}`;
   }
@@ -36,17 +37,18 @@ export const getUsers = (
 };
 
 export const addUser = (
+  orgUuid,
   username,
-  systemRole,
+  role,
   password,
   passwordConfirmation
 ) => {
-  return fetch(`${BASE_URL}/users`, {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/users`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
       username,
-      system_role: systemRole,
+      role: role,
       password,
       password_confirmation: passwordConfirmation
     })
@@ -78,13 +80,12 @@ export const addUser = (
     });
 };
 
-export const patchUser = (uuid, systemRole, suspended) => {
-  return fetch(`${BASE_URL}/users/${uuid}`, {
+export const patchUser = (orgUuid, uuid, role) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/users/${uuid}`, {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify({
-      system_role: systemRole,
-      suspended
+      role: role
     })
   })
     .then(response => {

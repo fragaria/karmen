@@ -109,19 +109,33 @@ export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
 
 export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
-  ({ dispatch }) => {
-    return retryIfUnauthorized(backend.loadApiTokens, dispatch)();
+  ({ dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(
+      backend.loadApiTokens,
+      dispatch
+    )(users.me.activeOrganization);
   }
 );
 
-export const addUserApiToken = createActionThunk("USER_ADD_API_TOKEN", name => {
-  return backend.addApiToken(name);
-});
+export const addUserApiToken = createActionThunk(
+  "USER_ADD_API_TOKEN",
+  (name, { dispatch, getState }) => {
+    const { users } = getState();
+    return retryIfUnauthorized(backend.addApiToken, dispatch)(
+      users.me.activeOrganization,
+      name
+    );
+  }
+);
 
 export const deleteUserApiToken = createActionThunk(
   "USER_DELETE_API_TOKEN",
-  jti => {
-    return backend.deleteApiToken(jti).then(status => {
+  (jti, { dispatch }) => {
+    return retryIfUnauthorized(
+      backend.deleteApiToken,
+      dispatch
+    )(jti).then(status => {
       if (status !== 204) {
         jti = null;
       }
@@ -143,9 +157,11 @@ export const getUsersPage = createActionThunk(
     orderBy = null,
     filter = null,
     limit = 15,
-    { dispatch }
+    { dispatch, getState }
   ) => {
+    const { users } = getState();
     return retryIfUnauthorized(backend.getUsers, dispatch)(
+      users.me.activeOrganization,
       startWith,
       orderBy,
       filter,
@@ -165,8 +181,16 @@ export const getUsersPage = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (username, systemRole, password, passwordConfirmation, { dispatch }) => {
+  (
+    username,
+    systemRole,
+    password,
+    passwordConfirmation,
+    { dispatch, getState }
+  ) => {
+    const { users } = getState();
     return retryIfUnauthorized(backend.addUser, dispatch)(
+      users.me.activeOrganization,
       username,
       systemRole,
       password,
@@ -177,8 +201,10 @@ export const addUser = createActionThunk(
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (uuid, systemRole, suspended, { dispatch }) => {
+  (uuid, systemRole, suspended, { dispatch, getState }) => {
+    const { users } = getState();
     return retryIfUnauthorized(backend.patchUser, dispatch)(
+      users.me.activeOrganization,
       uuid,
       systemRole,
       suspended

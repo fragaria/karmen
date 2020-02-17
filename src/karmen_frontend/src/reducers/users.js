@@ -8,7 +8,10 @@ const getUserDataFromApiResponse = data => {
     username: data.username,
     systemRole: data.system_role,
     hasFreshToken: data.fresh,
-    accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined
+    accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
+    organizations: data.organizations,
+    activeOrganization:
+      data.organizations && data.organizations[0] && data.organizations[0].uuid
   };
 };
 
@@ -22,7 +25,9 @@ export default (
       systemRole: null,
       apiTokens: [],
       apiTokensLoaded: false,
-      accessTokenExpiresOn: null
+      accessTokenExpiresOn: null,
+      organizations: {},
+      activeOrganization: null
     },
     list: {
       pages: [],
