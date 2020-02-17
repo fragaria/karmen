@@ -118,6 +118,7 @@ class PrinterList extends React.Component {
                       isPrinting={
                         printer.status && printer.status.state === "Printing"
                       }
+                      allowFullscreen={false}
                       image={printer.image}
                       setWebcamRefreshInterval={interval =>
                         setWebcamRefreshInterval(printer.uuid, interval)

@@ -1,7 +1,7 @@
 import React from "react";
 import useModal from "use-react-modal";
 
-const WebcamModal = ({ classNames, source, url }) => {
+const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
     background: "rgba(0, 0, 0, .95)"
   });
@@ -12,7 +12,11 @@ const WebcamModal = ({ classNames, source, url }) => {
         className={classNames.join(" ")}
         alt={`Current state from ${url}`}
         src={source}
-        onClick={openModal}
+        onClick={e => {
+          if (allowFullscreen !== false) {
+            openModal(e);
+          }
+        }}
       />
 
       {isOpen && (
@@ -63,7 +67,14 @@ class WebcamStream extends React.Component {
   }
 
   render() {
-    const { url, image, flipHorizontal, flipVertical, rotate90 } = this.props;
+    const {
+      url,
+      image,
+      flipHorizontal,
+      flipVertical,
+      rotate90,
+      allowFullscreen
+    } = this.props;
     let klass = [];
     if (flipHorizontal) {
       klass.push("flip-horizontal");
@@ -80,7 +91,12 @@ class WebcamStream extends React.Component {
       <>
         <div className={`webcam-stream ${image ? "" : "unavailable"}`}>
           {image ? (
-            <WebcamModal classNames={klass} source={image} url={url} />
+            <WebcamModal
+              classNames={klass}
+              source={image}
+              url={url}
+              allowFullscreen={allowFullscreen}
+            />
           ) : (
             <div>Stream unavailable</div>
           )}
