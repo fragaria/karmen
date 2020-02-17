@@ -9,14 +9,14 @@ export const retryIfUnauthorized = (func, dispatch) => {
     return func(...args).then(r => {
       if (r.status === 401) {
         if (!dispatch) {
-          return Promise.reject();
+          return Promise.resolve({});
         }
         return dispatch(refreshToken()).then(r => {
           if (r.status === 200) {
             return func(...args);
           } else {
             dispatch(clearUserIdentity());
-            return Promise.reject();
+            return Promise.resolve({});
           }
         });
       }
@@ -117,6 +117,9 @@ export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
   ({ dispatch, getState }) => {
     const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(
       backend.loadApiTokens,
       dispatch
@@ -128,6 +131,9 @@ export const addUserApiToken = createActionThunk(
   "USER_ADD_API_TOKEN",
   (name, { dispatch, getState }) => {
     const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.addApiToken, dispatch)(
       users.me.activeOrganization.uuid,
       name
@@ -160,6 +166,9 @@ export const getUsers = createActionThunk(
   "USERS_LOAD",
   (fields = [], { dispatch, getState }) => {
     const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.getUsers, dispatch)(
       users.me.activeOrganization.uuid,
       fields
@@ -176,6 +185,9 @@ export const addUser = createActionThunk(
   "USERS_ADD",
   (username, role, password, passwordConfirmation, { dispatch, getState }) => {
     const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.addUser, dispatch)(
       users.me.activeOrganization.uuid,
       username,
@@ -190,6 +202,9 @@ export const patchUser = createActionThunk(
   "USERS_EDIT",
   (uuid, role, { dispatch, getState }) => {
     const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.patchUser, dispatch)(
       users.me.activeOrganization.uuid,
       uuid,
@@ -202,6 +217,9 @@ export const deleteUser = createActionThunk(
   "USERS_DELETE",
   (uuid, { dispatch, getState }) => {
     const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.deleteUser, dispatch)(
       users.me.activeOrganization.uuid,
       uuid
