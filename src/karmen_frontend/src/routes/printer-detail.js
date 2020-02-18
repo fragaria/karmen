@@ -159,7 +159,7 @@ class PrintJobRow extends React.Component {
           {gcode_data && gcode_data.available ? (
             <Link
               className="list-item-subtitle"
-              to={`/gcodes/${gcode_data.id}`}
+              to={`/gcodes/${gcode_data.uuid}`}
             >
               {gcode_data.filename}
             </Link>
@@ -295,7 +295,7 @@ const PrinterDetail = ({
               itemList={jobList}
               loadPage={loadJobsPage}
               rowFactory={j => {
-                return <PrintJobRow key={j.id} {...j} />;
+                return <PrintJobRow key={j.uuid} {...j} />;
               }}
               sortByColumns={["started"]}
               clearItemsPages={clearJobsPages}

@@ -41,8 +41,8 @@ export const getGcodes = (
     });
 };
 
-export const getGcode = (orgUuid, id, fields = []) => {
-  let uri = `${BASE_URL}/organizations/${orgUuid}/gcodes/${id}`;
+export const getGcode = (orgUuid, uuid, fields = []) => {
+  let uri = `${BASE_URL}/organizations/${orgUuid}/gcodes/${uuid}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -63,8 +63,8 @@ export const getGcode = (orgUuid, id, fields = []) => {
     });
 };
 
-export const deleteGcode = (orgUuid, id) => {
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes/${id}`, {
+export const deleteGcode = (orgUuid, uuid) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes/${uuid}`, {
     method: "DELETE",
     headers: getHeaders()
   })
@@ -72,7 +72,7 @@ export const deleteGcode = (orgUuid, id) => {
       if (response.status !== 204) {
         console.error(`Cannot remove a gcode: ${response.status}`);
       }
-      return { status: response.status, data: { id } };
+      return { status: response.status, data: { uuid } };
     })
     .catch(e => {
       console.error(`Cannot remove a gcode: ${e}`);

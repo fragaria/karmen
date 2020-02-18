@@ -46,14 +46,14 @@ export const getGcodesPage = createActionThunk(
 
 export const loadGcode = createActionThunk(
   "GCODE_LOAD_DETAIL",
-  (id, fields = [], { dispatch, getState }) => {
+  (uuid, fields = [], { dispatch, getState }) => {
     const { users } = getState();
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getGcode, dispatch)(
       users.me.activeOrganization.uuid,
-      id,
+      uuid,
       fields
     );
   }
@@ -68,17 +68,17 @@ export const downloadGcode = createActionThunk(
 
 export const deleteGcode = createActionThunk(
   "GCODES_DELETE",
-  (id, { dispatch, getState }) => {
+  (uuid, { dispatch, getState }) => {
     const { users } = getState();
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.deleteGcode, dispatch)(
       users.me.activeOrganization.uuid,
-      id
+      uuid
     ).then(r => {
       if (r.status !== 204) {
-        r.data.id = null;
+        r.data.uuid = null;
       }
       return r;
     });

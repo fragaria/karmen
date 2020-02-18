@@ -2,12 +2,12 @@ import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const printGcode = (orgUuid, id, printer) => {
+export const printGcode = (orgUuid, uuid, printer) => {
   return fetch(`${BASE_URL}/organizations/${orgUuid}/printjobs`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
-      gcode: id,
+      gcode: uuid,
       printer: printer
     })
   })

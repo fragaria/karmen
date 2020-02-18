@@ -53,7 +53,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
 
 const GcodeTableRow = ({
   analysis,
-  id,
+  uuid,
   size,
   uploaded,
   username,
@@ -106,8 +106,8 @@ const GcodeTableRow = ({
     );
   };
 
-  const schedulePrint = (gcodeId, printerUuid) => {
-    onSchedulePrint(gcodeId, printerUuid).then(r => {
+  const schedulePrint = (gcodeUuid, printerUuid) => {
+    onSchedulePrint(gcodeUuid, printerUuid).then(r => {
       switch (r) {
         case 201:
           setMessage("Print was scheduled");
@@ -122,7 +122,7 @@ const GcodeTableRow = ({
 
   return (
     <div className="list-item">
-      <Link className="list-item-content" to={`/gcodes/${id}`}>
+      <Link className="list-item-content" to={`/gcodes/${uuid}`}>
         <span className="list-item-subtitle">
           {path}
           {path ? "/" : ""}
@@ -198,7 +198,7 @@ const GcodeTableRow = ({
                     setShowFilamentTypeWarning(false);
                     setMessage("Scheduling a print");
                     setMessageOk(true);
-                    schedulePrint(id, selectedPrinter);
+                    schedulePrint(uuid, selectedPrinter);
                   }}
                 >
                   Print anyway
@@ -249,7 +249,7 @@ const GcodeTableRow = ({
                   setMessage("Scheduling a print");
                   setMessageOk(true);
 
-                  schedulePrint(id, selectedPrinter);
+                  schedulePrint(uuid, selectedPrinter);
                 }}
               >
                 Print
@@ -319,12 +319,12 @@ class GcodeList extends React.Component {
           rowFactory={g => {
             return (
               <GcodeTableRow
-                key={g.id}
+                key={g.uuid}
                 {...g}
                 history={this.props.history}
                 printGcode={printGcode}
-                onSchedulePrint={(gcodeId, printerUuid) => {
-                  return printGcode(gcodeId, printerUuid).then(r => {
+                onSchedulePrint={(gcodeUuid, printerUuid) => {
+                  return printGcode(gcodeUuid, printerUuid).then(r => {
                     if (r === 201) {
                       printedOn.push(printerUuid);
                       this.setState({
@@ -336,7 +336,7 @@ class GcodeList extends React.Component {
                 }}
                 availablePrinters={getAvailablePrinters(printedOn)}
                 onRowDelete={() => {
-                  deleteGcode(g.id).then(() => {
+                  deleteGcode(g.uuid).then(() => {
                     loadGcodesPage(
                       gcodesList.startWith,
                       gcodesList.orderBy,
@@ -354,7 +354,7 @@ class GcodeList extends React.Component {
           loadPage={loadGcodesPage}
           clearItemsPages={clearGcodesPages}
           fields={[
-            "id",
+            "uuid",
             "display",
             "filename",
             "path",
@@ -386,7 +386,7 @@ export default connect(
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>
       dispatch(getGcodesPage(startWith, orderBy, filter, limit, fields)),
     clearGcodesPages: () => dispatch(clearGcodesPages()),
-    deleteGcode: id => dispatch(deleteGcode(id)),
-    printGcode: (id, printer) => dispatch(addPrintJob(id, printer))
+    deleteGcode: uuid => dispatch(deleteGcode(uuid)),
+    printGcode: (uuid, printer) => dispatch(addPrintJob(uuid, printer))
   })
 )(GcodeList);

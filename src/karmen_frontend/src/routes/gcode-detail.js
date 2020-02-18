@@ -55,8 +55,8 @@ const GcodePrint = ({
     );
   };
 
-  const schedulePrint = (gcodeId, printerUuid) => {
-    onSchedulePrint(gcodeId, printerUuid).then(r => {
+  const schedulePrint = (gcodeUuid, printerUuid) => {
+    onSchedulePrint(gcodeUuid, printerUuid).then(r => {
       switch (r) {
         case 201:
           setMessage("Print was scheduled");
@@ -115,7 +115,7 @@ const GcodePrint = ({
                     setShowFilamentTypeWarning(false);
                     setMessage("Scheduling a print");
                     setMessageOk(true);
-                    schedulePrint(gcode.id, selectedPrinter);
+                    schedulePrint(gcode.uuid, selectedPrinter);
                   }}
                 >
                   Print anyway
@@ -165,7 +165,7 @@ const GcodePrint = ({
                   setShowFilamentTypeWarning(false);
                   setMessage("Scheduling a print");
                   setMessageOk(true);
-                  schedulePrint(gcode.id, selectedPrinter);
+                  schedulePrint(gcode.uuid, selectedPrinter);
                 }}
               >
                 Print
@@ -229,7 +229,7 @@ class GcodeDetail extends React.Component {
 
   loadGcode() {
     const { match, getGcode } = this.props;
-    getGcode(match.params.id, []).then(r => {
+    getGcode(match.params.uuid, []).then(r => {
       this.setState({
         gcode: r.data,
         gcodeLoaded: true

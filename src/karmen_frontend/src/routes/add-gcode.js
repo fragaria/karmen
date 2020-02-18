@@ -11,7 +11,7 @@ class AddGcode extends React.Component {
     path: "",
     message: null,
     messageOk: false,
-    gcodeId: null
+    gcodeUuid: null
   };
 
   constructor(props) {
@@ -41,7 +41,7 @@ class AddGcode extends React.Component {
             path: "",
             messageOk: true,
             redirect: true,
-            gcodeId: r.data.id
+            gcodeUuid: r.data.uuid
           });
           break;
         case 415:
@@ -58,9 +58,9 @@ class AddGcode extends React.Component {
   }
 
   render() {
-    const { message, messageOk, redirect, path, gcodeId } = this.state;
+    const { message, messageOk, redirect, path, gcodeUuid } = this.state;
     if (redirect) {
-      return <Redirect to={`/gcodes/${gcodeId}`} />;
+      return <Redirect to={`/gcodes/${gcodeUuid}`} />;
     }
     return (
       <div className="content">
