@@ -33,6 +33,7 @@ class CachedOctoprint(Octoprint):
     def __init__(
         self,
         uuid,
+        organization_uuid,
         protocol="http",
         hostname=None,
         ip=None,
@@ -44,6 +45,7 @@ class CachedOctoprint(Octoprint):
     ):
         super(CachedOctoprint, self).__init__(
             uuid,
+            organization_uuid,
             protocol,
             hostname,
             ip,

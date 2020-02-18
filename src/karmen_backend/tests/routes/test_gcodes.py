@@ -15,6 +15,7 @@ from ..utils import (
     TOKEN_USER2,
     TOKEN_USER2_CSRF,
     UUID_USER,
+    UUID_ORG,
 )
 
 
@@ -30,13 +31,44 @@ class ListRoute(unittest.TestCase):
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
+                    organization_uuid=UUID_ORG,
                 )
             )
+
+    def test_list_bad_org_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/not-an-uuid/gcodes",
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_list_unknown_org(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/587852aa-9026-4422-852d-2533a92eb506/gcodes",
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 403)
+
+    def test_list_no_org_member(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
+            response = c.get(
+                "/organizations/%s/gcodes" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER2_CSRF},
+            )
+            self.assertEqual(response.status_code, 403)
 
     def test_list(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.get("/gcodes", headers={"x-csrf-token": TOKEN_USER_CSRF})
+            response = c.get(
+                "/organizations/%s/gcodes" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             if len(response.json["items"]) < 200:
@@ -57,7 +89,8 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?order_by=filename", headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes?order_by=filename" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -75,7 +108,8 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&order_by=filename&fields=id,filename",
+                "/organizations/%s/gcodes?limit=3&order_by=filename&fields=id,filename"
+                % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -83,7 +117,8 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 3)
             self.assertTrue(
-                "/gcodes?limit=3&order_by=filename&fields=id,filename&start_with="
+                "/organizations/%s/gcodes?limit=3&order_by=filename&fields=id,filename&start_with="
+                % UUID_ORG
                 in response.json["next"]
             )
 
@@ -91,7 +126,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&order_by=id,filename",
+                "/organizations/%s/gcodes?limit=3&order_by=id,filename" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 400)
@@ -100,7 +135,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&start_with=2",
+                "/organizations/%s/gcodes?limit=3&start_with=2" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -116,15 +151,16 @@ class ListRoute(unittest.TestCase):
             )
             self.assertEqual(
                 response.json["next"],
-                "/gcodes?limit=3&start_with=%s"
-                % str(int(response.json["items"][2]["id"]) + 1),
+                "/organizations/%s/gcodes?limit=3&start_with=%s"
+                % (UUID_ORG, str(int(response.json["items"][2]["id"]) + 1)),
             )
 
     def test_start_with_non_existent(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&start_with=99999&order_by=uploaded",
+                "/organizations/%s/gcodes?limit=3&start_with=99999&order_by=uploaded"
+                % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -135,7 +171,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&start_with=1&order_by=-id",
+                "/organizations/%s/gcodes?limit=3&start_with=1&order_by=-id" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -145,7 +181,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(response.json["items"][0]["id"] == 1)
 
             response = c.get(
-                "/gcodes?limit=3&start_with=1&order_by=id",
+                "/organizations/%s/gcodes?limit=3&start_with=1&order_by=id" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -164,7 +200,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&start_with=asdfasdf",
+                "/organizations/%s/gcodes?limit=3&start_with=asdfasdf" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -174,7 +210,8 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=-3", headers={"x-csrf-token": TOKEN_USER_CSRF}
+                "/organizations/%s/gcodes?limit=-3" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -183,7 +220,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=3&start_with=-1",
+                "/organizations/%s/gcodes?limit=3&start_with=-1" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -193,7 +230,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?limit=asdfasdf&start_with=5",
+                "/organizations/%s/gcodes?limit=asdfasdf&start_with=5" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -211,6 +248,7 @@ class ListRoute(unittest.TestCase):
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
+                    organization_uuid=UUID_ORG,
                 ),
                 gcodes.add_gcode(
                     path="a/b/c",
@@ -219,10 +257,11 @@ class ListRoute(unittest.TestCase):
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
+                    organization_uuid=UUID_ORG,
                 ),
             ]
             response = c.get(
-                "/gcodes?filter=filename:%s" % rand,
+                "/organizations/%s/gcodes?filter=filename:%s" % (UUID_ORG, rand),
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -235,7 +274,8 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?filter=filename:completely-absent%20filename",
+                "/organizations/%s/gcodes?filter=filename:completely-absent%%20filename"
+                % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -253,6 +293,7 @@ class ListRoute(unittest.TestCase):
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
+                    organization_uuid=UUID_ORG,
                 ),
                 gcodes.add_gcode(
                     path="a/b/c",
@@ -261,10 +302,12 @@ class ListRoute(unittest.TestCase):
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
+                    organization_uuid=UUID_ORG,
                 ),
             ]
             response = c.get(
-                "/gcodes?filter=filename:unique-FILENAME with space&limit=1&order_by=-id",
+                "/organizations/%s/gcodes?filter=filename:unique-FILENAME with space&limit=1&order_by=-id"
+                % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -285,7 +328,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?filter=random:file1",
+                "/organizations/%s/gcodes?filter=random:file1" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -296,7 +339,8 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes?filter=file1", headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes?filter=file1" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
@@ -304,7 +348,7 @@ class ListRoute(unittest.TestCase):
 
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.get("/gcodes")
+            response = c.get("/organizations/%s/gcodes")
             self.assertEqual(response.status_code, 401)
 
 
@@ -317,13 +361,15 @@ class DetailRoute(unittest.TestCase):
             absolute_path="/ab/a/b/c",
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
 
     def test_detail(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes/%s" % self.gcode_id, headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes/%s" % (UUID_ORG, self.gcode_id),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("id" in response.json)
@@ -332,14 +378,43 @@ class DetailRoute(unittest.TestCase):
 
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.get("/gcodes/%s" % self.gcode_id)
+            response = c.get("/organizations/%s/gcodes/%s" % (UUID_ORG, self.gcode_id))
             self.assertEqual(response.status_code, 401)
+
+    def test_list_bad_org_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/not-an-uuid/gcodes/%s" % self.gcode_id,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_list_unknown_org(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/587852aa-9026-4422-852d-2533a92eb506/gcodes/%s"
+                % self.gcode_id,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 403)
+
+    def test_list_no_org_member(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
+            response = c.get(
+                "/organizations/%s/gcodes/%s" % (UUID_ORG, self.gcode_id),
+                headers={"x-csrf-token": TOKEN_USER2_CSRF},
+            )
+            self.assertEqual(response.status_code, 403)
 
     def test_404(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes/172.16", headers={"x-csrf-token": TOKEN_USER_CSRF}
+                "/organizations/%s/gcodes/172.16" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -348,7 +423,11 @@ class CreateRoute(unittest.TestCase):
     def test_upload_no_token(self):
         with app.test_client() as c:
             data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
-            response = c.post("/gcodes", data=data, content_type="multipart/form-data")
+            response = c.post(
+                "/organizations/%s/gcodes" % UUID_ORG,
+                data=data,
+                content_type="multipart/form-data",
+            )
             self.assertEqual(response.status_code, 401)
 
     @mock.patch("server.routes.gcodes.analyze_gcode.delay")
@@ -367,14 +446,14 @@ class CreateRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
             response = c.post(
-                "/gcodes",
+                "/organizations/%s/gcodes" % UUID_ORG,
                 data=data,
                 content_type="multipart/form-data",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "/")
+            self.assertEqual(args[2], "/")
             self.assertEqual(mocked_delay.call_count, 1)
 
     @mock.patch("server.routes.gcodes.analyze_gcode.delay")
@@ -395,14 +474,14 @@ class CreateRoute(unittest.TestCase):
                 file=(io.BytesIO(b"my file contents"), "some.gcode"), path="/a/b"
             )
             response = c.post(
-                "/gcodes",
+                "/organizations/%s/gcodes" % UUID_ORG,
                 data=data,
                 content_type="multipart/form-data",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "/a/b")
+            self.assertEqual(args[2], "/a/b")
             self.assertTrue("id" in response.json)
             self.assertTrue("user_uuid" in response.json)
             self.assertEqual(response.json["user_uuid"], UUID_USER)
@@ -422,7 +501,7 @@ class CreateRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             data = dict(file=(io.BytesIO(b"my file contents"), "some.gcode"))
             response = c.post(
-                "/gcodes",
+                "/organizations/%s/gcodes" % UUID_ORG,
                 data=data,
                 content_type="multipart/form-data",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
@@ -432,7 +511,10 @@ class CreateRoute(unittest.TestCase):
     def test_upload_no_file(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.post("/gcodes", headers={"x-csrf-token": TOKEN_USER_CSRF})
+            response = c.post(
+                "/organizations/%s/gcodes" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_upload_empty_file(self):
@@ -440,7 +522,7 @@ class CreateRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             data = dict(file=(io.BytesIO(b"my file contents"), ""))
             response = c.post(
-                "/gcodes",
+                "/organizations/%s/gcodes" % UUID_ORG,
                 data=data,
                 content_type="multipart/form-data",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
@@ -452,7 +534,7 @@ class CreateRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             data = dict(file=(io.BytesIO(b"my file contents"), "some.txt"))
             response = c.post(
-                "/gcodes",
+                "/organizations/%s/gcodes" % UUID_ORG,
                 data=data,
                 content_type="multipart/form-data",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
@@ -469,27 +551,33 @@ class DeleteRoute(unittest.TestCase):
             absolute_path="/ab/a/b/c",
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
         printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"host": "172.16.236.11:8080"},
+            organization_uuid=UUID_ORG,
         )
         printjobs.add_printjob(
             gcode_id=gcode_id,
             gcode_data={"id": gcode_id},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"host": "172.16.236.11:8080"},
+            organization_uuid=UUID_ORG,
         )
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.delete(
-                "/gcodes/%s" % gcode_id, headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes/%s" % (UUID_ORG, gcode_id),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 204)
         self.assertEqual(gcodes.get_gcode(gcode_id), None)
-        pjs = [pj for pj in printjobs.get_printjobs() if pj["gcode_id"] == gcode_id]
+        pjs = [
+            pj for pj in printjobs.get_printjobs(UUID_ORG) if pj["gcode_id"] == gcode_id
+        ]
         self.assertEqual(len(pjs), 2)
         for pj in pjs:
             self.assertFalse(pj["gcode_data"]["available"])
@@ -502,11 +590,13 @@ class DeleteRoute(unittest.TestCase):
             absolute_path="/ab/a/b/c",
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.delete(
-                "/gcodes/%s" % gcode_id, headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                "/organizations/%s/gcodes/%s" % (UUID_ORG, gcode_id),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 204)
 
@@ -518,13 +608,15 @@ class DeleteRoute(unittest.TestCase):
             absolute_path="/ab/a/b/c",
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
             response = c.delete(
-                "/gcodes/%s" % gcode_id, headers={"x-csrf-token": TOKEN_USER2_CSRF},
+                "/organizations/%s/gcodes/%s" % (UUID_ORG, gcode_id),
+                headers={"x-csrf-token": TOKEN_USER2_CSRF},
             )
-            self.assertEqual(response.status_code, 401)
+            self.assertEqual(response.status_code, 403)
 
     def test_delete_no_token(self):
         gcode_id = gcodes.add_gcode(
@@ -534,16 +626,18 @@ class DeleteRoute(unittest.TestCase):
             absolute_path="/ab/a/b/c",
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
         with app.test_client() as c:
-            response = c.delete("/gcodes/%s" % gcode_id)
+            response = c.delete("/organizations/%s/gcodes/%s" % (UUID_ORG, gcode_id))
             self.assertEqual(response.status_code, 401)
 
     def test_delete_unknown(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.delete(
-                "/gcodes/172.16", headers={"x-csrf-token": TOKEN_USER_CSRF}
+                "/organizations/%s/gcodes/172.16" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -551,7 +645,7 @@ class DeleteRoute(unittest.TestCase):
 class GetDataRoute(unittest.TestCase):
     def test_download_no_token(self):
         with app.test_client() as c:
-            response = c.get("/gcodes/12/data")
+            response = c.get("/organizations/%s/gcodes/12/data" % UUID_ORG)
             self.assertEqual(response.status_code, 401)
 
     def test_download(self):
@@ -563,11 +657,13 @@ class GetDataRoute(unittest.TestCase):
             absolute_path=mock_file.name,
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes/%s/data" % gcode_id, headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes/%s/data" % (UUID_ORG, gcode_id),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
         mock_file.close()
@@ -577,7 +673,8 @@ class GetDataRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes/172.16/data", headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes/172.16/data" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 404)
 
@@ -589,10 +686,12 @@ class GetDataRoute(unittest.TestCase):
             absolute_path="/ab/a/b/c",
             size=123,
             user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG,
         )
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/gcodes/%s/data" % gcode_id, headers={"x-csrf-token": TOKEN_USER_CSRF},
+                "/organizations/%s/gcodes/%s/data" % (UUID_ORG, gcode_id),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 404)

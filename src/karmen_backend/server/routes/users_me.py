@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from werkzeug.exceptions import BadRequest, Unauthorized
 import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -16,10 +17,32 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 from server import app
-from server.database import users, local_users, api_tokens
+from server.database import users, local_users, api_tokens, organizations
 
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
+
+
+def get_user_identity(userdata, token_freshness):
+    membership = []
+    for org in organizations.get_by_user_uuid(userdata.get("uuid")):
+        membership.append(
+            {
+                "uuid": org.get("uuid"),
+                "name": org.get("name"),
+                "slug": org.get("slug"),
+                "role": org.get("role"),
+            }
+        )
+    return {
+        "identity": userdata.get("uuid"),
+        "system_role": userdata.get("system_role", "user"),
+        "username": userdata.get("username"),
+        "force_pwd_change": userdata.get("force_pwd_change", False),
+        "fresh": token_freshness,
+        "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
+        "organizations": membership,
+    }
 
 
 def authenticate_base(include_refresh_token):
@@ -29,33 +52,24 @@ def authenticate_base(include_refresh_token):
     username = data.get("username", None)
     password = data.get("password", None)
     if not username or not password:
-        return abort(make_response("", 400))
+        raise BadRequest("Missing username or password in request body.")
 
     user = users.get_by_username(username)
     if not user:
-        return abort(make_response("", 401))
+        raise Unauthorized("Invalid credentials.")
 
     if user["suspended"]:
-        return abort(make_response(jsonify(message="Account suspended"), 401))
+        raise Unauthorized("Account suspended")
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(make_response("", 401))
+        raise Unauthorized("Invalid credentials.")
     if not bcrypt.checkpw(password.encode("utf8"), local["pwd_hash"].encode("utf8")):
-        return abort(make_response("", 401))
+        raise Unauthorized("Invalid credentials.")
 
     userdata = dict(user)
     userdata.update(local)
-    response = jsonify(
-        {
-            "identity": userdata.get("uuid", None),
-            "role": userdata.get("role", "user"),
-            "username": userdata.get("username"),
-            "force_pwd_change": userdata.get("force_pwd_change", False),
-            "fresh": True,
-            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
-        }
-    )
+    response = jsonify(get_user_identity(userdata, True))
     access_token = create_access_token(
         identity=userdata, fresh=True, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
     )
@@ -96,16 +110,7 @@ def refresh():
         return abort(make_response("", 401))
     userdata = dict(user)
     userdata.update(local)
-    response = jsonify(
-        {
-            "identity": userdata.get("uuid", None),
-            "role": userdata.get("role", "user"),
-            "username": userdata.get("username"),
-            "force_pwd_change": userdata.get("force_pwd_change", False),
-            "fresh": False,
-            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
-        }
-    )
+    response = jsonify(get_user_identity(userdata, False))
     access_token = create_access_token(
         identity=userdata, fresh=False, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
     )
@@ -172,16 +177,7 @@ def change_password():
     )
     userdata = dict(user)
 
-    response = jsonify(
-        {
-            "identity": userdata.get("uuid", None),
-            "role": userdata.get("role", "user"),
-            "username": userdata.get("username"),
-            "force_pwd_change": userdata.get("force_pwd_change", False),
-            "fresh": True,
-            "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
-        }
-    )
+    response = jsonify(get_user_identity(userdata, True))
     access_token = create_access_token(
         identity=userdata, fresh=True, expires_delta=ACCESS_TOKEN_EXPIRES_AFTER
     )
@@ -195,11 +191,22 @@ def change_password():
 @fresh_jwt_required
 def list_api_tokens():
     items = []
-    for token in api_tokens.get_tokens_for_user_uuid(get_jwt_identity(), revoked=False):
+    tokens = api_tokens.get_tokens_for_user_uuid(get_jwt_identity(), revoked=False)
+    org_mapping = {
+        o["uuid"]: o["name"]
+        for o in organizations.get_organizations_by_uuids(
+            [t["organization_uuid"] for t in tokens]
+        )
+    }
+    for token in tokens:
         items.append(
             {
                 "jti": token["jti"],
                 "name": token["name"],
+                "organization": {
+                    "uuid": token["organization_uuid"],
+                    "name": org_mapping[token["organization_uuid"]],
+                },
                 "created": token["created"].isoformat(),
             }
         )
@@ -218,20 +225,31 @@ def create_api_token():
     if not name:
         return abort(make_response("", 400))
 
+    org_uuid = data.get("organization_uuid", None)
+    if not org_uuid:
+        return abort(make_response("", 400))
+
     user = get_current_user()
     if not user:
         return abort(make_response("", 401))
+    is_member = organizations.get_organization_role(org_uuid, user["uuid"])
+    if not is_member:
+        return abort(make_response("", 401))
+
     token = create_access_token(
         identity=user,
         expires_delta=False,
-        user_claims={"role": "user", "username": user.get("username")},
+        user_claims={"username": user.get("username"), "organization_uuid": org_uuid},
     )
     jti = decode_token(token)["jti"]
-    api_tokens.add_token(user_uuid=user["uuid"], jti=jti, name=name)
+    api_tokens.add_token(
+        user_uuid=user["uuid"], jti=jti, name=name, organization_uuid=org_uuid
+    )
     response = {
         "access_token": token,
         "name": name,
         "jti": jti,
+        "organization_uuid": org_uuid,
         "created": datetime.now().isoformat(),
     }
     return jsonify(response), 201

@@ -1,21 +1,9 @@
 import React from "react";
-
-import Loader from "../utils/loader";
 import BusyButton from "../utils/busy-button";
-import { FormInputs } from "./form-utils";
 
 class NetworkScan extends React.Component {
   state = {
-    init: true,
-    settings: {
-      network_interface: {
-        name: "On which network interface should we be looking for printers?",
-        val: "",
-        type: "text",
-        required: true,
-        error: null
-      }
-    },
+    error: null,
     message: null,
     messageOk: false
   };
@@ -23,28 +11,6 @@ class NetworkScan extends React.Component {
   constructor(props) {
     super(props);
     this.startNetworkScan = this.startNetworkScan.bind(this);
-    this.loadNetworkScan = this.loadNetworkScan.bind(this);
-  }
-
-  loadNetworkScan() {
-    const { settings } = this.state;
-    const { getSettings } = this.props;
-    getSettings().then(r => {
-      // eslint-disable-next-line no-unused-vars
-      for (let option of r.data) {
-        if (settings[option.key]) {
-          settings[option.key].val = option.val;
-        }
-      }
-      this.setState({
-        settings,
-        init: false
-      });
-    });
-  }
-
-  componentDidMount() {
-    this.loadNetworkScan();
   }
 
   startNetworkScan(e) {
@@ -53,76 +19,34 @@ class NetworkScan extends React.Component {
       message: null,
       messageOk: false
     });
-    const { settings } = this.state;
-    const { changeSettings, enqueueTask } = this.props;
-    let hasErrors = false;
-    const updatedSettings = Object.assign({}, settings);
-    const changedSettings = [];
-    // eslint-disable-next-line array-callback-return
-    Object.keys(settings).map(opt => {
-      if (
-        settings[opt].required &&
-        settings[opt].type === "text" &&
-        !settings[opt].val
-      ) {
-        hasErrors = true;
-        updatedSettings[opt].error = "This is a required field!";
-      }
-      changedSettings.push({
-        key: opt,
-        val: settings[opt].val
+    const { scanNetwork, networkInterface } = this.props;
+    if (!networkInterface) {
+      this.setState({
+        error: "Network name cannot be empty!"
       });
-    });
-    this.setState({
-      settings: updatedSettings
-    });
-    if (!hasErrors) {
-      return changeSettings(changedSettings).then(r => {
-        switch (r.status) {
-          case 201:
-            return enqueueTask("scan_network").then(r => {
-              switch (r.status) {
-                case 202:
-                  this.setState({
-                    message:
-                      "Network scan initiated, the printers should start popping up at any moment",
-                    messageOk: true
-                  });
-                  break;
-                case 400:
-                default:
-                  this.setState({
-                    message: "Cannot scan the network, check server logs"
-                  });
-              }
-            });
-          case 400:
-          default:
-            this.setState({
-              message: "Cannot scan the network, check server logs"
-            });
-        }
-      });
+      return;
     }
+    return scanNetwork(networkInterface).then(r => {
+      switch (r.status) {
+        case 202:
+          this.setState({
+            message:
+              "Network scan initiated, the printers should start popping up at any moment",
+            messageOk: true
+          });
+          break;
+        case 400:
+        default:
+          this.setState({
+            message: "Cannot scan the network, check server logs"
+          });
+      }
+    });
   }
 
   render() {
-    const { init, settings, message, messageOk } = this.state;
-    if (init) {
-      return (
-        <div>
-          <Loader />
-        </div>
-      );
-    }
-    const updateValue = (name, value) => {
-      const { settings } = this.state;
-      this.setState({
-        settings: Object.assign({}, settings, {
-          [name]: Object.assign({}, settings[name], { val: value, error: null })
-        })
-      });
-    };
+    const { error, message, messageOk } = this.state;
+    const { networkInterface, onNetworkInterfaceChange } = this.props;
     return (
       <form>
         <fieldset>
@@ -131,7 +55,21 @@ class NetworkScan extends React.Component {
               {message}
             </p>
           )}
-          <FormInputs definition={settings} updateValue={updateValue} />
+          <div className="input-group">
+            <label htmlFor="networkInterface">
+              On which network interface should we be looking for printers?
+            </label>
+            <input
+              type="text"
+              id="networkInterface"
+              name="networkInterface"
+              value={networkInterface}
+              onChange={e => {
+                onNetworkInterfaceChange(e.target.value);
+              }}
+            />
+            <span>{error && <small>{error}</small>}</span>
+          </div>
           <div className="cta-box text-center">
             <BusyButton
               className="btn"

@@ -1,39 +1,68 @@
 import functools
+import uuid as uuidmodule
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_current_user
 from server import app, jwt, __version__
-from server.database import users as db_users, local_users as db_local_users, api_tokens
+from server.database import (
+    users as db_users,
+    local_users as db_local_users,
+    api_tokens,
+    organizations,
+)
 
 
-def jwt_requires_role(required_role):
+def validate_org_access(required_role=None):
+    def validate_org_decorator(func):
+        @functools.wraps(func)
+        @jwt_required
+        def wrap(org_uuid, *args, **kwargs):
+            try:
+                uuidmodule.UUID(org_uuid, version=4)
+            except ValueError:
+                return abort(make_response("", 400))
+            user = get_current_user()
+            if not user:
+                return abort(make_response("", 401))
+            role = organizations.get_organization_role(org_uuid, user["uuid"])
+            if role is None:
+                return abort(
+                    make_response(
+                        jsonify(message="Cannot access this organization"), 403
+                    )
+                )
+            if required_role is not None and role["role"] != required_role:
+                return abort(
+                    make_response(
+                        jsonify(
+                            message="User does not have the required system role of %s"
+                            % required_role
+                        ),
+                        403,
+                    )
+                )
+            return func(org_uuid, *args, **kwargs)
+
+        return wrap
+
+    return validate_org_decorator
+
+
+def jwt_requires_system_role(required_role):
     def jwt_token_decorator(func):
         @functools.wraps(func)
         @jwt_required
         def wrap(*args, **kwargs):
             if request.method == "OPTIONS":
                 return func(*args, **kwargs)
-            claims = get_jwt_claims()
-            role = claims.get("role", None)
-            if not role or role != required_role or role != "admin":
-                return abort(
-                    make_response(
-                        jsonify(
-                            message="Token does not match the required role of %s"
-                            % required_role
-                        ),
-                        401,
-                    )
-                )
-            # check current situation, the token might be from a role-change or user delete period
             user = get_current_user()
             if not user:
                 return abort(make_response("", 401))
-            if user["role"] != required_role or role != "admin":
+            if user["system_role"] != required_role or user["system_role"] != "admin":
                 return abort(
                     make_response(
                         jsonify(
-                            message="User does not have the required role of %s or admin"
+                            message="User does not have the required system role of %s or admin"
                             % required_role
                         ),
                         401,
@@ -74,7 +103,6 @@ def jwt_force_password_change(func):
 @jwt.user_claims_loader
 def add_claims_to_access_token(user):
     return {
-        "role": user.get("role", "user"),
         "username": user.get("username"),
         "force_pwd_change": user.get("force_pwd_change", False),
     }
@@ -118,13 +146,13 @@ def index():
     )
 
 
-import server.routes.gcodes
-import server.routes.octoprintemulator
-import server.routes.printers
-import server.routes.printjobs
-import server.routes.settings
-import server.routes.tasks
-
 # me has to come before users
 import server.routes.users_me
+
+
+import server.routes.octoprintemulator
+import server.routes.gcodes
+import server.routes.printers
+import server.routes.printjobs
+import server.routes.tasks
 import server.routes.users

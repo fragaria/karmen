@@ -64,6 +64,5 @@ with get_connection() as connection:
             OIDS = FALSE
         );"""
         cursor.execute(create_schema_sql)
-        cursor.execute("ALTER TABLE public.schema_version OWNER to print3d;")
         cursor.execute("INSERT INTO public.schema_version(version, description, type, installed_by, installed_on) VALUES (1, 'initial schema', 'auto', 'print3d', current_timestamp)")
         sys.exit(0)

@@ -13,7 +13,7 @@ SET default_tablespace = '';
 
 ---- helpers -------
 
-# props to https://stackoverflow.com/questions/48102295/rename-column-only-if-exists
+-- props to https://stackoverflow.com/questions/48102295/rename-column-only-if-exists
 DROP FUNCTION IF EXISTS public.column_exists(text,text);
 CREATE OR REPLACE FUNCTION public.column_exists(ptable TEXT, pcolumn TEXT)
   RETURNS BOOLEAN AS $BODY$
@@ -43,12 +43,12 @@ END$BODY$
 
 ------ end helpers -----
 
-# Add the columns to printers
+-- Add the columns to printers
 ALTER TABLE public.printers
     ADD COLUMN IF NOT EXISTS uuid uuid DEFAULT MD5(RANDOM()::TEXT || ':' || CURRENT_TIMESTAMP)::UUID NOT NULL,
     ADD COLUMN IF NOT EXISTS port integer DEFAULT NULL;
 
-# Bring printjobs up to date
+-- Bring printjobs up to date
 ALTER TABLE public.printjobs
     ADD COLUMN IF NOT EXISTS printer_uuid uuid;
 
@@ -73,7 +73,7 @@ update public.printjobs
   set printer_data = jsonb (printer_data - 'host')
   where printer_data->>'host' is not null;
 
-# Handle ip and port and rename host back to ip
+-- Handle ip and port and rename host back to ip
 SELECT 1 from public.rename_column_if_exists('printers', 'host', 'ip');
 
 update public.printers p
@@ -83,7 +83,7 @@ update public.printers p
 update public.printers p
   set ip = (select nullif(split_part(ip, ':', 1), '') as addr from public.printers r where r.uuid = p.uuid);
 
-# Setup new constraints on printers and printjobs
+-- Setup new constraints on printers and printjobs
 ALTER TABLE public.printers
   DROP CONSTRAINT IF EXISTS printers_ip_pkey;
 ALTER TABLE public.printers

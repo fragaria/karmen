@@ -2,6 +2,7 @@ import unittest
 
 from server.clients import get_printer_instance
 from server.clients.octoprint import Octoprint
+from ..utils import UUID_ORG
 
 
 class GetWithFallbackTest(unittest.TestCase):
@@ -19,6 +20,7 @@ class GetWithFallbackTest(unittest.TestCase):
         octoprinter = get_printer_instance(
             {
                 "uuid": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                "organization_uuid": UUID_ORG,
                 "client": "octoprint",
                 "hostname": "octoprinter",
                 "host": "1.2.3.4",

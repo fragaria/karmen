@@ -34,11 +34,12 @@ def save_printer_data(**kwargs):
 
 
 @celery.task(name="sniff_printer")
-def sniff_printer(hostname, ip):
+def sniff_printer(org_uuid, hostname, ip):
     app.logger.info("Sniffing printer on %s (%s) - trying http" % (ip, hostname))
     printer = clients.get_printer_instance(
         {
             "uuid": uuid.uuid4(),
+            "organization_uuid": org_uuid,
             "hostname": hostname,
             "ip": ip,
             "client": "octoprint",  # TODO not only octoprint
@@ -61,6 +62,7 @@ def sniff_printer(hostname, ip):
     app.logger.info("Sniffing printer on %s (%s) - success" % (ip, hostname))
     save_printer_data(
         uuid=printer.uuid,
+        organization_uuid=org_uuid,
         name=hostname or ip,
         hostname=hostname,
         ip=ip,

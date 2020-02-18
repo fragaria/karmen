@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 
 import Loader from "../components/utils/loader";
-import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import { PrinterEditForm } from "../components/forms/printer-edit-form";
 
 import { loadPrinter, patchPrinter } from "../actions/printers";
@@ -19,7 +19,6 @@ class PrinterSettings extends React.Component {
 
   changePrinter(newParameters) {
     const { patchPrinter, printer } = this.props;
-    // TODO reflect this optimistically into redux
     return patchPrinter(newParameters).then(r => {
       switch (r.status) {
         case 200:
@@ -63,7 +62,7 @@ class PrinterSettings extends React.Component {
       );
     }
     return (
-      <RoleBasedGateway requiredRole="admin">
+      <OrgRoleBasedGateway requiredRole="admin">
         <section className="content">
           <div className="container">
             <h1 className="main-title text-center">
@@ -97,7 +96,7 @@ class PrinterSettings extends React.Component {
             />
           </div>
         </section>
-      </RoleBasedGateway>
+      </OrgRoleBasedGateway>
     );
   }
 }

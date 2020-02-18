@@ -3,7 +3,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, clients
 from server.database import printjobs, printers, gcodes, users
-from . import jwt_force_password_change
+from . import jwt_force_password_change, validate_org_access
 from flask_jwt_extended import get_current_user
 
 
@@ -30,10 +30,11 @@ def make_printjob_response(printjob, fields=None, user_mapping=None):
     return response
 
 
-@app.route("/printjobs", methods=["POST"])
+@app.route("/organizations/<org_uuid>/printjobs", methods=["POST"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printjob_create():
+def printjob_create(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))
@@ -42,7 +43,7 @@ def printjob_create():
     if not gcode_id or not printer_uuid:
         return abort(make_response("", 400))
     printer = printers.get_printer(printer_uuid)
-    if printer is None:
+    if printer is None or printer["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     gcode = gcodes.get_gcode(gcode_id)
     if gcode is None:
@@ -60,6 +61,7 @@ def printjob_create():
             )
         printjob_id = printjobs.add_printjob(
             gcode_id=gcode["id"],
+            organization_uuid=org_uuid,
             printer_uuid=printer["uuid"],
             user_uuid=get_current_user()["uuid"],
             gcode_data={
@@ -84,10 +86,11 @@ def printjob_create():
         return abort(make_response("", 409))
 
 
-@app.route("/printjobs", methods=["GET"])
+@app.route("/organizations/<org_uuid>/printjobs", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printjobs_list():
+def printjobs_list(org_uuid):
     printjob_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
@@ -113,7 +116,11 @@ def printjobs_list():
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
     printjobs_record_set = printjobs.get_printjobs(
-        order_by=order_by, limit=limit, start_with=start_with, filter=filter_crit
+        org_uuid,
+        order_by=order_by,
+        limit=limit,
+        start_with=start_with,
+        filter=filter_crit,
     )
     response = {"items": printjob_list}
     next_record = None
@@ -130,12 +137,10 @@ def printjobs_list():
             ]
         )
     )
-    uuid_mapping = {
-        u["uuid"]: u["username"] for u in users.get_usernames_for_uuids(uuids)
-    }
+    uuid_mapping = {u["uuid"]: u["username"] for u in users.get_users_by_uuids(uuids)}
     for printjob in printjobs_record_set:
         printjob_list.append(make_printjob_response(printjob, fields, uuid_mapping))
-    next_href = "/printjobs"
+    next_href = "/organizations/%s/printjobs" % org_uuid
     parts = ["limit=%s" % limit]
     if order_by:
         parts.append("order_by=%s" % order_by)
@@ -152,32 +157,15 @@ def printjobs_list():
     return jsonify(response), 200
 
 
-@app.route("/printjobs/<id>", methods=["GET"])
+@app.route("/organizations/<org_uuid>/printjobs/<id>", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def printjob_detail(id):
+def printjob_detail(org_uuid, id):
     printjob = printjobs.get_printjob(id)
-    if printjob is None:
+    if printjob is None or printjob["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = users.get_by_uuid(printjob.get("user_uuid"))
     user_mapping = {}
     user_mapping[printjob.get("user_uuid")] = user.get("username")
     return jsonify(make_printjob_response(printjob, None, user_mapping))
-
-
-@app.route("/printjobs/<id>", methods=["DELETE"])
-@jwt_force_password_change
-@cross_origin()
-def printjob_delete(id):
-    printjob = printjobs.get_printjob(id)
-    if printjob is None:
-        return abort(make_response("", 404))
-    user = get_current_user()
-    if user["uuid"] != printjob["user_uuid"] and user["role"] not in ["admin"]:
-        return abort(
-            make_response(
-                jsonify(message="Printjob does not belong to %s" % user["uuid"]), 401
-            )
-        )
-    printjobs.delete_printjob(id)
-    return "", 204

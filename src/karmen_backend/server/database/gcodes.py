@@ -1,15 +1,17 @@
 import psycopg2
+from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
 
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
-def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
+def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None):
     columns = [
         "id",
         "path",
         "filename",
         "display",
+        "organization_uuid",
         "absolute_path",
         "uploaded",
         "size",
@@ -25,6 +27,7 @@ def get_gcodes(order_by=None, limit=None, start_with=None, filter=None):
             limit=limit,
             start_with=start_with,
             filter=filter,
+            where=sql.SQL("organization_uuid = {}").format(sql.Literal(org_uuid)),
         )
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(statement)
@@ -42,7 +45,7 @@ def get_gcode(id):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid from gcodes where id = %s",
+            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid, organization_uuid from gcodes where id = %s",
             (id,),
         )
         data = cursor.fetchone()
@@ -54,7 +57,7 @@ def add_gcode(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis, user_uuid) values (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis, user_uuid, organization_uuid) values (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
             (
                 kwargs["path"],
                 kwargs["filename"],
@@ -62,7 +65,8 @@ def add_gcode(**kwargs):
                 kwargs["absolute_path"],
                 kwargs["size"],
                 psycopg2.extras.Json(kwargs.get("analysis", {})),
-                kwargs.get("user_uuid", None),
+                kwargs["user_uuid"],
+                kwargs["organization_uuid"],
             ),
         )
         data = cursor.fetchone()

@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-const RoleBasedGateway = ({ requiredRole, userRole, children }) => {
+const OrgRoleBasedGateway = ({ requiredRole, userRole, children }) => {
   if (requiredRole === userRole) {
     return <React.Fragment>{children}</React.Fragment>;
   }
@@ -10,5 +10,5 @@ const RoleBasedGateway = ({ requiredRole, userRole, children }) => {
 };
 
 export default connect(state => ({
-  userRole: state.users.me.role
-}))(RoleBasedGateway);
+  userRole: state.users.me.activeOrganization.role
+}))(OrgRoleBasedGateway);

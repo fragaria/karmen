@@ -2,8 +2,8 @@ import { getHeaders } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const printGcode = (id, printer) => {
-  return fetch(`${BASE_URL}/printjobs`, {
+export const printGcode = (orgUuid, id, printer) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/printjobs`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
@@ -24,12 +24,13 @@ export const printGcode = (id, printer) => {
 };
 
 export const getPrinterJobs = (
+  orgUuid,
   startWith = null,
   orderBy = null,
   filter = null,
   limit = 10
 ) => {
-  let uri = `${BASE_URL}/printjobs?limit=${limit}`;
+  let uri = `${BASE_URL}/organizations/${orgUuid}/printjobs?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${encodeURIComponent(startWith)}`;
   }

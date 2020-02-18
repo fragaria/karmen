@@ -38,7 +38,7 @@ If you don't mind that the connection state might be off for some time, you are 
 service autodiscovery. This works only when docker containers are run as `privileged` and when host's `/var/run/dbus`
 is mapped as a volume into the container. This feature is called from `flask` and `celery-worker` services. This might
 not work on Windows, Android and other operating systems.
-- The network autodiscovery service is off by default. It is using [ARP queries](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
+- The network autodiscovery service is using [ARP queries](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
 which don't work out of the box in a docker container. To make ARP work, the container has to run in a `host` network mode
 which affects how it is connected to the other containers (database, redis).
 
@@ -62,25 +62,32 @@ are identity providers, such as OAuth services, SAML services. Currently, only a
 available. They are identified by `UUIDv4`.
 - `local_users` - Users from the **local** provider. They have a `bcrypt`-ed password stored in the
 database.
-- There are two roles at the moment: *user* and *admin*.
-- Admins can create new users. Every new user gets a password set by admin. But the password is marked
+- Any user can be part of multiple organizations.
+- There are two system roles at the moment: *user* and *admin*. There are two organization-level roles
+at the moment: *user* an *admin*.
+- Organization admins can create new users. Every new user gets a password set by admin. But the password is marked
 to be changed and no interesting endpoints are available for users that are required to change their password.
+If a user already exists in another organization, it is re-used - so the password does not take effect.
 - Local users exchange their username and password for a pair `JWT` tokens. An `access_token` is used
 to access the API, a `refresh_token` is used to get a new access token. Access tokens expire in 15 minutes.
-Refresh tokens expire in 30 days.
+Refresh tokens expire in 30 days. These are sent in http-only cookies and are accompanied by CSRF token.
 - An access token issued after login is marked as *fresh*. Access tokens issued against the refresh
 token are marked as *nonfresh*. Sensitive operations (such as password changes and all admin endpoints) require *fresh* tokens.
 Thus forcing the user to send the username/password pair again. A special endpoint should be used for that
 to prevent issuing unnecessary refresh tokens.
-- User accounts can be suspended by admins. Whole API is then rendered inaccessible for them.
-- Every user can have multiple **API tokens**. These are *always nonfresh, in a `user` role and do not expire.*
-If you need to get rid of them, revoke them in the application.
+- Organization admins can delete a user from an organization. That makes the organization-scoped API inaccessible
+for them. However, they can still log in to the application.
+- Every user can have multiple **API tokens**. These are *always nonfresh, in a `user` system role and `user` organization
+role and do not expire.* They are also bound to a single organization. If you need to get rid of them, revoke them in the application.
 
 Also, there are at least two users available in the fresh dev environment:
 
-- `test-admin` (password *admin-password*) - An Administrator that can do everything, for example add more users.
+- `test-admin` (password *admin-password*) - An Administrator that can do everything in the organizations,
+for example add more users. Also a system-level administrator.
 - `test-user` (password *user-password*) - A user with restricted permissions. She cannot manage other users and
-printers.
+printers in the organization.
+
+Both are bound to the **Default organization** with uuid `b3060e41-e319-4a9b-8ac4-e0936c75f275`.
 
 In the production mode, there is a default admin user named `karmen` with password `karmen3D` that has to be changed
 upon first login. Make sure that you do this right after the installation.

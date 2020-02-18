@@ -3,7 +3,7 @@ import mock
 
 from server.tasks.check_printers import check_printers
 from server.clients.utils import PrinterClientAccessLevel
-from ..utils import Response
+from ..utils import Response, UUID_ORG
 
 
 class CheckPrintersTest(unittest.TestCase):
@@ -12,6 +12,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "organization_uuid": UUID_ORG,
                 "hostname": "a",
                 "ip": "1234",
                 "client_props": {
@@ -53,6 +54,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                        "organization_uuid": UUID_ORG,
                         "hostname": "a",
                         "ip": "1234",
                         "port": None,
@@ -77,6 +79,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
+                "organization_uuid": UUID_ORG,
                 "hostname": "b.local",
                 "ip": "5678",
                 "client_props": {
@@ -136,6 +139,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
+                        "organization_uuid": UUID_ORG,
                         "hostname": "b.local",
                         "ip": "5678",
                         "port": None,
@@ -167,6 +171,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "organization_uuid": UUID_ORG,
                 "ip": "1234",
                 "client_props": {
                     "connected": True,
@@ -207,6 +212,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                        "organization_uuid": UUID_ORG,
                         "hostname": "router.asus.com",
                         "ip": "1234",
                         "port": None,
@@ -231,6 +237,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "organization_uuid": UUID_ORG,
                 "ip": "1234",
                 "client_props": {
                     "connected": True,
@@ -270,6 +277,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                        "organization_uuid": UUID_ORG,
                         "hostname": None,
                         "ip": "1234",
                         "port": None,
@@ -294,6 +302,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "organization_uuid": UUID_ORG,
                 "hostname": "c.local",
                 "ip": "1234",
                 "client_props": {
@@ -335,6 +344,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                        "organization_uuid": UUID_ORG,
                         "hostname": "c.local",
                         "ip": "5678",
                         "port": None,
@@ -359,6 +369,7 @@ class CheckPrintersTest(unittest.TestCase):
         return_value=[
             {
                 "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "organization_uuid": UUID_ORG,
                 "hostname": "c.local",
                 "ip": "1234",
                 "client_props": {
@@ -400,6 +411,7 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                        "organization_uuid": UUID_ORG,
                         "hostname": "c.local",
                         "ip": "1234",
                         "port": None,

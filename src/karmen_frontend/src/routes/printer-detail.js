@@ -320,7 +320,7 @@ export default connect(
     printer: state.printers.printers.find(
       p => p.uuid === ownProps.match.params.uuid
     ),
-    role: state.users.me.role,
+    role: state.users.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
       orderBy: "-started",

@@ -3,7 +3,7 @@ import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { addUser } from "../actions/users";
 import { FormInputs } from "../components/forms/form-utils";
-import RoleBasedGateway from "../components/gateways/role-based-gateway";
+import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
 
@@ -115,7 +115,7 @@ class AddUser extends React.Component {
       return <Redirect to="/settings" />;
     }
     return (
-      <RoleBasedGateway requiredRole="admin">
+      <OrgRoleBasedGateway requiredRole="admin">
         <FreshTokenGateway>
           <div className="content">
             <div className="container">
@@ -162,7 +162,7 @@ class AddUser extends React.Component {
             </div>
           </div>
         </FreshTokenGateway>
-      </RoleBasedGateway>
+      </OrgRoleBasedGateway>
     );
   }
 }

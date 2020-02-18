@@ -9,14 +9,14 @@ export const retryIfUnauthorized = (func, dispatch) => {
     return func(...args).then(r => {
       if (r.status === 401) {
         if (!dispatch) {
-          return Promise.reject();
+          return Promise.resolve({});
         }
         return dispatch(refreshToken()).then(r => {
           if (r.status === 200) {
             return func(...args);
           } else {
             dispatch(clearUserIdentity());
-            return Promise.reject();
+            return Promise.resolve({});
           }
         });
       }
@@ -33,7 +33,13 @@ export const loadUserFromToken = token => dispatch => {
     loadUserData({
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
-      role: decoded.user_claims && decoded.user_claims.role,
+      organizations: [
+        {
+          role: "user",
+          uuid: decoded.user_claims && decoded.user_claims.organization_uuid
+        }
+      ],
+      systemRole: "user",
       hasFreshToken: decoded.fresh,
       accessTokenExpiresOn: undefined
     })
@@ -109,19 +115,39 @@ export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
 
 export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
-  ({ dispatch }) => {
-    return retryIfUnauthorized(backend.loadApiTokens, dispatch)();
+  ({ dispatch, getState }) => {
+    const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(
+      backend.loadApiTokens,
+      dispatch
+    )(users.me.activeOrganization.uuid);
   }
 );
 
-export const addUserApiToken = createActionThunk("USER_ADD_API_TOKEN", name => {
-  return backend.addApiToken(name);
-});
+export const addUserApiToken = createActionThunk(
+  "USER_ADD_API_TOKEN",
+  (name, { dispatch, getState }) => {
+    const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.addApiToken, dispatch)(
+      users.me.activeOrganization.uuid,
+      name
+    );
+  }
+);
 
 export const deleteUserApiToken = createActionThunk(
   "USER_DELETE_API_TOKEN",
-  jti => {
-    return backend.deleteApiToken(jti).then(status => {
+  (jti, { dispatch }) => {
+    return retryIfUnauthorized(
+      backend.deleteApiToken,
+      dispatch
+    )(jti).then(status => {
       if (status !== 204) {
         jti = null;
       }
@@ -130,34 +156,26 @@ export const deleteUserApiToken = createActionThunk(
   }
 );
 
-export const clearUsersPages = () => dispatch => {
+export const clearUsers = () => dispatch => {
   return dispatch({
-    type: "USERS_CLEAR_PAGES"
+    type: "USERS_CLEAR"
   });
 };
 
-export const getUsersPage = createActionThunk(
-  "USERS_LOAD_PAGE",
-  (
-    startWith = null,
-    orderBy = null,
-    filter = null,
-    limit = 15,
-    { dispatch }
-  ) => {
+export const getUsers = createActionThunk(
+  "USERS_LOAD",
+  (fields = [], { dispatch, getState }) => {
+    const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.getUsers, dispatch)(
-      startWith,
-      orderBy,
-      filter,
-      limit
+      users.me.activeOrganization.uuid,
+      fields
     ).then(r => {
       return {
         status: r.status,
-        data: r.data,
-        startWith,
-        orderBy,
-        filter,
-        limit
+        data: r.data
       };
     });
   }
@@ -165,8 +183,13 @@ export const getUsersPage = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (username, role, password, passwordConfirmation, { dispatch }) => {
+  (username, role, password, passwordConfirmation, { dispatch, getState }) => {
+    const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.addUser, dispatch)(
+      users.me.activeOrganization.uuid,
       username,
       role,
       password,
@@ -177,11 +200,29 @@ export const addUser = createActionThunk(
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (uuid, role, suspended, { dispatch }) => {
+  (uuid, role, { dispatch, getState }) => {
+    const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
     return retryIfUnauthorized(backend.patchUser, dispatch)(
+      users.me.activeOrganization.uuid,
       uuid,
-      role,
-      suspended
+      role
+    );
+  }
+);
+
+export const deleteUser = createActionThunk(
+  "USERS_DELETE",
+  (uuid, { dispatch, getState }) => {
+    const { users } = getState();
+    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.deleteUser, dispatch)(
+      users.me.activeOrganization.uuid,
+      uuid
     );
   }
 );

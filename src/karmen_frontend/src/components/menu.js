@@ -14,7 +14,6 @@ class Menu extends React.Component {
 
   render() {
     const { history, userState, username, role, logout } = this.props;
-
     const { navigation } = this.state;
 
     return (
@@ -110,7 +109,9 @@ export default withRouter(
     state => ({
       userState: state.users.me.currentState,
       username: state.users.me.username,
-      role: state.users.me.role
+      role:
+        state.users.me.activeOrganization &&
+        state.users.me.activeOrganization.role
     }),
     dispatch => ({
       logout: () => dispatch(clearUserIdentity())

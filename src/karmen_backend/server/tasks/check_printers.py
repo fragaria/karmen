@@ -22,6 +22,7 @@ def check_printers():
         printer.is_alive()
         printers.update_printer(
             uuid=printer.uuid,
+            organization_uuid=printer.organization_uuid,
             name=printer.name,
             hostname=printer.hostname,
             ip=printer.ip,

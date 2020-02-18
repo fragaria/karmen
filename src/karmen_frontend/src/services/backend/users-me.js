@@ -179,12 +179,13 @@ export const loadApiTokens = () => {
     });
 };
 
-export const addApiToken = name => {
+export const addApiToken = (orgUuid, name) => {
   return fetch(`${BASE_URL}/users/me/tokens`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
-      name
+      name: name,
+      organization_uuid: orgUuid
     })
   })
     .then(response => {

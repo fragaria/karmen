@@ -7,7 +7,7 @@ from server import app, __version__
 from server.database import gcodes, printjobs, users
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
-from . import jwt_force_password_change
+from . import jwt_force_password_change, validate_org_access
 from flask_jwt_extended import get_current_user
 
 
@@ -33,7 +33,10 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
                 response[field] = user_mapping.get(gcode.get("user_uuid"), None)
                 continue
             if field == "data":
-                response["data"] = "/gcodes/%s/data" % (gcode["id"],)
+                response["data"] = "/organizations/%s/gcodes/%s/data" % (
+                    gcode["organization_uuid"],
+                    gcode["id"],
+                )
                 continue
             response[field] = gcode.get(field, None)
     if "uploaded" in response:
@@ -41,10 +44,11 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
     return response
 
 
-@app.route("/gcodes", methods=["GET"])
+@app.route("/organizations/<org_uuid>/gcodes", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def gcodes_list():
+def gcodes_list(org_uuid):
     gcode_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
@@ -68,7 +72,11 @@ def gcodes_list():
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
     gcodes_record_set = gcodes.get_gcodes(
-        order_by=order_by, limit=limit, start_with=start_with, filter=filter_crit
+        org_uuid,
+        order_by=order_by,
+        limit=limit,
+        start_with=start_with,
+        filter=filter_crit,
     )
     response = {"items": gcode_list}
     next_record = None
@@ -85,13 +93,11 @@ def gcodes_list():
             ]
         )
     )
-    uuid_mapping = {
-        u["uuid"]: u["username"] for u in users.get_usernames_for_uuids(uuids)
-    }
+    uuid_mapping = {u["uuid"]: u["username"] for u in users.get_users_by_uuids(uuids)}
     for gcode in gcodes_record_set:
         gcode_list.append(make_gcode_response(gcode, fields, uuid_mapping))
 
-    next_href = "/gcodes"
+    next_href = "/organizations/%s/gcodes" % org_uuid
     parts = ["limit=%s" % limit]
     if order_by:
         parts.append("order_by=%s" % order_by)
@@ -108,12 +114,13 @@ def gcodes_list():
     return jsonify(response)
 
 
-@app.route("/gcodes/<id>", methods=["GET"])
+@app.route("/organizations/<org_uuid>/gcodes/<id>", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def gcode_detail(id):
+def gcode_detail(org_uuid, id):
     gcode = gcodes.get_gcode(id)
-    if gcode is None:
+    if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = users.get_by_uuid(gcode.get("user_uuid"))
     user_mapping = {}
@@ -122,10 +129,11 @@ def gcode_detail(id):
     return jsonify(make_gcode_response(gcode, None, user_mapping))
 
 
-@app.route("/gcodes", methods=["POST"])
+@app.route("/organizations/<org_uuid>/gcodes", methods=["POST"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def gcode_create():
+def gcode_create(org_uuid):
     if "file" not in request.files:
         return abort(make_response("", 400))
     incoming = request.files["file"]
@@ -136,7 +144,7 @@ def gcode_create():
         return abort(make_response("", 415))
 
     try:
-        saved = files.save(incoming, request.form.get("path", "/"))
+        saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
         gcode_id = gcodes.add_gcode(
             path=saved["path"],
             filename=saved["filename"],
@@ -144,6 +152,7 @@ def gcode_create():
             absolute_path=saved["absolute_path"],
             size=saved["size"],
             user_uuid=get_current_user()["uuid"],
+            organization_uuid=org_uuid,
         )
         analyze_gcode.delay(gcode_id)
     except (IOError, OSError) as e:
@@ -153,6 +162,7 @@ def gcode_create():
             make_gcode_response(
                 {
                     "id": gcode_id,
+                    "organization_uuid": org_uuid,
                     "user_uuid": get_current_user()["uuid"],
                     "username": get_current_user()["username"],
                     "path": saved["path"],
@@ -168,12 +178,13 @@ def gcode_create():
     )
 
 
-@app.route("/gcodes/<id>/data", methods=["GET"])
+@app.route("/organizations/<org_uuid>/gcodes/<id>/data", methods=["GET"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def gcode_file(id):
+def gcode_file(org_uuid, id):
     gcode = gcodes.get_gcode(id)
-    if gcode is None:
+    if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     try:
         return send_file(
@@ -185,15 +196,17 @@ def gcode_file(id):
         return abort(make_response("", 404))
 
 
-@app.route("/gcodes/<id>", methods=["DELETE"])
+@app.route("/organizations/<org_uuid>/gcodes/<id>", methods=["DELETE"])
 @jwt_force_password_change
+@validate_org_access()
 @cross_origin()
-def gcode_delete(id):
+def gcode_delete(org_uuid, id):
     gcode = gcodes.get_gcode(id)
-    if gcode is None:
+    if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = get_current_user()
-    if user["uuid"] != gcode["user_uuid"] and user["role"] not in ["admin"]:
+    # TODO scope to organization_uuid admin
+    if user["uuid"] != gcode["user_uuid"] and user["system_role"] not in ["admin"]:
         return abort(
             make_response(
                 jsonify(message="G-Code does not belong to %s" % user["uuid"]), 401

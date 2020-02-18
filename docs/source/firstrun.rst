@@ -36,6 +36,9 @@ Also, for some operations, such as another password change or adding users, you 
 re-authenticate with your password from time to time. So don't be alarmed if the application
 prompts for your password again.
 
+The users are always bound to an *organization*. A single user can be a member of multiple organizations
+with a different role in every one of them. Upon installation, there is a *Default organization* present.
+
 Handsfree access
 ----------------
 

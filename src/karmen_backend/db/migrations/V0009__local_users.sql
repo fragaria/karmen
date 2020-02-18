@@ -31,9 +31,6 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.users
-    OWNER to print3d;
-
 
 CREATE TABLE public.local_users
 (
@@ -51,8 +48,6 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.local_users
-    OWNER to print3d;
 
 
 ALTER TABLE public.gcodes

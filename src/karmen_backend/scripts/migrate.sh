@@ -12,12 +12,22 @@ if [ "$ENV" = 'production' ]; then
   cat << EOF > "${MYDIR}/../db/migrations.yml"
 conn: "host='${POSTGRES_HOST}' port=${POSTGRES_PORT} dbname='print3d' user='print3d' password='print3d'"
 EOF
+elif [ "$ENV" = 'test' ]; then
+    cat << EOF > "${MYDIR}/../db/migrations.yml"
+callbacks:
+  afterAll:
+      - test/organizations.sql
+      - test/printers.sql
+      - test/users.sql
+conn: "host='${POSTGRES_HOST}' port=${POSTGRES_PORT} dbname='print3d' user='print3d' password='print3d'"
+EOF
 else
   cat << EOF > "${MYDIR}/../db/migrations.yml"
 callbacks:
   afterAll:
-      - fake-printers.sql
-      - test-users.sql
+      - dev/organizations.sql
+      - dev/printers.sql
+      - dev/users.sql
 conn: "host='${POSTGRES_HOST}' port=${POSTGRES_PORT} dbname='print3d' user='print3d' password='print3d'"
 EOF
 fi

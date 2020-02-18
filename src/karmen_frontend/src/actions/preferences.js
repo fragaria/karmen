@@ -6,3 +6,12 @@ export const setPrinterViewType = viewType => dispatch => {
     }
   });
 };
+
+export const setNetworkInterface = networkInterface => dispatch => {
+  return dispatch({
+    type: "SET_NETWORK_INTERFACE",
+    payload: {
+      networkInterface
+    }
+  });
+};

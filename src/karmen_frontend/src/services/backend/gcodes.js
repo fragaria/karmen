@@ -4,13 +4,14 @@ import download from "downloadjs";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getGcodes = (
+  orgUuid,
   startWith = null,
   orderBy = null,
   displayFilter = null,
   limit = 15,
   fields = []
 ) => {
-  let uri = `${BASE_URL}/gcodes?limit=${limit}`;
+  let uri = `${BASE_URL}/organizations/${orgUuid}/gcodes?limit=${limit}`;
   if (fields) {
     uri += `&fields=${fields.join(",")}`;
   }
@@ -40,8 +41,8 @@ export const getGcodes = (
     });
 };
 
-export const getGcode = (id, fields = []) => {
-  let uri = `${BASE_URL}/gcodes/${id}`;
+export const getGcode = (orgUuid, id, fields = []) => {
+  let uri = `${BASE_URL}/organizations/${orgUuid}/gcodes/${id}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -62,8 +63,8 @@ export const getGcode = (id, fields = []) => {
     });
 };
 
-export const deleteGcode = id => {
-  return fetch(`${BASE_URL}/gcodes/${id}`, {
+export const deleteGcode = (orgUuid, id) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes/${id}`, {
     method: "DELETE",
     headers: getHeaders()
   })
@@ -79,13 +80,13 @@ export const deleteGcode = id => {
     });
 };
 
-export const uploadGcode = (path, file) => {
+export const uploadGcode = (orgUuid, path, file) => {
   var data = new FormData();
   data.append("file", file);
   data.append("path", path);
   const headers = getHeaders();
   headers.delete("content-type");
-  return fetch(`${BASE_URL}/gcodes`, {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes`, {
     method: "POST",
     headers: headers,
     body: data
