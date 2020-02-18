@@ -1,4 +1,4 @@
-import uuid
+import uuid as uuidmodule
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, clients
@@ -9,7 +9,7 @@ from flask_jwt_extended import get_current_user
 
 def make_printjob_response(printjob, fields=None, user_mapping=None):
     flist = [
-        "id",
+        "uuid",
         "started",
         "gcode_data",
         "printer_data",
@@ -38,14 +38,19 @@ def printjob_create(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))
-    gcode_id = data.get("gcode", None)
+    gcode_uuid = data.get("gcode", None)
     printer_uuid = data.get("printer", None)
-    if not gcode_id or not printer_uuid:
+    if not gcode_uuid or not printer_uuid:
+        return abort(make_response("", 400))
+    try:
+        uuidmodule.UUID(gcode_uuid, version=4)
+        uuidmodule.UUID(printer_uuid, version=4)
+    except (ValueError, AttributeError):
         return abort(make_response("", 400))
     printer = printers.get_printer(printer_uuid)
     if printer is None or printer["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
-    gcode = gcodes.get_gcode(gcode_id)
+    gcode = gcodes.get_gcode(gcode_uuid)
     if gcode is None:
         return abort(make_response("", 404))
     try:
@@ -59,13 +64,15 @@ def printjob_create(org_uuid):
                     jsonify(message="Cannot upload the g-code to the printer"), 500
                 )
             )
-        printjob_id = printjobs.add_printjob(
-            gcode_id=gcode["id"],
+        printjob_uuid = uuidmodule.uuid4()
+        printjobs.add_printjob(
+            uuid=printjob_uuid,
+            gcode_uuid=gcode["uuid"],
             organization_uuid=org_uuid,
             printer_uuid=printer["uuid"],
             user_uuid=get_current_user()["uuid"],
             gcode_data={
-                "id": gcode["id"],
+                "uuid": gcode["uuid"],
                 "filename": gcode["filename"],
                 "size": gcode["size"],
                 "available": True,
@@ -79,7 +86,7 @@ def printjob_create(org_uuid):
             },
         )
         return (
-            jsonify({"id": printjob_id, "user_uuid": get_current_user()["uuid"]}),
+            jsonify({"uuid": printjob_uuid, "user_uuid": get_current_user()["uuid"]}),
             201,
         )
     except clients.utils.PrinterClientException:
@@ -105,12 +112,10 @@ def printjobs_list(org_uuid):
         limit = 200
     try:
         start_with = (
-            int(request.args.get("start_with"))
+            uuidmodule.UUID(request.args.get("start_with"), version=4)
             if request.args.get("start_with")
             else None
         )
-        if start_with and start_with <= 0:
-            start_with = None
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get("fields", "").split(",") if f]
@@ -149,7 +154,7 @@ def printjobs_list(org_uuid):
     if filter_crit:
         parts.append("filter=%s" % filter_crit)
     if next_record:
-        parts.append("start_with=%s" % next_record["id"])
+        parts.append("start_with=%s" % next_record["uuid"])
         response["next"] = (
             "%s?%s" % (next_href, "&".join(parts)) if parts else next_href
         )
@@ -157,12 +162,16 @@ def printjobs_list(org_uuid):
     return jsonify(response), 200
 
 
-@app.route("/organizations/<org_uuid>/printjobs/<id>", methods=["GET"])
+@app.route("/organizations/<org_uuid>/printjobs/<uuid>", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printjob_detail(org_uuid, id):
-    printjob = printjobs.get_printjob(id)
+def printjob_detail(org_uuid, uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printjob = printjobs.get_printjob(uuid)
     if printjob is None or printjob["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = users.get_by_uuid(printjob.get("user_uuid"))

@@ -7,7 +7,7 @@ from server.database import get_connection, prepare_list_statement
 # Take that into account when processing results
 def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None):
     columns = [
-        "id",
+        "uuid",
         "path",
         "filename",
         "display",
@@ -28,6 +28,7 @@ def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None
             start_with=start_with,
             filter=filter,
             where=sql.SQL("organization_uuid = {}").format(sql.Literal(org_uuid)),
+            pk_column="uuid",
         )
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(statement)
@@ -36,17 +37,12 @@ def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None
         return data
 
 
-def get_gcode(id):
-    try:
-        if isinstance(id, str):
-            id = int(id, base=10)
-    except ValueError:
-        return None
+def get_gcode(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid, organization_uuid from gcodes where id = %s",
-            (id,),
+            "SELECT uuid, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid, organization_uuid from gcodes where uuid = %s",
+            (uuid,),
         )
         data = cursor.fetchone()
         cursor.close()
@@ -57,8 +53,9 @@ def add_gcode(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO gcodes (path, filename, display, absolute_path, size, analysis, user_uuid, organization_uuid) values (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO gcodes (uuid, path, filename, display, absolute_path, size, analysis, user_uuid, organization_uuid) values (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
             (
+                kwargs["uuid"],
                 kwargs["path"],
                 kwargs["filename"],
                 kwargs["display"],
@@ -74,23 +71,18 @@ def add_gcode(**kwargs):
         return data[0]
 
 
-def delete_gcode(id):
-    try:
-        if isinstance(id, str):
-            id = int(id, base=10)
-    except ValueError:
-        pass
+def delete_gcode(uuid):
     with get_connection() as connection:
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM gcodes WHERE id = %s", (id,))
+        cursor.execute("DELETE FROM gcodes WHERE uuid = %s", (uuid,))
         cursor.close()
 
 
-def set_analysis(gcode_id, analysis):
+def set_analysis(gcode_uuid, analysis):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE gcodes SET analysis = %s where id = %s",
-            (psycopg2.extras.Json(analysis), gcode_id),
+            "UPDATE gcodes SET analysis = %s where uuid = %s",
+            (psycopg2.extras.Json(analysis), gcode_uuid),
         )
         cursor.close()

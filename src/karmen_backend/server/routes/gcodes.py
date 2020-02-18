@@ -1,5 +1,6 @@
 import re
 import datetime
+import uuid as uuidmodule
 
 from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
@@ -13,7 +14,7 @@ from flask_jwt_extended import get_current_user
 
 def make_gcode_response(gcode, fields=None, user_mapping=None):
     flist = [
-        "id",
+        "uuid",
         "path",
         "filename",
         "display",
@@ -35,7 +36,7 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
             if field == "data":
                 response["data"] = "/organizations/%s/gcodes/%s/data" % (
                     gcode["organization_uuid"],
-                    gcode["id"],
+                    gcode["uuid"],
                 )
                 continue
             response[field] = gcode.get(field, None)
@@ -61,12 +62,10 @@ def gcodes_list(org_uuid):
         limit = 200
     try:
         start_with = (
-            int(request.args.get("start_with"))
+            uuidmodule.UUID(request.args.get("start_with"), version=4)
             if request.args.get("start_with")
             else None
         )
-        if start_with and start_with <= 0:
-            start_with = None
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get("fields", "").split(",") if f]
@@ -106,7 +105,7 @@ def gcodes_list(org_uuid):
     if filter_crit:
         parts.append("filter=%s" % filter_crit)
     if next_record:
-        parts.append("start_with=%s" % next_record["id"])
+        parts.append("start_with=%s" % next_record["uuid"])
         response["next"] = (
             "%s?%s" % (next_href, "&".join(parts)) if parts else next_href
         )
@@ -114,12 +113,16 @@ def gcodes_list(org_uuid):
     return jsonify(response)
 
 
-@app.route("/organizations/<org_uuid>/gcodes/<id>", methods=["GET"])
+@app.route("/organizations/<org_uuid>/gcodes/<uuid>", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcode_detail(org_uuid, id):
-    gcode = gcodes.get_gcode(id)
+def gcode_detail(org_uuid, uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = users.get_by_uuid(gcode.get("user_uuid"))
@@ -146,6 +149,7 @@ def gcode_create(org_uuid):
     try:
         saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
         gcode_id = gcodes.add_gcode(
+            uuid=uuidmodule.uuid4(),
             path=saved["path"],
             filename=saved["filename"],
             display=saved["display"],
@@ -161,7 +165,7 @@ def gcode_create(org_uuid):
         jsonify(
             make_gcode_response(
                 {
-                    "id": gcode_id,
+                    "uuid": gcode_id,
                     "organization_uuid": org_uuid,
                     "user_uuid": get_current_user()["uuid"],
                     "username": get_current_user()["username"],
@@ -178,12 +182,16 @@ def gcode_create(org_uuid):
     )
 
 
-@app.route("/organizations/<org_uuid>/gcodes/<id>/data", methods=["GET"])
+@app.route("/organizations/<org_uuid>/gcodes/<uuid>/data", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcode_file(org_uuid, id):
-    gcode = gcodes.get_gcode(id)
+def gcode_file(org_uuid, uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     try:
@@ -196,12 +204,16 @@ def gcode_file(org_uuid, id):
         return abort(make_response("", 404))
 
 
-@app.route("/organizations/<org_uuid>/gcodes/<id>", methods=["DELETE"])
+@app.route("/organizations/<org_uuid>/gcodes/<uuid>", methods=["DELETE"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcode_delete(org_uuid, id):
-    gcode = gcodes.get_gcode(id)
+def gcode_delete(org_uuid, uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = get_current_user()
@@ -217,15 +229,15 @@ def gcode_delete(org_uuid, id):
     except IOError:
         pass
     finally:
-        gcodes.delete_gcode(id)
         printjobs.update_gcode_data(
-            gcode["id"],
+            uuid,
             {
-                "id": gcode["id"],
+                "uuid": gcode["uuid"],
                 "user_uuid": gcode["user_uuid"],
                 "filename": gcode["filename"],
                 "size": gcode["size"],
                 "available": False,
             },
         )
+        gcodes.delete_gcode(uuid)
     return "", 204

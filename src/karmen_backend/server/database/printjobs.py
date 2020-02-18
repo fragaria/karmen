@@ -7,8 +7,8 @@ from server.database import get_connection, prepare_list_statement
 # Take that into account when processing results
 def get_printjobs(org_uuid, order_by=None, limit=None, start_with=None, filter=None):
     columns = [
-        "id",
-        "gcode_id",
+        "uuid",
+        "gcode_uuid",
         "organization_uuid",
         "printer_uuid",
         "started",
@@ -26,6 +26,7 @@ def get_printjobs(org_uuid, order_by=None, limit=None, start_with=None, filter=N
             start_with=start_with,
             filter=filter,
             where=sql.SQL("organization_uuid = {}").format(sql.Literal(org_uuid)),
+            pk_column="uuid",
         )
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(statement)
@@ -34,17 +35,12 @@ def get_printjobs(org_uuid, order_by=None, limit=None, start_with=None, filter=N
         return data
 
 
-def get_printjob(id):
-    try:
-        if isinstance(id, str):
-            id = int(id, base=10)
-    except ValueError:
-        return None
+def get_printjob(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT id, gcode_id, organization_uuid, printer_uuid, started, gcode_data, printer_data, user_uuid from printjobs where id = %s",
-            (id,),
+            "SELECT uuid, gcode_uuid, organization_uuid, printer_uuid, started, gcode_data, printer_data, user_uuid from printjobs where uuid = %s",
+            (uuid,),
         )
         data = cursor.fetchone()
         cursor.close()
@@ -55,9 +51,10 @@ def add_printjob(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printjobs (gcode_id, organization_uuid, printer_uuid, gcode_data, printer_data, user_uuid) values (%s, %s, %s, %s, %s, %s) RETURNING id",
+            "INSERT INTO printjobs (uuid, gcode_uuid, organization_uuid, printer_uuid, gcode_data, printer_data, user_uuid) values (%s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
             (
-                kwargs["gcode_id"],
+                kwargs["uuid"],
+                kwargs["gcode_uuid"],
                 kwargs["organization_uuid"],
                 kwargs["printer_uuid"],
                 psycopg2.extras.Json(kwargs.get("gcode_data", None)),
@@ -70,23 +67,18 @@ def add_printjob(**kwargs):
         return data[0]
 
 
-def delete_printjob(id):
-    try:
-        if isinstance(id, str):
-            id = int(id, base=10)
-    except ValueError:
-        pass
+def delete_printjob(uuid):
     with get_connection() as connection:
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM printjobs WHERE id = %s", (id,))
+        cursor.execute("DELETE FROM printjobs WHERE uuid = %s", (uuid,))
         cursor.close()
 
 
-def update_gcode_data(gcode_id, gcode_data):
+def update_gcode_data(gcode_uuid, gcode_data):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE printjobs SET gcode_data = %s where gcode_id = %s",
-            (psycopg2.extras.Json(gcode_data), gcode_id),
+            "UPDATE printjobs SET gcode_data = %s where gcode_uuid = %s",
+            (psycopg2.extras.Json(gcode_data), gcode_uuid),
         )
         cursor.close()

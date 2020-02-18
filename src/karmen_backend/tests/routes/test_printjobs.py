@@ -1,5 +1,6 @@
 import unittest
 import mock
+import uuid as uuidmodule
 
 from server import app
 from server.database import gcodes, printjobs, printers
@@ -19,7 +20,8 @@ from ..utils import (
 
 class ListRoute(unittest.TestCase):
     def setUp(self):
-        self.gcode_id = gcodes.add_gcode(
+        self.gcode_uuid = gcodes.add_gcode(
+            uuid=uuidmodule.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -28,7 +30,8 @@ class ListRoute(unittest.TestCase):
             user_uuid=UUID_USER,
             organization_uuid=UUID_ORG,
         )
-        self.gcode_id2 = gcodes.add_gcode(
+        self.gcode_uuid2 = gcodes.add_gcode(
+            uuid=uuidmodule.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -41,8 +44,9 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    gcode_id=self.gcode_id,
-                    gcode_data={"id": self.gcode_id},
+                    uuid=uuidmodule.uuid4(),
+                    gcode_uuid=self.gcode_uuid,
+                    gcode_data={"uuid": self.gcode_uuid},
                     printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
                     printer_data={"ip": "172.16.236.11", "port": 8080},
                     user_uuid=UUID_USER,
@@ -52,8 +56,9 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    gcode_id=self.gcode_id2,
-                    gcode_data={"id": self.gcode_id2},
+                    uuid=uuidmodule.uuid4(),
+                    gcode_uuid=self.gcode_uuid2,
+                    gcode_data={"uuid": self.gcode_uuid2},
                     printer_uuid="e24a9711-aabc-48f0-b790-eac056c43f07",
                     printer_data={"ip": "172.16.236.12", "port": 8080},
                     user_uuid=UUID_USER,
@@ -61,8 +66,9 @@ class ListRoute(unittest.TestCase):
                 )
             )
         printjobs.add_printjob(
-            gcode_id=self.gcode_id2,
-            gcode_data={"id": self.gcode_id2},
+            uuid=uuidmodule.uuid4(),
+            gcode_uuid=self.gcode_uuid2,
+            gcode_data={"uuid": self.gcode_uuid2},
             printer_uuid="7e5129ad-08d0-42d1-b65c-847d3c636157",
             printer_data={"ip": "172.16.236.12", "port": 8080},
             user_uuid=UUID_USER,
@@ -113,7 +119,7 @@ class ListRoute(unittest.TestCase):
             if len(response.json["items"]) < 200:
                 self.assertTrue("next" not in response.json)
             self.assertTrue(len(response.json["items"]) >= 2)
-            self.assertTrue("id" in response.json["items"][0])
+            self.assertTrue("uuid" in response.json["items"][0])
             self.assertTrue("user_uuid" in response.json["items"][0])
             self.assertTrue("username" in response.json["items"][0])
             self.assertTrue("gcode_data" in response.json["items"][0])
@@ -139,14 +145,14 @@ class ListRoute(unittest.TestCase):
                     self.assertTrue(code["started"] >= prev["started"])
                     # we are ordering implicitly by id ASC as well
                     if code["started"] == prev["started"]:
-                        self.assertTrue(code["id"] >= prev["id"])
+                        self.assertTrue(code["uuid"] >= prev["uuid"])
                 prev = code
 
     def test_limit(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printjobs?limit=3&order_by=started&fields=id,started"
+                "/organizations/%s/printjobs?limit=3&order_by=started&fields=uuid,started"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
@@ -155,7 +161,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 3)
             self.assertTrue(
-                "/organizations/%s/printjobs?limit=3&order_by=started&fields=id,started&start_with="
+                "/organizations/%s/printjobs?limit=3&order_by=started&fields=uuid,started&start_with="
                 % UUID_ORG
                 in response.json["next"]
             )
@@ -164,7 +170,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printjobs?limit=3&order_by=id,started" % UUID_ORG,
+                "/organizations/%s/printjobs?limit=3&order_by=uuid,started" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 400)
@@ -173,62 +179,20 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printjobs?limit=2&start_with=2" % UUID_ORG,
+                "/organizations/%s/printjobs?limit=2&start_with=%s"
+                % (UUID_ORG, self.printjob_ids[0]),
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
             self.assertTrue(len(response.json["items"]) == 2)
-            self.assertTrue(response.json["items"][0]["id"] >= 2)
             self.assertTrue(
-                response.json["items"][1]["id"] > response.json["items"][0]["id"]
-            )
-            self.assertEqual(
-                response.json["next"],
-                "/organizations/%s/printjobs?limit=2&start_with=%s"
-                % (UUID_ORG, str(int(response.json["items"][1]["id"]) + 1)),
-            )
-
-    def test_start_with_non_existent(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.get(
-                "/organizations/%s/printjobs?limit=3&start_with=99999&order_by=started"
-                % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
-            self.assertTrue(len(response.json["items"]) == 0)
-
-    def test_start_with_order_by(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.get(
-                "/organizations/%s/printjobs?limit=3&start_with=1&order_by=-id"
-                % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
-            self.assertTrue("next" not in response.json)
-            self.assertTrue(len(response.json["items"]) == 1)
-
-            response = c.get(
-                "/organizations/%s/printjobs?limit=3&start_with=1&order_by=id"
-                % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
-            self.assertTrue("next" in response.json)
-            self.assertTrue(len(response.json["items"]) == 3)
-            self.assertTrue(
-                response.json["items"][1]["id"] > response.json["items"][0]["id"]
+                response.json["items"][1]["uuid"] > response.json["items"][0]["uuid"]
             )
             self.assertTrue(
-                response.json["items"][2]["id"] > response.json["items"][1]["id"]
+                ("/organizations/%s/printjobs?limit=2&start_with=" % UUID_ORG)
+                in response.json["next"]
             )
 
     def test_ignore_start_with_str(self):
@@ -287,7 +251,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&order_by=id"
+                "/organizations/%s/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&order_by=uuid"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
@@ -298,20 +262,20 @@ class ListRoute(unittest.TestCase):
                     job["printer_uuid"], "e24a9711-aabc-48f0-b790-eac056c43f07"
                 )
             response = c.get(
-                "/organizations/%s/printjobs?filter=gcode_id:3:8080&order_by=id"
+                "/organizations/%s/printjobs?filter=gcode_uuid:3:8080&order_by=uuid"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             for job in response.json["items"]:
-                self.assertTrue(job["gcode_data"]["id"], "3")
+                self.assertTrue(job["gcode_data"]["uuid"], "3")
 
     def test_filter_next(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&limit=10&order_by=-id"
+                "/organizations/%s/printjobs?filter=printer_uuid:e24a9711-aabc-48f0-b790-eac056c43f07&limit=10&order_by=-uuid"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
@@ -325,7 +289,7 @@ class ListRoute(unittest.TestCase):
             self.assertEqual(response2.status_code, 200)
             self.assertTrue("items" in response2.json)
             self.assertTrue(
-                response.json["items"][0]["id"] > response2.json["items"][0]["id"]
+                response.json["items"][0]["uuid"] > response2.json["items"][0]["uuid"]
             )
 
     def test_filter_ignore_bad_column(self):
@@ -353,7 +317,8 @@ class ListRoute(unittest.TestCase):
 
 class DetailRoute(unittest.TestCase):
     def setUp(self):
-        self.gcode_id = gcodes.add_gcode(
+        self.gcode_uuid = gcodes.add_gcode(
+            uuid=uuidmodule.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -363,8 +328,9 @@ class DetailRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         self.printjob_id = printjobs.add_printjob(
-            gcode_id=self.gcode_id,
-            gcode_data={"id": self.gcode_id},
+            uuid=uuidmodule.uuid4(),
+            gcode_uuid=self.gcode_uuid,
+            gcode_data={"uuid": self.gcode_uuid},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"ip": "172.16.236.11", "port": 8080},
             user_uuid=UUID_USER,
@@ -423,8 +389,8 @@ class DetailRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
-            self.assertTrue("id" in response.json)
-            self.assertEqual(response.json["id"], self.printjob_id)
+            self.assertTrue("uuid" in response.json)
+            self.assertEqual(response.json["uuid"], self.printjob_id)
             self.assertTrue("gcode_data" in response.json)
             self.assertTrue("printer_data" in response.json)
 
@@ -432,7 +398,8 @@ class DetailRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printjobs/172.16" % UUID_ORG,
+                "/organizations/%s/printjobs/8109969e-be01-4180-8ef0-d900b101add6"
+                % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 404)
@@ -440,7 +407,8 @@ class DetailRoute(unittest.TestCase):
 
 class CreateRoute(unittest.TestCase):
     def setUp(self):
-        self.gcode_id = gcodes.add_gcode(
+        self.gcode_uuid = gcodes.add_gcode(
+            uuid=uuidmodule.uuid4(),
             path="a/b/c",
             filename="file",
             display="file-display",
@@ -463,14 +431,14 @@ class CreateRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
-                    "gcode": self.gcode_id,
+                    "gcode": self.gcode_uuid,
                 },
             )
             self.assertEqual(response.status_code, 201)
             self.assertEqual(response.json["user_uuid"], UUID_USER)
-            pid = response.json["id"]
+            pid = response.json["uuid"]
             pj = printjobs.get_printjob(pid)
-            self.assertEqual(pj["gcode_id"], self.gcode_id)
+            self.assertEqual(pj["gcode_uuid"], self.gcode_uuid)
             self.assertEqual(pj["user_uuid"], UUID_USER)
             self.assertEqual(pj["printer_uuid"], "20e91c14-c3e4-4fe9-a066-e69d53324a20")
             self.assertFalse(pj["printer_data"] is None)
@@ -498,7 +466,7 @@ class CreateRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
-                    "gcode": self.gcode_id,
+                    "gcode": self.gcode_uuid,
                 },
             )
             self.assertEqual(response.status_code, 409)
@@ -520,7 +488,7 @@ class CreateRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
-                    "gcode": self.gcode_id,
+                    "gcode": self.gcode_uuid,
                 },
             )
             self.assertEqual(response.status_code, 404)
@@ -568,7 +536,7 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/printjobs" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"gcode": self.gcode_id},
+                json={"gcode": self.gcode_uuid},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -579,7 +547,7 @@ class CreateRoute(unittest.TestCase):
                 "/organizations/%s/printjobs" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
-                    "gcode": self.gcode_id,
+                    "gcode": self.gcode_uuid,
                     "printer": "225b4a63-d94a-4231-87dc-f1bff717e5da",
                 },
             )
@@ -593,7 +561,7 @@ class CreateRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"gcode": -3, "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20"},
             )
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 400)
 
     @mock.patch(
         "server.routes.printjobs.clients.get_printer_instance", return_value=None
@@ -605,7 +573,7 @@ class CreateRoute(unittest.TestCase):
                 "/organizations/%s/printjobs" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={
-                    "gcode": self.gcode_id,
+                    "gcode": self.gcode_uuid,
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
                 },
             )
