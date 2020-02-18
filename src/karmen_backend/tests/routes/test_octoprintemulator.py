@@ -131,7 +131,7 @@ class FilesLocalRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "")
+            self.assertEqual(args[2], "")
             self.assertEqual(mocked_delay.call_count, 1)
 
     @mock.patch("server.routes.gcodes.gcodes.add_gcode")
@@ -159,7 +159,7 @@ class FilesLocalRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "/a/b")
+            self.assertEqual(args[2], "/a/b")
             self.assertTrue("files" in response.json)
             self.assertTrue("local" in response.json["files"])
             self.assertEqual(response.json["files"]["local"]["display"], "display")

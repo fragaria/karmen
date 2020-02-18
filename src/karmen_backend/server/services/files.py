@@ -6,10 +6,10 @@ from werkzeug.utils import secure_filename
 from server import app
 
 
-def save(incoming, path):
+def save(org_uuid, incoming, path):
     original_filename = incoming.filename
     filename = secure_filename(original_filename)
-    destination_dir = os.path.join(app.config["UPLOAD_FOLDER"], path)
+    destination_dir = os.path.join(app.config["UPLOAD_FOLDER"], org_uuid, path)
     destination = os.path.join(destination_dir, filename)
 
     # fix potentially non-existent paths
@@ -21,11 +21,6 @@ def save(incoming, path):
         )
         filename = secure_filename(original_filename)
         destination = os.path.join(destination_dir, filename)
-    # TODO detect more parameters
-    # ; filament_type = PLA
-    # M140 S60 ; set bed temp
-    # M104 S215 ; set extruder temp
-    # ; printer_model = MK3
     incoming.save(destination)
     size = os.stat(destination).st_size
     return {

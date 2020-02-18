@@ -102,13 +102,14 @@ def upload():
     if not re.search(r"\.gco(de)?$", incoming.filename):
         return abort(415)
     try:
-        saved = files.save(incoming, request.form.get("path", ""))
+        org_uuid = decoded["user_claims"]["organization_uuid"]
+        saved = files.save(org_uuid, incoming, request.form.get("path", ""))
         gcode_id = gcodes.add_gcode(
             path=saved["path"],
             filename=saved["filename"],
             display=saved["display"],
             absolute_path=saved["absolute_path"],
-            organization_uuid=decoded["user_claims"]["organization_uuid"],
+            organization_uuid=org_uuid,
             size=saved["size"],
             user_uuid=user_uuid,
         )

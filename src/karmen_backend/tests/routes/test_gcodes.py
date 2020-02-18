@@ -453,7 +453,7 @@ class CreateRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "/")
+            self.assertEqual(args[2], "/")
             self.assertEqual(mocked_delay.call_count, 1)
 
     @mock.patch("server.routes.gcodes.analyze_gcode.delay")
@@ -481,7 +481,7 @@ class CreateRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
-            self.assertEqual(args[1], "/a/b")
+            self.assertEqual(args[2], "/a/b")
             self.assertTrue("id" in response.json)
             self.assertTrue("user_uuid" in response.json)
             self.assertEqual(response.json["user_uuid"], UUID_USER)

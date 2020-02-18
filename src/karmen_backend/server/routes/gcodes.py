@@ -144,7 +144,7 @@ def gcode_create(org_uuid):
         return abort(make_response("", 415))
 
     try:
-        saved = files.save(incoming, request.form.get("path", "/"))
+        saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
         gcode_id = gcodes.add_gcode(
             path=saved["path"],
             filename=saved["filename"],
