@@ -139,6 +139,7 @@ const GcodeTableRow = ({
           setCtaListExpanded(!ctaListExpanded);
         }}
       >
+        <span className="list-dropdown-title">{display}</span>
         <button
           className="list-dropdown-item"
           onClick={e => {

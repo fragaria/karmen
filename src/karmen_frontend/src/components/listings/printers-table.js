@@ -69,6 +69,7 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
           setCtaListExpanded(!ctaListExpanded);
         }}
       >
+        <span className="list-dropdown-title">{printer.name}</span>
         <Link
           className="list-dropdown-item"
           to={`/printers/${printer.uuid}/settings`}

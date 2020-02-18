@@ -94,6 +94,7 @@ const UsersTableRow = ({ currentUuid, user, onUserChange, onUserDelete }) => {
             setCtaListExpanded(!ctaListExpanded);
           }}
         >
+          <span className="list-dropdown-title">{user.username}</span>
           <button
             className="list-dropdown-item"
             onClick={e => {

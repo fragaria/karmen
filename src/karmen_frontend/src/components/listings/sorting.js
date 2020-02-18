@@ -63,8 +63,9 @@ class Sorting extends React.Component {
 
         {expand && (
           <div className="list-dropdown-items">
-            <div className="list-dropdown-backdrop" onClick={toggle}></div>
+            <span className="list-dropdown-title">Sort by</span>
             {list}
+            <div className="list-dropdown-backdrop" onClick={toggle}></div>
           </div>
         )}
       </div>
