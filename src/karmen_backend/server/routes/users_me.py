@@ -191,12 +191,22 @@ def change_password():
 @fresh_jwt_required
 def list_api_tokens():
     items = []
-    for token in api_tokens.get_tokens_for_user_uuid(get_jwt_identity(), revoked=False):
+    tokens = api_tokens.get_tokens_for_user_uuid(get_jwt_identity(), revoked=False)
+    org_mapping = {
+        o["uuid"]: o["name"]
+        for o in organizations.get_organizations_by_uuids(
+            [t["organization_uuid"] for t in tokens]
+        )
+    }
+    for token in tokens:
         items.append(
             {
                 "jti": token["jti"],
                 "name": token["name"],
-                "organization_uuid": token["organization_uuid"],
+                "organization": {
+                    "uuid": token["organization_uuid"],
+                    "name": org_mapping[token["organization_uuid"]],
+                },
                 "created": token["created"].isoformat(),
             }
         )

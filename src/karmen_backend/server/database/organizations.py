@@ -71,3 +71,15 @@ def get_by_uuid(uuid):
         data = cursor.fetchone()
         cursor.close()
         return data
+
+
+def get_organizations_by_uuids(uuids):
+    with get_connection() as connection:
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute(
+            "SELECT uuid, name, slug, created from organizations where uuid::text = any(%s)",
+            (uuids,),
+        )
+        data = cursor.fetchall()
+        cursor.close()
+        return data

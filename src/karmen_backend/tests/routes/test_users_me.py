@@ -413,6 +413,11 @@ class ListApiTokensRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             for token in response.json["items"]:
+                self.assertTrue("name" in token)
+                self.assertTrue("created" in token)
+                self.assertTrue("organization" in token)
+                self.assertTrue("uuid" in token["organization"])
+                self.assertTrue("name" in token["organization"])
                 db_token = api_tokens.get_token(token["jti"])
                 self.assertEqual(db_token["user_uuid"], UUID_USER)
                 self.assertFalse(db_token["revoked"])
