@@ -883,7 +883,12 @@ select {
 .printer-detail {
   .printer-detail-meta .main-title {
     margin-bottom: 0;
+  
+    @media (max-width: $screen-sm-max) {
+      margin-top: $base-unit;
+    }
   }
+
 
   @media (min-width: $screen-sm-min) {
     display: grid;
