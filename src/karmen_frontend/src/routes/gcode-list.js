@@ -34,8 +34,10 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
           <div className="cta-box text-center">
             <button
               className="btn"
-              onClick={() => {
-                onRowDelete();
+              onClick={(e) => {
+                onRowDelete().then(() => {
+                  modal.closeModal(e);
+                });
               }}
             >
               Yes, delete it
@@ -336,7 +338,7 @@ class GcodeList extends React.Component {
                 }}
                 availablePrinters={getAvailablePrinters(printedOn)}
                 onRowDelete={() => {
-                  deleteGcode(g.uuid).then(() => {
+                  return deleteGcode(g.uuid).then(() => {
                     loadGcodesPage(
                       gcodesList.startWith,
                       gcodesList.orderBy,
