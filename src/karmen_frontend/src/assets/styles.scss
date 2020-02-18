@@ -390,7 +390,7 @@ footer {
 
     .list-items {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       grid-template-rows: 1fr;
       align-items: start;
       padding: 0 $base-unit*2;
@@ -763,7 +763,6 @@ select {
 
 .webcam-stream {
   display: flex;
-  min-height: 200px;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -773,6 +772,7 @@ select {
   cursor: pointer;
 
   &.unavailable {
+    padding: $spacing-default*3 $spacing-default;
     cursor: auto;
   }
 
