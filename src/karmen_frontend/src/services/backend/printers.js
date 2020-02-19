@@ -52,6 +52,7 @@ export const addPrinter = (
   hostname,
   ip,
   port,
+  path,
   name,
   apiKey
 ) => {
@@ -63,6 +64,7 @@ export const addPrinter = (
       hostname,
       ip,
       port,
+      path,
       name,
       api_key: apiKey
     })

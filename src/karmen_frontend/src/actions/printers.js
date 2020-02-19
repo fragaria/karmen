@@ -132,7 +132,16 @@ export const loadPrinter = createActionThunk(
 
 export const addPrinter = createActionThunk(
   "PRINTERS_ADD",
-  (protocol, hostname, ip, port, name, apiKey, { dispatch, getState }) => {
+  (
+    protocol,
+    hostname,
+    ip,
+    port,
+    path,
+    name,
+    apiKey,
+    { dispatch, getState }
+  ) => {
     const { users } = getState();
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
@@ -143,6 +152,7 @@ export const addPrinter = createActionThunk(
       hostname,
       ip,
       port,
+      path,
       name,
       apiKey
     );

@@ -39,6 +39,7 @@ def make_printer_response(printer, fields):
         "ip": printer_inst.ip,
         "port": printer_inst.port,
         "protocol": printer_inst.protocol,
+        "path": printer_inst.path,
     }
     if "status" in fields:
         data["status"] = printer_inst.status()
@@ -128,6 +129,7 @@ def printer_create(org_uuid):
     name = data.get("name", None)
     api_key = data.get("api_key", None)
     protocol = data.get("protocol", "http")
+    path = data.get("path", "")
 
     if (
         (not ip and not hostname)
@@ -156,6 +158,7 @@ def printer_create(org_uuid):
             "hostname": hostname,
             "ip": ip,
             "port": port,
+            "path": path,
             "name": name,
             "protocol": protocol,
             "client": "octoprint",  # TODO make this more generic
@@ -170,6 +173,7 @@ def printer_create(org_uuid):
         hostname=hostname,
         ip=ip,
         port=port,
+        path=path,
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={
@@ -220,7 +224,7 @@ def printer_patch(org_uuid, uuid):
     api_key = data.get("api_key", printer["client_props"].get("api_key", None))
     printer_props = data.get("printer_props", {})
 
-    # TODO it might be necessary to update ip, hostname, port as well eventually
+    # TODO it might be necessary to update ip, hostname, port and path as well eventually
     if not name or protocol not in ["http", "https"]:
         return abort(make_response("", 400))
     printer_inst = clients.get_printer_instance(printer)
@@ -254,6 +258,7 @@ def printer_patch(org_uuid, uuid):
         hostname=printer_inst.hostname,
         ip=printer_inst.ip,
         port=printer_inst.port,
+        path=printer_inst.path,
         protocol=protocol,
         client=printer_inst.client_name(),
         client_props={

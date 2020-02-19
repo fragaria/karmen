@@ -23,6 +23,7 @@ class Octoprint(PrinterClient):
         hostname=None,
         ip=None,
         port=None,
+        path="",
         name=None,
         client_props=None,
         printer_props=None,
@@ -34,10 +35,11 @@ class Octoprint(PrinterClient):
         self.hostname = hostname
         self.ip = ip
         self.port = port
+        self.path = path
         self.protocol = protocol
         self.printer_props = printer_props
         self.client = Octoprint.__client_name__
-        self.update_network_host()
+        self.update_network_base()
 
         if not client_props:
             client_props = {}
@@ -55,14 +57,20 @@ class Octoprint(PrinterClient):
         if self.client_info.api_key:
             self.http_session.headers.update({"X-Api-Key": self.client_info.api_key})
 
-    def update_network_host(self):
+    def update_network_base(self):
         # TODO adapt requests to support custom DNS resolving that speaks mDNS/bonjour/avahi
         # https://stackoverflow.com/questions/22609385/python-requests-library-define-specific-dns
         # until then, we're stuck with IP addresses
         if self.port is not None:
-            self.network_host = "%s:%s" % (self.ip, self.port)
+            network_host = "%s:%s" % (self.ip, self.port)
         else:
-            self.network_host = self.ip
+            network_host = self.ip
+        normalized_path = self.path
+        if len(self.path) and self.path[-1] == "/":
+            normalized_path = self.path[0:-1]
+        self.network_base = urlparse.urljoin(
+            "%s://%s" % (self.protocol, network_host), normalized_path
+        )
 
     def get_printer_props(self):
         return self.printer_props
@@ -77,7 +85,7 @@ class Octoprint(PrinterClient):
     def _http_get(self, path, force=False):
         if not self.client_info.connected and not force:
             return None
-        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.network_host), path)
+        uri = "%s%s" % (self.network_base, path)
         try:
             req = self.http_session.get(
                 uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
@@ -101,7 +109,7 @@ class Octoprint(PrinterClient):
     def _http_post(self, path, data=None, files=None, json=None, force=False):
         if not self.client_info.connected and not force:
             return None
-        uri = urlparse.urljoin("%s://%s" % (self.protocol, self.network_host), path)
+        uri = "%s/%s" % (self.network_base, path)
         try:
             headers = {}
             if self.client_info.api_key:
@@ -189,7 +197,7 @@ class Octoprint(PrinterClient):
         if request is None:
             app.logger.debug(
                 "%s is not responding on /api/version - not octoprint"
-                % self.network_host
+                % self.network_base
             )
             self.client_info = PrinterClientInfo(
                 {}, connected=False, api_key=self.client_info.api_key
@@ -199,7 +207,7 @@ class Octoprint(PrinterClient):
         if request.status_code == 403:
             app.logger.debug(
                 "%s is responding with %s on /api/version - might be access-protected octoprint"
-                % (self.network_host, request.status_code)
+                % (self.network_base, request.status_code)
             )
             settings_req = request = self._http_get("/api/settings", force=True)
             # This might break with the future versions of octoprint
@@ -207,7 +215,7 @@ class Octoprint(PrinterClient):
             if settings_req is not None and settings_req.status_code in [200, 403]:
                 app.logger.debug(
                     "%s is responding with %s on /api/settings - probably access-protected octoprint"
-                    % (self.network_host, settings_req.status_code)
+                    % (self.network_base, settings_req.status_code)
                 )
                 self.client_info = PrinterClientInfo(
                     {},
@@ -220,7 +228,7 @@ class Octoprint(PrinterClient):
             else:
                 app.logger.debug(
                     "%s is responding with %s on /api/settings - probably not octoprint"
-                    % (self.network_host, settings_req.status_code)
+                    % (self.network_base, settings_req.status_code)
                 )
                 self.client_info = PrinterClientInfo(
                     {},
@@ -233,7 +241,7 @@ class Octoprint(PrinterClient):
         if request.status_code != 200:
             app.logger.debug(
                 "%s is responding with %s on /api/version - not accessible"
-                % (self.network_host, request.status_code)
+                % (self.network_base, request.status_code)
             )
             self.client_info = PrinterClientInfo(
                 {},
@@ -248,7 +256,7 @@ class Octoprint(PrinterClient):
             if "text" not in data:
                 app.logger.debug(
                     "%s is responding with unfamiliar JSON %s on /api/version - probably not octoprint"
-                    % (self.network_host, data)
+                    % (self.network_base, data)
                 )
                 self.client_info = PrinterClientInfo(
                     data,
@@ -260,7 +268,7 @@ class Octoprint(PrinterClient):
         except json.decoder.JSONDecodeError:
             app.logger.debug(
                 "%s is not responding with JSON on /api/version - probably not octoprint"
-                % self.network_host
+                % self.network_base
             )
             self.client_info = PrinterClientInfo(
                 {},
@@ -272,7 +280,7 @@ class Octoprint(PrinterClient):
         if re.match(r"^octoprint", data["text"], re.IGNORECASE) is None:
             app.logger.debug(
                 "%s is responding with %s on /api/version - probably not octoprint"
-                % (self.network_host, data["text"])
+                % (self.network_base, data["text"])
             )
             self.client_info = PrinterClientInfo(
                 data,
@@ -324,30 +332,17 @@ class Octoprint(PrinterClient):
                     stream_url
                     and re.match(r"^https?", stream_url, re.IGNORECASE) is None
                 ):
-                    stream_url = "%s://%s%s" % (
-                        self.protocol,
-                        self.network_host,
-                        stream_url,
-                    )
+                    stream_url = "%s%s" % (self.network_base, stream_url)
                 if snapshot_url is not None:
                     if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
-                        snapshot_url = "%s://%s%s" % (
-                            self.protocol,
-                            self.network_host,
-                            snapshot_url,
-                        )
-                    host_without_port = re.sub(r":(\d+)", "", self.network_host)
+                        snapshot_url = "%s%s" % (self.network_base, snapshot_url)
                     if (
                         re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
                         is not None
                     ):
-                        snapshot_url = snapshot_url.replace(
-                            "127.0.0.1", host_without_port
-                        )
+                        snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
                     if re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None:
-                        snapshot_url = snapshot_url.replace(
-                            "localhost", host_without_port
-                        )
+                        snapshot_url = snapshot_url.replace("localhost", self.ip)
                 return {
                     "message": "OK",
                     "stream": stream_url,

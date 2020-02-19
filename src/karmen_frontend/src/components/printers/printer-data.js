@@ -136,12 +136,13 @@ export const PrinterConnectionStatus = ({ printer }) => {
             className="anchor"
             href={`${printer.protocol}://${printer.hostname}${
               printer.port ? `:${printer.port}` : ""
-            }`}
+            }${printer.path ? `${printer.path}` : ""}`}
             target="_blank"
             rel="noopener noreferrer"
           >
             {printer.hostname}
             {printer.port ? `:${printer.port}` : ""}
+            {printer.path ? `${printer.path}` : ""}
           </a>
         )}
         {printer.hostname && " ("}
@@ -149,12 +150,13 @@ export const PrinterConnectionStatus = ({ printer }) => {
           className="anchor"
           href={`${printer.protocol}://${printer.ip}${
             printer.port ? `:${printer.port}` : ""
-          }`}
+          }${printer.path ? `${printer.path}` : ""}`}
           target="_blank"
           rel="noopener noreferrer"
         >
           {printer.ip}
           {printer.port ? `:${printer.port}` : ""}
+          {printer.path ? `${printer.path}` : ""}
         </a>
         {printer.hostname && ")"}
       </dd>

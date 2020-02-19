@@ -3,7 +3,7 @@ import math
 import string
 import unittest
 import bcrypt
-
+import uuid as uuidmodule
 from server import app
 from server.database import users, local_users, organizations, api_tokens
 from ..utils import (
@@ -439,7 +439,7 @@ class DeleteUser(unittest.TestCase):
             user = users.get_by_username(username)
             api_tokens.add_token(
                 user_uuid=uuid,
-                jti="69aad97d-40ad-418f-ab6d-21605bd4aa71",
+                jti=uuidmodule.uuid4(),
                 organization_uuid=UUID_ORG,
                 name="jti",
             )

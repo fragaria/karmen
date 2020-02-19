@@ -18,6 +18,7 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
             <strong>
               {printer.hostname || printer.ip}
               {printer.port ? `:${printer.port}` : ""}
+              {printer.path ? `${printer.path}` : ""}
             </strong>
           </h3>
 
@@ -56,10 +57,14 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
         <span className="list-item-title">{printer.name}</span>
         <span className="text-mono">
           {printer.hostname
-            ? `${printer.hostname}${printer.port ? `:${printer.port}` : ""} (${
-                printer.ip
-              }${printer.port ? `:${printer.port}` : ""})`
-            : `${printer.ip}${printer.port ? `:${printer.port}` : ""}`}
+            ? `${printer.hostname}${printer.port ? `:${printer.port}` : ""}${
+                printer.path ? `${printer.path}` : ""
+              } (${printer.ip}${printer.port ? `:${printer.port}` : ""}${
+                printer.path ? `${printer.path}` : ""
+              })`
+            : `${printer.ip}${printer.port ? `:${printer.port}` : ""}${
+                printer.path ? `${printer.path}` : ""
+              }`}
         </span>
       </Link>
 

@@ -34,7 +34,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
           <div className="cta-box text-center">
             <button
               className="btn"
-              onClick={(e) => {
+              onClick={e => {
                 onRowDelete().then(() => {
                   modal.closeModal(e);
                 });

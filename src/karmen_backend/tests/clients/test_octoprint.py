@@ -126,6 +126,28 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_uri.call_count, 1)
         self.assertEqual(mock_post_uri.call_count, 0)
 
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"state": {"text": "Operational"}}),
+    )
+    def test_already_connected_printer_on_path(self, mock_get_uri, mock_post_uri):
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            port=80801,
+            path="/subroute/is/here",
+            client_props={"connected": True},
+        )
+        self.assertTrue(printer.connect_printer())
+        self.assertEqual(mock_get_uri.call_count, 1)
+        self.assertEqual(mock_post_uri.call_count, 0)
+        mock_get_uri.assert_called_with(
+            "http://192.168.1.15:80801/subroute/is/here/api/printer?exclude=history",
+            timeout=2,
+        )
+
 
 class OctoprintDisconnectPrinterTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.post", return_value=None)
@@ -330,10 +352,13 @@ class OctoprintSniffTest(unittest.TestCase):
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
             UUID_ORG,
             ip="192.168.1.15",
+            path="/something/",
             protocol="https",
         )
         printer.sniff()
-        mock_get_uri.assert_called_with("https://192.168.1.15/api/version", timeout=2)
+        mock_get_uri.assert_called_with(
+            "https://192.168.1.15/something/api/version", timeout=2
+        )
         self.assertEqual(printer.client_info.connected, True)
         self.assertEqual(printer.client_info.version, {"text": "OctoPrint"})
         self.assertEqual(

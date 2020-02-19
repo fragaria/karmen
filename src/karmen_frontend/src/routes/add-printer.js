@@ -57,12 +57,12 @@ class AddPrinter extends React.Component {
     if (
       !form.address.val ||
       form.address.val.match(
-        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?\/?$/
+        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?\/?[^?#]*$/
       ) === null
     ) {
       hasErrors = true;
       updatedForm.address.error =
-        "Printer address is required in a proper format (like http://1.2.3.4:81 or octopi.local)";
+        "Printer address is required in a proper format (like http://1.2.3.4:81 or karmen-pill.local/octoprint/)";
     }
     this.setState({
       form: updatedForm
@@ -91,6 +91,7 @@ class AddPrinter extends React.Component {
         hostname,
         ip,
         port,
+        url.pathname,
         form.name.val,
         form.apiKey.val
       ).then(r => {
@@ -165,6 +166,6 @@ class AddPrinter extends React.Component {
 }
 
 export default connect(null, dispatch => ({
-  createPrinter: (protocol, hostname, ip, port, name, apiKey) =>
-    dispatch(addPrinter(protocol, hostname, ip, port, name, apiKey))
+  createPrinter: (protocol, hostname, ip, port, path, name, apiKey) =>
+    dispatch(addPrinter(protocol, hostname, ip, port, path, name, apiKey))
 }))(AddPrinter);

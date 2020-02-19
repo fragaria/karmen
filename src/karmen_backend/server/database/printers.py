@@ -8,7 +8,7 @@ def add_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printers (uuid, organization_uuid, name, hostname, ip, port, client, client_props, printer_props, protocol) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO printers (uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (
                 kwargs["uuid"],
                 kwargs["organization_uuid"],
@@ -16,6 +16,7 @@ def add_printer(**kwargs):
                 kwargs["hostname"],
                 kwargs["ip"],
                 kwargs.get("port"),
+                kwargs.get("path", ""),
                 kwargs["client"],
                 psycopg2.extras.Json(kwargs["client_props"]),
                 psycopg2.extras.Json(kwargs.get("printer_props", None)),
@@ -29,13 +30,14 @@ def update_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "UPDATE printers SET name = %s, organization_uuid = %s, hostname = %s, ip = %s, port = %s, client = %s, client_props = %s, printer_props = %s, protocol = %s where uuid = %s",
+            "UPDATE printers SET name = %s, organization_uuid = %s, hostname = %s, ip = %s, port = %s, path = %s, client = %s, client_props = %s, printer_props = %s, protocol = %s where uuid = %s",
             (
                 kwargs["name"],
                 kwargs["organization_uuid"],
                 kwargs["hostname"],
                 kwargs["ip"],
                 kwargs.get("port"),
+                kwargs.get("path", ""),
                 kwargs["client"],
                 psycopg2.extras.Json(kwargs["client_props"]),
                 psycopg2.extras.Json(kwargs["printer_props"]),
@@ -49,7 +51,7 @@ def update_printer(**kwargs):
 def get_printers(organization_uuid=None):
     with get_connection() as connection:
         query = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, client, client_props, printer_props, protocol FROM printers"
+            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol FROM printers"
         )
         if organization_uuid:
             query = sql.SQL(" ").join(
@@ -71,7 +73,7 @@ def get_printer(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, client, client_props, printer_props, protocol FROM printers where uuid = %s",
+            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol FROM printers where uuid = %s",
             (uuid,),
         )
         data = cursor.fetchone()
@@ -91,7 +93,7 @@ def get_printer_by_network_props(hostname, ip, port):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         basequery = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, client, client_props, printer_props, protocol FROM printers WHERE"
+            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol FROM printers WHERE"
         )
         query = sql.SQL(" ").join(
             [

@@ -51,6 +51,7 @@ def sniff_printer(org_uuid, hostname, ip):
     # Let's try a secured connection
     if not printer.client_info.connected:
         printer.protocol = "https"
+        printer.update_network_base()
         app.logger.info("Sniffing printer on %s (%s) - trying https" % (ip, hostname))
         printer.sniff()
 

@@ -249,6 +249,7 @@ class CreateRoute(unittest.TestCase):
                         "ip": ip,
                         "name": "random-test-printer-name",
                         "protocol": "https",
+                        "path": "/something-blue",
                     },
                 )
                 uuid = response.json["uuid"]
@@ -260,6 +261,7 @@ class CreateRoute(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], ip)
                 self.assertEqual(response.json["protocol"], "https")
+                self.assertEqual(response.json["path"], "/something-blue")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
         except Exception as e:
