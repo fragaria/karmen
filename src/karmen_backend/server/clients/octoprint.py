@@ -39,6 +39,7 @@ class Octoprint(PrinterClient):
         self.protocol = protocol
         self.printer_props = printer_props
         self.client = Octoprint.__client_name__
+        self.network_base = ""
         self.update_network_base()
 
         if not client_props:
@@ -68,8 +69,14 @@ class Octoprint(PrinterClient):
         normalized_path = self.path
         if len(self.path) and self.path[-1] == "/":
             normalized_path = self.path[0:-1]
+        app.logger.info(
+            "update_network_base %s %s %s" % (self.network_base, self.ip, self.path)
+        )
         self.network_base = urlparse.urljoin(
             "%s://%s" % (self.protocol, network_host), normalized_path
+        )
+        app.logger.info(
+            "update_network_base %s %s %s" % (self.network_base, self.ip, self.path)
         )
 
     def get_printer_props(self):
@@ -86,6 +93,7 @@ class Octoprint(PrinterClient):
         if not self.client_info.connected and not force:
             return None
         uri = "%s%s" % (self.network_base, path)
+        app.logger.info("%s %s %s" % (self.network_base, self.path, path))
         try:
             req = self.http_session.get(
                 uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)

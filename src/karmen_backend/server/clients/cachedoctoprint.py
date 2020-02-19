@@ -73,7 +73,7 @@ class CachedOctoprint(Octoprint):
         return "cache_octoprint_api_%s_%s" % (self.uuid, path)
 
     def delete_cache_key(self, path):
-        uri = urlparse.urljoin(self.network_base, path)
+        uri = "%s%s" % (self.network_base, path)
         redisinstance.delete(self.get_cache_key(uri))
 
     def _perform_http_get(self, uri):
@@ -103,7 +103,7 @@ class CachedOctoprint(Octoprint):
         """
         if not self.client_info.connected and not force:
             return None
-        uri = urlparse.urljoin(self.network_base, path)
+        uri = "%s%s" % (self.network_base, path)
         if force:
             return self._perform_http_get(uri)
         cache_key = self.get_cache_key(uri)

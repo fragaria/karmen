@@ -81,8 +81,7 @@ def get_printer(uuid):
         return data
 
 
-# TODO organization_uuid
-def get_printer_by_network_props(hostname, ip, port):
+def get_printer_by_network_props(org_uuid, hostname, ip, port, path):
     def _is_or_equal(column, value):
         if value is None:
             return sql.SQL("{} is null").format(sql.Identifier(column))
@@ -100,9 +99,11 @@ def get_printer_by_network_props(hostname, ip, port):
                 basequery,
                 sql.SQL(" AND ").join(
                     [
+                        _is_or_equal("organization_uuid", org_uuid),
                         _is_or_equal("hostname", hostname),
                         _is_or_equal("ip", ip),
                         _is_or_equal("port", port),
+                        _is_or_equal("path", path),
                     ]
                 ),
             ]

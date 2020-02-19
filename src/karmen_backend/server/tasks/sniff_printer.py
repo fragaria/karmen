@@ -12,7 +12,11 @@ def save_printer_data(**kwargs):
         )
         return
     has_record = printers.get_printer_by_network_props(
-        kwargs.get("hostname"), kwargs.get("ip"), kwargs.get("port")
+        kwargs.get("organization_uuid"),
+        kwargs.get("hostname"),
+        kwargs.get("ip"),
+        kwargs.get("port"),
+        kwargs.get("path"),
     )
     # No need to update registered printers
     if has_record is not None:

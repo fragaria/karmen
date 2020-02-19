@@ -148,7 +148,10 @@ def printer_create(org_uuid):
     if ip and not hostname:
         hostname = network.get_avahi_hostname(ip)
 
-    if printers.get_printer_by_network_props(hostname, ip, port) is not None:
+    if (
+        printers.get_printer_by_network_props(org_uuid, hostname, ip, port, path)
+        is not None
+    ):
         return abort(make_response("", 409))
 
     printer = clients.get_printer_instance(
@@ -165,6 +168,7 @@ def printer_create(org_uuid):
         }
     )
     printer.add_api_key(api_key)
+    printer.update_network_base()
     printer.sniff()
     printers.add_printer(
         uuid=uuid,
