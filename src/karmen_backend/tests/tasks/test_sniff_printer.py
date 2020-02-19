@@ -110,7 +110,6 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_try_http_and_https(self, mock_get_data, mock_update_printer, mock_uuid):
         def mock_call(uri, **kwargs):
-            print(uri)
             if "https" in uri:
                 return Response(200, {"text": "OctoPrint"})
             return None

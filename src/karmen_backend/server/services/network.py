@@ -53,6 +53,8 @@ def get_avahi_hostname(ip_address):
         match = re.findall(r"^([0-9\.]+)[ \t]+(.+)", line)
         if not match:
             continue
+        if match[0][1][-6] != ".local":
+            return "%s.local" % match[0][1]
         return match[0][1]
 
 

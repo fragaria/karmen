@@ -155,7 +155,7 @@ class GetAvahiHostnameTest(unittest.TestCase):
         self.stdout_mock.write(
             dedent(
                 """
-                10.192.202.23\toctopi.local
+                10.192.202.23\toctopi
                 """
             ).encode("utf-8")
         )
@@ -171,7 +171,7 @@ class GetAvahiHostnameTest(unittest.TestCase):
         self.stdout_mock.write(
             dedent(
                 """
-                10.192.202.23\toctopi.local
+                10.192.202.23\toctopi
                 """
             ).encode("utf-8")
         )
