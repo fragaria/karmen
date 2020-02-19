@@ -34,6 +34,9 @@ services:
       REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
       POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
       POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
+      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
+      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
+      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
       SERVICE_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
@@ -68,6 +71,9 @@ services:
       REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
       POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
       POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
+      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
+      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
+      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
     depends_on:
       - postgres
   backend_celery_worker:
@@ -81,6 +87,9 @@ services:
       REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
       POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
       POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
+      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
+      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
+      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
@@ -101,6 +110,9 @@ services:
       REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
       POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
       POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
+      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
+      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
+      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
@@ -119,9 +131,9 @@ services:
     volumes:
       - ${KARMEN_DB_DIR:-./db/data}:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: print3d
-      POSTGRES_USER: print3d
-      POSTGRES_DB: print3d
+      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
+      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
+      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
     depends_on:
       - dbfiles
     ports:

@@ -6,7 +6,13 @@ import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
 
-DSN = "host='%s' port=%s dbname='print3d' user='print3d' password='print3d'" % (os.environ.get("POSTGRES_HOST", "127.0.0.1"), os.environ.get("POSTGRES_PORT", "5433"))
+DSN = "host='%s' port=%s dbname='%s' user='%s' password='%s'" % (
+    os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+    os.environ.get("POSTGRES_PORT", "5433"),
+    os.environ.get("POSTGRES_DB", "print3d"),
+    os.environ.get("POSTGRES_USER", "print3d"),
+    os.environ.get("POSTGRES_PASSWORD", "print3d"),
+)
 CONNECTION = None
 
 def connect():
@@ -33,9 +39,9 @@ def get_connection():
 
 with get_connection() as connection:
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_catalog = 'print3d' AND table_name = 'printers');")
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_catalog = %s AND table_name = 'printers');", (os.environ.get("POSTGRES_DB", "print3d"),))
     printers_table_exists = cursor.fetchone()[0]
-    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_catalog = 'print3d' AND table_name = 'schema_version');")
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_catalog = %s AND table_name = 'schema_version');", (os.environ.get("POSTGRES_DB", "print3d"),))
     schema_version_exists = cursor.fetchone()[0]
     if schema_version_exists and printers_table_exists:
         print("Both printers and schema_version tables exist, everything seems to be ok")
@@ -50,7 +56,6 @@ with get_connection() as connection:
         print("printers table exists, no schema_version though, this is pre-pgmigrate installation, making schema_version...")
 
         cursor.execute("CREATE TYPE public.schema_version_type AS ENUM ('auto', 'manual')")
-        cursor.execute("ALTER TYPE public.schema_version_type OWNER TO print3d;")
         create_schema_sql = """CREATE TABLE public.schema_version
         (
             version bigint NOT NULL,
@@ -64,5 +69,5 @@ with get_connection() as connection:
             OIDS = FALSE
         );"""
         cursor.execute(create_schema_sql)
-        cursor.execute("INSERT INTO public.schema_version(version, description, type, installed_by, installed_on) VALUES (1, 'initial schema', 'auto', 'print3d', current_timestamp)")
+        cursor.execute("INSERT INTO public.schema_version(version, description, type, installed_by, installed_on) VALUES (1, 'initial schema', 'auto', %s, current_timestamp)", (os.environ.get("POSTGRES_USER", "print3d"),))
         sys.exit(0)
