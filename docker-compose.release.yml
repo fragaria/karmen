@@ -23,6 +23,7 @@ services:
       BACKEND_BASE: /api
       SERVICE_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_FRONTEND_PORT:-9765}
+      SENTRY_DSN: ${KARMEN_FRONTEND_SENTRY_DSN}
   backend_flask:
     image: fragaria/karmen-backend
     restart: unless-stopped
