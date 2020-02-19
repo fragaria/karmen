@@ -146,10 +146,14 @@ def index():
     )
 
 
+@app.route("/sentry-report")
+@cross_origin()
+def trigger_error():
+    division_by_zero = 1 / 0
+
+
 # me has to come before users
 import server.routes.users_me
-
-
 import server.routes.octoprintemulator
 import server.routes.gcodes
 import server.routes.printers

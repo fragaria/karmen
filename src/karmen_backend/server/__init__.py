@@ -1,9 +1,11 @@
 import os
+import sentry_sdk
 from flask import Flask
 from flask_cors import CORS
 from celery import Celery
 from flask_jwt_extended import JWTManager
 from flask_executor import Executor
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 __version__ = "0.7.0-rc2"
 __author__ = "Jirka Chadima"
@@ -29,6 +31,13 @@ def setup_celery(flask_app):
     celery_inst.Task = ContextTask
     return celery_inst
 
+
+if os.environ.get("SENTRY_DSN") is not None:
+    sentry_sdk.init(
+        dsn=os.environ.get("SENTRY_DSN"),
+        integrations=[FlaskIntegration()],
+        release="karmen_backend@%s" % __version__,
+    )
 
 app = Flask(__name__)
 app.config.from_envvar("FLASKR_SETTINGS", silent=True)

@@ -24,6 +24,7 @@ yandex-pgmigrate = "*"
 bcrypt = "*"
 flask-jwt-extended = "*"
 flask-executor = "*"
+sentry-sdk = {extras = ["flask"],version = "==0.10.2"}
 
 [requires]
 python_version = "3.7"
