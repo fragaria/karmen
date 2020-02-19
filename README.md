@@ -42,9 +42,7 @@ $ mkdir tmp && docker-compose up --build
 # GO VISIT http://localhost:4000/
 ```
 
-The network autodiscovery via ARP does not work at all in the dev mode. The mDNS resolution
-also does not work in the dev mode due to the networking configuration. (You can enable these two
-features by altering the network settings of the containers, check [`docker-compose.release.yml`](./docker-compose.release.yml) for inspiration).
+The network autodiscovery via ARP does not work at all in the dev mode.
 
 On the other hand, two fake virtual printers are automatically added to your envirnoment, so you have a few
 things to play with.

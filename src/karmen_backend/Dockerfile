@@ -20,7 +20,7 @@ FROM python:3.7-alpine as runner
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
 # runtime deps
-RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash
+RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash dbus
 
 # ensure www-data user
 RUN set -x ; \

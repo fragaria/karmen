@@ -35,8 +35,8 @@ run in the docker's networking host mode.
 - The `celery-*` services are necessary for regular checks of the state of connected printers and for network discovery.
 If you don't mind that the connection state might be off for some time, you are fine without them.
 - Octoprint and other services are using [Multicast DNS](https://en.wikipedia.org/wiki/Multicast_DNS) for
-service autodiscovery. This works only when docker containers are run as `privileged` and when host's `/var/run/dbus`
-is mapped as a volume into the container. This feature is called from `flask` and `celery-worker` services. This might
+service autodiscovery. This works only when docker containers have the host's `/var/run/dbus` directory
+mapped as a volume into the container. This feature is called from `flask` and `celery-worker` services. This might
 not work on Windows, Android and other operating systems.
 - The network autodiscovery service is using [ARP queries](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
 which don't work out of the box in a docker container. To make ARP work, the container has to run in a `host` network mode

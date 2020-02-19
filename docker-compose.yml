@@ -28,7 +28,6 @@ services:
       - default
   backend_flask:
     image: fragaria/karmen-backend
-    user: www-data
     build: ./src/karmen_backend
     environment:
       REDIS_HOST: redis
@@ -45,6 +44,7 @@ services:
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
+      - /var/run/dbus:/var/run/dbus # for mdns resolution
     networks:
       - default
       - printers
@@ -118,6 +118,7 @@ services:
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
+      - /var/run/dbus:/var/run/dbus # for mdns resolution
     networks:
       - default
       - backend

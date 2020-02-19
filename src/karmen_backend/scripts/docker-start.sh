@@ -24,6 +24,9 @@ clean_pid_file() {
 
 if [ "$SERVICE" = 'flask' ]; then
   test_flaskr_settings
+  /usr/bin/dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
+  /usr/sbin/avahi-daemon -D
+  /usr/sbin/avahi-dnsconfd -D
   if [ "$ENV" = 'production' ]; then
     SERVICE_PORT=${SERVICE_PORT:-9764}
     SERVICE_HOST=${SERVICE_HOST:-0.0.0.0}
@@ -46,6 +49,9 @@ elif [ "$SERVICE" = 'celery-beat' ]; then
 elif [ "$SERVICE" = 'celery-worker' ]; then
   test_flaskr_settings
   clean_pid_file /tmp/celeryworkerd.pid
+  /usr/bin/dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
+  /usr/sbin/avahi-daemon -D
+  /usr/sbin/avahi-dnsconfd -D
   if [ "$ENV" = 'production' ]; then
     celery -A server.celery worker --pidfile=/tmp/celeryworkerd.pid
   else
