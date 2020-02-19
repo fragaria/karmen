@@ -369,6 +369,7 @@ class ChangePasswordRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(change.status_code, 200)
+            c.cookie_jar.clear()
             auth = c.post(
                 "/users/me/authenticate",
                 json={"username": "test-admin", "password": "random"},
@@ -380,14 +381,15 @@ class ChangePasswordRoute(unittest.TestCase):
             new_csrf = [ck for ck in c.cookie_jar if ck.name == "csrf_access_token"][
                 0
             ].value
+            c.cookie_jar.clear()
             c.set_cookie("localhost", "access_token_cookie", new_token)
             change_back = c.patch(
                 "users/me",
                 headers={"x-csrf-token": new_csrf},
                 json={
+                    "password": "random",
                     "new_password_confirmation": "admin-password",
                     "new_password": "admin-password",
-                    "password": "random",
                 },
             )
             self.assertEqual(change_back.status_code, 200)
