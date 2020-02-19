@@ -91,7 +91,7 @@ class AddPrinter extends React.Component {
         hostname,
         ip,
         port,
-        url.pathname,
+        url.pathname.length > 0 && url.pathname !== "/" ? url.pathname : "",
         form.name.val,
         form.apiKey.val
       ).then(r => {
