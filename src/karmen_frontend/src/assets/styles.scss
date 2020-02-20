@@ -603,7 +603,7 @@ footer {
     display: block;
     width: 100%;
     color: $color-light;
-    word-break: break-all;
+    word-break: break-word;
   }
 
   .list-item-title,
@@ -615,6 +615,11 @@ footer {
   .list-item-title {
     font-size: 2rem;
     line-height: 1.3;
+  }
+
+  .list-item-property {
+    max-height: 7.4rem;
+    overflow-x: hidden;
   }
 
   .list-item-cta {

@@ -142,7 +142,7 @@ class PrinterList extends React.Component {
                         ETA: {formatters.timespan(printer.job.printTimeLeft)}
                       </span>
                     </div>
-                    <span>{printer.job.name}</span>
+                    <div className="list-item-property">{printer.job.name}</div>
                   </>
                 )}
               </div>
