@@ -38,27 +38,9 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
 };
 
 class WebcamStream extends React.Component {
-  state = {
-    isPrinting: false
-  };
-
   componentDidMount() {
-    const { setWebcamRefreshInterval, isPrinting } = this.props;
-    this.setState({
-      isPrinting
-    });
-    setWebcamRefreshInterval(isPrinting ? 1000 / 5 : 5000);
-  }
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.isPrinting !== prevState.isPrinting) {
-      nextProps.setWebcamRefreshInterval(
-        nextProps.isPrinting ? 1000 / 5 : 5000
-      );
-    }
-    return {
-      isPrinting: nextProps.isPrinting
-    };
+    const { setWebcamRefreshInterval } = this.props;
+    setWebcamRefreshInterval(200);
   }
 
   componentWillUnmount() {
