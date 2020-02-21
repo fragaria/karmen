@@ -39,11 +39,7 @@ const GcodePrint = ({
               id="selectedPrinter"
               name="selectedPrinter"
               value={selectedPrinter}
-              onChange={e =>
-                this.setState({
-                  selectedPrinter: e.target.value
-                })
-              }
+              onChange={e => setSelectedPrinter(e.target.value)}
             >
               {availablePrinterOpts}
             </select>
