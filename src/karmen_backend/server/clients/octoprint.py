@@ -69,14 +69,8 @@ class Octoprint(PrinterClient):
         normalized_path = self.path
         if len(self.path) and self.path[-1] == "/":
             normalized_path = self.path[0:-1]
-        app.logger.info(
-            "update_network_base %s %s %s" % (self.network_base, self.ip, self.path)
-        )
         self.network_base = urlparse.urljoin(
             "%s://%s" % (self.protocol, network_host), normalized_path
-        )
-        app.logger.info(
-            "update_network_base %s %s %s" % (self.network_base, self.ip, self.path)
         )
 
     def get_printer_props(self):
@@ -117,7 +111,7 @@ class Octoprint(PrinterClient):
     def _http_post(self, path, data=None, files=None, json=None, force=False):
         if not self.client_info.connected and not force:
             return None
-        uri = "%s/%s" % (self.network_base, path)
+        uri = "%s%s" % (self.network_base, path)
         try:
             headers = {}
             if self.client_info.api_key:

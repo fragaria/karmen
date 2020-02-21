@@ -1,6 +1,7 @@
 # kudos https://github.com/deis/example-python-flask/blob/master/.gitignore
 
 *.py[co]
+__pycache__
 *.DS_*
 # Packages
 *.egg
