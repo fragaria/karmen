@@ -15,7 +15,7 @@ def do_arp_scan(network_interface):
     while True:
         rawerr = proc.stderr.readline() if proc.stderr else None
         if rawerr:
-            app.logger.error("arp-scan error: %s" % rawerr.rstrip().decode("utf-8"))
+            app.logger.info("arp-scan error: %s" % rawerr.rstrip().decode("utf-8"))
             break
         rawline = proc.stdout.readline()
         if not rawline:
@@ -40,7 +40,7 @@ def get_avahi_hostname(ip_address):
     while True:
         rawerr = proc.stderr.readline() if proc.stderr else None
         if rawerr:
-            app.logger.error(
+            app.logger.info(
                 "avahi-resolve-address error: %s" % rawerr.rstrip().decode("utf-8")
             )
             break
@@ -68,7 +68,7 @@ def get_avahi_address(hostname):
     while True:
         rawerr = proc.stderr.readline() if proc.stderr else None
         if rawerr:
-            app.logger.error(
+            app.logger.info(
                 "avahi-resolve-host-name error: %s" % rawerr.rstrip().decode("utf-8")
             )
             break

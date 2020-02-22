@@ -81,16 +81,16 @@ def printers_list(org_uuid):
                     fields,
                 )
             )
-        # This means that the future already exists and has not been poped yet -
+        # This means that the future already exists and has not been popped yet -
         # that's a race condition right there. It shouldn't happen as each request is identified by uqid though
         except ValueError as e:
-            app.logger.error("ValueError %s" % e)
+            app.logger.error("Possible race condition in printer list: %s" % e)
 
     for future in futures:
         try:
             data = future.result()
         except Exception as e:
-            app.logger.error("Exception %s" % e)
+            app.logger.error("Error in resolving a printer list future: %s" % e)
         else:
             device_list.append(data)
             executor.futures.pop("%s:%s" % (uqid, data["uuid"]))

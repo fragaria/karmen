@@ -6,12 +6,12 @@ from server.tasks.analyze_gcode import analyze_gcode
 
 
 class AnalyzeGcodeTest(unittest.TestCase):
-    @mock.patch("server.tasks.analyze_gcode.app.logger.error")
+    @mock.patch("server.tasks.analyze_gcode.app.logger.info")
     @mock.patch("server.database.gcodes.get_gcode", return_value=None)
     def test_record_not_found(self, mock_gcode_get, mock_logger):
         analyze_gcode(123)
         self.assertTrue(mock_logger.call_count, 1)
-        mock_logger.called_with("Gcode does not exist in database")
+        mock_logger.called_with("Gcode 123 does not exist in database")
 
     @mock.patch("server.tasks.analyze_gcode.app.logger.error")
     @mock.patch(

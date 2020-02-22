@@ -207,7 +207,7 @@ def get_slicer(line):
 def analyze_gcode(gcode_id):
     gcode = gcodes.get_gcode(gcode_id)
     if not gcode:
-        app.logger.error("Gcode does not exist in database")
+        app.logger.info("Gcode %s does not exist in database" % gcode_id)
         return
     # TODO if analysis already done on this file, skip
     try:
@@ -250,5 +250,5 @@ def analyze_gcode(gcode_id):
                         result["time"][fprop] = evaluator(line)
         gcodes.set_analysis(gcode_id, result)
     except FileNotFoundError:
-        app.logger.error("Gcode file not found")
+        app.logger.error("Gcode file not found %s" % gcode["absolute_path"])
         return

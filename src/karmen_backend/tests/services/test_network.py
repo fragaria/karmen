@@ -102,7 +102,7 @@ class DoArpScanTest(unittest.TestCase):
         self.assertEqual(results[0], ("10.192.202.1", "54:a0:50:e4:89:c0"))
         self.assertEqual(results[1], ("10.192.202.4", "b8:27:eb:05:5d:d1"))
 
-    @mock.patch("server.services.network.app.logger.error")
+    @mock.patch("server.services.network.app.logger.info")
     @mock.patch("subprocess.Popen")
     def test_err(self, mock_popen, mock_logger):
         self.stderr_mock.write(
@@ -184,7 +184,7 @@ class GetAvahiHostnameTest(unittest.TestCase):
             ["avahi-resolve-address", "10.192.202.23"], stdout=-1, stderr=-1
         )
 
-    @mock.patch("server.services.network.app.logger.error")
+    @mock.patch("server.services.network.app.logger.info")
     @mock.patch("subprocess.Popen")
     def test_err(self, mock_popen, mock_logger):
         self.stderr_mock.write(
@@ -265,7 +265,7 @@ class GetAvahiAddressTest(unittest.TestCase):
             ["avahi-resolve-host-name", "-4", "octopi.local"], stdout=-1, stderr=-1
         )
 
-    @mock.patch("server.services.network.app.logger.error")
+    @mock.patch("server.services.network.app.logger.info")
     @mock.patch("subprocess.Popen")
     def test_err(self, mock_popen, mock_logger):
         self.stderr_mock.write(
