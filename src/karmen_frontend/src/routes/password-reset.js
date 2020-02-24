@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 
-class Register extends React.Component {
+class PasswordReset extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,15 +24,15 @@ class Register extends React.Component {
     return (
       <div className="content">
         <div className="container">
-          <h1 className="main-title text-center">Karmen registration</h1>
+          <h1 className="main-title text-center">Reset Your password</h1>
           <p className="text-center">
-             We will send You an e-mail with verification link.
+             We will send You an e-mail with password reset link.
           </p>
           <form>
             <FormInputs definition={registerForm} />
             <div className="cta-box text-center">
               <button className="btn">
-                Register
+                Send reset link
               </button>{" "}
               <Link
                 to="/login"
@@ -48,4 +48,4 @@ class Register extends React.Component {
   };
 };
 
-export default Register;
+export default PasswordReset;

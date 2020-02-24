@@ -140,9 +140,8 @@ footer {
   left: 0;
   width: 100%;
   padding: 0 $base-unit*2;
-  z-index: 1;    
+  z-index: 1;
   @include blurred-bg;
-
 
   .navigation-content {
     display: flex;
@@ -163,6 +162,7 @@ footer {
       height: $logo-height-xs;
     }
   }
+
   .navigation-items {
     display: flex;
     position: fixed;
@@ -179,6 +179,7 @@ footer {
     overflow: auto;
     @include blurred-bg(.95);
   }
+
   .navigation-toggle {
     font-size: 3rem;
     z-index: 1;
@@ -453,7 +454,7 @@ footer {
       .list-item {
         padding: 0;
         border-top:none;
-      }      
+      }
     }
   }
 
@@ -644,7 +645,7 @@ footer {
     margin-bottom: $base-unit;
     background: #ccc;
   }
-  
+
   .list-item-content {
     display: block;
     width: 100%;
@@ -934,7 +935,7 @@ select {
 .printer-detail {
   .printer-detail-meta .main-title {
     margin-bottom: 0;
-  
+
     @media (max-width: $screen-sm-max) {
       margin-top: $base-unit;
     }
