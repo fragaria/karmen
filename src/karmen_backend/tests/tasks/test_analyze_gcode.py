@@ -13,6 +13,24 @@ class AnalyzeGcodeTest(unittest.TestCase):
         self.assertTrue(mock_logger.call_count, 1)
         mock_logger.called_with("Gcode 123 does not exist in database")
 
+    @mock.patch("server.tasks.analyze_gcode.app.logger.info")
+    @mock.patch("server.database.gcodes.set_analysis")
+    @mock.patch(
+        "server.database.gcodes.get_gcode",
+        return_value={
+            "analysis": {"slicer": "PrusaSlicer 2.0.0+linux64",},
+            "absolute_path": path.abspath(
+                path.dirname(__file__) + "/../_fixtures/prusaslicer.gcode"
+            ),
+        },
+    )
+    def test_analysis_already_done(
+        self, mock_gcode_get, mock_analysis_set, mock_logger
+    ):
+        analyze_gcode(123)
+        self.assertTrue(mock_logger.call_count, 1)
+        mock_logger.called_with("already")
+
     @mock.patch("server.tasks.analyze_gcode.app.logger.error")
     @mock.patch(
         "server.database.gcodes.get_gcode",
@@ -27,9 +45,10 @@ class AnalyzeGcodeTest(unittest.TestCase):
     @mock.patch(
         "server.database.gcodes.get_gcode",
         return_value={
+            "analysis": {},
             "absolute_path": path.abspath(
                 path.dirname(__file__) + "/../_fixtures/prusaslicer.gcode"
-            )
+            ),
         },
     )
     def test_file_prusaslicer(self, mock_gcode_get, mock_analysis_set):

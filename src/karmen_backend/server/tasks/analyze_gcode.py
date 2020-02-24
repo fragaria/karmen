@@ -209,7 +209,9 @@ def analyze_gcode(gcode_id):
     if not gcode:
         app.logger.info("Gcode %s does not exist in database" % gcode_id)
         return
-    # TODO if analysis already done on this file, skip
+    if gcode.get("analysis", {}) != {}:
+        app.logger.info("Gcode %s already has analysis data" % gcode_id)
+        return
     try:
         result = {"filament": {}, "temperatures": {}, "time": {}, "slicer": None}
         # TODO this should be faster if we grep for only lines with ; in shell
