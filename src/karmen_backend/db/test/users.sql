@@ -11,8 +11,8 @@ SET row_security = off;
 
 -- admin in org 1, nothing in org 2
 
-insert into public.users (uuid, username, system_role, providers, providers_data)
-  values ('6480fa7d-ce18-4ae2-818b-f1d200050806', 'test-admin', 'admin', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data)
+  values ('6480fa7d-ce18-4ae2-818b-f1d200050806', 'test-admin', 'test-admin@karmen.local', 'admin', '{"local"}', '{}')
   on conflict do nothing;
 
 insert into public.organization_roles (organization_uuid, user_uuid, role)
@@ -28,8 +28,8 @@ insert into public.local_users (user_uuid, pwd_hash, force_pwd_change)
 
 -- user in org 1, admin in org 2
 
-insert into public.users (uuid, username, system_role, providers, providers_data)
-  values ('77315957-8ebb-4a44-976c-758dbf28bb9f', 'test-user', 'user', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data)
+  values ('77315957-8ebb-4a44-976c-758dbf28bb9f', 'test-user', 'test-user@karmen.local', 'user', '{"local"}', '{}')
   on conflict do nothing;
 
 insert into public.organization_roles (organization_uuid, user_uuid, role)
@@ -49,8 +49,8 @@ insert into public.local_users (user_uuid, pwd_hash, force_pwd_change)
 
 -- nothing in org 1, nothing in org 2
 
-insert into public.users (uuid, username, system_role, providers, providers_data)
-  values ('e076b705-a484-4d24-844d-02594ac40b12', 'test-user-2', 'user', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data)
+  values ('e076b705-a484-4d24-844d-02594ac40b12', 'test-user-2', 'test-user-2@karmen.local', 'user', '{"local"}', '{}')
   on conflict do nothing;
 
 -- password is user-password

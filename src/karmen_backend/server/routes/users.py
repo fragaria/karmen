@@ -13,38 +13,54 @@ from . import jwt_requires_system_role, jwt_force_password_change, validate_org_
 @validate_org_access("admin")
 @fresh_jwt_required
 @jwt_force_password_change
-def create_user(org_uuid):
+def add_user(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))
     username = data.get("username", None)
+    email = data.get("email", None)
     org_role = data.get("role", None)
-    password = data.get("password", None)
-    password_confirmation = data.get("password_confirmation", None)
-    if not username or not password or not org_role:
+    if not email or not org_role:
         return abort(make_response("", 400))
-    if password != password_confirmation:
-        return abort(make_response("", 400))
+    # TODO validate email
+    if not username:
+        username = email
     if org_role not in ["admin", "user"]:
         return abort(make_response("", 400))
     existing = users.get_by_username(username)
     if existing is None:
-        pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
+        # TODO create invite, send e-mail
         user_uuid = guid.uuid4()
         users.add_user(
-            uuid=user_uuid, username=username, system_role="user", providers=["local"]
+            uuid=user_uuid,
+            username=username,
+            email=email,
+            system_role="user",
+            providers=["local"],
         )
+        # TODO drop this line
         local_users.add_local_user(
-            user_uuid=user_uuid, pwd_hash=pwd_hash.decode("utf8"), force_pwd_change=True
+            user_uuid=user_uuid,
+            pwd_hash="123456 TODO change me",
+            force_pwd_change=False,
         )
     else:
+        # TODO create invite, send e-mail
         user_uuid = existing.get("uuid", None)
+        if organizations.get_organization_role(org_uuid, user_uuid):
+            return abort(make_response("", 409))
 
-    if organizations.get_organization_role(org_uuid, user_uuid):
-        return abort(make_response("", 409))
     organizations.set_organization_role(org_uuid, user_uuid, org_role)
+    # TODO add invite-pending or state-pending
     return (
-        jsonify({"uuid": str(user_uuid), "username": username, "role": org_role,}),
+        jsonify(
+            {
+                "uuid": str(user_uuid),
+                "username": username,
+                "email": email,
+                "role": org_role,
+            }
+        ),
         201,
     )
 
@@ -73,7 +89,14 @@ def update_user(org_uuid, uuid):
 
     organizations.set_organization_role(org_uuid, uuid, role)
     return (
-        jsonify({"uuid": user["uuid"], "username": user["username"], "role": role,}),
+        jsonify(
+            {
+                "uuid": user["uuid"],
+                "username": user["username"],
+                "email": user["email"],
+                "role": role,
+            }
+        ),
         200,
     )
 
@@ -114,6 +137,7 @@ def list_users(org_uuid):
             {
                 "uuid": user["user_uuid"],
                 "username": users_metadata[user["user_uuid"]]["username"],
+                "email": users_metadata[user["user_uuid"]]["email"],
                 "role": user["role"],
             }
         )

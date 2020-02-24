@@ -84,9 +84,6 @@ select public.migrate_roles();
 ALTER TABLE public.users
   DROP COLUMN IF EXISTS role;
 
-update public.users set system_role = 'admin'
-  where uuid = '1b59f2e0-336f-4a1c-8caf-1f074fc43744';
-
 -- update indices
 ALTER TABLE public.printers
   DROP CONSTRAINT IF EXISTS printer_uq_ip_port;
