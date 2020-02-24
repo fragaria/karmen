@@ -174,8 +174,9 @@ footer {
     align-items: center;
     background: $bg-color;
     font-size: $navigation-font-size-xs;
-    padding-top: 10rem;
+    padding: 10rem 0;
     line-height: 2;
+    overflow: auto;
     @include blurred-bg(.95);
   }
   .navigation-toggle {
@@ -191,7 +192,52 @@ footer {
   }
 
   .navigation-toggle-label {
-    font-size: 2.4rem;
+    font-size: 2.1.5rem;
+  }
+
+  .navigation-user {
+    min-width: 300px;
+    margin-bottom: $spacing-default;
+    padding-bottom: $spacing-default;
+    border-bottom: $border-light;
+    text-align: center;
+    // font-size: 2.5rem;
+    line-height: $line-height-default;
+  }
+
+  .navigation-user-avatar {
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto $base-unit;
+    border-radius: 120px;
+    border: 6px solid #fff;
+    box-shadow: 0 0 4px 0 rgba(37, 42, 49, 0.3);
+    background: #fff;
+    overflow: hidden;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+
+      &.default {
+        max-height: 85%;
+        margin: $base-unit;
+      }
+    }
+  }
+
+  .navigation-user-organization {
+    font-size: 1.5rem;
+  }
+
+  .navigation-user-organization-toggle {
+    display: block;
+    min-width: 300px;
+    border-top: $border-light;
+    padding: $base-unit*3 $spacing-default/2 0;
+    margin-top: $base-unit*3;
+    text-align: center;
   }
 }
 

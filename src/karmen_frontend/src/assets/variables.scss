@@ -10,8 +10,12 @@ $txt-color-accented: #000;
 $anchor-color: $color-secondary;
 $bg-color: #fff;
 $border-color: lighten($color-primary, 55%);
+$border-color-light: lighten($color-primary, 70%);
 
 $border-default: 1px solid $border-color;
+$border-light: 1px solid $border-color-light;
+
+$line-height-default: 1.618;
 
 $palette: (
   black: #000,

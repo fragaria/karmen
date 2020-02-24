@@ -18,6 +18,7 @@ import AddApiToken from "./routes/add-api-token";
 import AddPrinter from "./routes/add-printer";
 import AddGcode from "./routes/add-gcode";
 import AddUser from "./routes/add-user";
+import Register from "./routes/register";
 import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
 import Page404 from "./routes/page404";
@@ -79,6 +80,7 @@ class App extends React.Component {
           <CatchTokenFromUrl />
           <Menu />
           <Heartbeat />
+          <Route path="/register" exact component={Register} />
           <main className="main">
             <LoginGateway>
               <ForcePwdChangeGateway>
