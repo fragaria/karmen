@@ -16,7 +16,9 @@ from ..utils import (
     TOKEN_USER2,
     TOKEN_USER2_CSRF,
     UUID_USER,
+    UUID_USER2,
     UUID_ORG,
+    UUID_ORG2,
 )
 
 
@@ -570,6 +572,25 @@ class DeleteRoute(unittest.TestCase):
             response = c.delete(
                 "/organizations/%s/gcodes/%s" % (UUID_ORG, gcode_uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 204)
+
+    def test_delete_org_admin(self):
+        gcode_uuid = gcodes.add_gcode(
+            uuid=uuidmodule.uuid4(),
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER2,
+            organization_uuid=UUID_ORG2,
+        )
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.delete(
+                "/organizations/%s/gcodes/%s" % (UUID_ORG2, gcode_uuid),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 204)
 

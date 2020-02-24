@@ -47,10 +47,14 @@ insert into public.local_users (user_uuid, pwd_hash, force_pwd_change)
 
 -------
 
--- nothing in org 1, nothing in org 2
+-- nothing in org 1, user in org 2
 
 insert into public.users (uuid, username, system_role, providers, providers_data)
   values ('e076b705-a484-4d24-844d-02594ac40b12', 'test-user-2', 'user', '{"local"}', '{}')
+  on conflict do nothing;
+
+insert into public.organization_roles (organization_uuid, user_uuid, role)
+  values ('d973e553-122b-46bb-b852-d6ab4472dbd5', 'e076b705-a484-4d24-844d-02594ac40b12', 'user')
   on conflict do nothing;
 
 -- password is user-password
