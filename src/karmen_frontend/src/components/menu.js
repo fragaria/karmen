@@ -33,6 +33,22 @@ class Menu extends React.Component {
             <>
               {navigation && (
                 <ul className="navigation-items">
+                  <li className="navigation-user">
+                    <Link
+                      to="/users/me"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      <span className="navigation-user-avatar">
+                        <img
+                          className="default" 
+                          alt="Karmen logo" 
+                          src="/karmen-logo.svg" 
+                        />
+                      </span>
+                      {username}
+                      <p className="navigation-user-organization">organization name</p>
+                    </Link>
+                  </li>
                   <li>
                     <Link
                       to="/"
@@ -60,14 +76,6 @@ class Menu extends React.Component {
                     </li>
                   )}
                   <li>
-                    <Link
-                      to="/users/me"
-                      onClick={() => this.setState({ navigation: false })}
-                    >
-                      {username}
-                    </Link>
-                  </li>
-                  <li>
                     <button
                       className="btn-reset"
                       title="Logout"
@@ -81,6 +89,24 @@ class Menu extends React.Component {
                       Logout
                     </button>
                   </li>
+                  <li>
+                    <Link
+                      className="navigation-user-organization navigation-user-organization-toggle"
+                      to="/gcodes"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      Switch to Another organization name
+                    </Link>
+                  </li>                  
+                  <li>
+                    <Link
+                      className="navigation-user-organization navigation-user-organization-toggle"
+                      to="/gcodes"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      Switch to Another organization name
+                    </Link>
+                  </li>                  
                 </ul>
               )}
               <button

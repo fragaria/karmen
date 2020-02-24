@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 import { FormInputs } from "./form-utils";
 import BusyButton from "../utils/busy-button";
 
@@ -137,6 +139,14 @@ class LoginForm extends React.Component {
               >
                 Login
               </BusyButton>{" "}
+              {!onCancel && (
+              <Link
+                to="/register"
+                className="btn btn-plain"
+              >
+                Register
+              </Link>
+              )}
               {onCancel && (
                 <BusyButton
                   className="btn btn-plain"
