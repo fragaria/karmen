@@ -7,7 +7,8 @@ if [ "$ENV" = 'production' ]; then
   cat << EOF > "../build/env.js"
 window.env = {
   BACKEND_BASE: "${BACKEND_BASE:-http://localhost:4000/api}",
-  SENTRY_DSN: "${SENTRY_DSN}"
+  SENTRY_DSN: "${SENTRY_DSN}",
+  IS_CLOUD_INSTALL: "${IS_CLOUD_INSTALL:-false}"
 };
 EOF
   SERVICE_HOST=${SERVICE_HOST:-0.0.0.0}
