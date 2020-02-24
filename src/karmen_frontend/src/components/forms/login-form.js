@@ -140,12 +140,22 @@ class LoginForm extends React.Component {
                 Login
               </BusyButton>{" "}
               {!onCancel && (
-              <Link
-                to="/register"
-                className="btn btn-plain"
-              >
-                Register
-              </Link>
+              <>
+                <Link
+                  to="/register"
+                  className="btn btn-plain"
+                >
+                  Register
+                </Link>
+                <br/>
+                <br/>
+                <Link
+                  to="/password-reset"
+                  className="anchor"
+                >
+                  Forgotten password
+                </Link>
+              </>
               )}
               {onCancel && (
                 <BusyButton
