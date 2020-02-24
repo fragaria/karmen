@@ -44,6 +44,8 @@ app.config.from_envvar("FLASKR_SETTINGS", silent=True)
 # This is hardcoded for 1GB
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
 
+app.config["IS_CLOUD_INSTALL"] = app.config.get("IS_CLOUD_INSTALL", False)
+
 CORS(app)
 app.config["JWT_SECRET_KEY"] = app.config["SECRET_KEY"]
 app.config["JWT_ERROR_MESSAGE_KEY"] = "message"

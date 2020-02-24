@@ -11,6 +11,7 @@ from . import jwt_force_password_change, validate_org_access
 @cross_origin()
 def enqueue_task(org_uuid):
     data = request.json
+
     if not data:
         return abort(make_response("", 400))
     if "task" not in data:
@@ -18,6 +19,8 @@ def enqueue_task(org_uuid):
     if data["task"] not in ["scan_network"]:
         return abort(make_response("", 400))
     if data["task"] == "scan_network":
+        if app.config.get("IS_CLOUD_INSTALL"):
+            return abort(make_response("Not allowed in this install", 400))
         try:
             scan_network.delay(org_uuid, data.get("network_interface"))
         except Exception as e:
