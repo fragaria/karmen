@@ -2,7 +2,6 @@ import random
 import math
 import string
 import unittest
-import bcrypt
 import uuid as uuidmodule
 from server import app
 from server.database import users, local_users, organizations, api_tokens
@@ -30,6 +29,11 @@ def get_random_username():
     return "user-%s" % "".join(random.sample(alphabet, 10))
 
 
+def get_random_email():
+    alphabet = string.ascii_lowercase
+    return "user-%s@ktest.local" % "".join(random.sample(alphabet, 10))
+
+
 class CreateUserRoute(unittest.TestCase):
     def test_no_token(self):
         with app.test_client() as c:
@@ -38,8 +42,7 @@ class CreateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 401)
@@ -53,8 +56,7 @@ class CreateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 401)
@@ -68,8 +70,7 @@ class CreateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 401)
@@ -83,8 +84,7 @@ class CreateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 403)
@@ -98,8 +98,7 @@ class CreateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 401)
@@ -113,31 +112,23 @@ class CreateUserRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_no_username(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.post(
-                "/organizations/%s/users" % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
-                },
-            )
-            self.assertEqual(response.status_code, 400)
-
     def test_no_role(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": "username",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
-                },
+                json={"username": "username", "email": get_random_email()},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_no_email(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": "username", "role": "user"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -150,57 +141,49 @@ class CreateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "doesnotexist",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_password_mismatch(self):
+    def test_no_username(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one-mismatch",
-                },
+                json={"role": "user", "email": get_random_email()},
             )
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 201)
+            self.assertTrue("uuid" in response.json)
+            self.assertTrue("username" in response.json)
+            self.assertTrue("email" in response.json)
+            self.assertTrue("role" in response.json)
+            self.assertTrue(response.json["username"], response.json["email"])
 
     def test_create_user(self):
         with app.test_client() as c:
             username = get_random_username()
+            email = get_random_email()
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": username,
-                    "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
-                },
+                json={"username": username, "role": "user", "email": email},
             )
             self.assertEqual(response.status_code, 201)
             self.assertTrue("uuid" in response.json)
             self.assertTrue("username" in response.json)
             self.assertTrue("role" in response.json)
+            self.assertTrue("email" in response.json)
             user = users.get_by_username(username)
             self.assertTrue(user is not None)
             self.assertEqual(user["username"], username)
+            self.assertEqual(user["email"], email)
             self.assertEqual(user["system_role"], "user")
             luser = local_users.get_local_user(user["uuid"])
             self.assertTrue(luser is not None)
-            self.assertEqual(luser["force_pwd_change"], True)
-            self.assertTrue(
-                bcrypt.checkpw(
-                    "temp-one".encode("utf8"), luser["pwd_hash"].encode("utf8")
-                )
-            )
+            self.assertEqual(luser["force_pwd_change"], False)
             orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
 
@@ -208,63 +191,19 @@ class CreateUserRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             username = get_random_username()
+            email = get_random_email()
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": username,
-                    "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
-                },
+                json={"username": username, "role": "user", "email": email},
             )
             self.assertEqual(response.status_code, 201)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": username,
-                    "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
-                },
+                json={"username": username, "role": "user", "email": email},
             )
             self.assertEqual(response.status_code, 409)
-
-    def test_conflict_system_usernames(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            username = get_random_username()
-            response = c.post(
-                "/organizations/%s/users" % UUID_ORG2,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={
-                    "username": username,
-                    "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
-                },
-            )
-            self.assertEqual(response.status_code, 201)
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.post(
-                "/organizations/%s/users" % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": username,
-                    "role": "user",
-                    "password": "temp-onexx",
-                    "password_confirmation": "temp-onexx",
-                },
-            )
-            user = users.get_by_username(username)
-            luser = local_users.get_local_user(user["uuid"])
-            self.assertEqual(response.status_code, 201)
-            self.assertTrue(
-                bcrypt.checkpw(
-                    "temp-one".encode("utf8"), luser["pwd_hash"].encode("utf8")
-                )
-            )
 
 
 class UpdateUserRoute(unittest.TestCase):
@@ -277,8 +216,7 @@ class UpdateUserRoute(unittest.TestCase):
                 json={
                     "username": get_random_username(),
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.uuid = response.json["uuid"]
@@ -414,6 +352,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("uuid" in response.json["items"][0])
             self.assertTrue("username" in response.json["items"][0])
+            self.assertTrue("email" in response.json["items"][0])
             self.assertTrue("role" in response.json["items"][0])
             for u in response.json["items"]:
                 self.assertTrue(u["uuid"] != UUID_USER2)
@@ -430,8 +369,7 @@ class DeleteUser(unittest.TestCase):
                 json={
                     "username": username,
                     "role": "user",
-                    "password": "temp-one",
-                    "password_confirmation": "temp-one",
+                    "email": get_random_email(),
                 },
             )
             self.assertEqual(response.status_code, 201)

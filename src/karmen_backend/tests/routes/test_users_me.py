@@ -35,11 +35,6 @@ class AuthenticateRoute(unittest.TestCase):
             response = c.post("/users/me/authenticate")
             self.assertEqual(response.status_code, 400)
 
-    def test_missing_username(self):
-        with app.test_client() as c:
-            response = c.post("/users/me/authenticate", json={"password": "random"})
-            self.assertEqual(response.status_code, 400)
-
     def test_missing_password(self):
         with app.test_client() as c:
             response = c.post("/users/me/authenticate", json={"username": "random"})
@@ -61,11 +56,54 @@ class AuthenticateRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
 
-    def test_returns_fresh_access_token(self):
+    def test_returns_fresh_access_token_username(self):
         with app.test_client() as c:
             response = c.post(
                 "/users/me/authenticate",
                 json={"username": "test-admin", "password": "admin-password"},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("access_token" not in response.json)
+            self.assertTrue("refresh_token" not in response.json)
+            self.assertTrue(
+                [ck for ck in c.cookie_jar if ck.name == "refresh_token_cookie"]
+                is not None
+            )
+            self.assertTrue(
+                [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"]
+                is not None
+            )
+            self.assertTrue(
+                [ck for ck in c.cookie_jar if ck.name == "csrf_refresh_token"]
+                is not None
+            )
+            self.assertTrue(
+                [ck for ck in c.cookie_jar if ck.name == "csrf_access_token"]
+                is not None
+            )
+            self.assertEqual(response.json["fresh"], True)
+            self.assertEqual(response.json["identity"], UUID_ADMIN)
+            self.assertTrue("expires_on" in response.json)
+            self.assertTrue("system_role" in response.json)
+            self.assertTrue("force_pwd_change" in response.json)
+            self.assertTrue("organizations" in response.json)
+            self.assertTrue(len(response.json["organizations"]) == 1)
+            self.assertTrue(
+                response.json["organizations"][0]["name"] == "Default organization"
+            )
+            self.assertTrue(
+                response.json["organizations"][0]["slug"] == "default-organization"
+            )
+            self.assertTrue(response.json["organizations"][0]["role"] == "admin")
+
+    def test_returns_fresh_access_token_email(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/authenticate",
+                json={
+                    "username": "test-admin@karmen.local",
+                    "password": "admin-password",
+                },
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("access_token" not in response.json)
@@ -138,11 +176,46 @@ class AuthenticateFreshRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
 
-    def test_returns_fresh_access_token(self):
+    def test_returns_fresh_access_token_username(self):
         with app.test_client() as c:
             response = c.post(
                 "/users/me/authenticate-fresh",
                 json={"username": "test-admin", "password": "admin-password"},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("access_token" not in response.json)
+            self.assertTrue("refresh_token" not in response.json)
+            self.assertTrue(
+                len([ck for ck in c.cookie_jar if ck.name == "refresh_token_cookie"])
+                is 0
+            )
+            self.assertTrue(
+                len([ck for ck in c.cookie_jar if ck.name == "csrf_refresh_token"]) is 0
+            )
+            self.assertTrue(
+                [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"]
+                is not None
+            )
+            self.assertTrue(
+                [ck for ck in c.cookie_jar if ck.name == "csrf_access_token"]
+                is not None
+            )
+            self.assertEqual(response.json["fresh"], True)
+            self.assertEqual(response.json["identity"], UUID_ADMIN)
+            self.assertTrue("expires_on" in response.json)
+            self.assertTrue("system_role" in response.json)
+            self.assertTrue("force_pwd_change" in response.json)
+            self.assertTrue("organizations" in response.json)
+            self.assertTrue(len(response.json["organizations"]) == 1)
+
+    def test_returns_fresh_access_token_email(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/authenticate-fresh",
+                json={
+                    "username": "test-admin@karmen.local",
+                    "password": "admin-password",
+                },
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("access_token" not in response.json)

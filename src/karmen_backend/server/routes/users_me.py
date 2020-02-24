@@ -38,6 +38,7 @@ def get_user_identity(userdata, token_freshness):
         "identity": userdata.get("uuid"),
         "system_role": userdata.get("system_role", "user"),
         "username": userdata.get("username"),
+        "email": userdata.get("email"),
         "force_pwd_change": userdata.get("force_pwd_change", False),
         "fresh": token_freshness,
         "expires_on": datetime.now() + ACCESS_TOKEN_EXPIRES_AFTER,
@@ -53,8 +54,10 @@ def authenticate_base(include_refresh_token):
     password = data.get("password", None)
     if not username or not password:
         raise BadRequest("Missing username or password in request body.")
-
-    user = users.get_by_username(username)
+    user = users.get_by_email(username)
+    # fallback to legacy username login
+    if not user:
+        user = users.get_by_username(username)
     if not user:
         raise Unauthorized("Invalid credentials.")
 
@@ -123,20 +126,6 @@ def logout():
     response = jsonify({"logout": True})
     unset_jwt_cookies(response)
     return response, 200
-
-
-@app.route("/users/me/probe", methods=["GET"])
-@cross_origin()
-@jwt_required
-def probe():
-    user = get_current_user()
-    if not user:
-        return abort(make_response("", 401))
-    if "local" in user["providers"]:
-        luser = local_users.get_local_user(user["uuid"])
-        if luser["force_pwd_change"]:
-            return jsonify({"force_pwd_change": True}), 200
-    return jsonify({"force_pwd_change": False}), 200
 
 
 # This returns fresh access_token with reset force_pwd_change user claim
@@ -239,7 +228,11 @@ def create_api_token():
     token = create_access_token(
         identity=user,
         expires_delta=False,
-        user_claims={"username": user.get("username"), "organization_uuid": org_uuid},
+        user_claims={
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "organization_uuid": org_uuid,
+        },
     )
     jti = decode_token(token)["jti"]
     api_tokens.add_token(

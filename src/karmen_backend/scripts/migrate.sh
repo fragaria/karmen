@@ -10,6 +10,9 @@ echo "Migrating db to the latest version..."
 
 if [ "$ENV" = 'production' ]; then
   cat << EOF > "${MYDIR}/../db/migrations.yml"
+callbacks:
+  afterAll:
+      - prod/users.sql
 conn: "host='${POSTGRES_HOST}' port=${POSTGRES_PORT} dbname='${POSTGRES_DB}' user='${POSTGRES_USER}' password='${POSTGRES_PASSWORD}'"
 EOF
 elif [ "$ENV" = 'test' ]; then
