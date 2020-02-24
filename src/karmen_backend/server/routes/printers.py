@@ -224,12 +224,11 @@ def printer_patch(org_uuid, uuid):
     if not data:
         return abort(make_response("", 400))
     name = data.get("name", printer["name"])
-    protocol = data.get("protocol", printer["protocol"])
     api_key = data.get("api_key", printer["client_props"].get("api_key", None))
     printer_props = data.get("printer_props", {})
 
-    # TODO it might be necessary to update ip, hostname, port and path as well eventually
-    if not name or protocol not in ["http", "https"]:
+    # TODO it might be necessary to update protocol, ip, hostname, port and path as well eventually
+    if not name:
         return abort(make_response("", 400))
     printer_inst = clients.get_printer_instance(printer)
     printer_inst.add_api_key(api_key)
@@ -254,17 +253,11 @@ def printer_patch(org_uuid, uuid):
                 if k in printer_props
             }
         )
+
     printer_inst.name = name
     printers.update_printer(
         uuid=printer_inst.uuid,
-        organization_uuid=printer_inst.organization_uuid,
         name=printer_inst.name,
-        hostname=printer_inst.hostname,
-        ip=printer_inst.ip,
-        port=printer_inst.port,
-        path=printer_inst.path,
-        protocol=protocol,
-        client=printer_inst.client_name(),
         client_props={
             "version": printer_inst.client_info.version,
             "connected": printer_inst.client_info.connected,

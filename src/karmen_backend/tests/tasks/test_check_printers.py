@@ -54,14 +54,8 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "organization_uuid": UUID_ORG,
                         "hostname": "a",
                         "ip": "1234",
-                        "port": None,
-                        "path": "",
-                        "name": None,
-                        "client": "octoprint",
-                        "protocol": "https",
                         "client_props": {
                             "connected": False,
                             "version": {},
@@ -69,7 +63,6 @@ class CheckPrintersTest(unittest.TestCase):
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
                         },
-                        "printer_props": {"filament_type": "PETG"},
                     }
                 ),
             ]
@@ -140,14 +133,8 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
-                        "organization_uuid": UUID_ORG,
                         "hostname": "b.local",
                         "ip": "5678",
-                        "port": None,
-                        "path": "",
-                        "protocol": "http",
-                        "name": None,
-                        "client": "octoprint",
                         "client_props": {
                             "connected": True,
                             "version": {},
@@ -162,7 +149,6 @@ class CheckPrintersTest(unittest.TestCase):
                                 "rotate90": False,
                             },
                         },
-                        "printer_props": None,
                     }
                 ),
             ]
@@ -214,14 +200,8 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "organization_uuid": UUID_ORG,
                         "hostname": "router.asus.com",
                         "ip": "1234",
-                        "port": None,
-                        "path": "",
-                        "name": None,
-                        "client": "octoprint",
-                        "protocol": "https",
                         "client_props": {
                             "connected": False,
                             "version": {},
@@ -229,7 +209,6 @@ class CheckPrintersTest(unittest.TestCase):
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
                         },
-                        "printer_props": {"filament_type": "PETG"},
                     }
                 )
             ]
@@ -249,7 +228,6 @@ class CheckPrintersTest(unittest.TestCase):
                 },
                 "client": "octoprint",
                 "protocol": "https",
-                "printer_props": {"filament_type": "PETG"},
             }
         ],
     )
@@ -280,14 +258,8 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "organization_uuid": UUID_ORG,
                         "hostname": None,
                         "ip": "1234",
-                        "port": None,
-                        "path": "",
-                        "name": None,
-                        "client": "octoprint",
-                        "protocol": "https",
                         "client_props": {
                             "connected": False,
                             "version": {},
@@ -295,7 +267,6 @@ class CheckPrintersTest(unittest.TestCase):
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
                         },
-                        "printer_props": {"filament_type": "PETG"},
                     }
                 )
             ]
@@ -316,7 +287,6 @@ class CheckPrintersTest(unittest.TestCase):
                 },
                 "client": "octoprint",
                 "protocol": "https",
-                "printer_props": {"filament_type": "PETG"},
             }
         ],
     )
@@ -348,14 +318,8 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "organization_uuid": UUID_ORG,
                         "hostname": "c.local",
                         "ip": "5678",
-                        "port": None,
-                        "path": "",
-                        "name": None,
-                        "client": "octoprint",
-                        "protocol": "https",
                         "client_props": {
                             "connected": False,
                             "version": {},
@@ -363,7 +327,6 @@ class CheckPrintersTest(unittest.TestCase):
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
                         },
-                        "printer_props": {"filament_type": "PETG"},
                     }
                 )
             ]
@@ -384,7 +347,6 @@ class CheckPrintersTest(unittest.TestCase):
                 },
                 "client": "octoprint",
                 "protocol": "https",
-                "printer_props": {"filament_type": "PETG"},
             }
         ],
     )
@@ -416,14 +378,8 @@ class CheckPrintersTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "organization_uuid": UUID_ORG,
                         "hostname": "c.local",
                         "ip": "1234",
-                        "port": None,
-                        "path": "",
-                        "name": None,
-                        "client": "octoprint",
-                        "protocol": "https",
                         "client_props": {
                             "connected": False,
                             "version": {},
@@ -431,7 +387,6 @@ class CheckPrintersTest(unittest.TestCase):
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
                         },
-                        "printer_props": {"filament_type": "PETG"},
                     }
                 )
             ]

@@ -692,12 +692,12 @@ class PatchRoute(unittest.TestCase):
             response = c.patch(
                 "/organizations/%s/printers/%s" % (UUID_ORG, self.uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"name": "random-test-printer-name", "protocol": "https"},
+                json={"name": "random-test-printer-name"},
             )
             self.assertEqual(response.status_code, 200)
             p = printers.get_printer(self.uuid)
             self.assertEqual(p["name"], "random-test-printer-name")
-            self.assertEqual(p["protocol"], "https")
+            self.assertEqual(p["protocol"], "http")
 
     def test_patch_printer_props(self):
         with app.test_client() as c:
@@ -817,16 +817,6 @@ class PatchRoute(unittest.TestCase):
                 "/organizations/%s/printers/%s" % (UUID_ORG, self.uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"name": ""},
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_patch_bad_protocol(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.patch(
-                "/organizations/%s/printers/%s" % (UUID_ORG, self.uuid),
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"name": "some", "protocol": "ftp"},
             )
             self.assertEqual(response.status_code, 400)
 

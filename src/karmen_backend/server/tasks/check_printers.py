@@ -22,14 +22,8 @@ def check_printers():
         printer.is_alive()
         printers.update_printer(
             uuid=printer.uuid,
-            organization_uuid=printer.organization_uuid,
-            name=printer.name,
             hostname=printer.hostname,
             ip=printer.ip,
-            port=printer.port,
-            path=printer.path,
-            protocol=printer.protocol,
-            client=printer.client_name(),
             client_props={
                 "version": printer.client_info.version,
                 "connected": printer.client_info.connected,
@@ -37,5 +31,4 @@ def check_printers():
                 "api_key": printer.client_info.api_key,
                 "webcam": printer.webcam(),
             },
-            printer_props=printer.get_printer_props(),
         )

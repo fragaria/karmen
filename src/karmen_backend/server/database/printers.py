@@ -27,24 +27,41 @@ def add_printer(**kwargs):
 
 
 def update_printer(**kwargs):
+    if kwargs.get("uuid") is None:
+        raise ValueError("Missing uuid in kwargs")
+    updates = []
+    for field in [
+        "name",
+        "organization_uuid",
+        "hostname",
+        "ip",
+        "port",
+        "path",
+        "client",
+        "protocol",
+        "uuid",
+    ]:
+        if field in kwargs:
+            updates.append(
+                sql.SQL("{} = {}").format(
+                    sql.Identifier(field), sql.Literal(kwargs[field])
+                )
+            )
+
+    for field in ["client_props", "printer_props"]:
+        if field in kwargs:
+            updates.append(
+                sql.SQL("{} = {}").format(
+                    sql.Identifier(field),
+                    sql.Literal(psycopg2.extras.Json(kwargs[field])),
+                )
+            )
+    query = sql.SQL("UPDATE printers SET {} where uuid = {}").format(
+        sql.SQL(", ").join(updates), sql.Literal(kwargs["uuid"])
+    )
     with get_connection() as connection:
         cursor = connection.cursor()
-        cursor.execute(
-            "UPDATE printers SET name = %s, organization_uuid = %s, hostname = %s, ip = %s, port = %s, path = %s, client = %s, client_props = %s, printer_props = %s, protocol = %s where uuid = %s",
-            (
-                kwargs["name"],
-                kwargs["organization_uuid"],
-                kwargs["hostname"],
-                kwargs["ip"],
-                kwargs.get("port"),
-                kwargs.get("path", ""),
-                kwargs["client"],
-                psycopg2.extras.Json(kwargs["client_props"]),
-                psycopg2.extras.Json(kwargs["printer_props"]),
-                kwargs["protocol"],
-                kwargs["uuid"],
-            ),
-        )
+        cursor.execute(query)
         cursor.close()
 
 
