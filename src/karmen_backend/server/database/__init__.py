@@ -83,22 +83,13 @@ def prepare_list_statement(
             cursor.execute(statement.as_string(connection), (start_with,))
             data = cursor.fetchone()
             cursor.close()
-            if data:
-                where_clause.append(
-                    sql.SQL("{} {} {}").format(
-                        sql.Identifier(order_by_column),
-                        sql.SQL("<=" if order_by_direction == "DESC" else ">="),
-                        sql.Literal(data[order_by_column]),
-                    )
+            where_clause.append(
+                sql.SQL("{} {} {}").format(
+                    sql.Identifier(order_by_column),
+                    sql.SQL("<=" if order_by_direction == "DESC" else ">="),
+                    sql.Literal(data[order_by_column] if data else start_with),
                 )
-            else:
-                where_clause.append(
-                    sql.SQL("{} {} {}").format(
-                        sql.Identifier(pk_column),
-                        sql.SQL("<=" if order_by_direction == "DESC" else ">="),
-                        sql.Literal(start_with),
-                    ),
-                )
+            )
         else:
             where_clause.append(
                 sql.SQL("{} >= {}").format(

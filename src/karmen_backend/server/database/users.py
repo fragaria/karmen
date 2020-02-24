@@ -2,35 +2,6 @@ import psycopg2
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
 
-# This intentionally selects limit+1 results in order to properly determine next start_with for pagination
-# Take that into account when processing results
-def get_users(order_by=None, limit=None, start_with=None, filter=None):
-    columns = [
-        "uuid",
-        "username",
-        "system_role",
-        "providers",
-        "providers_data",
-        "suspended",
-        "created",
-    ]
-    with get_connection() as connection:
-        statement = prepare_list_statement(
-            connection,
-            "users",
-            columns,
-            order_by=order_by,
-            limit=limit,
-            start_with=start_with,
-            filter=filter,
-            pk_column="uuid",
-        )
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute(statement)
-        data = cursor.fetchall()
-        cursor.close()
-        return data
-
 
 def get_by_username(username):
     with get_connection() as connection:

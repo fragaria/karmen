@@ -67,13 +67,6 @@ def add_printjob(**kwargs):
         return data[0]
 
 
-def delete_printjob(uuid):
-    with get_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM printjobs WHERE uuid = %s", (uuid,))
-        cursor.close()
-
-
 def update_gcode_data(gcode_uuid, gcode_data):
     with get_connection() as connection:
         cursor = connection.cursor()
