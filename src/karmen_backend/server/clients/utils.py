@@ -17,12 +17,14 @@ class PrinterClientInfo:
         access_level=PrinterClientAccessLevel.UNKNOWN,
         api_key=None,
         webcam=None,
+        plugins=None,
     ):
         self.version = version
         self.connected = connected
         self.access_level = access_level
         self.api_key = api_key
         self.webcam = webcam
+        self.plugins = plugins or []
 
 
 class PrinterClient(abc.ABC):
@@ -72,6 +74,10 @@ class PrinterClient(abc.ABC):
 
     @abc.abstractmethod
     def get_printer_props(self):
+        pass
+
+    @abc.abstractmethod
+    def set_lights(self, color=None, heartbeat=None):
         pass
 
 

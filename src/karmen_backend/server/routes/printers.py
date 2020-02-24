@@ -445,3 +445,21 @@ def printer_webcam_snapshot(org_uuid, uuid):
     # eventually get a snapshot.
     # We don't want to end with an error here, so the clients keep retrying
     return "", 202
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/set-led", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def printer_set_led(org_uuid, uuid):
+    try:
+        uuidmodule.UUID(uuid, version=4)
+    except ValueError:
+        return abort(make_response("", 400))
+    printer = printers.get_printer(uuid)
+    printer_inst = clients.get_printer_instance(printer)
+    if printer is None or printer.get("organization_uuid") != org_uuid:
+        return abort(make_response("", 404))
+    data = request.json
+    printer.set_printer_light(color="red")
+    return str(dir(printer_inst)), 200

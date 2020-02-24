@@ -54,6 +54,7 @@ class Octoprint(PrinterClient):
             ),
             api_key=client_props.get("api_key", None),
             webcam=client_props.get("webcam", None),
+            plugins=client_props.get("plugins", []),
         )
         self.http_session = requests.Session()
         self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
@@ -229,6 +230,7 @@ class Octoprint(PrinterClient):
                     "%s is responding with %s on /api/settings - probably access-protected octoprint"
                     % (self.network_base, settings_req.status_code)
                 )
+                plugin_list = list(dict(settings_req.json().get("plugins", {})).keys())
                 self.client_info = PrinterClientInfo(
                     {},
                     connected=True,
@@ -236,6 +238,7 @@ class Octoprint(PrinterClient):
                     if settings_req.status_code == 200
                     else PrinterClientAccessLevel.PROTECTED,
                     api_key=self.client_info.api_key,
+                    plugins=plugin_list,
                 )
             else:
                 app.logger.debug(
@@ -410,3 +413,20 @@ class Octoprint(PrinterClient):
         request = self._http_post("/api/job", json=body)
         # TODO improve return value
         return bool(request is not None and request.status_code == 204)
+
+    def set_lights(self, color=None, heartbeat=None):
+        if "awesome_karmen_led" not in self.client_info.plugins:
+            raise PrinterClientException(
+                "awesome_karmen_led is not loaded in octoprint"
+            )
+        body = {"command": "set_led"}
+        if color is not None:
+            body["color"] = color
+        else:
+            body["color"] = "black"
+
+        if heartbeat is not None:
+            body["heartbeat"] = heartbeat
+        request = self._http_post("/api/plugin/awesome_karmen_led", json=body)
+        # TODO improve return value
+        return bool(request is not None and request.status_code == 200)
