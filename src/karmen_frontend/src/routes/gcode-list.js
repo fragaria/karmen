@@ -10,6 +10,7 @@ import {
   deleteGcode
 } from "../actions/gcodes";
 import { useMyModal } from "../components/utils/modal";
+import { usePrintGcodeModal } from "../components/gcodes/print-gcode-modal";
 import { addPrintJob } from "../actions/printjobs";
 import { loadPrinters } from "../actions/printers";
 import formatters from "../services/formatters";
@@ -68,55 +69,17 @@ const GcodeTableRow = ({
   onRowDelete
 }) => {
   const deleteModal = useMyModal();
-  const printModal = useMyModal();
+  const printModal = usePrintGcodeModal({
+    gcode: {
+      uuid,
+      analysis
+    },
+    printGcode,
+    onSchedulePrint,
+    availablePrinters
+  });
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
-  const [showFilamentTypeWarning, setShowFilamentTypeWarning] = useState();
-  const [printerFilamentType, setPrinterFilamentType] = useState();
-  const [gcodeFilamentType, setGcodeFilamentType] = useState();
-  const [message, setMessage] = useState();
-  const [messageOk, setMessageOk] = useState();
-  const [selectedPrinter, setSelectedPrinter] = useState();
-  const [showPrinterSelect, setShowPrinterSelect] = useState();
-
-  const SelectPrinter = () => {
-    const availablePrinterOpts = availablePrinters.map(p => {
-      return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
-    });
-    return (
-      <div className="text-center">
-        {!!availablePrinters.length ? (
-          <label>
-            Please, select the printer to print on:
-            <select
-              id="selectedPrinter"
-              name="selectedPrinter"
-              value={selectedPrinter}
-              onChange={e => setSelectedPrinter(e.target.value)}
-            >
-              {availablePrinterOpts}
-            </select>
-          </label>
-        ) : (
-          <p className="message-error">No available printers found.</p>
-        )}
-      </div>
-    );
-  };
-
-  const schedulePrint = (gcodeUuid, printerUuid) => {
-    onSchedulePrint(gcodeUuid, printerUuid).then(r => {
-      switch (r) {
-        case 201:
-          setMessage("Print was scheduled");
-          setMessageOk(true);
-          break;
-        default:
-          setMessage("Print was not scheduled");
-          setMessageOk(false);
-      }
-    });
-  };
 
   return (
     <div className="list-item">
@@ -142,13 +105,6 @@ const GcodeTableRow = ({
           className="list-dropdown-item"
           onClick={e => {
             setCtaListExpanded(false);
-            setSelectedPrinter(
-              availablePrinters.length ? availablePrinters[0].uuid : null
-            );
-            setShowPrinterSelect(true);
-            setShowFilamentTypeWarning(false);
-            setMessage(undefined);
-            setMessageOk(undefined);
             printModal.openModal(e);
           }}
         >
@@ -168,107 +124,7 @@ const GcodeTableRow = ({
         </button>
       </CtaDropdown>
 
-      <printModal.Modal>
-        <>
-          <h1 className="modal-title text-center">Print G-Code</h1>
-
-          {showPrinterSelect && <SelectPrinter />}
-
-          {message && (
-            <p className={messageOk ? "message-success" : "message-error"}>
-              {message}
-            </p>
-          )}
-
-          {showFilamentTypeWarning && (
-            <>
-              <div className="message-error">
-                Are you sure? There seems to be a filament mismatch: Printer has{" "}
-                <strong>{printerFilamentType}</strong> configured, but this
-                gcode was sliced for <strong>{gcodeFilamentType}</strong>.
-              </div>
-
-              <div className="cta-box text-center">
-                <button
-                  className="btn"
-                  onClick={() => {
-                    setShowPrinterSelect(false);
-                    setShowFilamentTypeWarning(false);
-                    setMessage("Scheduling a print");
-                    setMessageOk(true);
-                    schedulePrint(uuid, selectedPrinter);
-                  }}
-                >
-                  Print anyway
-                </button>{" "}
-                <button
-                  className="btn btn-plain"
-                  onClick={() => {
-                    setShowPrinterSelect(true);
-                    setShowFilamentTypeWarning(false);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          )}
-
-          {!showFilamentTypeWarning && !message && !!availablePrinters.length && (
-            <div className="cta-box text-center">
-              <button
-                className="btn"
-                onClick={e => {
-                  e.preventDefault();
-                  const selected = availablePrinters.find(
-                    p => p.uuid === selectedPrinter
-                  );
-                  if (
-                    selected &&
-                    selected.printer_props &&
-                    selected.printer_props.filament_type &&
-                    analysis &&
-                    analysis.filament &&
-                    analysis.filament.type &&
-                    analysis.filament.type !==
-                      selected.printer_props.filament_type
-                  ) {
-                    setShowPrinterSelect(false);
-                    setShowFilamentTypeWarning(true);
-                    setPrinterFilamentType(
-                      selected.printer_props.filament_type
-                    );
-                    setGcodeFilamentType(analysis.filament.type);
-                    return;
-                  }
-
-                  setShowPrinterSelect(false);
-                  setShowFilamentTypeWarning(false);
-                  setMessage("Scheduling a print");
-                  setMessageOk(true);
-
-                  schedulePrint(uuid, selectedPrinter);
-                }}
-              >
-                Print
-              </button>
-
-              <button className="btn btn-plain" onClick={printModal.closeModal}>
-                Cancel
-              </button>
-            </div>
-          )}
-
-          {!!!availablePrinters.length && (
-            <div className="cta-box text-center">
-              <button className="btn" onClick={printModal.closeModal}>
-                Close
-              </button>
-            </div>
-          )}
-        </>
-      </printModal.Modal>
-
+      <printModal.Modal />
       <DeleteModal
         path={path}
         display={display}
