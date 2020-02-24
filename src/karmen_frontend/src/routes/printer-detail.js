@@ -28,16 +28,16 @@ import {
 
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,
-  printer,
+  accessLevel,
+  state,
   modal
 }) => {
   const printerTargetState =
-    printer.client &&
-    printer.client.access_level === "unlocked" &&
-    (["Offline", "Closed"].indexOf(printer.status && printer.status.state) >
-      -1 || printer.status.state.match(/printer is not/i)
+    accessLevel === "unlocked" &&
+    (["Offline", "Closed"].indexOf(state) > -1 ||
+      state.match(/printer is not/i))
       ? "online"
-      : "offline");
+      : "offline";
 
   return (
     <>
@@ -182,6 +182,7 @@ class PrintJobRow extends React.Component {
 
 const PrinterDetail = ({
   printer,
+  image,
   loadPrinter,
   setPrinterConnection,
   changeCurrentJobState,
@@ -223,7 +224,7 @@ const PrinterDetail = ({
           <WebcamStream
             {...printer.webcam}
             isPrinting={printer.status && printer.status.state === "Printing"}
-            image={printer.image}
+            image={image}
             setWebcamRefreshInterval={setWebcamRefreshInterval}
           />
           <Progress {...printer.job} />
@@ -262,7 +263,10 @@ const PrinterDetail = ({
               ))}
             <ChangeConnectionModal
               modal={changeConnectionModal}
-              printer={printer}
+              accessLevel={
+                printer.client ? printer.client.access_level : undefined
+              }
+              state={printer.status ? printer.status.state : undefined}
               onPrinterConnectionChanged={setPrinterConnection}
             />
             {role === "admin" && (
@@ -320,6 +324,7 @@ export default connect(
     printer: state.printers.printers.find(
       p => p.uuid === ownProps.match.params.uuid
     ),
+    image: state.printers.images[ownProps.match.params.uuid],
     role: state.users.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],

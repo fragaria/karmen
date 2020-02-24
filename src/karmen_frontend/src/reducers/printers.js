@@ -14,6 +14,7 @@ export default (
   state = {
     printersLoaded: false,
     printers: [],
+    images: {},
     toBeDeleted: [],
     checkQueue: {},
     webcamQueue: {}
@@ -184,20 +185,10 @@ export default (
       if (!newImage || newImage.status !== 200) {
         return state;
       }
-      // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.uuid === newImage.uuid);
-      if (!origPrinter) {
-        return state;
-      }
-      if (origPrinter && newImage) {
-        const origIndex = printers.indexOf(origPrinter);
-        printers[origIndex] = Object.assign({}, origPrinter, {
-          image: `${newImage.prefix}${newImage.data}`
-        });
-      }
-      return Object.assign({}, state, {
-        printers: getSortedPrinters(printers)
+      state.images = Object.assign({}, state.images, {
+        [newImage.uuid]: `${newImage.prefix}${newImage.data}`
       });
+      return state;
     default:
       return state;
   }

@@ -87,6 +87,7 @@ class PrinterList extends React.Component {
     const {
       printersLoaded,
       printers,
+      images,
       setWebcamRefreshInterval,
       viewType,
       setPrinterViewType
@@ -119,7 +120,7 @@ class PrinterList extends React.Component {
                         printer.status && printer.status.state === "Printing"
                       }
                       allowFullscreen={false}
-                      image={printer.image}
+                      image={images[printer.uuid]}
                       setWebcamRefreshInterval={interval =>
                         setWebcamRefreshInterval(printer.uuid, interval)
                       }
@@ -172,6 +173,7 @@ export default connect(
   state => ({
     viewType: state.preferences.printerViewType,
     printers: state.printers.printers,
+    images: state.printers.images,
     printersLoaded: state.printers.printersLoaded
   }),
   dispatch => ({
