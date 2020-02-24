@@ -33,6 +33,7 @@ export const loadUserFromToken = token => dispatch => {
     loadUserData({
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
+      email: decoded.user_claims && decoded.user_claims.email,
       organizations: [
         {
           role: "user",
@@ -183,7 +184,7 @@ export const getUsers = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (username, role, password, passwordConfirmation, { dispatch, getState }) => {
+  (username, role, { dispatch, getState }) => {
     const { users } = getState();
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
@@ -191,9 +192,7 @@ export const addUser = createActionThunk(
     return retryIfUnauthorized(backend.addUser, dispatch)(
       users.me.activeOrganization.uuid,
       username,
-      role,
-      password,
-      passwordConfirmation
+      role
     );
   }
 );

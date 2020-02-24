@@ -40,13 +40,15 @@ class Menu extends React.Component {
                     >
                       <span className="navigation-user-avatar">
                         <img
-                          className="default" 
-                          alt="Karmen logo" 
-                          src="/karmen-logo.svg" 
+                          className="default"
+                          alt="Karmen logo"
+                          src="/karmen-logo.svg"
                         />
                       </span>
                       {username}
-                      <p className="navigation-user-organization">organization name</p>
+                      <p className="navigation-user-organization">
+                        organization name
+                      </p>
                     </Link>
                   </li>
                   <li>
@@ -97,7 +99,7 @@ class Menu extends React.Component {
                     >
                       Switch to Another organization name
                     </Link>
-                  </li>                  
+                  </li>
                   <li>
                     <Link
                       className="navigation-user-organization navigation-user-organization-toggle"
@@ -106,7 +108,7 @@ class Menu extends React.Component {
                     >
                       Switch to Another organization name
                     </Link>
-                  </li>                  
+                  </li>
                 </ul>
               )}
               <button
