@@ -24,21 +24,13 @@ export const getUsers = (orgUuid, fields = []) => {
     });
 };
 
-export const addUser = (
-  orgUuid,
-  username,
-  role,
-  password,
-  passwordConfirmation
-) => {
+export const addUser = (orgUuid, username, role) => {
   return fetch(`${BASE_URL}/organizations/${orgUuid}/users`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
       username,
-      role: role,
-      password,
-      password_confirmation: passwordConfirmation
+      role: role
     })
   })
     .then(response => {

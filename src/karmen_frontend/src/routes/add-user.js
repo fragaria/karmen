@@ -29,18 +29,6 @@ class AddUser extends React.Component {
           { val: "user", name: "User" },
           { val: "admin", name: "Admin" }
         ]
-      },
-      password: {
-        name: "New password",
-        val: "",
-        type: "password",
-        required: true
-      },
-      password_confirmation: {
-        name: "New password confirmation",
-        val: "",
-        type: "password",
-        required: true
       }
     }
   };
@@ -67,14 +55,7 @@ class AddUser extends React.Component {
         field.error = "";
       }
     }
-    if (form.password.val) {
-      if (form.password.val !== form.password_confirmation.val) {
-        form.password.error = "New passwords do not match!";
-        hasErrors = true;
-      } else {
-        form.password.error = "";
-      }
-    }
+
     if (hasErrors) {
       this.setState({
         form: Object.assign({}, form)
@@ -83,12 +64,7 @@ class AddUser extends React.Component {
     }
     const { createUser } = this.props;
     if (!hasErrors) {
-      return createUser(
-        form.username.val,
-        form.role.val,
-        form.password.val,
-        form.password_confirmation.val
-      ).then(r => {
+      return createUser(form.username.val, form.role.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
@@ -120,10 +96,6 @@ class AddUser extends React.Component {
           <div className="content">
             <div className="container">
               <h1 className="main-title text-center">Add a new user</h1>
-              <p className="text-center">
-                The password is for the first login only and will have to be
-                changed afterwards.
-              </p>
               <form>
                 {message && (
                   <p
@@ -168,6 +140,5 @@ class AddUser extends React.Component {
 }
 
 export default connect(null, dispatch => ({
-  createUser: (username, role, password, passwordConfirmation) =>
-    dispatch(addUser(username, role, password, passwordConfirmation))
+  createUser: (username, role) => dispatch(addUser(username, role))
 }))(AddUser);

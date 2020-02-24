@@ -142,24 +142,6 @@ export const logout = () => {
     });
 };
 
-export const checkCurrentLoginState = () => {
-  return fetch(`${BASE_URL}/users/me/probe`, {
-    headers: getHeaders()
-  }).then(response => {
-    if (response.status === 200) {
-      return response.json().then(data => {
-        return {
-          status: response.status,
-          state:
-            data && data.force_pwd_change ? "pwd-change-required" : "logged-in"
-        };
-      });
-    } else if (response.status === 401) {
-      return Promise.resolve({ status: 401, state: "logged-out" });
-    }
-  });
-};
-
 export const loadApiTokens = () => {
   return fetch(`${BASE_URL}/users/me/tokens`, {
     method: "GET",

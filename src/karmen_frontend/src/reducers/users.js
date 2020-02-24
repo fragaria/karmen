@@ -6,6 +6,7 @@ const getUserDataFromApiResponse = data => {
     currentState: data.force_pwd_change ? "pwd-change-required" : "logged-in",
     identity: data.identity,
     username: data.username,
+    email: data.email,
     systemRole: data.system_role,
     hasFreshToken: data.fresh,
     accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
@@ -20,6 +21,7 @@ export default (
       hasFreshToken: false,
       currentState: "logged-out",
       username: "",
+      email: "",
       identity: null,
       systemRole: null,
       apiTokens: [],
@@ -99,6 +101,7 @@ export default (
           accessTokenExpiresOn: null,
           identity: null,
           username: "",
+          email: "",
           systemRole: null,
           apiTokens: [],
           apiTokensLoaded: false
