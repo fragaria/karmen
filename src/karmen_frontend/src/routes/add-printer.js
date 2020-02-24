@@ -20,7 +20,7 @@ class AddPrinter extends React.Component {
         error: null
       },
       address: {
-        name: "Printer address",
+        name: window.env.IS_CLOUD_INSTALL ? "Printer token" : "Printer address",
         val: "",
         type: "text",
         required: true,
@@ -56,9 +56,11 @@ class AddPrinter extends React.Component {
     }
     if (
       !form.address.val ||
+        //do not check hostname in cloud installation - printer is added by token
+        ( window.env.IS_CLOUD_INSTALL ? false :
       form.address.val.match(
         /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?\/?[^?#]*$/
-      ) === null
+      ) === null )
     ) {
       hasErrors = true;
       updatedForm.address.error =
@@ -70,28 +72,35 @@ class AddPrinter extends React.Component {
     const { createPrinter } = this.props;
     if (!hasErrors) {
       let protocol = "http";
-      let hostname, ip, port;
+      let hostname, ip, port, path;
       let raw = form.address.val;
-      if (raw.indexOf("//") === -1) {
-        raw = `${protocol}://${raw}`;
-      }
-      const url = new URL(raw);
-      protocol = url.protocol.replace(":", "");
-      port = url.port || null;
-      if (
-        url.hostname &&
-        url.hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null
-      ) {
-        hostname = url.hostname;
+      if (window.env.IS_CLOUD_INSTALL) {
+        protocol = "sock";
+        path = raw;
       } else {
-        ip = url.hostname;
+        if (raw.indexOf("//") === -1) {
+          raw = `${protocol}://${raw}`;
+        }
+        const url = new URL(raw);
+        protocol = url.protocol.replace(":", "");
+        port = url.port || null;
+        if (
+            url.hostname &&
+            url.hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null
+        ) {
+          hostname = url.hostname;
+        } else {
+          ip = url.hostname;
+        }
+        path = url.pathname.length > 0 && url.pathname !== "/" ? url.pathname : "";
       }
+
       return createPrinter(
         protocol,
         hostname,
         ip,
         port,
-        url.pathname.length > 0 && url.pathname !== "/" ? url.pathname : "",
+        path,
         form.name.val,
         form.apiKey.val
       ).then(r => {

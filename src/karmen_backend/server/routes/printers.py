@@ -130,29 +130,47 @@ def printer_create(org_uuid):
     api_key = data.get("api_key", None)
     protocol = data.get("protocol", "http")
     path = data.get("path", "")
+    token = data.get("path", None)
 
-    if (
-        (not ip and not hostname)
-        or not name
-        or protocol not in ["http", "https"]
-        or (hostname and re.match(r"^[0-9a-zA-Z.-]+\.local$", hostname) is None)
-        or (ip and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip) is None)
-        or (port and re.match(r"^\d{0,5}$", str(port)) is None)
-    ):
-        return abort(make_response("", 400))
+    # for cloud instances, to control adding by IP or socket
+    if not app.config.get("ALLOW_PRINTER_ADD_BY_IP") and protocol in ["http", "https"]:
+        return abort(make_response("This option is disabled in this installation", 400))
+    if not app.config.get("ALLOW_PRINTER_ADD_BY_SOCKET") and protocol in ["sock"]:
+        return abort(make_response("This option is disabled in this installation", 400))
 
-    if hostname and not ip:
-        ip = network.get_avahi_address(hostname)
-        if not ip:
-            return abort(make_response("Cannot resolve %s with mDNS" % hostname, 500))
-    if ip and not hostname:
-        hostname = network.get_avahi_hostname(ip)
+    if protocol in ["http", "https"]:
+        if (
+            (not ip and not hostname)
+            or not name
+            or protocol not in ["http", "https"]
+            or (hostname and re.match(r"^[0-9a-zA-Z.-]+\.local$", hostname) is None)
+            or (ip and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip) is None)
+            or (port and re.match(r"^\d{0,5}$", str(port)) is None)
+        ):
+            return abort(make_response("", 400))
 
-    if (
-        printers.get_printer_by_network_props(org_uuid, hostname, ip, port, path)
-        is not None
-    ):
-        return abort(make_response("", 409))
+        if hostname and not ip:
+            ip = network.get_avahi_address(hostname)
+            if not ip:
+                return abort(make_response("Cannot resolve %s with mDNS" % hostname, 500))
+        if ip and not hostname:
+            hostname = network.get_avahi_hostname(ip)
+
+        if (
+            printers.get_printer_by_network_props(org_uuid, hostname, ip, port, path)
+            is not None
+        ):
+            return abort(make_response("", 409))
+
+    if protocol == "sock":
+        path = ""
+        hostname = "prusa3d"
+        ip = "1.2.3.4"
+        port = 80
+        if printers.get_printer_by_socket_token(org_uuid, token) is not None:
+            return abort(make_response("", 409))
+
+        #return abort(make_response(str(data), 501))
 
     printer = clients.get_printer_instance(
         {
@@ -163,6 +181,7 @@ def printer_create(org_uuid):
             "port": port,
             "path": path,
             "name": name,
+            "token": token,
             "protocol": protocol,
             "client": "octoprint",  # TODO make this more generic
         }
@@ -178,6 +197,7 @@ def printer_create(org_uuid):
         ip=ip,
         port=port,
         path=path,
+        token=token,
         protocol=printer.protocol,
         client=printer.client_name(),
         client_props={

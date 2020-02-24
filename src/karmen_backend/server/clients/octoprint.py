@@ -24,6 +24,7 @@ class Octoprint(PrinterClient):
         ip=None,
         port=None,
         path="",
+        token=None,
         name=None,
         client_props=None,
         printer_props=None,
@@ -36,6 +37,7 @@ class Octoprint(PrinterClient):
         self.ip = ip
         self.port = port
         self.path = path
+        self.token = token
         self.protocol = protocol
         self.printer_props = printer_props
         self.client = Octoprint.__client_name__
@@ -62,16 +64,20 @@ class Octoprint(PrinterClient):
         # TODO adapt requests to support custom DNS resolving that speaks mDNS/bonjour/avahi
         # https://stackoverflow.com/questions/22609385/python-requests-library-define-specific-dns
         # until then, we're stuck with IP addresses
-        if self.port is not None:
-            network_host = "%s:%s" % (self.ip, self.port)
-        else:
-            network_host = self.ip
-        normalized_path = self.path
-        if len(self.path) and self.path[-1] == "/":
-            normalized_path = self.path[0:-1]
-        self.network_base = urlparse.urljoin(
-            "%s://%s" % (self.protocol, network_host), normalized_path
-        )
+
+        if self.protocol in ["http", "https"]:
+            if self.port is not None:
+                network_host = "%s:%s" % (self.ip, self.port)
+            else:
+                network_host = self.ip
+            normalized_path = self.path
+            if len(self.path) and self.path[-1] == "/":
+                normalized_path = self.path[0:-1]
+            self.network_base = urlparse.urljoin(
+                "%s://%s" % (self.protocol, network_host), normalized_path
+            )
+        elif self.protocol in ["sock"]:
+            self.network_base = app.config.get("SOCKET_API_URL") % self.token
 
     def get_printer_props(self):
         return self.printer_props
@@ -339,11 +345,13 @@ class Octoprint(PrinterClient):
                     if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
                         snapshot_url = "%s%s" % (self.network_base, snapshot_url)
                     if (
+                        app.config["IS_CLOUD_INSTALL"] is False and
                         re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
                         is not None
                     ):
                         snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
-                    if re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None:
+                    if (re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None
+                       and app.config["IS_CLOUD_INSTALL"] is False):
                         snapshot_url = snapshot_url.replace("localhost", self.ip)
                 return {
                     "message": "OK",
