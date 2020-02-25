@@ -100,7 +100,7 @@ class PasswordReset extends React.Component {
                   className={
                     messageOk
                       ? "text-success text-center"
-                      : "text-error text-center"
+                      : "message-error text-center"
                   }
                 >
                   {message}

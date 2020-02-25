@@ -6,17 +6,23 @@ import BusyButton from "../components/utils/busy-button";
 import { register } from "../actions/users-me";
 import { isEmail } from "../services/validators";
 
-class Register extends React.Component {
+class RegisterConfirmation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       message: null,
       messageOk: false,
-      registerForm: {
-        email: {
-          name: "Your e-mail",
+      passwordForm: {
+        new_password: {
+          name: "New password",
           val: "",
-          type: "text",
+          type: "password",
+          required: true
+        },
+        new_password_confirmation: {
+          name: "New password confirmation",
+          val: "",
+          type: "password",
           required: true
         }
       }
@@ -26,11 +32,11 @@ class Register extends React.Component {
 
   register(e) {
     e.preventDefault();
-    const { registerForm } = this.state;
+    const { passwordForm } = this.state;
     const { doRegister } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
-    for (let field of Object.values(registerForm)) {
+    for (let field of Object.values(passwordForm)) {
       if (field.required && !field.val) {
         field.error = `${field.name} is required!`;
         hasError = true;
@@ -38,44 +44,22 @@ class Register extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(registerForm.email.val)) {
-      hasError = true;
-      registerForm.email.error = "That does not seem like an e-mail address";
-    }
 
     if (hasError) {
       this.setState({
-        registerForm: Object.assign({}, registerForm)
+        passwordForm: Object.assign({}, passwordForm)
       });
       return;
     }
-
-    return doRegister(registerForm.email.val).then(r => {
-      if (r.status !== 202) {
-        this.setState({
-          messageOk: false,
-          message:
-            "We cannot send you the e-mail at this moment, try again later, please."
-        });
-      } else {
-        this.setState({
-          message: "An e-mail will be sent shortly. Check your Inbox, please",
-          messageOk: true,
-          registerForm: Object.assign({}, registerForm, {
-            email: Object.assign({}, registerForm.email, { val: "" })
-          })
-        });
-      }
-    });
   }
 
   render() {
-    const { registerForm, message, messageOk } = this.state;
+    const { passwordForm, message, messageOk } = this.state;
     const updateValue = (name, value) => {
-      const { registerForm } = this.state;
+      const { passwordForm } = this.state;
       this.setState({
-        registerForm: Object.assign({}, registerForm, {
-          [name]: Object.assign({}, registerForm[name], {
+        passwordForm: Object.assign({}, passwordForm, {
+          [name]: Object.assign({}, passwordForm[name], {
             val: value,
             error: null
           })
@@ -86,13 +70,13 @@ class Register extends React.Component {
     return (
       <div className="content">
         <div className="container">
-          <h1 className="main-title text-center">Karmen registration</h1>
+          <h1 className="main-title text-center">Welcome to Karmen, user.name@mail!</h1>
           <form>
-            <FormInputs definition={registerForm} updateValue={updateValue} />
+            <FormInputs definition={passwordForm} updateValue={updateValue} />
 
             <div className="form-messages">
               <p className="text-center">
-                We will send You an e-mail with verification link.
+                To start using Karmen You need to set the password.
               </p>
 
               {message && (
@@ -130,4 +114,4 @@ class Register extends React.Component {
 
 export default connect(undefined, dispatch => ({
   doRegister: email => dispatch(register(email))
-}))(Register);
+}))(RegisterConfirmation);

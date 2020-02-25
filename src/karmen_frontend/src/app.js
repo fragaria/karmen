@@ -11,6 +11,7 @@ import UnauthenticatedRoute from "./components/unauthenticated-route";
 
 import Login from "./routes/login";
 import Register from "./routes/register";
+import RegisterConfirmation from "./routes/register-confirmation";
 import PasswordReset from "./routes/password-reset";
 import Page404 from "./routes/page404";
 import PrinterList from "./routes/printer-list";
@@ -96,6 +97,12 @@ class App extends React.Component {
                 path="/register"
                 exact
                 component={Register}
+              />
+              <UnauthenticatedRoute
+                userState={userState}
+                path="/confirmation"
+                exact
+                component={RegisterConfirmation}
               />
               <UnauthenticatedRoute
                 userState={userState}
