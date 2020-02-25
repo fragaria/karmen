@@ -25,7 +25,7 @@ import AddUser from "./routes/add-user";
 import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
 
-import { loadUserFromLocalStorage } from "./actions/users";
+import { loadUserFromLocalStorage } from "./actions/users-me";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { changePassword } from "../../actions/users";
+import { changePassword } from "../../actions/users-me";
 import { FormInputs } from "../forms/form-utils";
 import BusyButton from "../utils/busy-button";
 

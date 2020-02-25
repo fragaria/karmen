@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 import BusyButton from "../components/utils/busy-button";
-import { resetPassword } from "../actions/users";
+import { resetPassword } from "../actions/users-me";
 import { isEmail } from "../services/validators";
 
 class PasswordReset extends React.Component {

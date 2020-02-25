@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link, withRouter } from "react-router-dom";
-import { clearUserIdentity } from "../actions/users";
+import { clearUserIdentity } from "../actions/users-me";
 
 class Menu extends React.Component {
   constructor(props) {

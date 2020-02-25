@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import LoginForm from "../components/forms/login-form";
-import { authenticate } from "../actions/users";
+import { authenticate } from "../actions/users-me";
 import { Redirect } from "react-router-dom";
 
 const Login = ({ userState, doAuthenticate }) => {

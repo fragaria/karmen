@@ -1,6 +1,6 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
-import { retryIfUnauthorized } from "./users";
+import { retryIfUnauthorized } from "./users-me";
 
 export const clearJobsPages = printerUuid => dispatch => {
   return dispatch({
