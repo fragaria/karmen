@@ -13,7 +13,7 @@ class RegistrationVerificationEmail:
 
     def prepare_variables(self, variables={}):
         self.variables = variables
-        self.variables["activation_link"] = "%s/confirmation?token=%s" % (
+        self.variables["activation_link"] = "%s/confirmation?activate=%s" % (
             app.config["FRONTEND_BASE_URL"],
             base64.b64encode(
                 json.dumps(

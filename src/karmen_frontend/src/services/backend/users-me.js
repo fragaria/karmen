@@ -134,6 +134,33 @@ export const register = email => {
     });
 };
 
+export const activate = (
+  email,
+  activationKey,
+  password,
+  passwordConfirmation
+) => {
+  return fetch(`${BASE_URL}/users/me/activate`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      email,
+      activation_key: activationKey,
+      password,
+      password_confirmation: passwordConfirmation
+    })
+  })
+    .then(response => {
+      return { status: response.status };
+    })
+    .catch(e => {
+      console.error(`Cannot activate account: ${e}`);
+      return { status: 500 };
+    });
+};
+
 export const refreshAccessToken = () => {
   return fetch(`${BASE_URL}/users/me/authenticate-refresh`, {
     method: "POST",

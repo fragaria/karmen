@@ -1,25 +1,28 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, Redirect, withRouter } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 import BusyButton from "../components/utils/busy-button";
-import { register } from "../actions/users-me";
-import { isEmail } from "../services/validators";
+import Loader from "../components/utils/loader";
+import { activate } from "../actions/users-me";
 
 class RegisterConfirmation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      tokenProcessed: false,
+      email: undefined,
+      activationKey: undefined,
       message: null,
       messageOk: false,
       passwordForm: {
-        new_password: {
+        password: {
           name: "New password",
           val: "",
           type: "password",
           required: true
         },
-        new_password_confirmation: {
+        passwordConfirmation: {
           name: "New password confirmation",
           val: "",
           type: "password",
@@ -27,13 +30,35 @@ class RegisterConfirmation extends React.Component {
         }
       }
     };
-    this.register = this.register.bind(this);
+    this.activate = this.activate.bind(this);
   }
 
-  register(e) {
+  componentDidMount() {
+    const { location } = this.props;
+    const params = new URLSearchParams(location.search);
+    if (params.has("activate")) {
+      try {
+        console.log(params.get("activate"), atob(params.get("activate")));
+        const tokenData = JSON.parse(atob(params.get("activate")));
+        this.setState({
+          email: tokenData.email,
+          activationKey: tokenData.activation_key,
+          tokenProcessed: true
+        });
+      } catch (e) {
+        console.error(e);
+        // silent pass as if no token was encountered
+      }
+    }
+    this.setState({
+      tokenProcessed: true
+    });
+  }
+
+  activate(e) {
     e.preventDefault();
-    const { passwordForm } = this.state;
-    const { doRegister } = this.props;
+    const { passwordForm, email, activationKey } = this.state;
+    const { doActivate } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(passwordForm)) {
@@ -44,6 +69,14 @@ class RegisterConfirmation extends React.Component {
         field.error = "";
       }
     }
+    if (passwordForm.password.val) {
+      if (passwordForm.password.val !== passwordForm.passwordConfirmation.val) {
+        passwordForm.password.error = "Passwords do not match!";
+        hasError = true;
+      } else {
+        passwordForm.password.error = "";
+      }
+    }
 
     if (hasError) {
       this.setState({
@@ -51,10 +84,40 @@ class RegisterConfirmation extends React.Component {
       });
       return;
     }
+
+    return doActivate(
+      email,
+      activationKey,
+      passwordForm.password.val,
+      passwordForm.passwordConfirmation.val
+    ).then(r => {
+      if (r.status !== 200) {
+        this.setState({
+          messageOk: false,
+          message:
+            "Account activation failed. Maybe you could try to register again?"
+        });
+      } else {
+        this.setState({
+          message: "Account activated, please login with your new password",
+          messageOk: true,
+          passwordForm: Object.assign({}, passwordForm, {
+            email: Object.assign({}, passwordForm.email, { val: "" })
+          })
+        });
+      }
+    });
   }
 
   render() {
-    const { passwordForm, message, messageOk } = this.state;
+    const {
+      passwordForm,
+      message,
+      messageOk,
+      tokenProcessed,
+      email,
+      activationKey
+    } = this.state;
     const updateValue = (name, value) => {
       const { passwordForm } = this.state;
       this.setState({
@@ -67,10 +130,22 @@ class RegisterConfirmation extends React.Component {
       });
     };
 
+    if (!tokenProcessed) {
+      return <Loader />;
+    }
+
+    if (tokenProcessed && (!email || !activationKey)) {
+      // TODO or activation_key_expired
+      // TODO this is not really user friendly
+      return <Redirect to="/login" />;
+    }
+
     return (
       <div className="content">
         <div className="container">
-          <h1 className="main-title text-center">Welcome to Karmen, user.name@mail!</h1>
+          <h1 className="main-title text-center">
+            Welcome to Karmen, {email}!
+          </h1>
           <form>
             <FormInputs definition={passwordForm} updateValue={updateValue} />
 
@@ -96,7 +171,7 @@ class RegisterConfirmation extends React.Component {
               <BusyButton
                 className="btn"
                 type="submit"
-                onClick={this.register}
+                onClick={this.activate}
                 busyChildren="Sending link..."
               >
                 Register
@@ -112,6 +187,9 @@ class RegisterConfirmation extends React.Component {
   }
 }
 
-export default connect(undefined, dispatch => ({
-  doRegister: email => dispatch(register(email))
-}))(RegisterConfirmation);
+export default withRouter(
+  connect(undefined, dispatch => ({
+    doActivate: (email, activationKey, password, passwordConfirmation) =>
+      dispatch(activate(email, activationKey, password, passwordConfirmation))
+  }))(RegisterConfirmation)
+);

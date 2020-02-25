@@ -114,7 +114,9 @@ class AddUser extends React.Component {
                 <div className="form-messages">
                   {message && (
                     <p
-                      className={messageOk ? "message-success" : "message-error"}
+                      className={
+                        messageOk ? "message-success" : "message-error"
+                      }
                     >
                       {message}
                     </p>

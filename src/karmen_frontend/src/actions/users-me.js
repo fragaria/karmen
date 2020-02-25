@@ -118,6 +118,18 @@ export const register = createActionThunk("USER_REGISTER", email => {
   return backend.register(email);
 });
 
+export const activate = createActionThunk(
+  "USER_ACTIVATE",
+  (email, activationKey, password, passwordConfirmation) => {
+    return backend.activate(
+      email,
+      activationKey,
+      password,
+      passwordConfirmation
+    );
+  }
+);
+
 export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
   return backend.logout();
 });
