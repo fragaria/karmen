@@ -193,7 +193,7 @@ footer {
   }
 
   .navigation-toggle-label {
-    font-size: 2.1.5rem;
+    font-size: 2.5rem;
   }
 
   .navigation-user {
@@ -328,6 +328,7 @@ footer {
   }
 
   &.btn-sm {
+    height: 4rem;
     padding: $base-unit $base-unit*2;
     font-size: 1.4rem;
   }
@@ -390,12 +391,24 @@ footer {
 
   .tab {
     padding: $base-unit $base-unit*2;
+    color: $color-light;
+    font-size: 1.618rem;
+
+    &:hover {
+      color: $color-primary;
+      cursor: pointer;
+    }
   }
 
   .active {
     margin-bottom: -1px;
     border-bottom: 3px solid $color-secondary;
     font-weight: bold;
+    color: $color-primary;
+
+    &:hover {
+      cursor: default;
+    }
   }
 }
 
@@ -417,12 +430,23 @@ footer {
       font-size: 2rem;
     }
   }
+
+  .tabs-content-header {
+    display: flex;
+    width: 100%;
+    padding: $base-unit*3 0;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tabs-content-title {
+    font-size: 2.4rem;
+  }
 }
 
 .progress {
   width: 100%;
   background: #fff;
-  // border-top: 1px solid #fff;
 
   .progress-bar {
     background: $color-secondary;

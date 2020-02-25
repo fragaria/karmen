@@ -109,6 +109,15 @@ class Menu extends React.Component {
                       Switch to Another organization name
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      className="navigation-user-organization navigation-user-organization-toggle"
+                      to="/gcodes"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      Manage organizations
+                    </Link>
+                  </li>
                 </ul>
               )}
               <button
