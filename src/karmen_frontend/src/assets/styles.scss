@@ -254,11 +254,15 @@ footer {
 .main-title {
   display: flex;
   width: 100%;
-  margin: $spacing-default*2 0 $spacing-default;
+  margin: $spacing-default 0;
   align-items: center;
   justify-content: space-between;
   font-family: $mono;
   font-size: 3.5rem;
+
+  @media (min-width: $screen-sm-min) {
+    margin: $spacing-default*2 0 $spacing-default;
+  }
 
   &.text-center {
     display: block;
@@ -656,9 +660,8 @@ select {
   height: $form-elements-height;
   padding: $base-unit;
   background-color: #fff;
-  color: #000;
   border: $border-default;
-  border-radius: 0;
+  color: #000;
   font-family: $sans-serif;
 }
 
@@ -695,6 +698,8 @@ select {
     width: 100%;
     max-width: 100%;
     margin: 0 0 $base-unit*2;
+    border: $border-default;
+    border-radius: 0;
 
     @media (min-width: $screen-sm-min) {
       min-width: 300px;
