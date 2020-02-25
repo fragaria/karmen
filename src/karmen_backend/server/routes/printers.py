@@ -35,12 +35,15 @@ def make_printer_response(printer, fields):
         },
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
-        "hostname": printer_inst.hostname,
-        "ip": printer_inst.ip,
-        "port": printer_inst.port,
         "protocol": printer_inst.protocol,
-        "path": printer_inst.path,
+        "token": printer_inst.token,
     }
+    if not app.config["IS_CLOUD_INSTALL"]:
+        data["hostname"] = printer_inst.hostname
+        data["ip"] = printer_inst.ip
+        data["port"] = printer_inst.port
+        data["path"] = printer_inst.path
+
     if "status" in fields:
         data["status"] = printer_inst.status()
     if "webcam" in fields:
@@ -167,7 +170,7 @@ def printer_create(org_uuid):
         path = ""
         hostname = ""
         ip = ""
-        port = 80
+        port = 0
         if printers.get_printer_by_socket_token(org_uuid, token) is not None:
             return abort(make_response("", 409))
     else:

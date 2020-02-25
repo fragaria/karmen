@@ -129,8 +129,8 @@ export const PrinterConnectionStatus = ({ printer }) => {
         </>
       )}
 
-      <dt className="term">Client host: </dt>
-      <dd className="decription text-mono">
+      <dt className={window.env.IS_CLOUD_INSTALL ? "hidden" : "term" }>Client host: </dt>
+      <dd className={window.env.IS_CLOUD_INSTALL ? "hidden" : "decription text-mono"}>
         {printer.hostname && (
           <a
             className="anchor"
