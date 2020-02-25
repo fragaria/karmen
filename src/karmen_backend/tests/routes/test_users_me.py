@@ -1,6 +1,12 @@
+import hashlib
+import uuid
+import pytz
+import random
+import string
 import base64
 import json
 import unittest
+from datetime import datetime, timedelta
 
 from server import app
 from ..utils import (
@@ -20,13 +26,223 @@ from ..utils import (
     UUID_USER,
     UUID_ORG,
 )
-from server.database import api_tokens
+from server.database import api_tokens, users, local_users
 
 
 def get_token_data(jwtoken):
     information = jwtoken.split(".")[1]
     information += "=" * (-len(information) % 4)
     return json.loads(base64.b64decode(information, "-_"))
+
+
+def get_random_email():
+    alphabet = string.ascii_lowercase
+    return "user-%s@ktest.local" % "".join(random.sample(alphabet, 10))
+
+
+class CreateNewUserRoute(unittest.TestCase):
+    def test_fail_no_data(self):
+        with app.test_client() as c:
+            response = c.post("/users/me")
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_bad_mail(self):
+        with app.test_client() as c:
+            response = c.post("/users/me", json={"email": "something"})
+            self.assertEqual(response.status_code, 400)
+
+    def test_create_inactive_user(self):
+        with app.test_client() as c:
+            email = get_random_email()
+            # this is testing whitespace truncate and casing as well
+            response = c.post("/users/me", json={"email": "   %s    " % email.upper()})
+            user = users.get_by_email(email)
+            self.assertTrue(user is not None)
+            self.assertEqual(user["providers"], [])
+            self.assertEqual(user["email"], email)
+            self.assertEqual(user["username"], email)
+            self.assertEqual(user["activated"], None)
+            self.assertTrue(user["activation_key_hash"] is not None)
+            self.assertTrue(user["activation_key_expires"] is not None)
+            self.assertTrue(
+                user["activation_key_expires"]
+                < (datetime.now().astimezone() + timedelta(minutes=15))
+            )
+            self.assertEqual(response.status_code, 202)
+
+    def test_fail_conflict_active(self):
+        with app.test_client() as c:
+            response = c.post("/users/me", json={"email": "test-admin@karmen.local"})
+            self.assertEqual(response.status_code, 400)
+
+    def test_reissue_activation_key(self):
+        with app.test_client() as c:
+            email = get_random_email()
+            response = c.post("/users/me", json={"email": email})
+            self.assertEqual(response.status_code, 202)
+            user = users.get_by_email(email)
+            self.assertTrue(user["activation_key_hash"] is not None)
+            response = c.post("/users/me", json={"email": email})
+            self.assertEqual(response.status_code, 202)
+            user2 = users.get_by_email(email)
+            self.assertTrue(user["activation_key_hash"] != user2["activation_key_hash"])
+            # assert False  # TODO test second mail send
+
+    def test_send_activation_mail(self):
+        with app.test_client() as c:
+            email = get_random_email()
+            response = c.post("/users/me", json={"email": email})
+            self.assertEqual(response.status_code, 202)
+            # assert False  # TODO test mail send
+
+
+class ActivateNewUserRoute(unittest.TestCase):
+    def setUp(self):
+        self.email = get_random_email()
+        self.activation_key = uuid.uuid4()
+        self.user_uuid = uuid.uuid4()
+        users.add_user(
+            uuid=self.user_uuid,
+            username=self.email,
+            email=self.email,
+            system_role="user",
+            providers=[],
+            activation_key_hash=hashlib.sha256(
+                str(self.activation_key).encode("utf-8")
+            ).hexdigest(),
+            activation_key_expires=datetime.now().astimezone() + timedelta(minutes=10),
+        )
+
+    def test_fail_no_data(self):
+        with app.test_client() as c:
+            response = c.post("/users/me/activate")
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_bad_mail(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": "something",
+                    "activation_key": self.activation_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_missing_activation_key(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": self.email,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_password_missing(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={"email": self.email, "activation_key": self.activation_key},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_password_mismatch(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": self.email,
+                    "activation_key": self.activation_key,
+                    "password": "aaa",
+                    "password_confirmation": "bbb",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_bad_activation_key(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": self.email,
+                    "activation_key": "1234",
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_expired_activation_key(self):
+        email = get_random_email()
+        activation_key = "1234"
+        users.add_user(
+            uuid=uuid.uuid4(),
+            username=email,
+            email=email,
+            system_role="user",
+            providers=[],
+            activation_key_hash=hashlib.sha256(
+                str(activation_key).encode("utf-8")
+            ).hexdigest(),
+            activation_key_expires=datetime.now().astimezone() - timedelta(minutes=10),
+        )
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": email,
+                    "activation_key": activation_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_activate_user(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": self.email,
+                    "activation_key": self.activation_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+            user = users.get_by_uuid(self.user_uuid)
+            self.assertTrue(user is not None)
+            self.assertTrue(user["activated"] is not None)
+            local_user = local_users.get_local_user(self.user_uuid)
+            self.assertTrue(local_user is not None)
+
+    def test_already_active_user(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": self.email,
+                    "activation_key": self.activation_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": self.email,
+                    "activation_key": self.activation_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 409)
 
 
 class AuthenticateRoute(unittest.TestCase):

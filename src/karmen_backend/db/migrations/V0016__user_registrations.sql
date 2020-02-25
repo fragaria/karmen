@@ -12,9 +12,14 @@ SET row_security = off;
 SET default_tablespace = '';
 
 ALTER TABLE public.users
-    ADD COLUMN IF NOT EXISTS email character varying;
+    ADD COLUMN IF NOT EXISTS email character varying,
+    ADD COLUMN IF NOT EXISTS activation_key_hash character varying(64),
+    ADD COLUMN IF NOT EXISTS activation_key_expires timestamp with time zone,
+    ADD COLUMN IF NOT EXISTS activated timestamp with time zone;
 
+UPDATE public.users SET email = username where username like '%@%';
 UPDATE public.users SET email = username||'@karmen.local' where email IS NULL;
+UPDATE public.users SET activated=now() where activated IS NULL;
 
 ALTER TABLE public.users
   ALTER COLUMN email SET NOT NULL;

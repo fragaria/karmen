@@ -1,4 +1,7 @@
+import hashlib
+import bcrypt
 from datetime import datetime, timedelta
+import uuid
 from werkzeug.exceptions import BadRequest, Unauthorized
 import bcrypt
 from flask import jsonify, request, abort, make_response
@@ -18,9 +21,96 @@ from flask_jwt_extended import (
 )
 from server import app
 from server.database import users, local_users, api_tokens, organizations
+from server.services.validators import is_email
 
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
+
+
+@app.route("/users/me", methods=["POST"])
+def create_inactive_user():
+    data = request.json
+    if not data:
+        return abort(make_response("", 400))
+    email = data.get("email", "").lstrip().rstrip().lower()
+    if not email or not is_email(email):
+        return abort(make_response("", 400))
+    existing = users.get_by_email(email)
+    # activated users
+    if existing and existing["activated"] is not None:
+        return abort(make_response("", 400))
+
+    activation_key = uuid.uuid4()
+    activation_key_expires = datetime.now().astimezone() + timedelta(minutes=10)
+    # reissue activation_key
+    if existing:
+        users.update_user(
+            uuid=existing["uuid"],
+            activation_key_hash=hashlib.sha256(
+                str(activation_key).encode("utf-8")
+            ).hexdigest(),
+            activation_key_expires=activation_key_expires,
+        )
+    # completely new user
+    else:
+        users.add_user(
+            uuid=uuid.uuid4(),
+            username=email,
+            email=email,
+            system_role="user",
+            providers=[],
+            activation_key_hash=hashlib.sha256(
+                str(activation_key).encode("utf-8")
+            ).hexdigest(),
+            activation_key_expires=activation_key_expires,
+        )
+    return make_response("", 202)
+
+
+@app.route("/users/me/activate", methods=["POST"])
+def activate_user():
+    data = request.json
+    if not data:
+        return abort(make_response("", 400))
+    email = data.get("email", "").lstrip().rstrip().lower()
+    activation_key = data.get("activation_key", None)
+    password = data.get("password", None)
+    password_confirmation = data.get("password_confirmation", None)
+
+    if not email or not is_email(email):
+        return abort(make_response("", 400))
+    if not password or not activation_key:
+        return abort(make_response("", 400))
+    if password != password_confirmation:
+        return abort(make_response("", 400))
+
+    existing = users.get_by_email(email)
+    if not existing:
+        return abort(make_response("", 400))
+    if existing["activated"] is not None:
+        return abort(make_response("", 409))
+
+    if (
+        hashlib.sha256(str(activation_key).encode("utf-8")).hexdigest()
+        != existing["activation_key_hash"]
+    ):
+        return abort(make_response("", 400))
+    if existing["activation_key_expires"] < datetime.now().astimezone():
+        return abort(make_response("", 400))
+
+    pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
+    users.update_user(
+        uuid=existing["uuid"],
+        activated=datetime.now().astimezone(),
+        providers=["local"],
+        providers_data={},
+    )
+    local_users.add_local_user(
+        user_uuid=existing["uuid"],
+        pwd_hash=pwd_hash.decode("utf8"),
+        force_pwd_change=False,
+    )
+    return make_response("", 200)
 
 
 def get_user_identity(userdata, token_freshness):
@@ -103,7 +193,7 @@ def authenticate_fresh():
 # This returns a non fresh access token and no refresh token
 @app.route("/users/me/authenticate-refresh", methods=["POST"])
 @jwt_refresh_token_required
-def refresh():
+def authenticate_refresh():
     user = get_current_user()
     if not user:
         return abort(make_response("", 401))

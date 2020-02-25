@@ -13,7 +13,7 @@ from . import jwt_requires_system_role, jwt_force_password_change, validate_org_
 @validate_org_access("admin")
 @fresh_jwt_required
 @jwt_force_password_change
-def add_user(org_uuid):
+def add_user_to_org(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))

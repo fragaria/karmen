@@ -1,5 +1,5 @@
-insert into public.users (uuid, username, email, system_role, providers, providers_data)
-  values ('1b59f2e0-336f-4a1c-8caf-1f074fc43744', 'karmen', 'karmen@karmen.local', 'admin', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data, activated)
+  values ('1b59f2e0-336f-4a1c-8caf-1f074fc43744', 'karmen', 'karmen@karmen.local', 'admin', '{"local"}', '{}', now())
   on conflict do nothing;
 
 update public.users set system_role = 'admin'

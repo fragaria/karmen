@@ -9,8 +9,8 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-insert into public.users (uuid, username, email, system_role, providers, providers_data)
-  values ('1b59f2e0-336f-4a1c-8caf-1f074fc43744', 'karmen', 'karmen@karmen.local', 'admin', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data, activated)
+  values ('1b59f2e0-336f-4a1c-8caf-1f074fc43744', 'karmen', 'karmen@karmen.local', 'admin', '{"local"}', '{}', now())
   on conflict do nothing;
 
 update public.users set system_role = 'admin'
@@ -23,8 +23,8 @@ insert into public.local_users (user_uuid, pwd_hash, force_pwd_change)
 
 ----
 
-insert into public.users (uuid, username, email, system_role, providers, providers_data)
-  values ('6480fa7d-ce18-4ae2-818b-f1d200050806', 'test-admin', 'test-admin@karmen.local', 'admin', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data, activated)
+  values ('6480fa7d-ce18-4ae2-818b-f1d200050806', 'test-admin', 'test-admin@karmen.local', 'admin', '{"local"}', '{}', now())
   on conflict do nothing;
 
 insert into public.organization_roles (organization_uuid, user_uuid, role)
@@ -38,8 +38,8 @@ insert into public.local_users (user_uuid, pwd_hash, force_pwd_change)
 
 -------
 
-insert into public.users (uuid, username, email, system_role, providers, providers_data)
-  values ('77315957-8ebb-4a44-976c-758dbf28bb9f', 'test-user', 'test-user@karmen.local', 'user', '{"local"}', '{}')
+insert into public.users (uuid, username, email, system_role, providers, providers_data, activated)
+  values ('77315957-8ebb-4a44-976c-758dbf28bb9f', 'test-user', 'test-user@karmen.local', 'user', '{"local"}', '{}', now())
   on conflict do nothing;
 
 insert into public.organization_roles (organization_uuid, user_uuid, role)
