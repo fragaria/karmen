@@ -1,11 +1,17 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
+import BusyButton from "../components/utils/busy-button";
+import { register } from "../actions/users-me";
+import { isEmail } from "../services/validators";
 
 class Register extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      message: null,
+      messageOk: false,
       registerForm: {
         email: {
           name: "Your e-mail",
@@ -15,9 +21,68 @@ class Register extends React.Component {
         }
       }
     };
+    this.register = this.register.bind(this);
   }
-  render() {
+
+  register(e) {
+    e.preventDefault();
     const { registerForm } = this.state;
+    const { doRegister } = this.props;
+    let hasError = false;
+    // eslint-disable-next-line no-unused-vars
+    for (let field of Object.values(registerForm)) {
+      if (field.required && !field.val) {
+        field.error = `${field.name} is required!`;
+        hasError = true;
+      } else {
+        field.error = "";
+      }
+    }
+    if (!isEmail(registerForm.email.val)) {
+      hasError = true;
+      registerForm.email.error = "That does not seem like an e-mail address";
+    }
+
+    if (hasError) {
+      this.setState({
+        registerForm: Object.assign({}, registerForm)
+      });
+      return;
+    }
+
+    return doRegister(registerForm.email.val).then(r => {
+      if (r.status !== 200) {
+        this.setState({
+          messageOk: false,
+          message:
+            "We cannot send you the e-mail at this moment, try again later, please."
+        });
+      } else {
+        this.setState({
+          message: "An e-mail will be sent shortly. Check your Inbox, please",
+          messageOk: true,
+          registerForm: Object.assign({}, registerForm, {
+            email: Object.assign({}, registerForm.email, { val: "" })
+          })
+        });
+      }
+    });
+  }
+
+  render() {
+    const { registerForm, message, messageOk } = this.state;
+    const updateValue = (name, value) => {
+      const { registerForm } = this.state;
+      this.setState({
+        registerForm: Object.assign({}, registerForm, {
+          [name]: Object.assign({}, registerForm[name], {
+            val: value,
+            error: null
+          })
+        })
+      });
+    };
+
     return (
       <div className="content">
         <div className="container">
@@ -26,9 +91,27 @@ class Register extends React.Component {
             We will send You an e-mail with verification link.
           </p>
           <form>
-            <FormInputs definition={registerForm} />
+            {message && (
+              <p
+                className={
+                  messageOk
+                    ? "text-success text-center"
+                    : "text-secondary text-center"
+                }
+              >
+                {message}
+              </p>
+            )}
+            <FormInputs definition={registerForm} updateValue={updateValue} />
             <div className="cta-box text-center">
-              <button className="btn">Register</button>{" "}
+              <BusyButton
+                className="btn"
+                type="submit"
+                onClick={this.register}
+                busyChildren="Sending link..."
+              >
+                Register
+              </BusyButton>{" "}
               <Link to="/login" className="btn btn-plain">
                 Cancel
               </Link>
@@ -40,4 +123,6 @@ class Register extends React.Component {
   }
 }
 
-export default Register;
+export default connect(undefined, dispatch => ({
+  doRegister: email => dispatch(register(email))
+}))(Register);
