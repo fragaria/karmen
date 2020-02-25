@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
@@ -30,52 +31,67 @@ const Settings = ({
   return (
     <OrgRoleBasedGateway requiredRole="admin">
       <FreshTokenGateway>
-        <div className="content user-list">
+        <div className="content">
           <div className="container">
-            <h1 className="main-title">
-              Printers
-              <Link to="/add-printer" className="btn btn-sm">
-                <span>+ Add a printer</span>
-              </Link>
-            </h1>
+            <h1 className="main-title">Settings</h1>
           </div>
-          <PrintersTable
-            loadPrinters={loadPrinters}
-            printersList={printersList}
-            printersLoaded={printersLoaded}
-            onPrinterDelete={onPrinterDelete}
-          />
-          {window.env.IS_CLOUD_INSTALL ? (
-            <br />
-          ) : (
-            <div className="container">
-              <br />
-              <br />
-              <strong>Network scan</strong>
-              <NetworkScan
-                networkInterface={networkInterface}
-                onNetworkInterfaceChange={onNetworkInterfaceChange}
-                scanNetwork={scanNetwork}
+          <Tabs>
+            <TabList>
+              <Tab>Printers</Tab>
+              <Tab>Users</Tab>
+            </TabList>
+            <TabPanel>
+              <div className="container">
+                <div className="react-tabs__tab-panel__header">
+                  <h1 className="react-tabs__tab-panel__header__title">
+                    Printers
+                  </h1>
+                  <Link to="/add-printer" className="btn btn-sm">
+                    <span>+ Add a printer</span>
+                  </Link>
+                </div>
+              </div>
+              <PrintersTable
+                loadPrinters={loadPrinters}
+                printersList={printersList}
+                printersLoaded={printersLoaded}
+                onPrinterDelete={onPrinterDelete}
               />
-            </div>
-          )}
 
-          <div className="container">
-            <h1 className="main-title">
-              Users
-              <Link to="/add-user" className="btn btn-sm">
-                <span>+ Add a user</span>
-              </Link>
-            </h1>
-          </div>
-          <UsersTable
-            currentUuid={currentUuid}
-            loadUsers={loadUsers}
-            usersList={usersList}
-            usersLoaded={usersLoaded}
-            onUserDelete={onUserDelete}
-            onUserChange={onUserChange}
-          />
+              <div className="container">
+                <br />
+                <br />
+                <strong>Network scan</strong>
+                <NetworkScan
+                  networkInterface={networkInterface}
+                  onNetworkInterfaceChange={onNetworkInterfaceChange}
+                  scanNetwork={scanNetwork}
+                />
+              </div>
+            </TabPanel>
+
+            <TabPanel>
+              <div className="container">
+                <div className="react-tabs__tab-panel__header">
+                  <h1 className="react-tabs__tab-panel__header__title">
+                    Users
+                  </h1>
+                  <Link to="/add-user" className="btn btn-sm">
+                    <span>+ Add a user</span>
+                  </Link>
+                </div>
+              </div>
+
+              <UsersTable
+                currentUuid={currentUuid}
+                loadUsers={loadUsers}
+                usersList={usersList}
+                usersLoaded={usersLoaded}
+                onUserDelete={onUserDelete}
+                onUserChange={onUserChange}
+              />
+            </TabPanel>
+          </Tabs>
         </div>
       </FreshTokenGateway>
     </OrgRoleBasedGateway>

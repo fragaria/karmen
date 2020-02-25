@@ -1,0 +1,62 @@
+@import "variables";
+
+.react-tabs {
+  -webkit-tap-highlight-color: transparent;
+
+  &__tab-list {
+    display: flex;
+    margin-bottom: $base-unit;
+    align-items: center;
+    border-bottom: 1px solid $border-color;
+    list-style: none;
+  }
+
+  &__tab {
+    padding: $base-unit $base-unit*2;
+    color: $color-light;
+    font-size: 1.618rem;
+
+    &:hover {
+      color: $color-primary;
+      cursor: pointer;
+    }
+
+    &--selected {
+      margin-bottom: -1px;
+      padding-bottom: 6px;
+      border-bottom: 3px solid $color-secondary;
+      font-weight: bold;
+      color: $color-primary;
+
+      &:hover {
+        cursor: default;
+      }
+    }
+
+    &--disabled {
+      color: GrayText;
+      cursor: default;
+    }
+  }
+
+  &__tab-panel {
+    display: none;
+    margin-bottom: $spacing-default;
+
+    &--selected {
+      display: block;
+    }
+
+    &__header {
+      display: flex;
+      width: 100%;
+      padding: $base-unit*3 0;
+      justify-content: space-between;
+      align-items: center;
+
+      &__title {
+        font-size: 2.4rem;
+      }
+    }
+  }
+}

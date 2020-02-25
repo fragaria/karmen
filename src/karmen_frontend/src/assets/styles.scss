@@ -3,6 +3,7 @@
 @import "./icons/style.css";
 @import "variables";
 @import "mixins";
+@import "react-tabs";
 
 
 * {
@@ -379,68 +380,6 @@ footer {
   .description {
     font-weight: bold;
     overflow-x: hidden;
-  }
-}
-
-.tabs-navigation {
-  display: flex;
-  margin-bottom: $base-unit;
-  align-items: center;
-  border-bottom: 1px solid $border-color;
-  list-style: none;
-
-  .tab {
-    padding: $base-unit $base-unit*2;
-    color: $color-light;
-    font-size: 1.618rem;
-
-    &:hover {
-      color: $color-primary;
-      cursor: pointer;
-    }
-  }
-
-  .active {
-    margin-bottom: -1px;
-    border-bottom: 3px solid $color-secondary;
-    font-weight: bold;
-    color: $color-primary;
-
-    &:hover {
-      cursor: default;
-    }
-  }
-}
-
-.tabs-content {
-  margin-bottom: $spacing-default;
-
-  .item {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    padding: $base-unit 0;
-
-    small {
-      display: block;
-    }
-
-    [class^="icon-"] {
-      margin-left: $base-unit;
-      font-size: 2rem;
-    }
-  }
-
-  .tabs-content-header {
-    display: flex;
-    width: 100%;
-    padding: $base-unit*3 0;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .tabs-content-title {
-    font-size: 2.4rem;
   }
 }
 
