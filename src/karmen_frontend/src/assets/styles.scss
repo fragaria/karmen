@@ -758,6 +758,10 @@ select {
   }
 }
 
+.form-messages {
+  margin-top: $base-unit*2;
+}
+
 .message-success,
 .message-error {
   text-align: center;

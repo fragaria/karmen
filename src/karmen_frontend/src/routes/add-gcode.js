@@ -68,11 +68,6 @@ class AddGcode extends React.Component {
           <h1 className="main-title text-center">Add a G-Code</h1>
 
           <form>
-            {message && (
-              <p className={messageOk ? "message-success" : "message-error"}>
-                {message}
-              </p>
-            )}
             <div className="input-group">
               <label htmlFor="file">Select your gcode</label>
               <input
@@ -100,6 +95,15 @@ class AddGcode extends React.Component {
               />
               <span></span>
             </div>
+
+            <div className="form-messages">
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
+            </div>
+
             <div className="cta-box text-center">
               <BusyButton
                 className="btn"

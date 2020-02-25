@@ -97,13 +97,6 @@ class AddUser extends React.Component {
             <div className="container">
               <h1 className="main-title text-center">Add a new user</h1>
               <form>
-                {message && (
-                  <p
-                    className={messageOk ? "message-success" : "message-error"}
-                  >
-                    {message}
-                  </p>
-                )}
                 <FormInputs
                   definition={form}
                   updateValue={(name, value) => {
@@ -117,6 +110,17 @@ class AddUser extends React.Component {
                     });
                   }}
                 />
+
+                <div className="form-messages">
+                  {message && (
+                    <p
+                      className={messageOk ? "message-success" : "message-error"}
+                    >
+                      {message}
+                    </p>
+                  )}
+                </div>
+
                 <div className="cta-box text-center">
                   <BusyButton
                     className="btn"
