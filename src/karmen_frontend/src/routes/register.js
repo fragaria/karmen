@@ -51,7 +51,7 @@ class Register extends React.Component {
     }
 
     return doRegister(registerForm.email.val).then(r => {
-      if (r.status !== 200) {
+      if (r.status !== 202) {
         this.setState({
           messageOk: false,
           message:

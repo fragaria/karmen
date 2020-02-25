@@ -3,7 +3,6 @@ import bcrypt
 from datetime import datetime, timedelta
 import uuid
 from werkzeug.exceptions import BadRequest, Unauthorized
-import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import (
@@ -22,6 +21,7 @@ from flask_jwt_extended import (
 from server import app
 from server.database import users, local_users, api_tokens, organizations
 from server.services.validators import is_email
+from server.tasks.send_mail import send_mail
 
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
@@ -64,6 +64,15 @@ def create_inactive_user():
             ).hexdigest(),
             activation_key_expires=activation_key_expires,
         )
+    send_mail.delay(
+        [email],
+        "REGISTRATION_VERIFICATION_EMAIL",
+        {
+            "activation_key": activation_key,
+            "activation_key_expires": activation_key_expires,
+            "email": email,
+        },
+    )
     return make_response("", 202)
 
 

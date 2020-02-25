@@ -5,6 +5,7 @@ import random
 import string
 import base64
 import json
+import mock
 import unittest
 from datetime import datetime, timedelta
 
@@ -75,7 +76,8 @@ class CreateNewUserRoute(unittest.TestCase):
             response = c.post("/users/me", json={"email": "test-admin@karmen.local"})
             self.assertEqual(response.status_code, 400)
 
-    def test_reissue_activation_key(self):
+    @mock.patch("server.tasks.send_mail.send_mail.delay",)
+    def test_reissue_activation_key(self, mock_send_mail):
         with app.test_client() as c:
             email = get_random_email()
             response = c.post("/users/me", json={"email": email})
@@ -86,14 +88,21 @@ class CreateNewUserRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 202)
             user2 = users.get_by_email(email)
             self.assertTrue(user["activation_key_hash"] != user2["activation_key_hash"])
-            # assert False  # TODO test second mail send
+            self.assertEqual(mock_send_mail.call_count, 2)
 
-    def test_send_activation_mail(self):
+    @mock.patch("server.tasks.send_mail.send_mail.delay",)
+    def test_send_activation_mail(self, mock_send_mail):
         with app.test_client() as c:
             email = get_random_email()
             response = c.post("/users/me", json={"email": email})
             self.assertEqual(response.status_code, 202)
-            # assert False  # TODO test mail send
+            self.assertEqual(mock_send_mail.call_count, 1)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[0][0][0][0], email)
+            self.assertEqual(args[0][0][1], "REGISTRATION_VERIFICATION_EMAIL")
+            self.assertTrue(args[0][0][2]["activation_key"] is not None)
+            self.assertTrue(args[0][0][2]["activation_key_expires"] is not None)
+            self.assertEqual(args[0][0][2]["email"], email)
 
 
 class ActivateNewUserRoute(unittest.TestCase):
