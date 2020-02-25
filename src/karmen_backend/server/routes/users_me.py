@@ -153,7 +153,7 @@ def authenticate_base(include_refresh_token):
     password = data.get("password", None)
     if not username or not password:
         raise BadRequest("Missing username or password in request body.")
-    user = users.get_by_email(username)
+    user = users.get_by_email(username.lstrip().rstrip().lower())
     # fallback to legacy username login
     if not user:
         user = users.get_by_username(username)

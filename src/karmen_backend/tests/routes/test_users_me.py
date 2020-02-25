@@ -326,7 +326,8 @@ class AuthenticateRoute(unittest.TestCase):
             response = c.post(
                 "/users/me/authenticate",
                 json={
-                    "username": "test-admin@karmen.local",
+                    # tests truncate and casing as well
+                    "username": "  TEST-admin@karmen.local  ",
                     "password": "admin-password",
                 },
             )
