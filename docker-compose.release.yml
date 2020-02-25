@@ -42,6 +42,7 @@ services:
       SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
+      FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ${KARMEN_FILES_DIR:-./karmen-files}:/tmp/karmen-files
@@ -94,6 +95,7 @@ services:
       POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
+      FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ${KARMEN_FILES_DIR:-./karmen-files}:/tmp/karmen-files
@@ -118,6 +120,7 @@ services:
       POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
+      FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
     privileged: true # for mdns resolution

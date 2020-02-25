@@ -69,7 +69,7 @@ def create_inactive_user():
         "REGISTRATION_VERIFICATION_EMAIL",
         {
             "activation_key": activation_key,
-            "activation_key_expires": activation_key_expires,
+            "activation_key_expires": int(activation_key_expires.timestamp()),
             "email": email,
         },
     )

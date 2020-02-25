@@ -39,10 +39,16 @@ if os.environ.get("SENTRY_DSN") is not None:
         release="karmen_backend@%s" % __version__,
     )
 
+
 app = Flask(__name__)
 app.config.from_envvar("FLASKR_SETTINGS", silent=True)
 # This is hardcoded for 1GB
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
+if app.config.get("FRONTEND_BASE_URL") is None:
+    raise RuntimeError(
+        "Cannot start the application without FRONTEND_BASE_URL in app.config"
+    )
+
 
 app.config["IS_CLOUD_INSTALL"] = app.config.get("IS_CLOUD_INSTALL", False)
 

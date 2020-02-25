@@ -1,4 +1,8 @@
+import base64
+import json
+
 from textwrap import dedent
+from server import app
 
 
 class RegistrationVerificationEmail:
@@ -9,13 +13,17 @@ class RegistrationVerificationEmail:
 
     def prepare_variables(self, variables={}):
         self.variables = variables
-        self.variables["activation_link"] = (
-            "http://somewhere.com/registration-verification?activation_key=%s&expires=%s&email=%s"
-            % (
-                variables["activation_key"],
-                variables["activation_key_expires"],
-                variables["email"],
-            )
+        self.variables["activation_link"] = "%s/confirmation?token=%s" % (
+            app.config["FRONTEND_BASE_URL"],
+            base64.b64encode(
+                json.dumps(
+                    {
+                        "activation_key": variables["activation_key"],
+                        "activation_key_expires": variables["activation_key_expires"],
+                        "email": variables["email"],
+                    }
+                ).encode("utf-8")
+            ).decode("utf-8"),
         )
 
     def textbody(self):
