@@ -1,6 +1,5 @@
 import React from "react";
-import { connect } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 
 class Register extends React.Component {
@@ -19,12 +18,6 @@ class Register extends React.Component {
   }
   render() {
     const { registerForm } = this.state;
-    const { userState } = this.props;
-
-    if (userState !== "logged-out") {
-      return <Redirect to="/" />;
-    }
-
     return (
       <div className="content">
         <div className="container">
@@ -47,6 +40,4 @@ class Register extends React.Component {
   }
 }
 
-export default connect(state => ({
-  userState: state.users.me.currentState
-}))(Register);
+export default Register;

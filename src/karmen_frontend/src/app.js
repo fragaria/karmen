@@ -5,9 +5,9 @@ import { BrowserRouter, Switch, Route, useLocation } from "react-router-dom";
 import Menu from "./components/menu";
 import Heartbeat from "./components/utils/heartbeat";
 import Loader from "./components/utils/loader";
-import LoginGateway from "./components/gateways/login-gateway";
-import ForcePwdChangeGateway from "./components/gateways/force-pwd-change-gateway";
 import CatchTokenFromUrl from "./components/gateways/catch-token-from-url";
+import AuthenticatedRoute from "./components/authenticated-route";
+import UnauthenticatedRoute from "./components/unauthenticated-route";
 
 import Login from "./routes/login";
 import Register from "./routes/register";
@@ -68,6 +68,7 @@ class App extends React.Component {
 
   render() {
     const { initialized } = this.state;
+    const { userState } = this.props;
     if (!initialized) {
       return (
         <div>
@@ -84,37 +85,89 @@ class App extends React.Component {
           <Heartbeat />
           <main className="main">
             <Switch>
-              <Route path="/login" exact component={Login} />
-              <Route path="/register" exact component={Register} />
-              <Route path="/password-reset" exact component={PasswordReset} />
-              <LoginGateway>
-                <ForcePwdChangeGateway>
-                  <Route path="/users/me" exact component={UserPreferences} />
-                  <Route
-                    path="/users/me/tokens"
-                    exact
-                    component={AddApiToken}
-                  />
-                  <Route path="/settings" exact component={Settings} />
-                  <Route path="/add-user" exact component={AddUser} />
-                  <Route path="/add-printer" exact component={AddPrinter} />
-                  <Route path="/add-gcode" exact component={AddGcode} />
-                  <Route path="/gcodes" exact component={GcodeList} />
-                  <Route path="/gcodes/:uuid" exact component={GcodeDetail} />
-                  <Route
-                    path="/printers/:uuid/settings"
-                    exact
-                    component={PrinterSettings}
-                  />
-                  <Route
-                    path="/printers/:uuid"
-                    exact
-                    component={PrinterDetail}
-                  />
-                  <Route path="/" exact component={PrinterList} />
-                  <Route component={Page404} />
-                </ForcePwdChangeGateway>
-              </LoginGateway>
+              <UnauthenticatedRoute
+                userState={userState}
+                path="/login"
+                exact
+                component={Login}
+              />
+              <UnauthenticatedRoute
+                userState={userState}
+                path="/register"
+                exact
+                component={Register}
+              />
+              <UnauthenticatedRoute
+                userState={userState}
+                path="/password-reset"
+                exact
+                component={PasswordReset}
+              />
+              <AuthenticatedRoute
+                path="/users/me"
+                exact
+                component={UserPreferences}
+              />
+              <AuthenticatedRoute
+                path="/users/me/tokens"
+                exact
+                component={AddApiToken}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/settings"
+                exact
+                component={Settings}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/add-user"
+                exact
+                component={AddUser}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/add-printer"
+                exact
+                component={AddPrinter}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/add-gcode"
+                exact
+                component={AddGcode}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/gcodes"
+                exact
+                component={GcodeList}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/gcodes/:uuid"
+                exact
+                component={GcodeDetail}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/printers/:uuid/settings"
+                exact
+                component={PrinterSettings}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/printers/:uuid"
+                exact
+                component={PrinterDetail}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/"
+                exact
+                component={PrinterList}
+              />
+              <Route component={Page404} />
             </Switch>
           </main>
         </BrowserRouter>
@@ -164,7 +217,8 @@ class App extends React.Component {
 
 export default connect(
   state => ({
-    accessTokenExpiresOn: state.users.me.accessTokenExpiresOn
+    accessTokenExpiresOn: state.users.me.accessTokenExpiresOn,
+    userState: state.users.me.currentState
   }),
   dispatch => ({
     loadUserFromStorage: () => dispatch(loadUserFromLocalStorage())

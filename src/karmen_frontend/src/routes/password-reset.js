@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 import BusyButton from "../components/utils/busy-button";
 import { resetPassword } from "../actions/users-me";
@@ -71,11 +71,6 @@ class PasswordReset extends React.Component {
 
   render() {
     const { resetForm, message, messageOk } = this.state;
-    const { userState } = this.props;
-
-    if (userState !== "logged-out") {
-      return <Redirect to="/" />;
-    }
     const updateValue = (name, value) => {
       const { resetForm } = this.state;
       this.setState({
@@ -128,11 +123,6 @@ class PasswordReset extends React.Component {
   }
 }
 
-export default connect(
-  state => ({
-    userState: state.users.me.currentState
-  }),
-  dispatch => ({
-    doReset: email => dispatch(resetPassword(email))
-  })
-)(PasswordReset);
+export default connect(undefined, dispatch => ({
+  doReset: email => dispatch(resetPassword(email))
+}))(PasswordReset);
