@@ -9,6 +9,10 @@ import LoginGateway from "./components/gateways/login-gateway";
 import ForcePwdChangeGateway from "./components/gateways/force-pwd-change-gateway";
 import CatchTokenFromUrl from "./components/gateways/catch-token-from-url";
 
+import Login from "./routes/login";
+import Register from "./routes/register";
+import PasswordReset from "./routes/password-reset";
+import Page404 from "./routes/page404";
 import PrinterList from "./routes/printer-list";
 import GcodeList from "./routes/gcode-list";
 import GcodeDetail from "./routes/gcode-detail";
@@ -18,11 +22,8 @@ import AddApiToken from "./routes/add-api-token";
 import AddPrinter from "./routes/add-printer";
 import AddGcode from "./routes/add-gcode";
 import AddUser from "./routes/add-user";
-import Register from "./routes/register";
-import PasswordReset from "./routes/password-reset";
 import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
-import Page404 from "./routes/page404";
 
 import { loadUserFromLocalStorage } from "./actions/users";
 
@@ -81,12 +82,13 @@ class App extends React.Component {
           <CatchTokenFromUrl />
           <Menu />
           <Heartbeat />
-          <Route path="/register" exact component={Register} />
-          <Route path="/password-reset" exact component={PasswordReset} />
           <main className="main">
-            <LoginGateway>
-              <ForcePwdChangeGateway>
-                <Switch>
+            <Switch>
+              <Route path="/login" exact component={Login} />
+              <Route path="/register" exact component={Register} />
+              <Route path="/password-reset" exact component={PasswordReset} />
+              <LoginGateway>
+                <ForcePwdChangeGateway>
                   <Route path="/users/me" exact component={UserPreferences} />
                   <Route
                     path="/users/me/tokens"
@@ -111,9 +113,9 @@ class App extends React.Component {
                   />
                   <Route path="/" exact component={PrinterList} />
                   <Route component={Page404} />
-                </Switch>
-              </ForcePwdChangeGateway>
-            </LoginGateway>
+                </ForcePwdChangeGateway>
+              </LoginGateway>
+            </Switch>
           </main>
         </BrowserRouter>
         <footer>

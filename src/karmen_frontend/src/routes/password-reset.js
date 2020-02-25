@@ -1,6 +1,6 @@
 import React from "react";
-
-import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import { Link, Redirect } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 
 class PasswordReset extends React.Component {
@@ -19,6 +19,12 @@ class PasswordReset extends React.Component {
   }
   render() {
     const { registerForm } = this.state;
+
+    const { userState } = this.props;
+
+    if (userState !== "logged-out") {
+      return <Redirect to="/" />;
+    }
 
     return (
       <div className="content">
@@ -42,4 +48,6 @@ class PasswordReset extends React.Component {
   }
 }
 
-export default PasswordReset;
+export default connect(state => ({
+  userState: state.users.me.currentState
+}))(PasswordReset);
