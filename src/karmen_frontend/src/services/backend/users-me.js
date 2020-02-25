@@ -96,6 +96,25 @@ export const changePassword = (
     });
 };
 
+export const resetPassword = email => {
+  return fetch(`${BASE_URL}/users/me/reset-password`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      email
+    })
+  })
+    .then(response => {
+      return { status: response.status };
+    })
+    .catch(e => {
+      console.error(`Cannot reset password: ${e}`);
+      return { status: 500 };
+    });
+};
+
 export const refreshAccessToken = () => {
   return fetch(`${BASE_URL}/users/me/authenticate-refresh`, {
     method: "POST",

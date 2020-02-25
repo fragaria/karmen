@@ -110,6 +110,10 @@ export const changePassword = createActionThunk(
   }
 );
 
+export const resetPassword = createActionThunk("USER_RESET_PASSWORD", email => {
+  return backend.resetPassword(email);
+});
+
 export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
   return backend.logout();
 });
