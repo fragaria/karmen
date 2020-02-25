@@ -290,7 +290,7 @@ const PrinterDetail = ({
         <div className="printer-detail-jobs">
           <ul className="tabs-navigation">
             <li className="tab active">
-              <h2>Jobs</h2>
+              Jobs
             </li>
           </ul>
           <div className="tabs-content">
