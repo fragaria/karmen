@@ -164,8 +164,8 @@ def printer_create(org_uuid):
 
     if protocol == "sock":
         path = ""
-        hostname = "prusa3d"
-        ip = "1.2.3.4"
+        hostname = ""
+        ip = ""
         port = 80
         if printers.get_printer_by_socket_token(org_uuid, token) is not None:
             return abort(make_response("", 409))
