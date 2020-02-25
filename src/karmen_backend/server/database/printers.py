@@ -74,7 +74,7 @@ def get_printer(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol FROM printers where uuid = %s",
+            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol FROM printers where uuid = %s",
             (uuid,),
         )
         data = cursor.fetchone()
@@ -93,7 +93,7 @@ def get_printer_by_network_props(org_uuid, hostname, ip, port, path):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         basequery = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol FROM printers WHERE"
+            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol FROM printers WHERE"
         )
         query = sql.SQL(" ").join(
             [
@@ -118,7 +118,7 @@ def get_printer_by_socket_token(org_uuid, token):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         query = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, client, client_props, printer_props, protocol "
+            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol "
             "FROM printers "
             "WHERE protocol = 'sock' AND organization_uuid = %s AND token = %s"
         )

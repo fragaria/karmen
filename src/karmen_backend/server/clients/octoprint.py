@@ -336,23 +336,26 @@ class Octoprint(PrinterClient):
                     return {"message": "Webcam disabled in octoprint"}
                 stream_url = data["webcam"].get("streamUrl", None)
                 snapshot_url = data["webcam"].get("snapshotUrl", None)
-                if (
-                    stream_url
-                    and re.match(r"^https?", stream_url, re.IGNORECASE) is None
-                ):
-                    stream_url = "%s%s" % (self.network_base, stream_url)
-                if snapshot_url is not None:
-                    if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
-                        snapshot_url = "%s%s" % (self.network_base, snapshot_url)
+                if self.protocol in ["http", "https"]:
                     if (
-                        app.config["IS_CLOUD_INSTALL"] is False and
-                        re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
-                        is not None
+                        stream_url
+                        and re.match(r"^https?", stream_url, re.IGNORECASE) is None
                     ):
-                        snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
-                    if (re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None
-                       and app.config["IS_CLOUD_INSTALL"] is False):
-                        snapshot_url = snapshot_url.replace("localhost", self.ip)
+                        stream_url = "%s%s" % (self.network_base, stream_url)
+                    if snapshot_url is not None:
+                        if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
+                            snapshot_url = "%s%s" % (self.network_base, snapshot_url)
+                        if (
+                            re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
+                            is not None
+                        ):
+                            snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
+                        if re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None:
+                            snapshot_url = snapshot_url.replace("localhost", self.ip)
+                elif self.protocol in ["sock"]:
+                    stream_url = None
+                    snapshot_url = None
+
                 return {
                     "message": "OK",
                     "stream": stream_url,
