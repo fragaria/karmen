@@ -33,29 +33,52 @@ const Settings = ({
         <div className="content user-list">
           <div className="container">
             <h1 className="main-title">
-              Printers
-              <Link to="/add-printer" className="btn btn-sm">
-                <span>+ Add a printer</span>
-              </Link>
+              Settings
             </h1>
           </div>
-          <PrintersTable
-            loadPrinters={loadPrinters}
-            printersList={printersList}
-            printersLoaded={printersLoaded}
-            onPrinterDelete={onPrinterDelete}
-          />
 
-          <div className="container">
-            <br />
-            <br />
-            <strong>Network scan</strong>
-            <NetworkScan
-              networkInterface={networkInterface}
-              onNetworkInterfaceChange={onNetworkInterfaceChange}
-              scanNetwork={scanNetwork}
+          <ul className="tabs-navigation">
+            <li className="tab active">
+              Printers
+            </li>
+            <li className="tab">
+              Users
+            </li>
+            <li className="tab">
+              Organizations
+            </li>
+            <li className="tab">
+              Account
+            </li>
+          </ul>
+          <div className="tabs-content">
+            <div className="container">
+              <div className="tabs-content-header">
+                <h2 className="tabs-content-title">Printers</h2>
+                <Link to="/add-printer" className="btn btn-sm">
+                  <span>+ Add a printer</span>
+                </Link>
+              </div>
+            </div>
+
+            <PrintersTable
+              loadPrinters={loadPrinters}
+              printersList={printersList}
+              printersLoaded={printersLoaded}
+              onPrinterDelete={onPrinterDelete}
             />
+            <div className="container">
+              <br />
+              <br />
+              <strong>Network scan</strong>
+              <NetworkScan
+                networkInterface={networkInterface}
+                onNetworkInterfaceChange={onNetworkInterfaceChange}
+                scanNetwork={scanNetwork}
+              />
+            </div>
           </div>
+
 
           <div className="container">
             <h1 className="main-title">
