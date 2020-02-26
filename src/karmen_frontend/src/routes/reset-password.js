@@ -169,17 +169,27 @@ class ResetPassword extends React.Component {
             </div>
 
             <div className="cta-box text-center">
-              <BusyButton
-                className="btn"
-                type="submit"
-                onClick={this.reset}
-                busyChildren="Sending link..."
-              >
-                Reset
-              </BusyButton>{" "}
-              <Link to="/login" className="btn btn-plain">
-                Cancel
-              </Link>
+              {!messageOk && (
+                <>
+                  <BusyButton
+                    className="btn"
+                    type="submit"
+                    onClick={this.reset}
+                    busyChildren="Sending link..."
+                  >
+                    Reset
+                  </BusyButton>{" "}
+                  <Link to="/login" className="btn btn-plain">
+                    Cancel
+                  </Link>
+                </>
+              )}
+
+              {messageOk && (
+                <Link to="/login" className="btn">
+                  Log in
+                </Link>
+              )}
             </div>
           </form>
         </div>
