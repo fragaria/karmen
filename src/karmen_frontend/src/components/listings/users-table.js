@@ -71,6 +71,26 @@ const DeleteUserModal = ({ modal, user, onUserDelete }) => {
   );
 };
 
+const InvitationSentModal = ({ modal, user }) => {
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">
+            The invitation e-mail has been sent to {user.email}
+          </h1>
+
+          <div className="cta-box text-center">
+            <button className="btn" onClick={modal.closeModal}>
+              Close
+            </button>
+          </div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
+
 const UsersTableRow = ({
   currentUuid,
   user,
@@ -80,6 +100,8 @@ const UsersTableRow = ({
 }) => {
   const toggleUserModal = useMyModal();
   const changeUserRoleModal = useMyModal();
+  const invitationSentModal = useMyModal();
+
   const [ctaListExpanded, setCtaListExpanded] = useState();
 
   return (
@@ -116,6 +138,7 @@ const UsersTableRow = ({
                 // TODO make this more reactive to user's actions
                 setCtaListExpanded(false);
                 onResendInvitation(user.email, user.role);
+                invitationSentModal.openModal(e);
               }}
             >
               <i className="icon-edit"></i>
@@ -154,6 +177,7 @@ const UsersTableRow = ({
         onUserChange={onUserChange}
         modal={changeUserRoleModal}
       />
+      <InvitationSentModal user={user} modal={invitationSentModal} />
     </div>
   );
 };

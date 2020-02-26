@@ -102,13 +102,13 @@ class RegisterConfirmation extends React.Component {
           messageOk: false,
           message: (
             <>
-              Account activation failed. Maybe you could try to
-              {" "}
-              <Link to="/register" className="anchor">register</Link>
-              {" "}
+              Account activation failed. Maybe you could try to{" "}
+              <Link to="/register" className="anchor">
+                register
+              </Link>{" "}
               again?
             </>
-            )
+          )
         });
       } else {
         this.setState({
@@ -157,7 +157,8 @@ class RegisterConfirmation extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">
-            Welcome to Karmen, <br/>{email}!
+            Welcome to Karmen, <br />
+            {email}!
           </h1>
           <h2 className="main-subtitle text-center">
             To start using Karmen You need to set the password.
@@ -182,26 +183,26 @@ class RegisterConfirmation extends React.Component {
             </div>
 
             <div className="cta-box text-center">
-            {!!!messageOk && (
-              <>
-                <BusyButton
-                  className="btn"
-                  type="submit"
-                  onClick={this.activate}
-                  busyChildren="Sending link..."
-                >
-                  Set password
-                </BusyButton>{" "}
-                <Link to="/login" className="btn btn-plain">
-                  Cancel
+              {!!!messageOk && (
+                <>
+                  <BusyButton
+                    className="btn"
+                    type="submit"
+                    onClick={this.activate}
+                    busyChildren="Sending link..."
+                  >
+                    Set password
+                  </BusyButton>{" "}
+                  <Link to="/login" className="btn btn-plain">
+                    Cancel
+                  </Link>
+                </>
+              )}
+              {message && messageOk && (
+                <Link to="/login" className="btn">
+                  Log in to Karmen
                 </Link>
-              </>
-             )}
-            {message && messageOk && (
-              <Link to="/login" className="btn">
-                Log in to Karmen
-              </Link>
-            )}
+              )}
             </div>
           </form>
         </div>

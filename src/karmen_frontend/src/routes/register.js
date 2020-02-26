@@ -102,7 +102,6 @@ class Register extends React.Component {
             <FormInputs definition={registerForm} updateValue={updateValue} />
 
             <div className="form-messages">
-
               {message && (
                 <p
                   className={
