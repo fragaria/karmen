@@ -34,11 +34,7 @@ class RegistrationVerification(MailTemplate):
 
             Verify Email on %s
 
-            If you have any problems or questions, please feel free to reply directly to this email.
-
             © 2020 Fragaria s.r.o.
-            Address …….
-            Follow us on Twitter, LinkedIn or Facebook
             """
             )
             % (self.variables["activation_link"])

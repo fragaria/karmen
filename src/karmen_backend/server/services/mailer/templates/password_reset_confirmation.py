@@ -15,8 +15,6 @@ class PasswordResetConfirmation(MailTemplate):
             We're contacting you to notify you that your Karmen password has been changed.
 
             © 2020 Fragaria s.r.o.
-            Address …….
-            Follow us on Twitter, LinkedIn or Facebook
             """
             )
             % (self.variables["email"])
