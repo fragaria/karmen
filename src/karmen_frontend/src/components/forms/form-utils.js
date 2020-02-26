@@ -86,7 +86,8 @@ export const FormInputs = ({ definition, updateValue }) => {
       case "honeypot":
         return (
           <input
-            type={"text"}
+            key={name}
+            type="text"
             id={name}
             name={name}
             autocomplete="off"
