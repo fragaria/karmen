@@ -173,6 +173,19 @@ class ActivateNewUserRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
+    def test_fail_unknown_email(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/activate",
+                json={
+                    "email": "certainly@notanaccount.com",
+                    "activation_key": "1234",
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_fail_bad_activation_key(self):
         with app.test_client() as c:
             response = c.post(
@@ -355,6 +368,19 @@ class ResetPasswordRoute(unittest.TestCase):
                 "/users/me/reset-password",
                 json={
                     "email": self.email,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_unknown_email(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": "certainly@notanaccount.com",
+                    "pwd_reset_key": "1234",
                     "password": "aaa",
                     "password_confirmation": "aaa",
                 },
