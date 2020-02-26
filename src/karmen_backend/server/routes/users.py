@@ -1,11 +1,15 @@
+import hashlib
+from datetime import datetime, timedelta
 import uuid as guid
 import bcrypt
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
-from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
+from flask_jwt_extended import get_jwt_identity, fresh_jwt_required, get_current_user
 from server import app
 from server.database import users, local_users, organizations, api_tokens
 from . import jwt_requires_system_role, jwt_force_password_change, validate_org_access
+from server.services.validators import is_email
+from server.tasks.send_mail import send_mail
 
 
 @app.route("/organizations/<org_uuid>/users", methods=["POST"])
@@ -17,46 +21,83 @@ def add_user_to_org(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))
-    username = data.get("username", None)
     email = data.get("email", None)
     org_role = data.get("role", None)
     if not email or not org_role:
         return abort(make_response("", 400))
-    # TODO validate email
-    if not username:
-        username = email
     if org_role not in ["admin", "user"]:
         return abort(make_response("", 400))
-    existing = users.get_by_username(username)
+    email = email.lstrip().rstrip().lower()
+    if not is_email(email):
+        return abort(make_response("", 400))
+
+    existing = users.get_by_email(email)
+    # completely new user
     if existing is None:
-        # TODO create invite, send e-mail
         user_uuid = guid.uuid4()
+        activation_key = guid.uuid4()
+        activation_key_expires = datetime.now().astimezone() + timedelta(hours=24)
         users.add_user(
             uuid=user_uuid,
-            username=username,
             email=email,
+            username=email,
             system_role="user",
-            providers=["local"],
-        )
-        # TODO drop this line
-        local_users.add_local_user(
-            user_uuid=user_uuid,
-            pwd_hash="123456 TODO change me",
-            force_pwd_change=False,
+            providers=[],
+            activation_key_hash=hashlib.sha256(
+                str(activation_key).encode("utf-8")
+            ).hexdigest(),
+            activation_key_expires=activation_key_expires,
         )
     else:
-        # TODO create invite, send e-mail
         user_uuid = existing.get("uuid", None)
-        if organizations.get_organization_role(org_uuid, user_uuid):
+        # an activated account that already has a role in this organization
+        if (
+            organizations.get_organization_role(org_uuid, user_uuid)
+            and existing["activated"]
+        ):
             return abort(make_response("", 409))
+        # an account that is not activated but has already been sent an invite
+        activation_key = guid.uuid4()
+        activation_key_expires = datetime.now().astimezone() + timedelta(hours=24)
+        users.update_user(
+            uuid=user_uuid,
+            activation_key_hash=hashlib.sha256(
+                str(activation_key).encode("utf-8")
+            ).hexdigest(),
+            activation_key_expires=activation_key_expires,
+        )
 
+    organization = organizations.get_by_uuid(org_uuid)
     organizations.set_organization_role(org_uuid, user_uuid, org_role)
-    # TODO add invite-pending or state-pending
+    if existing is None or existing["activated"] is None:
+        send_mail.delay(
+            [email],
+            "REGISTRATION_VERIFICATION_EMAIL",
+            {
+                "activation_key": activation_key,
+                "activation_key_expires": int(activation_key_expires.timestamp()),
+                "email": email,
+                "inviter_username": get_current_user()["username"],
+                "organization_name": organization["name"],
+                "organization_uuid": organization["uuid"],
+            },
+        )
+    else:
+        send_mail.delay(
+            [email],
+            "ORGANIZATION_INVITATION",
+            {
+                "email": email,
+                "inviter_username": get_current_user()["username"],
+                "organization_name": organization["name"],
+                "organization_uuid": organization["uuid"],
+            },
+        )
     return (
         jsonify(
             {
                 "uuid": str(user_uuid),
-                "username": username,
+                "username": email,
                 "email": email,
                 "role": org_role,
             }
@@ -114,8 +155,19 @@ def delete_user(org_uuid, uuid):
     user = users.get_by_uuid(uuid)
     if user is None or user_role is None:
         return abort(make_response("", 404))
+    organization = organizations.get_by_uuid(org_uuid)
     api_tokens.revoke_all_tokens(uuid, org_uuid)
     organizations.drop_organization_role(org_uuid, uuid)
+    send_mail.delay(
+        [user["email"]],
+        "ORGANIZATION_REMOVAL",
+        {
+            "email": user["email"],
+            "inviter_username": get_current_user()["username"],
+            "organization_name": organization["name"],
+            "organization_uuid": organization["uuid"],
+        },
+    )
     return "", 204
 
 
@@ -136,6 +188,7 @@ def list_users(org_uuid):
         user_list.append(
             {
                 "uuid": user["user_uuid"],
+                "activated": users_metadata[user["user_uuid"]]["activated"] is not None,
                 "username": users_metadata[user["user_uuid"]]["username"],
                 "email": users_metadata[user["user_uuid"]]["email"],
                 "role": user["role"],

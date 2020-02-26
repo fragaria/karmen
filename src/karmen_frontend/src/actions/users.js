@@ -29,14 +29,14 @@ export const getUsers = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (username, role, { dispatch, getState }) => {
+  (email, role, { dispatch, getState }) => {
     const { users } = getState();
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.addUser, dispatch)(
       users.me.activeOrganization.uuid,
-      username,
+      email,
       role
     );
   }

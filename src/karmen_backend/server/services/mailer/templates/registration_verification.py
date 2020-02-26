@@ -5,13 +5,14 @@ from textwrap import dedent
 from server import app
 
 
-class RegistrationVerificationEmail:
+class RegistrationVerification:
     variables = {}
 
     def subject(self):
         return "Karmen - Registration verification e-mail"
 
     def prepare_variables(self, variables={}):
+        # TODO handle organization_name and organization_uuid in activation_link and mail contents
         self.variables = variables
         self.variables["activation_link"] = "%s/confirmation?activate=%s" % (
             app.config["FRONTEND_BASE_URL"],

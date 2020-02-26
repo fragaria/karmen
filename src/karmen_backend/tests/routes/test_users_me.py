@@ -76,7 +76,7 @@ class CreateNewUserRoute(unittest.TestCase):
             response = c.post("/users/me", json={"email": "test-admin@karmen.local"})
             self.assertEqual(response.status_code, 400)
 
-    @mock.patch("server.tasks.send_mail.send_mail.delay",)
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
     def test_reissue_activation_key(self, mock_send_mail):
         with app.test_client() as c:
             email = get_random_email()
@@ -90,7 +90,7 @@ class CreateNewUserRoute(unittest.TestCase):
             self.assertTrue(user["activation_key_hash"] != user2["activation_key_hash"])
             self.assertEqual(mock_send_mail.call_count, 2)
 
-    @mock.patch("server.tasks.send_mail.send_mail.delay",)
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
     def test_send_activation_mail(self, mock_send_mail):
         with app.test_client() as c:
             email = get_random_email()

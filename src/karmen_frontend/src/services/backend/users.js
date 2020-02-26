@@ -24,12 +24,12 @@ export const getUsers = (orgUuid, fields = []) => {
     });
 };
 
-export const addUser = (orgUuid, username, role) => {
+export const addUser = (orgUuid, email, role) => {
   return fetch(`${BASE_URL}/organizations/${orgUuid}/users`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
-      username,
+      email,
       role: role
     })
   })

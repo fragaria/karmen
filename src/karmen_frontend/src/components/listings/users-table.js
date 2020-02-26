@@ -71,7 +71,13 @@ const DeleteUserModal = ({ modal, user, onUserDelete }) => {
   );
 };
 
-const UsersTableRow = ({ currentUuid, user, onUserChange, onUserDelete }) => {
+const UsersTableRow = ({
+  currentUuid,
+  user,
+  onUserChange,
+  onUserDelete,
+  onResendInvitation
+}) => {
   const toggleUserModal = useMyModal();
   const changeUserRoleModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
@@ -82,9 +88,17 @@ const UsersTableRow = ({ currentUuid, user, onUserChange, onUserDelete }) => {
         <span className="list-item-title">{user.username}</span>
         <span className="list-item-subtitle">
           <span>is </span>
-          <strong>{user.role} </strong>
+          <strong>{user.role}</strong>
+          {!user.activated && (
+            <>
+              {" "}
+              and <strong className="text-secondary">is not activated</strong>
+            </>
+          )}
         </span>
-        <span className="text-mono">{user.uuid}</span>
+        <span className="text-mono">
+          {user.email}, {user.uuid}
+        </span>
       </div>
 
       {currentUuid !== user.uuid && (
@@ -95,6 +109,19 @@ const UsersTableRow = ({ currentUuid, user, onUserChange, onUserDelete }) => {
           }}
         >
           <span className="list-dropdown-title">{user.username}</span>
+          {!user.activated && (
+            <button
+              className="list-dropdown-item"
+              onClick={e => {
+                // TODO make this more reactive to user's actions
+                setCtaListExpanded(false);
+                onResendInvitation(user.email, user.role);
+              }}
+            >
+              <i className="icon-edit"></i>
+              Resend invitation
+            </button>
+          )}
           <button
             className="list-dropdown-item"
             onClick={e => {
@@ -138,7 +165,7 @@ class UsersTable extends React.Component {
   };
 
   componentDidMount() {
-    // TODO this might be more efficient
+    // TODO this can be more efficient
     const { loadUsers } = this.props;
     loadUsers(["username", "uuid", "role"]);
   }
@@ -150,7 +177,8 @@ class UsersTable extends React.Component {
       usersLoaded,
       usersList,
       onUserChange,
-      onUserDelete
+      onUserDelete,
+      onResendInvitation
     } = this.props;
     const usersRows = usersList
       .filter(u => u.username.indexOf(filter) !== -1)
@@ -174,6 +202,7 @@ class UsersTable extends React.Component {
             user={u}
             onUserChange={onUserChange}
             onUserDelete={onUserDelete}
+            onResendInvitation={onResendInvitation}
           />
         );
       });

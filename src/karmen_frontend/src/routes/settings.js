@@ -8,7 +8,7 @@ import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import NetworkScan from "../components/forms/network-scan";
 import PrintersTable from "../components/listings/printers-table";
 import UsersTable from "../components/listings/users-table";
-import { getUsers, patchUser, deleteUser } from "../actions/users";
+import { addUser, getUsers, patchUser, deleteUser } from "../actions/users";
 import { enqueueTask } from "../actions/misc";
 import { setNetworkInterface } from "../actions/preferences";
 import { loadPrinters, deletePrinter } from "../actions/printers";
@@ -20,6 +20,7 @@ const Settings = ({
   usersList,
   onUserDelete,
   onUserChange,
+  onResendInvitation,
   loadPrinters,
   printersList,
   printersLoaded,
@@ -89,6 +90,7 @@ const Settings = ({
                 usersLoaded={usersLoaded}
                 onUserDelete={onUserDelete}
                 onUserChange={onUserChange}
+                onResendInvitation={onResendInvitation}
               />
             </TabPanel>
           </Tabs>
@@ -113,6 +115,7 @@ export default connect(
     loadUsers: fields => dispatch(getUsers(fields)),
     onUserChange: (uuid, role) => dispatch(patchUser(uuid, role)),
     onUserDelete: uuid => dispatch(deleteUser(uuid)),
+    onResendInvitation: (email, role) => dispatch(addUser(email, role)),
     onNetworkInterfaceChange: networkInterface =>
       dispatch(setNetworkInterface(networkInterface)),
     scanNetwork: networkInterface =>

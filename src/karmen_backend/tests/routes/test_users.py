@@ -1,7 +1,9 @@
 import random
 import math
+import mock
 import string
 import unittest
+from datetime import datetime
 import uuid as uuidmodule
 from server import app
 from server.database import users, local_users, organizations, api_tokens
@@ -34,16 +36,12 @@ def get_random_email():
     return "user-%s@ktest.local" % "".join(random.sample(alphabet, 10))
 
 
-class CreateUserRoute(unittest.TestCase):
+class CreateUserInOrganizationRoute(unittest.TestCase):
     def test_no_token(self):
         with app.test_client() as c:
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": get_random_email(),},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -53,11 +51,7 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_EXPIRED_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": get_random_email(),},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -67,11 +61,7 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG2,
                 headers={"x-csrf-token": TOKEN_ADMIN_EXPIRED_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": get_random_email(),},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -81,11 +71,7 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": get_random_email(),},
             )
             self.assertEqual(response.status_code, 403)
 
@@ -95,11 +81,7 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": get_random_email(),},
             )
             self.assertEqual(response.status_code, 401)
 
@@ -118,7 +100,7 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": "username", "email": get_random_email()},
+                json={"email": get_random_email()},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -128,7 +110,7 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": "username", "role": "user"},
+                json={"role": "user"},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -138,56 +120,55 @@ class CreateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "doesnotexist",
-                    "email": get_random_email(),
-                },
+                json={"role": "doesnotexist", "email": get_random_email(),},
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_no_username(self):
+    def test_bad_email(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"role": "user", "email": get_random_email()},
+                json={"role": "user", "email": "not an email"},
             )
-            self.assertEqual(response.status_code, 201)
-            self.assertTrue("uuid" in response.json)
-            self.assertTrue("username" in response.json)
-            self.assertTrue("email" in response.json)
-            self.assertTrue("role" in response.json)
-            self.assertTrue(response.json["username"], response.json["email"])
+            self.assertEqual(response.status_code, 400)
 
-    def test_create_user(self):
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_create_user(self, mock_send_mail):
         with app.test_client() as c:
-            username = get_random_username()
             email = get_random_email()
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": username, "role": "user", "email": email},
+                json={"role": "user", "email": "    %s    " % email.upper()},
             )
             self.assertEqual(response.status_code, 201)
             self.assertTrue("uuid" in response.json)
             self.assertTrue("username" in response.json)
             self.assertTrue("role" in response.json)
             self.assertTrue("email" in response.json)
-            user = users.get_by_username(username)
+            user = users.get_by_email(email)
             self.assertTrue(user is not None)
-            self.assertEqual(user["username"], username)
+            self.assertEqual(user["username"], email)
             self.assertEqual(user["email"], email)
             self.assertEqual(user["system_role"], "user")
             luser = local_users.get_local_user(user["uuid"])
-            self.assertTrue(luser is not None)
-            self.assertEqual(luser["force_pwd_change"], False)
+            self.assertTrue(luser is None)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[0][0][0][0], email)
+            self.assertEqual(args[0][0][1], "REGISTRATION_VERIFICATION_EMAIL")
+            self.assertTrue(args[0][0][2]["activation_key"] is not None)
+            self.assertTrue(args[0][0][2]["activation_key_expires"] is not None)
+            self.assertTrue(args[0][0][2]["organization_name"] is not None)
+            self.assertTrue(args[0][0][2]["organization_uuid"] is not None)
+            self.assertEqual(args[0][0][2]["email"], email)
             orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
 
-    def test_conflict_usernames_same_org(self):
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_conflict_usernames_same_org(self, mock_send_mail):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             username = get_random_username()
@@ -198,12 +179,100 @@ class CreateUserRoute(unittest.TestCase):
                 json={"username": username, "role": "user", "email": email},
             )
             self.assertEqual(response.status_code, 201)
+            user = users.get_by_email(email)
+            self.assertEqual(mock_send_mail.call_count, 1)
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"username": username, "role": "user", "email": email},
             )
-            self.assertEqual(response.status_code, 409)
+            self.assertEqual(response.status_code, 201)
+            user2 = users.get_by_email(email)
+            self.assertTrue(user["activation_key_hash"] != user2["activation_key_hash"])
+            self.assertEqual(mock_send_mail.call_count, 2)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_concurrent_orgs_inactive_user(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            username = get_random_username()
+            email = get_random_email()
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": username, "role": "user", "email": email},
+            )
+            self.assertEqual(response.status_code, 201)
+            user = users.get_by_email(email)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[0][0][0][0], email)
+            self.assertEqual(args[0][0][1], "REGISTRATION_VERIFICATION_EMAIL")
+            self.assertTrue(args[0][0][2]["activation_key"] is not None)
+            self.assertTrue(args[0][0][2]["activation_key_expires"] is not None)
+            self.assertTrue(args[0][0][2]["organization_name"] is not None)
+            self.assertTrue(args[0][0][2]["organization_uuid"] == UUID_ORG)
+            self.assertEqual(args[0][0][2]["email"], email)
+            orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            self.assertTrue(orgrole["role"], "user")
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG2,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={"username": username, "role": "user", "email": email},
+            )
+            self.assertEqual(response.status_code, 201)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[1][0][1], "REGISTRATION_VERIFICATION_EMAIL")
+            self.assertTrue(args[1][0][2]["activation_key"] is not None)
+            self.assertTrue(args[1][0][2]["activation_key_expires"] is not None)
+            self.assertTrue(args[1][0][2]["organization_name"] is not None)
+            self.assertTrue(args[1][0][2]["organization_uuid"] == UUID_ORG2)
+            self.assertEqual(args[1][0][2]["email"], email)
+            orgrole = organizations.get_organization_role(UUID_ORG2, user["uuid"])
+            self.assertTrue(orgrole["role"], "user")
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_existing_user_different_org(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            username = get_random_username()
+            email = get_random_email()
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": username, "role": "user", "email": email},
+            )
+            self.assertEqual(response.status_code, 201)
+            user = users.get_by_email(email)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[0][0][0][0], email)
+            self.assertEqual(args[0][0][1], "REGISTRATION_VERIFICATION_EMAIL")
+            self.assertTrue(args[0][0][2]["activation_key"] is not None)
+            self.assertTrue(args[0][0][2]["activation_key_expires"] is not None)
+            self.assertTrue(args[0][0][2]["organization_name"] is not None)
+            self.assertTrue(args[0][0][2]["organization_uuid"] == UUID_ORG)
+            self.assertEqual(args[0][0][2]["email"], email)
+            orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            self.assertTrue(orgrole["role"], "user")
+            # fake activate
+            users.update_user(uuid=user["uuid"], activated=datetime.now())
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG2,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={"username": username, "role": "user", "email": email},
+            )
+            self.assertEqual(response.status_code, 201)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[1][0][0][0], email)
+            self.assertEqual(args[1][0][1], "ORGANIZATION_INVITATION")
+            self.assertTrue("activation_key" not in args[1][0][2])
+            self.assertTrue("activation_key_expires" not in args[1][0][2])
+            self.assertTrue(args[1][0][2]["organization_name"] is not None)
+            self.assertTrue(args[1][0][2]["organization_uuid"] == UUID_ORG2)
+            self.assertEqual(args[1][0][2]["email"], email)
+            orgrole = organizations.get_organization_role(UUID_ORG2, user["uuid"])
+            self.assertTrue(orgrole["role"], "user")
 
 
 class UpdateUserRoute(unittest.TestCase):
@@ -213,11 +282,7 @@ class UpdateUserRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": get_random_username(),
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": get_random_email(),},
             )
             self.uuid = response.json["uuid"]
 
@@ -352,6 +417,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue(len(response.json["items"]) >= 2)
             self.assertTrue("uuid" in response.json["items"][0])
             self.assertTrue("username" in response.json["items"][0])
+            self.assertTrue("activated" in response.json["items"][0])
             self.assertTrue("email" in response.json["items"][0])
             self.assertTrue("role" in response.json["items"][0])
             for u in response.json["items"]:
@@ -359,22 +425,19 @@ class ListRoute(unittest.TestCase):
 
 
 class DeleteUser(unittest.TestCase):
-    def test_delete(self):
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_delete(self, mock_send_mail):
         with app.test_client() as c:
-            username = get_random_username()
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            email = get_random_email()
             response = c.post(
                 "/organizations/%s/users" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": username,
-                    "role": "user",
-                    "email": get_random_email(),
-                },
+                json={"role": "user", "email": email,},
             )
             self.assertEqual(response.status_code, 201)
             uuid = response.json["uuid"]
-            user = users.get_by_username(username)
+            user = users.get_by_email(email)
             api_tokens.add_token(
                 user_uuid=uuid,
                 jti=uuidmodule.uuid4(),
@@ -396,3 +459,9 @@ class DeleteUser(unittest.TestCase):
             for t in tokens:
                 self.assertTrue(t["revoked"])
                 self.assertTrue(t["organization_uuid"] == UUID_ORG)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[1][0][0][0], email)
+            self.assertEqual(args[1][0][1], "ORGANIZATION_REMOVAL")
+            self.assertTrue(args[1][0][2]["organization_name"] is not None)
+            self.assertTrue(args[1][0][2]["organization_uuid"] is not None)
+            self.assertEqual(args[1][0][2]["email"], email)

@@ -6,6 +6,7 @@ import { FormInputs } from "../components/forms/form-utils";
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
+import { isEmail } from "../services/validators";
 
 class AddUser extends React.Component {
   state = {
@@ -13,8 +14,8 @@ class AddUser extends React.Component {
     message: null,
     messageOk: false,
     form: {
-      username: {
-        name: "Username",
+      email: {
+        name: "E-mail",
         val: "",
         type: "text",
         required: true,
@@ -55,6 +56,10 @@ class AddUser extends React.Component {
         field.error = "";
       }
     }
+    if (!isEmail(form.email.val)) {
+      hasErrors = true;
+      form.email.error = "That does not seem like an e-mail address";
+    }
 
     if (hasErrors) {
       this.setState({
@@ -64,7 +69,7 @@ class AddUser extends React.Component {
     }
     const { createUser } = this.props;
     if (!hasErrors) {
-      return createUser(form.username.val, form.role.val).then(r => {
+      return createUser(form.email.val, form.role.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
@@ -73,7 +78,7 @@ class AddUser extends React.Component {
             break;
           case 409:
             this.setState({
-              message: "User with such username is already registered"
+              message: "User with such email is already registered"
             });
             break;
           default:
@@ -146,5 +151,5 @@ class AddUser extends React.Component {
 }
 
 export default connect(null, dispatch => ({
-  createUser: (username, role) => dispatch(addUser(username, role))
+  createUser: (email, role) => dispatch(addUser(email, role))
 }))(AddUser);
