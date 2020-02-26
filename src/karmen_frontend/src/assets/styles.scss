@@ -9,7 +9,7 @@
 
 @include plumber-set-defaults(
   $grid-height: 1rem,
-  $baseline: 0.158203,
+  $baseline: 0.15,
   $font-size: 1.75,
   $line-height: 3,
   $leading-top: 1,
@@ -305,14 +305,16 @@ footer {
 
   @include plumber(
     $font-size: 3.5,
-    $leading-bottom: 3
+    $leading-bottom: 3,
+    $line-height: 4
   );
 
   @media (min-width: $screen-sm-min) {
     @include plumber(
       $font-size: 3.5,
       $leading-top: 4,
-      $leading-bottom: 3
+      $leading-bottom: 3,
+      $line-height: 4
     );
   }
 
@@ -368,6 +370,7 @@ footer {
 .anchor {
   color: $color-secondary;
   text-decoration: underline;
+  word-break: break-all;
 
   &:hover {
     text-decoration: none;
@@ -445,18 +448,56 @@ footer {
 
 .dl-horizontal {
   display: grid;
-  grid-template-columns: 25% 1fr;
+  grid-template-columns: 1fr;
   grid-column-gap: $base-unit;
-  grid-row-gap: $base-unit;
-  margin: $base-unit*2 0;
+
+  @media (min-width: $screen-sm-min) {
+    grid-template-columns: 25% 1fr;
+    @include plumber(
+      $font-size: 1.618,
+      $line-height: 3,
+      $leading-top: 1,
+      $leading-bottom: 1
+    );
+  }
 
   .term {
-    // color: lighten($color-primary, 40%);
+    @include plumber(
+      $font-size: 1.618,
+      $line-height: 2,
+      $leading-top: 1,
+      $leading-bottom: 0
+    );
+
+    @media (min-width: $screen-sm-min) {
+      @include plumber(
+        $font-size: 1.618,
+        $line-height: 3,
+        $leading-top: 0,
+        $leading-bottom: 1
+      );
+    }
   }
 
   .description {
     font-weight: bold;
     overflow-x: hidden;
+
+    @include plumber(
+      $font-size: 1.618,
+      $line-height: 2,
+      $leading-top: 0,
+      $leading-bottom: 0
+    );
+
+    @media (min-width: $screen-sm-min) {
+      @include plumber(
+        $font-size: 1.618,
+        $line-height: 3,
+        $leading-top: 0,
+        $leading-bottom: 1
+      );
+    }
   }
 }
 
@@ -471,16 +512,12 @@ footer {
 }
 
 .list {
-  margin-top: $base-unit;
-
   &.grid {
-
     .list-items {
       display: grid;
       grid-template-columns: 1fr;
       grid-template-rows: 1fr;
       align-items: start;
-      padding: 0 $base-unit*2;
       grid-column-gap: $base-unit*2;
       grid-row-gap: $base-unit*4;
 
@@ -491,15 +528,38 @@ footer {
       @media (min-width: $screen-sm-min) {
         grid-template-columns: 1fr 1fr 1fr;
       }
+
       .list-item {
         padding: 0;
-        border-top:none;
+        border-top: none;
+      }
+
+      .list-item-title {
+        @include plumber(
+          $leading-top: 0,
+          $leading-bottom: 0,
+          $font-size: 2.1,
+          $line-height: 3
+        );
+
+        @media (min-width: $screen-sm-min) {
+          @include plumber(
+            $leading-top: 1,
+            $leading-bottom: 0,
+            $font-size: 2.1,
+            $line-height: 3
+          );
+        }
       }
     }
   }
 
 .list-header {
+  min-height: $spacing-default;
+
+  @media (min-width: $screen-sm-min) {
     min-height: $spacing-default*1.5;
+  }
 }
 
   .list-search {
@@ -509,6 +569,13 @@ footer {
       $leading-top: 1,
       $leading-bottom: 2
     );
+
+    @media (min-width: $screen-sm-min) {
+      @include plumber(
+        $leading-top: 1,
+        $leading-bottom: 2
+      );
+    }
 
     label {
       display: block;
@@ -556,9 +623,15 @@ footer {
 
   .list-dropdown {
     .list-dropdown-toggle {
-      padding: $base-unit $spacing-default/2;
-      font-size: 1.3rem;
+      padding: 0 $spacing-default/2;
       text-transform: capitalize;
+
+      @include plumber(
+        $leading-top: 2,
+        $leading-bottom: 1,
+        $font-size: 1.3,
+        $line-height: 2
+      );
 
       [class^="icon-"] {
         margin-left: 2px;
@@ -662,11 +735,29 @@ footer {
 
   .list-item {
     display: flex;
-    width: 100%;
-    padding: $base-unit $base-unit*2;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     border-top: 1px solid $list-border-color;
+  }
+
+  .list-item-content {
+    width: 100%;
+    padding: 0 $base-unit*2;
+
+    @include plumber(
+      $leading-top: 1,
+      $leading-bottom: 2,
+      $line-height: 2,
+      $font-size: 1.618
+    );
+
+    @media (min-width: $screen-sm-min) {
+      @include plumber(
+        $leading-top: 2,
+        $leading-bottom: 1,
+        $line-height: 3,
+      );
+    }
 
     &.list-item-message {
       padding: $base-unit*2;
@@ -704,8 +795,12 @@ footer {
   }
 
   .list-item-title {
-    font-size: 2rem;
-    line-height: 1.3;
+    @include plumber(
+      $leading-top: 0,
+      $leading-bottom: 0,
+      $font-size: 2.1,
+      $line-height: 3
+    );
   }
 
   .list-item-property {
@@ -940,15 +1035,16 @@ select {
   background: #fff;
   box-shadow: $shadow-default;
 
-  @include plumber(
-    $leading-top: 0,
-    $leading-bottom: 3
-  );
 
   @media (min-width: $screen-sm-min) {
     width: 100%;
     min-width: 80rem;
     height: auto;
+
+    @include plumber(
+      $leading-top: 0,
+      $leading-bottom: 3
+    );
   }
 
   .modal-title {
@@ -1009,7 +1105,6 @@ select {
       margin-top: $base-unit;
     }
   }
-
 
   @media (min-width: $screen-sm-min) {
     display: grid;
