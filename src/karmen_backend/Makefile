@@ -33,6 +33,10 @@ test: run-docker-test-redis run-docker-test-postgres
 	@-docker stop karmen_redis_test
 	@-docker rm karmen_redis_test
 
+test-isolated:
+	docker-compose -f docker-compose.test.yml up --build test
+	docker-compose -f docker-compose.test.yml stop
+
 format:
 	black server/ tests/
 

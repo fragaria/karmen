@@ -1,0 +1,24 @@
+FROM python:3.7-alpine
+RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
+WORKDIR /usr/src/app
+
+# build deps
+RUN apk --update add --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers gettext avahi avahi-tools arp-scan postgresql-client bash dbus
+RUN pip install --upgrade pip
+RUN pip install --upgrade pipenv
+
+# Install from lockfile
+COPY Pipfile* ./
+RUN pipenv install --dev --system --deploy
+
+ENV PYTHONPATH=$PYTHONPATH:/usr/src/app
+ENV PATH=$PATH:$PYTHONPATH:/usr/src/app
+
+ENV ENV test
+ENV FLASK_APP server
+ENV FLASKR_SETTINGS ../config.local.cfg
+
+COPY . .
+
+CMD ["pytest", "-n", "auto", "--dist=loadscope"]

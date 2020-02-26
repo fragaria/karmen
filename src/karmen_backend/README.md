@@ -10,6 +10,15 @@ Python based REST API backend for Karmen.
 The preferred way is to use the composed docker package as [described in here](../../README.md).
 You don't have to bother with setup of database and other services.
 
+### Testing
+
+There are two options:
+
+1. docker - just run `make test-isolated`
+2. `pipenv`
+    - You need `pipenv`, `python3-dev`, `libpq-dev`, `postgresql-client` dependencies
+    - Run `make test` or `make test-watch`
+
 ### Docker
 
 You might need to adjust values in `config.dev.cfg` to properly connect to Redis and PostgreSQL. Don't
