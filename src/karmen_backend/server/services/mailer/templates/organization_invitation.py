@@ -5,7 +5,7 @@ from server import app
 
 class OrganizationInvitation(MailTemplate):
     def subject(self):
-        return "Karmen - Organization invitation e-mail"
+        return "Karmen - Organization invitation"
 
     def prepare_variables(self, variables={}):
         self.variables = variables

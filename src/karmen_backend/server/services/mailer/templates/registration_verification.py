@@ -8,7 +8,7 @@ from server import app
 
 class RegistrationVerification(MailTemplate):
     def subject(self):
-        return "Karmen - Registration verification e-mail"
+        return "Karmen - Registration verification"
 
     def prepare_variables(self, variables={}):
         # TODO handle organization_name and organization_uuid in activation_link and mail contents
