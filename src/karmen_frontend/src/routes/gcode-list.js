@@ -22,7 +22,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
         <modal.Modal>
           <h1 className="modal-title text-center">Delete G-Code</h1>
 
-          <h3 className="text-center">
+          <h3 className="modal-subtitle text-center">
             Do you really want to delete{" "}
             <strong>
               {path}

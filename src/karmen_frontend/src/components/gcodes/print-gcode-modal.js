@@ -24,7 +24,7 @@ export const usePrintGcodeModal = ({
       return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
     });
     return (
-      <div className="text-center">
+      <div className="modal-subtitle text-center">
         {!!availablePrinters.length ? (
           <label>
             Please, select the printer to print on:

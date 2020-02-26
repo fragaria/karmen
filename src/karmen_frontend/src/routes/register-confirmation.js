@@ -93,8 +93,15 @@ class RegisterConfirmation extends React.Component {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
-          message:
-            "Account activation failed. Maybe you could try to register again?"
+          message: (
+            <>
+              Account activation failed. Maybe you could try to
+              {" "}
+              <Link to="/register" className="anchor">register</Link>
+              {" "}
+              again?
+            </>
+            )
         });
       } else {
         this.setState({
@@ -143,16 +150,17 @@ class RegisterConfirmation extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">
-            Welcome to Karmen, {email}!
+            Welcome to Karmen, <br/>{email}!
           </h1>
+          <h2 className="main-subtitle text-center">
+            To start using Karmen You need to set the password.
+          </h2>
           <form>
-            <FormInputs definition={passwordForm} updateValue={updateValue} />
+            {!!!messageOk && (
+              <FormInputs definition={passwordForm} updateValue={updateValue} />
+            )}
 
             <div className="form-messages">
-              <p className="text-center">
-                To start using Karmen You need to set the password.
-              </p>
-
               {message && (
                 <p
                   className={
@@ -167,17 +175,26 @@ class RegisterConfirmation extends React.Component {
             </div>
 
             <div className="cta-box text-center">
-              <BusyButton
-                className="btn"
-                type="submit"
-                onClick={this.activate}
-                busyChildren="Sending link..."
-              >
-                Register
-              </BusyButton>{" "}
-              <Link to="/login" className="btn btn-plain">
-                Cancel
+            {!!!messageOk && (
+              <>
+                <BusyButton
+                  className="btn"
+                  type="submit"
+                  onClick={this.activate}
+                  busyChildren="Sending link..."
+                >
+                  Set password
+                </BusyButton>{" "}
+                <Link to="/login" className="btn btn-plain">
+                  Cancel
+                </Link>
+              </>
+             )}
+            {message && messageOk && (
+              <Link to="/login" className="btn">
+                Log in to Karmen
               </Link>
+            )}
             </div>
           </form>
         </div>

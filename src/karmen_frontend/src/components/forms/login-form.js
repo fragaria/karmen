@@ -137,7 +137,7 @@ class LoginForm extends React.Component {
                 onClick={this.login}
                 busyChildren="Logging in..."
               >
-                Login
+                Log in
               </BusyButton>{" "}
               {!onCancel && (
                 <>

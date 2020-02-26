@@ -87,19 +87,19 @@ class Register extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">Karmen registration</h1>
+          <h2 className="main-subtitle text-center">
+            We will send You an e-mail with verification link.
+          </h2>
           <form>
             <FormInputs definition={registerForm} updateValue={updateValue} />
 
             <div className="form-messages">
-              <p className="text-center">
-                We will send You an e-mail with verification link.
-              </p>
 
               {message && (
                 <p
                   className={
                     messageOk
-                      ? "text-success text-center"
+                      ? "message-success text-center"
                       : "message-error text-center"
                   }
                 >

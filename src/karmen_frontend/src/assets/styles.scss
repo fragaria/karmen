@@ -4,7 +4,17 @@
 @import "variables";
 @import "mixins";
 @import "react-tabs";
+@import "../../node_modules/plumber-sass/plumber";
 
+
+@include plumber-set-defaults(
+  $grid-height: 1rem,
+  $baseline: 0.158203,
+  $font-size: 1.75,
+  $line-height: 3,
+  $leading-top: 1,
+  $leading-bottom: 2
+);
 
 * {
   box-sizing: border-box;
@@ -24,10 +34,6 @@ html {
 
 body {
   font-family: $sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.618;
-  letter-spacing: -0.015rem;
   color: $txt-color;
   background: $bg-color;
 }
@@ -43,15 +49,27 @@ textarea {
 }
 
 h1 {
-  font-size: 3rem;
+  @include plumber(
+    $font-size: 3,
+    $leading-top: 0,
+    $leading-bottom: 0
+  );
 }
 
 h2 {
-  font-size: 2.1rem;
+  @include plumber(
+    $font-size: 2.1,
+    $leading-top: 0,
+    $leading-bottom: 0
+  );
 }
 
 h3 {
-  font-size: 1.7rem
+  @include plumber(
+    $font-size: 1.7,
+    $leading-top: 0,
+    $leading-bottom: 0
+  );
 }
 
 a {
@@ -67,13 +85,20 @@ small {
 }
 
 p {
-  margin-bottom: $base-unit;
+  @include plumber(
+    $leading-top: 0,
+    $leading-bottom: 2
+  );
 }
 
 footer {
   width: 100%;
-  padding: $spacing-default*3 0 $spacing-default*2;
   text-align: center;
+
+  @include plumber(
+    $leading-top: 4,
+    $leading-bottom: 3
+  );
 }
 
 .img-responsive {
@@ -140,20 +165,27 @@ footer {
   top: 0;
   left: 0;
   width: 100%;
-  padding: 0 $base-unit*2;
   z-index: 1;
   @include blurred-bg;
+  @include plumber(
+    $leading-top: 0,
+    $leading-bottom: 0
+  );
 
   .navigation-content {
     display: flex;
     height: $navigation-height-xs;
     max-width: $screen-md-min;
     margin: 0 auto;
+    padding: 0 $spacing-default/2;
     justify-content: space-between;
     align-items: center;
 
     @media (min-width: $screen-sm-min) {
-      padding: 0 $spacing-default/2;
+      @include plumber(
+        $leading-top: 1,
+        $leading-bottom: 1
+      );
     }
   }
 
@@ -194,17 +226,24 @@ footer {
   }
 
   .navigation-toggle-label {
-    font-size: 2.5rem;
+    @include plumber(
+      $font-size: 2.5,
+      $leading-top: 0,
+      $leading-bottom: 0
+    );
   }
 
   .navigation-user {
     min-width: 300px;
-    margin-bottom: $spacing-default;
-    padding-bottom: $spacing-default;
     border-bottom: $border-light;
     text-align: center;
-    // font-size: 2.5rem;
-    line-height: $line-height-default;
+
+    @include plumber(
+      $font-size: 2.5,
+      $leading-top: 0,
+      $leading-bottom: 2
+    );
+
   }
 
   .navigation-user-avatar {
@@ -251,17 +290,25 @@ footer {
   padding: 0 $spacing-default/2;
 }
 
-.main-title {
+.main-title,
+.main-subtitle {
   display: flex;
   width: 100%;
-  margin: $spacing-default 0;
   align-items: center;
   justify-content: space-between;
   font-family: $mono;
-  font-size: 3.5rem;
+
+  @include plumber(
+    $font-size: 3.5,
+    $leading-bottom: 3
+  );
 
   @media (min-width: $screen-sm-min) {
-    margin: $spacing-default*2 0 $spacing-default;
+    @include plumber(
+      $font-size: 3.5,
+      $leading-top: 4,
+      $leading-bottom: 3
+    );
   }
 
   &.text-center {
@@ -269,15 +316,32 @@ footer {
   }
 }
 
+.main-subtitle {
+  @include plumber(
+    $font-size: 2.1,
+    $leading-top: 0,
+    $leading-bottom: 4
+  );
+}
+
 .content {
   position: relative;
   max-width: $screen-md-min;
   margin: 0 auto;
-  padding: $navigation-height-xs 0 $spacing-default;
+  // padding: $navigation-height-xs 0 $spacing-default;
+  @include plumber(
+    $font-size: 1.5,
+    $leading-top: 7,
+    $leading-bottom: 4,
+    $line-height: 2
+  );
 }
 
 .cta-box {
-  padding: $spacing-default 0 $spacing-default*2;
+  @include plumber(
+    $leading-top: 3,
+    $leading-bottom: 4
+  );
 }
 
 .text-secondary {
@@ -311,8 +375,11 @@ footer {
   justify-content: center;
 
   span {
-    font-size: 21px;
-    padding-top: $spacing-default * 6;
+    @include plumber(
+      $font-size: 2.5,
+      $leading-top: 8,
+      $leading-bottom: 0
+    );
   }
 }
 
@@ -326,6 +393,7 @@ footer {
   font-weight: bold;
   text-transform: uppercase;
   white-space: nowrap;
+  line-height: 1.618;
 
   &:hover {
     cursor: pointer;
@@ -430,8 +498,12 @@ footer {
 }
 
   .list-search {
-    padding: $base-unit $base-unit*2;
-    margin-bottom: $base-unit*2;
+    padding: 0 $base-unit*2;
+
+    @include plumber(
+      $leading-top: 1,
+      $leading-bottom: 2
+    );
 
     label {
       display: block;
@@ -676,7 +748,7 @@ select {
 
     &.input-group-title {
       text-align: left;
-      padding-top: 24px;
+      padding-top: $base-unit*3;
     }
 
     .input-label-icon {
@@ -717,7 +789,7 @@ select {
 
   small {
     display: block;
-    padding: 0 0 8px 0;
+    padding: 0 0 $base-unit 0;
     color: #ea272e;
     font-weight: bold;
     text-align: left;
@@ -739,13 +811,11 @@ select {
     input,
     select,
     textarea {
-      // width: 400px;
-      // max-width: 400px;
-      margin: 8px 0;
+      margin: $base-unit 0;
     }
 
     small {
-      padding: 0 0 0 32px;
+      padding: 0 0 0 $spacing-default;
     }
   }
 }
@@ -764,7 +834,10 @@ select {
 }
 
 .form-messages {
-  margin-top: $base-unit*2;
+  @include plumber(
+    $leading-top: 2,
+    $leading-bottom: 0
+  );
 }
 
 .message-success,
@@ -858,9 +931,14 @@ select {
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-  padding: $spacing-default*2 $spacing-default $spacing-default;
+  padding: 0 $spacing-default;
   background: #fff;
   box-shadow: $shadow-default;
+
+  @include plumber(
+    $leading-top: 0,
+    $leading-bottom: 3
+  );
 
   @media (min-width: $screen-sm-min) {
     width: 100%;
@@ -869,12 +947,26 @@ select {
   }
 
   .modal-title {
-    font-size: 2.4rem;
-    margin-bottom: $spacing-default;
+    @include plumber(
+      $font-size: 3,
+      $leading-top: 8,
+      $leading-bottom: 3,
+      $line-height: 4
+    );
+  }
+
+  .modal-subtitle {
+    @include plumber(
+      $leading-top: 0,
+      $leading-bottom: 2
+    );
   }
 
   .cta-box {
-    padding: $spacing-default*2 0 $spacing-default;
+    @include plumber(
+      $leading-top: 2,
+      $leading-bottom: 8
+    );
   }
 }
 
