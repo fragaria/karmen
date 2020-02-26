@@ -16,6 +16,10 @@ class RegisterConfirmation extends React.Component {
       message: null,
       messageOk: false,
       passwordForm: {
+        email: {
+          type: "honeypot",
+          val: ""
+        },
         password: {
           name: "New password",
           val: "",
@@ -57,6 +61,9 @@ class RegisterConfirmation extends React.Component {
   activate(e) {
     e.preventDefault();
     const { passwordForm, email, activationKey } = this.state;
+    if (passwordForm.email.val) {
+      throw new Error("seems like spam");
+    }
     const { doActivate } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars

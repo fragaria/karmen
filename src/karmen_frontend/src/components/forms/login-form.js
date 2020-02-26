@@ -11,6 +11,10 @@ class LoginForm extends React.Component {
       message: null,
       messageOk: false,
       loginForm: {
+        email: {
+          type: "honeypot",
+          val: ""
+        },
         username: {
           name: "Username",
           val: "",
@@ -52,6 +56,9 @@ class LoginForm extends React.Component {
   login(e) {
     e.preventDefault();
     const { loginForm } = this.state;
+    if (loginForm.email.val) {
+      throw new Error("seems like spam");
+    }
     const { doAuthenticate } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars

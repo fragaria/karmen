@@ -14,6 +14,10 @@ class PasswordReset extends React.Component {
       messageOk: false,
       resetForm: {
         email: {
+          type: "honeypot",
+          val: ""
+        },
+        realemail: {
           name: "Your e-mail",
           val: "",
           type: "text",
@@ -28,6 +32,9 @@ class PasswordReset extends React.Component {
     e.preventDefault();
     const { resetForm } = this.state;
     const { doRequest } = this.props;
+    if (resetForm.email.val) {
+      throw new Error("seems like spam");
+    }
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(resetForm)) {
@@ -38,9 +45,9 @@ class PasswordReset extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(resetForm.email.val)) {
+    if (!isEmail(resetForm.realemail.val)) {
       hasError = true;
-      resetForm.email.error = "That does not seem like an e-mail address";
+      resetForm.realemail.error = "That does not seem like an e-mail address";
     }
 
     if (hasError) {
@@ -50,7 +57,7 @@ class PasswordReset extends React.Component {
       return;
     }
 
-    return doRequest(resetForm.email.val).then(r => {
+    return doRequest(resetForm.realemail.val).then(r => {
       if (r.status !== 202) {
         this.setState({
           messageOk: false,
@@ -62,7 +69,7 @@ class PasswordReset extends React.Component {
           message: "An e-mail will be sent shortly. Check your Inbox, please",
           messageOk: true,
           resetForm: Object.assign({}, resetForm, {
-            email: Object.assign({}, resetForm.email, { val: "" })
+            realemail: Object.assign({}, resetForm.realemail, { val: "" })
           })
         });
       }

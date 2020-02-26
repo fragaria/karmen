@@ -14,6 +14,10 @@ class Register extends React.Component {
       messageOk: false,
       registerForm: {
         email: {
+          type: "honeypot",
+          val: ""
+        },
+        realemail: {
           name: "Your e-mail",
           val: "",
           type: "text",
@@ -27,6 +31,9 @@ class Register extends React.Component {
   register(e) {
     e.preventDefault();
     const { registerForm } = this.state;
+    if (registerForm.email.val) {
+      throw new Error("seems like spam");
+    }
     const { doRegister } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
@@ -38,9 +45,10 @@ class Register extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(registerForm.email.val)) {
+    if (!isEmail(registerForm.realemail.val)) {
       hasError = true;
-      registerForm.email.error = "That does not seem like an e-mail address";
+      registerForm.realemail.error =
+        "That does not seem like an e-mail address";
     }
 
     if (hasError) {
@@ -50,7 +58,7 @@ class Register extends React.Component {
       return;
     }
 
-    return doRegister(registerForm.email.val).then(r => {
+    return doRegister(registerForm.realemail.val).then(r => {
       if (r.status !== 202) {
         this.setState({
           messageOk: false,
@@ -62,7 +70,7 @@ class Register extends React.Component {
           message: "An e-mail will be sent shortly. Check your Inbox, please",
           messageOk: true,
           registerForm: Object.assign({}, registerForm, {
-            email: Object.assign({}, registerForm.email, { val: "" })
+            realemail: Object.assign({}, registerForm.realemail, { val: "" })
           })
         });
       }

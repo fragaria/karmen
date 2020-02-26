@@ -48,6 +48,11 @@ textarea {
   line-height: inherit;
 }
 
+.honeypot-field {
+  position: absolute !important;
+  top: -30em !important;
+}
+
 h1 {
   @include plumber(
     $font-size: 3,

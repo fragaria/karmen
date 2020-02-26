@@ -16,6 +16,10 @@ class ResetPassword extends React.Component {
       message: null,
       messageOk: false,
       passwordForm: {
+        email: {
+          type: "honeypot",
+          val: ""
+        },
         password: {
           name: "New password",
           val: "",
@@ -58,6 +62,9 @@ class ResetPassword extends React.Component {
     e.preventDefault();
     const { passwordForm, email, pwdResetKey } = this.state;
     const { doReset } = this.props;
+    if (passwordForm.email.val) {
+      throw new Error("seems like spam");
+    }
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(passwordForm)) {

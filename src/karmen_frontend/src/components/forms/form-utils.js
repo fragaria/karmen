@@ -83,6 +83,17 @@ export const FormInputs = ({ definition, updateValue }) => {
             </span>
           </React.Fragment>
         );
+      case "honeypot":
+        return (
+          <input
+            type={"text"}
+            id={name}
+            name={name}
+            autocomplete="off"
+            className="honeypot-field"
+            onChange={e => updateValue(name, e.target.value)}
+          />
+        );
       default:
         return null;
     }
