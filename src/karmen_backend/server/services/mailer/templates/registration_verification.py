@@ -1,3 +1,4 @@
+from .mail_template import MailTemplate
 import base64
 import json
 
@@ -5,9 +6,7 @@ from textwrap import dedent
 from server import app
 
 
-class RegistrationVerification:
-    variables = {}
-
+class RegistrationVerification(MailTemplate):
     def subject(self):
         return "Karmen - Registration verification e-mail"
 
@@ -44,6 +43,3 @@ class RegistrationVerification:
             )
             % (self.variables["activation_link"])
         )
-
-    def htmlbody(self):
-        return self.textbody()

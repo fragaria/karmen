@@ -1,3 +1,4 @@
+from .mail_template import MailTemplate
 import base64
 import json
 
@@ -5,9 +6,7 @@ from textwrap import dedent
 from server import app
 
 
-class PasswordResetLink:
-    variables = {}
-
+class PasswordResetLink(MailTemplate):
     def subject(self):
         return "Karmen - Password reset"
 
@@ -47,6 +46,3 @@ class PasswordResetLink:
             )
             % (self.variables["pwd_reset_link"])
         )
-
-    def htmlbody(self):
-        return self.textbody()

@@ -1,10 +1,9 @@
+from .mail_template import MailTemplate
 from textwrap import dedent
 from server import app
 
 
-class OrganizationInvitation:
-    variables = {}
-
+class OrganizationInvitation(MailTemplate):
     def subject(self):
         return "Karmen - Organization invitation e-mail"
 
@@ -36,6 +35,3 @@ class OrganizationInvitation:
                 self.variables["organization_link"],
             )
         )
-
-    def htmlbody(self):
-        return self.textbody()

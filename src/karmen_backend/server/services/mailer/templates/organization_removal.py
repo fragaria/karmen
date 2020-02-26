@@ -1,14 +1,10 @@
+from .mail_template import MailTemplate
 from textwrap import dedent
 
 
-class OrganizationRemoval:
-    variables = {}
-
+class OrganizationRemoval(MailTemplate):
     def subject(self):
         return "Karmen - Organization removal"
-
-    def prepare_variables(self, variables={}):
-        self.variables = variables
 
     def textbody(self):
         return (
@@ -25,6 +21,3 @@ class OrganizationRemoval:
             )
             % (self.variables["organization_name"])
         )
-
-    def htmlbody(self):
-        return self.textbody()

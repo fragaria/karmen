@@ -1,14 +1,10 @@
+from .mail_template import MailTemplate
 from textwrap import dedent
 
 
-class PasswordResetConfirmation:
-    variables = {}
-
+class PasswordResetConfirmation(MailTemplate):
     def subject(self):
         return "Karmen - Password reset confirmation"
-
-    def prepare_variables(self, variables={}):
-        self.variables = variables
 
     def textbody(self):
         return (
@@ -25,6 +21,3 @@ class PasswordResetConfirmation:
             )
             % (self.variables["email"])
         )
-
-    def htmlbody(self):
-        return self.textbody()

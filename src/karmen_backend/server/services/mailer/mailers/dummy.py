@@ -1,7 +1,7 @@
 from server import app
 
 
-class DummyMailer:
+class Dummy:
     def send(self, sender, recipients, subject, textbody, htmlbody, **kwargs):
         app.logger.info("===SENDING EMAIL START===")
         app.logger.info(

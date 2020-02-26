@@ -5,12 +5,12 @@ from server.services.mailer.templates import get_template
 
 @celery.task(name="send_mail")
 def send_mail(recipients, template_key, variables={}):
-    mailer = get_mailer()  # TODO config
+    mailer = get_mailer(app.config.get("MAILER", "DUMMY"))
     template = get_template(template_key)
     if template and mailer:
         template.prepare_variables(variables)
         mailer.send(
-            "noreply@karen.local",
+            app.config.get("MAILER_FROM", "Karmen <noreply@karmen.tech>"),
             recipients,
             template.subject(),
             template.textbody(),

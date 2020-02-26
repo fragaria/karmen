@@ -19,7 +19,7 @@ def get_template(key):
         "PASSWORD_RESET_LINK": PasswordResetLink,
         "PASSWORD_RESET_CONFIRMATION": PasswordResetConfirmation,
     }
-    if key in mapping:
-        return mapping[key]()
+    if key.upper() in mapping:
+        return mapping[key.upper()]()
 
     raise RuntimeError("Unknown template %s" % key)
