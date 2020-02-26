@@ -110,9 +110,24 @@ export const changePassword = createActionThunk(
   }
 );
 
-export const resetPassword = createActionThunk("USER_RESET_PASSWORD", email => {
-  return backend.resetPassword(email);
-});
+export const requestPasswordReset = createActionThunk(
+  "USER_RESET_PASSWORD_REQUEST",
+  email => {
+    return backend.requestPasswordReset(email);
+  }
+);
+
+export const resetPassword = createActionThunk(
+  "USER_RESET_PASSWORD",
+  (email, pwdResetKey, password, passwordConfirmation) => {
+    return backend.resetPassword(
+      email,
+      pwdResetKey,
+      password,
+      passwordConfirmation
+    );
+  }
+);
 
 export const register = createActionThunk("USER_REGISTER", email => {
   return backend.register(email);

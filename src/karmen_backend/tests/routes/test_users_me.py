@@ -254,6 +254,203 @@ class ActivateNewUserRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 409)
 
 
+class RequestResetPasswordRoute(unittest.TestCase):
+    def test_fail_missing_email(self):
+        with app.test_client() as c:
+            response = c.post("/users/me/request-password-reset")
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_bad_email(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/request-password-reset", json={"email": "not an email"}
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_fail_unknown_email(self, mock_send_mail):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/request-password-reset",
+                json={"email": "certainly@notauser.com"},
+            )
+            self.assertEqual(response.status_code, 202)
+            self.assertEqual(mock_send_mail.call_count, 0)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_fail_inactive_user(self, mock_send_mail):
+        with app.test_client() as c:
+            email = get_random_email()
+            c.post("/users/me", json={"email": email})
+            response = c.post("/users/me/request-password-reset", json={"email": email})
+            self.assertEqual(response.status_code, 202)
+            # The 1 sent mail is the activation one when user is registered
+            self.assertEqual(mock_send_mail.call_count, 1)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_send_email_with_reset_link(self, mock_send_mail):
+        with app.test_client() as c:
+            email = get_random_email()
+            c.post("/users/me", json={"email": email})
+            user = users.get_by_email(email)
+            users.update_user(uuid=user["uuid"], activated=datetime.now())
+            local_users.add_local_user(
+                user_uuid=user["uuid"], pwd_hash="aaa", force_pwd_change=False
+            )
+            response = c.post("/users/me/request-password-reset", json={"email": email})
+            self.assertEqual(response.status_code, 202)
+            self.assertEqual(mock_send_mail.call_count, 2)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[1][0][0][0], email)
+            self.assertEqual(args[1][0][1], "PASSWORD_RESET_LINK")
+            self.assertTrue(args[1][0][2]["pwd_reset_key"] is not None)
+            self.assertTrue(args[1][0][2]["pwd_reset_key_expires"] is not None)
+            self.assertEqual(args[1][0][2]["email"], email)
+
+
+class ResetPasswordRoute(unittest.TestCase):
+    def setUp(self):
+        self.email = get_random_email()
+        self.pwd_reset_key = uuid.uuid4()
+        self.user_uuid = uuid.uuid4()
+        users.add_user(
+            uuid=self.user_uuid,
+            username=self.email,
+            email=self.email,
+            system_role="user",
+            providers=["local"],
+            activated=datetime.now(),
+        )
+        local_users.add_local_user(
+            user_uuid=self.user_uuid,
+            pwd_hash="1234",
+            pwd_reset_key_hash=hashlib.sha256(
+                str(self.pwd_reset_key).encode("utf-8")
+            ).hexdigest(),
+            pwd_reset_key_expires=datetime.now().astimezone() + timedelta(minutes=10),
+            force_pwd_change=False,
+        )
+
+    def test_fail_no_data(self):
+        with app.test_client() as c:
+            response = c.post("/users/me/reset-password")
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_bad_mail(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": "something",
+                    "pwd_reset_key": self.pwd_reset_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_missing_pwd_reset_key(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": self.email,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_password_missing(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={"email": self.email, "pwd_reset_key": self.pwd_reset_key},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_password_mismatch(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": self.email,
+                    "pwd_reset_key": self.pwd_reset_key,
+                    "password": "aaa",
+                    "password_confirmation": "bbb",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_bad_pwd_reset_key(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": self.email,
+                    "pwd_reset_key": "1234",
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_fail_expired_pwd_reset_key(self):
+        email = get_random_email()
+        pwd_reset_key = "1234"
+        user_uuid = uuid.uuid4()
+        users.add_user(
+            uuid=user_uuid,
+            username=email,
+            email=email,
+            system_role="user",
+            providers=["local"],
+            activated=datetime.now(),
+        )
+        local_users.add_local_user(
+            user_uuid=user_uuid,
+            pwd_hash="1234",
+            pwd_reset_key_hash=hashlib.sha256(
+                str(pwd_reset_key).encode("utf-8")
+            ).hexdigest(),
+            pwd_reset_key_expires=datetime.now().astimezone() - timedelta(minutes=10),
+            force_pwd_change=False,
+        )
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": email,
+                    "pwd_reset_key": pwd_reset_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_reset_password(self, mock_send_mail):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/reset-password",
+                json={
+                    "email": self.email,
+                    "pwd_reset_key": self.pwd_reset_key,
+                    "password": "aaa",
+                    "password_confirmation": "aaa",
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+            local_user = local_users.get_local_user(self.user_uuid)
+            self.assertTrue(local_user["pwd_reset_key_hash"] is None)
+            self.assertTrue(local_user["pwd_reset_key_expires"] is None)
+            self.assertEqual(mock_send_mail.call_count, 1)
+            args = mock_send_mail.call_args_list
+            self.assertEqual(args[0][0][0][0], self.email)
+            self.assertEqual(args[0][0][1], "PASSWORD_RESET_CONFIRMATION")
+            self.assertEqual(args[0][0][2]["email"], self.email)
+
+
 class AuthenticateRoute(unittest.TestCase):
     def test_no_data(self):
         with app.test_client() as c:

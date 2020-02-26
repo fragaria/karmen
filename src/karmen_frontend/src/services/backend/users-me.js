@@ -96,14 +96,41 @@ export const changePassword = (
     });
 };
 
-export const resetPassword = email => {
-  return fetch(`${BASE_URL}/users/me/reset-password`, {
+export const requestPasswordReset = email => {
+  return fetch(`${BASE_URL}/users/me/request-password-reset`, {
     method: "POST",
     headers: {
       "content-type": "application/json"
     },
     body: JSON.stringify({
       email
+    })
+  })
+    .then(response => {
+      return { status: response.status };
+    })
+    .catch(e => {
+      console.error(`Cannot send password reset request: ${e}`);
+      return { status: 500 };
+    });
+};
+
+export const resetPassword = (
+  email,
+  pwdResetKey,
+  password,
+  passwordConfirmation
+) => {
+  return fetch(`${BASE_URL}/users/me/reset-password`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      email,
+      pwd_reset_key: pwdResetKey,
+      password,
+      password_confirmation: passwordConfirmation
     })
   })
     .then(response => {

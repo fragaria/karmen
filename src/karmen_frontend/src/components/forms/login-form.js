@@ -146,7 +146,7 @@ class LoginForm extends React.Component {
                   </Link>
                   <br />
                   <br />
-                  <Link to="/password-reset" className="anchor">
+                  <Link to="/request-password-reset" className="anchor">
                     Forgotten password
                   </Link>
                 </>

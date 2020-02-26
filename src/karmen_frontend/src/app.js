@@ -12,7 +12,8 @@ import UnauthenticatedRoute from "./components/unauthenticated-route";
 import Login from "./routes/login";
 import Register from "./routes/register";
 import RegisterConfirmation from "./routes/register-confirmation";
-import PasswordReset from "./routes/password-reset";
+import RequestPasswordReset from "./routes/request-password-reset";
+import ResetPassword from "./routes/reset-password";
 import Page404 from "./routes/page404";
 import PrinterList from "./routes/printer-list";
 import GcodeList from "./routes/gcode-list";
@@ -106,9 +107,15 @@ class App extends React.Component {
               />
               <UnauthenticatedRoute
                 userState={userState}
-                path="/password-reset"
+                path="/reset-password"
                 exact
-                component={PasswordReset}
+                component={ResetPassword}
+              />
+              <UnauthenticatedRoute
+                userState={userState}
+                path="/request-password-reset"
+                exact
+                component={RequestPasswordReset}
               />
               <AuthenticatedRoute
                 path="/users/me"

@@ -1,11 +1,11 @@
 from textwrap import dedent
 
 
-class OrganizationRemoval:
+class PasswordResetConfirmation:
     variables = {}
 
     def subject(self):
-        return "Karmen - Organization removal"
+        return "Karmen - Password reset confirmation"
 
     def prepare_variables(self, variables={}):
         self.variables = variables
@@ -14,16 +14,16 @@ class OrganizationRemoval:
         return (
             dedent(
                 """
-            You have been removed from the %s and You will have no access to this organization anymore.
+            Hello %s!
 
-            If you have any problems or questions, please feel free to reply directly to this email.
+            We're contacting you to notify you that your Karmen password has been changed.
 
             © 2020 Fragaria s.r.o.
             Address …….
             Follow us on Twitter, LinkedIn or Facebook
             """
             )
-            % (self.variables["organization_name"])
+            % (self.variables["email"])
         )
 
     def htmlbody(self):

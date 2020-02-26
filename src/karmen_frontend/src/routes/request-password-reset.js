@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../components/forms/form-utils";
 import BusyButton from "../components/utils/busy-button";
-import { resetPassword } from "../actions/users-me";
+import { requestPasswordReset } from "../actions/users-me";
 import { isEmail } from "../services/validators";
 
 class PasswordReset extends React.Component {
@@ -27,7 +27,7 @@ class PasswordReset extends React.Component {
   reset(e) {
     e.preventDefault();
     const { resetForm } = this.state;
-    const { doReset } = this.props;
+    const { doRequest } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(resetForm)) {
@@ -50,8 +50,8 @@ class PasswordReset extends React.Component {
       return;
     }
 
-    return doReset(resetForm.email.val).then(r => {
-      if (r.status !== 200) {
+    return doRequest(resetForm.email.val).then(r => {
+      if (r.status !== 202) {
         this.setState({
           messageOk: false,
           message:
@@ -129,5 +129,5 @@ class PasswordReset extends React.Component {
 }
 
 export default connect(undefined, dispatch => ({
-  doReset: email => dispatch(resetPassword(email))
+  doRequest: email => dispatch(requestPasswordReset(email))
 }))(PasswordReset);

@@ -26,7 +26,7 @@ from server.tasks.send_mail import send_mail
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
 
-
+# registers new user - does not save any password
 @app.route("/users/me", methods=["POST"])
 def create_inactive_user():
     data = request.json
@@ -76,6 +76,7 @@ def create_inactive_user():
     return make_response("", 202)
 
 
+# sets a first password to a user
 @app.route("/users/me/activate", methods=["POST"])
 def activate_user():
     data = request.json
@@ -118,6 +119,88 @@ def activate_user():
         user_uuid=existing["uuid"],
         pwd_hash=pwd_hash.decode("utf8"),
         force_pwd_change=False,
+    )
+    return make_response("", 200)
+
+
+@app.route("/users/me/request-password-reset", methods=["POST"])
+def request_password_reset():
+    data = request.json
+    if not data:
+        return abort(make_response("", 400))
+    email = data.get("email", "").lstrip().rstrip().lower()
+    if not email or not is_email(email):
+        return abort(make_response("", 400))
+    existing = users.get_by_email(email)
+    # we are not leaking used or unused e-mails, that's why this responds 202
+    if not existing or existing["activated"] is None:
+        return abort(make_response("", 202))
+    local = local_users.get_local_user(existing["uuid"])
+    if not local:
+        return abort(make_response("", 400))
+    pwd_reset_key = uuid.uuid4()
+    pwd_reset_key_expires = datetime.now().astimezone() + timedelta(hours=1)
+    local_users.update_local_user(
+        user_uuid=existing["uuid"],
+        pwd_reset_key_hash=hashlib.sha256(
+            str(pwd_reset_key).encode("utf-8")
+        ).hexdigest(),
+        pwd_reset_key_expires=pwd_reset_key_expires,
+    )
+    send_mail.delay(
+        [email],
+        "PASSWORD_RESET_LINK",
+        {
+            "pwd_reset_key": pwd_reset_key,
+            "pwd_reset_key_expires": int(pwd_reset_key_expires.timestamp()),
+            "email": email,
+        },
+    )
+    return make_response("", 202)
+
+
+@app.route("/users/me/reset-password", methods=["POST"])
+def reset_password():
+    data = request.json
+    if not data:
+        return abort(make_response("", 400))
+    email = data.get("email", "").lstrip().rstrip().lower()
+    pwd_reset_key = data.get("pwd_reset_key", None)
+    password = data.get("password", None)
+    password_confirmation = data.get("password_confirmation", None)
+
+    if not email or not is_email(email):
+        return abort(make_response("", 400))
+    if not password or not pwd_reset_key:
+        return abort(make_response("", 400))
+    if password != password_confirmation:
+        return abort(make_response("", 400))
+
+    existing = users.get_by_email(email)
+    if not existing:
+        return abort(make_response("", 400))
+    local = local_users.get_local_user(existing["uuid"])
+    if not local:
+        return abort(make_response("", 400))
+
+    if (
+        hashlib.sha256(str(pwd_reset_key).encode("utf-8")).hexdigest()
+        != local["pwd_reset_key_hash"]
+    ):
+        return abort(make_response("", 400))
+    if local["pwd_reset_key_expires"] < datetime.now().astimezone():
+        return abort(make_response("", 400))
+
+    pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
+    local_users.update_local_user(
+        user_uuid=existing["uuid"],
+        pwd_hash=pwd_hash.decode("utf8"),
+        pwd_reset_key_hash=None,
+        pwd_reset_key_expires=None,
+        force_pwd_change=False,
+    )
+    send_mail.delay(
+        [email], "PASSWORD_RESET_CONFIRMATION", {"email": email,},
     )
     return make_response("", 200)
 
@@ -168,6 +251,11 @@ def authenticate_base(include_refresh_token):
         raise Unauthorized("Invalid credentials.")
     if not bcrypt.checkpw(password.encode("utf8"), local["pwd_hash"].encode("utf8")):
         raise Unauthorized("Invalid credentials.")
+    # drop reset pwd key if any
+    if local["pwd_reset_key_hash"]:
+        local_users.update_local_user(
+            uuid=user["uuid"], pwd_reset_key_hash=None, pwd_reset_key_expires=None
+        )
 
     userdata = dict(user)
     userdata.update(local)
