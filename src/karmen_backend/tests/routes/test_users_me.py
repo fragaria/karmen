@@ -74,7 +74,7 @@ class CreateNewUserRoute(unittest.TestCase):
     def test_fail_conflict_active(self):
         with app.test_client() as c:
             response = c.post("/users/me", json={"email": "test-admin@karmen.local"})
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 202)
 
     @mock.patch("server.tasks.send_mail.send_mail.delay")
     def test_reissue_activation_key(self, mock_send_mail):

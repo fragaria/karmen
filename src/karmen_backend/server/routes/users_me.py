@@ -38,7 +38,7 @@ def create_inactive_user():
     existing = users.get_by_email(email)
     # activated users
     if existing and existing["activated"] is not None:
-        return abort(make_response("", 400))
+        return abort(make_response("", 202))
 
     activation_key = uuid.uuid4()
     activation_key_expires = datetime.now().astimezone() + timedelta(minutes=10)
