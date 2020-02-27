@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 
 const OrganizationRoot = ({ organizations, match }) => {
   if (
@@ -9,7 +10,12 @@ const OrganizationRoot = ({ organizations, match }) => {
   ) {
     return <Redirect to="/page-404" />;
   }
-  return <Redirect to={`/${match.params.orgslug}/printers`} />;
+  return (
+    <>
+      <SetActiveOrganization />
+      <Redirect to={`/${match.params.orgslug}/printers`} />
+    </>
+  );
 };
 
 export default connect(state => ({

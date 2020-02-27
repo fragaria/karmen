@@ -135,7 +135,6 @@ const UsersTableRow = ({
             <button
               className="list-dropdown-item"
               onClick={e => {
-                // TODO make this more reactive to user's actions
                 setCtaListExpanded(false);
                 onResendInvitation(user.email, user.role);
                 invitationSentModal.openModal(e);
@@ -205,7 +204,9 @@ class UsersTable extends React.Component {
       onResendInvitation
     } = this.props;
     const usersRows = usersList
-      .filter(u => u.username.indexOf(filter) !== -1)
+      .filter(
+        u => u.username.toLowerCase().indexOf(filter.toLowerCase()) !== -1
+      )
       .sort((u, q) => {
         let result = -1;
         if (u[orderBy] > q[orderBy]) {

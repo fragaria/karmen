@@ -1,5 +1,6 @@
 export * from "./gcodes";
 export * from "./misc";
+export * from "./organizations";
 export * from "./printers";
 export * from "./printjobs";
 export * from "./users-me";

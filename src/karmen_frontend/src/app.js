@@ -29,6 +29,7 @@ import AddUser from "./routes/add-user";
 import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
 import ManageOrganizations from "./routes/manage-organizations";
+import AddOrganization from "./routes/add-organization";
 
 import { loadUserFromLocalStorage } from "./actions/users-me";
 
@@ -138,6 +139,12 @@ class App extends React.Component {
                 path="/organizations"
                 exact
                 component={ManageOrganizations}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/add-organization"
+                exact
+                component={AddOrganization}
               />
               <AuthenticatedRoute
                 userState={userState}
