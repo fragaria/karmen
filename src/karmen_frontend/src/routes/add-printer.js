@@ -128,8 +128,9 @@ class AddPrinter extends React.Component {
 
   render() {
     const { form, message, messageOk, redirect } = this.state;
+    const { match } = this.props;
     if (redirect) {
-      return <Redirect to="/" />;
+      return <Redirect to={`/${match.params.orgslug}/printers`} />;
     }
     return (
       <OrgRoleBasedGateway requiredRole="admin">
@@ -164,7 +165,10 @@ class AddPrinter extends React.Component {
                 >
                   Add printer
                 </BusyButton>{" "}
-                <Link to="/" className="btn btn-plain">
+                <Link
+                  to={`/${match.params.orgslug}/printers`}
+                  className="btn btn-plain"
+                >
                   Cancel
                 </Link>
               </div>
@@ -176,7 +180,18 @@ class AddPrinter extends React.Component {
   }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch, ownProps) => ({
   createPrinter: (protocol, hostname, ip, port, path, name, apiKey) =>
-    dispatch(addPrinter(protocol, hostname, ip, port, path, name, apiKey))
+    dispatch(
+      addPrinter(
+        ownProps.match.params.orgslug,
+        protocol,
+        hostname,
+        ip,
+        port,
+        path,
+        name,
+        apiKey
+      )
+    )
 }))(AddPrinter);

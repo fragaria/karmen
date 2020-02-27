@@ -15,6 +15,8 @@ import RegisterConfirmation from "./routes/register-confirmation";
 import RequestPasswordReset from "./routes/request-password-reset";
 import ResetPassword from "./routes/reset-password";
 import Page404 from "./routes/page404";
+import AppRoot from "./routes/app-root";
+import OrganizationRoot from "./routes/organization-root";
 import PrinterList from "./routes/printer-list";
 import GcodeList from "./routes/gcode-list";
 import GcodeDetail from "./routes/gcode-detail";
@@ -129,57 +131,69 @@ class App extends React.Component {
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/settings"
+                path="/:orgslug/settings"
                 exact
                 component={Settings}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/add-user"
+                path="/:orgslug/add-user"
                 exact
                 component={AddUser}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/add-printer"
+                path="/:orgslug/add-printer"
                 exact
                 component={AddPrinter}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/add-gcode"
+                path="/:orgslug/add-gcode"
                 exact
                 component={AddGcode}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/gcodes"
-                exact
-                component={GcodeList}
-              />
-              <AuthenticatedRoute
-                userState={userState}
-                path="/gcodes/:uuid"
+                path="/:orgslug/gcodes/:uuid"
                 exact
                 component={GcodeDetail}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/printers/:uuid/settings"
+                path="/:orgslug/gcodes"
+                exact
+                component={GcodeList}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/:orgslug/printers/:uuid/settings"
                 exact
                 component={PrinterSettings}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/printers/:uuid"
+                path="/:orgslug/printers/:uuid"
                 exact
                 component={PrinterDetail}
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/"
+                path="/:orgslug/printers"
                 exact
                 component={PrinterList}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/:orgslug"
+                exact
+                component={OrganizationRoot}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/"
+                exact
+                component={AppRoot}
               />
               <Route component={Page404} />
             </Switch>

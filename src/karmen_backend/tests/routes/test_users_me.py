@@ -535,14 +535,15 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue(len(response.json["organizations"]) == 1)
+            self.assertTrue("default-organization" in response.json["organizations"])
             self.assertTrue(
-                response.json["organizations"][0]["name"] == "Default organization"
+                response.json["organizations"]["default-organization"]["name"]
+                == "Default organization"
             )
             self.assertTrue(
-                response.json["organizations"][0]["slug"] == "default-organization"
+                response.json["organizations"]["default-organization"]["role"]
+                == "admin"
             )
-            self.assertTrue(response.json["organizations"][0]["role"] == "admin")
 
     def test_returns_fresh_access_token_email(self):
         with app.test_client() as c:
@@ -579,14 +580,15 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue(len(response.json["organizations"]) == 1)
+            self.assertTrue("default-organization" in response.json["organizations"])
             self.assertTrue(
-                response.json["organizations"][0]["name"] == "Default organization"
+                response.json["organizations"]["default-organization"]["name"]
+                == "Default organization"
             )
             self.assertTrue(
-                response.json["organizations"][0]["slug"] == "default-organization"
+                response.json["organizations"]["default-organization"]["role"]
+                == "admin"
             )
-            self.assertTrue(response.json["organizations"][0]["role"] == "admin")
 
 
 class AuthenticateFreshRoute(unittest.TestCase):
@@ -655,7 +657,6 @@ class AuthenticateFreshRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue(len(response.json["organizations"]) == 1)
 
     def test_returns_fresh_access_token_email(self):
         with app.test_client() as c:
@@ -690,7 +691,6 @@ class AuthenticateFreshRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue(len(response.json["organizations"]) == 1)
 
 
 class AuthenticateRefreshRoute(unittest.TestCase):
@@ -735,7 +735,6 @@ class AuthenticateRefreshRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue(len(response.json["organizations"]) == 2)
             data = get_token_data(
                 [ck for ck in c.cookie_jar if ck.name == "access_token_cookie"][0].value
             )

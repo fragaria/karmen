@@ -85,6 +85,7 @@ class PrinterList extends React.Component {
 
   render() {
     const {
+      match,
       printersLoaded,
       printers,
       images,
@@ -109,7 +110,7 @@ class PrinterList extends React.Component {
             <Link
               className="list-item"
               key={printer.uuid}
-              to={`/printers/${printer.uuid}`}
+              to={`/${match.params.orgslug}/printers/${printer.uuid}`}
             >
               <div className="list-item-content">
                 {viewType === "grid" && (
@@ -176,10 +177,13 @@ export default connect(
     images: state.printers.images,
     printersLoaded: state.printers.printersLoaded
   }),
-  dispatch => ({
-    loadPrinters: fields => dispatch(loadAndQueuePrinters(fields)),
+  (dispatch, ownProps) => ({
+    loadPrinters: fields =>
+      dispatch(loadAndQueuePrinters(ownProps.match.params.orgslug, fields)),
     setWebcamRefreshInterval: (uuid, interval) =>
-      dispatch(setWebcamRefreshInterval(uuid, interval)),
+      dispatch(
+        setWebcamRefreshInterval(ownProps.match.params.orgslug, uuid, interval)
+      ),
     setPrinterViewType: viewType => dispatch(setPrinterViewType(viewType))
   })
 )(PrinterList);

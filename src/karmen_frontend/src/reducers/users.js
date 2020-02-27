@@ -11,7 +11,8 @@ const getUserDataFromApiResponse = data => {
     hasFreshToken: data.fresh,
     accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
     organizations: data.organizations,
-    activeOrganization: data.organizations && data.organizations[0]
+    activeOrganization:
+      data.organizations && Object.values(data.organizations)[0] // TODO FIXME
   };
 };
 
@@ -48,6 +49,20 @@ export default (
           apiTokensLoaded: false
         }
       });
+    case "USER_SWITCH_ORGANIZATION":
+      if (action.payload.data && state.me.organizations) {
+        const newActiveOrganization = state.me.organizations.find(
+          o => o.uuid === action.payload.data.organizationUuid
+        );
+        if (newActiveOrganization) {
+          return Object.assign({}, state, {
+            me: Object.assign({}, state.me, {
+              activeOrganization: newActiveOrganization
+            })
+          });
+        }
+      }
+      return state;
     case "USER_AUTHENTICATE_FRESH_SUCCEEDED":
       if (action.payload.status !== 200) {
         return state;

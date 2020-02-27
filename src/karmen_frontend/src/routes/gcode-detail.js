@@ -76,7 +76,7 @@ class GcodeDetail extends React.Component {
 
   render() {
     const { gcode, gcodeLoaded, printedOn } = this.state;
-    const { downloadGcode, printGcode } = this.props;
+    const { match, downloadGcode, printGcode } = this.props;
 
     if (!gcodeLoaded) {
       return (
@@ -233,7 +233,10 @@ class GcodeDetail extends React.Component {
           </div>
 
           <div className="cta-box text-center">
-            <Link to="/gcodes" className="btn btn-plain">
+            <Link
+              to={`/${match.params.orgslug}/gcodes`}
+              className="btn btn-plain"
+            >
               Back to listing
             </Link>
           </div>
@@ -253,10 +256,14 @@ export default connect(
         .filter(p => p.client && p.client.access_level === "unlocked")
         .filter(p => without.indexOf(p.uuid) === -1)
   }),
-  dispatch => ({
-    loadPrinters: () => dispatch(loadPrinters(["job", "status", "webcam"])),
-    getGcode: id => dispatch(loadGcode(id, [])),
-    printGcode: (id, printer) => dispatch(addPrintJob(id, printer)),
+  (dispatch, ownProps) => ({
+    loadPrinters: () =>
+      dispatch(
+        loadPrinters(ownProps.match.params.orgslug, ["job", "status", "webcam"])
+      ),
+    getGcode: id => dispatch(loadGcode(ownProps.match.params.orgslug, id, [])),
+    printGcode: (id, printer) =>
+      dispatch(addPrintJob(ownProps.match.params.orgslug, id, printer)),
     downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename))
   })
 )(GcodeDetail);

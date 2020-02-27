@@ -92,8 +92,9 @@ class AddUser extends React.Component {
 
   render() {
     const { form, message, messageOk, redirect } = this.state;
+    const { match } = this.props;
     if (redirect) {
-      return <Redirect to="/settings" />;
+      return <Redirect to={`/${match.params.orgslug}/settings`} />;
     }
     return (
       <OrgRoleBasedGateway requiredRole="admin">
@@ -137,7 +138,10 @@ class AddUser extends React.Component {
                   >
                     Add user
                   </BusyButton>{" "}
-                  <Link to="/settings" className="btn btn-plain">
+                  <Link
+                    to={`/${match.params.orgslug}/settings`}
+                    className="btn btn-plain"
+                  >
                     Cancel
                   </Link>
                 </div>
@@ -150,6 +154,7 @@ class AddUser extends React.Component {
   }
 }
 
-export default connect(null, dispatch => ({
-  createUser: (email, role) => dispatch(addUser(email, role))
+export default connect(null, (dispatch, ownProps) => ({
+  createUser: (email, role) =>
+    dispatch(addUser(ownProps.match.params.orgslug, email, role))
 }))(AddUser);

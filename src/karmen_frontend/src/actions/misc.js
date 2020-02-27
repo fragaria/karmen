@@ -4,13 +4,13 @@ import { retryIfUnauthorized } from "./users-me";
 
 export const enqueueTask = createActionThunk(
   "ENQUEUE_TASK",
-  (task, opts, { dispatch, getState }) => {
+  (orgslug, task, opts, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.enqueueTask, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       task,
       opts
     ).then(r => {

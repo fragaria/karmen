@@ -12,6 +12,7 @@ const UserPreferences = ({
   apiTokensLoaded,
   onTokenDelete
 }) => {
+  console.log("inme");
   return (
     <FreshTokenGateway>
       <div className="content">

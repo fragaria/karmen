@@ -55,6 +55,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
 };
 
 const GcodeTableRow = ({
+  orgslug,
   analysis,
   uuid,
   size,
@@ -62,7 +63,6 @@ const GcodeTableRow = ({
   username,
   path,
   display,
-  history,
   printGcode,
   onSchedulePrint,
   availablePrinters,
@@ -83,7 +83,7 @@ const GcodeTableRow = ({
 
   return (
     <div className="list-item">
-      <Link className="list-item-content" to={`/gcodes/${uuid}`}>
+      <Link className="list-item-content" to={`/${orgslug}/gcodes/${uuid}`}>
         <span className="list-item-subtitle">
           {path}
           {path ? "/" : ""}
@@ -150,6 +150,7 @@ class GcodeList extends React.Component {
   render() {
     const { printedOn } = this.state;
     const {
+      match,
       getAvailablePrinters,
       gcodesList,
       loadGcodesPage,
@@ -163,7 +164,10 @@ class GcodeList extends React.Component {
         <div className="container">
           <h1 className="main-title">
             G-Codes
-            <Link to="/add-gcode" className="btn btn-sm">
+            <Link
+              to={`/${match.params.orgslug}/add-gcode`}
+              className="btn btn-sm"
+            >
               + Upload a g-code
             </Link>
           </h1>
@@ -174,8 +178,8 @@ class GcodeList extends React.Component {
             return (
               <GcodeTableRow
                 key={g.uuid}
+                orgslug={match.params.orgslug}
                 {...g}
-                history={this.props.history}
                 printGcode={printGcode}
                 onSchedulePrint={(gcodeUuid, printerUuid) => {
                   return printGcode(gcodeUuid, printerUuid).then(r => {
@@ -235,12 +239,26 @@ export default connect(
         .filter(p => p.client && p.client.access_level === "unlocked")
         .filter(p => without.indexOf(p.uuid) === -1)
   }),
-  dispatch => ({
-    loadPrinters: () => dispatch(loadPrinters(["job", "status", "webcam"])),
+  (dispatch, ownProps) => ({
+    loadPrinters: () =>
+      dispatch(
+        loadPrinters(ownProps.match.params.orgslug, ["job", "status", "webcam"])
+      ),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>
-      dispatch(getGcodesPage(startWith, orderBy, filter, limit, fields)),
+      dispatch(
+        getGcodesPage(
+          ownProps.match.params.orgslug,
+          startWith,
+          orderBy,
+          filter,
+          limit,
+          fields
+        )
+      ),
     clearGcodesPages: () => dispatch(clearGcodesPages()),
-    deleteGcode: uuid => dispatch(deleteGcode(uuid)),
-    printGcode: (uuid, printer) => dispatch(addPrintJob(uuid, printer))
+    deleteGcode: uuid =>
+      dispatch(deleteGcode(ownProps.match.params.orgslug, uuid)),
+    printGcode: (uuid, printer) =>
+      dispatch(addPrintJob(ownProps.match.params.orgslug, uuid, printer))
   })
 )(GcodeList);

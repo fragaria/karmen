@@ -90,7 +90,7 @@ export const FormInputs = ({ definition, updateValue }) => {
             type="text"
             id={name}
             name={name}
-            autocomplete="off"
+            autoComplete="off"
             className="honeypot-field"
             onChange={e => updateValue(name, e.target.value)}
           />

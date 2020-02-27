@@ -59,8 +59,9 @@ class AddGcode extends React.Component {
 
   render() {
     const { message, messageOk, redirect, path, gcodeUuid } = this.state;
+    const { match } = this.props;
     if (redirect) {
-      return <Redirect to={`/gcodes/${gcodeUuid}`} />;
+      return <Redirect to={`/${match.params.orgslug}/gcodes/${gcodeUuid}`} />;
     }
     return (
       <div className="content">
@@ -114,7 +115,10 @@ class AddGcode extends React.Component {
                 Upload G-Code
               </BusyButton>{" "}
               {/* TODO this should actually work as a cancel button and cancel the upload if in progress */}
-              <Link to="/gcodes" className="btn btn-plain">
+              <Link
+                to={`/${match.params.orgslug}/gcodes`}
+                className="btn btn-plain"
+              >
                 Cancel
               </Link>
             </div>
@@ -125,6 +129,7 @@ class AddGcode extends React.Component {
   }
 }
 
-export default connect(null, dispatch => ({
-  uploadGcode: (path, toUpload) => dispatch(uploadGcode(path, toUpload))
+export default connect(null, (dispatch, ownProps) => ({
+  uploadGcode: (path, toUpload) =>
+    dispatch(uploadGcode(ownProps.match.params.orgslug, path, toUpload))
 }))(AddGcode);

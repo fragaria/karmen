@@ -34,6 +34,7 @@ export const loadUserFromToken = token => dispatch => {
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
       email: decoded.user_claims && decoded.user_claims.email,
+      // TODO FIXME - need to get org slug based on uuid
       organizations: [
         {
           role: "user",
@@ -45,15 +46,6 @@ export const loadUserFromToken = token => dispatch => {
       accessTokenExpiresOn: undefined
     })
   );
-};
-
-export const loadUserData = userData => dispatch => {
-  dispatch({
-    type: "USER_DATA_LOADED",
-    payload: {
-      data: userData
-    }
-  });
 };
 
 export const loadUserFromLocalStorage = () => dispatch => {
@@ -75,6 +67,26 @@ export const loadUserFromLocalStorage = () => dispatch => {
     });
   }
   return Promise.resolve(dispatch(loadUserData(profile)));
+};
+
+export const switchOrganization = organizationUuid => dispatch => {
+  dispatch({
+    type: "USER_SWITCH_ORGANIZATION",
+    payload: {
+      data: {
+        organizationUuid
+      }
+    }
+  });
+};
+
+export const loadUserData = userData => dispatch => {
+  dispatch({
+    type: "USER_DATA_LOADED",
+    payload: {
+      data: userData
+    }
+  });
 };
 
 export const authenticate = createActionThunk(
@@ -153,6 +165,7 @@ export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
   ({ dispatch, getState }) => {
     const { users } = getState();
+    // TODO FIXME
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
     }
@@ -167,6 +180,7 @@ export const addUserApiToken = createActionThunk(
   "USER_ADD_API_TOKEN",
   (name, { dispatch, getState }) => {
     const { users } = getState();
+    // TODO FIXME
     if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
       return Promise.resolve({});
     }
@@ -180,6 +194,7 @@ export const addUserApiToken = createActionThunk(
 export const deleteUserApiToken = createActionThunk(
   "USER_DELETE_API_TOKEN",
   (jti, { dispatch }) => {
+    // TODO FIXME org uuid
     return retryIfUnauthorized(
       backend.deleteApiToken,
       dispatch

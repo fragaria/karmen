@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link, withRouter } from "react-router-dom";
-import { clearUserIdentity } from "../actions/users-me";
+import { clearUserIdentity, switchOrganization } from "../actions/users-me";
 
 class Menu extends React.Component {
   constructor(props) {
@@ -13,8 +13,41 @@ class Menu extends React.Component {
   }
 
   render() {
-    const { history, userState, username, role, logout } = this.props;
+    const {
+      history,
+      userState,
+      username,
+      activeOrganization,
+      organizations,
+      role,
+      logout,
+      switchOrganization
+    } = this.props;
     const { navigation } = this.state;
+
+    const orgList = organizations
+      ? Object.values(organizations)
+          .map(o => {
+            if (o.uuid === activeOrganization.uuid) {
+              return undefined;
+            }
+            return (
+              <li key={o.uuid}>
+                <Link
+                  className="navigation-user-organization navigation-user-organization-toggle"
+                  to={`/${o.slug}`}
+                  onClick={() => {
+                    switchOrganization(o.uuid);
+                    this.setState({ navigation: false });
+                  }}
+                >
+                  Switch to {o.name}
+                </Link>
+              </li>
+            );
+          })
+          .filter(o => !!o)
+      : [];
 
     return (
       <nav className="navigation">
@@ -47,13 +80,13 @@ class Menu extends React.Component {
                       </span>
                       {username}
                       <p className="navigation-user-organization">
-                        organization name
+                        {activeOrganization.name}
                       </p>
                     </Link>
                   </li>
                   <li>
                     <Link
-                      to="/"
+                      to={`/${activeOrganization.slug}/printers`}
                       onClick={() => this.setState({ navigation: false })}
                     >
                       Printers
@@ -61,7 +94,7 @@ class Menu extends React.Component {
                   </li>
                   <li>
                     <Link
-                      to="/gcodes"
+                      to={`/${activeOrganization.slug}/gcodes`}
                       onClick={() => this.setState({ navigation: false })}
                     >
                       G-Codes
@@ -70,7 +103,7 @@ class Menu extends React.Component {
                   {role === "admin" && (
                     <li>
                       <Link
-                        to="/settings"
+                        to={`/${activeOrganization.slug}/settings`}
                         onClick={() => this.setState({ navigation: false })}
                       >
                         Settings
@@ -91,28 +124,11 @@ class Menu extends React.Component {
                       Logout
                     </button>
                   </li>
+                  {orgList}
                   <li>
                     <Link
                       className="navigation-user-organization navigation-user-organization-toggle"
-                      to="/gcodes"
-                      onClick={() => this.setState({ navigation: false })}
-                    >
-                      Switch to Another organization name
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className="navigation-user-organization navigation-user-organization-toggle"
-                      to="/gcodes"
-                      onClick={() => this.setState({ navigation: false })}
-                    >
-                      Switch to Another organization name
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className="navigation-user-organization navigation-user-organization-toggle"
-                      to="/gcodes"
+                      to="/TODO"
                       onClick={() => this.setState({ navigation: false })}
                     >
                       Manage organizations
@@ -146,12 +162,15 @@ export default withRouter(
     state => ({
       userState: state.users.me.currentState,
       username: state.users.me.username,
+      activeOrganization: state.users.me.activeOrganization,
+      organizations: state.users.me.organizations,
       role:
         state.users.me.activeOrganization &&
         state.users.me.activeOrganization.role
     }),
     dispatch => ({
-      logout: () => dispatch(clearUserIdentity())
+      logout: () => dispatch(clearUserIdentity()),
+      switchOrganization: orgUuid => dispatch(switchOrganization(orgUuid))
     })
   )(Menu)
 );

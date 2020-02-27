@@ -15,6 +15,7 @@ export const getJobsPage = createActionThunk(
   "JOBS_LOAD_PAGE",
   // TODO Reflect the actual filter attribute
   (
+    orgslug,
     printerUuid,
     startWith = null,
     orderBy = null,
@@ -23,11 +24,11 @@ export const getJobsPage = createActionThunk(
     { dispatch, getState }
   ) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       startWith,
       orderBy,
       printerUuid,
@@ -48,13 +49,13 @@ export const getJobsPage = createActionThunk(
 
 export const addPrintJob = createActionThunk(
   "JOBS_ADD",
-  (uuid, printer, { dispatch, getState }) => {
+  (orgslug, uuid, printer, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.printGcode, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       uuid,
       printer
     );

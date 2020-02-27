@@ -18,11 +18,13 @@ class PrinterSettings extends React.Component {
   }
 
   changePrinter(newParameters) {
-    const { patchPrinter, printer } = this.props;
+    const { match, patchPrinter, printer } = this.props;
     return patchPrinter(newParameters).then(r => {
       switch (r.status) {
         case 200:
-          this.props.history.push(`/printers/${printer.uuid}`);
+          this.props.history.push(
+            `/${match.params.orgslug}/printers/${printer.uuid}`
+          );
           return {
             ok: true,
             message: "Changes saved successfully"
@@ -53,7 +55,7 @@ class PrinterSettings extends React.Component {
 
   render() {
     const { printerLoaded } = this.state;
-    const { printer } = this.props;
+    const { match, printer } = this.props;
     if (!printerLoaded) {
       return (
         <div>
@@ -91,7 +93,9 @@ class PrinterSettings extends React.Component {
               }}
               onSubmit={this.changePrinter}
               onCancel={() => {
-                this.props.history.push(`/printers/${printer.uuid}`);
+                this.props.history.push(
+                  `/${match.params.orgslug}/printers/${printer.uuid}`
+                );
               }}
             />
           </div>
@@ -110,9 +114,19 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinter: () =>
       dispatch(
-        loadPrinter(ownProps.match.params.uuid, ["job", "status", "webcam"])
+        loadPrinter(ownProps.match.params.orgslug, ownProps.match.params.uuid, [
+          "job",
+          "status",
+          "webcam"
+        ])
       ),
     patchPrinter: data =>
-      dispatch(patchPrinter(ownProps.match.params.uuid, data))
+      dispatch(
+        patchPrinter(
+          ownProps.match.params.orgslug,
+          ownProps.match.params.uuid,
+          data
+        )
+      )
   })
 )(PrinterSettings);

@@ -44,7 +44,7 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   );
 };
 
-const PrintersTableRow = ({ printer, onPrinterDelete }) => {
+const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
   const deletePrinterModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
   return (
@@ -52,7 +52,7 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
       <Link
         className="list-item-content"
         key={printer.uuid}
-        to={`/printers/${printer.uuid}`}
+        to={`${orgslug}/printers/${printer.uuid}`}
       >
         <span className="list-item-title">{printer.name}</span>
         <span className="text-mono">
@@ -79,7 +79,7 @@ const PrintersTableRow = ({ printer, onPrinterDelete }) => {
         <span className="list-dropdown-title">{printer.name}</span>
         <Link
           className="list-dropdown-item"
-          to={`/printers/${printer.uuid}/settings`}
+          to={`/${orgslug}/printers/${printer.uuid}/settings`}
         >
           <i className="icon-edit"></i>
           Printer settings
@@ -118,7 +118,12 @@ class PrintersTable extends React.Component {
 
   render() {
     const { filter, orderBy } = this.state;
-    const { printersLoaded, printersList, onPrinterDelete } = this.props;
+    const {
+      orgslug,
+      printersLoaded,
+      printersList,
+      onPrinterDelete
+    } = this.props;
     const printersRows = printersList
       .filter(p => p.name.indexOf(filter) !== -1)
       .sort((p, r) => {
@@ -137,6 +142,7 @@ class PrintersTable extends React.Component {
         return (
           <PrintersTableRow
             key={p.uuid}
+            orgslug={orgslug}
             printer={p}
             onPrinterDelete={onPrinterDelete}
           />

@@ -14,6 +14,7 @@ import { setNetworkInterface } from "../actions/preferences";
 import { loadPrinters, deletePrinter } from "../actions/printers";
 
 const Settings = ({
+  match,
   currentUuid,
   loadUsers,
   usersLoaded,
@@ -47,12 +48,16 @@ const Settings = ({
                   <h1 className="react-tabs__tab-panel__header__title">
                     Printers
                   </h1>
-                  <Link to="/add-printer" className="btn btn-sm">
+                  <Link
+                    to={`/${match.params.orgslug}/add-printer`}
+                    className="btn btn-sm"
+                  >
                     <span>+ Add a printer</span>
                   </Link>
                 </div>
               </div>
               <PrintersTable
+                orgslug={match.params.orgslug}
                 loadPrinters={loadPrinters}
                 printersList={printersList}
                 printersLoaded={printersLoaded}
@@ -77,7 +82,10 @@ const Settings = ({
                   <h1 className="react-tabs__tab-panel__header__title">
                     Users
                   </h1>
-                  <Link to="/add-user" className="btn btn-sm">
+                  <Link
+                    to={`/${match.params.orgslug}/add-user`}
+                    className="btn btn-sm"
+                  >
                     <span>+ Add a user</span>
                   </Link>
                 </div>
@@ -109,18 +117,26 @@ export default connect(
     currentUuid: state.users.me.identity,
     networkInterface: state.preferences.networkInterface
   }),
-  dispatch => ({
-    loadPrinters: fields => dispatch(loadPrinters(fields)),
-    onPrinterDelete: uuid => dispatch(deletePrinter(uuid)),
-    loadUsers: fields => dispatch(getUsers(fields)),
-    onUserChange: (uuid, role) => dispatch(patchUser(uuid, role)),
-    onUserDelete: uuid => dispatch(deleteUser(uuid)),
-    onResendInvitation: (email, role) => dispatch(addUser(email, role)),
+  (dispatch, ownProps) => ({
+    loadPrinters: fields =>
+      dispatch(loadPrinters(ownProps.match.params.orgslug, fields)),
+    onPrinterDelete: uuid =>
+      dispatch(deletePrinter(ownProps.match.params.orgslug, uuid)),
+    loadUsers: fields =>
+      dispatch(getUsers(ownProps.match.params.orgslug, fields)),
+    onUserChange: (uuid, role) =>
+      dispatch(patchUser(ownProps.match.params.orgslug, uuid, role)),
+    onUserDelete: uuid =>
+      dispatch(deleteUser(ownProps.match.params.orgslug, uuid)),
+    onResendInvitation: (email, role) =>
+      dispatch(addUser(ownProps.match.params.orgslug, email, role)),
     onNetworkInterfaceChange: networkInterface =>
       dispatch(setNetworkInterface(networkInterface)),
     scanNetwork: networkInterface =>
       dispatch(
-        enqueueTask("scan_network", { network_interface: networkInterface })
+        enqueueTask(ownProps.match.params.orgslug, "scan_network", {
+          network_interface: networkInterface
+        })
       )
   })
 )(Settings);

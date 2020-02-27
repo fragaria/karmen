@@ -5,8 +5,11 @@ import { retryIfUnauthorized } from "./users-me";
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
 
-export const loadAndQueuePrinter = (uuid, fields) => (dispatch, getState) => {
-  return dispatch(loadPrinter(uuid, fields)).then(result => {
+export const loadAndQueuePrinter = (orgslug, uuid, fields) => (
+  dispatch,
+  getState
+) => {
+  return dispatch(loadPrinter(orgslug, uuid, fields)).then(result => {
     const { printers } = getState();
     if (result && result.data && printers.checkQueue) {
       const existing = printers.checkQueue[uuid];
@@ -17,16 +20,21 @@ export const loadAndQueuePrinter = (uuid, fields) => (dispatch, getState) => {
           ) > -1
             ? PRINTER_RUNNING_POLL
             : PRINTER_IDLE_POLL;
-        dispatch(setPrinterPollInterval(uuid, poll));
-        dispatch(queueLoadPrinter(uuid, ["job", "status", "webcam"], poll));
+        dispatch(setPrinterPollInterval(orgslug, uuid, poll));
+        dispatch(
+          queueLoadPrinter(orgslug, uuid, ["job", "status", "webcam"], poll)
+        );
       }
       return result;
     }
   });
 };
 
-export const loadAndQueuePrinters = fields => (dispatch, getState) => {
-  return dispatch(loadPrinters(fields)).then(result => {
+export const loadAndQueuePrinters = (orgslug, fields) => (
+  dispatch,
+  getState
+) => {
+  return dispatch(loadPrinters(orgslug, fields)).then(result => {
     const { printers } = getState();
     // eslint-disable-next-line no-unused-vars
     if (result && result.data && result.data.items) {
@@ -38,9 +46,14 @@ export const loadAndQueuePrinters = fields => (dispatch, getState) => {
               ["Printing", "Paused"].indexOf(printer.status.state) > -1
                 ? PRINTER_RUNNING_POLL
                 : PRINTER_IDLE_POLL;
-            dispatch(setPrinterPollInterval(printer.uuid, poll));
+            dispatch(setPrinterPollInterval(orgslug, printer.uuid, poll));
             dispatch(
-              queueLoadPrinter(printer.uuid, ["job", "status", "webcam"], poll)
+              queueLoadPrinter(
+                orgslug,
+                printer.uuid,
+                ["job", "status", "webcam"],
+                poll
+              )
             );
           }
         }
@@ -50,7 +63,7 @@ export const loadAndQueuePrinters = fields => (dispatch, getState) => {
   });
 };
 
-export const setPrinterPollInterval = (uuid, interval) => {
+export const setPrinterPollInterval = (orgslug, uuid, interval) => {
   return {
     type: "PRINTERS_POLL_INTERVAL_SET",
     payload: {
@@ -60,7 +73,7 @@ export const setPrinterPollInterval = (uuid, interval) => {
   };
 };
 
-export const queueLoadPrinter = (uuid, fields, delay) => (
+export const queueLoadPrinter = (orgslug, uuid, fields, delay) => (
   dispatch,
   getState
 ) => {
@@ -68,7 +81,7 @@ export const queueLoadPrinter = (uuid, fields, delay) => (
     const { printers } = getState();
     const previousInfo =
       printers.printers && printers.printers.find(p => p.uuid === uuid);
-    dispatch(loadPrinter(uuid, fields)).then(result => {
+    dispatch(loadPrinter(orgslug, uuid, fields)).then(result => {
       const { printers } = getState();
       if (printers.checkQueue[uuid] > 0) {
         let interval = printers.checkQueue[uuid];
@@ -85,15 +98,20 @@ export const queueLoadPrinter = (uuid, fields, delay) => (
             ["Printing", "Paused"].indexOf(result.data.status.state) > -1
               ? PRINTER_RUNNING_POLL
               : PRINTER_IDLE_POLL;
-          dispatch(setPrinterPollInterval(uuid, interval));
+          dispatch(setPrinterPollInterval(orgslug, uuid, interval));
         }
         // enqueue next check if result is ok
         if (result.status === 200) {
           dispatch(
-            queueLoadPrinter(uuid, ["job", "status", "webcam"], interval)
+            queueLoadPrinter(
+              orgslug,
+              uuid,
+              ["job", "status", "webcam"],
+              interval
+            )
           );
         } else {
-          dispatch(setPrinterPollInterval(uuid, -1));
+          dispatch(setPrinterPollInterval(orgslug, uuid, -1));
         }
       }
       return result;
@@ -103,13 +121,13 @@ export const queueLoadPrinter = (uuid, fields, delay) => (
 
 export const loadPrinters = createActionThunk(
   "PRINTERS_LOAD",
-  (fields = [], { dispatch, getState }) => {
+  (orgslug, fields = [], { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getPrinters, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       fields
     );
   }
@@ -117,13 +135,13 @@ export const loadPrinters = createActionThunk(
 
 export const loadPrinter = createActionThunk(
   "PRINTERS_LOAD_DETAIL",
-  (uuid, fields = [], { dispatch, getState }) => {
+  (orgslug, uuid, fields = [], { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getPrinter, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       uuid,
       fields
     );
@@ -133,6 +151,7 @@ export const loadPrinter = createActionThunk(
 export const addPrinter = createActionThunk(
   "PRINTERS_ADD",
   (
+    orgslug,
     protocol,
     hostname,
     ip,
@@ -143,11 +162,11 @@ export const addPrinter = createActionThunk(
     { dispatch, getState }
   ) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.addPrinter, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       protocol,
       hostname,
       ip,
@@ -161,13 +180,13 @@ export const addPrinter = createActionThunk(
 
 export const patchPrinter = createActionThunk(
   "PRINTERS_PATCH",
-  (uuid, data, { dispatch, getState }) => {
+  (orgslug, uuid, data, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.patchPrinter, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       uuid,
       data
     );
@@ -176,13 +195,13 @@ export const patchPrinter = createActionThunk(
 
 export const deletePrinter = createActionThunk(
   "PRINTERS_DELETE",
-  (uuid, { dispatch, getState }) => {
+  (orgslug, uuid, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.deletePrinter, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       uuid
     ).then(r => {
       if (r.status !== 204) {
@@ -195,13 +214,13 @@ export const deletePrinter = createActionThunk(
 
 export const setPrinterConnection = createActionThunk(
   "PRINTERS_SET_CONNECTION",
-  (uuid, state, { dispatch, getState }) => {
+  (orgslug, uuid, state, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.setPrinterConnection, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       uuid,
       state
     );
@@ -210,27 +229,30 @@ export const setPrinterConnection = createActionThunk(
 
 export const changeCurrentJob = createActionThunk(
   "PRINTERS_CHANGE_JOB",
-  (uuid, action, { dispatch, getState }) => {
+  (orgslug, uuid, action, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
+    if (!users.me.organizations || !users.me.organizations[orgslug]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.changeCurrentJob, dispatch)(
-      users.me.activeOrganization.uuid,
+      users.me.organizations[orgslug].uuid,
       uuid,
       action
     );
   }
 );
 
-export const setWebcamRefreshInterval = (uuid, interval) => (
+export const setWebcamRefreshInterval = (orgslug, uuid, interval) => (
   dispatch,
   getState
 ) => {
   const { printers } = getState();
   if (printers.webcamQueue && printers.webcamQueue[uuid] === undefined) {
     // we need to delay this so interval_set is run before
-    const timeout = setTimeout(() => dispatch(getWebcamSnapshot(uuid)), 300);
+    const timeout = setTimeout(
+      () => dispatch(getWebcamSnapshot(orgslug, uuid)),
+      300
+    );
     return dispatch({
       type: "PRINTERS_WEBCAM_TIMEOUT_SET",
       payload: {
@@ -243,7 +265,10 @@ export const setWebcamRefreshInterval = (uuid, interval) => (
   if (printers.webcamQueue[uuid].interval > interval) {
     clearTimeout(printers.webcamQueue[uuid].timeout);
     // we need to delay this so interval_set is run before
-    const timeout = setTimeout(() => dispatch(getWebcamSnapshot(uuid)), 300);
+    const timeout = setTimeout(
+      () => dispatch(getWebcamSnapshot(orgslug, uuid)),
+      300
+    );
     return dispatch({
       type: "PRINTERS_WEBCAM_TIMEOUT_SET",
       payload: {
@@ -266,7 +291,7 @@ export const setWebcamRefreshInterval = (uuid, interval) => (
 
 export const getWebcamSnapshot = createActionThunk(
   "PRINTERS_GET_WEBCAM_SNAPSHOT",
-  (uuid, { dispatch, getState }) => {
+  (orgslug, uuid, { dispatch, getState }) => {
     let { printers } = getState();
     const printer = printers.printers.find(p => p.uuid === uuid);
     if (!printer || !printer.webcam || !printer.webcam.url) {
@@ -282,7 +307,7 @@ export const getWebcamSnapshot = createActionThunk(
           const timeoutData = printers.webcamQueue[uuid];
           if (timeoutData.interval > 0) {
             const timeout = setTimeout(
-              () => dispatch(getWebcamSnapshot(uuid)),
+              () => dispatch(getWebcamSnapshot(orgslug, uuid)),
               timeoutData.interval
             );
             dispatch({

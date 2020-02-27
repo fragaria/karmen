@@ -206,16 +206,14 @@ def reset_password():
 
 
 def get_user_identity(userdata, token_freshness):
-    membership = []
+    membership = {}
     for org in organizations.get_by_user_uuid(userdata.get("uuid")):
-        membership.append(
-            {
-                "uuid": org.get("uuid"),
-                "name": org.get("name"),
-                "slug": org.get("slug"),
-                "role": org.get("role"),
-            }
-        )
+        membership[org.get("slug")] = {
+            "uuid": org.get("uuid"),
+            "name": org.get("name"),
+            "slug": org.get("slug"),
+            "role": org.get("role"),
+        }
     return {
         "identity": userdata.get("uuid"),
         "system_role": userdata.get("system_role", "user"),
