@@ -52,7 +52,7 @@ const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
       <Link
         className="list-item-content"
         key={printer.uuid}
-        to={`${orgslug}/printers/${printer.uuid}`}
+        to={`/${orgslug}/printers/${printer.uuid}`}
       >
         <span className="list-item-title">{printer.name}</span>
         <span className="text-mono">
