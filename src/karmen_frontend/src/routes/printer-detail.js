@@ -237,34 +237,36 @@ const PrinterDetail = ({
         <div className="printer-detail-meta">
           <div className="container">
             <h1 className="main-title">{printer.name}</h1>
-            <PrinterState printer={printer} />{" "}
-            {printer.client &&
-              printer.client.access_level === "unlocked" &&
-              (["Offline", "Closed"].indexOf(
-                printer.status && printer.status.state
-              ) > -1 || printer.status.state.match(/printer is not/i) ? (
-                <button
-                  className="btn btn-xs"
-                  type="submit"
-                  onClick={e => {
-                    e.preventDefault();
-                    changeConnectionModal.openModal(e);
-                  }}
-                >
-                  Connect
-                </button>
-              ) : (
-                <button
-                  className="btn btn-xs"
-                  type="submit"
-                  onClick={e => {
-                    e.preventDefault();
-                    changeConnectionModal.openModal(e);
-                  }}
-                >
-                  Disconnect
-                </button>
-              ))}
+            <div className="printer-state">
+              <PrinterState printer={printer} />{" "}
+              {printer.client &&
+                printer.client.access_level === "unlocked" &&
+                (["Offline", "Closed"].indexOf(
+                  printer.status && printer.status.state
+                ) > -1 || printer.status.state.match(/printer is not/i) ? (
+                  <button
+                    className="btn btn-xs"
+                    type="submit"
+                    onClick={e => {
+                      e.preventDefault();
+                      changeConnectionModal.openModal(e);
+                    }}
+                  >
+                    Connect
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-xs"
+                    type="submit"
+                    onClick={e => {
+                      e.preventDefault();
+                      changeConnectionModal.openModal(e);
+                    }}
+                  >
+                    Disconnect
+                  </button>
+                ))}
+            </div>
             <ChangeConnectionModal
               modal={changeConnectionModal}
               accessLevel={

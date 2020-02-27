@@ -812,8 +812,12 @@ footer {
   }
 
   .list-item-property {
-    max-height: 7.4rem;
+    max-height: 4rem;
     overflow-x: hidden;
+
+    @media (min-width: $screen-sm-min) {
+      max-height: 6rem;
+    }
   }
 
   .list-item-cta {
@@ -1114,6 +1118,13 @@ select {
     }
   }
 
+  .printer-state {
+    @include plumber(
+      $leading-top: 0,
+      $leading-bottom: 1
+    );
+  }
+
   @media (min-width: $screen-sm-min) {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1136,7 +1147,6 @@ select {
       .dl-horizontal {
         grid-template-columns: 35% 1fr;
       }
-
     }
 
     .printer-detail-jobs {
