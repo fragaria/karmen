@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Loader from "../components/utils/loader";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import PrinterState from "../components/printers/printer-state";
 import WebcamStream from "../components/printers/webcam-stream";
 import {
@@ -96,6 +97,7 @@ class PrinterList extends React.Component {
     if (!printersLoaded) {
       return (
         <div>
+          <SetActiveOrganization />
           <Loader />
         </div>
       );
@@ -153,19 +155,21 @@ class PrinterList extends React.Component {
         });
 
     return (
-      <div className="content printer-list">
-        <div className="container">
-          <h1 className="main-title">Printers</h1>
-        </div>
+      <>
+        <div className="content printer-list">
+          <div className="container">
+            <h1 className="main-title">Printers</h1>
+          </div>
 
-        <div className={viewType === "grid" ? "list grid" : "list"}>
-          <SwitchView
-            viewType={viewType}
-            onViewTypeChange={setPrinterViewType}
-          />
-          <div className="list-items">{printerElements}</div>
+          <div className={viewType === "grid" ? "list grid" : "list"}>
+            <SwitchView
+              viewType={viewType}
+              onViewTypeChange={setPrinterViewType}
+            />
+            <div className="list-items">{printerElements}</div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 }

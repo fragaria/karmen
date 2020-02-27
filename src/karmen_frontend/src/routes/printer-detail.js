@@ -6,6 +6,7 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import Loader from "../components/utils/loader";
 import BusyButton from "../components/utils/busy-button";
 import { useMyModal } from "../components/utils/modal";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import Listing from "../components/listings/wrapper";
 import Progress from "../components/printers/progress";
 import WebcamStream from "../components/printers/webcam-stream";
@@ -210,6 +211,7 @@ const PrinterDetail = ({
   if (!printerLoaded) {
     return (
       <div>
+        <SetActiveOrganization />
         <Loader />
       </div>
     );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import Listing from "../components/listings/wrapper";
 import CtaDropdown from "../components/listings/cta-dropdown";
 import {
@@ -162,6 +163,7 @@ class GcodeList extends React.Component {
     return (
       <section className="content">
         <div className="container">
+          <SetActiveOrganization />
           <h1 className="main-title">
             G-Codes
             <Link

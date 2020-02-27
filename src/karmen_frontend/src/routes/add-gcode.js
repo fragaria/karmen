@@ -1,9 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
-
-import { uploadGcode } from "../actions/gcodes";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import BusyButton from "../components/utils/busy-button";
+import { uploadGcode } from "../actions/gcodes";
 
 class AddGcode extends React.Component {
   state = {
@@ -64,67 +64,72 @@ class AddGcode extends React.Component {
       return <Redirect to={`/${match.params.orgslug}/gcodes/${gcodeUuid}`} />;
     }
     return (
-      <div className="content">
-        <div className="container">
-          <h1 className="main-title text-center">Add a G-Code</h1>
+      <>
+        <SetActiveOrganization />
+        <div className="content">
+          <div className="container">
+            <h1 className="main-title text-center">Add a G-Code</h1>
 
-          <form>
-            <div className="input-group">
-              <label htmlFor="file">Select your gcode</label>
-              <input
-                type="file"
-                name="file"
-                onChange={e => {
-                  this.setState({
-                    toUpload: e.target.files[0]
-                  });
-                }}
-              />
-              <span></span>
+            <form>
+              <div className="input-group">
+                <label htmlFor="file">Select your gcode</label>
+                <input
+                  type="file"
+                  name="file"
+                  onChange={e => {
+                    this.setState({
+                      toUpload: e.target.files[0]
+                    });
+                  }}
+                />
+                <span></span>
 
-              <label htmlFor="path">Path (optional)</label>
-              <input
-                type="text"
-                id="path"
-                name="path"
-                value={path}
-                onChange={e =>
-                  this.setState({
-                    path: e.target.value
-                  })
-                }
-              />
-              <span></span>
-            </div>
+                <label htmlFor="path">Path (optional)</label>
+                <input
+                  type="text"
+                  id="path"
+                  name="path"
+                  value={path}
+                  onChange={e =>
+                    this.setState({
+                      path: e.target.value
+                    })
+                  }
+                />
+                <span></span>
+              </div>
 
-            <div className="form-messages">
-              {message && (
-                <p className={messageOk ? "message-success" : "message-error"}>
-                  {message}
-                </p>
-              )}
-            </div>
+              <div className="form-messages">
+                {message && (
+                  <p
+                    className={messageOk ? "message-success" : "message-error"}
+                  >
+                    {message}
+                  </p>
+                )}
+              </div>
 
-            <div className="cta-box text-center">
-              <BusyButton
-                className="btn"
-                type="submit"
-                onClick={this.addCode}
-                busyChildren="Uploading..."
-              >
-                Upload G-Code
-              </BusyButton>{" "}
-              {/* TODO this should actually work as a cancel button and cancel the upload if in progress */}
-              <Link
-                to={`/${match.params.orgslug}/gcodes`}
-                className="btn btn-plain"
-              >
-                Cancel
-              </Link>
-            </div>
-          </form>
+              <div className="cta-box text-center">
+                <BusyButton
+                  className="btn"
+                  type="submit"
+                  onClick={this.addCode}
+                  busyChildren="Uploading..."
+                >
+                  Upload G-Code
+                </BusyButton>{" "}
+                {/* TODO this should actually work as a cancel button and cancel the upload if in progress */}
+                <Link
+                  to={`/${match.params.orgslug}/gcodes`}
+                  className="btn btn-plain"
+                >
+                  Cancel
+                </Link>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 }

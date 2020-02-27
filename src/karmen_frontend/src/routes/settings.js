@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import NetworkScan from "../components/forms/network-scan";
@@ -31,80 +32,85 @@ const Settings = ({
   scanNetwork
 }) => {
   return (
-    <OrgRoleBasedGateway requiredRole="admin">
-      <FreshTokenGateway>
-        <div className="content">
-          <div className="container">
-            <h1 className="main-title">Settings</h1>
-          </div>
-          <Tabs>
-            <TabList>
-              <Tab>Printers</Tab>
-              <Tab>Users</Tab>
-            </TabList>
-            <TabPanel>
-              <div className="container">
-                <div className="react-tabs__tab-panel__header">
-                  <h1 className="react-tabs__tab-panel__header__title">
-                    Printers
-                  </h1>
-                  <Link
-                    to={`/${match.params.orgslug}/add-printer`}
-                    className="btn btn-sm"
-                  >
-                    <span>+ Add a printer</span>
-                  </Link>
-                </div>
-              </div>
-              <PrintersTable
-                orgslug={match.params.orgslug}
-                loadPrinters={loadPrinters}
-                printersList={printersList}
-                printersLoaded={printersLoaded}
-                onPrinterDelete={onPrinterDelete}
-              />
+    <>
+      <SetActiveOrganization />
+      <OrgRoleBasedGateway requiredRole="admin">
+        <FreshTokenGateway>
+          <div className="content">
+            <div className="container">
+              <h1 className="main-title">Settings</h1>
+            </div>
 
-              <div className="container">
-                <br />
-                <br />
-                <strong>Network scan</strong>
-                <NetworkScan
-                  networkInterface={networkInterface}
-                  onNetworkInterfaceChange={onNetworkInterfaceChange}
-                  scanNetwork={scanNetwork}
+            <Tabs>
+              <TabList>
+                <Tab>Printers</Tab>
+                <Tab>Users</Tab>
+              </TabList>
+
+              <TabPanel>
+                <div className="container">
+                  <div className="react-tabs__tab-panel__header">
+                    <h1 className="react-tabs__tab-panel__header__title">
+                      Printers
+                    </h1>
+                    <Link
+                      to={`/${match.params.orgslug}/add-printer`}
+                      className="btn btn-sm"
+                    >
+                      <span>+ Add a printer</span>
+                    </Link>
+                  </div>
+                </div>
+                <PrintersTable
+                  orgslug={match.params.orgslug}
+                  loadPrinters={loadPrinters}
+                  printersList={printersList}
+                  printersLoaded={printersLoaded}
+                  onPrinterDelete={onPrinterDelete}
                 />
-              </div>
-            </TabPanel>
 
-            <TabPanel>
-              <div className="container">
-                <div className="react-tabs__tab-panel__header">
-                  <h1 className="react-tabs__tab-panel__header__title">
-                    Users
-                  </h1>
-                  <Link
-                    to={`/${match.params.orgslug}/add-user`}
-                    className="btn btn-sm"
-                  >
-                    <span>+ Add a user</span>
-                  </Link>
+                <div className="container">
+                  <br />
+                  <br />
+                  <strong>Network scan</strong>
+                  <NetworkScan
+                    networkInterface={networkInterface}
+                    onNetworkInterfaceChange={onNetworkInterfaceChange}
+                    scanNetwork={scanNetwork}
+                  />
                 </div>
-              </div>
+              </TabPanel>
 
-              <UsersTable
-                currentUuid={currentUuid}
-                loadUsers={loadUsers}
-                usersList={usersList}
-                usersLoaded={usersLoaded}
-                onUserDelete={onUserDelete}
-                onUserChange={onUserChange}
-                onResendInvitation={onResendInvitation}
-              />
-            </TabPanel>
-          </Tabs>
-        </div>
-      </FreshTokenGateway>
-    </OrgRoleBasedGateway>
+              <TabPanel>
+                <div className="container">
+                  <div className="react-tabs__tab-panel__header">
+                    <h1 className="react-tabs__tab-panel__header__title">
+                      Users
+                    </h1>
+                    <Link
+                      to={`/${match.params.orgslug}/add-user`}
+                      className="btn btn-sm"
+                    >
+                      <span>+ Add a user</span>
+                    </Link>
+                  </div>
+                </div>
+
+                <UsersTable
+                  currentUuid={currentUuid}
+                  loadUsers={loadUsers}
+                  usersList={usersList}
+                  usersLoaded={usersLoaded}
+                  onUserDelete={onUserDelete}
+                  onUserChange={onUserChange}
+                  onResendInvitation={onResendInvitation}
+                />
+              </TabPanel>
+            </Tabs>
+          </div>
+        </FreshTokenGateway>
+      </OrgRoleBasedGateway>
+    </>
   );
 };
 

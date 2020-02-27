@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import Loader from "../components/utils/loader";
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import { PrinterEditForm } from "../components/forms/printer-edit-form";
@@ -59,6 +59,7 @@ class PrinterSettings extends React.Component {
     if (!printerLoaded) {
       return (
         <div>
+          <SetActiveOrganization />
           <Loader />
         </div>
       );

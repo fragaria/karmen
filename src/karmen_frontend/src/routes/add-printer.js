@@ -1,10 +1,11 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { addPrinter } from "../actions/printers";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import { FormInputs } from "../components/forms/form-utils";
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import BusyButton from "../components/utils/busy-button";
+import { addPrinter } from "../actions/printers";
 
 class AddPrinter extends React.Component {
   state = {
@@ -133,49 +134,54 @@ class AddPrinter extends React.Component {
       return <Redirect to={`/${match.params.orgslug}/printers`} />;
     }
     return (
-      <OrgRoleBasedGateway requiredRole="admin">
-        <div className="content">
-          <div className="container">
-            <h1 className="main-title text-center">Add a new printer</h1>
-            <form>
-              {message && (
-                <p className={messageOk ? "message-success" : "message-error"}>
-                  {message}
-                </p>
-              )}
-              <FormInputs
-                definition={form}
-                updateValue={(name, value) => {
-                  this.setState({
-                    form: Object.assign({}, form, {
-                      [name]: Object.assign({}, form[name], {
-                        val: value,
-                        error: null
+      <>
+        <SetActiveOrganization />
+        <OrgRoleBasedGateway requiredRole="admin">
+          <div className="content">
+            <div className="container">
+              <h1 className="main-title text-center">Add a new printer</h1>
+              <form>
+                {message && (
+                  <p
+                    className={messageOk ? "message-success" : "message-error"}
+                  >
+                    {message}
+                  </p>
+                )}
+                <FormInputs
+                  definition={form}
+                  updateValue={(name, value) => {
+                    this.setState({
+                      form: Object.assign({}, form, {
+                        [name]: Object.assign({}, form[name], {
+                          val: value,
+                          error: null
+                        })
                       })
-                    })
-                  });
-                }}
-              />
-              <div className="cta-box text-center">
-                <BusyButton
-                  className="btn"
-                  type="submit"
-                  onClick={this.addPrinter}
-                  busyChildren="Adding..."
-                >
-                  Add printer
-                </BusyButton>{" "}
-                <Link
-                  to={`/${match.params.orgslug}/printers`}
-                  className="btn btn-plain"
-                >
-                  Cancel
-                </Link>
-              </div>
-            </form>
+                    });
+                  }}
+                />
+                <div className="cta-box text-center">
+                  <BusyButton
+                    className="btn"
+                    type="submit"
+                    onClick={this.addPrinter}
+                    busyChildren="Adding..."
+                  >
+                    Add printer
+                  </BusyButton>{" "}
+                  <Link
+                    to={`/${match.params.orgslug}/printers`}
+                    className="btn btn-plain"
+                  >
+                    Cancel
+                  </Link>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      </OrgRoleBasedGateway>
+        </OrgRoleBasedGateway>
+      </>
     );
   }
 }

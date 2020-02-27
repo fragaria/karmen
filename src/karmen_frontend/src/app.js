@@ -30,7 +30,6 @@ import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
 import ManageOrganizations from "./routes/manage-organizations";
 
-
 import { loadUserFromLocalStorage } from "./actions/users-me";
 
 const ScrollToTop = () => {
@@ -91,6 +90,7 @@ class App extends React.Component {
           <Heartbeat />
           <main className="main">
             <Switch>
+              <Route path="/page-404" exact component={Page404} />
               <UnauthenticatedRoute
                 userState={userState}
                 path="/login"

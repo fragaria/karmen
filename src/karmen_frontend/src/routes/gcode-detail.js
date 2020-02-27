@@ -1,6 +1,7 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import Loader from "../components/utils/loader";
 import BusyButton from "../components/utils/busy-button";
 import { usePrintGcodeModal } from "../components/gcodes/print-gcode-modal";
@@ -81,6 +82,7 @@ class GcodeDetail extends React.Component {
     if (!gcodeLoaded) {
       return (
         <div>
+          <SetActiveOrganization />
           <Loader />
         </div>
       );

@@ -1,12 +1,13 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { addUser } from "../actions/users";
 import { FormInputs } from "../components/forms/form-utils";
+import SetActiveOrganization from "../components/gateways/set-active-organization";
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
 import { isEmail } from "../services/validators";
+import { addUser } from "../actions/users";
 
 class AddUser extends React.Component {
   state = {
@@ -97,59 +98,62 @@ class AddUser extends React.Component {
       return <Redirect to={`/${match.params.orgslug}/settings`} />;
     }
     return (
-      <OrgRoleBasedGateway requiredRole="admin">
-        <FreshTokenGateway>
-          <div className="content">
-            <div className="container">
-              <h1 className="main-title text-center">Add a new user</h1>
-              <form>
-                <FormInputs
-                  definition={form}
-                  updateValue={(name, value) => {
-                    this.setState({
-                      form: Object.assign({}, form, {
-                        [name]: Object.assign({}, form[name], {
-                          val: value,
-                          error: null
+      <>
+        <SetActiveOrganization />
+        <OrgRoleBasedGateway requiredRole="admin">
+          <FreshTokenGateway>
+            <div className="content">
+              <div className="container">
+                <h1 className="main-title text-center">Add a new user</h1>
+                <form>
+                  <FormInputs
+                    definition={form}
+                    updateValue={(name, value) => {
+                      this.setState({
+                        form: Object.assign({}, form, {
+                          [name]: Object.assign({}, form[name], {
+                            val: value,
+                            error: null
+                          })
                         })
-                      })
-                    });
-                  }}
-                />
+                      });
+                    }}
+                  />
 
-                <div className="form-messages">
-                  {message && (
-                    <p
-                      className={
-                        messageOk ? "message-success" : "message-error"
-                      }
+                  <div className="form-messages">
+                    {message && (
+                      <p
+                        className={
+                          messageOk ? "message-success" : "message-error"
+                        }
+                      >
+                        {message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="cta-box text-center">
+                    <BusyButton
+                      className="btn"
+                      type="submit"
+                      onClick={this.addUser}
+                      busyChildren="Adding..."
                     >
-                      {message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="cta-box text-center">
-                  <BusyButton
-                    className="btn"
-                    type="submit"
-                    onClick={this.addUser}
-                    busyChildren="Adding..."
-                  >
-                    Add user
-                  </BusyButton>{" "}
-                  <Link
-                    to={`/${match.params.orgslug}/settings`}
-                    className="btn btn-plain"
-                  >
-                    Cancel
-                  </Link>
-                </div>
-              </form>
+                      Add user
+                    </BusyButton>{" "}
+                    <Link
+                      to={`/${match.params.orgslug}/settings`}
+                      className="btn btn-plain"
+                    >
+                      Cancel
+                    </Link>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        </FreshTokenGateway>
-      </OrgRoleBasedGateway>
+          </FreshTokenGateway>
+        </OrgRoleBasedGateway>
+      </>
     );
   }
 }

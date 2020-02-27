@@ -11,18 +11,13 @@ const ManageOrganizations = () => {
       <div className="container">
         <h1 className="main-title">
           Organizations
-          <Link
-            to={`/`}
-            className="btn btn-sm"
-          >
+          <Link to={`/`} className="btn btn-sm">
             + Create new organization
           </Link>
         </h1>
       </div>
-
     </section>
   );
-}
-
+};
 
 export default ManageOrganizations;
