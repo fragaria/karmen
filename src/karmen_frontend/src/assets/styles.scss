@@ -753,7 +753,7 @@ footer {
 
     @media (min-width: $screen-sm-min) {
       @include plumber(
-        $leading-top: 2,
+        $leading-top: 1,
         $leading-bottom: 1,
         $line-height: 3,
       );

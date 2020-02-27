@@ -1,6 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+
 import { loadUserApiTokens, deleteUserApiToken } from "../actions/users-me";
 import ChangePasswordForm from "../components/forms/change-password-form";
 import ApiTokensTable from "../components/listings/api-tokens-table";
@@ -16,27 +18,51 @@ const UserPreferences = ({
     <FreshTokenGateway>
       <div className="content">
         <div className="container">
-          <h1 className="main-title">
-            API tokens
-            <Link to="/users/me/tokens" className="btn btn-sm">
-              <span>+ Add a token</span>
-            </Link>
-          </h1>
+          <h1 className="main-title">Account Settings</h1>
         </div>
-        <ApiTokensTable
-          loadTokens={loadApiTokens}
-          tokens={apiTokens}
-          tokensLoaded={apiTokensLoaded}
-          onTokenDelete={onTokenDelete}
-        />
-        <div className="container">
-          <h1 className="main-title">Change password</h1>
-          <ChangePasswordForm
-            onUserStateChanged={() => {
-              return loadApiTokens();
-            }}
-          />
-        </div>
+
+        <Tabs>
+          <TabList>
+            <Tab>API tokens</Tab>
+            <Tab>Account</Tab>
+          </TabList>
+
+          <TabPanel>
+            <div className="container">
+              <div className="react-tabs__tab-panel__header">
+                <h1 className="react-tabs__tab-panel__header__title">
+                  API tokens
+                </h1>
+                <Link to="/users/me/tokens" className="btn btn-sm">
+                  <span>+ Add a token</span>
+                </Link>
+              </div>
+            </div>
+
+            <ApiTokensTable
+              loadTokens={loadApiTokens}
+              tokens={apiTokens}
+              tokensLoaded={apiTokensLoaded}
+              onTokenDelete={onTokenDelete}
+            />
+          </TabPanel>
+
+          <TabPanel>
+            <div className="container">
+              <div className="react-tabs__tab-panel__header">
+                <h1 className="react-tabs__tab-panel__header__title">
+                  Change password
+                </h1>
+              </div>
+            </div>
+
+            <ChangePasswordForm
+              onUserStateChanged={() => {
+                return loadApiTokens();
+              }}
+            />
+          </TabPanel>
+        </Tabs>
       </div>
     </FreshTokenGateway>
   );

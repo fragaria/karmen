@@ -47,10 +47,9 @@ const ApiTokensTableRow = ({ token, onTokenDelete }) => {
     <div className="list-item">
       <div className="list-item-content">
         <span className="list-item-title">{token.name}</span>
-        <span className="list-item-subtitle">
-          <span>created on {formatters.datetime(token.created)}</span>
-        </span>
-        <span className="text-mono">{token.jti}</span>
+        <span>created for {token.organization.name}</span>
+        {" "}
+        <span>on {formatters.datetime(token.created)}</span>
       </div>
 
       <div className="list-item-cta">
