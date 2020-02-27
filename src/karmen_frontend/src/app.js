@@ -120,11 +120,13 @@ class App extends React.Component {
                 component={RequestPasswordReset}
               />
               <AuthenticatedRoute
+                userState={userState}
                 path="/users/me"
                 exact
                 component={UserPreferences}
               />
               <AuthenticatedRoute
+                userState={userState}
                 path="/users/me/tokens"
                 exact
                 component={AddApiToken}

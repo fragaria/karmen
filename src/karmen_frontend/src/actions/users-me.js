@@ -164,37 +164,20 @@ export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
 export const loadUserApiTokens = createActionThunk(
   "USER_LOAD_API_TOKENS",
   ({ dispatch, getState }) => {
-    const { users } = getState();
-    // TODO FIXME
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(
-      backend.loadApiTokens,
-      dispatch
-    )(users.me.activeOrganization.uuid);
+    return retryIfUnauthorized(backend.loadApiTokens, dispatch)();
   }
 );
 
 export const addUserApiToken = createActionThunk(
   "USER_ADD_API_TOKEN",
-  (name, { dispatch, getState }) => {
-    const { users } = getState();
-    // TODO FIXME
-    if (!users.me.activeOrganization || !users.me.activeOrganization.uuid) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.addApiToken, dispatch)(
-      users.me.activeOrganization.uuid,
-      name
-    );
+  (orguuid, name, { dispatch, getState }) => {
+    return retryIfUnauthorized(backend.addApiToken, dispatch)(orguuid, name);
   }
 );
 
 export const deleteUserApiToken = createActionThunk(
   "USER_DELETE_API_TOKEN",
   (jti, { dispatch }) => {
-    // TODO FIXME org uuid
     return retryIfUnauthorized(
       backend.deleteApiToken,
       dispatch

@@ -7,25 +7,36 @@ import { addUserApiToken } from "../actions/users-me";
 import BusyButton from "../components/utils/busy-button";
 
 class AddApiToken extends React.Component {
-  state = {
-    showToken: false,
-    createdToken: null,
-    redirect: false,
-    message: null,
-    messageOk: false,
-    form: {
-      name: {
-        name: "Token's name",
-        val: "",
-        type: "text",
-        required: true,
-        error: null
-      }
-    }
-  };
-
   constructor(props) {
     super(props);
+    const { activeOrganization, organizations } = this.props;
+    this.state = {
+      showToken: false,
+      createdToken: null,
+      redirect: false,
+      message: null,
+      messageOk: false,
+      form: {
+        name: {
+          name: "Token's name",
+          val: "",
+          type: "text",
+          required: true,
+          error: null
+        },
+        orguuid: {
+          name: "Organization",
+          val: activeOrganization.uuid,
+          type: "select",
+          required: true,
+          options: Object.values(organizations).map(o => ({
+            val: o.uuid,
+            name: o.name
+          }))
+        }
+      }
+    };
+
     this.addApiToken = this.addApiToken.bind(this);
   }
 
@@ -49,7 +60,7 @@ class AddApiToken extends React.Component {
     });
     const { addApiToken } = this.props;
     if (!hasErrors) {
-      return addApiToken(form.name.val).then(r => {
+      return addApiToken(form.orguuid.val, form.name.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
@@ -179,6 +190,12 @@ class AddApiToken extends React.Component {
   }
 }
 
-export default connect(null, dispatch => ({
-  addApiToken: name => dispatch(addUserApiToken(name))
-}))(AddApiToken);
+export default connect(
+  state => ({
+    activeOrganization: state.users.me.activeOrganization,
+    organizations: state.users.me.organizations
+  }),
+  dispatch => ({
+    addApiToken: (orguuid, name) => dispatch(addUserApiToken(orguuid, name))
+  })
+)(AddApiToken);
