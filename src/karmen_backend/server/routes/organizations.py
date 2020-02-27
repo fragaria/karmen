@@ -2,7 +2,7 @@ import uuid as guid
 from slugify import slugify
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
-from flask_jwt_extended import get_current_user
+from flask_jwt_extended import get_current_user, fresh_jwt_required
 from server import app
 from server.database import organizations
 from . import jwt_force_password_change, validate_org_access
@@ -10,6 +10,7 @@ from . import jwt_force_password_change, validate_org_access
 
 @app.route("/organizations", methods=["POST"])
 @cross_origin()
+@fresh_jwt_required
 @jwt_force_password_change
 def create_organization():
     data = request.json
@@ -33,6 +34,7 @@ def create_organization():
 @app.route("/organizations/<org_uuid>", methods=["PATCH"])
 @cross_origin()
 @validate_org_access("admin")
+@fresh_jwt_required
 @jwt_force_password_change
 def update_organization(org_uuid):
     data = request.json
