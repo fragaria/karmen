@@ -4,7 +4,7 @@ import mock
 import string
 import unittest
 from datetime import datetime
-import uuid as uuidmodule
+import uuid as guid
 from server import app
 from server.database import users, local_users, organizations, api_tokens
 from ..utils import (
@@ -440,7 +440,7 @@ class DeleteUser(unittest.TestCase):
             user = users.get_by_email(email)
             api_tokens.add_token(
                 user_uuid=uuid,
-                jti=uuidmodule.uuid4(),
+                jti=guid.uuid4(),
                 organization_uuid=UUID_ORG,
                 name="jti",
             )

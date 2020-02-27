@@ -1,4 +1,4 @@
-import uuid as uuidmodule
+import uuid as guid
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from server import app, clients
@@ -43,8 +43,8 @@ def printjob_create(org_uuid):
     if not gcode_uuid or not printer_uuid:
         return abort(make_response("", 400))
     try:
-        uuidmodule.UUID(gcode_uuid, version=4)
-        uuidmodule.UUID(printer_uuid, version=4)
+        guid.UUID(gcode_uuid, version=4)
+        guid.UUID(printer_uuid, version=4)
     except (ValueError, AttributeError):
         return abort(make_response("", 400))
     printer = printers.get_printer(printer_uuid)
@@ -64,7 +64,7 @@ def printjob_create(org_uuid):
                     jsonify(message="Cannot upload the g-code to the printer"), 500
                 )
             )
-        printjob_uuid = uuidmodule.uuid4()
+        printjob_uuid = guid.uuid4()
         printjobs.add_printjob(
             uuid=printjob_uuid,
             gcode_uuid=gcode["uuid"],
@@ -112,7 +112,7 @@ def printjobs_list(org_uuid):
         limit = 200
     try:
         start_with = (
-            uuidmodule.UUID(request.args.get("start_with"), version=4)
+            guid.UUID(request.args.get("start_with"), version=4)
             if request.args.get("start_with")
             else None
         )
@@ -168,7 +168,7 @@ def printjobs_list(org_uuid):
 @cross_origin()
 def printjob_detail(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printjob = printjobs.get_printjob(uuid)

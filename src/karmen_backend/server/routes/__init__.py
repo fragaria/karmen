@@ -1,5 +1,5 @@
 import functools
-import uuid as uuidmodule
+import uuid as guid
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_current_user
@@ -18,7 +18,7 @@ def validate_org_access(required_role=None):
         @jwt_required
         def wrap(org_uuid, *args, **kwargs):
             try:
-                uuidmodule.UUID(org_uuid, version=4)
+                guid.UUID(org_uuid, version=4)
             except ValueError:
                 return abort(make_response("", 400))
             user = get_current_user()

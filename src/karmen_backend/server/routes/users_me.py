@@ -1,7 +1,7 @@
 import hashlib
 import bcrypt
 from datetime import datetime, timedelta
-import uuid
+import uuid as guid
 from werkzeug.exceptions import BadRequest, Unauthorized
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -40,7 +40,7 @@ def create_inactive_user():
     if existing and existing["activated"] is not None:
         return abort(make_response("", 202))
 
-    activation_key = uuid.uuid4()
+    activation_key = guid.uuid4()
     activation_key_expires = datetime.now().astimezone() + timedelta(minutes=10)
     # reissue activation_key
     if existing:
@@ -54,7 +54,7 @@ def create_inactive_user():
     # completely new user
     else:
         users.add_user(
-            uuid=uuid.uuid4(),
+            uuid=guid.uuid4(),
             username=email,
             email=email,
             system_role="user",
@@ -138,7 +138,7 @@ def request_password_reset():
     local = local_users.get_local_user(existing["uuid"])
     if not local:
         return abort(make_response("", 400))
-    pwd_reset_key = uuid.uuid4()
+    pwd_reset_key = guid.uuid4()
     pwd_reset_key_expires = datetime.now().astimezone() + timedelta(hours=1)
     local_users.update_local_user(
         user_uuid=existing["uuid"],

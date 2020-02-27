@@ -1,6 +1,6 @@
 import os
 import io
-import uuid as uuidmodule
+import uuid as guid
 import tempfile
 import unittest
 from time import time
@@ -28,7 +28,7 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 5):
             self.gcode_uuids.append(
                 gcodes.add_gcode(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="file%s" % i,
                     display="file-display",
@@ -203,7 +203,7 @@ class ListRoute(unittest.TestCase):
             rand = repr(round(time()))
             gcode_uuids = [
                 gcodes.add_gcode(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="my-unique-filename-%s" % rand,
                     display="file-display",
@@ -213,7 +213,7 @@ class ListRoute(unittest.TestCase):
                     organization_uuid=UUID_ORG,
                 ),
                 gcodes.add_gcode(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="my-unique-filename-%s" % rand,
                     display="file-display",
@@ -250,7 +250,7 @@ class ListRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             gcode_uuids = [
                 gcodes.add_gcode(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="unique-filename with space.gcode",
                     display="file-display",
@@ -260,7 +260,7 @@ class ListRoute(unittest.TestCase):
                     organization_uuid=UUID_ORG,
                 ),
                 gcodes.add_gcode(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="unique-filename with space",
                     display="file-display",
@@ -320,7 +320,7 @@ class ListRoute(unittest.TestCase):
 class DetailRoute(unittest.TestCase):
     def setUp(self):
         self.gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -514,7 +514,7 @@ class CreateRoute(unittest.TestCase):
 class DeleteRoute(unittest.TestCase):
     def test_delete(self):
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="delete-ab/c",
             filename="delete-gcode-specific-file1",
             display="file-display",
@@ -524,7 +524,7 @@ class DeleteRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         printjobs.add_printjob(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             gcode_uuid=gcode_uuid,
             gcode_data={"uuid": gcode_uuid},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -532,7 +532,7 @@ class DeleteRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         printjobs.add_printjob(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             gcode_uuid=gcode_uuid,
             gcode_data={"uuid": gcode_uuid},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -558,7 +558,7 @@ class DeleteRoute(unittest.TestCase):
 
     def test_delete_admin(self):
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="delete-ab/c",
             filename="delete-gcode-specific-file1",
             display="file-display",
@@ -596,7 +596,7 @@ class DeleteRoute(unittest.TestCase):
 
     def test_delete_bad_user(self):
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="delete-ab/c",
             filename="delete-gcode-specific-file1",
             display="file-display",
@@ -615,7 +615,7 @@ class DeleteRoute(unittest.TestCase):
 
     def test_delete_no_token(self):
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="delete-ab/c",
             filename="delete-gcode-specific-file1",
             display="file-display",
@@ -648,7 +648,7 @@ class GetDataRoute(unittest.TestCase):
     def test_download(self):
         mock_file = tempfile.NamedTemporaryFile(delete=False)
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -679,7 +679,7 @@ class GetDataRoute(unittest.TestCase):
 
     def test_get_not_on_disk(self):
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",

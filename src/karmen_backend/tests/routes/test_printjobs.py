@@ -1,6 +1,6 @@
 import unittest
 import mock
-import uuid as uuidmodule
+import uuid as guid
 
 from server import app
 from server.database import gcodes, printjobs, printers
@@ -21,7 +21,7 @@ from ..utils import (
 class ListRoute(unittest.TestCase):
     def setUp(self):
         self.gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -31,7 +31,7 @@ class ListRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         self.gcode_uuid2 = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -44,7 +44,7 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     gcode_uuid=self.gcode_uuid,
                     gcode_data={"uuid": self.gcode_uuid},
                     printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -56,7 +56,7 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    uuid=uuidmodule.uuid4(),
+                    uuid=guid.uuid4(),
                     gcode_uuid=self.gcode_uuid2,
                     gcode_data={"uuid": self.gcode_uuid2},
                     printer_uuid="e24a9711-aabc-48f0-b790-eac056c43f07",
@@ -66,7 +66,7 @@ class ListRoute(unittest.TestCase):
                 )
             )
         printjobs.add_printjob(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             gcode_uuid=self.gcode_uuid2,
             gcode_data={"uuid": self.gcode_uuid2},
             printer_uuid="7e5129ad-08d0-42d1-b65c-847d3c636157",
@@ -318,7 +318,7 @@ class ListRoute(unittest.TestCase):
 class DetailRoute(unittest.TestCase):
     def setUp(self):
         self.gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file1",
             display="file-display",
@@ -328,7 +328,7 @@ class DetailRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         self.printjob_id = printjobs.add_printjob(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             gcode_uuid=self.gcode_uuid,
             gcode_data={"uuid": self.gcode_uuid},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -408,7 +408,7 @@ class DetailRoute(unittest.TestCase):
 class CreateRoute(unittest.TestCase):
     def setUp(self):
         self.gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="a/b/c",
             filename="file",
             display="file-display",

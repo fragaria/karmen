@@ -1,4 +1,4 @@
-import uuid
+import uuid as guid
 
 from server import app, celery
 from server.database import printers
@@ -42,7 +42,7 @@ def sniff_printer(org_uuid, hostname, ip):
     app.logger.info("Sniffing printer on %s (%s) - trying http" % (ip, hostname))
     printer = clients.get_printer_instance(
         {
-            "uuid": uuid.uuid4(),
+            "uuid": guid.uuid4(),
             "organization_uuid": org_uuid,
             "hostname": hostname,
             "ip": ip,

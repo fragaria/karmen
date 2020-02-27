@@ -1,4 +1,4 @@
-import uuid
+import uuid as guid
 from contextlib import contextmanager
 import psycopg2
 from psycopg2 import sql
@@ -14,7 +14,7 @@ def adapt_uuid(uuid):
     return psycopg2.extensions.adapt(str(uuid))
 
 
-psycopg2.extensions.register_adapter(uuid.UUID, adapt_uuid)
+psycopg2.extensions.register_adapter(guid.UUID, adapt_uuid)
 
 
 def connect():

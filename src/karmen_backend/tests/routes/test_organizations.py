@@ -1,4 +1,4 @@
-import uuid as uuidmodule
+import uuid as guid
 import unittest
 import mock
 import random
@@ -116,7 +116,7 @@ class PatchOrganizationRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
             response = c.patch(
-                "/organizations/%s" % uuidmodule.uuid4(),
+                "/organizations/%s" % guid.uuid4(),
                 headers={"x-csrf-token": TOKEN_USER2_CSRF},
                 json={"name": "something"},
             )
@@ -126,7 +126,7 @@ class PatchOrganizationRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.patch(
-                "/organizations/%s" % uuidmodule.uuid4(),
+                "/organizations/%s" % guid.uuid4(),
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
                 json={"name": "something"},
             )

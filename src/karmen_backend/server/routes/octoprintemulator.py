@@ -1,5 +1,5 @@
 import re
-import uuid as uuidmodule
+import uuid as guid
 
 import functools
 
@@ -106,7 +106,7 @@ def upload():
         org_uuid = decoded["user_claims"]["organization_uuid"]
         saved = files.save(org_uuid, incoming, request.form.get("path", ""))
         gcode_id = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path=saved["path"],
             filename=saved["filename"],
             display=saved["display"],

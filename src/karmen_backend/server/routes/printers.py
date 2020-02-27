@@ -4,7 +4,7 @@ import requests
 import redis
 import string
 import time
-import uuid as uuidmodule
+import uuid as guid
 
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
@@ -107,7 +107,7 @@ def printers_list(org_uuid):
 @cross_origin()
 def printer_detail(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
@@ -125,7 +125,7 @@ def printer_create(org_uuid):
     data = request.json
     if not data:
         return abort(make_response("", 400))
-    uuid = uuidmodule.uuid4()
+    uuid = guid.uuid4()
     ip = data.get("ip", None)
     port = data.get("port", None)
     hostname = data.get("hostname", None)
@@ -221,7 +221,7 @@ def printer_create(org_uuid):
 @cross_origin()
 def printer_delete(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -237,7 +237,7 @@ def printer_delete(org_uuid, uuid):
 @cross_origin()
 def printer_patch(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -304,7 +304,7 @@ def printer_patch(org_uuid, uuid):
 def printer_change_connection(org_uuid, uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -346,7 +346,7 @@ def printer_modify_job(org_uuid, uuid):
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -411,7 +411,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
     fine.
     """
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)

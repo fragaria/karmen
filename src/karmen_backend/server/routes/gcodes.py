@@ -1,6 +1,6 @@
 import re
 import datetime
-import uuid as uuidmodule
+import uuid as guid
 
 from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
@@ -62,7 +62,7 @@ def gcodes_list(org_uuid):
         limit = 200
     try:
         start_with = (
-            uuidmodule.UUID(request.args.get("start_with"), version=4)
+            guid.UUID(request.args.get("start_with"), version=4)
             if request.args.get("start_with")
             else None
         )
@@ -119,7 +119,7 @@ def gcodes_list(org_uuid):
 @cross_origin()
 def gcode_detail(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     gcode = gcodes.get_gcode(uuid)
@@ -149,7 +149,7 @@ def gcode_create(org_uuid):
     try:
         saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
         gcode_id = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path=saved["path"],
             filename=saved["filename"],
             display=saved["display"],
@@ -188,7 +188,7 @@ def gcode_create(org_uuid):
 @cross_origin()
 def gcode_file(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     gcode = gcodes.get_gcode(uuid)
@@ -210,7 +210,7 @@ def gcode_file(org_uuid, uuid):
 @cross_origin()
 def gcode_delete(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     gcode = gcodes.get_gcode(uuid)
