@@ -94,6 +94,8 @@ export default (
           pages: newPages
         })
       });
+    case "USER_SWITCH_ORGANIZATION":
+      return Object.assign({}, state, initialListState);
     case "GCODES_CLEAR_PAGES":
       return Object.assign({}, state, initialListState);
     default:

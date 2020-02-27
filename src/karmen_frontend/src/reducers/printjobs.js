@@ -54,6 +54,8 @@ export default (state = {}, action) => {
           limit: action.payload.limit
         })
       });
+    case "USER_SWITCH_ORGANIZATION":
+      return Object.assign({}, state, {});
     case "JOBS_CLEAR_PAGES":
       return Object.assign({}, state, {
         [action.payload.printer]: Object.assign({}, initialListState)

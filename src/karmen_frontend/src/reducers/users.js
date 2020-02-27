@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { persistUserProfile, dropUserProfile } from "../services/backend";
 
-const getUserDataFromApiResponse = data => {
+const getUserDataFromApiResponse = (data, activeOrganization) => {
   return {
     currentState: data.force_pwd_change ? "pwd-change-required" : "logged-in",
     identity: data.identity,
@@ -12,7 +12,8 @@ const getUserDataFromApiResponse = data => {
     accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
     organizations: data.organizations,
     activeOrganization:
-      data.organizations && Object.values(data.organizations)[0] // TODO FIXME
+      activeOrganization ||
+      (data.organizations && Object.values(data.organizations)[0])
   };
 };
 
@@ -49,25 +50,14 @@ export default (
           apiTokensLoaded: false
         }
       });
-    case "USER_SWITCH_ORGANIZATION":
-      if (action.payload.data && state.me.organizations) {
-        const newActiveOrganization = state.me.organizations.find(
-          o => o.uuid === action.payload.data.organizationUuid
-        );
-        if (newActiveOrganization) {
-          return Object.assign({}, state, {
-            me: Object.assign({}, state.me, {
-              activeOrganization: newActiveOrganization
-            })
-          });
-        }
-      }
-      return state;
     case "USER_AUTHENTICATE_FRESH_SUCCEEDED":
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromApiResponse(action.payload.data);
+      userData = getUserDataFromApiResponse(
+        action.payload.data,
+        state.me.activeOrganization
+      );
       persistUserProfile(userData);
       return Object.assign({}, state, {
         me: {
@@ -80,7 +70,10 @@ export default (
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromApiResponse(action.payload.data);
+      userData = getUserDataFromApiResponse(
+        action.payload.data,
+        state.me.activeOrganization
+      );
       persistUserProfile(userData);
       return Object.assign({}, state, {
         me: {
@@ -93,7 +86,10 @@ export default (
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromApiResponse(action.payload.data);
+      userData = getUserDataFromApiResponse(
+        action.payload.data,
+        state.me.activeOrganization
+      );
       persistUserProfile(userData);
       return Object.assign({}, state, {
         me: Object.assign({}, state.me, userData)
@@ -102,7 +98,10 @@ export default (
       if (action.payload.status !== 200) {
         return state;
       }
-      userData = getUserDataFromApiResponse(action.payload.data);
+      userData = getUserDataFromApiResponse(
+        action.payload.data,
+        state.me.activeOrganization
+      );
       persistUserProfile(userData);
       return Object.assign({}, state, {
         me: Object.assign({}, state.me, userData)
@@ -119,9 +118,26 @@ export default (
           email: "",
           systemRole: null,
           apiTokens: [],
-          apiTokensLoaded: false
+          apiTokensLoaded: false,
+          organizations: {},
+          activeOrganization: null
         }
       });
+    case "USER_SWITCH_ORGANIZATION":
+      if (action.payload.data && state.me.organizations) {
+        const newActiveOrganization =
+          state.me.organizations[action.payload.data.slug];
+        if (newActiveOrganization) {
+          return Object.assign({}, state, {
+            me: Object.assign({}, state.me, {
+              activeOrganization: newActiveOrganization
+            }),
+            list: [],
+            listLoaded: false
+          });
+        }
+      }
+      return state;
     case "USER_LOAD_API_TOKENS_SUCCEEDED":
       return Object.assign({}, state, {
         me: Object.assign({}, state.me, {

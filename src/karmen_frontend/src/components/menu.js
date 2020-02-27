@@ -24,7 +24,6 @@ class Menu extends React.Component {
       switchOrganization
     } = this.props;
     const { navigation } = this.state;
-
     const orgList = organizations
       ? Object.values(organizations)
           .map(o => {
@@ -37,7 +36,7 @@ class Menu extends React.Component {
                   className="navigation-user-organization navigation-user-organization-toggle"
                   to={`/${o.slug}`}
                   onClick={() => {
-                    switchOrganization(o.uuid);
+                    switchOrganization(o.uuid, o.slug);
                     this.setState({ navigation: false });
                   }}
                 >
@@ -170,7 +169,8 @@ export default withRouter(
     }),
     dispatch => ({
       logout: () => dispatch(clearUserIdentity()),
-      switchOrganization: orgUuid => dispatch(switchOrganization(orgUuid))
+      switchOrganization: (uuid, slug) =>
+        dispatch(switchOrganization(uuid, slug))
     })
   )(Menu)
 );

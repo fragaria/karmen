@@ -69,12 +69,13 @@ export const loadUserFromLocalStorage = () => dispatch => {
   return Promise.resolve(dispatch(loadUserData(profile)));
 };
 
-export const switchOrganization = organizationUuid => dispatch => {
+export const switchOrganization = (uuid, slug) => dispatch => {
   dispatch({
     type: "USER_SWITCH_ORGANIZATION",
     payload: {
       data: {
-        organizationUuid
+        uuid,
+        slug
       }
     }
   });
@@ -87,6 +88,18 @@ export const loadUserData = userData => dispatch => {
       data: userData
     }
   });
+  if (userData.activeOrganization) {
+    dispatch(
+      switchOrganization(
+        userData.activeOrganization.uuid,
+        userData.activeOrganization.slug
+      )
+    );
+  } else {
+    const org =
+      userData.organizations && Object.values(userData.organizations)[0];
+    dispatch(switchOrganization(org.uuid, org.slug));
+  }
 };
 
 export const authenticate = createActionThunk(

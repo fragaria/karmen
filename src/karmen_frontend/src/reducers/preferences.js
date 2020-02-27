@@ -7,6 +7,7 @@ export default (
 ) => {
   switch (action.type) {
     // TODO persist user preferences in local storage
+    // TODO make preferences org-specific
     case "SET_PRINTER_VIEW":
       return Object.assign({}, state, {
         printerViewType: action.payload.viewType

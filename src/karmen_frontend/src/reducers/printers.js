@@ -10,8 +10,19 @@ const getSortedPrinters = printers => {
   });
 };
 
+const initialState = {
+  activeOrganizationUuid: null,
+  printersLoaded: false,
+  printers: [],
+  images: {},
+  toBeDeleted: [],
+  checkQueue: {},
+  webcamQueue: {}
+};
+
 export default (
   state = {
+    activeOrganizationUuid: null,
     printersLoaded: false,
     printers: [],
     images: {},
@@ -189,6 +200,18 @@ export default (
         [newImage.uuid]: `${newImage.prefix}${newImage.data}`
       });
       return state;
+    case "USER_SWITCH_ORGANIZATION":
+      const { webcamQueue, checkQueue } = state;
+      for (let job in webcamQueue) {
+        clearInterval(job.interval);
+      }
+      for (let job in checkQueue) {
+        clearInterval(job);
+      }
+      // TODO protect the results of the last interval calls
+      return Object.assign({}, initialState, {
+        activeOrganizationUuid: action.payload.data.uuid
+      });
     default:
       return state;
   }
