@@ -127,7 +127,7 @@ class Menu extends React.Component {
                   <li>
                     <Link
                       className="navigation-user-organization navigation-user-organization-toggle"
-                      to="/TODO"
+                      to="/organizations"
                       onClick={() => this.setState({ navigation: false })}
                     >
                       Manage organizations

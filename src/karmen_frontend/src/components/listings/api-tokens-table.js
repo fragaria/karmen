@@ -19,7 +19,7 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
 
           <div className="cta-box text-center">
             <BusyButton
-              className="btn"
+              className="btn btn-sm"
               type="submit"
               onClick={e => {
                 e.preventDefault();

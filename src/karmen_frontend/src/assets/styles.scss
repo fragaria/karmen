@@ -759,10 +759,6 @@ footer {
       );
     }
 
-    &.list-item-message {
-      padding: $base-unit*2;
-      font-weight: bold;
-    }
 
     &.list-item-inverse {
       padding: $base-unit*2;
@@ -773,6 +769,18 @@ footer {
         color: #fff!important;
       }
     }
+  }
+
+  .list-item-message {
+    display: block;
+    padding: 0 $base-unit*2;
+    font-weight: bold;
+    @include plumber(
+      $leading-top: 1,
+      $leading-bottom: 1,
+      $line-height: 3,
+      $font-size: 1.618
+    );
   }
 
   .list-item-illustration {

@@ -28,6 +28,8 @@ import AddGcode from "./routes/add-gcode";
 import AddUser from "./routes/add-user";
 import Settings from "./routes/settings";
 import UserPreferences from "./routes/user-preferences";
+import ManageOrganizations from "./routes/manage-organizations";
+
 
 import { loadUserFromLocalStorage } from "./actions/users-me";
 
@@ -130,6 +132,12 @@ class App extends React.Component {
                 path="/users/me/tokens"
                 exact
                 component={AddApiToken}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/organizations"
+                exact
+                component={ManageOrganizations}
               />
               <AuthenticatedRoute
                 userState={userState}
