@@ -146,11 +146,7 @@ export default (
         })
       });
     case "USER_ADD_API_TOKEN_SUCCEEDED":
-      me.apiTokens.push({
-        jti: action.payload.data.jti,
-        name: action.payload.data.name,
-        created: action.payload.data.created
-      });
+      me.apiTokens.push(action.payload.data);
       return Object.assign({}, state, {
         me: Object.assign({}, state.me, {
           apiTokens: [].concat(me.apiTokens)

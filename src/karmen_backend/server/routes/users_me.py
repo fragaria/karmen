@@ -409,14 +409,15 @@ def create_api_token():
     is_member = organizations.get_organization_role(org_uuid, user["uuid"])
     if not is_member:
         return abort(make_response("", 401))
-
+    organization = organizations.get_by_uuid(org_uuid)
     token = create_access_token(
         identity=user,
         expires_delta=False,
         user_claims={
             "username": user.get("username"),
             "email": user.get("email"),
-            "organization_uuid": org_uuid,
+            "organization_uuid": organization["uuid"],
+            "organization_name": organization["name"],
         },
     )
     jti = decode_token(token)["jti"]
@@ -427,7 +428,7 @@ def create_api_token():
         "access_token": token,
         "name": name,
         "jti": jti,
-        "organization_uuid": org_uuid,
+        "organization": {"uuid": organization["uuid"], "name": organization["name"],},
         "created": datetime.now().isoformat(),
     }
     return jsonify(response), 201

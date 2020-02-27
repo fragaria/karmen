@@ -47,8 +47,7 @@ const ApiTokensTableRow = ({ token, onTokenDelete }) => {
     <div className="list-item">
       <div className="list-item-content">
         <span className="list-item-title">{token.name}</span>
-        <span>created for {token.organization.name}</span>
-        {" "}
+        <span>created for {token.organization.name}</span>{" "}
         <span>on {formatters.datetime(token.created)}</span>
       </div>
 
