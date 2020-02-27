@@ -34,13 +34,14 @@ export const loadUserFromToken = token => dispatch => {
       identity: decoded.identity,
       username: decoded.user_claims && decoded.user_claims.username,
       email: decoded.user_claims && decoded.user_claims.email,
-      // TODO FIXME - need to get org slug based on uuid
-      organizations: [
-        {
+      organizations: {
+        [decoded.user_claims && decoded.user_claims.organization_slug]: {
           role: "user",
-          uuid: decoded.user_claims && decoded.user_claims.organization_uuid
+          uuid: decoded.user_claims && decoded.user_claims.organization_uuid,
+          name: decoded.user_claims && decoded.user_claims.organization_name,
+          slug: decoded.user_claims && decoded.user_claims.organization_slug
         }
-      ],
+      },
       systemRole: "user",
       hasFreshToken: decoded.fresh,
       accessTokenExpiresOn: undefined

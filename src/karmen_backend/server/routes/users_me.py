@@ -418,6 +418,7 @@ def create_api_token():
             "email": user.get("email"),
             "organization_uuid": organization["uuid"],
             "organization_name": organization["name"],
+            "organization_slug": organization["slug"],
         },
     )
     jti = decode_token(token)["jti"]
@@ -428,7 +429,11 @@ def create_api_token():
         "access_token": token,
         "name": name,
         "jti": jti,
-        "organization": {"uuid": organization["uuid"], "name": organization["name"],},
+        "organization": {
+            "uuid": organization["uuid"],
+            "name": organization["name"],
+            "slug": organization["slug"],
+        },
         "created": datetime.now().isoformat(),
     }
     return jsonify(response), 201
