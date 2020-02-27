@@ -32,7 +32,7 @@ export default (
   },
   action
 ) => {
-  const { printers } = state;
+  const { printers, activeOrganizationUuid } = state;
   let newPrinter, origPrinter;
   switch (action.type) {
     case "PRINTERS_POLL_INTERVAL_SET":
@@ -63,6 +63,9 @@ export default (
         })
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
+      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+        return state;
+      }
       newPrinter = action.payload.data;
       if (!newPrinter || newPrinter.message) {
         return state;
@@ -80,6 +83,9 @@ export default (
         printers: getSortedPrinters(printers)
       });
     case "PRINTERS_PATCH_SUCCEEDED":
+      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+        return state;
+      }
       newPrinter = action.payload.data;
       if (!newPrinter) {
         return state;
@@ -153,6 +159,9 @@ export default (
         printers: getSortedPrinters(printers)
       });
     case "PRINTERS_LOAD_SUCCEEDED":
+      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+        return state;
+      }
       if (!action.payload.data || !action.payload.data.items) {
         return Object.assign({}, state, {
           printers: [],
@@ -192,6 +201,9 @@ export default (
         )
       });
     case "PRINTERS_GET_WEBCAM_SNAPSHOT_SUCCEEDED":
+      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+        return state;
+      }
       let newImage = action.payload;
       if (!newImage || newImage.status !== 200) {
         return state;
@@ -208,7 +220,6 @@ export default (
       for (let job in checkQueue) {
         clearInterval(job);
       }
-      // TODO protect the results of the last interval calls
       return Object.assign({}, initialState, {
         activeOrganizationUuid: action.payload.data.uuid
       });

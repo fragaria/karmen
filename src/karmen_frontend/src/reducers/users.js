@@ -17,6 +17,8 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
   };
 };
 
+const _without = (key, { [key]: _, ...obj }) => obj;
+
 export default (
   state = {
     me: {
@@ -42,7 +44,7 @@ export default (
   switch (action.type) {
     case "USER_DATA_LOADED":
       userData = getUserDataFromApiResponse(action.payload.data);
-      persistUserProfile(userData);
+      persistUserProfile(_without("activeOrganization", userData));
       return Object.assign({}, state, {
         me: {
           ...userData,
@@ -58,7 +60,7 @@ export default (
         action.payload.data,
         state.me.activeOrganization
       );
-      persistUserProfile(userData);
+      persistUserProfile(_without("activeOrganization", userData));
       return Object.assign({}, state, {
         me: {
           ...userData,
@@ -74,7 +76,7 @@ export default (
         action.payload.data,
         state.me.activeOrganization
       );
-      persistUserProfile(userData);
+      persistUserProfile(_without("activeOrganization", userData));
       return Object.assign({}, state, {
         me: {
           ...userData,

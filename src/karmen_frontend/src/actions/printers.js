@@ -129,7 +129,11 @@ export const loadPrinters = createActionThunk(
     return retryIfUnauthorized(backend.getPrinters, dispatch)(
       users.me.organizations[orgslug].uuid,
       fields
-    );
+    ).then(data => {
+      return Object.assign(data, {
+        organizationUuid: users.me.organizations[orgslug].uuid
+      });
+    });
   }
 );
 
@@ -144,7 +148,11 @@ export const loadPrinter = createActionThunk(
       users.me.organizations[orgslug].uuid,
       uuid,
       fields
-    );
+    ).then(data => {
+      return Object.assign(data, {
+        organizationUuid: users.me.organizations[orgslug].uuid
+      });
+    });
   }
 );
 
@@ -174,7 +182,11 @@ export const addPrinter = createActionThunk(
       path,
       name,
       apiKey
-    );
+    ).then(data => {
+      return Object.assign(data, {
+        organizationUuid: users.me.organizations[orgslug].uuid
+      });
+    });
   }
 );
 
@@ -189,7 +201,11 @@ export const patchPrinter = createActionThunk(
       users.me.organizations[orgslug].uuid,
       uuid,
       data
-    );
+    ).then(data => {
+      return Object.assign(data, {
+        organizationUuid: users.me.organizations[orgslug].uuid
+      });
+    });
   }
 );
 
@@ -292,7 +308,7 @@ export const setWebcamRefreshInterval = (orgslug, uuid, interval) => (
 export const getWebcamSnapshot = createActionThunk(
   "PRINTERS_GET_WEBCAM_SNAPSHOT",
   (orgslug, uuid, { dispatch, getState }) => {
-    let { printers } = getState();
+    let { printers, users } = getState();
     const printer = printers.printers.find(p => p.uuid === uuid);
     if (!printer || !printer.webcam || !printer.webcam.url) {
       return Promise.resolve({});
@@ -323,12 +339,14 @@ export const getWebcamSnapshot = createActionThunk(
       }
       if (r.data && r.data.prefix && r.data.data) {
         return {
+          organizationUuid: users.me.organizations[orgslug].uuid,
           uuid,
           status: r.status,
           ...r.data
         };
       }
       return {
+        organizationUuid: users.me.organizations[orgslug].uuid,
         uuid,
         status: r.status
       };
