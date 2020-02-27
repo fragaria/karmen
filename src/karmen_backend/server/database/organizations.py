@@ -73,6 +73,38 @@ def get_by_uuid(uuid):
         return data
 
 
+def get_by_slug(slug):
+    with get_connection() as connection:
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute(
+            "SELECT uuid, name, slug, created from organizations where slug = %s",
+            (slug,),
+        )
+        data = cursor.fetchone()
+        cursor.close()
+        return data
+
+
+def add_organization(**kwargs):
+    with get_connection() as connection:
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute(
+            "INSERT INTO organizations (uuid, name, slug) VALUES (%s, %s, %s)",
+            (kwargs["uuid"], kwargs["name"], kwargs["slug"],),
+        )
+        cursor.close()
+
+
+def update_organization(**kwargs):
+    with get_connection() as connection:
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute(
+            "UPDATE organizations SET name = %s, slug = %s WHERE uuid = %s",
+            (kwargs["name"], kwargs["slug"], kwargs["uuid"],),
+        )
+        cursor.close()
+
+
 def get_organizations_by_uuids(uuids):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)

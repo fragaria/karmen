@@ -8,7 +8,7 @@ from server.database import (
     users as db_users,
     local_users as db_local_users,
     api_tokens,
-    organizations,
+    organizations as db_organizations,
 )
 
 
@@ -24,7 +24,7 @@ def validate_org_access(required_role=None):
             user = get_current_user()
             if not user:
                 return abort(make_response("", 401))
-            role = organizations.get_organization_role(org_uuid, user["uuid"])
+            role = db_organizations.get_organization_role(org_uuid, user["uuid"])
             if role is None:
                 return abort(
                     make_response(
@@ -156,6 +156,7 @@ def trigger_error():
 # me has to come before users
 import server.routes.users_me
 import server.routes.octoprintemulator
+import server.routes.organizations
 import server.routes.gcodes
 import server.routes.printers
 import server.routes.printjobs
