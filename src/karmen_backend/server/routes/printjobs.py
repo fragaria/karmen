@@ -1,10 +1,10 @@
 import uuid as guid
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
+from flask_jwt_extended import get_current_user
 from server import app, clients
 from server.database import printjobs, printers, gcodes, users
 from . import jwt_force_password_change, validate_org_access
-from flask_jwt_extended import get_current_user
 
 
 def make_printjob_response(printjob, fields=None, user_mapping=None):

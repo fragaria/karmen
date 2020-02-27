@@ -1,24 +1,18 @@
 import uuid as guid
 import unittest
-import mock
 import random
 import string
 from slugify import slugify
 
 from server import app
 from server.database import organizations
-from ..utils import Response
 from ..utils import (
-    TOKEN_ADMIN,
-    TOKEN_ADMIN_CSRF,
     TOKEN_USER,
     TOKEN_USER_CSRF,
     TOKEN_USER2,
     TOKEN_USER2_CSRF,
     UUID_USER,
     UUID_USER2,
-    UUID_ORG,
-    UUID_ORG2,
 )
 
 

@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2 import sql
 import psycopg2.extras
-from server.database import get_connection, prepare_list_statement
+from server.database import get_connection
 
 FIELDS = [
     "uuid",

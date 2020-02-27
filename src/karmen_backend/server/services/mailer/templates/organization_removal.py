@@ -1,5 +1,5 @@
-from .mail_template import MailTemplate
 from textwrap import dedent
+from .mail_template import MailTemplate
 
 
 class OrganizationRemoval(MailTemplate):

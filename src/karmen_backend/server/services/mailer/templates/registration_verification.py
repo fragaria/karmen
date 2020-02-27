@@ -1,9 +1,9 @@
-from .mail_template import MailTemplate
 import base64
 import json
-
 from textwrap import dedent
+
 from server import app
+from .mail_template import MailTemplate
 
 
 class RegistrationVerification(MailTemplate):

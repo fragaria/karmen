@@ -13,7 +13,6 @@ from ..utils import (
     TOKEN_USER_CSRF,
     TOKEN_USER2,
     TOKEN_USER2_CSRF,
-    UUID_USER,
     UUID_ORG,
     UUID_ORG2,
 )

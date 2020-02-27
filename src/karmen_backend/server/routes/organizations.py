@@ -2,7 +2,7 @@ import uuid as guid
 from slugify import slugify
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
-from flask_jwt_extended import get_jwt_identity, fresh_jwt_required, get_current_user
+from flask_jwt_extended import get_current_user
 from server import app
 from server.database import organizations
 from . import jwt_force_password_change, validate_org_access

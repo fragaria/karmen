@@ -1,6 +1,6 @@
-from .mail_template import MailTemplate
 from textwrap import dedent
 from server import app
+from .mail_template import MailTemplate
 
 
 class OrganizationInvitation(MailTemplate):

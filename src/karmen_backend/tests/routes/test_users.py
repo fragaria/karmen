@@ -1,5 +1,4 @@
 import random
-import math
 import mock
 import string
 import unittest
@@ -16,10 +15,7 @@ from ..utils import (
     TOKEN_ADMIN_NONFRESH_CSRF,
     TOKEN_USER,
     TOKEN_USER_CSRF,
-    TOKEN_USER2,
-    TOKEN_USER2_CSRF,
     UUID_ADMIN,
-    UUID_USER,
     UUID_USER2,
     UUID_ORG,
     UUID_ORG2,

@@ -1,19 +1,16 @@
 import re
 import random
-import requests
-import redis
 import string
-import time
 import uuid as guid
-
+import requests
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
+from flask_jwt_extended import get_current_user
 from server import app, __version__
 from server.database import printers
 from server import clients, executor
 from server.services import network
-from . import jwt_force_password_change, jwt_requires_system_role, validate_org_access
-from flask_jwt_extended import get_current_user
+from . import jwt_force_password_change, validate_org_access
 
 
 def make_printer_response(printer, fields):

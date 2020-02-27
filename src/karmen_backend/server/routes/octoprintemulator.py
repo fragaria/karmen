@@ -5,12 +5,12 @@ import functools
 
 from flask import jsonify, request, abort
 from flask_cors import cross_origin
+from flask_jwt_extended import decode_token
 
 from server import app, __version__
 from server.database import gcodes
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
-from flask_jwt_extended import decode_token
 
 
 def x_api_key_required(func):

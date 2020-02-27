@@ -6,8 +6,6 @@ from server import app
 from server.database import gcodes, printjobs, printers
 from server.clients.utils import PrinterClientException
 from ..utils import (
-    TOKEN_ADMIN,
-    TOKEN_ADMIN_CSRF,
     TOKEN_USER,
     TOKEN_USER_CSRF,
     TOKEN_USER2,

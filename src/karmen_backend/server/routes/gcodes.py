@@ -4,12 +4,12 @@ import uuid as guid
 
 from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
+from flask_jwt_extended import get_current_user
 from server import app, __version__
 from server.database import gcodes, printjobs, users, organizations
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
 from . import jwt_force_password_change, validate_org_access
-from flask_jwt_extended import get_current_user
 
 
 def make_gcode_response(gcode, fields=None, user_mapping=None):

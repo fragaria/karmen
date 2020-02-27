@@ -1,6 +1,5 @@
 import hashlib
 import uuid
-import pytz
 import random
 import string
 import base64

@@ -1,12 +1,10 @@
 import pickle
-import json
-import redis
-from urllib import parse as urlparse
-import requests
 from concurrent.futures import ThreadPoolExecutor
+import redis
+import requests
 
 from server import app
-from server.clients.utils import PrinterClientAccessLevel, PrinterClientException
+from server.clients.utils import PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint
 
 redisinstance = redis.Redis(

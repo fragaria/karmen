@@ -1,7 +1,6 @@
 import psycopg2
 import psycopg2.extras
-from psycopg2 import sql
-from server.database import get_connection, prepare_list_statement
+from server.database import get_connection
 
 
 def get_by_user_uuid(user_uuid):

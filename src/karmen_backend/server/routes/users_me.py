@@ -1,7 +1,7 @@
 import hashlib
-import bcrypt
 from datetime import datetime, timedelta
 import uuid as guid
+import bcrypt
 from werkzeug.exceptions import BadRequest, Unauthorized
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
