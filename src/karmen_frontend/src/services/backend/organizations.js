@@ -13,6 +13,7 @@ export const addOrganization = name => {
     .then(response => {
       if (response.status !== 201) {
         console.error(`Cannot create organization: ${response.status}`);
+        return { status: response.status };
       }
       return response.json().then(data => {
         return { status: response.status, data };

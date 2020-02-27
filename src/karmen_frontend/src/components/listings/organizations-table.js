@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React/*, { useState }*/ from "react";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
 //import CtaDropdown from "../listings/cta-dropdown";
@@ -10,7 +10,7 @@ const OrganizationsTableRow = ({
   onOrganizationDelete,
   onResendInvitation
 }) => {
-  const [ctaListExpanded, setCtaListExpanded] = useState();
+  //const [ctaListExpanded, setCtaListExpanded] = useState();
 
   return (
     <div className="list-item">

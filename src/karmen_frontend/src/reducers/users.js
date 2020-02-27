@@ -199,6 +199,17 @@ export default (
       return Object.assign({}, state, {
         list: [].concat(state.list)
       });
+    case "ORGANIZATIONS_ADD_SUCCEEDED":
+      if (action.payload && action.payload.data && action.payload.data.slug) {
+        return Object.assign({}, state, {
+          me: Object.assign({}, state.me, {
+            organizations: Object.assign({}, state.me.organizations, {
+              [action.payload.data.slug]: action.payload.data
+            })
+          })
+        });
+      }
+      return state;
     case "USERS_CLEAR":
       return Object.assign({}, state, {
         list: []
