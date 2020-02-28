@@ -156,7 +156,6 @@ class App extends React.Component {
               <AuthenticatedRoute
                 userState={userState}
                 path="/:orgslug/settings"
-                exact
                 component={OrganizationSettings}
               />
               <AuthenticatedRoute
