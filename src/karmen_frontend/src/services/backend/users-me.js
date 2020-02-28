@@ -69,7 +69,7 @@ export const changePassword = (
   new_password,
   new_password_confirmation
 ) => {
-  return fetch(`${BASE_URL}/users/me`, {
+  return fetch(`${BASE_URL}/users/me/password`, {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify({

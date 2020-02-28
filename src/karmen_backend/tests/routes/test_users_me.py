@@ -749,7 +749,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_missing_jwt(self):
         with app.test_client() as c:
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 json={
                     "password": "random",
                     "new_password_confirmation": "random",
@@ -762,7 +762,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_NONFRESH)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
                 json={
                     "password": "random",
@@ -776,7 +776,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_EXPIRED)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_EXPIRED_CSRF},
                 json={
                     "password": "admin-password",
@@ -786,31 +786,19 @@ class ChangePasswordRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 401)
 
-    def test_mismatch_token_uuid(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.patch(
-                "users/me",
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "password": "user-password",
-                    "new_password_confirmation": "random",
-                    "new_password": "random",
-                },
-            )
-            self.assertEqual(response.status_code, 401)
-
     def test_no_data(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.patch("users/me", headers={"x-csrf-token": TOKEN_ADMIN_CSRF})
+            response = c.patch(
+                "users/me/password", headers={"x-csrf-token": TOKEN_ADMIN_CSRF}
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_missing_new_password(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"password": "random", "new_password_confirmation": "random"},
             )
@@ -820,7 +808,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"password": "random", "new_password": "random"},
             )
@@ -830,7 +818,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"new_password_confirmation": "random", "new_password": "random"},
             )
@@ -839,7 +827,7 @@ class ChangePasswordRoute(unittest.TestCase):
     def test_missing_auth(self):
         with app.test_client() as c:
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 json={
                     "new_password_confirmation": "random",
                     "new_password": "random",
@@ -852,7 +840,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "new_password_confirmation": "random",
@@ -866,7 +854,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "new_password_confirmation": "random",
@@ -880,7 +868,7 @@ class ChangePasswordRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             change = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={
                     "new_password_confirmation": "random",
@@ -904,7 +892,7 @@ class ChangePasswordRoute(unittest.TestCase):
             c.cookie_jar.clear()
             c.set_cookie("localhost", "access_token_cookie", new_token)
             change_back = c.patch(
-                "users/me",
+                "users/me/password",
                 headers={"x-csrf-token": new_csrf},
                 json={
                     "password": "random",
@@ -913,6 +901,104 @@ class ChangePasswordRoute(unittest.TestCase):
                 },
             )
             self.assertEqual(change_back.status_code, 200)
+
+
+class UpdateUser(unittest.TestCase):
+    def test_missing_jwt(self):
+        with app.test_client() as c:
+            response = c.patch(
+                "users/me", json={"username": "random", "email": "random",},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_nonfresh_jwt(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_NONFRESH)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_NONFRESH_CSRF},
+                json={"username": "random", "email": "random",},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_expired_jwt(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN_EXPIRED)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_EXPIRED_CSRF},
+                json={"username": "admin", "email": "random",},
+            )
+            self.assertEqual(response.status_code, 401)
+
+    def test_missing_username(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"email": "random@random.com",},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_missing_email(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": "random@random.com",},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_bad_email(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": "random@random.com", "email": "not an email"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_change(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": get_random_email(), "email": get_random_email()},
+            )
+            self.assertEqual(response.status_code, 200)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": "test-admin", "email": "test-admin@karmen.local"},
+            )
+            self.assertEqual(response.status_code, 200)
+
+    def test_change_conflict_username(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"username": "test-user", "email": get_random_email()},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_change_conflict_email(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.patch(
+                "users/me",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={
+                    "username": get_random_email(),
+                    "email": "test-user@karmen.local",
+                },
+            )
+            self.assertEqual(response.status_code, 400)
 
 
 class ListApiTokensRoute(unittest.TestCase):
