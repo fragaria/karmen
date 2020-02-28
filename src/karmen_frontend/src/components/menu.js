@@ -41,7 +41,7 @@ class Menu extends React.Component {
                     this.setState({ navigation: false });
                   }}
                 >
-                  Switch to {o.name}
+                  Switch to <strong>{o.name}</strong>
                 </Link>
               </li>
             );

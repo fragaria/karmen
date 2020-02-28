@@ -94,13 +94,13 @@ class PasswordReset extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">Reset Your password</h1>
+          <h2 className="main-subtitle text-center">
+            We will send You an e-mail with password reset link.
+          </h2>
           <form>
             <FormInputs definition={resetForm} updateValue={updateValue} />
 
             <div className="form-messages">
-              <p className="text-center">
-                We will send You an e-mail with password reset link.
-              </p>
 
               {message && (
                 <p
