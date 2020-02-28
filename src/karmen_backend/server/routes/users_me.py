@@ -374,9 +374,6 @@ def patch_user():
     if not data:
         return abort(make_response("", 400))
     username = data.get("username", None)
-    email = data.get("email", "").lstrip().rstrip().lower()
-    if not email or not is_email(email):
-        return abort(make_response("", 400))
     if not username:
         return abort(make_response("", 400))
 
@@ -384,16 +381,12 @@ def patch_user():
     if not user:
         return abort(make_response("", 401))
 
-    existing = users.get_by_email(email)
-    if existing and existing["uuid"] != user["uuid"]:
-        return abort(make_response("", 400))
     existing = users.get_by_username(username)
     if existing and existing["uuid"] != user["uuid"]:
         return abort(make_response("", 400))
 
-    users.update_user(uuid=user["uuid"], email=email, username=username)
+    users.update_user(uuid=user["uuid"], username=username)
     userdata = dict(user)
-    userdata["email"] = email
     userdata["username"] = username
     response = jsonify(get_user_identity(userdata, True))
     return response, 200

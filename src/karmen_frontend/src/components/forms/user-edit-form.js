@@ -20,7 +20,8 @@ class UserEditForm extends React.Component {
           name: "E-mail",
           val: props.email,
           type: "text",
-          required: true
+          required: true,
+          disabled: true
         }
       }
     };
@@ -51,37 +52,27 @@ class UserEditForm extends React.Component {
       });
       return;
     }
-    return patchUser(patchUserForm.username.val, patchUserForm.email.val).then(
-      r => {
-        if (r.status !== 200) {
-          this.setState({
-            messageOk: false,
-            message: "Profile change unsuccessful, try again, please.",
-            patchUserForm: Object.assign({}, patchUserForm, {
-              username: Object.assign({}, patchUserForm.username, {
-                val: username
-              }),
-              email: Object.assign({}, patchUserForm.email, {
-                val: email
-              })
+    return patchUser(patchUserForm.username.val, email).then(r => {
+      if (r.status !== 200) {
+        this.setState({
+          messageOk: false,
+          message: "Profile change unsuccessful, try again, please.",
+          patchUserForm: Object.assign({}, patchUserForm, {
+            username: Object.assign({}, patchUserForm.username, {
+              val: username
+            }),
+            email: Object.assign({}, patchUserForm.email, {
+              val: email
             })
-          });
-        } else {
-          this.setState({
-            message: "Profile changed successfully.",
-            messageOk: true,
-            patchUserForm: Object.assign({}, patchUserForm, {
-              username: Object.assign({}, patchUserForm.username, {
-                val: username
-              }),
-              email: Object.assign({}, patchUserForm.email, {
-                val: email
-              })
-            })
-          });
-        }
+          })
+        });
+      } else {
+        this.setState({
+          message: "Profile changed successfully.",
+          messageOk: true
+        });
       }
-    );
+    });
   }
 
   render() {

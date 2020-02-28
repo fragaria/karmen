@@ -903,7 +903,7 @@ class ChangePasswordRoute(unittest.TestCase):
             self.assertEqual(change_back.status_code, 200)
 
 
-class UpdateUser(unittest.TestCase):
+class PatchUser(unittest.TestCase):
     def test_missing_jwt(self):
         with app.test_client() as c:
             response = c.patch(
@@ -941,39 +941,19 @@ class UpdateUser(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_missing_email(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.patch(
-                "users/me",
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": "random@random.com",},
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_bad_email(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.patch(
-                "users/me",
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": "random@random.com", "email": "not an email"},
-            )
-            self.assertEqual(response.status_code, 400)
-
     def test_change(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
                 "users/me",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": get_random_email(), "email": get_random_email()},
+                json={"username": get_random_email()},
             )
             self.assertEqual(response.status_code, 200)
             response = c.patch(
                 "users/me",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"username": "test-admin", "email": "test-admin@karmen.local"},
+                json={"username": "test-admin"},
             )
             self.assertEqual(response.status_code, 200)
 
@@ -984,19 +964,6 @@ class UpdateUser(unittest.TestCase):
                 "users/me",
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 json={"username": "test-user", "email": get_random_email()},
-            )
-            self.assertEqual(response.status_code, 400)
-
-    def test_change_conflict_email(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-            response = c.patch(
-                "users/me",
-                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={
-                    "username": get_random_email(),
-                    "email": "test-user@karmen.local",
-                },
             )
             self.assertEqual(response.status_code, 400)
 

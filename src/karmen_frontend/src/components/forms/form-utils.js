@@ -13,6 +13,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               id={name}
               name={name}
               value={definition[name].val}
+              disabled={definition[name].disabled}
               onChange={e => updateValue(name, e.target.value)}
             />
             <span>
@@ -30,6 +31,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               id={name}
               name={name}
               value={definition[name].val}
+              disabled={definition[name].disabled}
               onChange={e => updateValue(name, e.target.value)}
             ></textarea>
             <span>
@@ -48,6 +50,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               id={name}
               name={name}
               checked={definition[name].val}
+              disabled={definition[name].disabled}
               onChange={e => updateValue(name, e.target.checked)}
             />
             <span>
@@ -72,6 +75,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               id={name}
               name={name}
               value={definition[name].val}
+              disabled={definition[name].disabled}
               onChange={e => updateValue(name, e.target.value)}
             >
               {opts}
@@ -92,6 +96,7 @@ export const FormInputs = ({ definition, updateValue }) => {
             name={name}
             autoComplete="off"
             className="honeypot-field"
+            disabled={definition[name].disabled}
             onChange={e => updateValue(name, e.target.value)}
           />
         );
