@@ -48,7 +48,7 @@ def update_organization(org_uuid):
         return abort(make_response("", 404))
     slug = slugify(name)
     existing = organizations.get_by_slug(slug)
-    if existing:
+    if existing and existing["uuid"] != org_uuid:
         return abort(make_response("", 409))
     organizations.update_organization(uuid=org_uuid, name=name, slug=slug)
     return jsonify({"uuid": org_uuid, "name": name, "slug": slug,}), 200

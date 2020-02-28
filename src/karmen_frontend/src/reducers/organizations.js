@@ -14,7 +14,9 @@ export default (
         return state;
       }
       return Object.assign({}, state, {
-        list: [].concat(action.payload.data.items),
+        list: []
+          .concat(action.payload.data.items)
+          .sort((o, p) => (o.name < p.name ? -1 : 1)),
         listLoaded: true
       });
     case "ORGANIZATIONS_EDIT_SUCCEEDED":

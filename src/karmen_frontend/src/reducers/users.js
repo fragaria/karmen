@@ -208,6 +208,33 @@ export default (
         });
       }
       return state;
+    case "ORGANIZATIONS_EDIT_SUCCEEDED":
+      let newOrganizations = Object.assign({}, state.me.organizations);
+      const existing = Object.values(state.me.organizations).find(
+        o => o.uuid === action.payload.data.uuid
+      );
+      if (existing) {
+        newOrganizations[action.payload.data.slug] = Object.assign(
+          {},
+          state.me.organizations[existing.slug],
+          action.payload.data
+        );
+        delete newOrganizations[existing.slug];
+      }
+      let newActiveOrganization = state.me.activeOrganization;
+      if (state.me.activeOrganization.uuid === action.payload.data.uuid) {
+        newActiveOrganization = Object.assign(
+          {},
+          state.me.activeOrganization,
+          action.payload.data
+        );
+      }
+      return Object.assign({}, state, {
+        me: Object.assign({}, state.me, {
+          organizations: newOrganizations,
+          activeOrganization: newActiveOrganization
+        })
+      });
     case "USERS_CLEAR":
       return Object.assign({}, state, {
         list: []

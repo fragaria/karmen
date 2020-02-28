@@ -1,7 +1,7 @@
-import React/*, { useState }*/ from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { DebounceInput } from "react-debounce-input";
-//import CtaDropdown from "../listings/cta-dropdown";
+import CtaDropdown from "../listings/cta-dropdown";
 import Sorting from "./sorting";
 
 const OrganizationsTableRow = ({
@@ -10,7 +10,7 @@ const OrganizationsTableRow = ({
   onOrganizationDelete,
   onResendInvitation
 }) => {
-  //const [ctaListExpanded, setCtaListExpanded] = useState();
+  const [ctaListExpanded, setCtaListExpanded] = useState();
 
   return (
     <div className="list-item">
@@ -25,24 +25,21 @@ const OrganizationsTableRow = ({
         </Link>
       </div>
 
-      {/*<CtaDropdown
+      <CtaDropdown
         expanded={ctaListExpanded}
         onToggle={() => {
           setCtaListExpanded(!ctaListExpanded);
         }}
       >
         <span className="list-dropdown-title">{organization.name}</span>
-        <button
+        <Link
           className="list-dropdown-item"
-          onClick={e => {
-            setCtaListExpanded(false);
-            //changeOrganizationRoleModal.openModal(e);
-          }}
+          to={`/organizations/${organization.slug}/settings`}
         >
           <i className="icon-edit"></i>
-          Edit organization
-        </button>
-      </CtaDropdown>*/}
+          Organization Settings
+        </Link>
+      </CtaDropdown>
     </div>
   );
 };
@@ -50,13 +47,13 @@ const OrganizationsTableRow = ({
 class OrganizationsTable extends React.Component {
   state = {
     filter: "",
-    orderBy: "-name"
+    orderBy: "+name"
   };
 
   componentDidMount() {
     // TODO this can be more efficient
     const { loadOrganizations } = this.props;
-    loadOrganizations(["name"]);
+    loadOrganizations();
   }
 
   render() {
@@ -72,9 +69,10 @@ class OrganizationsTable extends React.Component {
       .filter(u => u.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1)
       .sort((u, q) => {
         let result = -1;
-        if (u[orderBy] > q[orderBy]) {
+        let order = orderBy.slice(1);
+        if (u[order] > q[order]) {
           result = 1;
-        } else if (u[orderBy] === q[orderBy]) {
+        } else if (u[order] === q[order]) {
           result = u.uuid > q.uuid ? 1 : -1;
         }
         if (orderBy[0] === "-") {

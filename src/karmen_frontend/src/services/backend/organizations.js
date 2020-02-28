@@ -36,6 +36,7 @@ export const patchOrganization = (uuid, name) => {
     .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot update organization: ${response.status}`);
+        return { status: response.status };
       }
       return response.json().then(data => {
         return { status: response.status, data };
@@ -54,6 +55,7 @@ export const getOrganizations = () => {
     .then(response => {
       if (response.status !== 200) {
         console.error(`Cannot get list of organizations: ${response.status}`);
+        return { status: response.status };
       }
       return response.json().then(data => {
         return { status: response.status, data };

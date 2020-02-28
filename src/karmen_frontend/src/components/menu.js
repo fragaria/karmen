@@ -26,6 +26,7 @@ class Menu extends React.Component {
     const { navigation } = this.state;
     const orgList = organizations
       ? Object.values(organizations)
+          .sort((o, p) => (o.name < p.name ? -1 : 1))
           .map(o => {
             if (activeOrganization && o.uuid === activeOrganization.uuid) {
               return undefined;

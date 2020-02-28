@@ -150,6 +150,23 @@ class PatchOrganizationRoute(unittest.TestCase):
             self.assertEqual(response.json["name"], " %s" % name)
             self.assertEqual(response.json["slug"], slugify(name, lowercase=True))
 
+    def test_org_same_name(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            name = get_random_name()
+            response = c.post(
+                "/organizations",
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={"name": name},
+            )
+            self.assertEqual(response.status_code, 201)
+            response = c.patch(
+                "/organizations/%s" % response.json["uuid"],
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={"name": name},
+            )
+            self.assertEqual(response.status_code, 200)
+
     def test_fail_org_name_conflict(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)

@@ -26,10 +26,11 @@ import AddApiToken from "./routes/add-api-token";
 import AddPrinter from "./routes/add-printer";
 import AddGcode from "./routes/add-gcode";
 import AddUser from "./routes/add-user";
-import Settings from "./routes/settings";
+import OrganizationSettings from "./routes/organization-settings";
 import UserPreferences from "./routes/user-preferences";
 import ManageOrganizations from "./routes/manage-organizations";
 import AddOrganization from "./routes/add-organization";
+import OrganizationProperties from "./routes/organization-properties";
 
 import { loadUserFromLocalStorage } from "./actions/users-me";
 
@@ -142,6 +143,12 @@ class App extends React.Component {
               />
               <AuthenticatedRoute
                 userState={userState}
+                path="/organizations/:orgslug/settings"
+                exact
+                component={OrganizationProperties}
+              />
+              <AuthenticatedRoute
+                userState={userState}
                 path="/add-organization"
                 exact
                 component={AddOrganization}
@@ -150,7 +157,7 @@ class App extends React.Component {
                 userState={userState}
                 path="/:orgslug/settings"
                 exact
-                component={Settings}
+                component={OrganizationSettings}
               />
               <AuthenticatedRoute
                 userState={userState}
