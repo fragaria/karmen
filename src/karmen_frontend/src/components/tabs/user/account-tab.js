@@ -1,10 +1,20 @@
 import React from "react";
 
+import UserEditForm from "../../forms/user-edit-form";
 import ChangePasswordForm from "../../forms/change-password-form";
 
-const Account = ({ loadApiTokens, onUserStateChanged }) => {
+const Account = ({ changePassword, patchUser, username, email }) => {
   return (
     <>
+      <div className="container">
+        <div className="react-tabs__tab-panel__header">
+          <h1 className="react-tabs__tab-panel__header__title">
+            Change profile
+          </h1>
+        </div>
+      </div>
+      <UserEditForm patchUser={patchUser} username={username} email={email} />
+
       <div className="container">
         <div className="react-tabs__tab-panel__header">
           <h1 className="react-tabs__tab-panel__header__title">
@@ -13,11 +23,7 @@ const Account = ({ loadApiTokens, onUserStateChanged }) => {
         </div>
       </div>
 
-      <ChangePasswordForm
-        onUserStateChanged={() => {
-          return loadApiTokens();
-        }}
-      />
+      <ChangePasswordForm changePassword={changePassword} />
     </>
   );
 };

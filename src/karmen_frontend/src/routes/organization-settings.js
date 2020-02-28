@@ -7,8 +7,8 @@ import SetActiveOrganization from "../components/gateways/set-active-organizatio
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 
-import UsersTab from "../components/tabs/settings/users-tab.js";
-import PrintersTab from "../components/tabs/settings/printers-tab.js";
+import UsersTab from "../components/tabs/settings/users-tab";
+import PrintersTab from "../components/tabs/settings/printers-tab";
 
 import { enqueueTask } from "../actions/misc";
 import { setNetworkInterface } from "../actions/preferences";

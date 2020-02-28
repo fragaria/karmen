@@ -4,7 +4,7 @@ import { Redirect } from "react-router-dom";
 import Loader from "../components/utils/loader";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
-import { OrganizationEditForm } from "../components/forms/organization-edit-form";
+import OrganizationEditForm from "../components/forms/organization-edit-form";
 
 import { getOrganizations, patchOrganization } from "../actions/organizations";
 

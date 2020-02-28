@@ -6,7 +6,12 @@ import { RoutedTabs, NavTab } from "react-router-tabs";
 import ApiTokensTab from "../components/tabs/user/api-tokens-tab";
 import AccountTab from "../components/tabs/user/account-tab";
 
-import { loadUserApiTokens, deleteUserApiToken } from "../actions/users-me";
+import {
+  loadUserApiTokens,
+  deleteUserApiToken,
+  changePassword,
+  patchUser
+} from "../actions/users-me";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 
 const UserPreferences = ({ match, ...rest }) => {
@@ -50,10 +55,17 @@ const UserPreferences = ({ match, ...rest }) => {
 export default connect(
   state => ({
     apiTokens: state.users.me.apiTokens,
-    apiTokensLoaded: state.users.me.apiTokensLoaded
+    apiTokensLoaded: state.users.me.apiTokensLoaded,
+    username: state.users.me.username,
+    email: state.users.me.email
   }),
   dispatch => ({
     loadApiTokens: () => dispatch(loadUserApiTokens()),
-    onTokenDelete: jti => dispatch(deleteUserApiToken(jti))
+    onTokenDelete: jti => dispatch(deleteUserApiToken(jti)),
+    changePassword: (password, new_password, new_password_confirmation) =>
+      dispatch(
+        changePassword(password, new_password, new_password_confirmation)
+      ),
+    patchUser: (username, email) => dispatch(patchUser(username, email))
   })
 )(UserPreferences);

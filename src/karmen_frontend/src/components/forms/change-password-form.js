@@ -1,6 +1,4 @@
 import React from "react";
-import { connect } from "react-redux";
-import { changePassword } from "../../actions/users-me";
 import { FormInputs } from "../forms/form-utils";
 import BusyButton from "../utils/busy-button";
 
@@ -37,7 +35,7 @@ class ChangePasswordForm extends React.Component {
   changePwd(e) {
     e.preventDefault();
     const { changePwdForm } = this.state;
-    const { username, doChangePassword } = this.props;
+    const { changePassword } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(changePwdForm)) {
@@ -65,8 +63,7 @@ class ChangePasswordForm extends React.Component {
       });
       return;
     }
-    return doChangePassword(
-      username,
+    return changePassword(
       changePwdForm.password.val,
       changePwdForm.new_password.val,
       changePwdForm.new_password_confirmation.val
@@ -147,24 +144,4 @@ class ChangePasswordForm extends React.Component {
   }
 }
 
-export default connect(
-  state => ({
-    username: state.users.me.username
-  }),
-  dispatch => ({
-    doChangePassword: (
-      username,
-      password,
-      new_password,
-      new_password_confirmation
-    ) =>
-      dispatch(
-        changePassword(
-          username,
-          password,
-          new_password,
-          new_password_confirmation
-        )
-      )
-  })
-)(ChangePasswordForm);
+export default ChangePasswordForm;

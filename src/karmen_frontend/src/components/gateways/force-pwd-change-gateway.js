@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import ChangePasswordForm from "../forms/change-password-form";
+import { changePassword } from "../../actions/users-me";
 import Loader from "../utils/loader";
 
-const ForcePwdChangeGateway = ({ children, userState, onUserStateChanged }) => {
+const ForcePwdChangeGateway = ({ children, userState, changePassword }) => {
   if (!userState || userState === "unknown") {
     return (
       <div>
@@ -18,7 +19,7 @@ const ForcePwdChangeGateway = ({ children, userState, onUserStateChanged }) => {
           <h1 className="main-title text-center">
             Your password needs to be changed
           </h1>
-          <ChangePasswordForm onUserStateChanged={onUserStateChanged} />
+          <ChangePasswordForm changePassword={changePassword} />
         </div>
       </section>
     );
@@ -27,6 +28,14 @@ const ForcePwdChangeGateway = ({ children, userState, onUserStateChanged }) => {
   }
 };
 
-export default connect(state => ({
-  userState: state.users.me.currentState
-}))(ForcePwdChangeGateway);
+export default connect(
+  state => ({
+    userState: state.users.me.currentState
+  }),
+  dispatch => ({
+    changePassword: (password, new_password, new_password_confirmation) =>
+      dispatch(
+        changePassword(password, new_password, new_password_confirmation)
+      )
+  })
+)(ForcePwdChangeGateway);

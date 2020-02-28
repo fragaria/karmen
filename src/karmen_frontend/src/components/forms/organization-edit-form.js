@@ -2,7 +2,7 @@ import React from "react";
 import { FormInputs } from "./form-utils";
 import BusyButton from "../utils/busy-button";
 
-export class OrganizationEditForm extends React.Component {
+class OrganizationEditForm extends React.Component {
   state = {
     initialized: false,
     message: null,
@@ -109,3 +109,5 @@ export class OrganizationEditForm extends React.Component {
     );
   }
 }
+
+export default OrganizationEditForm;

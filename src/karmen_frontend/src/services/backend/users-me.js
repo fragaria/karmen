@@ -64,7 +64,6 @@ export const authenticateFresh = (username, password) => {
 };
 
 export const changePassword = (
-  username,
   password,
   new_password,
   new_password_confirmation
@@ -92,6 +91,33 @@ export const changePassword = (
     })
     .catch(e => {
       console.error(`Cannot change password: ${e}`);
+      return { status: 500 };
+    });
+};
+
+export const patchUser = (username, email) => {
+  return fetch(`${BASE_URL}/users/me`, {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      username,
+      email
+    })
+  })
+    .then(response => {
+      if (response.status !== 200) {
+        console.error(`Cannot change user: ${response.status}`);
+        return { status: response.status };
+      }
+      return response.json().then(data => {
+        return {
+          status: response.status,
+          data
+        };
+      });
+    })
+    .catch(e => {
+      console.error(`Cannot change user: ${e}`);
       return { status: 500 };
     });
 };

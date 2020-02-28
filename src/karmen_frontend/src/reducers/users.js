@@ -94,6 +94,18 @@ export default (
       return Object.assign({}, state, {
         me: Object.assign({}, state.me, userData)
       });
+    case "USER_PATCH_SUCCEEDED":
+      if (action.payload.status !== 200) {
+        return state;
+      }
+      userData = Object.assign({}, state.me, {
+        username: action.payload.data.username,
+        email: action.payload.data.email
+      });
+      persistUserProfile(userData);
+      return Object.assign({}, state, {
+        me: Object.assign({}, state.me, userData)
+      });
     case "USER_CHANGE_PASSWORD_SUCCEEDED":
       if (action.payload.status !== 200) {
         return state;

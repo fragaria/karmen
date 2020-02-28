@@ -126,15 +126,18 @@ export const refreshToken = createActionThunk(
 
 export const changePassword = createActionThunk(
   "USER_CHANGE_PASSWORD",
-  (username, password, new_password, new_password_confirmation) => {
+  (password, new_password, new_password_confirmation) => {
     return backend.changePassword(
-      username,
       password,
       new_password,
       new_password_confirmation
     );
   }
 );
+
+export const patchUser = createActionThunk("USER_PATCH", (username, email) => {
+  return backend.patchUser(username, email);
+});
 
 export const requestPasswordReset = createActionThunk(
   "USER_RESET_PASSWORD_REQUEST",

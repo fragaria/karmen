@@ -2,7 +2,7 @@ import React from "react";
 import { FormInputs } from "./form-utils";
 import BusyButton from "../utils/busy-button";
 
-export class PrinterEditForm extends React.Component {
+class PrinterEditForm extends React.Component {
   state = {
     initialized: false,
     message: null,
@@ -171,3 +171,5 @@ export class PrinterEditForm extends React.Component {
     );
   }
 }
+
+export default PrinterEditForm;
