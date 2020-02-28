@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 
 import Loader from "../components/utils/loader";
 import BusyButton from "../components/utils/busy-button";
@@ -294,30 +293,28 @@ const PrinterDetail = ({
         </div>
 
         <div className="printer-detail-jobs">
-          <Tabs>
-            <TabList>
-              <Tab>Jobs</Tab>
-            </TabList>
+          <div className="react-tabs__tab-list">
+            <span className="react-tabs__tab react-tabs__tab--selected">
+              Jobs
+            </span>
+          </div>
 
-            <TabPanel>
-              <Listing
-                enableFiltering={false}
-                itemList={jobList}
-                loadPage={loadJobsPage}
-                rowFactory={j => {
-                  return (
-                    <PrintJobRow
-                      key={j.uuid}
-                      {...j}
-                      orgslug={match.params.orgslug}
-                    />
-                  );
-                }}
-                sortByColumns={["started"]}
-                clearItemsPages={clearJobsPages}
-              />
-            </TabPanel>
-          </Tabs>
+          <Listing
+            enableFiltering={false}
+            itemList={jobList}
+            loadPage={loadJobsPage}
+            rowFactory={j => {
+              return (
+                <PrintJobRow
+                  key={j.uuid}
+                  {...j}
+                  orgslug={match.params.orgslug}
+                />
+              );
+            }}
+            sortByColumns={["started"]}
+            clearItemsPages={clearJobsPages}
+          />
 
           {role === "admin" && (
             <div className="cta-box text-center">
