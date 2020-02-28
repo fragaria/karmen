@@ -207,17 +207,16 @@ class UsersTable extends React.Component {
       .filter(
         u => u.username.toLowerCase().indexOf(filter.toLowerCase()) !== -1
       )
-      .sort((u, q) => {
-        let result = -1;
-        if (u[orderBy] > q[orderBy]) {
-          result = 1;
-        } else if (u[orderBy] === q[orderBy]) {
-          result = u.uuid > q.uuid ? 1 : -1;
+      .sort((a, b) => {
+        const columnName = orderBy.substring(1);
+        if (a[columnName] === b[columnName]) {
+          return a.uuid > b.uuid ? -1 : 1;
         }
-        if (orderBy[0] === "-") {
-          return -result;
+        if (orderBy[0] === "+") {
+          return a[columnName] < b[columnName] ? -1 : 1;
+        } else {
+          return a[columnName] > b[columnName] ? -1 : 1;
         }
-        return result;
       })
       .map(u => {
         return (

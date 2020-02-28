@@ -126,17 +126,16 @@ class PrintersTable extends React.Component {
     } = this.props;
     const printersRows = printersList
       .filter(p => p.name.indexOf(filter) !== -1)
-      .sort((p, r) => {
-        let result = -1;
-        if (p.name > r.name) {
-          result = 1;
-        } else if (p.name === r.name) {
-          result = p.ip > r.ip ? 1 : -1;
+      .sort((a, b) => {
+        const columnName = orderBy.substring(1);
+        if (a[columnName] === b[columnName]) {
+          return a.uuid > b.uuid ? -1 : 1;
         }
-        if (orderBy === "-name") {
-          return -result;
+        if (orderBy[0] === "+") {
+          return a[columnName] < b[columnName] ? -1 : 1;
+        } else {
+          return a[columnName] > b[columnName] ? -1 : 1;
         }
-        return result;
       })
       .map(p => {
         return (

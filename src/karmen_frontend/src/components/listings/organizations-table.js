@@ -67,18 +67,16 @@ class OrganizationsTable extends React.Component {
     } = this.props;
     const organizationsRows = organizationsList
       .filter(u => u.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1)
-      .sort((u, q) => {
-        let result = -1;
-        let order = orderBy.slice(1);
-        if (u[order] > q[order]) {
-          result = 1;
-        } else if (u[order] === q[order]) {
-          result = u.uuid > q.uuid ? 1 : -1;
+      .sort((a, b) => {
+        const columnName = orderBy.substring(1);
+        if (a[columnName] === b[columnName]) {
+          return a.uuid > b.uuid ? -1 : 1;
         }
-        if (orderBy[0] === "-") {
-          return -result;
+        if (orderBy[0] === "+") {
+          return a[columnName] < b[columnName] ? -1 : 1;
+        } else {
+          return a[columnName] > b[columnName] ? -1 : 1;
         }
-        return result;
       })
       .map(u => {
         return (
