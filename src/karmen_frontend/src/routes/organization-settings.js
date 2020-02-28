@@ -28,8 +28,9 @@ const Settings = ({ match, ...rest }) => {
 
             <RoutedTabs
               startPathWith={match.url}
-              tabClassName="tab-link"
-              activeTabClassName="active"
+              className="react-tabs__tab-list"
+              tabClassName="react-tabs__tab"
+              activeTabClassName="react-tabs__tab--selected"
             >
               <NavTab to="/printers">Printers</NavTab>
               <NavTab to="/users">Users</NavTab>
