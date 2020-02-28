@@ -3,6 +3,15 @@ import psycopg2.extras
 from psycopg2 import sql
 from server.database import get_connection
 
+FIELDS = [
+    "user_uuid",
+    "organization_uuid",
+    "jti",
+    "name",
+    "created",
+    "revoked",
+]
+
 
 def add_token(**kwargs):
     with get_connection() as connection:
@@ -22,10 +31,10 @@ def add_token(**kwargs):
 def get_token(jti):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute(
-            "SELECT user_uuid, organization_uuid, jti, created, name, revoked from api_tokens where jti = %s",
-            (jti,),
+        query = sql.SQL("SELECT {} from api_tokens where jti = {}").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]), sql.Literal(jti),
         )
+        cursor.execute(query)
         data = cursor.fetchone()
         cursor.close()
         return data
@@ -51,9 +60,10 @@ def revoke_all_tokens(user_uuid, organization_uuid):
 def get_tokens_for_user_uuid(user_uuid, revoked=None, org_uuid=None):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        statement = sql.SQL(
-            "SELECT user_uuid, organization_uuid, jti, created, name, revoked from api_tokens where user_uuid = {}"
-        ).format(sql.Placeholder())
+        statement = sql.SQL("SELECT {} from api_tokens where user_uuid = {}").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]),
+            sql.Literal(user_uuid),
+        )
         if revoked is not None:
             statement = sql.SQL(" ").join(
                 [statement, sql.SQL("AND revoked = {}").format(sql.Literal(revoked))]
@@ -65,7 +75,7 @@ def get_tokens_for_user_uuid(user_uuid, revoked=None, org_uuid=None):
                     sql.SQL("AND organization_uuid = {}").format(sql.Literal(org_uuid)),
                 ]
             )
-        cursor.execute(statement, (user_uuid,))
+        cursor.execute(statement)
         data = cursor.fetchall()
         cursor.close()
         return data
