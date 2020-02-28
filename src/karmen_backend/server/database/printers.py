@@ -3,6 +3,21 @@ from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection
 
+FIELDS = [
+    "uuid",
+    "organization_uuid",
+    "name",
+    "hostname",
+    "ip",
+    "port",
+    "path",
+    "client",
+    "protocol",
+    "client_props",
+    "printer_props",
+    "token",
+]
+
 
 def add_printer(**kwargs):
     with get_connection() as connection:
@@ -31,31 +46,13 @@ def update_printer(**kwargs):
     if kwargs.get("uuid") is None:
         raise ValueError("Missing uuid in kwargs")
     updates = []
-    for field in [
-        "name",
-        "organization_uuid",
-        "hostname",
-        "ip",
-        "port",
-        "path",
-        "client",
-        "protocol",
-        "uuid",
-    ]:
+    for field in FIELDS:
         if field in kwargs:
+            data = kwargs[field]
+            if field in ["client_props", "printer_props"]:
+                data = psycopg2.extras.Json(kwargs[field])
             updates.append(
-                sql.SQL("{} = {}").format(
-                    sql.Identifier(field), sql.Literal(kwargs[field])
-                )
-            )
-
-    for field in ["client_props", "printer_props"]:
-        if field in kwargs:
-            updates.append(
-                sql.SQL("{} = {}").format(
-                    sql.Identifier(field),
-                    sql.Literal(psycopg2.extras.Json(kwargs[field])),
-                )
+                sql.SQL("{} = {}").format(sql.Identifier(field), sql.Literal(data))
             )
     query = sql.SQL("UPDATE printers SET {} where uuid = {}").format(
         sql.SQL(", ").join(updates), sql.Literal(kwargs["uuid"])
@@ -68,8 +65,8 @@ def update_printer(**kwargs):
 
 def get_printers(organization_uuid=None):
     with get_connection() as connection:
-        query = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol FROM printers"
+        query = sql.SQL("SELECT {} from printers").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS])
         )
         if organization_uuid:
             query = sql.SQL(" ").join(
@@ -90,10 +87,10 @@ def get_printers(organization_uuid=None):
 def get_printer(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol FROM printers where uuid = %s",
-            (uuid,),
+        query = sql.SQL("SELECT {} from printers where uuid = {}").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]), sql.Literal(uuid)
         )
+        cursor.execute(query)
         data = cursor.fetchone()
         cursor.close()
         return data
@@ -108,9 +105,8 @@ def get_printer_by_network_props(org_uuid, hostname, ip, port, path):
 
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-        basequery = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol FROM printers WHERE"
+        basequery = sql.SQL("SELECT {} from printers WHERE").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS])
         )
         query = sql.SQL(" ").join(
             [
@@ -136,11 +132,13 @@ def get_printer_by_socket_token(org_uuid, token):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         query = sql.SQL(
-            "SELECT uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol "
-            "FROM printers "
-            "WHERE protocol = 'sock' AND organization_uuid = %s AND token = %s"
+            "SELECT {} from printers WHERE protocol = 'sock' AND organization_uuid = {} AND token = {}"
+        ).format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]),
+            sql.Literal(org_uuid),
+            sql.Literal(token),
         )
-        cursor.execute(query, (org_uuid, token))
+        cursor.execute(query)
         data = cursor.fetchone()
         cursor.close()
         return data

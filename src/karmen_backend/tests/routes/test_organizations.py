@@ -5,7 +5,7 @@ import string
 from slugify import slugify
 
 from server import app
-from server.database import organizations
+from server.database import organization_roles
 from ..utils import (
     TOKEN_USER,
     TOKEN_USER_CSRF,
@@ -221,7 +221,7 @@ class ListOrganizationsRoute(unittest.TestCase):
             self.assertTrue("items" in response.json)
             self.assertTrue(
                 len(response.json["items"])
-                <= len(organizations.get_by_user_uuid(UUID_USER2))
+                <= len(organization_roles.get_by_user_uuid(UUID_USER2))
             )
 
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
@@ -232,5 +232,5 @@ class ListOrganizationsRoute(unittest.TestCase):
             self.assertTrue("items" in response.json)
             self.assertTrue(
                 len(response.json["items"])
-                <= len(organizations.get_by_user_uuid(UUID_USER))
+                <= len(organization_roles.get_by_user_uuid(UUID_USER))
             )

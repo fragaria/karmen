@@ -6,7 +6,7 @@ from flask import jsonify, request, abort, send_file, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
 from server import app, __version__
-from server.database import gcodes, printjobs, users, organizations
+from server.database import gcodes, printjobs, users, organizations, organization_roles
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
 from . import jwt_force_password_change, validate_org_access
@@ -217,7 +217,7 @@ def gcode_delete(org_uuid, uuid):
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
     user = get_current_user()
-    org_role = organizations.get_organization_role(org_uuid, user["uuid"])
+    org_role = organization_roles.get_organization_role(org_uuid, user["uuid"])
     if (
         user["uuid"] != gcode["user_uuid"]
         and user["system_role"] != "admin"

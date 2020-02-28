@@ -5,7 +5,7 @@ import unittest
 from datetime import datetime
 import uuid as guid
 from server import app
-from server.database import users, local_users, organizations, api_tokens
+from server.database import users, local_users, organization_roles, api_tokens
 from ..utils import (
     TOKEN_ADMIN_EXPIRED,
     TOKEN_ADMIN_EXPIRED_CSRF,
@@ -160,7 +160,7 @@ class CreateUserInOrganizationRoute(unittest.TestCase):
             self.assertTrue(args[0][0][2]["organization_name"] is not None)
             self.assertTrue(args[0][0][2]["organization_uuid"] is not None)
             self.assertEqual(args[0][0][2]["email"], email)
-            orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            orgrole = organization_roles.get_organization_role(UUID_ORG, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
 
     @mock.patch("server.tasks.send_mail.send_mail.delay")
@@ -208,7 +208,7 @@ class CreateUserInOrganizationRoute(unittest.TestCase):
             self.assertTrue(args[0][0][2]["organization_name"] is not None)
             self.assertTrue(args[0][0][2]["organization_uuid"] == UUID_ORG)
             self.assertEqual(args[0][0][2]["email"], email)
-            orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            orgrole = organization_roles.get_organization_role(UUID_ORG, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
@@ -224,7 +224,7 @@ class CreateUserInOrganizationRoute(unittest.TestCase):
             self.assertTrue(args[1][0][2]["organization_name"] is not None)
             self.assertTrue(args[1][0][2]["organization_uuid"] == UUID_ORG2)
             self.assertEqual(args[1][0][2]["email"], email)
-            orgrole = organizations.get_organization_role(UUID_ORG2, user["uuid"])
+            orgrole = organization_roles.get_organization_role(UUID_ORG2, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
 
     @mock.patch("server.tasks.send_mail.send_mail.delay")
@@ -248,7 +248,7 @@ class CreateUserInOrganizationRoute(unittest.TestCase):
             self.assertTrue(args[0][0][2]["organization_name"] is not None)
             self.assertTrue(args[0][0][2]["organization_uuid"] == UUID_ORG)
             self.assertEqual(args[0][0][2]["email"], email)
-            orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            orgrole = organization_roles.get_organization_role(UUID_ORG, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
             # fake activate
             users.update_user(uuid=user["uuid"], activated=datetime.now())
@@ -267,7 +267,7 @@ class CreateUserInOrganizationRoute(unittest.TestCase):
             self.assertTrue(args[1][0][2]["organization_name"] is not None)
             self.assertTrue(args[1][0][2]["organization_uuid"] == UUID_ORG2)
             self.assertEqual(args[1][0][2]["email"], email)
-            orgrole = organizations.get_organization_role(UUID_ORG2, user["uuid"])
+            orgrole = organization_roles.get_organization_role(UUID_ORG2, user["uuid"])
             self.assertTrue(orgrole["role"], "user")
 
 
@@ -350,7 +350,7 @@ class UpdateUserRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("role" in response.json)
             self.assertEqual(response.json["role"], "admin")
-            user = organizations.get_organization_role(UUID_ORG, self.uuid)
+            user = organization_roles.get_organization_role(UUID_ORG, self.uuid)
             self.assertTrue(user is not None)
             self.assertEqual(user["role"], "admin")
 
@@ -446,7 +446,7 @@ class DeleteUser(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 204)
-            orgrole = organizations.get_organization_role(UUID_ORG, user["uuid"])
+            orgrole = organization_roles.get_organization_role(UUID_ORG, user["uuid"])
             tokens = api_tokens.get_tokens_for_user_uuid(
                 user["uuid"], org_uuid=UUID_ORG
             )

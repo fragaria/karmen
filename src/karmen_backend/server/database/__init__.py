@@ -75,12 +75,12 @@ def prepare_list_statement(
         if order_by:
             cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
             statement = sql.SQL("SELECT {} FROM {} where {} = {}").format(
-                sql.SQL(", ").join([sql.Identifier(c) for c in columns]),
+                sql.Identifier(order_by_column),
                 sql.Identifier(tablename),
                 sql.Identifier(pk_column),
-                sql.Placeholder(),
+                sql.Literal(start_with),
             )
-            cursor.execute(statement.as_string(connection), (start_with,))
+            cursor.execute(statement)
             data = cursor.fetchone()
             cursor.close()
             where_clause.append(
@@ -92,8 +92,10 @@ def prepare_list_statement(
             )
         else:
             where_clause.append(
-                sql.SQL("{} >= {}").format(
-                    sql.Identifier(pk_column), sql.Literal(start_with)
+                sql.SQL("{} {} {}").format(
+                    sql.Identifier(pk_column),
+                    sql.SQL("<=" if order_by_direction == "DESC" else ">="),
+                    sql.Literal(start_with),
                 )
             )
 
@@ -118,7 +120,7 @@ def prepare_list_statement(
         else:
             where_clause.append(where)
 
-    if limit:
+    if limit and limit != "all":
         limit_clause = sql.SQL(" ").join(
             [sql.SQL("limit"), sql.Literal(int(limit + 1))]
         )

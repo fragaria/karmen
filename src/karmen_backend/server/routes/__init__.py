@@ -8,7 +8,7 @@ from server.database import (
     users as db_users,
     local_users as db_local_users,
     api_tokens,
-    organizations as db_organizations,
+    organization_roles,
 )
 
 
@@ -24,7 +24,7 @@ def validate_org_access(required_role=None):
             user = get_current_user()
             if not user:
                 return abort(make_response("", 401))
-            role = db_organizations.get_organization_role(org_uuid, user["uuid"])
+            role = organization_roles.get_organization_role(org_uuid, user["uuid"])
             if role is None:
                 return abort(
                     make_response(

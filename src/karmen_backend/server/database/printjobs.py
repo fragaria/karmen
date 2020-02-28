@@ -3,24 +3,25 @@ from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
 
+FIELDS = [
+    "uuid",
+    "gcode_uuid",
+    "organization_uuid",
+    "printer_uuid",
+    "started",
+    "gcode_data",
+    "printer_data",
+    "user_uuid",
+]
+
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
 def get_printjobs(org_uuid, order_by=None, limit=None, start_with=None, filter=None):
-    columns = [
-        "uuid",
-        "gcode_uuid",
-        "organization_uuid",
-        "printer_uuid",
-        "started",
-        "gcode_data",
-        "printer_data",
-        "user_uuid",
-    ]
     with get_connection() as connection:
         statement = prepare_list_statement(
             connection,
             "printjobs",
-            columns,
+            FIELDS,
             order_by=order_by,
             limit=limit,
             start_with=start_with,
@@ -38,10 +39,10 @@ def get_printjobs(org_uuid, order_by=None, limit=None, start_with=None, filter=N
 def get_printjob(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute(
-            "SELECT uuid, gcode_uuid, organization_uuid, printer_uuid, started, gcode_data, printer_data, user_uuid from printjobs where uuid = %s",
-            (uuid,),
+        query = sql.SQL("SELECT {} from printjobs where uuid = {}").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]), sql.Literal(uuid),
         )
+        cursor.execute(query)
         data = cursor.fetchone()
         cursor.close()
         return data

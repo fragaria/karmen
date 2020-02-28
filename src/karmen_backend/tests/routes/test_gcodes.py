@@ -577,7 +577,7 @@ class DeleteRoute(unittest.TestCase):
 
     def test_delete_org_admin(self):
         gcode_uuid = gcodes.add_gcode(
-            uuid=uuidmodule.uuid4(),
+            uuid=guid.uuid4(),
             path="delete-ab/c",
             filename="delete-gcode-specific-file1",
             display="file-display",

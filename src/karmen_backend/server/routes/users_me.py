@@ -19,7 +19,13 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 from server import app
-from server.database import users, local_users, api_tokens, organizations
+from server.database import (
+    users,
+    local_users,
+    api_tokens,
+    organizations,
+    organization_roles,
+)
 from server.services.validators import is_email
 from server.tasks.send_mail import send_mail
 
@@ -207,7 +213,7 @@ def reset_password():
 
 def get_user_identity(userdata, token_freshness):
     membership = {}
-    for org in organizations.get_by_user_uuid(userdata.get("uuid")):
+    for org in organization_roles.get_by_user_uuid(userdata.get("uuid")):
         membership[org.get("slug")] = {
             "uuid": org.get("uuid"),
             "name": org.get("name"),
@@ -406,7 +412,7 @@ def create_api_token():
     user = get_current_user()
     if not user:
         return abort(make_response("", 401))
-    is_member = organizations.get_organization_role(org_uuid, user["uuid"])
+    is_member = organization_roles.get_organization_role(org_uuid, user["uuid"])
     if not is_member:
         return abort(make_response("", 401))
     organization = organizations.get_by_uuid(org_uuid)

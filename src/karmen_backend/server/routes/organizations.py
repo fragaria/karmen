@@ -4,7 +4,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user, fresh_jwt_required
 from server import app
-from server.database import organizations
+from server.database import organizations, organization_roles
 from . import jwt_force_password_change, validate_org_access
 
 
@@ -27,7 +27,7 @@ def create_organization():
         return abort(make_response("", 409))
 
     organizations.add_organization(uuid=uuid, name=name, slug=slug)
-    organizations.set_organization_role(uuid, user["uuid"], "admin")
+    organization_roles.set_organization_role(uuid, user["uuid"], "admin")
     return jsonify({"uuid": uuid, "name": name, "slug": slug,}), 201
 
 
@@ -60,7 +60,7 @@ def update_organization(org_uuid):
 def list_organizations():
     user = get_current_user()
     item_list = []
-    for org in organizations.get_by_user_uuid(user["uuid"]):
+    for org in organization_roles.get_by_user_uuid(user["uuid"]):
         item_list.append(
             {
                 "uuid": org["uuid"],

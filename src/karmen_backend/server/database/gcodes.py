@@ -3,26 +3,27 @@ from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
 
+FIELDS = [
+    "uuid",
+    "path",
+    "filename",
+    "display",
+    "organization_uuid",
+    "absolute_path",
+    "uploaded",
+    "size",
+    "analysis",
+    "user_uuid",
+]
+
 # This intentionally selects limit+1 results in order to properly determine next start_with for pagination
 # Take that into account when processing results
 def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None):
-    columns = [
-        "uuid",
-        "path",
-        "filename",
-        "display",
-        "organization_uuid",
-        "absolute_path",
-        "uploaded",
-        "size",
-        "analysis",
-        "user_uuid",
-    ]
     with get_connection() as connection:
         statement = prepare_list_statement(
             connection,
             "gcodes",
-            columns,
+            FIELDS,
             order_by=order_by,
             limit=limit,
             start_with=start_with,
@@ -40,10 +41,10 @@ def get_gcodes(org_uuid, order_by=None, limit=None, start_with=None, filter=None
 def get_gcode(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute(
-            "SELECT uuid, path, filename, display, absolute_path, uploaded, size, analysis, user_uuid, organization_uuid from gcodes where uuid = %s",
-            (uuid,),
+        query = sql.SQL("SELECT {} from gcodes where uuid = {}").format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]), sql.Literal(uuid),
         )
+        cursor.execute(query)
         data = cursor.fetchone()
         cursor.close()
         return data

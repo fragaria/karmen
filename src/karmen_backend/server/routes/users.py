@@ -5,7 +5,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_jwt_identity, fresh_jwt_required, get_current_user
 from server import app
-from server.database import users, organizations, api_tokens
+from server.database import users, organizations, api_tokens, organization_roles
 from server.services.validators import is_email
 from server.tasks.send_mail import send_mail
 from . import jwt_force_password_change, validate_org_access
@@ -51,7 +51,7 @@ def add_user_to_org(org_uuid):
         user_uuid = existing.get("uuid", None)
         # an activated account that already has a role in this organization
         if (
-            organizations.get_organization_role(org_uuid, user_uuid)
+            organization_roles.get_organization_role(org_uuid, user_uuid)
             and existing["activated"]
         ):
             return abort(make_response("", 409))
@@ -67,7 +67,7 @@ def add_user_to_org(org_uuid):
         )
 
     organization = organizations.get_by_uuid(org_uuid)
-    organizations.set_organization_role(org_uuid, user_uuid, org_role)
+    organization_roles.set_organization_role(org_uuid, user_uuid, org_role)
     if existing is None or existing["activated"] is None:
         send_mail.delay(
             [email],
@@ -114,7 +114,7 @@ def update_user(org_uuid, uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
         return abort(make_response("", 409))
-    user_role = organizations.get_organization_role(org_uuid, uuid)
+    user_role = organization_roles.get_organization_role(org_uuid, uuid)
     user = users.get_by_uuid(uuid)
     if user is None or user_role is None:
         return abort(make_response("", 404))
@@ -127,7 +127,7 @@ def update_user(org_uuid, uuid):
     if role not in ["admin", "user"]:
         return abort(make_response("", 400))
 
-    organizations.set_organization_role(org_uuid, uuid, role)
+    organization_roles.set_organization_role(org_uuid, uuid, role)
     return (
         jsonify(
             {
@@ -150,13 +150,13 @@ def delete_user(org_uuid, uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
         return abort(make_response("", 409))
-    user_role = organizations.get_organization_role(org_uuid, uuid)
+    user_role = organization_roles.get_organization_role(org_uuid, uuid)
     user = users.get_by_uuid(uuid)
     if user is None or user_role is None:
         return abort(make_response("", 404))
     organization = organizations.get_by_uuid(org_uuid)
     api_tokens.revoke_all_tokens(uuid, org_uuid)
-    organizations.drop_organization_role(org_uuid, uuid)
+    organization_roles.drop_organization_role(org_uuid, uuid)
     send_mail.delay(
         [user["email"]],
         "ORGANIZATION_REMOVAL",
@@ -177,7 +177,7 @@ def delete_user(org_uuid, uuid):
 @jwt_force_password_change
 def list_users(org_uuid):
     user_list = []
-    users_record_set = organizations.get_all_users(org_uuid)
+    users_record_set = organization_roles.get_all_users(org_uuid)
     response = {"items": user_list}
     users_metadata = {
         u["uuid"]: u
