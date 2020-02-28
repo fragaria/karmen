@@ -13,7 +13,11 @@ const SetActiveOrganization = ({
     if (!organizations[match.params.orgslug]) {
       return <Redirect to="/page-404" />;
     }
-    if (activeOrganization.slug !== match.params.orgslug) {
+    // This should be catching a situation after direct URL access
+    if (
+      !activeOrganization ||
+      activeOrganization.slug !== match.params.orgslug
+    ) {
       switchOrganization(
         organizations[match.params.orgslug].uuid,
         match.params.orgslug

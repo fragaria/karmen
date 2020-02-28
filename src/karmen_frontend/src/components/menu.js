@@ -27,7 +27,7 @@ class Menu extends React.Component {
     const orgList = organizations
       ? Object.values(organizations)
           .map(o => {
-            if (o.uuid === activeOrganization.uuid) {
+            if (activeOrganization && o.uuid === activeOrganization.uuid) {
               return undefined;
             }
             return (
