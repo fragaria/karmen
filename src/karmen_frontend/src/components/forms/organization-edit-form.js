@@ -66,7 +66,6 @@ export class OrganizationEditForm extends React.Component {
         });
       })
       .catch(e => {
-        console.log(e);
         this.setState({
           message: e.toString(),
           messageOk: false

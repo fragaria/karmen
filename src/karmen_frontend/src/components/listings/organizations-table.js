@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { DebounceInput } from "react-debounce-input";
 import CtaDropdown from "../listings/cta-dropdown";
-import Sorting from "./sorting";
+import NoPaginationListing from "./no-pagination-wrapper";
 
 const OrganizationsTableRow = ({
   organization,
@@ -44,41 +43,24 @@ const OrganizationsTableRow = ({
   );
 };
 
-class OrganizationsTable extends React.Component {
-  state = {
-    filter: "",
-    orderBy: "+name"
-  };
-
-  componentDidMount() {
-    // TODO this can be more efficient
-    const { loadOrganizations } = this.props;
-    loadOrganizations();
-  }
-
-  render() {
-    const { filter, orderBy } = this.state;
-    const {
-      organizationsLoaded,
-      organizationsList,
-      onOrganizationChange,
-      onOrganizationDelete,
-      onResendInvitation
-    } = this.props;
-    const organizationsRows = organizationsList
-      .filter(u => u.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1)
-      .sort((a, b) => {
-        const columnName = orderBy.substring(1);
-        if (a[columnName] === b[columnName]) {
-          return a.uuid > b.uuid ? -1 : 1;
-        }
-        if (orderBy[0] === "+") {
-          return a[columnName] < b[columnName] ? -1 : 1;
-        } else {
-          return a[columnName] > b[columnName] ? -1 : 1;
-        }
-      })
-      .map(u => {
+const OrganizationsTable = ({
+  loadOrganizations,
+  organizationsLoaded,
+  organizationsList,
+  onOrganizationChange,
+  onOrganizationDelete,
+  onResendInvitation
+}) => {
+  return (
+    <NoPaginationListing
+      defaultOrderBy="+name"
+      loadItems={loadOrganizations}
+      itemsLoaded={organizationsLoaded}
+      items={organizationsList}
+      enableFiltering={true}
+      sortByColumns={["name"]}
+      filterByColumns={["name"]}
+      rowFactory={u => {
         return (
           <OrganizationsTableRow
             key={u.uuid}
@@ -88,54 +70,9 @@ class OrganizationsTable extends React.Component {
             onResendInvitation={onResendInvitation}
           />
         );
-      });
-
-    return (
-      <div className="list">
-        <div className="list-header">
-          <div className="list-search">
-            <label htmlFor="filter">
-              <span className="icon icon-search"></span>
-              <DebounceInput
-                type="search"
-                name="filter"
-                id="filter"
-                minLength={3}
-                debounceTimeout={300}
-                onChange={e => {
-                  this.setState({
-                    filter: e.target.value
-                  });
-                }}
-              />
-            </label>
-          </div>
-
-          <Sorting
-            active={orderBy}
-            columns={["name"]}
-            onChange={column => {
-              return () => {
-                const { orderBy } = this.state;
-                this.setState({
-                  orderBy:
-                    orderBy === `+${column}` ? `-${column}` : `+${column}`
-                });
-              };
-            }}
-          />
-        </div>
-
-        {!organizationsLoaded ? (
-          <p className="list-item list-item-message">Loading...</p>
-        ) : !organizationsRows || organizationsRows.length === 0 ? (
-          <p className="list-item list-item-message">No organizations found!</p>
-        ) : (
-          <>{organizationsRows}</>
-        )}
-      </div>
-    );
-  }
-}
+      }}
+    />
+  );
+};
 
 export default OrganizationsTable;

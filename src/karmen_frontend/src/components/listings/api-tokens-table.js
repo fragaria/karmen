@@ -1,10 +1,8 @@
 import React from "react";
-import { DebounceInput } from "react-debounce-input";
-
 import { useMyModal } from "../../components/utils/modal";
 import BusyButton from "../../components/utils/busy-button";
 import formatters from "../../services/formatters";
-import Sorting from "./sorting";
+import NoPaginationListing from "./no-pagination-wrapper";
 
 const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
   return (
@@ -66,90 +64,32 @@ const ApiTokensTableRow = ({ token, onTokenDelete }) => {
   );
 };
 
-class ApiTokensTable extends React.Component {
-  state = {
-    filter: "",
-    orderBy: "-created"
-  };
-
-  componentDidMount() {
-    const { tokensLoaded, loadTokens } = this.props;
-    if (!tokensLoaded) {
-      loadTokens();
-    }
-  }
-
-  render() {
-    const { tokensLoaded, onTokenDelete, tokens } = this.props;
-    const { orderBy, filter } = this.state;
-    const tokensRows = tokens
-      .filter(
-        t => t.name.indexOf(filter) !== -1 || t.jti.indexOf(filter) !== -1
-      )
-      .sort((a, b) => {
-        const columnName = orderBy.substring(1);
-        if (a[columnName] === b[columnName]) {
-          return a.created > b.created ? -1 : 1;
-        }
-        if (orderBy[0] === "+") {
-          return a[columnName] < b[columnName] ? -1 : 1;
-        } else {
-          return a[columnName] > b[columnName] ? -1 : 1;
-        }
-      })
-      .map(t => {
+const ApiTokensTable = ({
+  loadTokens,
+  tokensLoaded,
+  tokensList,
+  onTokenDelete
+}) => {
+  return (
+    <NoPaginationListing
+      defaultOrderBy="-created"
+      loadItems={loadTokens}
+      itemsLoaded={tokensLoaded}
+      items={tokensList}
+      enableFiltering={true}
+      sortByColumns={["name", "created"]}
+      filterByColumns={["name"]}
+      rowFactory={t => {
         return (
           <ApiTokensTableRow
-            onTokenDelete={onTokenDelete}
             key={t.jti}
+            onTokenDelete={onTokenDelete}
             token={t}
           />
         );
-      });
-    return (
-      <div className="list">
-        <div className="list-header">
-          <div className="list-search">
-            <label htmlFor="filter">
-              <span className="icon icon-search"></span>
-              <DebounceInput
-                type="search"
-                name="filter"
-                id="filter"
-                minLength={3}
-                debounceTimeout={300}
-                onChange={e => {
-                  this.setState({
-                    filter: e.target.value
-                  });
-                }}
-              />
-            </label>
-          </div>
-          <Sorting
-            active={orderBy}
-            columns={["name", "created"]}
-            onChange={column => {
-              return () => {
-                const { orderBy } = this.state;
-                this.setState({
-                  orderBy:
-                    orderBy === `+${column}` ? `-${column}` : `+${column}`
-                });
-              };
-            }}
-          />
-        </div>
-        {!tokensLoaded ? (
-          <p className="list-item list-item-message">Loading...</p>
-        ) : !tokensRows || tokensRows.length === 0 ? (
-          <p className="list-item list-item-message">No API tokens found!</p>
-        ) : (
-          <>{tokensRows}</>
-        )}
-      </div>
-    );
-  }
-}
+      }}
+    />
+  );
+};
 
 export default ApiTokensTable;

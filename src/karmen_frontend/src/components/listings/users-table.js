@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { DebounceInput } from "react-debounce-input";
 import CtaDropdown from "../listings/cta-dropdown";
 import { useMyModal } from "../utils/modal";
-import Sorting from "./sorting";
+import NoPaginationListing from "./no-pagination-wrapper";
 
 const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
   return (
@@ -181,44 +180,25 @@ const UsersTableRow = ({
   );
 };
 
-class UsersTable extends React.Component {
-  state = {
-    filter: "",
-    orderBy: "+username"
-  };
-
-  componentDidMount() {
-    // TODO this can be more efficient
-    const { loadUsers } = this.props;
-    loadUsers(["username", "uuid", "role"]);
-  }
-
-  render() {
-    const { filter, orderBy } = this.state;
-    const {
-      currentUuid,
-      usersLoaded,
-      usersList,
-      onUserChange,
-      onUserDelete,
-      onResendInvitation
-    } = this.props;
-    const usersRows = usersList
-      .filter(
-        u => u.username.toLowerCase().indexOf(filter.toLowerCase()) !== -1
-      )
-      .sort((a, b) => {
-        const columnName = orderBy.substring(1);
-        if (a[columnName] === b[columnName]) {
-          return a.uuid > b.uuid ? -1 : 1;
-        }
-        if (orderBy[0] === "+") {
-          return a[columnName] < b[columnName] ? -1 : 1;
-        } else {
-          return a[columnName] > b[columnName] ? -1 : 1;
-        }
-      })
-      .map(u => {
+const UsersTable = ({
+  currentUuid,
+  loadUsers,
+  usersLoaded,
+  usersList,
+  onUserChange,
+  onUserDelete,
+  onResendInvitation
+}) => {
+  return (
+    <NoPaginationListing
+      defaultOrderBy="+username"
+      loadItems={() => loadUsers(["username", "uuid", "role"])}
+      itemsLoaded={usersLoaded}
+      items={usersList}
+      enableFiltering={true}
+      sortByColumns={["username", "uuid", "role"]}
+      filterByColumns={["username"]}
+      rowFactory={u => {
         return (
           <UsersTableRow
             key={u.uuid}
@@ -229,54 +209,9 @@ class UsersTable extends React.Component {
             onResendInvitation={onResendInvitation}
           />
         );
-      });
-
-    return (
-      <div className="list">
-        <div className="list-header">
-          <div className="list-search">
-            <label htmlFor="filter">
-              <span className="icon icon-search"></span>
-              <DebounceInput
-                type="search"
-                name="filter"
-                id="filter"
-                minLength={3}
-                debounceTimeout={300}
-                onChange={e => {
-                  this.setState({
-                    filter: e.target.value
-                  });
-                }}
-              />
-            </label>
-          </div>
-
-          <Sorting
-            active={orderBy}
-            columns={["username", "uuid", "role"]}
-            onChange={column => {
-              return () => {
-                const { orderBy } = this.state;
-                this.setState({
-                  orderBy:
-                    orderBy === `+${column}` ? `-${column}` : `+${column}`
-                });
-              };
-            }}
-          />
-        </div>
-
-        {!usersLoaded ? (
-          <p className="list-item list-item-message">Loading...</p>
-        ) : !usersRows || usersRows.length === 0 ? (
-          <p className="list-item list-item-message">No users found!</p>
-        ) : (
-          <>{usersRows}</>
-        )}
-      </div>
-    );
-  }
-}
+      }}
+    />
+  );
+};
 
 export default UsersTable;

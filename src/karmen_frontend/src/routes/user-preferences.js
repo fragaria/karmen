@@ -41,7 +41,7 @@ const UserPreferences = ({
 
             <ApiTokensTable
               loadTokens={loadApiTokens}
-              tokens={apiTokens}
+              tokensList={apiTokens}
               tokensLoaded={apiTokensLoaded}
               onTokenDelete={onTokenDelete}
             />

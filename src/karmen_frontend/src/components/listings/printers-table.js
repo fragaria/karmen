@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { DebounceInput } from "react-debounce-input";
-
-import Sorting from "./sorting";
 import CtaDropdown from "./cta-dropdown";
+import NoPaginationListing from "./no-pagination-wrapper";
 import { useMyModal } from "../utils/modal";
 
 const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
@@ -104,40 +102,23 @@ const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
   );
 };
 
-class PrintersTable extends React.Component {
-  state = {
-    filter: "",
-    orderBy: "+name"
-  };
-
-  componentDidMount() {
-    // TODO this might be more efficient
-    const { loadPrinters } = this.props;
-    loadPrinters(["job", "status", "webcam"]);
-  }
-
-  render() {
-    const { filter, orderBy } = this.state;
-    const {
-      orgslug,
-      printersLoaded,
-      printersList,
-      onPrinterDelete
-    } = this.props;
-    const printersRows = printersList
-      .filter(p => p.name.indexOf(filter) !== -1)
-      .sort((a, b) => {
-        const columnName = orderBy.substring(1);
-        if (a[columnName] === b[columnName]) {
-          return a.uuid > b.uuid ? -1 : 1;
-        }
-        if (orderBy[0] === "+") {
-          return a[columnName] < b[columnName] ? -1 : 1;
-        } else {
-          return a[columnName] > b[columnName] ? -1 : 1;
-        }
-      })
-      .map(p => {
+const PrintersTable = ({
+  orgslug,
+  onPrinterDelete,
+  loadPrinters,
+  printersLoaded,
+  printersList
+}) => {
+  return (
+    <NoPaginationListing
+      defaultOrderBy="+name"
+      loadItems={() => loadPrinters(["job", "status", "webcam"])}
+      itemsLoaded={printersLoaded}
+      items={printersList}
+      enableFiltering={true}
+      sortByColumns={["name"]}
+      filterByColumns={["name"]}
+      rowFactory={p => {
         return (
           <PrintersTableRow
             key={p.uuid}
@@ -146,53 +127,9 @@ class PrintersTable extends React.Component {
             onPrinterDelete={onPrinterDelete}
           />
         );
-      });
-
-    return (
-      <div className="list">
-        <div className="list-header">
-          <div className="list-search">
-            <label htmlFor="filter">
-              <span className="icon icon-search"></span>
-              <DebounceInput
-                type="search"
-                name="filter"
-                id="filter"
-                minLength={3}
-                debounceTimeout={300}
-                onChange={e => {
-                  this.setState({
-                    filter: e.target.value
-                  });
-                }}
-              />
-            </label>
-          </div>
-
-          <Sorting
-            active={orderBy}
-            columns={["name"]}
-            onChange={() => {
-              return () => {
-                const { orderBy } = this.state;
-                this.setState({
-                  orderBy: orderBy === "+name" ? "-name" : "+name"
-                });
-              };
-            }}
-          />
-        </div>
-
-        {!printersLoaded ? (
-          <p className="list-item list-item-message">Loading...</p>
-        ) : !printersRows || printersRows.length === 0 ? (
-          <p className="list-item list-item-message">No printers found!</p>
-        ) : (
-          <>{printersRows}</>
-        )}
-      </div>
-    );
-  }
-}
+      }}
+    />
+  );
+};
 
 export default PrintersTable;
