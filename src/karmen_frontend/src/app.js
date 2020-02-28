@@ -125,14 +125,14 @@ class App extends React.Component {
               />
               <AuthenticatedRoute
                 userState={userState}
-                path="/users/me"
-                component={UserPreferences}
-              />
-              <AuthenticatedRoute
-                userState={userState}
                 path="/users/me/tokens"
                 exact
                 component={AddApiToken}
+              />
+              <AuthenticatedRoute
+                userState={userState}
+                path="/users/me"
+                component={UserPreferences}
               />
               <AuthenticatedRoute
                 userState={userState}

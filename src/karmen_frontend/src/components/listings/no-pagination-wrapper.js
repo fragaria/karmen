@@ -39,13 +39,17 @@ class Wrapper extends React.Component {
       })
       .sort((a, b) => {
         const columnName = orderBy.substring(1);
-        if (a[columnName] === b[columnName]) {
+        if (a[columnName].toLowerCase() === b[columnName].toLowerCase()) {
           return a.uuid > b.uuid ? -1 : 1;
         }
         if (orderBy[0] === "+") {
-          return a[columnName] < b[columnName] ? -1 : 1;
+          return a[columnName].toLowerCase() < b[columnName].toLowerCase()
+            ? -1
+            : 1;
         } else {
-          return a[columnName] > b[columnName] ? -1 : 1;
+          return a[columnName].toLowerCase() > b[columnName].toLowerCase()
+            ? -1
+            : 1;
         }
       })
       .map(rowFactory);

@@ -131,7 +131,7 @@ class AddPrinter extends React.Component {
     const { form, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
-      return <Redirect to={`/${match.params.orgslug}/printers`} />;
+      return <Redirect to={`/${match.params.orgslug}/settings/printers`} />;
     }
     return (
       <>
@@ -171,7 +171,7 @@ class AddPrinter extends React.Component {
                     Add printer
                   </BusyButton>{" "}
                   <Link
-                    to={`/${match.params.orgslug}/printers`}
+                    to={`/${match.params.orgslug}/settings/printers`}
                     className="btn btn-plain"
                   >
                     Cancel

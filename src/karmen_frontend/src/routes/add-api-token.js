@@ -177,7 +177,7 @@ class AddApiToken extends React.Component {
                   >
                     Create token
                   </BusyButton>{" "}
-                  <Link to="/users/me" className="btn btn-plain">
+                  <Link to="/users/me/api-tokens" className="btn btn-plain">
                     Cancel
                   </Link>
                 </div>

@@ -183,6 +183,11 @@ export default (
         list: [].concat(action.payload.data.items),
         listLoaded: true
       });
+    case "USERS_ADD_SUCCEEDED":
+      return Object.assign({}, state, {
+        list: [].concat(state.list).concat([action.payload.data]),
+        listLoaded: true
+      });
     case "USERS_EDIT_SUCCEEDED":
       if (action.payload.data) {
         const userIndex = state.list.findIndex(
@@ -214,7 +219,10 @@ export default (
         return Object.assign({}, state, {
           me: Object.assign({}, state.me, {
             organizations: Object.assign({}, state.me.organizations, {
-              [action.payload.data.slug]: action.payload.data
+              [action.payload.data.slug]: {
+                ...action.payload.data,
+                role: "admin"
+              }
             })
           })
         });
