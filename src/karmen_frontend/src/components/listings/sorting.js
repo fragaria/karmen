@@ -25,7 +25,7 @@ class Sorting extends React.Component {
       return (
         <button
           key={item}
-          className={`list-dropdown-item ${
+          className={`dropdown-item ${
             active.indexOf(item) > -1 ? "active" : ""
           }`}
           onClick={handleClick(item)}
@@ -43,9 +43,9 @@ class Sorting extends React.Component {
     const { expand } = this.state;
 
     return (
-      <div className="list-dropdown">
+      <div className="dropdown">
         <button
-          className="list-dropdown-toggle btn-reset"
+          className="dropdown-toggle btn-reset"
           onClick={e => {
             e.preventDefault();
             if (columns.length === 1) {
@@ -62,10 +62,12 @@ class Sorting extends React.Component {
         </button>
 
         {expand && (
-          <div className="list-dropdown-items">
-            <span className="list-dropdown-title">Sort by</span>
-            {list}
-            <div className="list-dropdown-backdrop" onClick={toggle}></div>
+          <div className="dropdown-items">
+            <div className="dropdown-items-content">
+              <span className="dropdown-title">Sort by</span>
+              {list}
+            </div>
+            <div className="dropdown-backdrop" onClick={toggle}></div>
           </div>
         )}
       </div>

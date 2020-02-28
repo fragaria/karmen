@@ -13,16 +13,14 @@ const OrganizationsTableRow = ({
 
   return (
     <div className="list-item">
-      <div className="list-item-content">
-        <Link
-          className="list-item-content"
-          key={organization.uuid}
-          to={`/${organization.slug}`}
-        >
-          <span className="list-item-title">{organization.name}</span>
-          <span className="text-mono">{organization.slug}</span>
-        </Link>
-      </div>
+      <Link
+        className="list-item-content"
+        key={organization.uuid}
+        to={`/${organization.slug}`}
+      >
+        <span className="list-item-title">{organization.name}</span>
+        <span className="text-mono">{organization.slug}</span>
+      </Link>
 
       <CtaDropdown
         expanded={ctaListExpanded}
@@ -30,14 +28,16 @@ const OrganizationsTableRow = ({
           setCtaListExpanded(!ctaListExpanded);
         }}
       >
-        <span className="list-dropdown-title">{organization.name}</span>
-        <Link
-          className="list-dropdown-item"
-          to={`/organizations/${organization.slug}/settings`}
-        >
-          <i className="icon-edit"></i>
-          Organization Settings
-        </Link>
+        <div className="dropdown-items-content">
+          <span className="dropdown-title">{organization.name}</span>
+          <Link
+            className="dropdown-item"
+            to={`/organizations/${organization.slug}/settings`}
+          >
+            <i className="icon-edit"></i>
+            Organization Settings
+          </Link>
+        </div>
       </CtaDropdown>
     </div>
   );

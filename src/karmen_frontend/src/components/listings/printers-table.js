@@ -74,16 +74,16 @@ const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
           setCtaListExpanded(!ctaListExpanded);
         }}
       >
-        <span className="list-dropdown-title">{printer.name}</span>
+        <span className="dropdown-title">{printer.name}</span>
         <Link
-          className="list-dropdown-item"
+          className="dropdown-item"
           to={`/${orgslug}/printers/${printer.uuid}/settings`}
         >
           <i className="icon-edit"></i>
           Printer settings
         </Link>
         <button
-          className="list-dropdown-item text-secondary"
+          className="dropdown-item text-secondary"
           onClick={e => {
             setCtaListExpanded(false);
             deletePrinterModal.openModal(e);

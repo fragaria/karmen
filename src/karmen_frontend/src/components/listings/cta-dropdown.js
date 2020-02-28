@@ -2,9 +2,9 @@ import React from "react";
 
 const CtaDropdown = ({ children, onToggle, expanded }) => {
   return (
-    <div className="list-dropdown list-cta">
+    <div className="dropdown list-cta">
       <button
-        className="list-dropdown-toggle btn-reset"
+        className="dropdown-toggle btn-reset"
         onClick={e => {
           e.preventDefault();
           onToggle && onToggle();
@@ -14,9 +14,11 @@ const CtaDropdown = ({ children, onToggle, expanded }) => {
       </button>
 
       {expanded && (
-        <div className="list-dropdown-items">
-          {children}
-          <div className="list-dropdown-backdrop" onClick={onToggle}></div>
+        <div className="dropdown-items">
+          <div className="dropdown-items-content">
+            {children}
+          </div>
+          <div className="dropdown-backdrop" onClick={onToggle}></div>
         </div>
       )}
     </div>

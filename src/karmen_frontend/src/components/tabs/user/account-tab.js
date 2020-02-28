@@ -12,8 +12,8 @@ const Account = ({ changePassword, patchUser, username, email }) => {
             Change profile
           </h1>
         </div>
+        <UserEditForm patchUser={patchUser} username={username} email={email} />
       </div>
-      <UserEditForm patchUser={patchUser} username={username} email={email} />
 
       <div className="container">
         <div className="react-tabs__tab-panel__header">
@@ -21,9 +21,8 @@ const Account = ({ changePassword, patchUser, username, email }) => {
             Change password
           </h1>
         </div>
+        <ChangePasswordForm changePassword={changePassword} />
       </div>
-
-      <ChangePasswordForm changePassword={changePassword} />
     </>
   );
 };

@@ -129,10 +129,10 @@ const UsersTableRow = ({
             setCtaListExpanded(!ctaListExpanded);
           }}
         >
-          <span className="list-dropdown-title">{user.username}</span>
+          <span className="dropdown-title">{user.username}</span>
           {!user.activated && (
             <button
-              className="list-dropdown-item"
+              className="dropdown-item"
               onClick={e => {
                 setCtaListExpanded(false);
                 onResendInvitation(user.email, user.role);
@@ -144,7 +144,7 @@ const UsersTableRow = ({
             </button>
           )}
           <button
-            className="list-dropdown-item"
+            className="dropdown-item"
             onClick={e => {
               setCtaListExpanded(false);
               changeUserRoleModal.openModal(e);
@@ -154,7 +154,7 @@ const UsersTableRow = ({
             Change role
           </button>
           <button
-            className="list-dropdown-item text-secondary"
+            className="dropdown-item text-secondary"
             onClick={e => {
               setCtaListExpanded(false);
               toggleUserModal.openModal(e);

@@ -8,11 +8,39 @@ class Menu extends React.Component {
     super(props);
 
     this.state = {
-      navigation: false
+      navigation: false,
+      orgListExpanded: false
     };
   }
 
   render() {
+    const OrganizationSwitch = ({ children, organizations, activeOrganization, onToggle, expanded }) => {
+      return (
+        <div className="dropdown">
+          <button
+            className="dropdown-toggle btn-reset"
+            onClick={e => {
+              e.preventDefault();
+              onToggle && onToggle();
+            }}
+          >
+            {activeOrganization.name}
+            <span className="icon-down"></span>
+          </button>
+
+          {expanded && (
+            <div className="dropdown-items">
+              <div className="dropdown-items-content">
+                <span className="dropdown-title">Switch organization</span>
+                 {children}
+              </div>
+              <div className="dropdown-backdrop" onClick={onToggle}></div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     const {
       history,
       userState,
@@ -23,7 +51,8 @@ class Menu extends React.Component {
       logout,
       switchOrganization
     } = this.props;
-    const { navigation } = this.state;
+    const { navigation, orgListExpanded } = this.state;
+
     const orgList = organizations
       ? Object.values(organizations)
           .sort((o, p) => (o.name < p.name ? -1 : 1))
@@ -32,18 +61,17 @@ class Menu extends React.Component {
               return undefined;
             }
             return (
-              <li key={o.uuid}>
-                <Link
-                  className="navigation-user-organization navigation-user-organization-toggle"
-                  to={`/${o.slug}`}
-                  onClick={() => {
-                    switchOrganization(o.uuid, o.slug);
-                    this.setState({ navigation: false });
-                  }}
-                >
-                  Switch to <strong>{o.name}</strong>
-                </Link>
-              </li>
+              <Link
+                className="dropdown-item"
+                key={o.uuid}
+                to={`/${o.slug}`}
+                onClick={() => {
+                  switchOrganization(o.uuid, o.slug);
+                  this.setState({ orgListExpanded: false });
+                }}
+              >
+                {o.name}
+              </Link>
             );
           })
           .filter(o => !!o)
@@ -61,6 +89,19 @@ class Menu extends React.Component {
             }}
           >
             <img alt="Karmen logo" src="/karmen-logo.svg" />
+
+            <OrganizationSwitch
+              organizations={organizations}
+              activeOrganization={activeOrganization}
+              onToggle={() => {
+                this.setState(prevState => ({
+                  orgListExpanded: !prevState.orgListExpanded
+                }));
+              }}
+              expanded={orgListExpanded}
+            >
+              {orgList}
+            </OrganizationSwitch>
           </Link>
           {userState === "logged-in" && (
             <>
@@ -111,6 +152,14 @@ class Menu extends React.Component {
                     </li>
                   )}
                   <li>
+                    <Link
+                      to="/organizations"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      Organizations
+                    </Link>
+                  </li>
+                  <li>
                     <button
                       className="btn-reset"
                       title="Logout"
@@ -124,16 +173,6 @@ class Menu extends React.Component {
                       Logout
                     </button>
                   </li>
-                  {orgList}
-                  <li>
-                    <Link
-                      className="navigation-user-organization navigation-user-organization-toggle"
-                      to="/organizations"
-                      onClick={() => this.setState({ navigation: false })}
-                    >
-                      Manage organizations
-                    </Link>
-                  </li>
                 </ul>
               )}
               <button
@@ -146,7 +185,10 @@ class Menu extends React.Component {
               >
                 {navigation && <span className="icon-close"></span>}
                 {!navigation && (
-                  <span className="navigation-toggle-label">Menu</span>
+                  <span className="navigation-toggle-label">
+                    <span className="icon-menu"></span>
+                    <span className="hidden-xs">Menu</span>
+                  </span>
                 )}
               </button>
             </>

@@ -101,9 +101,9 @@ const GcodeTableRow = ({
           setCtaListExpanded(!ctaListExpanded);
         }}
       >
-        <span className="list-dropdown-title">{display}</span>
+        <span className="dropdown-title">{display}</span>
         <button
-          className="list-dropdown-item"
+          className="dropdown-item"
           onClick={e => {
             setCtaListExpanded(false);
             printModal.openModal(e);
@@ -114,7 +114,7 @@ const GcodeTableRow = ({
         </button>
 
         <button
-          className="list-dropdown-item text-secondary"
+          className="dropdown-item text-secondary"
           onClick={e => {
             setCtaListExpanded(false);
             deleteModal.openModal(e);
