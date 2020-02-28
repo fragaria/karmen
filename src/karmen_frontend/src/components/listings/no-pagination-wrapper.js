@@ -12,9 +12,10 @@ class Wrapper extends React.Component {
   }
 
   componentDidMount() {
-    // TODO this could be more efficient
-    const { loadItems } = this.props;
-    loadItems();
+    const { itemsLoaded, loadItems } = this.props;
+    if (!itemsLoaded) {
+      loadItems();
+    }
   }
 
   render() {
