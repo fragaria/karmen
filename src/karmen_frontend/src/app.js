@@ -126,7 +126,6 @@ class App extends React.Component {
               <AuthenticatedRoute
                 userState={userState}
                 path="/users/me"
-                exact
                 component={UserPreferences}
               />
               <AuthenticatedRoute
