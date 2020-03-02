@@ -101,7 +101,6 @@ class PasswordReset extends React.Component {
             <FormInputs definition={resetForm} updateValue={updateValue} />
 
             <div className="form-messages">
-
               {message && (
                 <p
                   className={

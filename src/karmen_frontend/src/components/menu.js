@@ -14,7 +14,13 @@ class Menu extends React.Component {
   }
 
   render() {
-    const OrganizationSwitch = ({ children, organizations, activeOrganization, onToggle, expanded }) => {
+    const OrganizationSwitch = ({
+      children,
+      organizations,
+      activeOrganization,
+      onToggle,
+      expanded
+    }) => {
       return (
         <div className="dropdown">
           <button
@@ -24,7 +30,7 @@ class Menu extends React.Component {
               onToggle && onToggle();
             }}
           >
-            {activeOrganization.name}
+            {activeOrganization && activeOrganization.name}
             <span className="icon-down"></span>
           </button>
 
@@ -32,14 +38,14 @@ class Menu extends React.Component {
             <div className="dropdown-items">
               <div className="dropdown-items-content">
                 <span className="dropdown-title">Switch organization</span>
-                 {children}
+                {children}
               </div>
               <div className="dropdown-backdrop" onClick={onToggle}></div>
             </div>
           )}
         </div>
       );
-    }
+    };
 
     const {
       history,

@@ -15,9 +15,7 @@ const CtaDropdown = ({ children, onToggle, expanded }) => {
 
       {expanded && (
         <div className="dropdown-items">
-          <div className="dropdown-items-content">
-            {children}
-          </div>
+          <div className="dropdown-items-content">{children}</div>
           <div className="dropdown-backdrop" onClick={onToggle}></div>
         </div>
       )}
