@@ -43,7 +43,7 @@ class Sorting extends React.Component {
     const { expand } = this.state;
 
     return (
-      <div className="dropdown">
+      <div className="dropdown sorting">
         <button
           className="dropdown-toggle btn-reset"
           onClick={e => {
