@@ -95,19 +95,20 @@ class Menu extends React.Component {
             }}
           >
             <img alt="Karmen logo" src="/karmen-logo.svg" />
-
-            <OrganizationSwitch
-              organizations={organizations}
-              activeOrganization={activeOrganization}
-              onToggle={() => {
-                this.setState(prevState => ({
-                  orgListExpanded: !prevState.orgListExpanded
-                }));
-              }}
-              expanded={orgListExpanded}
-            >
-              {orgList}
-            </OrganizationSwitch>
+            {userState === "logged-in" && (
+              <OrganizationSwitch
+                organizations={organizations}
+                activeOrganization={activeOrganization}
+                onToggle={() => {
+                  this.setState(prevState => ({
+                    orgListExpanded: !prevState.orgListExpanded
+                  }));
+                }}
+                expanded={orgListExpanded}
+              >
+                {orgList}
+              </OrganizationSwitch>
+            )}
           </Link>
           {userState === "logged-in" && (
             <>
