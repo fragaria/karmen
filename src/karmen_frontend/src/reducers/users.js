@@ -239,7 +239,6 @@ export default (
           state.me.organizations[existing.uuid],
           action.payload.data
         );
-        delete newOrganizations[existing.uuid];
       }
       let newActiveOrganization = state.me.activeOrganization;
       if (state.me.activeOrganization.uuid === action.payload.data.uuid) {
