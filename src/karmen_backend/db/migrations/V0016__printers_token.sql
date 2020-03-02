@@ -13,3 +13,9 @@ SET default_tablespace = '';
 
 ALTER TABLE public.printers
     ADD COLUMN IF NOT EXISTS token character varying DEFAULT '';
+
+alter table public.printers drop constraint printer_uq_ip_port_path_org;
+
+alter table public.printers
+	add constraint printer_uq_ip_port_path_org
+		unique (organization_uuid, ip, port, path, token);

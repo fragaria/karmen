@@ -155,7 +155,9 @@ def printer_create(org_uuid):
         if hostname and not ip:
             ip = network.get_avahi_address(hostname)
             if not ip:
-                return abort(make_response("Cannot resolve %s with mDNS" % hostname, 500))
+                return abort(
+                    make_response("Cannot resolve %s with mDNS" % hostname, 500)
+                )
         if ip and not hostname:
             hostname = network.get_avahi_hostname(ip)
 
@@ -168,7 +170,7 @@ def printer_create(org_uuid):
     elif protocol == "sock":
         path = ""
         hostname = ""
-        ip = ''
+        ip = ""
         port = 0
         if printers.get_printer_by_socket_token(org_uuid, token) is not None:
             return abort(make_response("", 409))
@@ -176,7 +178,7 @@ def printer_create(org_uuid):
     else:
         return abort(make_response("Invalid protocol", 400))
 
-        #return abort(make_response(str(data), 501))
+        # return abort(make_response(str(data), 501))
 
     printer = clients.get_printer_instance(
         {
