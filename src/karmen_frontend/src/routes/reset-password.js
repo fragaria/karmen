@@ -13,6 +13,7 @@ class ResetPassword extends React.Component {
       tokenProcessed: false,
       email: undefined,
       pwdResetKey: undefined,
+      pwdResetKeyExpires: undefined,
       message: null,
       messageOk: false,
       passwordForm: {
@@ -46,6 +47,7 @@ class ResetPassword extends React.Component {
         this.setState({
           email: tokenData.email,
           pwdResetKey: tokenData.pwd_reset_key,
+          pwdResetKeyExpires: tokenData.pwd_reset_key_expires,
           tokenProcessed: true
         });
       } catch (e) {
@@ -121,7 +123,8 @@ class ResetPassword extends React.Component {
       messageOk,
       tokenProcessed,
       email,
-      pwdResetKey
+      pwdResetKey,
+      pwdResetKeyExpires
     } = this.state;
     const updateValue = (name, value) => {
       const { passwordForm } = this.state;
@@ -139,8 +142,12 @@ class ResetPassword extends React.Component {
       return <Loader />;
     }
 
+    if (tokenProcessed && new Date(pwdResetKeyExpires * 1000) < new Date()) {
+      // TODO this is not really user friendly
+      return <Redirect to="/page-404" />;
+    }
+
     if (tokenProcessed && (!email || !pwdResetKey)) {
-      // TODO or pwd_reset_key_expired
       // TODO this is not really user friendly
       return <Redirect to="/login" />;
     }

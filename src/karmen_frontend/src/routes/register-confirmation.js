@@ -13,6 +13,7 @@ class RegisterConfirmation extends React.Component {
       tokenProcessed: false,
       email: undefined,
       activationKey: undefined,
+      activationKeyExpires: undefined,
       message: null,
       messageOk: false,
       passwordForm: {
@@ -46,6 +47,7 @@ class RegisterConfirmation extends React.Component {
         this.setState({
           email: tokenData.email,
           activationKey: tokenData.activation_key,
+          activationKeyExpires: tokenData.activation_key_expires,
           tokenProcessed: true
         });
       } catch (e) {
@@ -61,10 +63,10 @@ class RegisterConfirmation extends React.Component {
   activate(e) {
     e.preventDefault();
     const { passwordForm, email, activationKey } = this.state;
+    const { doActivate } = this.props;
     if (passwordForm.email.val) {
       throw new Error("seems like spam");
     }
-    const { doActivate } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
     for (let field of Object.values(passwordForm)) {
@@ -129,7 +131,8 @@ class RegisterConfirmation extends React.Component {
       messageOk,
       tokenProcessed,
       email,
-      activationKey
+      activationKey,
+      activationKeyExpires
     } = this.state;
     const updateValue = (name, value) => {
       const { passwordForm } = this.state;
@@ -147,8 +150,12 @@ class RegisterConfirmation extends React.Component {
       return <Loader />;
     }
 
+    if (tokenProcessed && new Date(activationKeyExpires * 1000) < new Date()) {
+      // TODO this is not really user friendly
+      return <Redirect to="/page-404" />;
+    }
+
     if (tokenProcessed && (!email || !activationKey)) {
-      // TODO or activation_key_expired
       // TODO this is not really user friendly
       return <Redirect to="/login" />;
     }
