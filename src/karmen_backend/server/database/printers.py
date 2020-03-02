@@ -114,6 +114,7 @@ def get_printer_by_network_props(org_uuid, hostname, ip, port, path):
         cursor.close()
         return data
 
+
 def get_printer_by_socket_token(org_uuid, token):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -123,7 +124,9 @@ def get_printer_by_socket_token(org_uuid, token):
             "WHERE protocol = 'sock' AND organization_uuid = %s AND token = %s"
         )
         cursor.execute(query, (org_uuid, token))
-
+        data = cursor.fetchone()
+        cursor.close()
+        return data
 
 
 def delete_printer(uuid):

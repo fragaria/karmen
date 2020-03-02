@@ -56,11 +56,12 @@ class AddPrinter extends React.Component {
     }
     if (
       !form.address.val ||
-        //do not check hostname in cloud installation - printer is added by token
-        ( window.env.IS_CLOUD_INSTALL ? false :
-      form.address.val.match(
-        /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?\/?[^?#]*$/
-      ) === null )
+      //do not check hostname in cloud installation - printer is added by token
+      (window.env.IS_CLOUD_INSTALL
+        ? false
+        : form.address.val.match(
+            /^(https?:\/\/)?([0-9a-zA-Z.-]+\.local|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):?\d{0,5}?\/?[^?#]*$/
+          ) === null)
     ) {
       hasErrors = true;
       updatedForm.address.error =
@@ -85,14 +86,15 @@ class AddPrinter extends React.Component {
         protocol = url.protocol.replace(":", "");
         port = url.port || null;
         if (
-            url.hostname &&
-            url.hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null
+          url.hostname &&
+          url.hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null
         ) {
           hostname = url.hostname;
         } else {
           ip = url.hostname;
         }
-        path = url.pathname.length > 0 && url.pathname !== "/" ? url.pathname : "";
+        path =
+          url.pathname.length > 0 && url.pathname !== "/" ? url.pathname : "";
       }
 
       return createPrinter(
