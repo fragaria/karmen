@@ -114,6 +114,12 @@ def activate_user():
     if existing["activation_key_expires"] < datetime.now().astimezone():
         return abort(make_response("", 400))
 
+    memberships = organization_roles.get_by_user_uuid(existing["uuid"])
+    if len(memberships) == 0:
+        orguuid = guid.uuid4()
+        organizations.add_organization(uuid=orguuid, name="Default organization")
+        organization_roles.set_organization_role(orguuid, existing["uuid"], "admin")
+
     pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
     users.update_user(
         uuid=existing["uuid"],

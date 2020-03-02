@@ -55,7 +55,7 @@ class CreateOrganizationRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 201)
             self.assertTrue("uuid" in response.json)
-            self.assertEqual(response.json["name"], " %s" % name.upper())
+            self.assertEqual(response.json["name"], name.upper())
             response = c.get("/organizations/%s/users" % response.json["uuid"])
             self.assertTrue("items" in response.json)
             self.assertEqual(response.json["items"][0]["uuid"], UUID_USER)

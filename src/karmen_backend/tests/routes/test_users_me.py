@@ -26,7 +26,7 @@ from ..utils import (
     UUID_USER,
     UUID_ORG,
 )
-from server.database import api_tokens, users, local_users
+from server.database import api_tokens, users, local_users, organization_roles
 
 
 def get_token_data(jwtoken):
@@ -224,8 +224,11 @@ class ActivateNewUserRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_activate_user(self):
+    def test_activate_user_with_default_org(self):
         with app.test_client() as c:
+            self.assertTrue(
+                len(organization_roles.get_by_user_uuid(self.user_uuid)) == 0
+            )
             response = c.post(
                 "/users/me/activate",
                 json={
@@ -241,6 +244,10 @@ class ActivateNewUserRoute(unittest.TestCase):
             self.assertTrue(user["activated"] is not None)
             local_user = local_users.get_local_user(self.user_uuid)
             self.assertTrue(local_user is not None)
+            print(organization_roles.get_by_user_uuid(self.user_uuid))
+            self.assertTrue(
+                len(organization_roles.get_by_user_uuid(self.user_uuid)) == 1
+            )
 
     def test_already_active_user(self):
         with app.test_client() as c:

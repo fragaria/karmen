@@ -20,7 +20,7 @@ def create_organization():
         return abort(make_response("", 400))
     uuid = guid.uuid4()
     user = get_current_user()
-
+    name = name.lstrip().rstrip()
     organizations.add_organization(uuid=uuid, name=name)
     organization_roles.set_organization_role(uuid, user["uuid"], "admin")
     return jsonify({"uuid": uuid, "name": name}), 201
