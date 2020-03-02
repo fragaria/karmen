@@ -141,6 +141,9 @@ def get_printer_by_socket_token(org_uuid, token):
             "WHERE protocol = 'sock' AND organization_uuid = %s AND token = %s"
         )
         cursor.execute(query, (org_uuid, token))
+        data = cursor.fetchone()
+        cursor.close()
+        return data
 
 
 def delete_printer(uuid):

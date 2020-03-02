@@ -46,22 +46,19 @@ const Settings = ({
             onPrinterDelete={onPrinterDelete}
           />
           {window.env.IS_CLOUD_INSTALL ? (
-              <br/>
-              )
-              : (
-                  <div className="container">
-                    <br/>
-                    <br/>
-                    <strong>Network scan</strong>
-                    <NetworkScan
-                        networkInterface={networkInterface}
-                        onNetworkInterfaceChange={onNetworkInterfaceChange}
-                        scanNetwork={scanNetwork}
-                    />
-                  </div>
-              )
-          }
-
+            <br />
+          ) : (
+            <div className="container">
+              <br />
+              <br />
+              <strong>Network scan</strong>
+              <NetworkScan
+                networkInterface={networkInterface}
+                onNetworkInterfaceChange={onNetworkInterfaceChange}
+                scanNetwork={scanNetwork}
+              />
+            </div>
+          )}
 
           <div className="container">
             <h1 className="main-title">
