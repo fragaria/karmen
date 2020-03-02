@@ -48,11 +48,13 @@ export default (
       });
     case "USER_SWITCH_ORGANIZATION":
       return Object.assign({}, state, {
-        list: []
+        list: [],
+        listLoaded: false
       });
     case "ORGANIZATIONS_CLEAR":
       return Object.assign({}, state, {
-        list: []
+        list: [],
+        listLoaded: false
       });
     default:
       return state;
