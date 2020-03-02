@@ -3,17 +3,17 @@ import { connect } from "react-redux";
 import { Route, Switch, Redirect } from "react-router-dom";
 import { RoutedTabs, NavTab } from "react-router-tabs";
 
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
-import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
+import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 
-import UsersTab from "../components/tabs/settings/users-tab";
-import PrintersTab from "../components/tabs/settings/printers-tab";
+import UsersTab from "../../components/tabs/settings/users-tab";
+import PrintersTab from "../../components/tabs/settings/printers-tab";
 
-import { enqueueTask } from "../actions/misc";
-import { setNetworkInterface } from "../actions/preferences";
-import { loadPrinters, deletePrinter } from "../actions/printers";
-import { addUser, getUsers, patchUser, deleteUser } from "../actions/users";
+import { enqueueTask } from "../../actions/misc";
+import { setNetworkInterface } from "../../actions/preferences";
+import { loadPrinters, deletePrinter } from "../../actions/printers";
+import { addUser, getUsers, patchUser, deleteUser } from "../../actions/users";
 
 const Settings = ({ match, ...rest }) => {
   return (

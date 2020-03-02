@@ -1,10 +1,10 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
-import { FormInputs } from "../components/forms/form-utils";
-import { addUserApiToken } from "../actions/users-me";
-import BusyButton from "../components/utils/busy-button";
+import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
+import { FormInputs } from "../../components/forms/form-utils";
+import { addUserApiToken } from "../../actions/users-me";
+import BusyButton from "../../components/utils/busy-button";
 
 class AddApiToken extends React.Component {
   constructor(props) {

@@ -1,16 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import Loader from "../components/utils/loader";
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import PrinterState from "../components/printers/printer-state";
-import WebcamStream from "../components/printers/webcam-stream";
+import Loader from "../../components/utils/loader";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import PrinterState from "../../components/printers/printer-state";
+import WebcamStream from "../../components/printers/webcam-stream";
 import {
   loadAndQueuePrinters,
   setWebcamRefreshInterval
-} from "../actions/printers";
-import { setPrinterViewType } from "../actions/preferences";
-import formatters from "../services/formatters";
+} from "../../actions/printers";
+import { setPrinterViewType } from "../../actions/preferences";
+import formatters from "../../services/formatters";
 
 const SwitchView = ({ viewType, onViewTypeChange }) => {
   return (

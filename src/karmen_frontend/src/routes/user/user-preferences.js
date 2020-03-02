@@ -3,16 +3,16 @@ import { connect } from "react-redux";
 import { Route, Switch, Redirect } from "react-router-dom";
 import { RoutedTabs, NavTab } from "react-router-tabs";
 
-import ApiTokensTab from "../components/tabs/user/api-tokens-tab";
-import AccountTab from "../components/tabs/user/account-tab";
+import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
+import ApiTokensTab from "../../components/tabs/user/api-tokens-tab";
+import AccountTab from "../../components/tabs/user/account-tab";
 
 import {
   loadUserApiTokens,
   deleteUserApiToken,
   changePassword,
   patchUser
-} from "../actions/users-me";
-import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
+} from "../../actions/users-me";
 
 const UserPreferences = ({ match, ...rest }) => {
   return (

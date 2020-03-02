@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { FormInputs } from "../components/forms/form-utils";
-import BusyButton from "../components/utils/busy-button";
-import { requestPasswordReset } from "../actions/users-me";
-import { isEmail } from "../services/validators";
+import { FormInputs } from "../../components/forms/form-utils";
+import BusyButton from "../../components/utils/busy-button";
+import { requestPasswordReset } from "../../actions/users-me";
+import { isEmail } from "../../services/validators";
 
 class PasswordReset extends React.Component {
   constructor(props) {

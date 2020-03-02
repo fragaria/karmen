@@ -1,13 +1,13 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { FormInputs } from "../components/forms/form-utils";
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import OrgRoleBasedGateway from "../components/gateways/org-role-based-gateway";
-import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
-import BusyButton from "../components/utils/busy-button";
-import { isEmail } from "../services/validators";
-import { addUser } from "../actions/users";
+import { FormInputs } from "../../components/forms/form-utils";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
+import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
+import BusyButton from "../../components/utils/busy-button";
+import { isEmail } from "../../services/validators";
+import { addUser } from "../../actions/users";
 
 class AddUser extends React.Component {
   state = {

@@ -1,15 +1,15 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import Loader from "../components/utils/loader";
-import BusyButton from "../components/utils/busy-button";
-import { usePrintGcodeModal } from "../components/gcodes/print-gcode-modal";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import Loader from "../../components/utils/loader";
+import BusyButton from "../../components/utils/busy-button";
+import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 
-import { loadGcode, downloadGcode } from "../actions/gcodes";
-import { addPrintJob } from "../actions/printjobs";
-import { loadPrinters } from "../actions/printers";
-import formatters from "../services/formatters";
+import { loadGcode, downloadGcode } from "../../actions/gcodes";
+import { addPrintJob } from "../../actions/printjobs";
+import { loadPrinters } from "../../actions/printers";
+import formatters from "../../services/formatters";
 
 const GcodePrint = ({
   gcode,

@@ -2,19 +2,19 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import Listing from "../components/listings/wrapper";
-import CtaDropdown from "../components/listings/cta-dropdown";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import Listing from "../../components/listings/wrapper";
+import CtaDropdown from "../../components/listings/cta-dropdown";
+import { useMyModal } from "../../components/utils/modal";
+import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 import {
   getGcodesPage,
   clearGcodesPages,
   deleteGcode
-} from "../actions/gcodes";
-import { useMyModal } from "../components/utils/modal";
-import { usePrintGcodeModal } from "../components/gcodes/print-gcode-modal";
-import { addPrintJob } from "../actions/printjobs";
-import { loadPrinters } from "../actions/printers";
-import formatters from "../services/formatters";
+} from "../../actions/gcodes";
+import { addPrintJob } from "../../actions/printjobs";
+import { loadPrinters } from "../../actions/printers";
+import formatters from "../../services/formatters";
 
 const DeleteModal = ({ modal, path, display, onRowDelete }) => {
   return (

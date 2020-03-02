@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import SetActiveOrganization from "../components/gateways/set-active-organization";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
 
 const OrganizationRoot = ({ organizations, match }) => {
   if (

@@ -1,9 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import BusyButton from "../components/utils/busy-button";
-import { uploadGcode } from "../actions/gcodes";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import BusyButton from "../../components/utils/busy-button";
+import { uploadGcode } from "../../actions/gcodes";
 
 class AddGcode extends React.Component {
   state = {

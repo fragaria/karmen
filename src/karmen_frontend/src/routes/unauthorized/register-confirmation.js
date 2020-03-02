@@ -1,19 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link, Redirect, withRouter } from "react-router-dom";
-import { FormInputs } from "../components/forms/form-utils";
-import BusyButton from "../components/utils/busy-button";
-import Loader from "../components/utils/loader";
-import { resetPassword } from "../actions/users-me";
+import { FormInputs } from "../../components/forms/form-utils";
+import BusyButton from "../../components/utils/busy-button";
+import Loader from "../../components/utils/loader";
+import { activate } from "../../actions/users-me";
 
-class ResetPassword extends React.Component {
+class RegisterConfirmation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       tokenProcessed: false,
       email: undefined,
-      pwdResetKey: undefined,
-      pwdResetKeyExpires: undefined,
+      activationKey: undefined,
+      activationKeyExpires: undefined,
       message: null,
       messageOk: false,
       passwordForm: {
@@ -35,19 +35,19 @@ class ResetPassword extends React.Component {
         }
       }
     };
-    this.reset = this.reset.bind(this);
+    this.activate = this.activate.bind(this);
   }
 
   componentDidMount() {
     const { location } = this.props;
     const params = new URLSearchParams(location.search);
-    if (params.has("reset")) {
+    if (params.has("activate")) {
       try {
-        const tokenData = JSON.parse(atob(params.get("reset")));
+        const tokenData = JSON.parse(atob(params.get("activate")));
         this.setState({
           email: tokenData.email,
-          pwdResetKey: tokenData.pwd_reset_key,
-          pwdResetKeyExpires: tokenData.pwd_reset_key_expires,
+          activationKey: tokenData.activation_key,
+          activationKeyExpires: tokenData.activation_key_expires,
           tokenProcessed: true
         });
       } catch (e) {
@@ -60,10 +60,10 @@ class ResetPassword extends React.Component {
     });
   }
 
-  reset(e) {
+  activate(e) {
     e.preventDefault();
-    const { passwordForm, email, pwdResetKey } = this.state;
-    const { doReset } = this.props;
+    const { passwordForm, email, activationKey } = this.state;
+    const { doActivate } = this.props;
     if (passwordForm.email.val) {
       throw new Error("seems like spam");
     }
@@ -93,20 +93,28 @@ class ResetPassword extends React.Component {
       return;
     }
 
-    return doReset(
+    return doActivate(
       email,
-      pwdResetKey,
+      activationKey,
       passwordForm.password.val,
       passwordForm.passwordConfirmation.val
     ).then(r => {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
-          message: "Password reset failed. Maybe you could try again later?"
+          message: (
+            <>
+              Account activation failed. Maybe you could try to{" "}
+              <Link to="/register" className="anchor">
+                register
+              </Link>{" "}
+              again?
+            </>
+          )
         });
       } else {
         this.setState({
-          message: "Password was reset, please login with your new password",
+          message: "Account activated, please login with your new password",
           messageOk: true,
           passwordForm: Object.assign({}, passwordForm, {
             email: Object.assign({}, passwordForm.email, { val: "" })
@@ -123,8 +131,8 @@ class ResetPassword extends React.Component {
       messageOk,
       tokenProcessed,
       email,
-      pwdResetKey,
-      pwdResetKeyExpires
+      activationKey,
+      activationKeyExpires
     } = this.state;
     const updateValue = (name, value) => {
       const { passwordForm } = this.state;
@@ -142,12 +150,12 @@ class ResetPassword extends React.Component {
       return <Loader />;
     }
 
-    if (tokenProcessed && new Date(pwdResetKeyExpires * 1000) < new Date()) {
+    if (tokenProcessed && new Date(activationKeyExpires * 1000) < new Date()) {
       // TODO this is not really user friendly
       return <Redirect to="/page-404" />;
     }
 
-    if (tokenProcessed && (!email || !pwdResetKey)) {
+    if (tokenProcessed && (!email || !activationKey)) {
       // TODO this is not really user friendly
       return <Redirect to="/login" />;
     }
@@ -156,10 +164,16 @@ class ResetPassword extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">
-            Reset password for {email}?
+            Welcome to Karmen, <br />
+            {email}!
           </h1>
+          <h2 className="main-subtitle text-center">
+            To start using Karmen You need to set the password.
+          </h2>
           <form>
-            <FormInputs definition={passwordForm} updateValue={updateValue} />
+            {!!!messageOk && (
+              <FormInputs definition={passwordForm} updateValue={updateValue} />
+            )}
 
             <div className="form-messages">
               {message && (
@@ -176,25 +190,24 @@ class ResetPassword extends React.Component {
             </div>
 
             <div className="cta-box text-center">
-              {!messageOk && (
+              {!!!messageOk && (
                 <>
                   <BusyButton
                     className="btn"
                     type="submit"
-                    onClick={this.reset}
+                    onClick={this.activate}
                     busyChildren="Sending link..."
                   >
-                    Reset
+                    Set password
                   </BusyButton>{" "}
                   <Link to="/login" className="btn btn-plain">
                     Cancel
                   </Link>
                 </>
               )}
-
-              {messageOk && (
+              {message && messageOk && (
                 <Link to="/login" className="btn">
-                  Log in
+                  Log in to Karmen
                 </Link>
               )}
             </div>
@@ -207,9 +220,7 @@ class ResetPassword extends React.Component {
 
 export default withRouter(
   connect(undefined, dispatch => ({
-    doReset: (email, pwdResetKey, password, passwordConfirmation) =>
-      dispatch(
-        resetPassword(email, pwdResetKey, password, passwordConfirmation)
-      )
-  }))(ResetPassword)
+    doActivate: (email, activationKey, password, passwordConfirmation) =>
+      dispatch(activate(email, activationKey, password, passwordConfirmation))
+  }))(RegisterConfirmation)
 );

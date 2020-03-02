@@ -1,19 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link, Redirect, withRouter } from "react-router-dom";
-import { FormInputs } from "../components/forms/form-utils";
-import BusyButton from "../components/utils/busy-button";
-import Loader from "../components/utils/loader";
-import { activate } from "../actions/users-me";
+import { FormInputs } from "../../components/forms/form-utils";
+import BusyButton from "../../components/utils/busy-button";
+import Loader from "../../components/utils/loader";
+import { resetPassword } from "../../actions/users-me";
 
-class RegisterConfirmation extends React.Component {
+class ResetPassword extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       tokenProcessed: false,
       email: undefined,
-      activationKey: undefined,
-      activationKeyExpires: undefined,
+      pwdResetKey: undefined,
+      pwdResetKeyExpires: undefined,
       message: null,
       messageOk: false,
       passwordForm: {
@@ -35,19 +35,19 @@ class RegisterConfirmation extends React.Component {
         }
       }
     };
-    this.activate = this.activate.bind(this);
+    this.reset = this.reset.bind(this);
   }
 
   componentDidMount() {
     const { location } = this.props;
     const params = new URLSearchParams(location.search);
-    if (params.has("activate")) {
+    if (params.has("reset")) {
       try {
-        const tokenData = JSON.parse(atob(params.get("activate")));
+        const tokenData = JSON.parse(atob(params.get("reset")));
         this.setState({
           email: tokenData.email,
-          activationKey: tokenData.activation_key,
-          activationKeyExpires: tokenData.activation_key_expires,
+          pwdResetKey: tokenData.pwd_reset_key,
+          pwdResetKeyExpires: tokenData.pwd_reset_key_expires,
           tokenProcessed: true
         });
       } catch (e) {
@@ -60,10 +60,10 @@ class RegisterConfirmation extends React.Component {
     });
   }
 
-  activate(e) {
+  reset(e) {
     e.preventDefault();
-    const { passwordForm, email, activationKey } = this.state;
-    const { doActivate } = this.props;
+    const { passwordForm, email, pwdResetKey } = this.state;
+    const { doReset } = this.props;
     if (passwordForm.email.val) {
       throw new Error("seems like spam");
     }
@@ -93,28 +93,20 @@ class RegisterConfirmation extends React.Component {
       return;
     }
 
-    return doActivate(
+    return doReset(
       email,
-      activationKey,
+      pwdResetKey,
       passwordForm.password.val,
       passwordForm.passwordConfirmation.val
     ).then(r => {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
-          message: (
-            <>
-              Account activation failed. Maybe you could try to{" "}
-              <Link to="/register" className="anchor">
-                register
-              </Link>{" "}
-              again?
-            </>
-          )
+          message: "Password reset failed. Maybe you could try again later?"
         });
       } else {
         this.setState({
-          message: "Account activated, please login with your new password",
+          message: "Password was reset, please login with your new password",
           messageOk: true,
           passwordForm: Object.assign({}, passwordForm, {
             email: Object.assign({}, passwordForm.email, { val: "" })
@@ -131,8 +123,8 @@ class RegisterConfirmation extends React.Component {
       messageOk,
       tokenProcessed,
       email,
-      activationKey,
-      activationKeyExpires
+      pwdResetKey,
+      pwdResetKeyExpires
     } = this.state;
     const updateValue = (name, value) => {
       const { passwordForm } = this.state;
@@ -150,12 +142,12 @@ class RegisterConfirmation extends React.Component {
       return <Loader />;
     }
 
-    if (tokenProcessed && new Date(activationKeyExpires * 1000) < new Date()) {
+    if (tokenProcessed && new Date(pwdResetKeyExpires * 1000) < new Date()) {
       // TODO this is not really user friendly
       return <Redirect to="/page-404" />;
     }
 
-    if (tokenProcessed && (!email || !activationKey)) {
+    if (tokenProcessed && (!email || !pwdResetKey)) {
       // TODO this is not really user friendly
       return <Redirect to="/login" />;
     }
@@ -164,16 +156,10 @@ class RegisterConfirmation extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">
-            Welcome to Karmen, <br />
-            {email}!
+            Reset password for {email}?
           </h1>
-          <h2 className="main-subtitle text-center">
-            To start using Karmen You need to set the password.
-          </h2>
           <form>
-            {!!!messageOk && (
-              <FormInputs definition={passwordForm} updateValue={updateValue} />
-            )}
+            <FormInputs definition={passwordForm} updateValue={updateValue} />
 
             <div className="form-messages">
               {message && (
@@ -190,24 +176,25 @@ class RegisterConfirmation extends React.Component {
             </div>
 
             <div className="cta-box text-center">
-              {!!!messageOk && (
+              {!messageOk && (
                 <>
                   <BusyButton
                     className="btn"
                     type="submit"
-                    onClick={this.activate}
+                    onClick={this.reset}
                     busyChildren="Sending link..."
                   >
-                    Set password
+                    Reset
                   </BusyButton>{" "}
                   <Link to="/login" className="btn btn-plain">
                     Cancel
                   </Link>
                 </>
               )}
-              {message && messageOk && (
+
+              {messageOk && (
                 <Link to="/login" className="btn">
-                  Log in to Karmen
+                  Log in
                 </Link>
               )}
             </div>
@@ -220,7 +207,9 @@ class RegisterConfirmation extends React.Component {
 
 export default withRouter(
   connect(undefined, dispatch => ({
-    doActivate: (email, activationKey, password, passwordConfirmation) =>
-      dispatch(activate(email, activationKey, password, passwordConfirmation))
-  }))(RegisterConfirmation)
+    doReset: (email, pwdResetKey, password, passwordConfirmation) =>
+      dispatch(
+        resetPassword(email, pwdResetKey, password, passwordConfirmation)
+      )
+  }))(ResetPassword)
 );

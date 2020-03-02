@@ -2,30 +2,30 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
 
-import Loader from "../components/utils/loader";
-import BusyButton from "../components/utils/busy-button";
-import { useMyModal } from "../components/utils/modal";
-import SetActiveOrganization from "../components/gateways/set-active-organization";
-import Listing from "../components/listings/wrapper";
-import Progress from "../components/printers/progress";
-import WebcamStream from "../components/printers/webcam-stream";
-import PrinterState from "../components/printers/printer-state";
-import PrinterAuthorizationForm from "../components/printers/printer-authorization-form";
+import Loader from "../../components/utils/loader";
+import BusyButton from "../../components/utils/busy-button";
+import { useMyModal } from "../../components/utils/modal";
+import SetActiveOrganization from "../../components/gateways/set-active-organization";
+import Listing from "../../components/listings/wrapper";
+import Progress from "../../components/printers/progress";
+import WebcamStream from "../../components/printers/webcam-stream";
+import PrinterState from "../../components/printers/printer-state";
+import PrinterAuthorizationForm from "../../components/printers/printer-authorization-form";
 import {
   PrinterProperties,
   PrinterProgress,
   PrinterConnectionStatus
-} from "../components/printers/printer-data";
-import formatters from "../services/formatters";
+} from "../../components/printers/printer-data";
+import formatters from "../../services/formatters";
 
-import { getJobsPage, clearJobsPages } from "../actions/printjobs";
+import { getJobsPage, clearJobsPages } from "../../actions/printjobs";
 import {
   loadAndQueuePrinter,
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
   setWebcamRefreshInterval
-} from "../actions/printers";
+} from "../../actions/printers";
 
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,

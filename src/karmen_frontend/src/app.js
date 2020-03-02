@@ -10,28 +10,28 @@ import AuthenticatedRoute from "./components/authenticated-route";
 import UnauthenticatedRoute from "./components/unauthenticated-route";
 import ForceLogoutRoute from "./components/force-logout-route";
 
-import Login from "./routes/login";
-import Register from "./routes/register";
-import RegisterConfirmation from "./routes/register-confirmation";
-import RequestPasswordReset from "./routes/request-password-reset";
-import ResetPassword from "./routes/reset-password";
-import Page404 from "./routes/page404";
-import AppRoot from "./routes/app-root";
-import OrganizationRoot from "./routes/organization-root";
-import PrinterList from "./routes/printer-list";
-import GcodeList from "./routes/gcode-list";
-import GcodeDetail from "./routes/gcode-detail";
-import PrinterDetail from "./routes/printer-detail";
-import PrinterSettings from "./routes/printer-settings";
-import AddApiToken from "./routes/add-api-token";
-import AddPrinter from "./routes/add-printer";
-import AddGcode from "./routes/add-gcode";
-import AddUser from "./routes/add-user";
-import OrganizationSettings from "./routes/organization-settings";
-import UserPreferences from "./routes/user-preferences";
+import Login from "./routes/unauthorized/login";
+import Register from "./routes/unauthorized/register";
+import RegisterConfirmation from "./routes/unauthorized/register-confirmation";
+import RequestPasswordReset from "./routes/unauthorized/request-password-reset";
+import ResetPassword from "./routes/unauthorized/reset-password";
+import OrganizationRoot from "./routes/organizations/organization-root";
+import OrganizationSettings from "./routes/organizations/organization-settings";
+import OrganizationProperties from "./routes/organizations/organization-properties";
+import AddPrinter from "./routes/organizations/add-printer";
+import AddUser from "./routes/organizations/add-user";
+import PrinterList from "./routes/printers/printer-list";
+import PrinterDetail from "./routes/printers/printer-detail";
+import PrinterSettings from "./routes/printers/printer-settings";
+import GcodeList from "./routes/gcodes/gcode-list";
+import GcodeDetail from "./routes/gcodes/gcode-detail";
+import AddGcode from "./routes/gcodes/add-gcode";
+import AddApiToken from "./routes/user/add-api-token";
+import UserPreferences from "./routes/user/user-preferences";
 import ManageOrganizations from "./routes/manage-organizations";
 import AddOrganization from "./routes/add-organization";
-import OrganizationProperties from "./routes/organization-properties";
+import Page404 from "./routes/page404";
+import AppRoot from "./routes/app-root";
 
 import {
   loadUserFromLocalStorage,
