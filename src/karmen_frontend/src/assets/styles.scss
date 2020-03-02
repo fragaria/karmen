@@ -48,6 +48,10 @@ textarea {
   line-height: inherit;
 }
 
+input:disabled {
+  background: $border-color-light!important
+}
+
 .honeypot-field {
   position: absolute !important;
   top: -30em !important;
