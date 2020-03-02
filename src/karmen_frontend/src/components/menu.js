@@ -57,16 +57,12 @@ class Menu extends React.Component {
       switchOrganization
     } = this.props;
     const { navigation, orgListExpanded } = this.state;
-
     const orgList = organizations
       ? Object.values(organizations)
           .sort((o, p) =>
             o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
           )
           .map(o => {
-            if (activeOrganization && o.uuid === activeOrganization.uuid) {
-              return undefined;
-            }
             return (
               <button
                 className="dropdown-item"

@@ -33,16 +33,18 @@ const Printers = ({
         onPrinterDelete={onPrinterDelete}
       />
 
-      <div className="container">
-        <br />
-        <br />
-        <strong>Network scan</strong>
-        <NetworkScan
-          networkInterface={networkInterface}
-          onNetworkInterfaceChange={onNetworkInterfaceChange}
-          scanNetwork={scanNetwork}
-        />
-      </div>
+      {!window.env.IS_CLOUD_INSTALL && (
+        <div className="container">
+          <br />
+          <br />
+          <strong>Network scan</strong>
+          <NetworkScan
+            networkInterface={networkInterface}
+            onNetworkInterfaceChange={onNetworkInterfaceChange}
+            scanNetwork={scanNetwork}
+          />
+        </div>
+      )}
     </>
   );
 };
