@@ -1179,8 +1179,10 @@ select {
     grid-gap: $spacing-default;
 
     .printer-detail-stream {
-      padding-top: $spacing-default*3.8;
       grid-area: stream;
+      @include plumber(
+        $leading-top: 14,
+      );
     }
 
     .printer-detail-meta {
