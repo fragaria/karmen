@@ -218,11 +218,15 @@ footer {
     flex-direction: column;
     align-items: center;
     background: $bg-color;
-    font-size: $navigation-font-size-xs;
     padding: 10rem 0;
-    line-height: 2;
     overflow: auto;
     @include blurred-bg(.95);
+    @include plumber(
+      $font-size: $navigation-font-size-xs,
+      $leading-top: 9,
+      $leading-bottom: 10,
+      $line-height: 5
+    );
   }
 
   .navigation-toggle {
@@ -247,8 +251,10 @@ footer {
       $leading-bottom: 0
     );
 
-    .icon-menu {
-      padding-right: $base-unit;
+    @media (min-width: $screen-sm-min) {
+      .icon-menu {
+        padding-right: $base-unit;
+      }
     }
   }
 
@@ -317,7 +323,7 @@ footer {
   font-family: $mono;
 
   @include plumber(
-    $font-size: 3.5,
+    $font-size: 3,
     $leading-bottom: 3,
     $line-height: 4
   );
@@ -398,8 +404,8 @@ footer {
   span {
     @include plumber(
       $font-size: 2.5,
-      $leading-top: 8,
-      $leading-bottom: 0
+      $leading-top: 16,
+      $leading-bottom: 8
     );
   }
 }
