@@ -12,10 +12,10 @@ const AppRoot = ({ activeOrganization, organizations, switchOrganization }) => {
     Object.keys(organizations).length > 0
   ) {
     const firstOrg = Object.values(organizations)[0];
-    switchOrganization(firstOrg.uuid, firstOrg.slug);
+    switchOrganization(firstOrg.uuid);
     return <Loader />;
   }
-  return <Redirect to={`/${activeOrganization.slug}`} />;
+  return <Redirect to={`/${activeOrganization.uuid}`} />;
 };
 
 export default connect(
@@ -24,6 +24,6 @@ export default connect(
     activeOrganization: state.users.me.activeOrganization
   }),
   dispatch => ({
-    switchOrganization: (uuid, slug) => dispatch(switchOrganization(uuid, slug))
+    switchOrganization: uuid => dispatch(switchOrganization(uuid))
   })
 )(AppRoot);

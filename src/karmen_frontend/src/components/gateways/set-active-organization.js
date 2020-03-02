@@ -9,19 +9,16 @@ const SetActiveOrganization = ({
   activeOrganization,
   switchOrganization
 }) => {
-  if (match.params.orgslug) {
-    if (!organizations[match.params.orgslug]) {
+  if (match.params.orguuid) {
+    if (!organizations[match.params.orguuid]) {
       return <Redirect to="/page-404" />;
     }
     // This should be catching a situation after direct URL access
     if (
       !activeOrganization ||
-      activeOrganization.slug !== match.params.orgslug
+      activeOrganization.uuid !== match.params.orguuid
     ) {
-      switchOrganization(
-        organizations[match.params.orgslug].uuid,
-        match.params.orgslug
-      );
+      switchOrganization(organizations[match.params.orguuid].uuid);
     }
     return <></>;
   }
@@ -35,8 +32,7 @@ export default withRouter(
       activeOrganization: state.users.me.activeOrganization
     }),
     dispatch => ({
-      switchOrganization: (uuid, slug) =>
-        dispatch(switchOrganization(uuid, slug))
+      switchOrganization: uuid => dispatch(switchOrganization(uuid))
     })
   )(SetActiveOrganization)
 );

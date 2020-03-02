@@ -2,7 +2,6 @@ import uuid as guid
 import unittest
 import random
 import string
-from slugify import slugify
 
 from server import app
 from server.database import organization_roles
@@ -57,28 +56,10 @@ class CreateOrganizationRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 201)
             self.assertTrue("uuid" in response.json)
             self.assertEqual(response.json["name"], " %s" % name.upper())
-            self.assertEqual(response.json["slug"], slugify(name, lowercase=True))
             response = c.get("/organizations/%s/users" % response.json["uuid"])
             self.assertTrue("items" in response.json)
             self.assertEqual(response.json["items"][0]["uuid"], UUID_USER)
             self.assertEqual(response.json["items"][0]["role"], "admin")
-
-    def test_fail_org_name_conflict(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            name = get_random_name()
-            response = c.post(
-                "/organizations",
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": " %s" % name.upper()},
-            )
-            self.assertEqual(response.status_code, 201)
-            response = c.post(
-                "/organizations",
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": name.upper()},
-            )
-            self.assertEqual(response.status_code, 409)
 
 
 class PatchOrganizationRoute(unittest.TestCase):
@@ -148,7 +129,6 @@ class PatchOrganizationRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["uuid"], self.uuid)
             self.assertEqual(response.json["name"], " %s" % name)
-            self.assertEqual(response.json["slug"], slugify(name, lowercase=True))
 
     def test_org_same_name(self):
         with app.test_client() as c:
@@ -166,23 +146,6 @@ class PatchOrganizationRoute(unittest.TestCase):
                 json={"name": name},
             )
             self.assertEqual(response.status_code, 200)
-
-    def test_fail_org_name_conflict(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            name = get_random_name()
-            response = c.post(
-                "/organizations",
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": name},
-            )
-            self.assertEqual(response.status_code, 201)
-            response = c.patch(
-                "/organizations/%s" % self.uuid,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": name},
-            )
-            self.assertEqual(response.status_code, 409)
 
 
 class ListOrganizationsRoute(unittest.TestCase):

@@ -99,7 +99,7 @@ class OrganizationProperties extends React.Component {
 export default connect(
   (state, ownProps) => ({
     organization: state.organizations.list.find(
-      o => o.slug === ownProps.match.params.orgslug
+      o => o.uuid === ownProps.match.params.orguuid
     )
   }),
   dispatch => ({

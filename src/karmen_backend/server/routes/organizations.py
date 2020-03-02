@@ -1,5 +1,4 @@
 import uuid as guid
-from slugify import slugify
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user, fresh_jwt_required
@@ -20,15 +19,11 @@ def create_organization():
     if not name:
         return abort(make_response("", 400))
     uuid = guid.uuid4()
-    slug = slugify(name)
     user = get_current_user()
-    existing = organizations.get_by_slug(slug)
-    if existing:
-        return abort(make_response("", 409))
 
-    organizations.add_organization(uuid=uuid, name=name, slug=slug)
+    organizations.add_organization(uuid=uuid, name=name)
     organization_roles.set_organization_role(uuid, user["uuid"], "admin")
-    return jsonify({"uuid": uuid, "name": name, "slug": slug,}), 201
+    return jsonify({"uuid": uuid, "name": name}), 201
 
 
 @app.route("/organizations/<org_uuid>", methods=["PATCH"])
@@ -46,12 +41,8 @@ def update_organization(org_uuid):
     existing = organizations.get_by_uuid(org_uuid)
     if not existing:
         return abort(make_response("", 404))
-    slug = slugify(name)
-    existing = organizations.get_by_slug(slug)
-    if existing and existing["uuid"] != org_uuid:
-        return abort(make_response("", 409))
-    organizations.update_organization(uuid=org_uuid, name=name, slug=slug)
-    return jsonify({"uuid": org_uuid, "name": name, "slug": slug,}), 200
+    organizations.update_organization(uuid=org_uuid, name=name)
+    return jsonify({"uuid": org_uuid, "name": name}), 200
 
 
 @app.route("/organizations", methods=["GET"])
@@ -62,11 +53,6 @@ def list_organizations():
     item_list = []
     for org in organization_roles.get_by_user_uuid(user["uuid"]):
         item_list.append(
-            {
-                "uuid": org["uuid"],
-                "name": org["name"],
-                "slug": org["slug"],
-                "role": org["role"],
-            }
+            {"uuid": org["uuid"], "name": org["name"], "role": org["role"],}
         )
     return jsonify({"items": item_list}), 200

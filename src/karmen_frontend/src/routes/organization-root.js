@@ -5,15 +5,15 @@ import SetActiveOrganization from "../components/gateways/set-active-organizatio
 
 const OrganizationRoot = ({ organizations, match }) => {
   if (
-    !organizations[match.params.orgslug] ||
-    match.params.orgslug === "page-404"
+    !organizations[match.params.orguuid] ||
+    match.params.orguuid === "page-404"
   ) {
     return <Redirect to="/page-404" />;
   }
   return (
     <>
       <SetActiveOrganization />
-      <Redirect to={`/${match.params.orgslug}/printers`} />
+      <Redirect to={`/${match.params.orguuid}/printers`} />
     </>
   );
 };

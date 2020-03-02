@@ -95,7 +95,7 @@ class AddUser extends React.Component {
     const { form, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
-      return <Redirect to={`/${match.params.orgslug}/settings/users`} />;
+      return <Redirect to={`/${match.params.orguuid}/settings/users`} />;
     }
     return (
       <>
@@ -142,7 +142,7 @@ class AddUser extends React.Component {
                       Add user
                     </BusyButton>{" "}
                     <Link
-                      to={`/${match.params.orgslug}/settings/users`}
+                      to={`/${match.params.orguuid}/settings/users`}
                       className="btn btn-plain"
                     >
                       Cancel
@@ -160,5 +160,5 @@ class AddUser extends React.Component {
 
 export default connect(null, (dispatch, ownProps) => ({
   createUser: (email, role) =>
-    dispatch(addUser(ownProps.match.params.orgslug, email, role))
+    dispatch(addUser(ownProps.match.params.orguuid, email, role))
 }))(AddUser);

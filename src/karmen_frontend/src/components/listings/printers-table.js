@@ -42,7 +42,7 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   );
 };
 
-const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
+const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
   const deletePrinterModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
   return (
@@ -50,7 +50,7 @@ const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
       <Link
         className="list-item-content"
         key={printer.uuid}
-        to={`/${orgslug}/printers/${printer.uuid}`}
+        to={`/${orguuid}/printers/${printer.uuid}`}
       >
         <span className="list-item-title">{printer.name}</span>
         <span className="text-mono">
@@ -77,7 +77,7 @@ const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
         <span className="dropdown-title">{printer.name}</span>
         <Link
           className="dropdown-item"
-          to={`/${orgslug}/printers/${printer.uuid}/settings`}
+          to={`/${orguuid}/printers/${printer.uuid}/settings`}
         >
           <i className="icon-edit"></i>
           Printer settings
@@ -103,7 +103,7 @@ const PrintersTableRow = ({ orgslug, printer, onPrinterDelete }) => {
 };
 
 const PrintersTable = ({
-  orgslug,
+  orguuid,
   onPrinterDelete,
   loadPrinters,
   printersLoaded,
@@ -122,7 +122,7 @@ const PrintersTable = ({
         return (
           <PrintersTableRow
             key={p.uuid}
-            orgslug={orgslug}
+            orguuid={orguuid}
             printer={p}
             onPrinterDelete={onPrinterDelete}
           />

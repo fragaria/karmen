@@ -35,11 +35,10 @@ export const loadUserFromToken = token => dispatch => {
       username: decoded.user_claims && decoded.user_claims.username,
       email: decoded.user_claims && decoded.user_claims.email,
       organizations: {
-        [decoded.user_claims && decoded.user_claims.organization_slug]: {
+        [decoded.user_claims && decoded.user_claims.organization_uuid]: {
           role: "user",
           uuid: decoded.user_claims && decoded.user_claims.organization_uuid,
-          name: decoded.user_claims && decoded.user_claims.organization_name,
-          slug: decoded.user_claims && decoded.user_claims.organization_slug
+          name: decoded.user_claims && decoded.user_claims.organization_name
         }
       },
       systemRole: "user",
@@ -70,13 +69,12 @@ export const loadUserFromLocalStorage = () => dispatch => {
   return Promise.resolve(dispatch(loadUserData(profile)));
 };
 
-export const switchOrganization = (uuid, slug) => dispatch => {
+export const switchOrganization = uuid => dispatch => {
   dispatch({
     type: "USER_SWITCH_ORGANIZATION",
     payload: {
       data: {
-        uuid,
-        slug
+        uuid
       }
     }
   });
@@ -90,16 +88,11 @@ export const loadUserData = userData => dispatch => {
     }
   });
   if (userData.activeOrganization) {
-    dispatch(
-      switchOrganization(
-        userData.activeOrganization.uuid,
-        userData.activeOrganization.slug
-      )
-    );
+    dispatch(switchOrganization(userData.activeOrganization.uuid));
   } else {
     const org =
       userData.organizations && Object.values(userData.organizations)[0];
-    dispatch(switchOrganization(org.uuid, org.slug));
+    dispatch(switchOrganization(org.uuid));
   }
 };
 

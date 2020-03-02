@@ -236,7 +236,7 @@ class GcodeDetail extends React.Component {
 
           <div className="cta-box text-center">
             <Link
-              to={`/${match.params.orgslug}/gcodes`}
+              to={`/${match.params.orguuid}/gcodes`}
               className="btn btn-plain"
             >
               Back to listing
@@ -261,11 +261,11 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinters: () =>
       dispatch(
-        loadPrinters(ownProps.match.params.orgslug, ["job", "status", "webcam"])
+        loadPrinters(ownProps.match.params.orguuid, ["job", "status", "webcam"])
       ),
-    getGcode: id => dispatch(loadGcode(ownProps.match.params.orgslug, id, [])),
+    getGcode: id => dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
     printGcode: (id, printer) =>
-      dispatch(addPrintJob(ownProps.match.params.orgslug, id, printer)),
+      dispatch(addPrintJob(ownProps.match.params.orguuid, id, printer)),
     downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename))
   })
 )(GcodeDetail);

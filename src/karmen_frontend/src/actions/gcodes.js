@@ -12,7 +12,7 @@ export const clearGcodesPages = printerUuid => dispatch => {
 export const getGcodesPage = createActionThunk(
   "GCODES_LOAD_PAGE",
   (
-    orgslug,
+    orguuid,
     startWith = null,
     orderBy = null,
     filter = null,
@@ -21,11 +21,11 @@ export const getGcodesPage = createActionThunk(
     { dispatch, getState }
   ) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getGcodes, dispatch)(
-      users.me.organizations[orgslug].uuid,
+      orguuid,
       startWith,
       orderBy,
       filter,
@@ -47,13 +47,13 @@ export const getGcodesPage = createActionThunk(
 
 export const loadGcode = createActionThunk(
   "GCODE_LOAD_DETAIL",
-  (orgslug, uuid, fields = [], { dispatch, getState }) => {
+  (orguuid, uuid, fields = [], { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getGcode, dispatch)(
-      users.me.organizations[orgslug].uuid,
+      orguuid,
       uuid,
       fields
     );
@@ -69,13 +69,13 @@ export const downloadGcode = createActionThunk(
 
 export const deleteGcode = createActionThunk(
   "GCODES_DELETE",
-  (orgslug, uuid, { dispatch, getState }) => {
+  (orguuid, uuid, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.deleteGcode, dispatch)(
-      users.me.organizations[orgslug].uuid,
+      orguuid,
       uuid
     ).then(r => {
       if (r.status !== 204) {
@@ -88,13 +88,13 @@ export const deleteGcode = createActionThunk(
 
 export const uploadGcode = createActionThunk(
   "GCODES_UPLOAD",
-  (orgslug, path, toUpload, { dispatch, getState }) => {
+  (orguuid, path, toUpload, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.uploadGcode, dispatch)(
-      users.me.organizations[orgslug].uuid,
+      orguuid,
       path,
       toUpload
     );

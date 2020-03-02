@@ -44,13 +44,13 @@ const Settings = ({ match, ...rest }) => {
               <Route
                 path={`${match.url}/printers`}
                 render={props => (
-                  <PrintersTab {...rest} orgslug={match.params.orgslug} />
+                  <PrintersTab {...rest} orguuid={match.params.orguuid} />
                 )}
               />
               <Route
                 path={`${match.url}/users`}
                 render={props => (
-                  <UsersTab {...rest} orgslug={match.params.orgslug} />
+                  <UsersTab {...rest} orguuid={match.params.orguuid} />
                 )}
               />
             </Switch>
@@ -72,24 +72,24 @@ export default connect(
   }),
   (dispatch, ownProps) => ({
     onPrinterDelete: uuid =>
-      dispatch(deletePrinter(ownProps.match.params.orgslug, uuid)),
+      dispatch(deletePrinter(ownProps.match.params.orguuid, uuid)),
     loadPrinters: fields =>
-      dispatch(loadPrinters(ownProps.match.params.orgslug, fields)),
+      dispatch(loadPrinters(ownProps.match.params.orguuid, fields)),
     onNetworkInterfaceChange: networkInterface =>
       dispatch(setNetworkInterface(networkInterface)),
     scanNetwork: networkInterface =>
       dispatch(
-        enqueueTask(ownProps.match.params.orgslug, "scan_network", {
+        enqueueTask(ownProps.match.params.orguuid, "scan_network", {
           network_interface: networkInterface
         })
       ),
     loadUsers: fields =>
-      dispatch(getUsers(ownProps.match.params.orgslug, fields)),
+      dispatch(getUsers(ownProps.match.params.orguuid, fields)),
     onUserChange: (uuid, role) =>
-      dispatch(patchUser(ownProps.match.params.orgslug, uuid, role)),
+      dispatch(patchUser(ownProps.match.params.orguuid, uuid, role)),
     onUserDelete: uuid =>
-      dispatch(deleteUser(ownProps.match.params.orgslug, uuid)),
+      dispatch(deleteUser(ownProps.match.params.orguuid, uuid)),
     onResendInvitation: (email, role) =>
-      dispatch(addUser(ownProps.match.params.orgslug, email, role))
+      dispatch(addUser(ownProps.match.params.orguuid, email, role))
   })
 )(Settings);

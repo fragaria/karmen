@@ -16,10 +16,10 @@ const OrganizationsTableRow = ({
       <Link
         className="list-item-content"
         key={organization.uuid}
-        to={`/${organization.slug}`}
+        to={`/${organization.uuid}`}
       >
         <span className="list-item-title">{organization.name}</span>
-        <span className="text-mono">{organization.slug}</span>
+        <span className="text-mono">{organization.uuid}</span>
       </Link>
 
       <CtaDropdown
@@ -32,7 +32,7 @@ const OrganizationsTableRow = ({
           <span className="dropdown-title">{organization.name}</span>
           <Link
             className="dropdown-item"
-            to={`/organizations/${organization.slug}/settings`}
+            to={`/organizations/${organization.uuid}/settings`}
           >
             <i className="icon-edit"></i>
             Organization Settings

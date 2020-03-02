@@ -56,7 +56,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
 };
 
 const GcodeTableRow = ({
-  orgslug,
+  orguuid,
   analysis,
   uuid,
   size,
@@ -84,7 +84,7 @@ const GcodeTableRow = ({
 
   return (
     <div className="list-item">
-      <Link className="list-item-content" to={`/${orgslug}/gcodes/${uuid}`}>
+      <Link className="list-item-content" to={`/${orguuid}/gcodes/${uuid}`}>
         <span className="list-item-subtitle">
           {path}
           {path ? "/" : ""}
@@ -167,7 +167,7 @@ class GcodeList extends React.Component {
           <h1 className="main-title">
             G-Codes
             <Link
-              to={`/${match.params.orgslug}/add-gcode`}
+              to={`/${match.params.orguuid}/add-gcode`}
               className="btn btn-sm"
             >
               + Upload a g-code
@@ -180,7 +180,7 @@ class GcodeList extends React.Component {
             return (
               <GcodeTableRow
                 key={g.uuid}
-                orgslug={match.params.orgslug}
+                orguuid={match.params.orguuid}
                 {...g}
                 printGcode={printGcode}
                 onSchedulePrint={(gcodeUuid, printerUuid) => {
@@ -244,12 +244,12 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinters: () =>
       dispatch(
-        loadPrinters(ownProps.match.params.orgslug, ["job", "status", "webcam"])
+        loadPrinters(ownProps.match.params.orguuid, ["job", "status", "webcam"])
       ),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>
       dispatch(
         getGcodesPage(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           startWith,
           orderBy,
           filter,
@@ -259,8 +259,8 @@ export default connect(
       ),
     clearGcodesPages: () => dispatch(clearGcodesPages()),
     deleteGcode: uuid =>
-      dispatch(deleteGcode(ownProps.match.params.orgslug, uuid)),
+      dispatch(deleteGcode(ownProps.match.params.orguuid, uuid)),
     printGcode: (uuid, printer) =>
-      dispatch(addPrintJob(ownProps.match.params.orgslug, uuid, printer))
+      dispatch(addPrintJob(ownProps.match.params.orguuid, uuid, printer))
   })
 )(GcodeList);

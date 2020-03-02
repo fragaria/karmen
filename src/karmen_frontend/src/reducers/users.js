@@ -138,7 +138,7 @@ export default (
     case "USER_SWITCH_ORGANIZATION":
       if (action.payload.data && state.me.organizations) {
         const newActiveOrganization =
-          state.me.organizations[action.payload.data.slug];
+          state.me.organizations[action.payload.data.uuid];
         if (newActiveOrganization) {
           return Object.assign({}, state, {
             me: Object.assign({}, state.me, {
@@ -215,11 +215,11 @@ export default (
         list: [].concat(state.list)
       });
     case "ORGANIZATIONS_ADD_SUCCEEDED":
-      if (action.payload && action.payload.data && action.payload.data.slug) {
+      if (action.payload && action.payload.data && action.payload.data.uuid) {
         return Object.assign({}, state, {
           me: Object.assign({}, state.me, {
             organizations: Object.assign({}, state.me.organizations, {
-              [action.payload.data.slug]: {
+              [action.payload.data.uuid]: {
                 ...action.payload.data,
                 role: "admin"
               }
@@ -234,12 +234,12 @@ export default (
         o => o.uuid === action.payload.data.uuid
       );
       if (existing) {
-        newOrganizations[action.payload.data.slug] = Object.assign(
+        newOrganizations[action.payload.data.uuid] = Object.assign(
           {},
-          state.me.organizations[existing.slug],
+          state.me.organizations[existing.uuid],
           action.payload.data
         );
-        delete newOrganizations[existing.slug];
+        delete newOrganizations[existing.uuid];
       }
       let newActiveOrganization = state.me.activeOrganization;
       if (state.me.activeOrganization.uuid === action.payload.data.uuid) {

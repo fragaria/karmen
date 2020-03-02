@@ -5,7 +5,7 @@ import PrintersTable from "../../listings/printers-table";
 import NetworkScan from "../../forms/network-scan";
 
 const Printers = ({
-  orgslug,
+  orguuid,
   loadPrinters,
   printersList,
   printersLoaded,
@@ -19,14 +19,14 @@ const Printers = ({
       <div className="container">
         <div className="react-tabs__tab-panel__header">
           <h1 className="react-tabs__tab-panel__header__title">Printers</h1>
-          <Link to={`/${orgslug}/add-printer`} className="btn btn-sm">
+          <Link to={`/${orguuid}/add-printer`} className="btn btn-sm">
             <span>+ Add a printer</span>
           </Link>
         </div>
       </div>
 
       <PrintersTable
-        orgslug={orgslug}
+        orguuid={orguuid}
         loadPrinters={loadPrinters}
         printersList={printersList}
         printersLoaded={printersLoaded}

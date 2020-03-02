@@ -534,15 +534,12 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue("default-organization" in response.json["organizations"])
+            self.assertTrue(UUID_ORG in response.json["organizations"])
             self.assertTrue(
-                response.json["organizations"]["default-organization"]["name"]
+                response.json["organizations"][UUID_ORG]["name"]
                 == "Default organization"
             )
-            self.assertTrue(
-                response.json["organizations"]["default-organization"]["role"]
-                == "admin"
-            )
+            self.assertTrue(response.json["organizations"][UUID_ORG]["role"] == "admin")
 
     def test_returns_fresh_access_token_email(self):
         with app.test_client() as c:
@@ -579,15 +576,12 @@ class AuthenticateRoute(unittest.TestCase):
             self.assertTrue("system_role" in response.json)
             self.assertTrue("force_pwd_change" in response.json)
             self.assertTrue("organizations" in response.json)
-            self.assertTrue("default-organization" in response.json["organizations"])
+            self.assertTrue(UUID_ORG in response.json["organizations"])
             self.assertTrue(
-                response.json["organizations"]["default-organization"]["name"]
+                response.json["organizations"][UUID_ORG]["name"]
                 == "Default organization"
             )
-            self.assertTrue(
-                response.json["organizations"]["default-organization"]["role"]
-                == "admin"
-            )
+            self.assertTrue(response.json["organizations"][UUID_ORG]["role"] == "admin")
 
 
 class AuthenticateFreshRoute(unittest.TestCase):

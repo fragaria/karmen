@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import UsersTable from "../../listings/users-table";
 
 const Users = ({
-  orgslug,
+  orguuid,
   currentUuid,
   loadUsers,
   usersLoaded,
@@ -18,7 +18,7 @@ const Users = ({
       <div className="container">
         <div className="react-tabs__tab-panel__header">
           <h1 className="react-tabs__tab-panel__header__title">Users</h1>
-          <Link to={`/${orgslug}/add-user`} className="btn btn-sm">
+          <Link to={`/${orguuid}/add-user`} className="btn btn-sm">
             <span>+ Add a user</span>
           </Link>
         </div>

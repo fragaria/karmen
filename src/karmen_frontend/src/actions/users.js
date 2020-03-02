@@ -10,13 +10,13 @@ export const clearUsers = () => dispatch => {
 
 export const getUsers = createActionThunk(
   "USERS_LOAD",
-  (orgslug, fields = [], { dispatch, getState }) => {
+  (orguuid, fields = [], { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getUsers, dispatch)(
-      users.me.organizations[orgslug].uuid,
+      orguuid,
       fields
     ).then(r => {
       return {
@@ -29,28 +29,24 @@ export const getUsers = createActionThunk(
 
 export const addUser = createActionThunk(
   "USERS_ADD",
-  (orgslug, email, role, { dispatch, getState }) => {
+  (orguuid, email, role, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
-    return retryIfUnauthorized(backend.addUser, dispatch)(
-      users.me.organizations[orgslug].uuid,
-      email,
-      role
-    );
+    return retryIfUnauthorized(backend.addUser, dispatch)(orguuid, email, role);
   }
 );
 
 export const patchUser = createActionThunk(
   "USERS_EDIT",
-  (orgslug, uuid, role, { dispatch, getState }) => {
+  (orguuid, uuid, role, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.patchUser, dispatch)(
-      users.me.organizations[orgslug].uuid,
+      orguuid,
       uuid,
       role
     );
@@ -59,14 +55,11 @@ export const patchUser = createActionThunk(
 
 export const deleteUser = createActionThunk(
   "USERS_DELETE",
-  (orgslug, uuid, { dispatch, getState }) => {
+  (orguuid, uuid, { dispatch, getState }) => {
     const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orgslug]) {
+    if (!users.me.organizations || !users.me.organizations[orguuid]) {
       return Promise.resolve({});
     }
-    return retryIfUnauthorized(backend.deleteUser, dispatch)(
-      users.me.organizations[orgslug].uuid,
-      uuid
-    );
+    return retryIfUnauthorized(backend.deleteUser, dispatch)(orguuid, uuid);
   }
 );

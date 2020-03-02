@@ -70,9 +70,9 @@ class Menu extends React.Component {
               <Link
                 className="dropdown-item"
                 key={o.uuid}
-                to={`/${o.slug}`}
+                to={`/${o.uuid}`}
                 onClick={() => {
-                  switchOrganization(o.uuid, o.slug);
+                  switchOrganization(o.uuid);
                   this.setState({ orgListExpanded: false });
                 }}
               >
@@ -133,7 +133,7 @@ class Menu extends React.Component {
                   </li>
                   <li>
                     <Link
-                      to={`/${activeOrganization.slug}/printers`}
+                      to={`/${activeOrganization.uuid}/printers`}
                       onClick={() => this.setState({ navigation: false })}
                     >
                       Printers
@@ -141,7 +141,7 @@ class Menu extends React.Component {
                   </li>
                   <li>
                     <Link
-                      to={`/${activeOrganization.slug}/gcodes`}
+                      to={`/${activeOrganization.uuid}/gcodes`}
                       onClick={() => this.setState({ navigation: false })}
                     >
                       G-Codes
@@ -150,7 +150,7 @@ class Menu extends React.Component {
                   {role === "admin" && (
                     <li>
                       <Link
-                        to={`/${activeOrganization.slug}/settings`}
+                        to={`/${activeOrganization.uuid}/settings`}
                         onClick={() => this.setState({ navigation: false })}
                       >
                         Settings
@@ -218,8 +218,7 @@ export default withRouter(
     }),
     dispatch => ({
       logout: () => dispatch(clearUserIdentity()),
-      switchOrganization: (uuid, slug) =>
-        dispatch(switchOrganization(uuid, slug))
+      switchOrganization: uuid => dispatch(switchOrganization(uuid))
     })
   )(Menu)
 );

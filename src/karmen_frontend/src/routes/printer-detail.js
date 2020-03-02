@@ -150,7 +150,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
 
 class PrintJobRow extends React.Component {
   render() {
-    const { orgslug, gcode_data, started, username } = this.props;
+    const { orguuid, gcode_data, started, username } = this.props;
     if (!gcode_data) {
       return <div className="list-item"></div>;
     }
@@ -160,7 +160,7 @@ class PrintJobRow extends React.Component {
           {gcode_data && gcode_data.available ? (
             <Link
               className="list-item-subtitle"
-              to={`/${orgslug}/gcodes/${gcode_data.uuid}`}
+              to={`/${orguuid}/gcodes/${gcode_data.uuid}`}
             >
               {gcode_data.filename}
             </Link>
@@ -308,7 +308,7 @@ const PrinterDetail = ({
                 <PrintJobRow
                   key={j.uuid}
                   {...j}
-                  orgslug={match.params.orgslug}
+                  orguuid={match.params.orguuid}
                 />
               );
             }}
@@ -319,7 +319,7 @@ const PrinterDetail = ({
           {role === "admin" && (
             <div className="cta-box text-center">
               <Link
-                to={`/${match.params.orgslug}/printers/${printer.uuid}/settings`}
+                to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
               >
                 <button className="btn">Printer settings</button>
               </Link>
@@ -349,7 +349,7 @@ export default connect(
     loadPrinter: () =>
       dispatch(
         loadAndQueuePrinter(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           ["job", "status", "webcam"]
         )
@@ -357,7 +357,7 @@ export default connect(
     changeCurrentJobState: action =>
       dispatch(
         changeCurrentJob(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           action
         )
@@ -365,7 +365,7 @@ export default connect(
     patchPrinter: data =>
       dispatch(
         patchPrinter(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           data
         )
@@ -373,7 +373,7 @@ export default connect(
     setPrinterConnection: state =>
       dispatch(
         setPrinterConnection(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           state
         )
@@ -381,7 +381,7 @@ export default connect(
     loadJobsPage: (startWith, orderBy, filter, limit) =>
       dispatch(
         getJobsPage(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           startWith,
           orderBy,
@@ -392,14 +392,14 @@ export default connect(
     clearJobsPages: () =>
       dispatch(
         clearJobsPages(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid
         )
       ),
     setWebcamRefreshInterval: interval =>
       dispatch(
         setWebcamRefreshInterval(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           interval
         )

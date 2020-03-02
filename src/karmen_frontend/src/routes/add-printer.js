@@ -131,7 +131,7 @@ class AddPrinter extends React.Component {
     const { form, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
-      return <Redirect to={`/${match.params.orgslug}/settings/printers`} />;
+      return <Redirect to={`/${match.params.orguuid}/settings/printers`} />;
     }
     return (
       <>
@@ -171,7 +171,7 @@ class AddPrinter extends React.Component {
                     Add printer
                   </BusyButton>{" "}
                   <Link
-                    to={`/${match.params.orgslug}/settings/printers`}
+                    to={`/${match.params.orguuid}/settings/printers`}
                     className="btn btn-plain"
                   >
                     Cancel
@@ -190,7 +190,7 @@ export default connect(null, (dispatch, ownProps) => ({
   createPrinter: (protocol, hostname, ip, port, path, name, apiKey) =>
     dispatch(
       addPrinter(
-        ownProps.match.params.orgslug,
+        ownProps.match.params.orguuid,
         protocol,
         hostname,
         ip,

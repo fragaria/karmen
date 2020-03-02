@@ -214,10 +214,9 @@ def reset_password():
 def get_user_identity(userdata, token_freshness):
     membership = {}
     for org in organization_roles.get_by_user_uuid(userdata.get("uuid")):
-        membership[org.get("slug")] = {
+        membership[org.get("uuid")] = {
             "uuid": org.get("uuid"),
             "name": org.get("name"),
-            "slug": org.get("slug"),
             "role": org.get("role"),
         }
     return {
@@ -451,7 +450,6 @@ def create_api_token():
             "email": user.get("email"),
             "organization_uuid": organization["uuid"],
             "organization_name": organization["name"],
-            "organization_slug": organization["slug"],
         },
     )
     jti = decode_token(token)["jti"]
@@ -462,11 +460,7 @@ def create_api_token():
         "access_token": token,
         "name": name,
         "jti": jti,
-        "organization": {
-            "uuid": organization["uuid"],
-            "name": organization["name"],
-            "slug": organization["slug"],
-        },
+        "organization": {"uuid": organization["uuid"], "name": organization["name"],},
         "created": datetime.now().isoformat(),
     }
     return jsonify(response), 201

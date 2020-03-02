@@ -23,7 +23,7 @@ class PrinterSettings extends React.Component {
       switch (r.status) {
         case 200:
           this.props.history.push(
-            `/${match.params.orgslug}/printers/${printer.uuid}`
+            `/${match.params.orguuid}/printers/${printer.uuid}`
           );
           return {
             ok: true,
@@ -95,7 +95,7 @@ class PrinterSettings extends React.Component {
               onSubmit={this.changePrinter}
               onCancel={() => {
                 this.props.history.push(
-                  `/${match.params.orgslug}/printers/${printer.uuid}`
+                  `/${match.params.orguuid}/printers/${printer.uuid}`
                 );
               }}
             />
@@ -115,7 +115,7 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinter: () =>
       dispatch(
-        loadPrinter(ownProps.match.params.orgslug, ownProps.match.params.uuid, [
+        loadPrinter(ownProps.match.params.orguuid, ownProps.match.params.uuid, [
           "job",
           "status",
           "webcam"
@@ -124,7 +124,7 @@ export default connect(
     patchPrinter: data =>
       dispatch(
         patchPrinter(
-          ownProps.match.params.orgslug,
+          ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           data
         )
