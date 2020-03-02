@@ -8,6 +8,7 @@ import Loader from "./components/utils/loader";
 import CatchLoginTokenFromUrl from "./components/gateways/catch-login-token-from-url";
 import AuthenticatedRoute from "./components/authenticated-route";
 import UnauthenticatedRoute from "./components/unauthenticated-route";
+import ForceLogoutRoute from "./components/force-logout-route";
 
 import Login from "./routes/login";
 import Register from "./routes/register";
@@ -32,7 +33,10 @@ import ManageOrganizations from "./routes/manage-organizations";
 import AddOrganization from "./routes/add-organization";
 import OrganizationProperties from "./routes/organization-properties";
 
-import { loadUserFromLocalStorage } from "./actions/users-me";
+import {
+  loadUserFromLocalStorage,
+  clearUserIdentity
+} from "./actions/users-me";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -75,7 +79,7 @@ class App extends React.Component {
 
   render() {
     const { initialized } = this.state;
-    const { userState } = this.props;
+    const { userState, logout } = this.props;
     if (!initialized) {
       return (
         <div>
@@ -105,14 +109,16 @@ class App extends React.Component {
                 exact
                 component={Register}
               />
-              <UnauthenticatedRoute
+              <ForceLogoutRoute
                 userState={userState}
+                logout={logout}
                 path="/confirmation"
                 exact
                 component={RegisterConfirmation}
               />
-              <UnauthenticatedRoute
+              <ForceLogoutRoute
                 userState={userState}
+                logout={logout}
                 path="/reset-password"
                 exact
                 component={ResetPassword}
@@ -271,6 +277,7 @@ export default connect(
     userState: state.users.me.currentState
   }),
   dispatch => ({
-    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage())
+    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
+    logout: () => dispatch(clearUserIdentity())
   })
 )(App);

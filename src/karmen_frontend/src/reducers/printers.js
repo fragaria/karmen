@@ -32,7 +32,7 @@ export default (
   },
   action
 ) => {
-  const { printers, activeOrganizationUuid } = state;
+  const { printers, activeOrganizationUuid, webcamQueue, checkQueue } = state;
   let newPrinter, origPrinter;
   switch (action.type) {
     case "PRINTERS_POLL_INTERVAL_SET":
@@ -212,8 +212,15 @@ export default (
         [newImage.uuid]: `${newImage.prefix}${newImage.data}`
       });
       return state;
+    case "USER_CLEAR_ENDED":
+      for (let job in webcamQueue) {
+        clearInterval(job.interval);
+      }
+      for (let job in checkQueue) {
+        clearInterval(job);
+      }
+      return Object.assign({}, initialState);
     case "USER_SWITCH_ORGANIZATION":
-      const { webcamQueue, checkQueue } = state;
       for (let job in webcamQueue) {
         clearInterval(job.interval);
       }
