@@ -61,7 +61,9 @@ class Menu extends React.Component {
 
     const orgList = organizations
       ? Object.values(organizations)
-          .sort((o, p) => (o.name < p.name ? -1 : 1))
+          .sort((o, p) =>
+            o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
+          )
           .map(o => {
             if (activeOrganization && o.uuid === activeOrganization.uuid) {
               return undefined;
@@ -95,7 +97,7 @@ class Menu extends React.Component {
             }}
           >
             <img alt="Karmen logo" src="/karmen-logo.svg" />
-            {userState === "logged-in" && (
+            {userState === "logged-in" && orgList.length > 1 && (
               <OrganizationSwitch
                 organizations={organizations}
                 activeOrganization={activeOrganization}
@@ -128,7 +130,7 @@ class Menu extends React.Component {
                       </span>
                       {username}
                       <p className="navigation-user-organization">
-                        {activeOrganization.name}
+                        {orgList.length > 1 ? activeOrganization.name : " "}
                       </p>
                     </Link>
                   </li>
