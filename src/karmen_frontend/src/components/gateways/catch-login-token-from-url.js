@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { loadUserFromToken } from "../../actions/users-me";
 
-const CatchTokenFromUrl = ({
+const CatchLoginTokenFromUrl = ({
   history,
   location,
   userState,
@@ -30,5 +30,5 @@ export default withRouter(
     dispatch => ({
       loadUserFromToken: accessToken => dispatch(loadUserFromToken(accessToken))
     })
-  )(CatchTokenFromUrl)
+  )(CatchLoginTokenFromUrl)
 );
