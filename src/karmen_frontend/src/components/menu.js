@@ -16,7 +16,6 @@ class Menu extends React.Component {
   render() {
     const OrganizationSwitch = ({
       children,
-      organizations,
       activeOrganization,
       onToggle,
       expanded
@@ -69,17 +68,17 @@ class Menu extends React.Component {
               return undefined;
             }
             return (
-              <Link
+              <button
                 className="dropdown-item"
                 key={o.uuid}
-                to={`/${o.uuid}`}
                 onClick={() => {
                   switchOrganization(o.uuid);
                   this.setState({ orgListExpanded: false });
+                  history.push(`/${o.uuid}`);
                 }}
               >
                 {o.name}
-              </Link>
+              </button>
             );
           })
           .filter(o => !!o)
@@ -99,7 +98,6 @@ class Menu extends React.Component {
             <img alt="Karmen logo" src="/karmen-logo.svg" />
             {userState === "logged-in" && orgList.length > 1 && (
               <OrganizationSwitch
-                organizations={organizations}
                 activeOrganization={activeOrganization}
                 onToggle={() => {
                   this.setState(prevState => ({
