@@ -65,7 +65,9 @@ class Octoprint(PrinterClient):
         # https://stackoverflow.com/questions/22609385/python-requests-library-define-specific-dns
         # until then, we're stuck with IP addresses
 
-        if self.protocol in ["http", "https"]:
+        if self.token is not None:
+            self.network_base = app.config.get("SOCKET_API_URL") % self.token
+        else:
             if self.port is not None:
                 network_host = "%s:%s" % (self.ip, self.port)
             else:
@@ -76,8 +78,6 @@ class Octoprint(PrinterClient):
             self.network_base = urlparse.urljoin(
                 "%s://%s" % (self.protocol, network_host), normalized_path
             )
-        elif self.protocol in ["sock"]:
-            self.network_base = app.config.get("SOCKET_API_URL") % self.token
 
     def get_printer_props(self):
         return self.printer_props

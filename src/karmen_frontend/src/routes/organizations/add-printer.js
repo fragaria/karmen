@@ -74,11 +74,10 @@ class AddPrinter extends React.Component {
     const { createPrinter } = this.props;
     if (!hasErrors) {
       let protocol = "http";
-      let hostname, ip, port, path;
+      let hostname, ip, port, path, token;
       let raw = form.address.val;
       if (window.env.IS_CLOUD_INSTALL) {
-        protocol = "sock";
-        path = raw;
+        token = raw;
       } else {
         if (raw.indexOf("//") === -1) {
           raw = `${protocol}://${raw}`;
@@ -104,6 +103,7 @@ class AddPrinter extends React.Component {
         ip,
         port,
         path,
+        token,
         form.name.val,
         form.apiKey.val
       ).then(r => {
@@ -187,7 +187,7 @@ class AddPrinter extends React.Component {
 }
 
 export default connect(null, (dispatch, ownProps) => ({
-  createPrinter: (protocol, hostname, ip, port, path, name, apiKey) =>
+  createPrinter: (protocol, hostname, ip, port, path, token, name, apiKey) =>
     dispatch(
       addPrinter(
         ownProps.match.params.orguuid,
@@ -196,6 +196,7 @@ export default connect(null, (dispatch, ownProps) => ({
         ip,
         port,
         path,
+        token,
         name,
         apiKey
       )

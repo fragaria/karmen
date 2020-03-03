@@ -445,7 +445,7 @@ class CreateRoute(unittest.TestCase):
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_default_protocol_forbidden(self, mock_get_uri, mock_avahi):
-        app.config["ALLOW_PRINTER_ADD_BY_IP"] = False
+        app.config["IS_CLOUD_INSTALL"] = True
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -463,18 +463,18 @@ class CreateRoute(unittest.TestCase):
         except Exception as e:
             raise e
         finally:
-            app.config["ALLOW_PRINTER_ADD_BY_IP"] = True
+            app.config["IS_CLOUD_INSTALL"] = False
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
-    def test_create_sock_protocol(self, mock_get_uri):
+    def test_create_sock_api(self, mock_get_uri):
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 response = c.post(
                     "/organizations/%s/printers" % UUID_ORG,
                     json={
-                        "protocol": "sock",
-                        "path": "random-access-key",
+                        "protocol": "jttp",
+                        "token": "random-access-key",
                         "name": "random-test-printer-name",
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
@@ -488,7 +488,7 @@ class CreateRoute(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], "")
                 self.assertEqual(response.json["port"], 0)
-                self.assertEqual(response.json["protocol"], "sock")
+                self.assertEqual(response.json["protocol"], "")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
         except Exception as e:
@@ -501,15 +501,14 @@ class CreateRoute(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_sock_forbidden(self, mock_get_uri):
-        app.config["ALLOW_PRINTER_ADD_BY_SOCKET"] = False
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 response = c.post(
                     "/organizations/%s/printers" % UUID_ORG,
                     json={
-                        "protocol": "sock",
-                        "path": "random-access-key",
+                        "protocol": "http",
+                        "token": "random-access-key",
                         "name": "random-test-printer-name",
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
@@ -517,23 +516,19 @@ class CreateRoute(unittest.TestCase):
                 self.assertEqual(response.status_code, 400)
         except Exception as e:
             raise e
-        finally:
-            app.config["ALLOW_PRINTER_ADD_BY_SOCKET"] = True
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
-    def test_create_sock_protocol(self, mock_get_uri, mock_avahi):
+    def test_create_sock_api(self, mock_get_uri, mock_avahi):
+        app.config["IS_CLOUD_INSTALL"] = True
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
-                ip = "192.168.%s" % ".".join(
-                    [str(random.randint(0, 255)) for _ in range(2)]
-                )
                 response = c.post(
                     "/organizations/%s/printers" % UUID_ORG,
                     json={
-                        "protocol": "sock",
-                        "path": "random-access-key",
+                        "protocol": "http",
+                        "token": "random-access-key",
                         "name": "random-test-printer-name",
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
@@ -547,7 +542,7 @@ class CreateRoute(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json["ip"], "")
                 self.assertEqual(response.json["port"], 0)
-                self.assertEqual(response.json["protocol"], "sock")
+                self.assertEqual(response.json["protocol"], "")
                 self.assertEqual(response.json["name"], "random-test-printer-name")
                 self.assertEqual(response.json["client"]["name"], "octoprint")
         except Exception as e:
@@ -557,6 +552,7 @@ class CreateRoute(unittest.TestCase):
                 "/organizations/%s/printers/%s" % (UUID_ORG, uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
+            app.config["IS_CLOUD_INSTALL"] = False
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
@@ -695,15 +691,16 @@ class CreateRoute(unittest.TestCase):
             )
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
-    def test_conflict_socket(self, mock_get):
+    def test_conflict_sock_api(self, mock_get):
+        app.config["IS_CLOUD_INSTALL"] = True
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
                 response = c.post(
                     "/organizations/%s/printers" % UUID_ORG,
                     json={
-                        "protocol": "sock",
-                        "path": "random-token",
+                        "protocol": "http",
+                        "token": "random-token",
                         "name": "random-test-printer-name",
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
@@ -712,8 +709,8 @@ class CreateRoute(unittest.TestCase):
                 response = c.post(
                     "/organizations/%s/printers" % UUID_ORG,
                     json={
-                        "protocol": "sock",
-                        "path": "random-token",
+                        "protocol": "http",
+                        "token": "random-token",
                         "name": "random-test-printer-name",
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
@@ -726,6 +723,7 @@ class CreateRoute(unittest.TestCase):
                 "/organizations/%s/printers/%s" % (UUID_ORG, uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
+            app.config["IS_CLOUD_INSTALL"] = False
 
 
 class DeleteRoute(unittest.TestCase):

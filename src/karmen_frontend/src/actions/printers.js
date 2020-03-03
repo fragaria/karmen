@@ -165,6 +165,7 @@ export const addPrinter = createActionThunk(
     ip,
     port,
     path,
+    token,
     name,
     apiKey,
     { dispatch, getState }
@@ -180,6 +181,7 @@ export const addPrinter = createActionThunk(
       ip,
       port,
       path,
+      token,
       name,
       apiKey
     ).then(data => {

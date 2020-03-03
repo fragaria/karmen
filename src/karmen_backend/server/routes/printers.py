@@ -34,12 +34,11 @@ def make_printer_response(printer, fields):
         "name": printer_inst.name,
         "protocol": printer_inst.protocol,
         "token": printer_inst.token,
+        "hostname": printer_inst.hostname,
+        "ip": printer_inst.ip,
+        "port": printer_inst.port,
+        "path": printer_inst.path,
     }
-    if not app.config["IS_CLOUD_INSTALL"]:
-        data["hostname"] = printer_inst.hostname
-        data["ip"] = printer_inst.ip
-        data["port"] = printer_inst.port
-        data["path"] = printer_inst.path
 
     if "status" in fields:
         data["status"] = printer_inst.status()
@@ -130,15 +129,23 @@ def printer_create(org_uuid):
     api_key = data.get("api_key", None)
     protocol = data.get("protocol", "http")
     path = data.get("path", "")
-    token = data.get("path", None)
+    token = data.get("token", None)
 
-    # for cloud instances, to control adding by IP or socket
-    if not app.config.get("ALLOW_PRINTER_ADD_BY_IP") and protocol in ["http", "https"]:
-        return abort(make_response("This option is disabled in this installation", 400))
-    if not app.config.get("ALLOW_PRINTER_ADD_BY_SOCKET") and protocol in ["sock"]:
-        return abort(make_response("This option is disabled in this installation", 400))
+    if token is not None:
+        if not app.config.get("IS_CLOUD_INSTALL"):
+            return abort(make_response("", 400))
+        if printers.get_printer_by_socket_token(org_uuid, token) is not None:
+            return abort(make_response("", 409))
+        path = ""
+        hostname = ""
+        ip = ""
+        protocol = ""
+        port = 0
 
-    if protocol in ["http", "https"]:
+    else:
+        if app.config.get("IS_CLOUD_INSTALL"):
+            return abort(make_response("", 400))
+
         if (
             (not ip and not hostname)
             or not name
@@ -163,15 +170,7 @@ def printer_create(org_uuid):
             is not None
         ):
             return abort(make_response("", 409))
-    elif protocol == "sock":
-        path = ""
-        hostname = ""
-        ip = ""
-        port = 0
-        if printers.get_printer_by_socket_token(org_uuid, token) is not None:
-            return abort(make_response("", 409))
-    else:
-        return abort(make_response("Invalid protocol", 400))
+
     printer = clients.get_printer_instance(
         {
             "uuid": uuid,

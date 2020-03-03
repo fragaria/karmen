@@ -132,7 +132,7 @@ def get_printer_by_socket_token(org_uuid, token):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         query = sql.SQL(
-            "SELECT {} from printers WHERE protocol = 'sock' AND organization_uuid = {} AND token = {}"
+            "SELECT {} from printers WHERE organization_uuid = {} AND token = {}"
         ).format(
             sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]),
             sql.Literal(org_uuid),
