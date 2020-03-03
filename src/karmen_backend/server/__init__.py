@@ -52,11 +52,9 @@ if app.config.get("FRONTEND_BASE_URL") is None:
 # Put up a default, just to be sure
 app.config["IS_CLOUD_INSTALL"] = app.config.get("IS_CLOUD_INSTALL", False)
 
-if app.config.get("ALLOW_PRINTER_ADD_BY_SOCKET") and not app.config.get(
-    "SOCKET_API_URL"
-):
+if app.config.get("IS_CLOUD_INSTALL") and not app.config.get("SOCKET_API_URL"):
     raise RuntimeError(
-        "Cannot start the application: ALLOW_PRINTER_ADD_BY_SOCKET is on, but no SOCKET_API_URL was specified"
+        "Cannot start the application: IS_CLOUD_INSTALL is on, but no SOCKET_API_URL was specified"
     )
 
 
