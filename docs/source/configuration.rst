@@ -1,0 +1,57 @@
+.. _configuration:
+
+############################################
+Configuration
+############################################
+
+.. toctree::
+  :maxdepth: 2
+
+If you are running Karmen Hub in the :ref:`recommended way <installation>`, you can adjust
+the software's behaviour by plenty of environment variables.
+
+These are interpreted in the ``docker-compose.yml`` file that is part of the release. Be aware
+that if you are working with environment variables in the ``config.local.cfg`` file, the names
+might be different, because the variables there are interpreted from within the docker containers
+and not from the host machine. For example ``KARMEN_REDIS_HOST`` is accessible as ``REDIS_HOST``
+within the container.
+
+.. csv-table::
+    :header: Variable name, Default, Description
+
+    ``KARMEN_CLOUD_MODE``, 1, "If on, the network scan feature is disabled and printers can be connected only via
+    `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_. If off, you can connect to printers via
+    ``http`` or ``https``."
+    ``KARMEN_HOST``, 0.0.0.0, "Host interface on which Karmen listens. This is useful when you need to restrict
+    access."
+    ``KARMEN_PORT``, 80, "Port on which Karmen listens. This is useful if you are running Karmen in an environment
+    shared with other services."
+    ``FLASKR_SETTINGS``, ../config.local.cfg, "Path to the backend configuration file. If you change this, there is
+    a big chance that you have to mount that file as a volume into the containers."
+    ``KARMEN_BACKEND_HOST``, 127.0.0.1, "Host on which the backend API server listens."
+    ``KARMEN_BACKEND_PORT``, 9764, "Port on which the backend API server listens."
+    ``KARMEN_BACKEND_SENTRY_DSN``, None, "`Sentry <https://sentry.io/>`_ DSN to which the backend will log errors.
+    If empty, no logging is happenning."
+    ``KARMEN_SOCKET_API_URL``, None, "Base URL such as ``http://path.to/websocket/api/%s`` where the
+    `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_ is accepting connections. USed only when
+    ``KARMEN_CLOUD_MODE`` is on."
+    ``KARMEN_FRONTEND_BASE_URL``, None, "Base URL of Karmen Hub frontend. This is used as a base URL in e-mails
+    that Karmen Hub is sending ocassionally."
+    ``KARMEN_FRONTEND_HOST``, 127.0.0.1, "Host on which the frontend server listens."
+    ``KARMEN_FRONTEND_PORT``, 9765, "Port on which the frontend server listens."
+    ``KARMEN_FRONTEND_SENTRY_DSN``, None, "`Sentry <https://sentry.io/>`_ DSN to which the frontend will log errors.
+    If empty, no logging is happenning."
+    ``KARMEN_POSTGRES_HOST``, 127.0.0.1, "Host of the `PostgreSQL <https://www.postgresql.org/>`_ database. You
+    don't have to use the dockerized instance bundled within the release."
+    ``KARMEN_POSTGRES_PORT``, 5433, "Port of the `PostgreSQL <https://www.postgresql.org/>`_ database. You
+    don't have to use the dockerized instance bundled within the release."
+    ``KARMEN_POSTGRES_DB``, print3d, "Name of the `PostgreSQL <https://www.postgresql.org/>`_ database. This DB is
+    created for you during the first run."
+    ``KARMEN_POSTGRES_USER``, print3d, "Username for the `PostgreSQL <https://www.postgresql.org/>`_ database. This
+    user is created for you during the first run."
+    ``KARMEN_POSTGRES_PASSWORD``, print3d, "Password for the `PostgreSQL <https://www.postgresql.org/>`_ database.
+    This password is set for the user during the first run."
+    ``KARMEN_REDIS_HOST``, 127.0.0.1, "Host of `Redis <https://redis.io/>`_ storage. You don't have to use the
+    dockerized instance bundled within the release. We don't support protected instances at the moment, though."
+    ``KARMEN_REDIS_PORT``, 6379, "Port of `Redis <https://redis.io/>`_ storage. You don't have to use the dockerized
+    instance bundled within the release. We don't support protected instances at the moment, though."

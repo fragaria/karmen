@@ -30,4 +30,5 @@ The project is released under the `GNU Affero General Public License V3 <http://
   updating
   printing
   internet-access
+  configuration
   faq

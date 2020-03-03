@@ -44,7 +44,7 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
@@ -99,7 +99,7 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
@@ -126,7 +126,7 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg

@@ -38,9 +38,23 @@ the most comfortable way is with docker compose.
 
 ```sh
 $ git clone git@github.com:fragaria/karmen.git && cd karmen/ # get the repo
-$ mkdir tmp && docker-compose up --build
+$ docker-compose up --build
 # GO VISIT http://localhost:4000/
 ```
+
+There are two modes available. They differ in the way the printers are connected to Karmen Hub.
+
+1. **Cloud Mode**
+    This mode is used when Karmen Hub is run as a service on the internet. The printers are connected
+    via [websocket proxy](https://github.com/fragaria/websocket-proxy) that is tunnelling the network connection
+    to Octoprint or other compatible API. In this mode, the autodiscovery feature is disabled. This is
+    the default mode for development.
+1. **Local Mode**
+    This can be used when Karmen Hub is run on premise with access to printers via local network.
+    In this mode, you can add printers by running the autodiscovery task.
+
+You can switch between the modes by using `KARMEN_CLOUD_MODE` environment variable, i. e.
+`KARMEN_CLOUD_MODE=0 docker-compose up --build` will run Karmen Hub in the local mode. 
 
 The network autodiscovery via ARP does not work at all in the dev mode.
 
@@ -53,7 +67,7 @@ Also, there are at least two users available in the fresh dev environment:
 - `test-user` (password *user-password*) - A user with restricted permissions. She cannot manage other users and
 printers.
 
-All of the g-codes are currently shared across all user accounts.
+All of the g-codes are currently shared across all user accounts in an organization.
 
 **Note**: If something suddenly breaks within this setup, try to clean docker with `docker system prune`, it might help.
 
@@ -73,5 +87,5 @@ If the VERSION variable contains a `-` (e. g. `1.2.3-rc.1`), it is considered as
 
 ## License
 
-All of the code herein is copyright 2019 [Fragaria s.r.o.](https://fragaria.cz) and released
+All of the code herein is copyright 2020 [Fragaria s.r.o.](https://fragaria.cz) and released
 under the terms of the [GNU Affero General Public License, version 3](./LICENSE.txt).

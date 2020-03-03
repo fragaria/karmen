@@ -141,6 +141,8 @@ which might be setup with a file like this:
   After=docker.service
 
   [Service]
+  Environment="KARMEN_HOST=127.0.0.1"
+  Environment="KARMEN_PORT=3776"
   User=pi
   Group=users
   ExecStart=/usr/bin/karmen
