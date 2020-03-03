@@ -316,13 +316,17 @@ footer {
     }
   }
 
-  @media (min-width: $screen-sm-min) {
-    .dropdown {
-      .dropdown-items {
+  .dropdown {
+    .dropdown-items {
+      top: 10px;
+
+      @media (min-width: $screen-sm-min) {
         top: $base-unit*4;
       }
+    }
 
-      .dropdown-item {
+    .dropdown-item {
+      @media (min-width: $screen-sm-min) {
         padding: $base-unit*2 $base-unit*3
       }
     }
