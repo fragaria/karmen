@@ -18,6 +18,7 @@ within the container.
 
 .. csv-table::
     :header: Variable name, Default, Description
+    :escape: \
 
     ``KARMEN_CLOUD_MODE``, 1, "If on, the network scan feature is disabled and printers can be connected only via
     `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_. If off, you can connect to printers via
@@ -35,6 +36,9 @@ within the container.
     ``KARMEN_SOCKET_API_URL``, None, "Base URL such as ``http://path.to/websocket/api/%s`` where the
     `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_ is accepting connections. USed only when
     ``KARMEN_CLOUD_MODE`` is on."
+    ``KARMEN_FILES_DIR``, ./karmen-files, "Location of uploaded files. This directory is mounted as a volume into
+    the container."
+    ``KARMEN_DB_DIR``, ./db/data, "Location of PostgreSQL datadir."
     ``KARMEN_FRONTEND_BASE_URL``, None, "Base URL of Karmen Hub frontend. This is used as a base URL in e-mails
     that Karmen Hub is sending ocassionally."
     ``KARMEN_FRONTEND_HOST``, 127.0.0.1, "Host on which the frontend server listens."
@@ -55,3 +59,12 @@ within the container.
     dockerized instance bundled within the release. We don't support protected instances at the moment, though."
     ``KARMEN_REDIS_PORT``, 6379, "Port of `Redis <https://redis.io/>`_ storage. You don't have to use the dockerized
     instance bundled within the release. We don't support protected instances at the moment, though."
+    ``KARMEN_MAILER``, dummy, "Type of mailer that is used in the backend to send e-mail. Supported values are
+    ``dummy``, ``mailgun`` and ``ses``. ``Dummy`` mailer is writing to logfile, others are calling an external mail
+    sending service. Mailers can be further configured in ``KARMEN_MAILER_CONFIG``."
+    ``KARMEN_MAILER_FROM``, Karmen <karmen@karmen.local>, "Default sender of all e-mails."
+    ``KARMEN_MAILER_CONFIG``, ``{}``, "JSON with configuration required by the chosen ``KARMEN_MAILER``.
+    
+    For ``mailgun``: ``{\"mailgun_domain\": \"...\", \"mailgun_api_key\": \"...\"}``.
+    
+    For ``ses``: ``{\"aws_secret_key\": \"...\", \"aws_access_key\": \"...\", \"aws_region\": \"...\"}``"

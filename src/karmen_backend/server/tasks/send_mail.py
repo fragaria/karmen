@@ -16,4 +16,5 @@ def send_mail(recipients, template_key, variables={}):
             template.textbody(),
             template.htmlbody(),
         )
-    app.logger.error("Cannot send email %s" % template_key)
+    else:
+        app.logger.error("Cannot send email %s" % template_key)
