@@ -59,7 +59,7 @@ class Menu extends React.Component {
     const { navigation, orgListExpanded } = this.state;
     const orgList = organizations
       ? Object.values(organizations)
-          .filter(o => o.uuid !== activeOrganization.uuid)
+          .filter(o => activeOrganization && o.uuid !== activeOrganization.uuid)
           .sort((o, p) =>
             o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
           )
