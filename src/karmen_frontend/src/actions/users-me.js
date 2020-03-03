@@ -119,12 +119,23 @@ export const refreshToken = createActionThunk(
 
 export const changePassword = createActionThunk(
   "USER_CHANGE_PASSWORD",
-  (password, new_password, new_password_confirmation) => {
-    return backend.changePassword(
-      password,
-      new_password,
-      new_password_confirmation
-    );
+  (
+    password,
+    new_password,
+    new_password_confirmation,
+    { dispatch, getState }
+  ) => {
+    const { users } = getState();
+    return dispatch(authenticateFresh(users.me.username, password)).then(r => {
+      if (r.status !== 200) {
+        return Promise.resolve({ status: 500 });
+      }
+      return backend.changePassword(
+        password,
+        new_password,
+        new_password_confirmation
+      );
+    });
   }
 );
 
