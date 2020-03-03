@@ -24,6 +24,7 @@ services:
       SERVICE_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_FRONTEND_PORT:-9765}
       SENTRY_DSN: ${KARMEN_FRONTEND_SENTRY_DSN}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
   backend_flask:
     image: fragaria/karmen-backend
     restart: unless-stopped
@@ -43,6 +44,8 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ${KARMEN_FILES_DIR:-./karmen-files}:/tmp/karmen-files
@@ -96,6 +99,8 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ${KARMEN_FILES_DIR:-./karmen-files}:/tmp/karmen-files
@@ -121,6 +126,8 @@ services:
       FLASKR_SETTINGS: "${FLASKR_SETTINGS:-../config.local.cfg}"
       SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
     privileged: true # for mdns resolution

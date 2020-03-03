@@ -19,6 +19,7 @@ services:
     build: ./src/karmen_frontend
     environment:
       ENV: develop
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
     ports:
       - 127.0.0.1:3000:9765
     volumes:
@@ -39,6 +40,8 @@ services:
       ENV: develop
       SERVICE: flask
       FLASKR_SETTINGS: '../config.dev.cfg'
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://path.to/websocket/api/%s}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
@@ -114,6 +117,8 @@ services:
       ENV: develop
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.dev.cfg'
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://path.to/websocket/api/%s}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
@@ -137,6 +142,8 @@ services:
       ENV: develop
       SERVICE: celery-beat
       FLASKR_SETTINGS: '../config.dev.cfg'
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://path.to/websocket/api/%s}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
     networks:
