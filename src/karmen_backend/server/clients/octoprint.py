@@ -65,7 +65,7 @@ class Octoprint(PrinterClient):
         # https://stackoverflow.com/questions/22609385/python-requests-library-define-specific-dns
         # until then, we're stuck with IP addresses
 
-        if self.token is not None:
+        if self.token is not None and self.token != "":
             self.network_base = app.config.get("SOCKET_API_URL") % self.token
         else:
             if self.port is not None:

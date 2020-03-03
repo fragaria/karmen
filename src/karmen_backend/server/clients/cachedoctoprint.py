@@ -111,24 +111,20 @@ class CachedOctoprint(Octoprint):
         if cached:
             return pickle.loads(cached)
         if CachedOctoprint.running_requests.get(cache_key):
-            app.logger.debug("futures: reusing %s" % cache_key)
             future_wrap = CachedOctoprint.running_requests.get(cache_key)
             future_wrap["users"] = future_wrap["users"] + 1
         else:
-            app.logger.debug("futures: newone %s" % cache_key)
             future = self.executor.submit(self._perform_http_get, uri)
             CachedOctoprint.running_requests[cache_key] = {"future": future, "users": 1}
 
         fut = CachedOctoprint.running_requests.get(cache_key)
         data = fut["future"].result()
         fut["users"] = fut["users"] - 1
-        app.logger.debug("futures: state %s %s" % (cache_key, fut["users"]))
         if fut["users"] == 0:
-            app.logger.debug("futures: cleanup %s" % cache_key)
             try:
                 del CachedOctoprint.running_requests[cache_key]
             except Exception:
-                app.logger.debug("futures: cleanup unsuccessful %s" % cache_key)
+                pass
 
         try:
             redisinstance.set(
