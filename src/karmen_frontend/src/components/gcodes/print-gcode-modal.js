@@ -170,7 +170,7 @@ export const usePrintGcodeModal = ({
                 </div>
               )}
 
-            {!!!availablePrinters.length && (
+            {(!!!availablePrinters.length || message) && (
               <div className="cta-box text-center">
                 <button
                   className="btn"
