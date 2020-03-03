@@ -59,7 +59,7 @@ class Menu extends React.Component {
     const { navigation, orgListExpanded } = this.state;
     const orgList = organizations
       ? Object.values(organizations)
-          .filter(o => (o.uuid !== activeOrganization.uuid))
+          .filter(o => o.uuid !== activeOrganization.uuid)
           .sort((o, p) =>
             o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
           )
@@ -93,19 +93,20 @@ class Menu extends React.Component {
             }}
           >
             <img alt="Karmen logo" src="/karmen-logo.svg" />
-            {userState === "logged-in" && Object.values(organizations).length > 1 && (
-              <OrganizationSwitch
-                activeOrganization={activeOrganization}
-                onToggle={() => {
-                  this.setState(prevState => ({
-                    orgListExpanded: !prevState.orgListExpanded
-                  }));
-                }}
-                expanded={orgListExpanded}
-              >
-                {orgList}
-              </OrganizationSwitch>
-            )}
+            {userState === "logged-in" &&
+              Object.values(organizations).length > 1 && (
+                <OrganizationSwitch
+                  activeOrganization={activeOrganization}
+                  onToggle={() => {
+                    this.setState(prevState => ({
+                      orgListExpanded: !prevState.orgListExpanded
+                    }));
+                  }}
+                  expanded={orgListExpanded}
+                >
+                  {orgList}
+                </OrganizationSwitch>
+              )}
           </Link>
           {userState === "logged-in" && (
             <>
@@ -125,7 +126,9 @@ class Menu extends React.Component {
                       </span>
                       {username}
                       <p className="navigation-user-organization">
-                        {Object.values(organizations).length > 1 ? activeOrganization.name : " "}
+                        {Object.values(organizations).length > 1
+                          ? activeOrganization.name
+                          : " "}
                       </p>
                     </Link>
                   </li>

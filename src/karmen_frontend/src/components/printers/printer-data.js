@@ -128,44 +128,47 @@ export const PrinterConnectionStatus = ({ printer }) => {
           </dd>
         </>
       )}
-
-      <dt className={window.env.IS_CLOUD_INSTALL ? "hidden" : "term"}>
-        Client host:{" "}
-      </dt>
-      <dd
-        className={
-          window.env.IS_CLOUD_INSTALL ? "hidden" : "decription text-mono"
-        }
-      >
-        {printer.hostname && (
-          <a
-            className="anchor"
-            href={`${printer.protocol}://${printer.hostname}${
-              printer.port ? `:${printer.port}` : ""
-            }${printer.path ? `${printer.path}` : ""}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {printer.hostname}
-            {printer.port ? `:${printer.port}` : ""}
-            {printer.path ? `${printer.path}` : ""}
-          </a>
-        )}
-        {printer.hostname && " ("}
-        <a
-          className="anchor"
-          href={`${printer.protocol}://${printer.ip}${
-            printer.port ? `:${printer.port}` : ""
-          }${printer.path ? `${printer.path}` : ""}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {printer.ip}
-          {printer.port ? `:${printer.port}` : ""}
-          {printer.path ? `${printer.path}` : ""}
-        </a>
-        {printer.hostname && ")"}
-      </dd>
+      {!window.env.IS_CLOUD_INSTALL && (printer.hostname || printer.ip) && (
+        <>
+          <dt className="term">Client host: </dt>
+          <dd className="decription text-mono">
+            {printer.hostname && (
+              <a
+                className="anchor"
+                href={`${printer.protocol}://${printer.hostname}${
+                  printer.port ? `:${printer.port}` : ""
+                }${printer.path ? `${printer.path}` : ""}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {printer.hostname}
+                {printer.port ? `:${printer.port}` : ""}
+                {printer.path ? `${printer.path}` : ""}
+              </a>
+            )}
+            {printer.hostname && " ("}
+            <a
+              className="anchor"
+              href={`${printer.protocol}://${printer.ip}${
+                printer.port ? `:${printer.port}` : ""
+              }${printer.path ? `${printer.path}` : ""}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {printer.ip}
+              {printer.port ? `:${printer.port}` : ""}
+              {printer.path ? `${printer.path}` : ""}
+            </a>
+            {printer.hostname && ")"}
+          </dd>
+        </>
+      )}
+      {window.env.IS_CLOUD_INSTALL && printer.token && (
+        <>
+          <dt className="term">Device token: </dt>
+          <dd className="decription">{printer.token}</dd>
+        </>
+      )}
       {printer.client && printer.client.api_key && (
         <>
           <dt className="term">API Key: </dt>
