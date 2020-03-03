@@ -93,7 +93,8 @@ class Menu extends React.Component {
             }}
           >
             <img alt="Karmen logo" src="/karmen-logo.svg" />
-            {userState === "logged-in" &&
+            {!navigation &&
+              userState === "logged-in" &&
               Object.values(organizations).length > 1 && (
                 <OrganizationSwitch
                   activeOrganization={activeOrganization}
@@ -108,6 +109,7 @@ class Menu extends React.Component {
                 </OrganizationSwitch>
               )}
           </Link>
+
           {userState === "logged-in" && (
             <>
               {navigation && (
@@ -124,7 +126,9 @@ class Menu extends React.Component {
                           src="/karmen-logo.svg"
                         />
                       </span>
-                      {username}
+
+                      <p className="navigation-user-name">{username}</p>
+
                       <p className="navigation-user-organization">
                         {Object.values(organizations).length > 1
                           ? activeOrganization.name

@@ -293,6 +293,29 @@ footer {
     }
   }
 
+  .navigation-user-name {
+    @include plumber(
+      $font-size: 2.3,
+      $leading-top: 2 ,
+      $leading-bottom: 0
+    );
+
+    @media (min-width: $screen-sm-min) {
+
+    }
+  }
+
+  .navigation-user-organization {
+    @include plumber(
+      $font-size: 1.618,
+      $leading-top: 0
+    );
+
+    @media (min-width: $screen-sm-min) {
+
+    }
+  }
+
   @media (min-width: $screen-sm-min) {
     .dropdown {
       .dropdown-items {
