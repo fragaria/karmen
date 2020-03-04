@@ -96,9 +96,10 @@ def add_user_to_org(org_uuid):
         jsonify(
             {
                 "uuid": str(user_uuid),
-                "username": email,
+                "username": existing["username"] if existing else email,
                 "email": email,
                 "role": org_role,
+                "activated": existing["activated"] is not None if existing else False,
             }
         ),
         201,
@@ -135,6 +136,7 @@ def update_user(org_uuid, uuid):
                 "username": user["username"],
                 "email": user["email"],
                 "role": role,
+                "activated": user["activated"] is not None,
             }
         ),
         200,

@@ -184,6 +184,9 @@ export default (
         listLoaded: true
       });
     case "USERS_ADD_SUCCEEDED":
+      if (!action.payload.data) {
+        return state;
+      }
       return Object.assign({}, state, {
         list: [].concat(state.list).concat([action.payload.data]),
         listLoaded: true
