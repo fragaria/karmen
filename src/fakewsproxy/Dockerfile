@@ -1,5 +1,4 @@
-FROM python:3.7-alpine as builder
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+FROM alpine
 WORKDIR /usr/src/app
 
 # build deps
