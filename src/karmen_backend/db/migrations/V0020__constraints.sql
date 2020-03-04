@@ -11,6 +11,9 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
+-- Due to an error in previous versions, this is necessary for a clean dev update
+INSERT INTO public.organizations(uuid, name) VALUES ('d973e553-122b-46bb-b852-d6ab4472dbd5', 'Another')
+  on conflict do nothing;
 
 ALTER TABLE public.organization_roles
   DROP CONSTRAINT IF EXISTS fk_organization_uuid;
