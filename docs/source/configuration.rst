@@ -20,6 +20,7 @@ within the container.
     :header: Variable name, Default, Description
     :escape: \
 
+    ``KARMEN_SECRET_KEY``, None, "A unique key that is used for session encryption."
     ``KARMEN_CLOUD_MODE``, 1, "If on, the network scan feature is disabled and printers can be connected only via
     `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_. If off, you can connect to printers via
     ``http`` or ``https``."
@@ -27,8 +28,6 @@ within the container.
     access."
     ``KARMEN_PORT``, 80, "Port on which Karmen listens. This is useful if you are running Karmen in an environment
     shared with other services."
-    ``FLASKR_SETTINGS``, ../config.local.cfg, "Path to the backend configuration file. If you change this, there is
-    a big chance that you have to mount that file as a volume into the containers."
     ``KARMEN_BACKEND_HOST``, 127.0.0.1, "Host on which the backend API server listens."
     ``KARMEN_BACKEND_PORT``, 9764, "Port on which the backend API server listens."
     ``KARMEN_BACKEND_SENTRY_DSN``, None, "`Sentry <https://sentry.io/>`_ DSN to which the backend will log errors.
@@ -68,3 +67,6 @@ within the container.
     For ``mailgun``: ``{\"mailgun_domain\": \"...\", \"mailgun_api_key\": \"...\"}``.
     
     For ``ses``: ``{\"aws_secret_key\": \"...\", \"aws_access_key\": \"...\", \"aws_region\": \"...\"}``"
+    ``KARMEN_NETWORK_TIMEOUT``, 5, "Timeout for HTTP reads"
+    ``KARMEN_VERIFY_CERTIFICATES``, 1, "Whether the app should verify HTTPS certificates. It should and you should
+    never change this setting unless you know exactly what you are doing."

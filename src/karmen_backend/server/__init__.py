@@ -1,4 +1,5 @@
 import os
+import json
 import sentry_sdk
 from flask import Flask
 from flask_cors import CORS
@@ -16,12 +17,14 @@ __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 
 def setup_celery(flask_app):
-    celery_inst = Celery(
-        flask_app.import_name,
-        backend=flask_app.config["CELERY_RESULT_BACKEND"],
-        broker=flask_app.config["CELERY_BROKER_URL"],
+    redis_backend = "redis://%s:%s" % (
+        app.config["REDIS_HOST"],
+        app.config["REDIS_PORT"],
     )
-    celery_inst.conf.update(flask_app.config["CELERY_CONFIG"])
+    celery_inst = Celery(
+        flask_app.import_name, backend=redis_backend, broker=redis_backend,
+    )
+    celery_inst.conf.update(json.loads(flask_app.config["CELERY_CONFIG"]))
 
     class ContextTask(celery_inst.Task):
         def __call__(self, *args, **kwargs):
@@ -41,20 +44,52 @@ if os.environ.get("SENTRY_DSN") is not None:
 
 
 app = Flask(__name__)
-app.config.from_envvar("FLASKR_SETTINGS", silent=True)
+
+
+def normalize_val(val):
+    if isinstance(val, str):
+        if val.isdigit():
+            return int(val)
+        if val.lower() in ("true", "1", "yes", "on"):
+            return True
+        if val.lower() in ("false", "0", "no", "off"):
+            return False
+    return val
+
+
+# configuration
+CONFIG_KEYS = {
+    "FRONTEND_BASE_URL": "http://set-your-karmen-address-here.com",
+    "UPLOAD_FOLDER": "/tmp/karmen-files",
+    "NETWORK_TIMEOUT": 2,
+    "NETWORK_VERIFY_CERTIFICATES": True,
+    "SECRET_KEY": None,
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": 6379,
+    "POSTGRES_DB": "print3d",
+    "POSTGRES_PASSWORD": "print3d",
+    "POSTGRES_USER": "print3d",
+    "POSTGRES_HOST": "localhost",
+    "POSTGRES_PORT": 5432,
+    "CLOUD_MODE": False,
+    "SOCKET_API_URL": "http://pathset-your-proxy-api-address-here/%s",
+    "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}}}',
+}
+
+for key, defaults in CONFIG_KEYS.items():
+    # TODO convert to python types if necessary, booleans are hard in particular
+    app.config[key] = normalize_val(os.environ.get(key, defaults))
+
 # This is hardcoded for 1GB
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
-if app.config.get("FRONTEND_BASE_URL") is None:
-    raise RuntimeError(
-        "Cannot start the application without FRONTEND_BASE_URL in app.config"
-    )
 
-# Put up a default, just to be sure
-app.config["IS_CLOUD_INSTALL"] = app.config.get("IS_CLOUD_INSTALL", False)
+# config options combination validation
+if app.config.get("SECRET_KEY") is None:
+    raise RuntimeError("Cannot start the application: SECRET_KEY cannot be null")
 
-if app.config.get("IS_CLOUD_INSTALL") and not app.config.get("SOCKET_API_URL"):
+if app.config.get("CLOUD_MODE") and not app.config.get("SOCKET_API_URL"):
     raise RuntimeError(
-        "Cannot start the application: IS_CLOUD_INSTALL is on, but no SOCKET_API_URL was specified"
+        "Cannot start the application: CLOUD_MODE is on, but no SOCKET_API_URL was specified"
     )
 
 
@@ -67,11 +102,6 @@ app.config["JWT_ACCESS_COOKIE_PATH"] = "/api/"
 app.config["JWT_REFRESH_COOKIE_PATH"] = "/api/users/me/authenticate-refresh"
 app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access"]
-
-if not app.config.get("REDIS_HOST"):
-    app.config["REDIS_HOST"] = os.environ.get("REDIS_HOST", "localhost")
-if not app.config.get("REDIS_PORT"):
-    app.config["REDIS_PORT"] = os.environ.get("REDIS_PORT", 6379)
 
 jwt = JWTManager(app)
 celery = setup_celery(app)

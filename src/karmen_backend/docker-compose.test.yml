@@ -6,6 +6,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+    environment:
+      FLASK_APP: server
+      POSTGRES_PASSWORD: print3dtest
+      POSTGRES_USER: print3dtest
+      POSTGRES_DB: print3dtest
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 54350
+      REDIS_HOST: localhost
+      REDIS_PORT: 6380
+      CELERY_CONFIG: '{}'
+      SECRET_KEY: tests
     volumes:
       - ./config.test.cfg:/usr/src/app/config.local.cfg
     depends_on:
@@ -17,6 +28,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+    environment:
+      POSTGRES_PASSWORD: print3dtest
+      POSTGRES_USER: print3dtest
+      POSTGRES_DB: print3dtest
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 54350
     command: scripts/migrate.sh
     depends_on:
       - postgres

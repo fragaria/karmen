@@ -445,7 +445,7 @@ class CreateRoute(unittest.TestCase):
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_default_protocol_forbidden(self, mock_get_uri, mock_avahi):
-        app.config["IS_CLOUD_INSTALL"] = True
+        app.config["CLOUD_MODE"] = True
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -463,7 +463,7 @@ class CreateRoute(unittest.TestCase):
         except Exception as e:
             raise e
         finally:
-            app.config["IS_CLOUD_INSTALL"] = False
+            app.config["CLOUD_MODE"] = False
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_sock_api(self, mock_get_uri):
@@ -520,7 +520,7 @@ class CreateRoute(unittest.TestCase):
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_sock_api(self, mock_get_uri, mock_avahi):
-        app.config["IS_CLOUD_INSTALL"] = True
+        app.config["CLOUD_MODE"] = True
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -552,7 +552,7 @@ class CreateRoute(unittest.TestCase):
                 "/organizations/%s/printers/%s" % (UUID_ORG, uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
-            app.config["IS_CLOUD_INSTALL"] = False
+            app.config["CLOUD_MODE"] = False
 
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
@@ -692,7 +692,7 @@ class CreateRoute(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_conflict_sock_api(self, mock_get):
-        app.config["IS_CLOUD_INSTALL"] = True
+        app.config["CLOUD_MODE"] = True
         try:
             with app.test_client() as c:
                 c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -723,7 +723,7 @@ class CreateRoute(unittest.TestCase):
                 "/organizations/%s/printers/%s" % (UUID_ORG, uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
-            app.config["IS_CLOUD_INSTALL"] = False
+            app.config["CLOUD_MODE"] = False
 
 
 class DeleteRoute(unittest.TestCase):

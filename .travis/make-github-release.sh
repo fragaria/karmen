@@ -9,7 +9,6 @@ rm -r "$DEST" 2> /dev/null
 mkdir -p "${DEST}"
 cp ../README.md "${DEST}"
 cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
-cp ../src/karmen_backend/config.release.cfg "${DEST}/config.local.cfg.sample"
 echo "${TRAVIS_BRANCH-latest}" > "${DEST}/VERSION"
 
 # Hardcode version into docker-compose
@@ -24,10 +23,6 @@ cat << "EOF" > "$DEST/run-karmen.sh"
 PARENT_PATH=$( cd $(dirname $(readlink -f "$0")) ; pwd -P )
 cd "$PARENT_PATH"
 
-if [ ! -f "./config.local.cfg" ]; then
-  echo "Cannot run karmen without the ./config.local.cfg file"
-  exit
-fi
 docker-compose up -d
 EOF
 chmod +x "${DEST}/run-karmen.sh"

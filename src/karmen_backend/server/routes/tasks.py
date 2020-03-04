@@ -19,7 +19,7 @@ def enqueue_task(org_uuid):
     if data["task"] not in ["scan_network"]:
         return abort(make_response("", 400))
     if data["task"] == "scan_network":
-        if app.config.get("IS_CLOUD_INSTALL"):
+        if app.config.get("CLOUD_MODE"):
             return abort(make_response("Not allowed in this install", 400))
         try:
             scan_network.delay(org_uuid, data.get("network_interface"))

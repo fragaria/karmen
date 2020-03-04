@@ -2,18 +2,6 @@
 
 MYDIR="$(dirname "$(readlink -f "$0")")"
 
-test_flaskr_settings() {
-  if [ -z "$FLASKR_SETTINGS" ]; then
-    echo "FLASKR_SETTINGS environment variable is required"
-    exit 1
-  fi
-
-  if [ ! -f "$MYDIR/$FLASKR_SETTINGS" ]; then
-    echo "File on ${MYDIR}/${FLASKR_SETTINGS} does not exist"
-    exit 1
-  fi
-}
-
 clean_pid_file() {
   pidpath=$1
   if [ -f $pidpath ]; then
@@ -23,7 +11,6 @@ clean_pid_file() {
 }
 
 if [ "$SERVICE" = 'flask' ]; then
-  test_flaskr_settings
   /usr/bin/dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
   /usr/sbin/avahi-daemon -D
   /usr/sbin/avahi-dnsconfd -D
@@ -38,7 +25,6 @@ if [ "$SERVICE" = 'flask' ]; then
     flask run --host=${SERVICE_HOST:-0.0.0.0} --port ${SERVICE_PORT:-9764}
   fi
 elif [ "$SERVICE" = 'celery-beat' ]; then
-  test_flaskr_settings
   clean_pid_file /tmp/celerybeatd.pid
   if [ "$ENV" = 'production' ]; then
     celery -A server.celery beat --pidfile=/tmp/celerybeatd.pid -s /tmp/celerybeat-schedule
@@ -47,7 +33,6 @@ elif [ "$SERVICE" = 'celery-beat' ]; then
     watchmedo auto-restart --recursive -- celery -A server.celery beat --pidfile=/tmp/celerybeatd.pid -s /tmp/celerybeat-schedule
   fi
 elif [ "$SERVICE" = 'celery-worker' ]; then
-  test_flaskr_settings
   clean_pid_file /tmp/celeryworkerd.pid
   /usr/bin/dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
   /usr/sbin/avahi-daemon -D

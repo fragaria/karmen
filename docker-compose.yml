@@ -31,17 +31,20 @@ services:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
+      ENV: develop
+      SERVICE: flask
+      NETWORK_TIMEOUT: 5
+      NETWORK_VERIFY_CERTIFICATES: 1
+      SECRET_KEY: random-secret!-but-better===========
       REDIS_HOST: redis
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
-      ENV: develop
-      SERVICE: flask
-      FLASKR_SETTINGS: '../config.dev.cfg'
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
@@ -116,17 +119,20 @@ services:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
+      ENV: develop
+      SERVICE: celery-worker
+      NETWORK_TIMEOUT: 5
+      NETWORK_VERIFY_CERTIFICATES: 1
+      SECRET_KEY: random-secret!-but-better===========
       REDIS_HOST: redis
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
-      ENV: develop
-      SERVICE: celery-worker
-      FLASKR_SETTINGS: '../config.dev.cfg'
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
@@ -141,17 +147,20 @@ services:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
     environment:
+      ENV: develop
+      SERVICE: celery-beat
+      NETWORK_TIMEOUT: 5
+      NETWORK_VERIFY_CERTIFICATES: 1
+      SECRET_KEY: random-secret!-but-better===========
       REDIS_HOST: redis
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_PASSWORD: print3d
       POSTGRES_USER: print3d
       POSTGRES_DB: print3d
-      ENV: develop
-      SERVICE: celery-beat
-      FLASKR_SETTINGS: '../config.dev.cfg'
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
     networks:

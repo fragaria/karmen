@@ -70,17 +70,15 @@ Just download the latest one to your Raspberry Pi's home directory and unzip it.
 The directory ``karmen`` now contains at least the following files:
 
 - ``docker-compose.yml`` - A blueprint for all necessary services
-- ``config.local.cfg.sample`` - A sample configuration file that you should edit to your needs
 - ``run-karmen.sh`` - A startup script you can use to launch karmen
 - ``update.sh`` - An update script that can bring your installation up to date
 - ``VERSION`` - A file with a version number. Useful for troubleshooting
 
-Firstly, you should copy the ``config.local.cfg.sample`` in ``config.local.cfg`` and edit all the
-necessary stuff. You can for example tweak the settings of the network discovery, but you
-should **absolutely change the** ``SECRET_KEY`` variable for security reasons.
-
 The database schema is created automatically upon the first start and is kept up to date during updates.
 The datafiles are created on your filesystem, not inside the container, so no data will be lost during Karmen's downtime.
+
+Karmen requires a little bit of :ref:`configuration <configuration>` that is done with environment
+variables. The only required one, is ``KARMEN_SECRET_KEY`` which you should set to something secret.
 
 Finally, you can start all of the services. During the first startup, the script will automatically
 download (from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&type=image>`_) and run
@@ -89,7 +87,7 @@ all other starts, you can use a shorthand script like this:
 
 .. code-block:: sh
 
-   ./run-karmen.sh
+   KARMEN_SECRET_KEY=something-secr3t ./run-karmen.sh
 
 The browser-accessible frontend is then accessible on the standard port 80.
 

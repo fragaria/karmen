@@ -1,11 +1,12 @@
 FLASK_APP:=server
-FLASKR_SETTINGS:=../config.test.cfg
 POSTGRES_PASSWORD?=print3dtest
 POSTGRES_USER?=print3dtest
 POSTGRES_DB?=print3dtest
 POSTGRES_HOST?=localhost
 POSTGRES_PORT?=54350
 REDIS_PORT?=6380
+CELERY_CONFIG?={}
+SECRET_KEY?=tests
 
 run-docker-test-postgres:
 	@-docker stop karmen_pg_test
@@ -27,7 +28,16 @@ run-docker-test-redis:
 		redis:5 &
 
 test: run-docker-test-redis run-docker-test-postgres
-	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest -n auto --dist=loadscope
+	FLASK_APP=${FLASK_APP} \
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+	POSTGRES_USER=${POSTGRES_USER} \
+	POSTGRES_DB=${POSTGRES_DB} \
+	POSTGRES_HOST=${POSTGRES_HOST} \
+	POSTGRES_PORT=${POSTGRES_PORT} \
+	REDIS_PORT=${REDIS_PORT} \
+	CELERY_CONFIG=${CELERY_CONFIG} \
+	SECRET_KEY=${SECRET_KEY} \
+	  pytest -n auto --dist=loadscope
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 	@-docker stop karmen_redis_test
@@ -44,14 +54,32 @@ lint:
 	pylint server/ tests/
 
 test-watch: run-docker-test-redis run-docker-test-postgres
-	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && pytest --looponfail -n auto --dist=loadscope
+	FLASK_APP=${FLASK_APP} \
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+	POSTGRES_USER=${POSTGRES_USER} \
+	POSTGRES_DB=${POSTGRES_DB} \
+	POSTGRES_HOST=${POSTGRES_HOST} \
+	POSTGRES_PORT=${POSTGRES_PORT} \
+	REDIS_PORT=${REDIS_PORT} \
+	CELERY_CONFIG=${CELERY_CONFIG} \
+	SECRET_KEY=${SECRET_KEY} \
+	  pytest --looponfail -n auto --dist=loadscope
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 	@-docker stop karmen_redis_test
 	@-docker rm karmen_redis_test
 
 coverage: run-docker-test-redis run-docker-test-postgres
-	export FLASK_APP=${FLASK_APP} && export FLASKR_SETTINGS=${FLASKR_SETTINGS} && coverage run --branch --source server -m pytest
+	FLASK_APP=${FLASK_APP} \
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+	POSTGRES_USER=${POSTGRES_USER} \
+	POSTGRES_DB=${POSTGRES_DB} \
+	POSTGRES_HOST=${POSTGRES_HOST} \
+	POSTGRES_PORT=${POSTGRES_PORT} \
+	REDIS_PORT=${REDIS_PORT} \
+	CELERY_CONFIG=${CELERY_CONFIG} \
+	SECRET_KEY=${SECRET_KEY} \
+	  coverage run --branch --source server -m pytest
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 	@-docker stop karmen_redis_test

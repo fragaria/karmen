@@ -6,7 +6,13 @@ import psycopg2.extras
 import psycopg2.extensions
 from server import app
 
-DSN = app.config["DB_DSN"]
+DSN = "host='%s' port=%s dbname='%s' user='%s' password='%s'" % (
+    app.config["POSTGRES_HOST"],
+    app.config["POSTGRES_PORT"],
+    app.config["POSTGRES_DB"],
+    app.config["POSTGRES_USER"],
+    app.config["POSTGRES_PASSWORD"],
+)
 CONNECTION = None
 
 
