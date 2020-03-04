@@ -48,7 +48,7 @@ services:
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG:-{}
+      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG:-{}}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ${KARMEN_FILES_DIR:-./karmen-files}:/tmp/karmen-files
@@ -106,7 +106,7 @@ services:
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG:-{}
+      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG:-{}}
     volumes:
       - ./config.local.cfg:/usr/src/app/config.local.cfg
       - ${KARMEN_FILES_DIR:-./karmen-files}:/tmp/karmen-files
