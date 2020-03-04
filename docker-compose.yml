@@ -41,7 +41,7 @@ services:
       SERVICE: flask
       FLASKR_SETTINGS: '../config.dev.cfg'
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://path.to/websocket/api/%s}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
@@ -104,6 +104,14 @@ services:
     networks:
       printers:
         ipv4_address: 172.16.236.12
+  fake_ws_proxy:
+    image: fragaria/karmen-fakewsproxy
+    build: ./src/fakewsproxy
+    environment:
+      SERVICE_PORT: 9999
+    networks:
+      - default
+      - printers
   backend_celery_worker:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
@@ -118,7 +126,7 @@ services:
       SERVICE: celery-worker
       FLASKR_SETTINGS: '../config.dev.cfg'
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://path.to/websocket/api/%s}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
@@ -143,7 +151,7 @@ services:
       SERVICE: celery-beat
       FLASKR_SETTINGS: '../config.dev.cfg'
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://path.to/websocket/api/%s}
+      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
     networks:

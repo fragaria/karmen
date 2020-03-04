@@ -27,8 +27,8 @@ SET row_security = off;
 insert into public.printers (uuid, organization_uuid, client_props, name, ip, port, hostname, client, printer_props, protocol)
   values ('20e91c14-c3e4-4fe9-a066-e69d53324a20', 'b3060e41-e319-4a9b-8ac4-e0936c75f275', '{"version": {"api": "0.1", "server": "0.0.1", "text": "octoprint fake"}, "connected": false, "access_level": "unlocked"}', 'fake 1', '172.16.236.11', '8080', NULL, 'octoprint', '{"filament_type": "PETG", "filament_color": "black", "bed_type": "Powder coated PEI", "tool0_diameter": 0.25}', 'http')
   on conflict do nothing;
-insert into public.printers (uuid, organization_uuid, client_props, name, ip, port, hostname, client, printer_props, protocol)
-  values ('e24a9711-aabc-48f0-b790-eac056c43f07', 'b3060e41-e319-4a9b-8ac4-e0936c75f275', '{"version": {"api": "0.1", "server": "0.0.1", "text": "octoprint fake"}, "connected": false, "access_level": "unlocked"}',	'fake 2',	'172.16.236.12', '8080', NULL,	'octoprint', '{"filament_type": "PLA", "filament_color": "red", "bed_type": "Flat PEI", "tool0_diameter": 0.4}', 'http')
+insert into public.printers (uuid, organization_uuid, client_props, name, client, printer_props, token, ip, port, hostname, protocol)
+  values ('cf292020-a2f3-409a-8a13-100cf60978fb', 'b3060e41-e319-4a9b-8ac4-e0936c75f275', '{"version": {"api": "0.1", "server": "0.0.1", "text": "octoprint fake"}, "connected": false, "access_level": "unlocked"}', 'fake 2 ws', 'octoprint', '{"filament_type": "PLA", "filament_color": "red", "bed_type": "Flat PEI", "tool0_diameter": 0.4}', '172.16.236.12:8080', '', 0, '', '')
   on conflict do nothing;
 
 insert into public.printers (uuid, organization_uuid, client_props, name, ip, port, hostname, client, printer_props, protocol)
