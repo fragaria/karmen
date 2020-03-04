@@ -182,7 +182,7 @@ class ResetPassword extends React.Component {
                     className="btn"
                     type="submit"
                     onClick={this.reset}
-                    busyChildren="Sending link..."
+                    busyChildren="Resetting..."
                   >
                     Reset
                   </BusyButton>{" "}

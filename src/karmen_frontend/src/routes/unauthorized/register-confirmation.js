@@ -196,7 +196,7 @@ class RegisterConfirmation extends React.Component {
                     className="btn"
                     type="submit"
                     onClick={this.activate}
-                    busyChildren="Sending link..."
+                    busyChildren="Setting password..."
                   >
                     Set password
                   </BusyButton>{" "}
