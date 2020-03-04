@@ -14,7 +14,7 @@ class RegistrationVerification(MailTemplate):
         # TODO handle organization_name and organization_uuid in activation_link and mail contents
         self.variables = variables
         self.variables["activation_link"] = "%s/confirmation?activate=%s" % (
-            app.config["FRONTEND_BASE_URL"],
+            self.get_base_url(),
             base64.b64encode(
                 json.dumps(
                     {

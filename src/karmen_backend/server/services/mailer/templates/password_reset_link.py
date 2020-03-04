@@ -13,7 +13,7 @@ class PasswordResetLink(MailTemplate):
     def prepare_variables(self, variables={}):
         self.variables = variables
         self.variables["pwd_reset_link"] = "%s/reset-password?reset=%s" % (
-            app.config["FRONTEND_BASE_URL"],
+            self.get_base_url(),
             base64.b64encode(
                 json.dumps(
                     {

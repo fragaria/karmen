@@ -9,7 +9,8 @@ class OrganizationInvitation(MailTemplate):
 
     def prepare_variables(self, variables={}):
         self.variables = variables
-        self.variables["organization_link"] = "%s" % (app.config["FRONTEND_BASE_URL"])
+        # TODO Actually deeplink into organization - does it survive frontend login though?
+        self.variables["organization_link"] = "%s" % (self.get_base_url())
 
     def textbody(self):
         return (
