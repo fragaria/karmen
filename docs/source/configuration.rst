@@ -36,7 +36,7 @@ within the container.
     ``KARMEN_SOCKET_API_URL``, None, "Base URL such as ``http://path.to/websocket/api/%s`` where the
     `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_ is accepting connections. USed only when
     ``KARMEN_CLOUD_MODE`` is on."
-    ``KARMEN_FILES_DIR``, ./karmen-files, "Location of uploaded files. This directory is mounted as a volume into
+    ``KARMEN_UPLOAD_FOLDER``, ./karmen-files, "Location of uploaded files. This directory is mounted as a volume into
     the container."
     ``KARMEN_DB_DIR``, ./db/data, "Location of PostgreSQL datadir."
     ``KARMEN_FRONTEND_BASE_URL``, None, "Base URL of Karmen Hub frontend. This is used as a base URL in e-mails
