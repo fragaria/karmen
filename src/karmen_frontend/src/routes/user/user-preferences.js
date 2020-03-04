@@ -54,10 +54,10 @@ const UserPreferences = ({ match, ...rest }) => {
 
 export default connect(
   state => ({
-    apiTokens: state.users.me.apiTokens,
-    apiTokensLoaded: state.users.me.apiTokensLoaded,
-    username: state.users.me.username,
-    email: state.users.me.email
+    apiTokens: state.me.apiTokens,
+    apiTokensLoaded: state.me.apiTokensLoaded,
+    username: state.me.username,
+    email: state.me.email
   }),
   dispatch => ({
     loadApiTokens: () => dispatch(loadUserApiTokens()),

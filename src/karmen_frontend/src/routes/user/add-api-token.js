@@ -192,8 +192,8 @@ class AddApiToken extends React.Component {
 
 export default connect(
   state => ({
-    activeOrganization: state.users.me.activeOrganization,
-    organizations: state.users.me.organizations
+    activeOrganization: state.me.activeOrganization,
+    organizations: state.me.organizations
   }),
   dispatch => ({
     addApiToken: (orguuid, name) => dispatch(addUserApiToken(orguuid, name))

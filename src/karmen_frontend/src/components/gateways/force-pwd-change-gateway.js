@@ -30,7 +30,7 @@ const ForcePwdChangeGateway = ({ children, userState, changePassword }) => {
 
 export default connect(
   state => ({
-    userState: state.users.me.currentState
+    userState: state.me.currentState
   }),
   dispatch => ({
     changePassword: (password, new_password, new_password_confirmation) =>

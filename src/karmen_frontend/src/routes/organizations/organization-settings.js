@@ -68,7 +68,7 @@ export default connect(
     networkInterface: state.preferences.networkInterface,
     usersList: state.users.list,
     usersLoaded: state.users.listLoaded,
-    currentUuid: state.users.me.identity
+    currentUuid: state.me.identity
   }),
   (dispatch, ownProps) => ({
     onPrinterDelete: uuid =>

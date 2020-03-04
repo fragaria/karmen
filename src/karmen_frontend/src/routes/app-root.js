@@ -20,8 +20,8 @@ const AppRoot = ({ activeOrganization, organizations, switchOrganization }) => {
 
 export default connect(
   state => ({
-    organizations: state.users.me.organizations,
-    activeOrganization: state.users.me.activeOrganization
+    organizations: state.me.organizations,
+    activeOrganization: state.me.activeOrganization
   }),
   dispatch => ({
     switchOrganization: uuid => dispatch(switchOrganization(uuid))

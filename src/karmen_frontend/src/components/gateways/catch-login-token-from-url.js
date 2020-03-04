@@ -25,7 +25,7 @@ const CatchLoginTokenFromUrl = ({
 export default withRouter(
   connect(
     state => ({
-      userState: state.users.me.currentState
+      userState: state.me.currentState
     }),
     dispatch => ({
       loadUserFromToken: accessToken => dispatch(loadUserFromToken(accessToken))

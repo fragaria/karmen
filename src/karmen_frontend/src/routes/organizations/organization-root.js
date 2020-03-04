@@ -19,5 +19,5 @@ const OrganizationRoot = ({ organizations, match }) => {
 };
 
 export default connect(state => ({
-  organizations: state.users.me.organizations
+  organizations: state.me.organizations
 }))(OrganizationRoot);

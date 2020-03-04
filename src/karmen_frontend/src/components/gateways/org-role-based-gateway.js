@@ -10,5 +10,5 @@ const OrgRoleBasedGateway = ({ requiredRole, userRole, children }) => {
 };
 
 export default connect(state => ({
-  userRole: state.users.me.activeOrganization.role
+  userRole: state.me.activeOrganization.role
 }))(OrgRoleBasedGateway);

@@ -125,8 +125,8 @@ export const changePassword = createActionThunk(
     new_password_confirmation,
     { dispatch, getState }
   ) => {
-    const { users } = getState();
-    return dispatch(authenticateFresh(users.me.username, password)).then(r => {
+    const { me } = getState();
+    return dispatch(authenticateFresh(me.username, password)).then(r => {
       if (r.status !== 200) {
         return Promise.resolve({ status: 500 });
       }

@@ -20,8 +20,8 @@ export const getGcodesPage = createActionThunk(
     fields = [],
     { dispatch, getState }
   ) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getGcodes, dispatch)(
@@ -48,8 +48,8 @@ export const getGcodesPage = createActionThunk(
 export const loadGcode = createActionThunk(
   "GCODE_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getGcode, dispatch)(
@@ -70,8 +70,8 @@ export const downloadGcode = createActionThunk(
 export const deleteGcode = createActionThunk(
   "GCODES_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.deleteGcode, dispatch)(
@@ -89,8 +89,8 @@ export const deleteGcode = createActionThunk(
 export const uploadGcode = createActionThunk(
   "GCODES_UPLOAD",
   (orguuid, path, toUpload, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.uploadGcode, dispatch)(

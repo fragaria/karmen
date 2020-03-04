@@ -213,13 +213,11 @@ class Menu extends React.Component {
 export default withRouter(
   connect(
     state => ({
-      userState: state.users.me.currentState,
-      username: state.users.me.username,
-      activeOrganization: state.users.me.activeOrganization,
-      organizations: state.users.me.organizations,
-      role:
-        state.users.me.activeOrganization &&
-        state.users.me.activeOrganization.role
+      userState: state.me.currentState,
+      username: state.me.username,
+      activeOrganization: state.me.activeOrganization,
+      organizations: state.me.organizations,
+      role: state.me.activeOrganization && state.me.activeOrganization.role
     }),
     dispatch => ({
       logout: () => dispatch(clearUserIdentity()),

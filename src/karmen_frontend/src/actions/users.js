@@ -11,8 +11,8 @@ export const clearUsers = () => dispatch => {
 export const getUsers = createActionThunk(
   "USERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getUsers, dispatch)(
@@ -30,8 +30,8 @@ export const getUsers = createActionThunk(
 export const addUser = createActionThunk(
   "USERS_ADD",
   (orguuid, email, role, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.addUser, dispatch)(orguuid, email, role);
@@ -41,8 +41,8 @@ export const addUser = createActionThunk(
 export const patchUser = createActionThunk(
   "USERS_EDIT",
   (orguuid, uuid, role, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.patchUser, dispatch)(
@@ -56,8 +56,8 @@ export const patchUser = createActionThunk(
 export const deleteUser = createActionThunk(
   "USERS_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.deleteUser, dispatch)(orguuid, uuid);

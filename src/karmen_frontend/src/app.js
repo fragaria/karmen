@@ -273,8 +273,8 @@ class App extends React.Component {
 
 export default connect(
   state => ({
-    accessTokenExpiresOn: state.users.me.accessTokenExpiresOn,
-    userState: state.users.me.currentState
+    accessTokenExpiresOn: state.me.accessTokenExpiresOn,
+    userState: state.me.currentState
   }),
   dispatch => ({
     loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),

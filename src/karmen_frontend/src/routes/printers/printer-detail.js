@@ -337,7 +337,7 @@ export default connect(
       p => p.uuid === ownProps.match.params.uuid
     ),
     image: state.printers.images[ownProps.match.params.uuid],
-    role: state.users.me.activeOrganization.role,
+    role: state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
       orderBy: "-started",

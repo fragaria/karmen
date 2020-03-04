@@ -122,8 +122,8 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
 export const loadPrinters = createActionThunk(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getPrinters, dispatch)(
@@ -140,8 +140,8 @@ export const loadPrinters = createActionThunk(
 export const loadPrinter = createActionThunk(
   "PRINTERS_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.getPrinter, dispatch)(
@@ -170,8 +170,8 @@ export const addPrinter = createActionThunk(
     apiKey,
     { dispatch, getState }
   ) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.addPrinter, dispatch)(
@@ -195,8 +195,8 @@ export const addPrinter = createActionThunk(
 export const patchPrinter = createActionThunk(
   "PRINTERS_PATCH",
   (orguuid, uuid, data, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.patchPrinter, dispatch)(
@@ -214,8 +214,8 @@ export const patchPrinter = createActionThunk(
 export const deletePrinter = createActionThunk(
   "PRINTERS_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.deletePrinter, dispatch)(
@@ -233,8 +233,8 @@ export const deletePrinter = createActionThunk(
 export const setPrinterConnection = createActionThunk(
   "PRINTERS_SET_CONNECTION",
   (orguuid, uuid, state, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.setPrinterConnection, dispatch)(
@@ -248,8 +248,8 @@ export const setPrinterConnection = createActionThunk(
 export const changeCurrentJob = createActionThunk(
   "PRINTERS_CHANGE_JOB",
   (orguuid, uuid, action, { dispatch, getState }) => {
-    const { users } = getState();
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     return retryIfUnauthorized(backend.changeCurrentJob, dispatch)(
@@ -310,9 +310,9 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
 export const getWebcamSnapshot = createActionThunk(
   "PRINTERS_GET_WEBCAM_SNAPSHOT",
   (orguuid, uuid, { dispatch, getState }) => {
-    let { printers, users } = getState();
+    let { printers, me } = getState();
     const printer = printers.printers.find(p => p.uuid === uuid);
-    if (!users.me.organizations || !users.me.organizations[orguuid]) {
+    if (!me.organizations || !me.organizations[orguuid]) {
       return Promise.resolve({});
     }
     if (!printer || !printer.webcam || !printer.webcam.url) {

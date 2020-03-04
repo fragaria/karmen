@@ -49,10 +49,10 @@ const FreshTokenGateway = ({
 export default withRouter(
   connect(
     state => ({
-      userState: state.users.me.currentState,
-      username: state.users.me.username,
-      hasFreshToken: state.users.me.hasFreshToken,
-      accessTokenExpiresOn: state.users.me.accessTokenExpiresOn
+      userState: state.me.currentState,
+      username: state.me.username,
+      hasFreshToken: state.me.hasFreshToken,
+      accessTokenExpiresOn: state.me.accessTokenExpiresOn
     }),
     dispatch => ({
       doAuthenticate: (username, password) =>
