@@ -33,7 +33,9 @@ def make_printer_response(printer, fields):
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
         "protocol": printer_inst.protocol,
-        "token": printer_inst.token,
+        "token": printer_inst.token[0:2] + "*" * 30  # Add star padding to 32 characters
+        if printer_inst.token
+        else None,
         "hostname": printer_inst.hostname,
         "ip": printer_inst.ip,
         "port": printer_inst.port,
