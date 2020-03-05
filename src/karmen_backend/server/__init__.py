@@ -59,25 +59,27 @@ def normalize_val(val):
 
 # configuration
 CONFIG_KEYS = {
+    "CLOUD_MODE": False,
     "FRONTEND_BASE_URL": "http://set-your-karmen-address-here.com",
-    "UPLOAD_FOLDER": "/tmp/karmen-files",
+    "MAILER": "dummy",
+    "MAILER_CONFIG": "{}",
+    "MAILER_FROM": "Karmen <karmen@karmen.local>",
     "NETWORK_TIMEOUT": 2,
     "NETWORK_VERIFY_CERTIFICATES": True,
-    "SECRET_KEY": None,
-    "REDIS_HOST": "localhost",
-    "REDIS_PORT": 6379,
     "POSTGRES_DB": "print3d",
     "POSTGRES_PASSWORD": "print3d",
     "POSTGRES_USER": "print3d",
     "POSTGRES_HOST": "localhost",
     "POSTGRES_PORT": 5432,
-    "CLOUD_MODE": False,
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": 6379,
+    "SECRET_KEY": None,
     "SOCKET_API_URL": "http://pathset-your-proxy-api-address-here/%s",
+    "UPLOAD_FOLDER": "/tmp/karmen-files",
     "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}}}',
 }
 
 for key, defaults in CONFIG_KEYS.items():
-    # TODO convert to python types if necessary, booleans are hard in particular
     app.config[key] = normalize_val(os.environ.get(key, defaults))
 
 # This is hardcoded for 1GB

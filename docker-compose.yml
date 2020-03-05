@@ -45,6 +45,9 @@ services:
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
       FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
+      MAILER: ${KARMEN_MAILER:-DUMMY}
+      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
+      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
@@ -133,6 +136,9 @@ services:
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
       FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
+      MAILER: ${KARMEN_MAILER:-DUMMY}
+      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
+      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
@@ -161,6 +167,9 @@ services:
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
       FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
+      MAILER: ${KARMEN_MAILER:-DUMMY}
+      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
+      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
     networks:
