@@ -35,7 +35,7 @@ These should always be setup so your instance works as expected.
     `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_ is accepting connections. USed only when
     ``KARMEN_CLOUD_MODE`` is on. The ``%s`` is replaced by device token during runtime."
     ``KARMEN_MAILER``, dummy, "Type of mailer that is used in the backend to send e-mail. Supported values are
-    ``dummy``, ``mailgun`` and ``ses``. ``Dummy`` mailer is writing to logfile, others are calling an external mail
+    ``ses``, ``smtp``, ``mailgun`` and ``dummy``. ``Dummy`` mailer is writing to logfile, others are calling an external mail
     sending service. Mailers can be further configured with ``KARMEN_MAILER_CONFIG``."
     ``KARMEN_MAILER_FROM``, Karmen <karmen@karmen.local>, "Default sender of all e-mails."
     ``KARMEN_MAILER_CONFIG``, ``{}``, "JSON with configuration required by the chosen ``KARMEN_MAILER``. The JSON
@@ -43,7 +43,10 @@ These should always be setup so your instance works as expected.
     
     For ``mailgun``: ``{\"mailgun_domain\": \"...\", \"mailgun_api_key\": \"...\"}``.
     
-    For ``ses``: ``{\"aws_secret_key\": \"...\", \"aws_access_key\": \"...\", \"aws_region\": \"...\"}``"
+    For ``ses``: ``{\"aws_secret_key\": \"...\", \"aws_access_key\": \"...\", \"aws_region\": \"...\"}``
+
+    For ``smtp``: ``{\"host\": \"...\", \"port\": \"...\", \"ssl\": \"...\", \"login\": \"...\", \"password\": \"...\"}``
+    "
 
 Advanced options
 ----------------------------
