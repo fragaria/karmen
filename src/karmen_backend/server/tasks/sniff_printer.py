@@ -79,6 +79,7 @@ def sniff_printer(org_uuid, hostname, ip):
             "access_level": printer.client_info.access_level,
             "api_key": printer.client_info.api_key,
             "webcam": printer.webcam(),
+            "plugins": printer.client_info.plugins,
         },
         printer_props=printer.get_printer_props(),
     )

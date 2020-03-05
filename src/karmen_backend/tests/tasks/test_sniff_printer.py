@@ -100,6 +100,7 @@ class SniffPrinterTest(unittest.TestCase):
                     "access_level": PrinterClientAccessLevel.UNLOCKED,
                     "api_key": None,
                     "webcam": {"message": "Webcam disabled in octoprint"},
+                    "plugins": [],
                 },
                 "printer_props": None,
             }
@@ -118,7 +119,7 @@ class SniffPrinterTest(unittest.TestCase):
 
         sniff_printer(UUID_ORG, "octopi.local", "192.168.1.12")
         self.assertEqual(mock_update_printer.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 3)
+        self.assertEqual(mock_get_data.call_count, 4)
         mock_update_printer.assert_called_with(
             **{
                 "uuid": "1234",
@@ -134,6 +135,7 @@ class SniffPrinterTest(unittest.TestCase):
                     "access_level": PrinterClientAccessLevel.UNLOCKED,
                     "api_key": None,
                     "webcam": {"message": "Webcam disabled in octoprint"},
+                    "plugins": [],
                 },
                 "printer_props": None,
             }

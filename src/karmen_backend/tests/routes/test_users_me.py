@@ -1,5 +1,5 @@
 import hashlib
-import uuid
+import uuid as guid
 import random
 import string
 import base64
@@ -107,8 +107,8 @@ class CreateNewUserRoute(unittest.TestCase):
 class ActivateNewUserRoute(unittest.TestCase):
     def setUp(self):
         self.email = get_random_email()
-        self.activation_key = uuid.uuid4()
-        self.user_uuid = uuid.uuid4()
+        self.activation_key = guid.uuid4()
+        self.user_uuid = guid.uuid4()
         users.add_user(
             uuid=self.user_uuid,
             username=self.email,
@@ -202,7 +202,7 @@ class ActivateNewUserRoute(unittest.TestCase):
         email = get_random_email()
         activation_key = "1234"
         users.add_user(
-            uuid=uuid.uuid4(),
+            uuid=guid.uuid4(),
             username=email,
             email=email,
             system_role="user",
@@ -330,8 +330,8 @@ class RequestResetPasswordRoute(unittest.TestCase):
 class ResetPasswordRoute(unittest.TestCase):
     def setUp(self):
         self.email = get_random_email()
-        self.pwd_reset_key = uuid.uuid4()
-        self.user_uuid = uuid.uuid4()
+        self.pwd_reset_key = guid.uuid4()
+        self.user_uuid = guid.uuid4()
         users.add_user(
             uuid=self.user_uuid,
             username=self.email,
@@ -430,7 +430,7 @@ class ResetPasswordRoute(unittest.TestCase):
     def test_fail_expired_pwd_reset_key(self):
         email = get_random_email()
         pwd_reset_key = "1234"
-        user_uuid = uuid.uuid4()
+        user_uuid = guid.uuid4()
         users.add_user(
             uuid=user_uuid,
             username=email,

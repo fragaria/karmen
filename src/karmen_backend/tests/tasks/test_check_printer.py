@@ -60,6 +60,7 @@ class CheckPrinterTest(unittest.TestCase):
                             "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
+                            "plugins": [],
                         },
                     }
                 ),
@@ -136,6 +137,7 @@ class CheckPrinterTest(unittest.TestCase):
                             "version": {},
                             "access_level": PrinterClientAccessLevel.READ_ONLY,
                             "api_key": None,
+                            "plugins": [],
                             "webcam": {
                                 "message": "OK",
                                 "stream": "http://5678/webcam/?action=stream",
@@ -202,6 +204,7 @@ class CheckPrinterTest(unittest.TestCase):
                             "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
+                            "plugins": [],
                         },
                     }
                 )
@@ -258,6 +261,7 @@ class CheckPrinterTest(unittest.TestCase):
                             "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
+                            "plugins": [],
                         },
                     }
                 )
@@ -315,6 +319,7 @@ class CheckPrinterTest(unittest.TestCase):
                             "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
+                            "plugins": [],
                         },
                     }
                 )
@@ -372,6 +377,7 @@ class CheckPrinterTest(unittest.TestCase):
                             "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                             "webcam": {"message": "Webcam not accessible"},
+                            "plugins": [],
                         },
                     }
                 )

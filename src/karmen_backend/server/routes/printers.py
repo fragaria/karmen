@@ -29,6 +29,7 @@ def make_printer_response(printer, fields):
             + "*" * 30  # Add star padding to 32 characters
             if printer_inst.client_info.api_key
             else None,
+            "plugins": printer_inst.client_info.plugins,
         },
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,
@@ -207,6 +208,7 @@ def printer_create(org_uuid):
             "access_level": printer.client_info.access_level,
             "api_key": printer.client_info.api_key,
             "webcam": printer.webcam(),
+            "plugins": printer.client_info.plugins,
         },
     )
     # TODO cache webcam, job, status for a small amount of time in this client
@@ -285,6 +287,7 @@ def printer_patch(org_uuid, uuid):
             "access_level": printer_inst.client_info.access_level,
             "api_key": printer_inst.client_info.api_key,
             "webcam": printer_inst.webcam(),
+            "plugins": printer_inst.client_info.plugins,
         },
         printer_props=printer_inst.get_printer_props(),
     )
@@ -453,7 +456,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
 @cross_origin()
 def printer_set_led(org_uuid, uuid):
     try:
-        uuidmodule.UUID(uuid, version=4)
+        guid.UUID(uuid, version=4)
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)

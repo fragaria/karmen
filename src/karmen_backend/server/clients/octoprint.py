@@ -222,7 +222,7 @@ class Octoprint(PrinterClient):
                 "%s is responding with %s on /api/version - might be access-protected octoprint"
                 % (self.network_base, request.status_code)
             )
-            settings_req = request = self._http_get("/api/settings", force=True)
+            settings_req = self._http_get("/api/settings", force=True)
             # This might break with the future versions of octoprint
             # settings responds 200 when forcelogin plugin is disabled, but 403 when forcelogin is enabled
             if settings_req is not None and settings_req.status_code in [200, 403]:
@@ -292,7 +292,7 @@ class Octoprint(PrinterClient):
                 access_level=PrinterClientAccessLevel.UNKNOWN,
             )
             return
-        if re.match(r"^octoprint", data["text"], re.IGNORECASE) is None:
+        if re.match(r"^octoprint", data.get("text"), re.IGNORECASE) is None:
             app.logger.debug(
                 "%s is responding with %s on /api/version - probably not octoprint"
                 % (self.network_base, data["text"])
@@ -304,11 +304,14 @@ class Octoprint(PrinterClient):
                 access_level=PrinterClientAccessLevel.UNKNOWN,
             )
             return
+        settings_req = self._http_get("/api/settings", force=True)
+        plugin_list = list(dict(settings_req.json().get("plugins", {})).keys())
         self.client_info = PrinterClientInfo(
             data,
             connected=True,
             api_key=self.client_info.api_key,
             access_level=PrinterClientAccessLevel.UNLOCKED,
+            plugins=plugin_list,
         )
 
     def status(self):
