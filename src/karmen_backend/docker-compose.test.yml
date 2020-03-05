@@ -17,8 +17,6 @@ services:
       REDIS_PORT: 6380
       CELERY_CONFIG: '{}'
       SECRET_KEY: tests
-    volumes:
-      - ./config.test.cfg:/usr/src/app/config.local.cfg
     depends_on:
       - redis
       - dbmigrations
