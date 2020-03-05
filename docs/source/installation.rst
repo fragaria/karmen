@@ -17,33 +17,33 @@ called `OctoPi <https://github.com/guysoft/OctoPi>`_ that is designed for Raspbe
 microcomputers.
 
 .. note::
-  There might be other viable solutions, but at the moment, Karmen supports only
+  There might be other viable solutions, but at the moment, Karmen Hub supports only
   Octoprint.
 
 After the initial Octoprint/OctoPi setup that connects your printer is performed,
 you are ready to connect the printer to Karmen. Please note, that any issues you
 might have with a webcam stream or other specifics, are related to Octoprint/OctoPi
-and not to Karmen. *Karmen is only using Octoprint's API to communicate with the
+and not to Karmen Hub. *Karmen Hub is only using Octoprint's API to communicate with the
 printer.*
 
-Karmen supports `password-protected Octoprint <http://docs.octoprint.org/en/master/features/accesscontrol.html>`_
+Karmen Hub supports `password-protected Octoprint <http://docs.octoprint.org/en/master/features/accesscontrol.html>`_
 instances as well, it is possible to attach an API token to a printer on the printer settings screen (the option is
 only available when Octoprint is actually password-protected).
 
 Also, make sure that the Octoprint instance is accessible over the network
-from a computer on which Karmen will be running.
+from a computer on which Karmen Hub is running.
 
-Installing Karmen
------------------
+Installing Karmen Hub
+---------------------
 
-Karmen should run on any Linux-based distribution running on ``amd64`` or ``arm/v7`` architecture.
+Karmen Hub should run on any OS supporting `Docker <https://www.docker.com>`_ running on ``amd64`` or ``arm/v7`` architecture.
 We recommend to use a standalone computer for it, namely a `Raspberry Pi 4 <https://www.raspberrypi.org>`_ is a great fit.
-The only dependency Karmen requires is `Docker <https://www.docker.com>`_ that can be easily installed on Raspberry Pi by
-running a few commands adapted from this `official blogpost <https://blog.docker.com/2019/03/happy-pi-day-docker-raspberry-pi/>`_.
-We recommend to use a clean Raspbian image as a base for installing Karmen.
+Docker can be easily installed on Raspberry Pi by running a few commands adapted from this
+`official blogpost <https://blog.docker.com/2019/03/happy-pi-day-docker-raspberry-pi/>`_.
+We recommend to use a clean Raspbian image as a base for installing Karmen Hub.
 
 If you use a freshly installed Raspbian image, make sure that you run `sudo apt update && sudo apt upgrade -y && sudo reboot`
-before installing docker. That installs the latest version of all of the system packages and performs a restart.
+before installing docker. That updates the system to the latest version and performs a restart.
 
 .. code-block:: sh
 
@@ -56,9 +56,9 @@ before installing docker. That installs the latest version of all of the system 
 
 The last command should spit out a bunch of information about your docker installation.
 
-The next step is to get a production bundle for Karmen. You can get these in the
+The next step is to get a production bundle for Karmen Hub. You can get these in the
 `Releases section on our GitHub <https://github.com/fragaria/karmen/releases>`_.
-Just download the latest one to your Raspberry Pi's home directory and unzip it.
+Just download the latest ``release.zip`` to your Raspberry Pi's home directory and unzip it.
 
 .. code-block:: sh
 
@@ -71,25 +71,30 @@ The directory ``karmen`` now contains at least the following files:
 
 - ``docker-compose.yml`` - A blueprint for all necessary services
 - ``run-karmen.sh`` - A startup script you can use to launch karmen
+- ``stop-karmen.sh`` - A script you can use to stop karmen
 - ``update.sh`` - An update script that can bring your installation up to date
-- ``VERSION`` - A file with a version number. Useful for troubleshooting
+- ``VERSION`` - A file with a version number useful for troubleshooting
 
 The database schema is created automatically upon the first start and is kept up to date during updates.
-The datafiles are created on your filesystem, not inside the container, so no data will be lost during Karmen's downtime.
+The datafiles are created on your filesystem, not inside the container, so no data will be lost during
+Karmen Hub's downtime.
 
-Karmen requires a little bit of :ref:`configuration <configuration>` that is done with environment
-variables. The only required one, is ``KARMEN_SECRET_KEY`` which you should set to something secret.
+Karmen Hub requires a little bit of :ref:`configuration <configuration>` that is done exclusively
+with environment variables. The only required one is ``KARMEN_SECRET_KEY`` which you should
+set to something secret. It is used for session encryption and should be unique for each installation.
 
 Finally, you can start all of the services. During the first startup, the script will automatically
 download (from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&type=image>`_) and run
-all of the necessary containers setup scripts. This might take a few minutes. For the first and
-all other starts, you can use a shorthand script like this:
+all of the necessary containers. This might take a few minutes. For the first and
+all other starts, you can use the shorthand script like this:
 
 .. code-block:: sh
 
    KARMEN_SECRET_KEY=something-secr3t ./run-karmen.sh
 
-The browser-accessible frontend is then accessible on the standard port 80.
+The browser-accessible frontend is then accessible on the standard HTTP port 80. There are other useful
+options such as ``KARMEN_FRONTEND_BASE_URL`` that should be set so Karmen Hub works as expected. Consult
+the :ref:`configuration <configuration>` page for more options.
 
 It is possible to modify the listening host and port like this:
 
@@ -97,8 +102,8 @@ It is possible to modify the listening host and port like this:
 
    KARMEN_HOST=127.0.0.1 KARMEN_PORT=3776 ./run-karmen.sh
 
-This will run the frontend on port 3776 bound only to the local interface. Karmen will not be accessible from other computers.
-By default, Karmen listens on all interfaces (``0.0.0.0``) and on port ``80``.
+This will run Karmen Hub on port 3776 bound only to the local interface so Karmen Hub will not be
+accessible from other computers. By default, Karmen listens on all interfaces (``0.0.0.0``) and on port ``80``.
 
 You can access the UI by accessing the public IP address of your machine, or by accessing the
 ``<hostname>.local`` address which is automatically provided by Raspbian. The default hostname

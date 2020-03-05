@@ -7,30 +7,43 @@ Internet access
 .. toctree::
   :maxdepth: 2
 
-Karmen is successfully running in your environment, but to make the whole system
+Karmen Hub is successfully running in your environment, but to make the whole system
 really useful, there is still one thing missing: The ability to manage your printers
 from anywhere in the world.
 
 There are multiple ways of doing that, take the following list as an inspiration on
 how it can be done.
 
+Deployment accessible from the internet
+---------------------------------------
+
+This is the obvious choice. You can run Karmen Hub on a server accessible from the internet.
+But you have to have your Octoprint's accessible over the internet as well. Don't forget
+to protect all of your services that are publicly accessible with passwords and TLS.
+
+Websocket proxy
+---------------
+You can use our `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_ that is supported
+in Karmen Hub out of the box with ``KARMEN_SOCKET_API_URL`` and ``KARMEN_CLOUD_MODE`` options. It
+requires a client running next to your Octoprint and a server running in a location accessible by
+Karmen Hub. The communication is secured and encrypted.
 
 Port mapping on a router
 --------------------------------
-If you have Karmen and your printers set up behind a router with a fixed public IP address,
+If you have your service set up behind a router with a fixed public IP address,
 you can use the `port mapping (or port forwarding) <https://en.wikipedia.org/wiki/Port_forwarding>`_
 technique.
 
 Just pick a port number and set up a `route on your router <https://portforward.com/router.htm>`_
-that maps an outgoing port to the internal Karmen address.
+that maps an outgoing port to the internal device's address.
 
 An example: Your public IP is ``1.2.3.4``, Karmen is running locally on ``192.168.3.89`` and you pick
 an external port ``44444``. After setting things up properly, Karmen will be available on ``1.2.3.4:44444``.
 
 All traffic including the webcam streams is now routed to the internet through this mapped port.
 
-This solution is not really safe since the traffic is not encrypted. There will be a guide
-on how to secure the Karmen server with a TLS certificate eventually.
+This solution is not really safe since the traffic is not encrypted. You should protect the outgoing
+service with a TLS certificate.
 
 Virtual Private Network (VPN)
 -----------------------------
@@ -50,18 +63,18 @@ If you have no control over the network element that provides the internet acces
 cannot simply run or get a VPN, `SSH tunneling <https://www.ssh.com/ssh/tunneling/>`_
 is yet another option that can be used.
 
-In short, you open an SSH tunnel from the computer that is running Karmen to a computer
+In short, you open an SSH tunnel from the computer that is running the service to a computer
 that is visible from the internet. A part of that tunnel is again a port mapping. So let's
-say that Karmen is running on ``192.168.3.89:80`` and your internet-visible computer is ``1.2.3.4``.
+say that Karmen Hub is running on ``192.168.3.89:80`` and your internet-visible computer is ``1.2.3.4``.
 
 .. code-block:: sh
   
    ssh -R 8888:localhost:80 1.2.3.4
 
-By running that command, you are routing Karmen's local port 80 to ``1.2.3.4:8888``. So anybody that
-can access ``1.2.3.4:8888`` can now access Karmen. In this situation, the traffic between ``1.2.3.4``
-and Karmen is encrypted. The traffic between the end user and ``1.2.3.4`` is not, unless the public
-facing computer is configured to use some kind of encrypted traffic.
+By running that command, you are routing Karmen Hub's local port 80 to ``1.2.3.4:8888``. So anybody that
+can access ``1.2.3.4:8888`` can now access Karmen Hub. In this situation, the traffic between ``1.2.3.4``
+and Karmen Hub is encrypted. The traffic between the end user and ``1.2.3.4`` is not, unless the public
+facing computer is configured to use a TLS certificate.
 
 Online tunneling services
 ---------------------------
