@@ -21,7 +21,8 @@ class PasswordReset extends React.Component {
           name: "Your e-mail",
           val: "",
           type: "text",
-          required: true
+          required: true,
+          autocomplete: "email"
         }
       }
     };

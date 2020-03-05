@@ -12,6 +12,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               type={definition[name].type}
               id={name}
               name={name}
+              autoComplete={definition[name].autocomplete}
               value={definition[name].val}
               disabled={definition[name].disabled}
               onChange={e => updateValue(name, e.target.value)}
@@ -92,9 +93,13 @@ export const FormInputs = ({ definition, updateValue }) => {
           <input
             key={name}
             type="text"
-            id={name}
-            name={name}
-            autoComplete="off"
+            id={`hpot56-${name}-${Math.random()
+              .toString(36)
+              .substring(7)}`}
+            name={`hpot56-${name}-${Math.random()
+              .toString(36)
+              .substring(7)}`}
+            autoComplete="new-password"
             className="honeypot-field"
             disabled={definition[name].disabled}
             onChange={e => updateValue(name, e.target.value)}

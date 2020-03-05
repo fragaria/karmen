@@ -25,13 +25,15 @@ class RegisterConfirmation extends React.Component {
           name: "New password",
           val: "",
           type: "password",
-          required: true
+          required: true,
+          autocomplete: "new-password"
         },
         passwordConfirmation: {
           name: "New password confirmation",
           val: "",
           type: "password",
-          required: true
+          required: true,
+          autocomplete: "new-password"
         }
       }
     };

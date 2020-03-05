@@ -19,13 +19,15 @@ class LoginForm extends React.Component {
           name: "Username",
           val: "",
           type: "text",
-          required: true
+          required: true,
+          autocomplete: "username"
         },
         password: {
           name: "Password",
           val: "",
           type: "password",
-          required: true
+          required: true,
+          autocomplete: "current-password"
         }
       }
     };
