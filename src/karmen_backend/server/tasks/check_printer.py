@@ -17,11 +17,10 @@ def check_printer(printer_uuid):
             if current_ip is not None and current_ip != printer.ip:
                 printer.ip = current_ip
                 printer.update_network_base()
-        else:
-            hostname = network.get_avahi_hostname(printer.ip)
-            if hostname is not None:
-                printer.hostname = hostname
-                printer.update_network_base()
+        hostname = network.get_avahi_hostname(printer.ip)
+        if hostname is not None and hostname != printer.hostname:
+            printer.hostname = hostname
+            printer.update_network_base()
     now = datetime.now()
     if now.minute % 15 == 0 and printer.client_info.connected:
         printer.sniff()

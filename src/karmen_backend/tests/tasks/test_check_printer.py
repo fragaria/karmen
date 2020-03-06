@@ -51,13 +51,13 @@ class CheckPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_data.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 1)
         self.assertEqual(mock_address.call_count, 1)
-        self.assertEqual(mock_hostname.call_count, 0)
+        self.assertEqual(mock_hostname.call_count, 1)
         mock_update_printer.assert_has_calls(
             [
                 mock.call(
                     **{
                         "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": "a",
+                        "hostname": "router.asus.com",
                         "ip": "1234",
                         "client_props": {
                             "connected": False,
@@ -132,7 +132,7 @@ class CheckPrinterTest(unittest.TestCase):
         check_printer("b2732ff8-605b-4d56-87f3-5a590d672912")
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_address.call_count, 1)
-        self.assertEqual(mock_hostname.call_count, 0)
+        self.assertEqual(mock_hostname.call_count, 1)
         self.assertEqual(mock_get_data.call_count, 2)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_has_calls(
@@ -140,7 +140,7 @@ class CheckPrinterTest(unittest.TestCase):
                 mock.call(
                     **{
                         "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
-                        "hostname": "b.local",
+                        "hostname": "router.asus.com",
                         "ip": "5678",
                         "client_props": {
                             "connected": True,
@@ -326,7 +326,7 @@ class CheckPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_get_data.call_count, 1)
         self.assertEqual(mock_address.call_count, 1)
-        self.assertEqual(mock_hostname.call_count, 0)
+        self.assertEqual(mock_hostname.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_has_calls(
             [
@@ -388,7 +388,7 @@ class CheckPrinterTest(unittest.TestCase):
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_get_data.call_count, 1)
         self.assertEqual(mock_address.call_count, 1)
-        self.assertEqual(mock_hostname.call_count, 0)
+        self.assertEqual(mock_hostname.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_has_calls(
             [
