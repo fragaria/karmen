@@ -436,8 +436,10 @@ class CheckPrinterTest(unittest.TestCase):
     )
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printer.datetime")
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
     def test_call_sniff_periodically(
         self,
+        mock_octoprint_redis,
         mock_datetime,
         mock_get_data,
         mock_address,
@@ -447,6 +449,7 @@ class CheckPrinterTest(unittest.TestCase):
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=30)
+        mock_octoprint_redis.get.return_value = None
 
         def mock_call(uri, **kwargs):
             if "/api/settings" in uri:

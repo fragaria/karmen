@@ -38,11 +38,15 @@ class ListRoute(unittest.TestCase):
             user_uuid=UUID_USER,
             organization_uuid=UUID_ORG,
         )
+        uuids = []
+        for i in range(0, 7):
+            uuids.append(guid.uuid4())
+        uuids.sort()
         self.printjob_ids = []
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    uuid=guid.uuid4(),
+                    uuid=uuids.pop(),
                     gcode_uuid=self.gcode_uuid,
                     gcode_data={"uuid": self.gcode_uuid},
                     printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -54,7 +58,7 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    uuid=guid.uuid4(),
+                    uuid=uuids.pop(),
                     gcode_uuid=self.gcode_uuid2,
                     gcode_data={"uuid": self.gcode_uuid2},
                     printer_uuid="e24a9711-aabc-48f0-b790-eac056c43f07",
@@ -64,7 +68,7 @@ class ListRoute(unittest.TestCase):
                 )
             )
         printjobs.add_printjob(
-            uuid=guid.uuid4(),
+            uuid=uuids.pop(),
             gcode_uuid=self.gcode_uuid2,
             gcode_data={"uuid": self.gcode_uuid2},
             printer_uuid="7e5129ad-08d0-42d1-b65c-847d3c636157",

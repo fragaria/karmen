@@ -109,13 +109,17 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.tasks.sniff_printer.guid.uuid4", return_value="1234")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    def test_try_http_and_https(self, mock_get_data, mock_update_printer, mock_uuid):
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    def test_try_http_and_https(
+        self, mock_octoprint_redis, mock_get_data, mock_update_printer, mock_uuid
+    ):
         def mock_call(uri, **kwargs):
             if "https" in uri:
                 return Response(200, {"text": "OctoPrint"})
             return None
 
         mock_get_data.side_effect = mock_call
+        mock_octoprint_redis.get.return_value = None
 
         sniff_printer(UUID_ORG, "octopi.local", "192.168.1.12")
         self.assertEqual(mock_update_printer.call_count, 1)
