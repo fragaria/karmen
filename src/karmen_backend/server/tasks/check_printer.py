@@ -2,6 +2,7 @@ from server import app, celery
 from server.database import printers
 from server import clients
 from server.services import network
+from datetime import datetime
 
 
 @celery.task(name="check_printer")
@@ -21,7 +22,12 @@ def check_printer(printer_uuid):
             if hostname is not None:
                 printer.hostname = hostname
                 printer.update_network_base()
-    printer.is_alive()
+    now = datetime.now()
+    if now.minute % 15 == 0 and printer.client_info.connected:
+        printer.sniff()
+    else:
+        printer.is_alive()
+
     printers.update_printer(
         uuid=printer.uuid,
         hostname=printer.hostname,
