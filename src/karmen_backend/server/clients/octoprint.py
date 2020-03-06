@@ -337,6 +337,33 @@ class Octoprint(PrinterClient):
             return {"state": "Printer is not responding", "temperature": {}}
 
     def webcam(self):
+        def parse_url(url):
+            if url is None:
+                return None
+            if url.startswith("/"):
+                return self.network_base + url
+            if not (url.startswith("http://") or url.startswith("http://")):
+                url = "http://" + url
+            parsed = urlparse.urlparse(url)
+            port = parsed.port if parsed.port is not None else "80"
+            if self.token is not None and port != "80":
+                return None  # Yet we can't sed other port's than 80 over ws api yet
+            if self.token:
+                # If we have ws api, we just try the path, not much else to do
+                return "%s%s?%s" % (self.network_base, parsed.path, parsed.query)
+                return self.network_base + parsed.path
+
+            # Rest is only for local hub installations
+            if parsed.hostname in ["localhost", "127.0.0.1"]:
+                return "%s://%s:%s%s?%s" % (
+                    parsed.scheme,
+                    self.ip,
+                    port,
+                    parsed.path,
+                    parsed.query,
+                )
+            return url
+
         request = self._http_get("/api/settings")
         if request is not None and request.status_code == 200:
             try:
@@ -346,25 +373,9 @@ class Octoprint(PrinterClient):
                     return {"message": "Webcam disabled in octoprint"}
                 stream_url = data["webcam"].get("streamUrl", None)
                 snapshot_url = data["webcam"].get("snapshotUrl", None)
-                if (
-                    stream_url
-                    and re.match(r"^https?", stream_url, re.IGNORECASE) is None
-                ):
-                    stream_url = "%s%s" % (self.network_base, stream_url)
-                if snapshot_url is not None:
-                    if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
-                        snapshot_url = "%s%s" % (self.network_base, snapshot_url)
-                    if self.ip:
-                        if (
-                            re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
-                            is not None
-                        ):
-                            snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
-                        if (
-                            re.search(r"localhost", snapshot_url, re.IGNORECASE)
-                            is not None
-                        ):
-                            snapshot_url = snapshot_url.replace("localhost", self.ip)
+                stream_url = parse_url(stream_url)
+                snapshot_url = parse_url(snapshot_url)
+
                 return {
                     "message": "OK",
                     "stream": stream_url,

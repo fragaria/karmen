@@ -4,6 +4,7 @@ import json
 import tempfile
 import mock
 
+from server import app
 from server.clients.utils import PrinterClientException, PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint
 from ..utils import Response, UUID_ORG
@@ -556,6 +557,38 @@ class OctoprintWebcamTest(unittest.TestCase):
         )
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
+    def test_webcam_missing_protocol_url(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "webcam": {
+                "flipH": True,
+                "flipV": True,
+                "rotate90": False,
+                "streamUrl": "1.2.3.4/webcam/?action=stream",
+                "snapshotUrl": "1.2.3.4/?action=snapshot",
+                "webcamEnabled": True,
+            }
+        }
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
+        result = printer.webcam()
+        self.assertEqual(
+            result,
+            {
+                "message": "OK",
+                "stream": "http://1.2.3.4/webcam/?action=stream",
+                "snapshot": "http://1.2.3.4/?action=snapshot",
+                "flipHorizontal": True,
+                "flipVertical": True,
+                "rotate90": False,
+            },
+        )
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_webcam_snapshot_local_url(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
@@ -590,6 +623,94 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "message": "OK",
                 "stream": "http://192.168.1.15/webcam/?action=stream",
                 "snapshot": "http://192.168.1.15:8080/webcam/?action=snapshot",
+                "flipHorizontal": True,
+                "flipVertical": True,
+                "rotate90": False,
+            },
+        )
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    def test_webcam_snapshot_local_url_ws_api(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "webcam": {
+                "bitrate": "5000k",
+                "ffmpegPath": "/usr/bin/ffmpeg",
+                "ffmpegThreads": 1,
+                "flipH": True,
+                "flipV": True,
+                "rotate90": False,
+                "snapshotSslValidation": True,
+                "snapshotTimeout": 5,
+                "snapshotUrl": "http://127.0.0.1/webcam/?action=snapshot",
+                "streamRatio": "4:3",
+                "streamTimeout": 5,
+                "streamUrl": "/webcam/?action=stream",
+                "timelapseEnabled": True,
+                "watermark": True,
+                "webcamEnabled": True,
+            }
+        }
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True},
+            token="ws-token",
+        )
+        result = printer.webcam()
+        self.maxDiff = None
+        self.assertEqual(
+            result,
+            {
+                "message": "OK",
+                "stream": app.config["SOCKET_API_URL"] % ("ws-token")
+                + "/webcam/?action=stream",
+                "snapshot": app.config["SOCKET_API_URL"] % ("ws-token")
+                + "/webcam/?action=snapshot",
+                "flipHorizontal": True,
+                "flipVertical": True,
+                "rotate90": False,
+            },
+        )
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    def test_webcam_snapshot_ws_api_port(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.return_value = {
+            "webcam": {
+                "bitrate": "5000k",
+                "ffmpegPath": "/usr/bin/ffmpeg",
+                "ffmpegThreads": 1,
+                "flipH": True,
+                "flipV": True,
+                "rotate90": False,
+                "snapshotSslValidation": True,
+                "snapshotTimeout": 5,
+                "snapshotUrl": "http://127.0.0.1:8888/webcam/?action=snapshot",
+                "streamRatio": "4:3",
+                "streamTimeout": 5,
+                "streamUrl": "localhost:1234/webcam/?action=stream",
+                "timelapseEnabled": True,
+                "watermark": True,
+                "webcamEnabled": True,
+            }
+        }
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True},
+            token="ws-token",
+        )
+        result = printer.webcam()
+        self.maxDiff = None
+        self.assertEqual(
+            result,
+            {
+                "message": "OK",
+                "stream": None,
+                "snapshot": None,
                 "flipHorizontal": True,
                 "flipVertical": True,
                 "rotate90": False,
