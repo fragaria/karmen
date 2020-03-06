@@ -261,7 +261,12 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinters: () =>
       dispatch(
-        loadPrinters(ownProps.match.params.orguuid, ["job", "status", "webcam"])
+        loadPrinters(ownProps.match.params.orguuid, [
+          "job",
+          "status",
+          "webcam",
+          "lights"
+        ])
       ),
     getGcode: id => dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
     printGcode: (id, printer) =>

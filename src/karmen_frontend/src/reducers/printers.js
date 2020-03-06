@@ -212,6 +212,25 @@ export default (
         [newImage.uuid]: `${newImage.prefix}${newImage.data}`
       });
       return state;
+    case "PRINTERS_CHANGE_LIGHTS_SUCCEEDED":
+      newPrinter = action.payload;
+      if (!newPrinter) {
+        return state;
+      }
+      // TODO possibly switch to findIndex
+      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
+      if (!origPrinter && newPrinter) {
+        return state;
+      }
+      if (origPrinter && newPrinter) {
+        const origIndex = printers.indexOf(origPrinter);
+        printers[origIndex] = Object.assign({}, origPrinter, {
+          lights: newPrinter.data.status
+        });
+      }
+      return Object.assign({}, state, {
+        printers: getSortedPrinters(printers)
+      });
     case "USER_CLEAR_ENDED":
       for (let job in webcamQueue) {
         clearInterval(job.interval);

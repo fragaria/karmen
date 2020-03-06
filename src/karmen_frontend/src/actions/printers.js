@@ -22,7 +22,12 @@ export const loadAndQueuePrinter = (orguuid, uuid, fields) => (
             : PRINTER_IDLE_POLL;
         dispatch(setPrinterPollInterval(orguuid, uuid, poll));
         dispatch(
-          queueLoadPrinter(orguuid, uuid, ["job", "status", "webcam"], poll)
+          queueLoadPrinter(
+            orguuid,
+            uuid,
+            ["job", "status", "webcam", "lights"],
+            poll
+          )
         );
       }
       return result;
@@ -51,7 +56,7 @@ export const loadAndQueuePrinters = (orguuid, fields) => (
               queueLoadPrinter(
                 orguuid,
                 printer.uuid,
-                ["job", "status", "webcam"],
+                ["job", "status", "webcam", "lights"],
                 poll
               )
             );
@@ -106,7 +111,7 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
             queueLoadPrinter(
               orguuid,
               uuid,
-              ["job", "status", "webcam"],
+              ["job", "status", "webcam", "lights"],
               interval
             )
           );
@@ -356,5 +361,16 @@ export const getWebcamSnapshot = createActionThunk(
         status: r.status
       };
     });
+  }
+);
+
+export const changeLights = createActionThunk(
+  "PRINTERS_CHANGE_LIGHTS",
+  (orguuid, uuid, { dispatch, getState }) => {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.changeLights, dispatch)(orguuid, uuid);
   }
 );

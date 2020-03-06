@@ -118,7 +118,8 @@ export default connect(
         loadPrinter(ownProps.match.params.orguuid, ownProps.match.params.uuid, [
           "job",
           "status",
-          "webcam"
+          "webcam",
+          "lights"
         ])
       ),
     patchPrinter: data =>

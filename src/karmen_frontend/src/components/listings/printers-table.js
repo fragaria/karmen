@@ -112,7 +112,7 @@ const PrintersTable = ({
   return (
     <NoPaginationListing
       defaultOrderBy="+name"
-      loadItems={() => loadPrinters(["job", "status", "webcam"])}
+      loadItems={() => loadPrinters(["job", "status", "webcam", "lights"])}
       itemsLoaded={printersLoaded}
       items={printersList}
       enableFiltering={true}

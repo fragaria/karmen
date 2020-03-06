@@ -216,3 +216,22 @@ export const getWebcamSnapshot = snapshotUrl => {
       return { status: 500 };
     });
 };
+
+export const changeLights = (orgUuid, uuid) => {
+  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers/${uuid}/lights`, {
+    method: "POST",
+    headers: getHeaders()
+  })
+    .then(response => {
+      if (response.status !== 200) {
+        console.error(`Cannot change lights status: ${response.status}`);
+      }
+      return response.json().then(data => {
+        return { status: response.status, uuid, data };
+      });
+    })
+    .catch(e => {
+      console.error(`Cannot change lights status: ${e}`);
+      return { status: 500 };
+    });
+};

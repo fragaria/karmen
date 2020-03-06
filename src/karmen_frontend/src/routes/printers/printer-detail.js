@@ -24,7 +24,8 @@ import {
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
-  setWebcamRefreshInterval
+  setWebcamRefreshInterval,
+  changeLights
 } from "../../actions/printers";
 
 const ChangeConnectionModal = ({
@@ -193,7 +194,8 @@ const PrinterDetail = ({
   jobList,
   loadJobsPage,
   clearJobsPages,
-  setWebcamRefreshInterval
+  setWebcamRefreshInterval,
+  changeLights
 }) => {
   const changeConnectionModal = useMyModal();
   const [printerLoaded, setPrinterLoaded] = useState(false);
@@ -231,6 +233,18 @@ const PrinterDetail = ({
             setWebcamRefreshInterval={setWebcamRefreshInterval}
           />
           <Progress {...printer.job} />
+          <div className="printer-detail-controls">
+            {printer.lights !== "unavailable" && (
+              <BusyButton
+                className="btn"
+                type="button"
+                onClick={changeLights}
+                busyChildren="Switching lights..."
+              >
+                {`Lights ${printer.lights === "on" ? "off" : "on"}`}
+              </BusyButton>
+            )}
+          </div>
         </div>
 
         <div className="printer-detail-meta">
@@ -351,7 +365,7 @@ export default connect(
         loadAndQueuePrinter(
           ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
-          ["job", "status", "webcam"]
+          ["job", "status", "webcam", "lights"]
         )
       ),
     changeCurrentJobState: action =>
@@ -403,6 +417,10 @@ export default connect(
           ownProps.match.params.uuid,
           interval
         )
+      ),
+    changeLights: () =>
+      dispatch(
+        changeLights(ownProps.match.params.orguuid, ownProps.match.params.uuid)
       )
   })
 )(PrinterDetail);

@@ -1227,6 +1227,10 @@ select {
     .printer-detail-jobs {
       grid-area: jobs;
     }
+
+    .printer-detail-controls {
+      margin-top: $spacing-default / 4;
+    }
   }
 }
 
