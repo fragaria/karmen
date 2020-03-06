@@ -41,7 +41,7 @@ class ListRoute(unittest.TestCase):
         uuids = []
         for i in range(0, 7):
             uuids.append(guid.uuid4())
-        uuids.sort()
+        uuids.sort(reverse=True)
         self.printjob_ids = []
         for i in range(0, 3):
             self.printjob_ids.append(
