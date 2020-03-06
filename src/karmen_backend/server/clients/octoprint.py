@@ -354,13 +354,17 @@ class Octoprint(PrinterClient):
                 if snapshot_url is not None:
                     if re.match(r"^https?", snapshot_url, re.IGNORECASE) is None:
                         snapshot_url = "%s%s" % (self.network_base, snapshot_url)
-                    if (
-                        re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
-                        is not None
-                    ):
-                        snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
-                    if re.search(r"localhost", snapshot_url, re.IGNORECASE) is not None:
-                        snapshot_url = snapshot_url.replace("localhost", self.ip)
+                    if self.ip:
+                        if (
+                            re.search(r"127\.0\.0\.1", snapshot_url, re.IGNORECASE)
+                            is not None
+                        ):
+                            snapshot_url = snapshot_url.replace("127.0.0.1", self.ip)
+                        if (
+                            re.search(r"localhost", snapshot_url, re.IGNORECASE)
+                            is not None
+                        ):
+                            snapshot_url = snapshot_url.replace("localhost", self.ip)
                 return {
                     "message": "OK",
                     "stream": stream_url,
