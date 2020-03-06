@@ -1160,7 +1160,10 @@ class OctoprintSetLightsTest(unittest.TestCase):
         r = printer.set_lights()
         self.assertFalse(r)
 
-    @mock.patch("server.clients.octoprint.requests.post")
+    @mock.patch(
+        "server.clients.octoprint.requests.post",
+        return_value=Response(200, {"status": "OK"}),
+    )
     def test_plugin_responding(self, mock_post_uri):
         mock_post_uri.return_value.status_code = 200
         printer = Octoprint(
@@ -1171,3 +1174,58 @@ class OctoprintSetLightsTest(unittest.TestCase):
         )
         r = printer.set_lights()
         self.assertTrue(r)
+
+
+class OctoprintAreLightsOnTest(unittest.TestCase):
+    def test_no_plugin(self):
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
+        with self.assertRaises(Exception) as ctx:
+            printer.are_lights_on()
+
+        self.assertTrue("awesome_karmen_led is not loaded" in str(ctx.exception))
+
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_plugin_not_responding(self, mock_get_uri):
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.are_lights_on()
+        self.assertFalse(r)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"color": [0, 0, 1]}),
+    )
+    def test_plugin_responding_not_black(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.are_lights_on()
+        self.assertTrue(r)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"color": [0, 0, 0]}),
+    )
+    def test_plugin_responding_black(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.are_lights_on()
+        self.assertFalse(r)

@@ -417,6 +417,25 @@ class Octoprint(PrinterClient):
         # TODO improve return value
         return bool(request is not None and request.status_code == 204)
 
+    def are_lights_on(self):
+        if "awesome_karmen_led" not in self.client_info.plugins:
+            raise PrinterClientException(
+                "awesome_karmen_led is not loaded in octoprint"
+            )
+        request = self._http_get("/api/plugin/awesome_karmen_led", force=True)
+        if not request:
+            return False
+        try:
+            data = request.json()
+            color = data.get("color", [])
+            is_on = False
+            for c in color:
+                if c > 0:
+                    is_on = True
+            return is_on
+        except json.decoder.JSONDecodeError:
+            return False
+
     def set_lights(self, color=None, heartbeat=None):
         if "awesome_karmen_led" not in self.client_info.plugins:
             raise PrinterClientException(
@@ -431,5 +450,10 @@ class Octoprint(PrinterClient):
         if heartbeat is not None:
             body["heartbeat"] = heartbeat
         request = self._http_post("/api/plugin/awesome_karmen_led", json=body)
-        # TODO improve return value
-        return bool(request is not None and request.status_code == 200)
+        if not request:
+            return False
+        try:
+            data = request.json()
+            return data.get("status", "NOK") == "OK"
+        except json.decoder.JSONDecodeError:
+            return False

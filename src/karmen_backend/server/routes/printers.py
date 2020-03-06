@@ -11,6 +11,7 @@ from server.database import printers
 from server import clients, executor
 from server.services import network
 from . import jwt_force_password_change, validate_org_access
+from server.clients.utils import PrinterClientException
 
 
 def make_printer_response(printer, fields):
@@ -56,6 +57,11 @@ def make_printer_response(printer, fields):
         }
     if "job" in fields:
         data["job"] = printer_inst.job()
+    if "lights" in fields:
+        try:
+            data["lights"] = "on" if printer_inst.are_lights_on() else "off"
+        except PrinterClientException:
+            data["lights"] = "unavailable"
     return data
 
 
@@ -450,11 +456,11 @@ def printer_webcam_snapshot(org_uuid, uuid):
     return "", 202
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/set-led", methods=["POST"])
+@app.route("/organizations/<org_uuid>/printers/<uuid>/lights", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printer_set_led(org_uuid, uuid):
+def printer_set_lights(org_uuid, uuid):
     try:
         guid.UUID(uuid, version=4)
     except ValueError:
@@ -463,6 +469,13 @@ def printer_set_led(org_uuid, uuid):
     printer_inst = clients.get_printer_instance(printer)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
-    data = request.json
-    printer.set_printer_light(color="red")
-    return str(dir(printer_inst)), 200
+    try:
+        # TODO do not only toggle
+        lights_on = printer_inst.are_lights_on()
+        r = printer_inst.set_lights(color="black" if lights_on else "white")
+        if not r:
+            return make_response(jsonify({"status": "unavailable"}), 500)
+        # This is inverse because lights_on is BEFORE we actually change it
+        return make_response(jsonify({"status": "off" if lights_on else "on"}), 200)
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)

@@ -77,6 +77,10 @@ class PrinterClient(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def are_lights_on(self, color=None, heartbeat=None):
+        pass
+
+    @abc.abstractmethod
     def set_lights(self, color=None, heartbeat=None):
         pass
 
