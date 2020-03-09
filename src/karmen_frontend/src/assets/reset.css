@@ -67,3 +67,12 @@ a {
     text-decoration: none;
   }
 }
+
+input[type="search"] {
+    -webkit-appearance: textfield;
+}
+
+input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+
