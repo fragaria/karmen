@@ -117,7 +117,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
   }
 
   return (
-    <div className="cta-box text-center">
+    <>
       {printer.status.state === "Paused" ? (
         <button
           className="btn btn-sm"
@@ -136,7 +136,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
         >
           Pause print
         </button>
-      )}{" "}
+      )}
       <button className="btn btn-sm" onClick={cancelPrintModal.openModal}>
         Cancel print
       </button>
@@ -145,7 +145,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
         printer={printer}
         onCurrentJobStateChange={onCurrentJobStateChange}
       />
-    </div>
+    </>
   );
 };
 
@@ -233,10 +233,14 @@ const PrinterDetail = ({
             setWebcamRefreshInterval={setWebcamRefreshInterval}
           />
           <Progress {...printer.job} />
-          <div className="printer-detail-controls">
+          <div className="cta-box text-center hidden-xs">
+            <PrinterCurrentPrintControl
+              printer={printer}
+              onCurrentJobStateChange={changeCurrentJobState}
+            />
             {printer.lights !== "unavailable" && (
               <BusyButton
-                className="btn"
+                className="btn btn-sm"
                 type="button"
                 onClick={changeLights}
                 busyChildren="Switching lights..."
@@ -299,12 +303,26 @@ const PrinterDetail = ({
               <PrinterProperties printer={printer} />
               <PrinterConnectionStatus printer={printer} />
             </dl>
-            <PrinterCurrentPrintControl
-              printer={printer}
-              onCurrentJobStateChange={changeCurrentJobState}
-            />
           </div>
         </div>
+
+        <div className="cta-box text-center visible-xs">
+          <PrinterCurrentPrintControl
+            printer={printer}
+            onCurrentJobStateChange={changeCurrentJobState}
+          />
+          {printer.lights !== "unavailable" && (
+            <BusyButton
+              className="btn btn-sm"
+              type="button"
+              onClick={changeLights}
+              busyChildren="Switching lights..."
+            >
+              {`Lights ${printer.lights === "on" ? "off" : "on"}`}
+            </BusyButton>
+          )}
+        </div>
+
 
         <div className="printer-detail-jobs">
           <div className="react-tabs__tab-list">
@@ -335,7 +353,7 @@ const PrinterDetail = ({
               <Link
                 to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
               >
-                <button className="btn">Printer settings</button>
+                <button className="btn btn-outline">Printer settings</button>
               </Link>
             </div>
           )}

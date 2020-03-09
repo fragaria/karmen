@@ -1,26 +1,57 @@
 import React from "react";
 
-const CtaDropdown = ({ children, onToggle, expanded }) => {
-  return (
-    <div className="dropdown list-cta">
-      <button
-        className="dropdown-toggle btn-reset"
-        onClick={e => {
-          e.preventDefault();
-          onToggle && onToggle();
-        }}
-      >
-        <span className="icon-kebab"></span>
-      </button>
+class CtaDropdown extends React.Component {
+  constructor(props) {
+    super(props);
+    this.dropdownItems = React.createRef();
+  }
 
-      {expanded && (
-        <div className="dropdown-items">
-          <div className="dropdown-items-content">{children}</div>
-          <div className="dropdown-backdrop" onClick={onToggle}></div>
-        </div>
-      )}
-    </div>
-  );
+  componentDidUpdate() {
+    const dropdownItems = this.dropdownItems.current;
+
+    const countViewportHeight = (dropdownItems) => {
+      const vh = window.innerHeight * 0.01;
+      dropdownItems.style.setProperty('--vh', `${vh}px`);
+    }
+
+    if (dropdownItems) {
+      countViewportHeight(dropdownItems);
+      window.addEventListener('resize', () => {
+        countViewportHeight(dropdownItems)
+      });
+    }
+  }
+
+
+  render() {
+    const { children, onToggle, expanded } = this.props;
+
+    return (
+      <div className="dropdown list-cta">
+        <button
+          className="dropdown-toggle btn-reset"
+          onClick={e => {
+            e.preventDefault();
+            onToggle && onToggle();
+          }}
+        >
+          <span className="icon-kebab"></span>
+        </button>
+
+        {expanded && (
+          <div className="dropdown-items">
+            <div
+              className="dropdown-items-content"
+              ref={this.dropdownItems}
+             >
+              {children}
+            </div>
+            <div className="dropdown-backdrop" onClick={onToggle}></div>
+          </div>
+        )}
+      </div>
+    );
+  };
 };
 
 export default CtaDropdown;

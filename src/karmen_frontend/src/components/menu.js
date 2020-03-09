@@ -6,11 +6,27 @@ import { clearUserIdentity, switchOrganization } from "../actions/users-me";
 class Menu extends React.Component {
   constructor(props) {
     super(props);
-
+    this.dropdownItems = React.createRef();
     this.state = {
       navigation: false,
       orgListExpanded: false
     };
+  }
+
+  componentDidUpdate() {
+    const dropdownItems = this.dropdownItems.current;
+
+    const countViewportHeight = (dropdownItems) => {
+      const vh = window.innerHeight * 0.01;
+      dropdownItems.style.setProperty('--vh', `${vh}px`);
+    }
+
+    if (dropdownItems) {
+      countViewportHeight(dropdownItems);
+      window.addEventListener('resize', () => {
+        countViewportHeight(dropdownItems)
+      });
+    }
   }
 
   render() {
@@ -20,6 +36,7 @@ class Menu extends React.Component {
       onToggle,
       expanded
     }) => {
+
       return (
         <div className="dropdown">
           <button
@@ -34,7 +51,7 @@ class Menu extends React.Component {
           </button>
 
           {expanded && (
-            <div className="dropdown-items">
+            <div className="dropdown-items" ref={this.dropdownItems}>
               <div className="dropdown-items-content">
                 <span className="dropdown-title">Switch organization</span>
                 {children}
@@ -136,7 +153,7 @@ class Menu extends React.Component {
                       </p>
                     </Link>
                   </li>
-                  <li>
+                  <li className="navigation-item">
                     <Link
                       to={`/${activeOrganization.uuid}/printers`}
                       onClick={() => this.setState({ navigation: false })}
@@ -144,7 +161,7 @@ class Menu extends React.Component {
                       Printers
                     </Link>
                   </li>
-                  <li>
+                  <li className="navigation-item">
                     <Link
                       to={`/${activeOrganization.uuid}/gcodes`}
                       onClick={() => this.setState({ navigation: false })}
@@ -153,7 +170,7 @@ class Menu extends React.Component {
                     </Link>
                   </li>
                   {role === "admin" && (
-                    <li>
+                    <li className="navigation-item">
                       <Link
                         to={`/${activeOrganization.uuid}/settings`}
                         onClick={() => this.setState({ navigation: false })}
@@ -162,7 +179,7 @@ class Menu extends React.Component {
                       </Link>
                     </li>
                   )}
-                  <li>
+                  <li className="navigation-item">
                     <Link
                       to="/organizations"
                       onClick={() => this.setState({ navigation: false })}
@@ -170,7 +187,7 @@ class Menu extends React.Component {
                       Organizations
                     </Link>
                   </li>
-                  <li>
+                  <li className="navigation-item">
                     <button
                       className="btn-reset"
                       title="Logout"

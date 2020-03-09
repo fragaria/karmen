@@ -3,8 +3,26 @@ import React from "react";
 class Sorting extends React.Component {
   constructor(props) {
     super(props);
+    this.dropdownItems = React.createRef();
     this.state = { expand: false };
   }
+
+  componentDidUpdate() {
+    const dropdownItems = this.dropdownItems.current;
+
+    const countViewportHeight = (dropdownItems) => {
+      const vh = window.innerHeight * 0.01;
+      dropdownItems.style.setProperty('--vh', `${vh}px`);
+    }
+
+    if (dropdownItems) {
+      countViewportHeight(dropdownItems);
+      window.addEventListener('resize', () => {
+        countViewportHeight(dropdownItems)
+      });
+    }
+  }
+
   render() {
     const { active, columns, onChange } = this.props;
     const toggle = () => {
@@ -62,7 +80,7 @@ class Sorting extends React.Component {
         </button>
 
         {expand && (
-          <div className="dropdown-items">
+          <div className="dropdown-items" ref={this.dropdownItems}>
             <div className="dropdown-items-content">
               <span className="dropdown-title">Sort by</span>
               {list}
