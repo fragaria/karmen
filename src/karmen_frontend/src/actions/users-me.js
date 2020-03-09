@@ -90,9 +90,18 @@ export const loadUserData = userData => dispatch => {
   if (userData.activeOrganization) {
     dispatch(switchOrganization(userData.activeOrganization.uuid));
   } else {
-    const org =
-      userData.organizations && Object.values(userData.organizations)[0];
-    dispatch(switchOrganization(org.uuid));
+    const prefs = backend.getUserPreferences();
+    if (
+      prefs &&
+      prefs.activeOrganizationUuid &&
+      userData.organizations[prefs.activeOrganizationUuid]
+    ) {
+      dispatch(switchOrganization(prefs.activeOrganizationUuid));
+    } else {
+      const org =
+        userData.organizations && Object.values(userData.organizations)[0];
+      dispatch(switchOrganization(org.uuid));
+    }
   }
 };
 
