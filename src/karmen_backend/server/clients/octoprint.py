@@ -342,7 +342,7 @@ class Octoprint(PrinterClient):
                 return None
             if url.startswith("/"):
                 return self.network_base + url
-            if not (url.startswith("http://") or url.startswith("http://")):
+            if not (url.startswith("http://") or url.startswith("https://")):
                 url = "http://" + url
             parsed = urlparse.urlparse(url)
             port = parsed.port if parsed.port is not None else "80"
@@ -351,7 +351,6 @@ class Octoprint(PrinterClient):
             if self.token:
                 # If we have ws api, we just try the path, not much else to do
                 return "%s%s?%s" % (self.network_base, parsed.path, parsed.query)
-                return self.network_base + parsed.path
 
             # Rest is only for local hub installations
             if parsed.hostname in ["localhost", "127.0.0.1"]:

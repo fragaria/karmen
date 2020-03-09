@@ -533,7 +533,7 @@ class OctoprintWebcamTest(unittest.TestCase):
                 "flipV": True,
                 "rotate90": False,
                 "streamUrl": "http://1.2.3.4/webcam/?action=stream",
-                "snapshotUrl": "http://1.2.3.4/?action=snapshot",
+                "snapshotUrl": "https://1.2.3.4/?action=snapshot",
                 "webcamEnabled": True,
             }
         }
@@ -549,7 +549,7 @@ class OctoprintWebcamTest(unittest.TestCase):
             {
                 "message": "OK",
                 "stream": "http://1.2.3.4/webcam/?action=stream",
-                "snapshot": "http://1.2.3.4/?action=snapshot",
+                "snapshot": "https://1.2.3.4/?action=snapshot",
                 "flipHorizontal": True,
                 "flipVertical": True,
                 "rotate90": False,
