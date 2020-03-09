@@ -62,10 +62,12 @@ const Settings = ({ match, ...rest }) => {
 };
 
 export default connect(
-  state => ({
+  (state, ownProps) => ({
     printersLoaded: state.printers.printersLoaded,
     printersList: state.printers.printers,
-    networkInterface: state.preferences.networkInterface,
+    networkInterface:
+      state.preferences.orgs[ownProps.match.params.orguuid] &&
+      state.preferences.orgs[ownProps.match.params.orguuid].networkInterface,
     usersList: state.users.list,
     usersLoaded: state.users.listLoaded,
     currentUuid: state.me.identity

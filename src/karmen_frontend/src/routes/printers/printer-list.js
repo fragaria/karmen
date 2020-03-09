@@ -175,8 +175,10 @@ class PrinterList extends React.Component {
 }
 
 export default connect(
-  state => ({
-    viewType: state.preferences.printerViewType,
+  (state, ownProps) => ({
+    viewType:
+      state.preferences.orgs[ownProps.match.params.orguuid] &&
+      state.preferences.orgs[ownProps.match.params.orguuid].printerViewType,
     printers: state.printers.printers,
     images: state.printers.images,
     printersLoaded: state.printers.printersLoaded
