@@ -323,7 +323,6 @@ const PrinterDetail = ({
           )}
         </div>
 
-
         <div className="printer-detail-jobs">
           <div className="react-tabs__tab-list">
             <span className="react-tabs__tab react-tabs__tab--selected">

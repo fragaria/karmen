@@ -10,15 +10,15 @@ class Sorting extends React.Component {
   componentDidUpdate() {
     const dropdownItems = this.dropdownItems.current;
 
-    const countViewportHeight = (dropdownItems) => {
+    const countViewportHeight = dropdownItems => {
       const vh = window.innerHeight * 0.01;
-      dropdownItems.style.setProperty('--vh', `${vh}px`);
-    }
+      dropdownItems.style.setProperty("--vh", `${vh}px`);
+    };
 
     if (dropdownItems) {
       countViewportHeight(dropdownItems);
-      window.addEventListener('resize', () => {
-        countViewportHeight(dropdownItems)
+      window.addEventListener("resize", () => {
+        countViewportHeight(dropdownItems);
       });
     }
   }
