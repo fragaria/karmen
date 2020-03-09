@@ -89,13 +89,15 @@ def prepare_list_statement(
             cursor.execute(statement)
             data = cursor.fetchone()
             cursor.close()
-            where_clause.append(
-                sql.SQL("{} {} {}").format(
-                    sql.Identifier(order_by_column),
-                    sql.SQL("<=" if order_by_direction == "DESC" else ">="),
-                    sql.Literal(data[order_by_column] if data else start_with),
+            if data:
+                # TODO the else clause of this should probably not fail silently
+                where_clause.append(
+                    sql.SQL("{} {} {}").format(
+                        sql.Identifier(order_by_column),
+                        sql.SQL("<=" if order_by_direction == "DESC" else ">="),
+                        sql.Literal(data[order_by_column]),
+                    )
                 )
-            )
         else:
             where_clause.append(
                 sql.SQL("{} {} {}").format(

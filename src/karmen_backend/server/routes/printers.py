@@ -112,7 +112,9 @@ def printers_list(org_uuid):
 @cross_origin()
 def printer_detail(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
@@ -227,7 +229,9 @@ def printer_create(org_uuid):
 @cross_origin()
 def printer_delete(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -243,7 +247,9 @@ def printer_delete(org_uuid, uuid):
 @cross_origin()
 def printer_patch(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -311,7 +317,9 @@ def printer_patch(org_uuid, uuid):
 def printer_change_connection(org_uuid, uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -353,7 +361,9 @@ def printer_modify_job(org_uuid, uuid):
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -418,7 +428,9 @@ def printer_webcam_snapshot(org_uuid, uuid):
     fine.
     """
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
@@ -462,7 +474,9 @@ def printer_webcam_snapshot(org_uuid, uuid):
 @cross_origin()
 def printer_set_lights(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)

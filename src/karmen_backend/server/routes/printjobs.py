@@ -43,8 +43,10 @@ def printjob_create(org_uuid):
     if not gcode_uuid or not printer_uuid:
         return abort(make_response("", 400))
     try:
-        guid.UUID(gcode_uuid, version=4)
-        guid.UUID(printer_uuid, version=4)
+        gcodeuuid = guid.UUID(gcode_uuid, version=4)
+        printeruuid = guid.UUID(printer_uuid, version=4)
+        if str(printeruuid) != printer_uuid or str(gcodeuuid) != gcode_uuid:
+            return abort(make_response("", 400))
     except (ValueError, AttributeError):
         return abort(make_response("", 400))
     printer = printers.get_printer(printer_uuid)
@@ -116,6 +118,10 @@ def printjobs_list(org_uuid):
             if request.args.get("start_with")
             else None
         )
+        # There is a hidden side effect in uuid module. When version is specified,
+        # it does not break, but instead silently modifies the content. Ugly!
+        if str(start_with) != request.args.get("start_with"):
+            start_with = None
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get("fields", "").split(",") if f]
@@ -168,7 +174,9 @@ def printjobs_list(org_uuid):
 @cross_origin()
 def printjob_detail(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     printjob = printjobs.get_printjob(uuid)

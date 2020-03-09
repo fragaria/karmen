@@ -66,10 +66,15 @@ def gcodes_list(org_uuid):
             if request.args.get("start_with")
             else None
         )
+        # There is a hidden side effect in uuid module. When version is specified,
+        # it does not break, but instead silently modifies the content. Ugly!
+        if str(start_with) != request.args.get("start_with"):
+            start_with = None
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
+
     gcodes_record_set = gcodes.get_gcodes(
         org_uuid,
         order_by=order_by,
@@ -119,7 +124,9 @@ def gcodes_list(org_uuid):
 @cross_origin()
 def gcode_detail(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     gcode = gcodes.get_gcode(uuid)
@@ -188,7 +195,9 @@ def gcode_create(org_uuid):
 @cross_origin()
 def gcode_file(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     gcode = gcodes.get_gcode(uuid)
@@ -210,7 +219,9 @@ def gcode_file(org_uuid, uuid):
 @cross_origin()
 def gcode_delete(org_uuid, uuid):
     try:
-        guid.UUID(uuid, version=4)
+        uuidm = guid.UUID(uuid, version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
     except ValueError:
         return abort(make_response("", 400))
     gcode = gcodes.get_gcode(uuid)

@@ -18,7 +18,9 @@ def validate_org_access(required_role=None):
         @jwt_required
         def wrap(org_uuid, *args, **kwargs):
             try:
-                guid.UUID(org_uuid, version=4)
+                orguuid = guid.UUID(org_uuid, version=4)
+                if str(orguuid) != org_uuid:
+                    return abort(make_response("", 400))
             except ValueError:
                 return abort(make_response("", 400))
             user = get_current_user()
