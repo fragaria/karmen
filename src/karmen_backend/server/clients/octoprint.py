@@ -347,7 +347,7 @@ class Octoprint(PrinterClient):
                 url = "http://" + url
             parsed = urlparse.urlparse(url)
             port = parsed.port if parsed.port is not None else "80"
-            if self.token is not None and port != "80":
+            if self.token is not None and self.token != "" and port != "80":
                 return None  # Yet we can't sed other port's than 80 over ws api yet
             if self.token:
                 # If we have ws api, we just try the path, not much else to do
