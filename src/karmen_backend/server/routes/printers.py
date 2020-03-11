@@ -402,8 +402,9 @@ def _get_webcam_snapshot(snapshot_url):
             timeout=app.config.get("NETWORK_TIMEOUT", 10),
             verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
         )
-        if req is not None:
+        if req is not None and req.status_code == 200:
             return req
+        return None
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout,) as e:
         app.logger.debug("Cannot call %s because %s" % (snapshot_url, e))
         return None
