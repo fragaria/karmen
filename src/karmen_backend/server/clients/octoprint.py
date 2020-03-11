@@ -304,6 +304,7 @@ class Octoprint(PrinterClient):
                 access_level=PrinterClientAccessLevel.UNKNOWN,
             )
             return
+        self.client_info.connected = True
         settings_req = self._http_get("/api/settings", force=True)
         plugin_list = list(dict(settings_req.json().get("plugins", {})).keys())
         self.client_info = PrinterClientInfo(
@@ -312,6 +313,7 @@ class Octoprint(PrinterClient):
             api_key=self.client_info.api_key,
             access_level=PrinterClientAccessLevel.UNLOCKED,
             plugins=plugin_list,
+            webcam=self.webcam(),
         )
 
     def status(self):

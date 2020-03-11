@@ -215,7 +215,7 @@ def printer_create(org_uuid):
             "connected": printer.client_info.connected,
             "access_level": printer.client_info.access_level,
             "api_key": printer.client_info.api_key,
-            "webcam": printer.webcam(),
+            "webcam": printer.client_info.webcam,
             "plugins": printer.client_info.plugins,
         },
     )
@@ -298,7 +298,7 @@ def printer_patch(org_uuid, uuid):
             "connected": printer_inst.client_info.connected,
             "access_level": printer_inst.client_info.access_level,
             "api_key": printer_inst.client_info.api_key,
-            "webcam": printer_inst.webcam(),
+            "webcam": printer_inst.client_info.webcam,
             "plugins": printer_inst.client_info.plugins,
         },
         printer_props=printer_inst.get_printer_props(),

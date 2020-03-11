@@ -23,7 +23,7 @@ class PrinterClientInfo:
         self.connected = connected
         self.access_level = access_level
         self.api_key = api_key
-        self.webcam = webcam
+        self.webcam = webcam or {"message": "Webcam not accessible"}
         self.plugins = plugins or []
 
 

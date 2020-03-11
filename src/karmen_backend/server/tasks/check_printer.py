@@ -36,7 +36,7 @@ def check_printer(printer_uuid):
             "connected": printer.client_info.connected,
             "access_level": printer.client_info.access_level,
             "api_key": printer.client_info.api_key,
-            "webcam": printer.webcam(),
+            "webcam": printer.client_info.webcam,
             "plugins": printer.client_info.plugins,
         },
     )

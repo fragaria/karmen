@@ -1,6 +1,7 @@
 import unittest
 from datetime import datetime
 import mock
+import pickle
 
 from server.tasks.check_printer import check_printer
 from server.clients.utils import PrinterClientAccessLevel
@@ -80,7 +81,7 @@ class CheckPrinterTest(unittest.TestCase):
             "hostname": "b.local",
             "ip": "5678",
             "client_props": {
-                "connected": True,
+                "connected": False,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.READ_ONLY,
             },
@@ -110,30 +111,31 @@ class CheckPrinterTest(unittest.TestCase):
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=29)
+        settings_response = Response(
+            200,
+            {
+                "webcam": {
+                    "webcamEnabled": True,
+                    "streamUrl": "/webcam/?action=stream",
+                    "flipH": False,
+                    "flipV": True,
+                    "rotate90": False,
+                }
+            },
+        )
 
         def mock_call(uri, **kwargs):
             if "5678" in uri and "/api/settings" in uri:
-                return Response(
-                    200,
-                    {
-                        "webcam": {
-                            "webcamEnabled": True,
-                            "streamUrl": "/webcam/?action=stream",
-                            "flipH": False,
-                            "flipV": True,
-                            "rotate90": False,
-                        }
-                    },
-                )
-            return Response(200)
+                return settings_response
+            return Response(200, {"text": "octoprint"})
 
-        mock_octoprint_redis.get.return_value = None
+        mock_octoprint_redis.get.return_value = pickle.dumps(settings_response)
         mock_get_data.side_effect = mock_call
         check_printer("b2732ff8-605b-4d56-87f3-5a590d672912")
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_address.call_count, 1)
         self.assertEqual(mock_hostname.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 2)
+        self.assertEqual(mock_get_data.call_count, 3)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_has_calls(
             [
@@ -144,8 +146,8 @@ class CheckPrinterTest(unittest.TestCase):
                         "ip": "5678",
                         "client_props": {
                             "connected": True,
-                            "version": {},
-                            "access_level": PrinterClientAccessLevel.READ_ONLY,
+                            "version": {"text": "octoprint"},
+                            "access_level": PrinterClientAccessLevel.UNLOCKED,
                             "api_key": None,
                             "plugins": [],
                             "webcam": {

@@ -360,7 +360,7 @@ class OctoprintSniffTest(unittest.TestCase):
             protocol="https",
         )
         printer.sniff()
-        self.assertEqual(mock_get_uri.call_count, 2)
+        self.assertEqual(mock_get_uri.call_count, 3)
         mock_get_uri.assert_any_call(
             "https://192.168.1.15/something/api/version", timeout=2
         )

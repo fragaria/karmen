@@ -1,5 +1,6 @@
 import unittest
 import mock
+import pickle
 
 from server.tasks.sniff_printer import save_printer_data, sniff_printer
 from server.clients.utils import PrinterClientAccessLevel
@@ -76,14 +77,16 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.tasks.sniff_printer.guid.uuid4", return_value="1234")
     @mock.patch("server.clients.cachedoctoprint.redisinstance")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
-    @mock.patch("server.clients.octoprint.requests.Session.get")
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"text": "OctoPrint"}),
+    )
     def test_add_responding_printer(
         self, mock_get_data, mock_update_printer, mock_redis, mock_uuid
     ):
-        mock_get_data.return_value.status_code = 200
-        mock_redis.get.return_value = None
-        mock_get_data.return_value.json.return_value = {"text": "OctoPrint"}
+        mock_redis.get.return_value = pickle.dumps(Response(200, {"text": "OctoPrint"}))
         sniff_printer(UUID_ORG, "octopi.local", "192.168.1.12")
+        self.assertEqual(mock_get_data.call_count, 2)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_called_with(
             **{
