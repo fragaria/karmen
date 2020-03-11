@@ -94,6 +94,9 @@ export const uploadGcode = (orgUuid, path, file) => {
     .then(response => {
       if (response.status !== 201) {
         console.error(`Cannot add a gcode: ${response.status}`);
+        return {
+          status: response.status
+        };
       }
       return response.json().then(data => {
         return { status: response.status, data };
