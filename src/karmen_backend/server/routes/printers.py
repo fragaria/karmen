@@ -142,7 +142,7 @@ def printer_create(org_uuid):
     path = data.get("path", "")
     token = data.get("token", None)
 
-    if token is not None:
+    if token is not None and token != "":
         if not app.config.get("CLOUD_MODE"):
             return abort(make_response("", 400))
         if printers.get_printer_by_socket_token(org_uuid, token) is not None:

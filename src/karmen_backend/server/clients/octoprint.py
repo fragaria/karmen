@@ -94,7 +94,6 @@ class Octoprint(PrinterClient):
         if not self.client_info.connected and not force:
             return None
         uri = "%s%s" % (self.network_base, path)
-        app.logger.info("%s %s %s" % (self.network_base, self.path, path))
         try:
             req = self.http_session.get(
                 uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
