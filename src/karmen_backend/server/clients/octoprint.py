@@ -229,7 +229,13 @@ class Octoprint(PrinterClient):
                     "%s is responding with %s on /api/settings - probably access-protected octoprint"
                     % (self.network_base, settings_req.status_code)
                 )
-                plugin_list = list(dict(settings_req.json().get("plugins", {})).keys())
+                try:
+                    plugin_list = list(
+                        dict(settings_req.json().get("plugins", {})).keys()
+                    )
+                except json.decoder.JSONDecodeError:
+                    # This might happen when settings responds with 403
+                    plugin_list = []
                 self.client_info = PrinterClientInfo(
                     {},
                     connected=True,
@@ -251,7 +257,7 @@ class Octoprint(PrinterClient):
                     access_level=PrinterClientAccessLevel.UNKNOWN,
                 )
             return
-        # /api/version is not responding at all, which is weird
+        # /api/version is not responding happily
         if request.status_code != 200:
             app.logger.debug(
                 "%s is responding with %s on /api/version - not accessible"
