@@ -14,6 +14,7 @@ class OctoprintConstructor(unittest.TestCase):
     def test_parse_client_props(self):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             hostname="octopi.local",
@@ -33,7 +34,10 @@ class OctoprintIsAliveTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertFalse(printer.client_info.connected)
         self.assertFalse(printer.is_alive())
@@ -45,7 +49,10 @@ class OctoprintIsAliveTest(unittest.TestCase):
     )
     def test_connected_printer(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertFalse(printer.client_info.connected)
         self.assertTrue(printer.is_alive())
@@ -58,6 +65,7 @@ class OctoprintIsAliveTest(unittest.TestCase):
     def test_already_connected_printer(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -73,7 +81,10 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertFalse(printer.connect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
@@ -87,6 +98,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     def test_reachable_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -103,6 +115,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     def test_reachable_offline_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -119,6 +132,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     def test_already_connected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -135,6 +149,7 @@ class OctoprintConnectPrinterTest(unittest.TestCase):
     def test_already_connected_printer_on_path(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             port=80801,
@@ -155,7 +170,10 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertTrue(printer.disconnect_printer())
         self.assertEqual(mock_get_uri.call_count, 1)
@@ -169,6 +187,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     def test_reachable_disconnected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -185,6 +204,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     def test_reachable_offline_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -201,6 +221,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     def test_connected_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -217,6 +238,7 @@ class OctoprintDisconnectPrinterTest(unittest.TestCase):
     def test_not_disconnectable_printer(self, mock_get_uri, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -230,7 +252,10 @@ class OctoprintSniffTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_deactivate_non_responding_printer(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertFalse(printer.client_info.connected)
         printer.sniff()
@@ -249,7 +274,10 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.side_effect = mock_call
 
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, True)
@@ -269,7 +297,10 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.side_effect = mock_call
 
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
@@ -282,7 +313,10 @@ class OctoprintSniffTest(unittest.TestCase):
     def test_access_protected_octoprint_forcelogin(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 403
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, True)
@@ -295,7 +329,10 @@ class OctoprintSniffTest(unittest.TestCase):
     def test_deactivate_non_200_responding_printer(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 404
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
@@ -311,7 +348,10 @@ class OctoprintSniffTest(unittest.TestCase):
             "msg", "aa", 123
         )
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
@@ -325,7 +365,10 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {"text": "Fumbleprint"}
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
@@ -339,7 +382,10 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {"random": "field"}
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.sniff()
         self.assertEqual(printer.client_info.connected, False)
@@ -354,6 +400,7 @@ class OctoprintSniffTest(unittest.TestCase):
         mock_get_uri.return_value.json.return_value = {"text": "OctoPrint"}
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             path="/something/",
@@ -387,6 +434,7 @@ class OctoprintStatusTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -411,6 +459,7 @@ class OctoprintStatusTest(unittest.TestCase):
         )
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -426,6 +475,7 @@ class OctoprintStatusTest(unittest.TestCase):
         mock_get_uri.return_value.status_code = 409
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -440,6 +490,7 @@ class OctoprintStatusTest(unittest.TestCase):
     def test_status_unreachable(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -454,6 +505,7 @@ class OctoprintStatusTest(unittest.TestCase):
         mock_get_uri.return_value.status_code = 403
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={
@@ -476,7 +528,10 @@ class OctoprintStatusTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_status_disconnected(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.status()
         self.assertEqual(mock_get_uri.call_count, 0)
@@ -507,6 +562,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -539,6 +595,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -571,6 +628,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -612,6 +670,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -653,6 +712,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -698,6 +758,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -741,6 +802,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             port=1234,
@@ -763,6 +825,7 @@ class OctoprintWebcamTest(unittest.TestCase):
     def test_webcam_disconnect(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -774,7 +837,10 @@ class OctoprintWebcamTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_webcam_disconnected(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.webcam()
         self.assertEqual(mock_get_uri.call_count, 0)
@@ -793,6 +859,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -808,6 +875,7 @@ class OctoprintWebcamTest(unittest.TestCase):
         )
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -819,6 +887,7 @@ class OctoprintWebcamTest(unittest.TestCase):
     def test_webcam_no_response(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -829,7 +898,10 @@ class OctoprintWebcamTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_webcam_inactive_printer(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.webcam()
@@ -847,6 +919,7 @@ class OctoprintJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -872,6 +945,7 @@ class OctoprintJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -889,6 +963,7 @@ class OctoprintJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -904,6 +979,7 @@ class OctoprintJobTest(unittest.TestCase):
         )
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -915,6 +991,7 @@ class OctoprintJobTest(unittest.TestCase):
     def test_job_disconnect(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -926,7 +1003,10 @@ class OctoprintJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_job_disconnected(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         printer.job()
         self.assertEqual(mock_get_uri.call_count, 0)
@@ -935,6 +1015,7 @@ class OctoprintJobTest(unittest.TestCase):
     def test_job_no_response(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -945,7 +1026,10 @@ class OctoprintJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_job_inactive_printer(self, mock_get_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertEqual(mock_get_uri.call_count, 0)
         result = printer.job()
@@ -984,6 +1068,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1019,6 +1104,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1044,6 +1130,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         with self.assertRaises(PrinterClientException) as context:
             printer = Octoprint(
                 "900c73b8-1f12-4027-941a-e4b29531e8e3",
+                "d501f4f0-48d5-468e-a137-1f3803cd836c",
                 UUID_ORG,
                 ip="192.168.1.15",
                 client_props={"connected": True},
@@ -1053,7 +1140,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
 
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.clients.octoprint.requests.post", return_value=None)
-    def test_upload_job_disconnect(self, mock_post_uri, mock_get_uri):
+    def test_upload_job_upload_crash(self, mock_post_uri, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
         mock_get_uri.return_value.json.return_value = {
             "state": {"text": "Operational"},
@@ -1061,6 +1148,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1081,6 +1169,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={
@@ -1105,7 +1194,9 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
             "state": {"text": "Operational"},
             "temperature": {},
         }
-        printer = Octoprint("192.168.1.15", UUID_ORG)
+        printer = Octoprint(
+            "192.168.1.15", "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG
+        )
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertEqual(mock_post_uri.call_count, 0)
         self.assertFalse(result)
@@ -1120,6 +1211,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         }
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1130,7 +1222,9 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_upload_job_inactive_printer(self, mock_post_uri, mock_get_uri):
-        printer = Octoprint("192.168.1.15", UUID_ORG)
+        printer = Octoprint(
+            "192.168.1.15", "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG
+        )
         self.assertEqual(mock_post_uri.call_count, 0)
         result = printer.upload_and_start_job(self.file_mock.name)
         self.assertFalse(result)
@@ -1143,6 +1237,7 @@ class OctoprintUploadAndStartJobTest(unittest.TestCase):
         mock_post_uri.return_value.status_code = 403
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={
@@ -1165,6 +1260,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         mock_post_uri.return_value.status_code = 204
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1179,6 +1275,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         mock_post_uri.return_value.status_code = 204
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1193,6 +1290,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         mock_post_uri.return_value.status_code = 204
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1206,6 +1304,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     def test_modify_job_disconnect(self, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1218,7 +1317,10 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.post")
     def test_modify_job_disconnected(self, mock_post_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         result = printer.modify_current_job("toggle")
         self.assertEqual(mock_post_uri.call_count, 0)
@@ -1228,6 +1330,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     def test_modify_job_no_response(self, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1238,7 +1341,10 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.post", return_value=None)
     def test_modify_job_inactive_printer(self, mock_post_uri):
         printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3", UUID_ORG, ip="192.168.1.15"
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
         )
         self.assertEqual(mock_post_uri.call_count, 0)
         result = printer.modify_current_job("toggle")
@@ -1247,6 +1353,7 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
     def test_unknown_action(self):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1261,6 +1368,7 @@ class OctoprintSetLightsTest(unittest.TestCase):
     def test_no_plugin(self):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1274,6 +1382,7 @@ class OctoprintSetLightsTest(unittest.TestCase):
     def test_plugin_not_responding(self, mock_post_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
@@ -1289,6 +1398,7 @@ class OctoprintSetLightsTest(unittest.TestCase):
         mock_post_uri.return_value.status_code = 200
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
@@ -1301,6 +1411,7 @@ class OctoprintAreLightsOnTest(unittest.TestCase):
     def test_no_plugin(self):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True},
@@ -1314,6 +1425,7 @@ class OctoprintAreLightsOnTest(unittest.TestCase):
     def test_plugin_not_responding(self, mock_get_uri):
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
@@ -1329,6 +1441,7 @@ class OctoprintAreLightsOnTest(unittest.TestCase):
         mock_get_uri.return_value.status_code = 200
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
@@ -1344,6 +1457,7 @@ class OctoprintAreLightsOnTest(unittest.TestCase):
         mock_get_uri.return_value.status_code = 200
         printer = Octoprint(
             "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
             UUID_ORG,
             ip="192.168.1.15",
             client_props={"connected": True, "plugins": ["awesome_karmen_led"]},

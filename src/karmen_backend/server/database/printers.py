@@ -5,17 +5,11 @@ from server.database import get_connection
 
 FIELDS = [
     "uuid",
+    "network_client_uuid",
     "organization_uuid",
     "name",
-    "hostname",
-    "ip",
-    "port",
-    "path",
-    "client",
-    "protocol",
     "client_props",
     "printer_props",
-    "token",
 ]
 
 
@@ -23,20 +17,14 @@ def add_printer(**kwargs):
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO printers (uuid, organization_uuid, name, hostname, ip, port, path, token, client, client_props, printer_props, protocol) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO printers (uuid, network_client_uuid, organization_uuid, name, client_props, printer_props) VALUES (%s, %s, %s, %s, %s, %s)",
             (
                 kwargs["uuid"],
+                kwargs["network_client_uuid"],
                 kwargs["organization_uuid"],
                 kwargs["name"],
-                kwargs["hostname"],
-                kwargs["ip"],
-                kwargs.get("port"),
-                kwargs.get("path", ""),
-                kwargs.get("token", ""),
-                kwargs["client"],
                 psycopg2.extras.Json(kwargs["client_props"]),
                 psycopg2.extras.Json(kwargs.get("printer_props", None)),
-                kwargs.get("protocol", "http"),
             ),
         )
         cursor.close()
@@ -84,6 +72,21 @@ def get_printers(organization_uuid=None):
         return data
 
 
+def get_printers_by_network_client_uuid(network_client_uuid):
+    with get_connection() as connection:
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = sql.SQL(
+            "SELECT {} from printers where network_client_uuid = {}"
+        ).format(
+            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]),
+            sql.Literal(network_client_uuid),
+        )
+        cursor.execute(query)
+        data = cursor.fetchall()
+        cursor.close()
+        return data
+
+
 def get_printer(uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -96,47 +99,15 @@ def get_printer(uuid):
         return data
 
 
-def get_printer_by_network_props(org_uuid, hostname, ip, port, path):
-    def _is_or_equal(column, value):
-        if value is None:
-            return sql.SQL("{} is null").format(sql.Identifier(column))
-        else:
-            return sql.SQL("{} = {}").format(sql.Identifier(column), sql.Literal(value))
-
-    with get_connection() as connection:
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        basequery = sql.SQL("SELECT {} from printers WHERE").format(
-            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS])
-        )
-        query = sql.SQL(" ").join(
-            [
-                basequery,
-                sql.SQL(" AND ").join(
-                    [
-                        _is_or_equal("organization_uuid", org_uuid),
-                        _is_or_equal("hostname", hostname),
-                        _is_or_equal("ip", ip),
-                        _is_or_equal("port", port),
-                        _is_or_equal("path", path),
-                    ]
-                ),
-            ]
-        )
-        cursor.execute(query)
-        data = cursor.fetchone()
-        cursor.close()
-        return data
-
-
-def get_printer_by_socket_token(org_uuid, token):
+def get_printer_by_network_client_uuid(organization_uuid, network_client_uuid):
     with get_connection() as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         query = sql.SQL(
-            "SELECT {} from printers WHERE organization_uuid = {} AND token = {}"
+            "SELECT {} from printers where organization_uuid = {} and network_client_uuid = {}"
         ).format(
             sql.SQL(",").join([sql.Identifier(f) for f in FIELDS]),
-            sql.Literal(org_uuid),
-            sql.Literal(token),
+            sql.Literal(organization_uuid),
+            sql.Literal(network_client_uuid),
         )
         cursor.execute(query)
         data = cursor.fetchone()

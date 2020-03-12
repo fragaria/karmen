@@ -420,12 +420,14 @@ class CreateRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
 
-    @mock.patch(
-        "server.routes.printjobs.clients.get_printer_instance",
-        headers={"x-csrf-token": TOKEN_USER_CSRF},
-    )
+    @mock.patch("server.routes.printjobs.clients.get_printer_instance")
     def test_create(self, mock_print_inst):
         mock_print_inst.return_value.upload_and_start_job.return_value = True
+        mock_print_inst.return_value.ip = "1.2.3.4"
+        mock_print_inst.return_value.port = 1234
+        mock_print_inst.return_value.hostname = "hostname.local"
+        mock_print_inst.return_value.name = "my-printer"
+        mock_print_inst.return_value.client = "octoprint"
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(

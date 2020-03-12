@@ -5,7 +5,7 @@ import string
 import uuid as guid
 
 from server import app
-from server.database import printers
+from server.database import printers, network_clients
 from ..utils import Response
 from ..utils import (
     TOKEN_ADMIN,
@@ -165,12 +165,17 @@ class DetailRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
+    @mock.patch("server.routes.printers.network_clients.get_network_client")
     @mock.patch("server.routes.printers.printers.get_printer")
-    def test_no_api_key_leak(self, mock_get_printer):
+    def test_no_api_key_leak(self, mock_get_printer, mock_get_client):
         mock_get_printer.return_value = {
             "uuid": "a7984df9-ddbb-488d-943e-676a3b9f7d65",
+            "network_client_uuid": "a7984df9-ddbb-488d-943e-676a3b9f7d65",
             "organization_uuid": UUID_ORG,
             "client_props": {"api_key": "123456"},
+        }
+        mock_get_client.return_value = {
+            "uuid": "a7984df9-ddbb-488d-943e-676a3b9f7d65",
             "client": "octoprint",
             "ip": "1.2.3.4",
         }
@@ -272,6 +277,50 @@ class CreateRoute(unittest.TestCase):
             self.assertEqual(response.json["path"], "/something-blue")
             self.assertEqual(response.json["name"], "random-test-printer-name")
             self.assertEqual(response.json["client"]["name"], "octoprint")
+
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_create_same_network_client(self, mock_get_uri, mock_avahi):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            ip = "192.168.%s" % ".".join(
+                [str(random.randint(0, 255)) for _ in range(2)]
+            )
+            response1 = c.post(
+                "/organizations/%s/printers" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={
+                    "ip": ip,
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                    "path": "/something-blue",
+                },
+            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response2 = c.post(
+                "/organizations/%s/printers" % UUID_ORG2,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={
+                    "ip": ip,
+                    "name": "random-test-printer-name",
+                    "protocol": "https",
+                    "path": "/something-blue",
+                },
+            )
+            self.assertEqual(response1.status_code, 201)
+            self.assertEqual(response2.status_code, 201)
+
+            self.assertTrue(response1.json["uuid"] != response2.json["uuid"])
+            self.assertEqual(response1.json["ip"], ip)
+            self.assertEqual(response1.json["protocol"], "https")
+            self.assertEqual(response1.json["path"], "/something-blue")
+            self.assertEqual(response1.json["name"], "random-test-printer-name")
+            self.assertEqual(response1.json["client"]["name"], "octoprint")
+            self.assertEqual(response2.json["ip"], ip)
+            self.assertEqual(response2.json["protocol"], "https")
+            self.assertEqual(response2.json["path"], "/something-blue")
+            self.assertEqual(response2.json["name"], "random-test-printer-name")
+            self.assertEqual(response2.json["client"]["name"], "octoprint")
 
     @mock.patch(
         "server.services.network.get_avahi_address", return_value="172.16.236.220"
@@ -665,6 +714,48 @@ class DeleteRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 204)
 
+    @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_delete_network_client_when_last_printer_is_deleted(
+        self, mock_get_uri, mock_avahi
+    ):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            ip = "192.168.%s" % ".".join(
+                [str(random.randint(0, 255)) for _ in range(2)]
+            )
+            response1 = c.post(
+                "/organizations/%s/printers" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"ip": ip, "name": "random-test-printer-name"},
+            )
+            self.assertEqual(response1.status_code, 201)
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response2 = c.post(
+                "/organizations/%s/printers" % UUID_ORG2,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={"ip": ip, "name": "random-test-printer-name"},
+            )
+            self.assertEqual(response2.status_code, 201)
+            nc = network_clients.get_network_client_by_props(None, ip, None, "")
+            self.assertTrue(nc is not None)
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.delete(
+                "/organizations/%s/printers/%s" % (UUID_ORG, response1.json["uuid"]),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 204)
+            nc = network_clients.get_network_client_by_props(None, ip, None, "")
+            self.assertTrue(nc is not None)
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.delete(
+                "/organizations/%s/printers/%s" % (UUID_ORG2, response2.json["uuid"]),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 204)
+            nc = network_clients.get_network_client_by_props(None, ip, None, "")
+            self.assertTrue(nc is None)
+
     def test_delete_bad_token(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -735,22 +826,30 @@ class DeleteRoute(unittest.TestCase):
 class PatchRoute(unittest.TestCase):
     def setUp(self):
         self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
         printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid,
+            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
+            hostname="hostname",
+            client="octoprint",
+        )
         printers.add_printer(
             uuid=self.uuid,
-            name="name",
+            network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
-            hostname="hostname",
-            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
-            client="octoprint",
-            client_props={"version": "123"},
+            name="name",
+            client_props={"version": "123", "connected": True},
             printer_props={"filament_type": "PLA"},
         )
 
     def tearDown(self):
         printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
 
-    def test_patch(self):
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_patch(self, mock_session_get):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
@@ -761,9 +860,9 @@ class PatchRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             p = printers.get_printer(self.uuid)
             self.assertEqual(p["name"], "random-test-printer-name")
-            self.assertEqual(p["protocol"], "http")
 
-    def test_patch_printer_props(self):
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    def test_patch_printer_props(self, mock_session_get):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.patch(
@@ -888,19 +987,26 @@ class PatchRoute(unittest.TestCase):
 class CurrentJobRoute(unittest.TestCase):
     def setUp(self):
         self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
         printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid,
+            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
+            hostname="hostname",
+            client="octoprint",
+        )
         printers.add_printer(
             uuid=self.uuid,
+            network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            hostname="hostname",
-            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
-            client="octoprint",
             client_props={"version": "123", "connected": True},
         )
 
     def tearDown(self):
         printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
 
     def test_current_job_no_token(self):
         with app.test_client() as c:
@@ -998,19 +1104,26 @@ class CurrentJobRoute(unittest.TestCase):
 class PrinterConnectionRoute(unittest.TestCase):
     def setUp(self):
         self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
         printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid,
+            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
+            hostname="hostname",
+            client="octoprint",
+        )
         printers.add_printer(
             uuid=self.uuid,
+            network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            hostname="hostname",
-            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
-            client="octoprint",
             client_props={"version": "123", "connected": True},
         )
 
     def tearDown(self):
         printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
 
     @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     @mock.patch(

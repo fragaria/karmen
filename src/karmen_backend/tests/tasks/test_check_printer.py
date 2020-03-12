@@ -13,20 +13,28 @@ class CheckPrinterTest(unittest.TestCase):
         "server.database.printers.get_printer",
         return_value={
             "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "organization_uuid": UUID_ORG,
-            "hostname": "a",
-            "ip": "1234",
             "client_props": {
                 "connected": True,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.UNLOCKED,
             },
-            "client": "octoprint",
-            "protocol": "https",
             "printer_props": {"filament_type": "PETG"},
         },
     )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "hostname": "a",
+            "ip": "1234",
+            "client": "octoprint",
+            "protocol": "https",
+        },
+    )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_hostname",
         return_value="router.asus.com",
@@ -42,35 +50,40 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data,
         mock_address,
         mock_hostname,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=29)
         check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
         self.assertEqual(mock_get_printer.call_count, 1)
+        self.assertEqual(mock_get_network_client.call_count, 1)
         self.assertEqual(mock_get_data.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 1)
+        self.assertEqual(mock_update_network_client.call_count, 1)
         self.assertEqual(mock_address.call_count, 1)
         self.assertEqual(mock_hostname.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": "router.asus.com",
-                        "ip": "1234",
-                        "client_props": {
-                            "connected": False,
-                            "version": {},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "webcam": {"message": "Webcam not accessible"},
-                            "plugins": [],
-                        },
-                    }
-                ),
-            ]
+        mock_update_printer.assert_any_call(
+            **{
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "client_props": {
+                    "connected": False,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                    "api_key": None,
+                    "webcam": {"message": "Webcam not accessible"},
+                    "plugins": [],
+                },
+            }
+        )
+        mock_update_network_client.assert_any_call(
+            **{
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "hostname": "router.asus.com",
+                "ip": "1234",
+            }
         )
 
     @mock.patch(
@@ -78,21 +91,29 @@ class CheckPrinterTest(unittest.TestCase):
         return_value={
             "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
             "organization_uuid": UUID_ORG,
-            "hostname": "b.local",
-            "ip": "5678",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "client_props": {
                 "connected": False,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.READ_ONLY,
             },
+        },
+    )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "hostname": "b.local",
+            "ip": "5678",
             "client": "octoprint",
+            "protocol": "http",
         },
     )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch(
-        "server.tasks.check_printer.network.get_avahi_hostname",
-        return_value="router.asus.com",
+        "server.tasks.check_printer.network.get_avahi_hostname", return_value="b.local",
     )
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_address", return_value="5678",
@@ -106,7 +127,9 @@ class CheckPrinterTest(unittest.TestCase):
         mock_address,
         mock_hostname,
         mock_get_data,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
@@ -137,50 +160,54 @@ class CheckPrinterTest(unittest.TestCase):
         self.assertEqual(mock_hostname.call_count, 1)
         self.assertEqual(mock_get_data.call_count, 3)
         self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
-                        "hostname": "router.asus.com",
-                        "ip": "5678",
-                        "client_props": {
-                            "connected": True,
-                            "version": {"text": "octoprint"},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "plugins": [],
-                            "webcam": {
-                                "message": "OK",
-                                "stream": "http://5678/webcam/?action=stream",
-                                "snapshot": None,
-                                "flipHorizontal": False,
-                                "flipVertical": True,
-                                "rotate90": False,
-                            },
-                        },
-                    }
-                ),
-            ]
+        self.assertEqual(mock_update_network_client.call_count, 0)
+        mock_update_printer.assert_any_call(
+            **{
+                "uuid": "b2732ff8-605b-4d56-87f3-5a590d672912",
+                "client_props": {
+                    "connected": True,
+                    "version": {"text": "octoprint"},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                    "api_key": None,
+                    "webcam": {
+                        "message": "OK",
+                        "stream": "http://5678/webcam/?action=stream",
+                        "snapshot": None,
+                        "flipHorizontal": False,
+                        "flipVertical": True,
+                        "rotate90": False,
+                    },
+                    "plugins": [],
+                },
+            }
         )
 
     @mock.patch(
         "server.database.printers.get_printer",
         return_value={
             "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "organization_uuid": UUID_ORG,
-            "ip": "1234",
             "client_props": {
                 "connected": True,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.UNLOCKED,
             },
-            "client": "octoprint",
-            "protocol": "https",
             "printer_props": {"filament_type": "PETG"},
         },
     )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "ip": "1234",
+            "hostname": None,
+            "client": "octoprint",
+            "protocol": "https",
+        },
+    )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_hostname",
         return_value="router.asus.com",
@@ -196,53 +223,47 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data,
         mock_address,
         mock_hostname,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=29)
         check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
-        self.assertEqual(mock_hostname.call_count, 1)
-        self.assertEqual(mock_address.call_count, 0)
-        self.assertEqual(mock_get_printer.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 1)
-        self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": "router.asus.com",
-                        "ip": "1234",
-                        "client_props": {
-                            "connected": False,
-                            "version": {},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "webcam": {"message": "Webcam not accessible"},
-                            "plugins": [],
-                        },
-                    }
-                )
-            ]
+        mock_update_network_client.assert_any_call(
+            **{
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "hostname": "router.asus.com",
+                "ip": "1234",
+            }
         )
 
     @mock.patch(
         "server.database.printers.get_printer",
         return_value={
             "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "organization_uuid": UUID_ORG,
-            "ip": "1234",
             "client_props": {
                 "connected": True,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.UNLOCKED,
             },
+        },
+    )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "ip": "1234",
+            "hostname": None,
             "client": "octoprint",
             "protocol": "https",
         },
     )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_hostname", return_value=None,
     )
@@ -257,54 +278,41 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data,
         mock_address,
         mock_hostname,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=29)
         check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
-        self.assertEqual(mock_hostname.call_count, 1)
-        self.assertEqual(mock_address.call_count, 0)
-        self.assertEqual(mock_get_printer.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 1)
-        self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": None,
-                        "ip": "1234",
-                        "client_props": {
-                            "connected": False,
-                            "version": {},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "webcam": {"message": "Webcam not accessible"},
-                            "plugins": [],
-                        },
-                    }
-                )
-            ]
-        )
+        self.assertEqual(mock_update_network_client.call_count, 0)
 
     @mock.patch(
         "server.database.printers.get_printer",
         return_value={
             "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "organization_uuid": UUID_ORG,
-            "hostname": "c.local",
-            "ip": "1234",
             "client_props": {
                 "connected": True,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.UNLOCKED,
             },
+        },
+    )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "hostname": "c.local",
+            "ip": "1234",
             "client": "octoprint",
             "protocol": "https",
         },
     )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_hostname", return_value="c.local",
     )
@@ -319,54 +327,62 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data,
         mock_address,
         mock_hostname,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=29)
         check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
-        self.assertEqual(mock_get_printer.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 1)
-        self.assertEqual(mock_address.call_count, 1)
-        self.assertEqual(mock_hostname.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": "c.local",
-                        "ip": "5678",
-                        "client_props": {
-                            "connected": False,
-                            "version": {},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "webcam": {"message": "Webcam not accessible"},
-                            "plugins": [],
-                        },
-                    }
-                )
-            ]
+        self.assertEqual(mock_update_network_client.call_count, 1)
+        mock_update_network_client.assert_any_call(
+            **{
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "hostname": "c.local",
+                "ip": "5678",
+            }
+        )
+        mock_update_printer.assert_any_call(
+            **{
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "client_props": {
+                    "connected": False,
+                    "version": {},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                    "api_key": None,
+                    "webcam": {"message": "Webcam not accessible"},
+                    "plugins": [],
+                },
+            }
         )
 
     @mock.patch(
         "server.database.printers.get_printer",
         return_value={
             "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "organization_uuid": UUID_ORG,
-            "hostname": "c.local",
-            "ip": "1234",
             "client_props": {
                 "connected": True,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.UNLOCKED,
             },
+        },
+    )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "hostname": "c.local",
+            "ip": "1234",
             "client": "octoprint",
             "protocol": "https",
         },
     )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_hostname", return_value="c.local",
     )
@@ -381,54 +397,41 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data,
         mock_address,
         mock_hostname,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
         mock_datetime.now.return_value = date.replace(minute=29)
         check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
-        self.assertEqual(mock_get_printer.call_count, 1)
-        self.assertEqual(mock_get_data.call_count, 1)
-        self.assertEqual(mock_address.call_count, 1)
-        self.assertEqual(mock_hostname.call_count, 1)
-        self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": "c.local",
-                        "ip": "1234",
-                        "client_props": {
-                            "connected": False,
-                            "version": {},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "webcam": {"message": "Webcam not accessible"},
-                            "plugins": [],
-                        },
-                    }
-                )
-            ]
-        )
+        self.assertEqual(mock_update_network_client.call_count, 0)
 
     @mock.patch(
         "server.database.printers.get_printer",
         return_value={
             "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
             "organization_uuid": UUID_ORG,
-            "ip": "1234",
             "client_props": {
                 "connected": True,
                 "version": {},
                 "access_level": PrinterClientAccessLevel.UNLOCKED,
             },
-            "client": "octoprint",
-            "protocol": "https",
             "printer_props": {"filament_type": "PETG"},
         },
     )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "ip": "1234",
+            "client": "octoprint",
+            "protocol": "https",
+        },
+    )
     @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_hostname",
         return_value="router.asus.com",
@@ -446,7 +449,9 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data,
         mock_address,
         mock_hostname,
+        mock_update_network_client,
         mock_update_printer,
+        mock_get_network_client,
         mock_get_printer,
     ):
         date = datetime.strptime("06 Mar 2020", "%d %b %Y")
@@ -470,22 +475,16 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data.assert_any_call("https://1234/api/settings", timeout=2)
         self.assertEqual(mock_get_data.call_count, 3)
         self.assertEqual(mock_update_printer.call_count, 1)
-        mock_update_printer.assert_has_calls(
-            [
-                mock.call(
-                    **{
-                        "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
-                        "hostname": "router.asus.com",
-                        "ip": "1234",
-                        "client_props": {
-                            "connected": True,
-                            "version": {"text": "octoprint"},
-                            "access_level": PrinterClientAccessLevel.UNLOCKED,
-                            "api_key": None,
-                            "webcam": {"message": "Webcam disabled in octoprint"},
-                            "plugins": ["aaa"],
-                        },
-                    }
-                )
-            ]
+        mock_update_printer.assert_any_call(
+            **{
+                "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+                "client_props": {
+                    "connected": True,
+                    "version": {"text": "octoprint"},
+                    "access_level": PrinterClientAccessLevel.UNLOCKED,
+                    "api_key": None,
+                    "webcam": {"message": "Webcam disabled in octoprint"},
+                    "plugins": ["aaa"],
+                },
+            }
         )

@@ -1,7 +1,7 @@
 import uuid as guid
 
 from server import app, celery
-from server.database import printers
+from server.database import printers, network_clients
 from server import clients
 
 
@@ -11,28 +11,43 @@ def save_printer_data(**kwargs):
             "Printer on %s is not responding as connected" % kwargs.get("ip")
         )
         return
-    has_record = printers.get_printer_by_network_props(
-        kwargs.get("organization_uuid"),
+    existing_network_client = network_clients.get_network_client_by_props(
         kwargs.get("hostname"),
         kwargs.get("ip"),
         kwargs.get("port"),
         kwargs.get("path"),
     )
-    # No need to update registered printers
-    if has_record is not None:
+    existing_printer = printers.get_printer_by_network_client_uuid(
+        kwargs.get("organization_uuid"), kwargs.get("network_client_uuid")
+    )
+    if existing_printer:
         app.logger.info(
-            "Printer on %s is already registered within karmen" % kwargs.get("ip")
+            "Printer on %s is already registered in %s"
+            % (kwargs.get("ip"), kwargs.get("organization_uuid"))
         )
         return
+    if existing_network_client is None:
+        network_clients.add_network_client(
+            uuid=kwargs.get("network_client_uuid"),
+            client=kwargs.get("client"),
+            ip=kwargs.get("ip"),
+            hostname=kwargs.get("hostname"),
+            port=kwargs.get("port"),
+            path=kwargs.get("path"),
+            token=kwargs.get("token"),
+        )
+        network_client_uuid = kwargs.get("network_client_uuid")
+    else:
+        network_client_uuid = existing_network_client.get("network_client_uuid")
+
     printers.add_printer(
         **{
-            "name": None,
-            "client_props": {
-                "connected": False,
-                "version": {},
-                "access_level": clients.utils.PrinterClientAccessLevel.PROTECTED,
-            },
-            **kwargs,
+            "uuid": kwargs.get("uuid"),
+            "network_client_uuid": network_client_uuid,
+            "organization_uuid": kwargs.get("organization_uuid"),
+            "name": kwargs.get("name"),
+            "client_props": kwargs.get("client_props"),
+            "printer_props": kwargs.get("printer_props"),
         }
     )
 
@@ -43,6 +58,7 @@ def sniff_printer(org_uuid, hostname, ip):
     printer = clients.get_printer_instance(
         {
             "uuid": guid.uuid4(),
+            "network_client_uuid": guid.uuid4(),  # this one might be overwritten later
             "organization_uuid": org_uuid,
             "hostname": hostname,
             "ip": ip,
@@ -67,12 +83,16 @@ def sniff_printer(org_uuid, hostname, ip):
     app.logger.info("Sniffing printer on %s (%s) - success" % (ip, hostname))
     save_printer_data(
         uuid=printer.uuid,
+        network_client_uuid=printer.network_client_uuid,
         organization_uuid=org_uuid,
         name=hostname or ip,
-        hostname=hostname,
-        ip=ip,
-        protocol=printer.protocol,
         client=printer.client_name(),
+        protocol=printer.protocol,
+        ip=ip,
+        hostname=hostname,
+        port=80 if printer.protocol == "http" else 443,
+        path="",
+        token=None,
         client_props={
             "version": printer.client_info.version,
             "connected": printer.client_info.connected,

@@ -18,6 +18,7 @@ class Octoprint(PrinterClient):
     def __init__(
         self,
         uuid,
+        network_client_uuid,
         organization_uuid,
         protocol="http",
         hostname=None,
@@ -32,6 +33,7 @@ class Octoprint(PrinterClient):
     ):
         self.uuid = uuid
         self.organization_uuid = organization_uuid
+        self.network_client_uuid = network_client_uuid
         self.name = name
         self.hostname = hostname
         self.ip = ip

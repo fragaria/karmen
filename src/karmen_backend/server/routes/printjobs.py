@@ -3,7 +3,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
 from server import app, clients
-from server.database import printjobs, printers, gcodes, users
+from server.database import printjobs, printers, gcodes, users, network_clients
 from . import jwt_force_password_change, validate_org_access
 
 
@@ -56,7 +56,10 @@ def printjob_create(org_uuid):
     if gcode is None:
         return abort(make_response("", 404))
     try:
-        printer_inst = clients.get_printer_instance(printer)
+        network_client = network_clients.get_network_client(
+            printer["network_client_uuid"]
+        )
+        printer_inst = clients.get_printer_instance(printer.extend(network_client))
         uploaded = printer_inst.upload_and_start_job(
             gcode["absolute_path"], gcode["path"]
         )
@@ -80,11 +83,11 @@ def printjob_create(org_uuid):
                 "available": True,
             },
             printer_data={
-                "ip": printer["ip"],
-                "port": printer["port"],
-                "hostname": printer["hostname"],
-                "name": printer["name"],
-                "client": printer["client"],
+                "ip": printer_inst.ip,
+                "port": printer_inst.port,
+                "hostname": printer_inst.hostname,
+                "name": printer_inst.name,
+                "client": printer_inst.client,
             },
         )
         return (

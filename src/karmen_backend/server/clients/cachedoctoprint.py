@@ -31,6 +31,7 @@ class CachedOctoprint(Octoprint):
     def __init__(
         self,
         uuid,
+        network_client_uuid,
         organization_uuid,
         protocol="http",
         hostname=None,
@@ -45,6 +46,7 @@ class CachedOctoprint(Octoprint):
     ):
         super(CachedOctoprint, self).__init__(
             uuid,
+            network_client_uuid,
             organization_uuid,
             protocol,
             hostname,
@@ -70,7 +72,7 @@ class CachedOctoprint(Octoprint):
         self.delete_cache_key("/api/job")
 
     def get_cache_key(self, path):
-        return "cache_octoprint_api_%s_%s" % (self.uuid, path)
+        return "cache_octoprint_api_%s_%s" % (self.network_client_uuid, path)
 
     def delete_cache_key(self, path):
         uri = "%s%s" % (self.network_base, path)

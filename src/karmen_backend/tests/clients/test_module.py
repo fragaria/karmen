@@ -20,6 +20,7 @@ class GetWithFallbackTest(unittest.TestCase):
         octoprinter = get_printer_instance(
             {
                 "uuid": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                "network_client_uuid": "900c73b8-1f12-4027-941a-e4b29531e8e3",
                 "organization_uuid": UUID_ORG,
                 "client": "octoprint",
                 "hostname": "octoprinter",

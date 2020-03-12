@@ -1,6 +1,7 @@
 import unittest
 import mock
 import pickle
+import uuid as guid
 
 from server.tasks.sniff_printer import save_printer_data, sniff_printer
 from server.clients.utils import PrinterClientAccessLevel
@@ -11,12 +12,14 @@ class SavePrinterDataTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.database.printers.add_printer")
     @mock.patch(
-        "server.database.printers.get_printer_by_network_props", return_value=None
+        "server.database.network_clients.get_network_client_by_props", return_value=None
     )
     def test_not_update_inactive_unknown_printer(
         self, mock_get_printer, mock_add_printer, mock_update_printer
     ):
-        save_printer_data(ip="1.2.3.4", client_props={"connected": False})
+        save_printer_data(
+            uuid=guid.uuid4(), ip="1.2.3.4", client_props={"connected": False}
+        )
         self.assertEqual(mock_get_printer.call_count, 0)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 0)
@@ -24,12 +27,28 @@ class SavePrinterDataTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.database.printers.add_printer")
     @mock.patch(
-        "server.database.printers.get_printer_by_network_props", return_value=None
+        "server.database.network_clients.get_network_client_by_props", return_value=None
+    )
+    @mock.patch(
+        "server.database.printers.get_printer_by_network_client_uuid",
+        return_value=None,
     )
     def test_add_active_unknown_printer(
-        self, mock_get_printer, mock_add_printer, mock_update_printer
+        self,
+        mock_get_printer,
+        mock_get_network_client,
+        mock_add_printer,
+        mock_update_printer,
     ):
-        save_printer_data(ip="1.2.3.4", client_props={"connected": True})
+        save_printer_data(
+            uuid=guid.uuid4(),
+            network_client_uuid=guid.uuid4(),
+            organization_uuid=guid.uuid4(),
+            ip="1.2.3.4",
+            port=80,
+            client="octoprint",
+            client_props={"connected": True},
+        )
         self.assertEqual(mock_get_printer.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 1)
         self.assertEqual(mock_update_printer.call_count, 0)
@@ -37,20 +56,32 @@ class SavePrinterDataTest(unittest.TestCase):
     @mock.patch("server.database.printers.update_printer")
     @mock.patch("server.database.printers.add_printer")
     @mock.patch(
-        "server.database.printers.get_printer_by_network_props",
+        "server.database.network_clients.get_network_client_by_props",
         return_value={
             "name": "1234",
             "ip": "1.2.3.4.",
             "client_props": {"api_key": "5678"},
         },
     )
+    @mock.patch(
+        "server.database.printers.get_printer_by_network_client_uuid",
+        return_value={"name": "1234",},
+    )
     def test_not_update_any_known_printer(
-        self, mock_get_printer, mock_add_printer, mock_update_printer
+        self,
+        mock_get_printer,
+        mock_get_network_client,
+        mock_add_printer,
+        mock_update_printer,
     ):
         save_printer_data(
-            ip="1.2.3.4", client_props={"connected": True}, name="1.2.3.4"
+            uuid=guid.uuid4(),
+            ip="1.2.3.4",
+            client_props={"connected": True},
+            name="1.2.3.4",
         )
         self.assertEqual(mock_get_printer.call_count, 1)
+        self.assertEqual(mock_get_network_client.call_count, 1)
         self.assertEqual(mock_add_printer.call_count, 0)
         self.assertEqual(mock_update_printer.call_count, 0)
 
@@ -91,11 +122,15 @@ class SniffPrinterTest(unittest.TestCase):
         mock_update_printer.assert_called_with(
             **{
                 "uuid": "1234",
+                "network_client_uuid": "1234",
                 "organization_uuid": UUID_ORG,
-                "hostname": "octopi.local",
-                "ip": "192.168.1.12",
                 "protocol": "http",
                 "name": "octopi.local",
+                "ip": "192.168.1.12",
+                "hostname": "octopi.local",
+                "port": 80,
+                "path": "",
+                "token": None,
                 "client": "octoprint",
                 "client_props": {
                     "connected": True,
@@ -130,11 +165,15 @@ class SniffPrinterTest(unittest.TestCase):
         mock_update_printer.assert_called_with(
             **{
                 "uuid": "1234",
+                "network_client_uuid": "1234",
                 "organization_uuid": UUID_ORG,
-                "hostname": "octopi.local",
-                "ip": "192.168.1.12",
-                "protocol": "https",
                 "name": "octopi.local",
+                "protocol": "https",
+                "ip": "192.168.1.12",
+                "hostname": "octopi.local",
+                "port": 443,
+                "path": "",
+                "token": None,
                 "client": "octoprint",
                 "client_props": {
                     "connected": True,

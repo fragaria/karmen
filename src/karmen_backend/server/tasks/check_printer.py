@@ -1,5 +1,5 @@
 from server import app, celery
-from server.database import printers
+from server.database import printers, network_clients
 from server import clients
 from server.services import network
 from datetime import datetime
@@ -9,7 +9,8 @@ from datetime import datetime
 def check_printer(printer_uuid):
     app.logger.debug("Checking printer %s" % printer_uuid)
     raw_printer = printers.get_printer(printer_uuid)
-    printer = clients.get_printer_instance(raw_printer)
+    raw_client = network_clients.get_network_client(raw_printer["network_client_uuid"])
+    printer = clients.get_printer_instance(dict(raw_client, **raw_printer))
     # websocket printers are not expected to change
     if printer.protocol in ["http", "https"]:
         if printer.hostname is not None:
@@ -27,10 +28,15 @@ def check_printer(printer_uuid):
     else:
         printer.is_alive()
 
+    if printer.hostname != raw_client.get("hostname") or printer.ip != raw_client.get(
+        "ip"
+    ):
+        network_clients.update_network_client(
+            uuid=raw_client["uuid"], hostname=printer.hostname, ip=printer.ip,
+        )
+
     printers.update_printer(
         uuid=printer.uuid,
-        hostname=printer.hostname,
-        ip=printer.ip,
         client_props={
             "version": printer.client_info.version,
             "connected": printer.client_info.connected,

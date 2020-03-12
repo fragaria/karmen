@@ -7,7 +7,7 @@ from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
 from server import app, __version__
-from server.database import printers
+from server.database import network_clients, printers
 from server import clients, executor
 from server.services import network
 from . import jwt_force_password_change, validate_org_access
@@ -16,7 +16,12 @@ from server.clients.utils import PrinterClientException
 
 def make_printer_response(printer, fields):
     if not isinstance(printer, clients.utils.PrinterClient):
-        printer_inst = clients.get_printer_instance(printer)
+        network_client = network_clients.get_network_client(
+            printer["network_client_uuid"]
+        )
+        printer_data = dict(network_client)
+        printer_data.update(dict(printer))
+        printer_inst = clients.get_printer_instance(printer_data)
     else:
         printer_inst = printer
     data = {
@@ -79,13 +84,22 @@ def printers_list(org_uuid):
         return "".join(random.choice(letters) for i in range(10))
 
     uqid = reqid()
+    printers_set = printers.get_printers(organization_uuid=org_uuid)
+    network_clients_mapping = {
+        nc["uuid"]: nc
+        for nc in network_clients.get_network_clients_by_uuids(
+            [p["network_client_uuid"] for p in printers_set]
+        )
+    }
     for printer in printers.get_printers(organization_uuid=org_uuid):
         try:
+            printer_data = dict(network_clients_mapping[printer["network_client_uuid"]])
+            printer_data.update(dict(printer))
             futures.append(
                 executor.submit_stored(
                     "%s:%s" % (uqid, printer["uuid"]),
                     make_printer_response,
-                    printer,
+                    printer_data,
                     fields,
                 )
             )
@@ -121,7 +135,10 @@ def printer_detail(org_uuid, uuid):
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
-    return jsonify(make_printer_response(printer, fields))
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    return jsonify(make_printer_response(printer_data, fields))
 
 
 @app.route("/organizations/<org_uuid>/printers", methods=["POST"])
@@ -145,18 +162,23 @@ def printer_create(org_uuid):
     if token is not None and token != "":
         if not app.config.get("CLOUD_MODE"):
             return abort(make_response("", 400))
-        if printers.get_printer_by_socket_token(org_uuid, token) is not None:
-            return abort(make_response("", 409))
+        existing_network_client = network_clients.get_network_client_by_socket_token(
+            token
+        )
+        if existing_network_client:
+            existing_printer = printers.get_printer_by_network_client_uuid(
+                org_uuid, existing_network_client.get("uuid")
+            )
+            if existing_printer is not None:
+                return abort(make_response("", 409))
         path = ""
         hostname = ""
         ip = ""
         protocol = ""
         port = 0
-
     else:
         if app.config.get("CLOUD_MODE"):
             return abort(make_response("", 400))
-
         if (
             (not ip and not hostname)
             or not name
@@ -176,24 +198,42 @@ def printer_create(org_uuid):
         if ip and not hostname:
             hostname = network.get_avahi_hostname(ip)
 
-        if (
-            printers.get_printer_by_network_props(org_uuid, hostname, ip, port, path)
-            is not None
-        ):
-            return abort(make_response("", 409))
+        existing_network_client = network_clients.get_network_client_by_props(
+            hostname, ip, port, path
+        )
+        if existing_network_client:
+            existing_printer = printers.get_printer_by_network_client_uuid(
+                org_uuid, existing_network_client.get("uuid")
+            )
+            if existing_printer is not None:
+                return abort(make_response("", 409))
+
+    if not existing_network_client:
+        existing_network_client = {
+            "uuid": guid.uuid4(),
+            "hostname": hostname,
+            "client": "octoprint",  # TODO make this more generic
+            "protocol": protocol,
+            "ip": ip,
+            "port": port,
+            "path": path,
+            "token": token,
+        }
+        network_clients.add_network_client(**existing_network_client)
 
     printer = clients.get_printer_instance(
         {
             "uuid": uuid,
+            "network_client_uuid": existing_network_client["uuid"],
             "organization_uuid": org_uuid,
-            "hostname": hostname,
-            "ip": ip,
-            "port": port,
-            "path": path,
             "name": name,
-            "token": token,
-            "protocol": protocol,
-            "client": "octoprint",  # TODO make this more generic
+            "client": existing_network_client["client"],
+            "protocol": existing_network_client["protocol"],
+            "hostname": existing_network_client["hostname"],
+            "ip": existing_network_client["ip"],
+            "port": existing_network_client["port"],
+            "path": existing_network_client["path"],
+            "token": existing_network_client["token"],
         }
     )
     printer.add_api_key(api_key)
@@ -201,14 +241,9 @@ def printer_create(org_uuid):
     printer.sniff()
     printers.add_printer(
         uuid=uuid,
-        name=name,
+        network_client_uuid=existing_network_client["uuid"],
         organization_uuid=org_uuid,
-        hostname=hostname,
-        ip=ip,
-        port=port,
-        path=path,
-        token=token,
-        protocol=printer.protocol,
+        name=name,
         client=printer.client_name(),
         client_props={
             "version": printer.client_info.version,
@@ -238,6 +273,11 @@ def printer_delete(org_uuid, uuid):
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     printers.delete_printer(uuid)
+    network_client_records = printers.get_printers_by_network_client_uuid(
+        printer["network_client_uuid"]
+    )
+    if len(network_client_records) == 0:
+        network_clients.delete_network_client(printer["network_client_uuid"])
     return "", 204
 
 
@@ -262,10 +302,12 @@ def printer_patch(org_uuid, uuid):
     api_key = data.get("api_key", printer["client_props"].get("api_key", None))
     printer_props = data.get("printer_props", {})
 
-    # TODO it might be necessary to update protocol, ip, hostname, port and path as well eventually
     if not name:
         return abort(make_response("", 400))
-    printer_inst = clients.get_printer_instance(printer)
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
     printer_inst.add_api_key(api_key)
     if data.get("api_key", "-1") != "-1" and data.get("api_key", "-1") != printer[
         "client_props"
@@ -303,7 +345,6 @@ def printer_patch(org_uuid, uuid):
         },
         printer_props=printer_inst.get_printer_props(),
     )
-    # TODO cache webcam, job, status for a small amount of time in client
     return (
         jsonify(make_printer_response(printer_inst, ["status", "webcam", "job"])),
         200,
@@ -329,7 +370,10 @@ def printer_change_connection(org_uuid, uuid):
     if not data:
         return abort(make_response("", 400))
     state = data.get("state", None)
-    printer_inst = clients.get_printer_instance(printer)
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
     if state == "online":
         r = printer_inst.connect_printer()
         return (
@@ -375,7 +419,10 @@ def printer_modify_job(org_uuid, uuid):
     action = data.get("action", None)
     if not action:
         return abort(make_response("", 400))
-    printer_inst = clients.get_printer_instance(printer)
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
     try:
         if printer_inst.modify_current_job(action):
             user = get_current_user()
@@ -437,7 +484,10 @@ def printer_webcam_snapshot(org_uuid, uuid):
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
-    printer_inst = clients.get_printer_instance(printer)
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
     if printer_inst.client_info.webcam is None:
         return abort(make_response("", 404))
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
@@ -445,19 +495,26 @@ def printer_webcam_snapshot(org_uuid, uuid):
         return abort(make_response("", 404))
 
     # process current future if done
-    if FUTURES_MICROCACHE.get(uuid) and FUTURES_MICROCACHE.get(uuid).done():
-        WEBCAM_MICROCACHE[uuid] = FUTURES_MICROCACHE[uuid].result()
+    if (
+        FUTURES_MICROCACHE.get(printer["network_client_uuid"])
+        and FUTURES_MICROCACHE.get(printer["network_client_uuid"]).done()
+    ):
+        WEBCAM_MICROCACHE[printer["network_client_uuid"]] = FUTURES_MICROCACHE[
+            printer["network_client_uuid"]
+        ].result()
         try:
-            del FUTURES_MICROCACHE[uuid]
+            del FUTURES_MICROCACHE[printer["network_client_uuid"]]
         except Exception:
             # that's ok, probably a race condition
             pass
     # issue a new future if not present
-    if not FUTURES_MICROCACHE.get(uuid):
-        FUTURES_MICROCACHE[uuid] = executor.submit(_get_webcam_snapshot, snapshot_url)
+    if not FUTURES_MICROCACHE.get(printer["network_client_uuid"]):
+        FUTURES_MICROCACHE[printer["network_client_uuid"]] = executor.submit(
+            _get_webcam_snapshot, snapshot_url
+        )
 
-    if WEBCAM_MICROCACHE.get(uuid) is not None:
-        response = WEBCAM_MICROCACHE.get(uuid)
+    if WEBCAM_MICROCACHE.get(printer["network_client_uuid"]) is not None:
+        response = WEBCAM_MICROCACHE.get(printer["network_client_uuid"])
         return (
             response.content,
             200,
@@ -481,7 +538,10 @@ def printer_set_lights(org_uuid, uuid):
     except ValueError:
         return abort(make_response("", 400))
     printer = printers.get_printer(uuid)
-    printer_inst = clients.get_printer_instance(printer)
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
     try:
