@@ -17,16 +17,18 @@ def save_printer_data(**kwargs):
         kwargs.get("port"),
         kwargs.get("path"),
     )
-    existing_printer = printers.get_printer_by_network_client_uuid(
-        kwargs.get("organization_uuid"), kwargs.get("network_client_uuid")
-    )
-    if existing_printer:
-        app.logger.info(
-            "Printer on %s is already registered in %s"
-            % (kwargs.get("ip"), kwargs.get("organization_uuid"))
+    if existing_network_client is not None:
+        existing_printer = printers.get_printer_by_network_client_uuid(
+            kwargs.get("organization_uuid"), existing_network_client.get("uuid")
         )
-        return
-    if existing_network_client is None:
+        if existing_printer:
+            app.logger.info(
+                "Printer on %s is already registered in %s"
+                % (kwargs.get("ip"), kwargs.get("organization_uuid"))
+            )
+            return
+        network_client_uuid = existing_network_client.get("network_client_uuid")
+    else:
         network_clients.add_network_client(
             uuid=kwargs.get("network_client_uuid"),
             client=kwargs.get("client"),
@@ -37,8 +39,6 @@ def save_printer_data(**kwargs):
             token=kwargs.get("token"),
         )
         network_client_uuid = kwargs.get("network_client_uuid")
-    else:
-        network_client_uuid = existing_network_client.get("network_client_uuid")
 
     printers.add_printer(
         **{

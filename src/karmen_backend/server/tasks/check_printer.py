@@ -10,7 +10,9 @@ def check_printer(printer_uuid):
     app.logger.debug("Checking printer %s" % printer_uuid)
     raw_printer = printers.get_printer(printer_uuid)
     raw_client = network_clients.get_network_client(raw_printer["network_client_uuid"])
-    printer = clients.get_printer_instance(dict(raw_client, **raw_printer))
+    printer_data = dict(raw_client)
+    printer_data.update(raw_printer)
+    printer = clients.get_printer_instance(printer_data)
     # websocket printers are not expected to change
     if printer.protocol in ["http", "https"]:
         if printer.hostname is not None:

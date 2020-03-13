@@ -488,3 +488,47 @@ class CheckPrinterTest(unittest.TestCase):
                 },
             }
         )
+
+    @mock.patch(
+        "server.database.printers.get_printer",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "organization_uuid": UUID_ORG,
+        },
+    )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "token": "1234",
+            "client": "octoprint",
+            "protocol": "",
+        },
+    )
+    @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
+    @mock.patch(
+        "server.tasks.check_printer.network.get_avahi_hostname", return_value=None,
+    )
+    @mock.patch(
+        "server.tasks.check_printer.network.get_avahi_address", return_value="5678",
+    )
+    @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
+    @mock.patch("server.tasks.check_printer.datetime")
+    def test_no_check_network_for_token_based_printers(
+        self,
+        mock_datetime,
+        mock_get_data,
+        mock_address,
+        mock_hostname,
+        mock_update_network_client,
+        mock_update_printer,
+        mock_get_network_client,
+        mock_get_printer,
+    ):
+        date = datetime.strptime("06 Mar 2020", "%d %b %Y")
+        mock_datetime.now.return_value = date.replace(minute=29)
+        check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
+        self.assertEqual(mock_address.call_count, 0)
+        self.assertEqual(mock_hostname.call_count, 0)

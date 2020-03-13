@@ -5,9 +5,9 @@ from server.services.mailer.templates import get_template
 
 @celery.task(name="send_mail")
 def send_mail(recipients, template_key, variables={}):
-    mailer = get_mailer(app.config.get("MAILER", "DUMMY"))
-    template = get_template(template_key)
-    if template and mailer:
+    try:
+        mailer = get_mailer(app.config.get("MAILER", "DUMMY"))
+        template = get_template(template_key)
         template.prepare_variables(variables)
         mailer.send(
             app.config.get("MAILER_FROM", "Karmen <noreply@karmen.tech>"),
@@ -16,5 +16,5 @@ def send_mail(recipients, template_key, variables={}):
             template.textbody(),
             template.htmlbody(),
         )
-    else:
-        app.logger.error("Cannot send email %s" % template_key)
+    except RuntimeError as e:
+        app.logger.error("Cannot send email: %s" % e)
