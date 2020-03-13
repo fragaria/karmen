@@ -18,7 +18,7 @@ def get_client():
             or not config.get("aws_secret_key")
             or not config.get("aws_region")
         ):
-            raise Exception(
+            raise RuntimeError(
                 "Cannot send mail with SES: Missing aws_access_key or aws_secret_key or aws_region in MAILER_CONFIG"
             )
         if not AWS_CLIENT:
@@ -29,7 +29,7 @@ def get_client():
                 region_name=config.get("aws_region"),
             )
         return AWS_CLIENT
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, TypeError) as e:
         raise RuntimeError("Cannot configure mailer:", e)
 
 
@@ -51,4 +51,6 @@ class Ses:
                 Source=sender,
             )
         except ClientError as e:
-            raise Exception("Cannot send mail with SES", e.response["Error"]["Message"])
+            raise RuntimeError(
+                "Cannot send mail with SES", e.response["Error"]["Message"]
+            )

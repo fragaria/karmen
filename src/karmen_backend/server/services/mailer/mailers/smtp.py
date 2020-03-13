@@ -16,7 +16,7 @@ class Smtp:
             password = config.get("password")
             use_ssl = config.get("ssl", 1)
             if not host or not port:
-                raise Exception(
+                raise RuntimeError(
                     "Cannot send mail with smtp: Missing host or port in MAILER_CONFIG"
                 )
             app.logger.info("Sending %s via smtp" % subject)
@@ -38,9 +38,10 @@ class Smtp:
                 server = smtplib.SMTP(host, port)
             if login and password:
                 server.login(login, password)
+            # TODO handle errors properly
             r = server.sendmail(sender, recipients, message.as_string())
             app.logger.info(r)
             server.quit()
 
-        except json.JSONDecodeError as e:
+        except (json.JSONDecodeError, TypeError) as e:
             raise RuntimeError("Cannot configure mailer:", e)

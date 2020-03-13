@@ -1,6 +1,5 @@
 from server import app, celery
-from server.services.mailer import get_mailer
-from server.services.mailer.templates import get_template
+from server.services.mailer import get_mailer, get_template
 
 
 @celery.task(name="send_mail")

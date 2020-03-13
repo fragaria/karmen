@@ -11,7 +11,7 @@ class Mailgun:
             domain = config.get("mailgun_domain")
             apikey = config.get("mailgun_api_key")
             if not domain or not apikey:
-                raise Exception(
+                raise RuntimeError(
                     "Cannot send mail with mailgun: Missing mailgun_domain or mailgun_api_key in MAILER_CONFIG"
                 )
             app.logger.info("Sending %s via mailgun" % subject)
@@ -27,6 +27,6 @@ class Mailgun:
                 },
             )
             if req.status_code != 200:
-                raise Exception("Cannot send mail with mailgun", req.status_code)
-        except json.JSONDecodeError as e:
+                raise RuntimeError("Cannot send mail with mailgun", req.status_code)
+        except (json.JSONDecodeError, TypeError) as e:
             raise RuntimeError("Cannot configure mailer:", e)
