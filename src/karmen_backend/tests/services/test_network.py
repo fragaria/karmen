@@ -151,6 +151,22 @@ class GetAvahiHostnameTest(unittest.TestCase):
         self.assertEqual(get_avahi_hostname("10.192.202.200"), None)
 
     @mock.patch("subprocess.Popen")
+    def test_return_fqdn(self, mock_popen):
+        self.stdout_mock.write(
+            dedent(
+                """
+                10.192.202.23\toctopi.local
+                """
+            ).encode("utf-8")
+        )
+        self.stdout_mock.seek(0)
+        mock_popen.return_value.stdout = self.stdout_mock
+        self.stderr_mock.seek(0)
+        mock_popen.return_value.stderr = self.stderr_mock
+        result = get_avahi_hostname("10.192.202.23")
+        self.assertEqual(result, "octopi.local")
+
+    @mock.patch("subprocess.Popen")
     def test_regex(self, mock_popen):
         self.stdout_mock.write(
             dedent(
