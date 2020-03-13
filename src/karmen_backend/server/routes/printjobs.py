@@ -4,7 +4,7 @@ from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
 from server import app, clients
 from server.database import printjobs, printers, gcodes, users, network_clients
-from . import jwt_force_password_change, validate_org_access
+from . import jwt_force_password_change, validate_org_access, validate_uuid
 
 
 def make_printjob_response(printjob, fields=None, user_mapping=None):
@@ -42,13 +42,8 @@ def printjob_create(org_uuid):
     printer_uuid = data.get("printer", None)
     if not gcode_uuid or not printer_uuid:
         return abort(make_response("", 400))
-    try:
-        gcodeuuid = guid.UUID(gcode_uuid, version=4)
-        printeruuid = guid.UUID(printer_uuid, version=4)
-        if str(printeruuid) != printer_uuid or str(gcodeuuid) != gcode_uuid:
-            return abort(make_response("", 400))
-    except (ValueError, AttributeError):
-        return abort(make_response("", 400))
+    validate_uuid(gcode_uuid)
+    validate_uuid(printer_uuid)
     printer = printers.get_printer(printer_uuid)
     if printer is None or printer["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
@@ -176,12 +171,7 @@ def printjobs_list(org_uuid):
 @validate_org_access()
 @cross_origin()
 def printjob_detail(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     printjob = printjobs.get_printjob(uuid)
     if printjob is None or printjob["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))

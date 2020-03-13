@@ -9,7 +9,7 @@ from server import app, __version__
 from server.database import gcodes, printjobs, users, organizations, organization_roles
 from server.services import files
 from server.tasks.analyze_gcode import analyze_gcode
-from . import jwt_force_password_change, validate_org_access
+from . import jwt_force_password_change, validate_org_access, validate_uuid
 
 
 def make_gcode_response(gcode, fields=None, user_mapping=None):
@@ -123,12 +123,7 @@ def gcodes_list(org_uuid):
 @validate_org_access()
 @cross_origin()
 def gcode_detail(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
@@ -194,12 +189,7 @@ def gcode_create(org_uuid):
 @validate_org_access()
 @cross_origin()
 def gcode_file(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))
@@ -218,12 +208,7 @@ def gcode_file(org_uuid, uuid):
 @validate_org_access()
 @cross_origin()
 def gcode_delete(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response("", 404))

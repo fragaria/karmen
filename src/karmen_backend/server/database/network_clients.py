@@ -96,18 +96,6 @@ def get_network_client_by_socket_token(token):
         return data
 
 
-def get_network_clients():
-    with get_connection() as connection:
-        query = sql.SQL("SELECT {} from network_clients").format(
-            sql.SQL(",").join([sql.Identifier(f) for f in FIELDS])
-        )
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute(query)
-        data = cursor.fetchall()
-        cursor.close()
-        return data
-
-
 def get_network_clients_by_uuids(uuids):
     with get_connection() as connection:
         query = sql.SQL(

@@ -46,6 +46,18 @@ class TasksRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
+    def test_unavailable_in_cloud_mode(self):
+        with app.test_client() as c:
+            app.config["CLOUD_MODE"] = True
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/tasks" % UUID_ORG,
+                json={"task": "scan_network"},
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+            app.config["CLOUD_MODE"] = False
+
     @mock.patch("server.routes.tasks.scan_network.delay", return_value=None)
     def test_set_data(self, mock_delay):
         with app.test_client() as c:
@@ -79,7 +91,7 @@ class TasksRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 403)
 
     @mock.patch("server.routes.tasks.scan_network.delay")
-    def test_calls_scan_network(self, mocked_delay):
+    def test_cannot_call_scan_network(self, mocked_delay):
         mocked_delay.side_effect = Exception("Redis does not work")
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)

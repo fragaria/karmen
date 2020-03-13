@@ -461,3 +461,23 @@ class DeleteUser(unittest.TestCase):
             self.assertTrue(args[1][0][2]["organization_name"] is not None)
             self.assertTrue(args[1][0][2]["organization_uuid"] is not None)
             self.assertEqual(args[1][0][2]["email"], email)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_cannot_delete_herself(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.delete(
+                "/organizations/%s/users/%s" % (UUID_ORG, UUID_ADMIN),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 409)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_cannot_delete_unknown(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.delete(
+                "/organizations/%s/users/%s" % (UUID_ORG, guid.uuid4()),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)

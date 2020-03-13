@@ -16,14 +16,13 @@ def enqueue_task(org_uuid):
         return abort(make_response("", 400))
     if "task" not in data:
         return abort(make_response("", 400))
-    if data["task"] not in ["scan_network"]:
-        return abort(make_response("", 400))
     if data["task"] == "scan_network":
         if app.config.get("CLOUD_MODE"):
             return abort(make_response("Not allowed in this install", 400))
         try:
             scan_network.delay(org_uuid, data.get("network_interface"))
+            return "", 202
         except Exception as e:
             app.logger.error("Cannot enqueue a task: %s", e)
             abort(500)
-    return "", 202
+    return abort(make_response("", 400))

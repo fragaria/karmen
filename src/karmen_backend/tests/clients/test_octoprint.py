@@ -1364,49 +1364,6 @@ class OctoprintModifyCurrentJobTest(unittest.TestCase):
         self.assertTrue("random is not allowed" in str(ctx.exception))
 
 
-class OctoprintSetLightsTest(unittest.TestCase):
-    def test_no_plugin(self):
-        printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3",
-            "d501f4f0-48d5-468e-a137-1f3803cd836c",
-            UUID_ORG,
-            ip="192.168.1.15",
-            client_props={"connected": True},
-        )
-        with self.assertRaises(Exception) as ctx:
-            printer.set_lights()
-
-        self.assertTrue("awesome_karmen_led is not loaded" in str(ctx.exception))
-
-    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
-    def test_plugin_not_responding(self, mock_post_uri):
-        printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3",
-            "d501f4f0-48d5-468e-a137-1f3803cd836c",
-            UUID_ORG,
-            ip="192.168.1.15",
-            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
-        )
-        r = printer.set_lights()
-        self.assertFalse(r)
-
-    @mock.patch(
-        "server.clients.octoprint.requests.post",
-        return_value=Response(200, {"status": "OK"}),
-    )
-    def test_plugin_responding(self, mock_post_uri):
-        mock_post_uri.return_value.status_code = 200
-        printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3",
-            "d501f4f0-48d5-468e-a137-1f3803cd836c",
-            UUID_ORG,
-            ip="192.168.1.15",
-            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
-        )
-        r = printer.set_lights()
-        self.assertTrue(r)
-
-
 class OctoprintAreLightsOnTest(unittest.TestCase):
     def test_no_plugin(self):
         printer = Octoprint(
@@ -1463,4 +1420,105 @@ class OctoprintAreLightsOnTest(unittest.TestCase):
             client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
         )
         r = printer.are_lights_on()
+        self.assertFalse(r)
+
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    def test_plugin_bad_response(self, mock_get_uri):
+        mock_get_uri.return_value.status_code = 200
+        mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
+            "msg", "aa", 123
+        )
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.are_lights_on()
+        self.assertFalse(r)
+
+
+class OctoprintSetLightsTest(unittest.TestCase):
+    def test_no_plugin(self):
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True},
+        )
+        with self.assertRaises(Exception) as ctx:
+            printer.set_lights()
+
+        self.assertTrue("awesome_karmen_led is not loaded" in str(ctx.exception))
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_plugin_not_responding(self, mock_post_uri):
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.set_lights()
+        self.assertFalse(r)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post",
+        return_value=Response(200, {"status": "OK"}),
+    )
+    def test_plugin_responding(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 200
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.set_lights()
+        self.assertTrue(r)
+        self.assertEqual(mock_post_uri.call_count, 1)
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(args[0], "http://192.168.1.15/api/plugin/awesome_karmen_led")
+        self.assertEqual(kwargs["json"], {"command": "set_led", "color": "black"})
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post",
+        return_value=Response(200, {"status": "OK"}),
+    )
+    def test_plugin_pass_data(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 200
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.set_lights(color="red", heartbeat=1)
+        self.assertTrue(r)
+        self.assertEqual(mock_post_uri.call_count, 1)
+        args, kwargs = mock_post_uri.call_args
+        self.assertEqual(args[0], "http://192.168.1.15/api/plugin/awesome_karmen_led")
+        self.assertEqual(
+            kwargs["json"], {"command": "set_led", "color": "red", "heartbeat": 1,}
+        )
+
+    @mock.patch("server.clients.octoprint.requests.post")
+    def test_plugin_bad_response(self, mock_post_uri):
+        mock_post_uri.return_value.status_code = 200
+        mock_post_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
+            "msg", "aa", 123
+        )
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+            client_props={"connected": True, "plugins": ["awesome_karmen_led"]},
+        )
+        r = printer.set_lights()
         self.assertFalse(r)

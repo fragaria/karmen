@@ -10,7 +10,7 @@ from server import app, __version__
 from server.database import network_clients, printers
 from server import clients, executor
 from server.services import network
-from . import jwt_force_password_change, validate_org_access
+from . import jwt_force_password_change, validate_org_access, validate_uuid
 from server.clients.utils import PrinterClientException
 
 
@@ -125,12 +125,7 @@ def printers_list(org_uuid):
 @validate_org_access()
 @cross_origin()
 def printer_detail(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
@@ -263,12 +258,7 @@ def printer_create(org_uuid):
 @validate_org_access("admin")
 @cross_origin()
 def printer_delete(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
@@ -286,12 +276,7 @@ def printer_delete(org_uuid, uuid):
 @validate_org_access("admin")
 @cross_origin()
 def printer_patch(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
@@ -357,12 +342,8 @@ def printer_patch(org_uuid, uuid):
 @cross_origin()
 def printer_change_connection(org_uuid, uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
+
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
@@ -404,12 +385,8 @@ def printer_modify_job(org_uuid, uuid):
     # and does not handle prints issued by bypassing Karmen Hub
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
+
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
@@ -475,12 +452,8 @@ def printer_webcam_snapshot(org_uuid, uuid):
     can emulate a video-like experience. Since we have no sound, this should be
     fine.
     """
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
+
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response("", 404))
@@ -531,12 +504,8 @@ def printer_webcam_snapshot(org_uuid, uuid):
 @validate_org_access()
 @cross_origin()
 def printer_set_lights(org_uuid, uuid):
-    try:
-        uuidm = guid.UUID(uuid, version=4)
-        if str(uuidm) != uuid:
-            return abort(make_response("", 400))
-    except ValueError:
-        return abort(make_response("", 400))
+    validate_uuid(uuid)
+
     printer = printers.get_printer(uuid)
     network_client = network_clients.get_network_client(printer["network_client_uuid"])
     printer_data = dict(network_client)

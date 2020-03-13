@@ -244,7 +244,6 @@ class ActivateNewUserRoute(unittest.TestCase):
             self.assertTrue(user["activated"] is not None)
             local_user = local_users.get_local_user(self.user_uuid)
             self.assertTrue(local_user is not None)
-            print(organization_roles.get_by_user_uuid(self.user_uuid))
             self.assertTrue(
                 len(organization_roles.get_by_user_uuid(self.user_uuid)) == 1
             )

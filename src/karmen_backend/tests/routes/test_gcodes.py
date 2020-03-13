@@ -330,6 +330,16 @@ class DetailRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
 
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes/%s"
+                % (UUID_ORG, "152dd638-6526-11ea-bc55-0242ac130003"),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_detail(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
@@ -628,6 +638,25 @@ class DeleteRoute(unittest.TestCase):
             response = c.delete("/organizations/%s/gcodes/%s" % (UUID_ORG, gcode_uuid))
             self.assertEqual(response.status_code, 401)
 
+    def test_delete_bad_owner(self):
+        gcode_uuid = gcodes.add_gcode(
+            uuid=guid.uuid4(),
+            path="delete-ab/c",
+            filename="delete-gcode-specific-file1",
+            display="file-display",
+            absolute_path="/ab/a/b/c",
+            size=123,
+            user_uuid=UUID_USER,
+            organization_uuid=UUID_ORG2,
+        )
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER2)
+            response = c.delete(
+                "/organizations/%s/gcodes/%s" % (UUID_ORG2, gcode_uuid),
+                headers={"x-csrf-token": TOKEN_USER2_CSRF},
+            )
+            self.assertEqual(response.status_code, 401)
+
     def test_delete_unknown(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
@@ -638,6 +667,16 @@ class DeleteRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
+    def test_bad_uuid_format(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.delete(
+                "/organizations/%s/gcodes/%s"
+                % (UUID_ORG, "152dd638-6526-11ea-bc55-0242ac130003"),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
 
 class GetDataRoute(unittest.TestCase):
     def test_download_no_token(self):
@@ -645,15 +684,25 @@ class GetDataRoute(unittest.TestCase):
             response = c.get("/organizations/%s/gcodes/12/data" % UUID_ORG)
             self.assertEqual(response.status_code, 401)
 
+    def test_bad_uuid_format(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes/%s/data"
+                % (UUID_ORG, "152dd638-6526-11ea-bc55-0242ac130003"),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_bad_uuid(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/gcodes/2022bd6c-00ba-4dc3-01a0-eba2b8c4923e/data"
+                "/organizations/%s/gcodes/8b088c41-189d-4eae-a16a-d595e53d034b/data"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
 
     def test_download(self):
         mock_file = tempfile.NamedTemporaryFile(delete=False)

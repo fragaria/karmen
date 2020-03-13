@@ -12,17 +12,21 @@ from server.database import (
 )
 
 
+def validate_uuid(uuid):
+    try:
+        uuidm = guid.UUID(str(uuid), version=4)
+        if str(uuidm) != uuid:
+            return abort(make_response("", 400))
+    except ValueError:
+        return abort(make_response("", 400))
+
+
 def validate_org_access(required_role=None):
     def validate_org_decorator(func):
         @functools.wraps(func)
         @jwt_required
         def wrap(org_uuid, *args, **kwargs):
-            try:
-                orguuid = guid.UUID(org_uuid, version=4)
-                if str(orguuid) != org_uuid:
-                    return abort(make_response("", 400))
-            except ValueError:
-                return abort(make_response("", 400))
+            validate_uuid(org_uuid)
             user = get_current_user()
             if not user:
                 return abort(make_response("", 401))
