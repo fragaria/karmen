@@ -3,8 +3,8 @@ import { connect } from "react-redux";
 import { BrowserRouter, Switch, Route, useLocation } from "react-router-dom";
 
 import Menu from "./components/menu";
-import Heartbeat from "./components/utils/heartbeat";
 import Loader from "./components/utils/loader";
+import Heartbeat from "./components/gateways/heartbeat";
 import CatchLoginTokenFromUrl from "./components/gateways/catch-login-token-from-url";
 import AuthenticatedRoute from "./components/authenticated-route";
 import UnauthenticatedRoute from "./components/unauthenticated-route";
