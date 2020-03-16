@@ -1249,17 +1249,8 @@ select {
 
   .printer-control-panel {
     display: grid;
-    background-color: blue;
     grid-template-columns: repeat(8, 1fr);
     grid-gap: 5px;
-
-    div::before {
-      content: "";
-      //padding: 5px;
-      padding-bottom: 100%;
-      display: inline-block;
-      vertical-align: top;
-    }
   }
 }
 

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Route, Switch, Redirect } from "react-router-dom";
+import { RoutedTabs, NavTab } from "react-router-tabs";
 
+import JobsTab from "../../components/tabs/printer/jobs-tab";
+import ControlsTab from "../../components/tabs/printer/controls-tab";
 import Loader from "../../components/utils/loader";
 import BusyButton from "../../components/utils/busy-button";
 import { useMyModal } from "../../components/utils/modal";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
-import Listing from "../../components/listings/wrapper";
 import Progress from "../../components/printers/progress";
 import WebcamStream from "../../components/printers/webcam-stream";
 import PrinterState from "../../components/printers/printer-state";
@@ -16,7 +18,6 @@ import {
   PrinterProgress,
   PrinterConnectionStatus
 } from "../../components/printers/printer-data";
-import formatters from "../../services/formatters";
 
 import { getJobsPage, clearJobsPages } from "../../actions/printjobs";
 import {
@@ -147,39 +148,6 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
   );
 };
 
-class PrintJobRow extends React.Component {
-  render() {
-    const { orguuid, gcode_data, started, username } = this.props;
-    if (!gcode_data) {
-      return <div className="list-item"></div>;
-    }
-    return (
-      <div className="list-item">
-        <div className="list-item-content">
-          {gcode_data && gcode_data.available ? (
-            <Link
-              className="list-item-subtitle"
-              to={`/${orguuid}/gcodes/${gcode_data.uuid}`}
-            >
-              {gcode_data.filename}
-            </Link>
-          ) : (
-            <span className="list-item-subtitle">{gcode_data.filename}</span>
-          )}
-
-          <small>
-            {formatters.bytes(gcode_data.size)}
-            {", "}
-            {formatters.datetime(started)}
-            {", "}
-            {username}
-          </small>
-        </div>
-      </div>
-    );
-  }
-}
-
 const PrinterDetail = ({
   match,
   printer,
@@ -247,266 +215,6 @@ const PrinterDetail = ({
                 {`Lights ${printer.lights === "on" ? "off" : "on"}`}
               </BusyButton>
             )}
-          </div>
-          <div className="cta-box text-center hidden-xs">
-            <div className="printer-control-panel">
-              <div style={{ gridColumn: 2, gridRow: 1 }}>X/Y</div>
-              <div style={{ gridColumn: 2, gridRow: 2 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-up1"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 1, gridRow: 3 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-left"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 2, gridRow: 3 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-home"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 3, gridRow: 3 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-right"></span>
-                </BusyButton>
-              </div>
-
-              <div style={{ gridColumn: 2, gridRow: 4 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-down1"></span>
-                </BusyButton>
-              </div>
-
-              <div style={{ gridColumn: 4, gridRow: 1 }}>Z</div>
-              <div style={{ gridColumn: 4, gridRow: 2 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-up1"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 4, gridRow: 3 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-home"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 4, gridRow: 4 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-down1"></span>
-                </BusyButton>
-              </div>
-
-              <div
-                style={{
-                  gridColumn: 5,
-                  gridRow: 1,
-                  gridColumnEnd: 7,
-                  height: 0
-                }}
-              >
-                Extrude
-              </div>
-              <div
-                style={{
-                  gridColumn: 5,
-                  gridRow: 2,
-                  gridColumnEnd: 7,
-                  height: 0
-                }}
-              >
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-up1"></span>
-                </BusyButton>
-              </div>
-              <div
-                style={{
-                  gridColumn: 5,
-                  gridRow: 3,
-                  gridColumnEnd: 7,
-                  height: 0
-                }}
-              >
-                <input style={{ maxWidth: 50 }} type="number" value="1" />
-              </div>
-              <div
-                style={{
-                  gridColumn: 5,
-                  gridRow: 4,
-                  gridColumnEnd: 7,
-                  height: 0
-                }}
-              >
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-down1"></span>
-                </BusyButton>
-              </div>
-
-              <div style={{ gridColumn: 4, gridRow: 1 }}>Z</div>
-              <div style={{ gridColumn: 4, gridRow: 2 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-up1"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 4, gridRow: 3 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-home"></span>
-                </BusyButton>
-              </div>
-              <div style={{ gridColumn: 4, gridRow: 4 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  <span className="icon-down1"></span>
-                </BusyButton>
-              </div>
-
-              <div style={{ gridColumn: 7, gridRow: 1 }}>Fan</div>
-              <div style={{ gridColumn: 7, gridRow: 2 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  ON
-                </BusyButton>
-              </div>
-
-              <div style={{ gridColumn: 7, gridRow: 4 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  OFF
-                </BusyButton>
-              </div>
-
-              <div
-                style={{
-                  gridColumn: 1,
-                  gridRow: 6,
-                  gridColumnEnd: 4,
-                  height: 0
-                }}
-              >
-                <span>Bed temp</span>
-              </div>
-              <div
-                style={{
-                  gridColumn: 4,
-                  gridRow: 6,
-                  gridColumnEnd: 7,
-                  height: 0
-                }}
-              >
-                <input type="number" style={{ width: "100%" }} />
-              </div>
-              <div style={{ gridColumn: 7, gridRow: 6 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  SET
-                </BusyButton>
-              </div>
-
-              <div
-                style={{
-                  gridColumn: 1,
-                  gridRow: 7,
-                  gridColumnEnd: 4,
-                  height: 0
-                }}
-              >
-                <span>Hotend temp</span>
-              </div>
-              <div
-                style={{
-                  gridColumn: 4,
-                  gridRow: 7,
-                  gridColumnEnd: 7,
-                  height: 0
-                }}
-              >
-                <input type="number" style={{ width: "100%" }} />
-              </div>
-              <div style={{ gridColumn: 7, gridRow: 7 }}>
-                <BusyButton
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={printerControl}
-                  busyChildren="..."
-                >
-                  SET
-                </BusyButton>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -583,28 +291,38 @@ const PrinterDetail = ({
         </div>
 
         <div className="printer-detail-jobs">
-          <div className="react-tabs__tab-list">
-            <span className="react-tabs__tab react-tabs__tab--selected">
-              Jobs
-            </span>
-          </div>
+          <RoutedTabs
+            startPathWith={match.url}
+            className="react-tabs__tab-list"
+            tabClassName="react-tabs__tab"
+            activeTabClassName="react-tabs__tab--selected"
+          >
+            <NavTab to="/jobs">Jobs</NavTab>
+            <NavTab to="/controls">Controls</NavTab>
+          </RoutedTabs>
 
-          <Listing
-            enableFiltering={false}
-            itemList={jobList}
-            loadPage={loadJobsPage}
-            rowFactory={j => {
-              return (
-                <PrintJobRow
-                  key={j.uuid}
-                  {...j}
+          <Switch>
+            <Route
+              exact
+              path={`${match.url}`}
+              render={() => <Redirect replace to={`${match.url}/jobs`} />}
+            />
+            <Route
+              path={`${match.url}/jobs`}
+              render={props => (
+                <JobsTab
                   orguuid={match.params.orguuid}
+                  jobList={jobList}
+                  loadJobsPage={loadJobsPage}
+                  clearJobsPages={clearJobsPages}
                 />
-              );
-            }}
-            sortByColumns={["started"]}
-            clearItemsPages={clearJobsPages}
-          />
+              )}
+            />
+            <Route
+              path={`${match.url}/controls`}
+              render={props => <ControlsTab printerControl={printerControl} />}
+            />
+          </Switch>
 
           {role === "admin" && (
             <div className="cta-box text-center">

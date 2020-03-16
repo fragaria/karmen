@@ -202,7 +202,6 @@ class App extends React.Component {
               <AuthenticatedRoute
                 userState={userState}
                 path="/:orguuid/printers/:uuid"
-                exact
                 component={PrinterDetail}
               />
               <AuthenticatedRoute
