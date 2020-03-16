@@ -30,12 +30,14 @@ export const heartbeat = () => {
     .then(response => {
       if (response.status !== 200) {
         console.error(`Heartbeat fail: ${response.status}`);
-        return false;
+        return -1;
       }
-      return true;
+      return response.json().then(r => {
+        return r.version;
+      });
     })
     .catch(e => {
       console.error(`Heartbeat fail: ${e}`);
-      return false;
+      return -1;
     });
 };

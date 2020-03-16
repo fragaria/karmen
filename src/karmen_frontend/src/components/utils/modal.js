@@ -1,7 +1,7 @@
 import React from "react";
 import useModal from "use-react-modal";
 
-export const useMyModal = () => {
+export const useMyModal = ({ hideClose }) => {
   const { closeModal, isOpen, Modal, ...rest } = useModal({
     background: "rgba(0, 0, 0, 0.5)"
   });
@@ -10,7 +10,9 @@ export const useMyModal = () => {
     Modal: ({ children }) =>
       isOpen && (
         <Modal>
-          <ModalWrapper closeFunc={closeModal}>{children}</ModalWrapper>
+          <ModalWrapper closeFunc={closeModal} hideClose={hideClose}>
+            {children}
+          </ModalWrapper>
         </Modal>
       ),
     isOpen,
@@ -19,12 +21,14 @@ export const useMyModal = () => {
   };
 };
 
-export const ModalWrapper = ({ closeFunc, children }) => {
+export const ModalWrapper = ({ closeFunc, hideClose, children }) => {
   return (
     <div className="modal-content">
-      <button className="modal-close" onClick={closeFunc}>
-        <span className="icon-close"></span>
-      </button>
+      {!hideClose && (
+        <button className="modal-close" onClick={closeFunc}>
+          <span className="icon-close"></span>
+        </button>
+      )}
       {children}
     </div>
   );
