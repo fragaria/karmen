@@ -24,10 +24,9 @@ import {
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
-  setWebcamRefreshInterval,
   changeLights
 } from "../../actions/printers";
-
+import { setWebcamRefreshInterval } from "../../actions/webcams";
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,
   accessLevel,
@@ -142,7 +141,6 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
       </button>
       <CancelPrintModal
         modal={cancelPrintModal}
-        printer={printer}
         onCurrentJobStateChange={onCurrentJobStateChange}
       />
     </>
@@ -367,7 +365,7 @@ export default connect(
     printer: state.printers.printers.find(
       p => p.uuid === ownProps.match.params.uuid
     ),
-    image: state.printers.images[ownProps.match.params.uuid],
+    image: state.webcams.images[ownProps.match.params.uuid],
     role: state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],

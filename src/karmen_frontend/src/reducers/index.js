@@ -6,6 +6,7 @@ import preferences from "./preferences";
 import printers from "./printers";
 import printjobs from "./printjobs";
 import users from "./users";
+import webcams from "./webcams";
 
 export default combineReducers({
   gcodes,
@@ -14,5 +15,6 @@ export default combineReducers({
   preferences,
   printers,
   printjobs,
-  users
+  users,
+  webcams
 });

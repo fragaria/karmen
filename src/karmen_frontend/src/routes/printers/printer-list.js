@@ -5,10 +5,8 @@ import Loader from "../../components/utils/loader";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import PrinterState from "../../components/printers/printer-state";
 import WebcamStream from "../../components/printers/webcam-stream";
-import {
-  loadAndQueuePrinters,
-  setWebcamRefreshInterval
-} from "../../actions/printers";
+import { loadAndQueuePrinters } from "../../actions/printers";
+import { setWebcamRefreshInterval } from "../../actions/webcams";
 import { setPrinterViewType } from "../../actions/preferences";
 import formatters from "../../services/formatters";
 
@@ -180,7 +178,7 @@ export default connect(
       state.preferences.orgs[ownProps.match.params.orguuid] &&
       state.preferences.orgs[ownProps.match.params.orguuid].printerViewType,
     printers: state.printers.printers,
-    images: state.printers.images,
+    images: state.webcams.images,
     printersLoaded: state.printers.printersLoaded
   }),
   (dispatch, ownProps) => ({

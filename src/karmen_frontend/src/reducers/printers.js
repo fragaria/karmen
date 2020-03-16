@@ -14,10 +14,8 @@ const initialState = {
   activeOrganizationUuid: null,
   printersLoaded: false,
   printers: [],
-  images: {},
   toBeDeleted: [],
-  checkQueue: {},
-  webcamQueue: {}
+  checkQueue: {}
 };
 
 export default (
@@ -25,41 +23,18 @@ export default (
     activeOrganizationUuid: null,
     printersLoaded: false,
     printers: [],
-    images: {},
     toBeDeleted: [],
-    checkQueue: {},
-    webcamQueue: {}
+    checkQueue: {}
   },
   action
 ) => {
-  const { printers, activeOrganizationUuid, webcamQueue, checkQueue } = state;
+  const { printers, activeOrganizationUuid, checkQueue } = state;
   let newPrinter, origPrinter;
   switch (action.type) {
     case "PRINTERS_POLL_INTERVAL_SET":
       return Object.assign({}, state, {
         checkQueue: Object.assign({}, state.checkQueue, {
           [action.payload.uuid]: action.payload.interval
-        })
-      });
-    case "PRINTERS_WEBCAM_INTERVAL_SET":
-      return Object.assign({}, state, {
-        webcamQueue: Object.assign({}, state.webcamQueue, {
-          [action.payload.uuid]: Object.assign(
-            {},
-            state.webcamQueue[action.payload.uuid],
-            {
-              interval: action.payload.interval
-            }
-          )
-        })
-      });
-    case "PRINTERS_WEBCAM_TIMEOUT_SET":
-      return Object.assign({}, state, {
-        webcamQueue: Object.assign({}, state.webcamQueue, {
-          [action.payload.uuid]: {
-            interval: action.payload.interval,
-            timeout: action.payload.timeout
-          }
         })
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
@@ -200,18 +175,7 @@ export default (
           d => d !== action.payload.data.uuid
         )
       });
-    case "PRINTERS_GET_WEBCAM_SNAPSHOT_SUCCEEDED":
-      if (action.payload.organizationUuid !== activeOrganizationUuid) {
-        return state;
-      }
-      let newImage = action.payload;
-      if (!newImage || newImage.status !== 200) {
-        return state;
-      }
-      state.images = Object.assign({}, state.images, {
-        [newImage.uuid]: `${newImage.prefix}${newImage.data}`
-      });
-      return state;
+
     case "PRINTERS_CHANGE_LIGHTS_SUCCEEDED":
       newPrinter = action.payload;
       if (!newPrinter) {
@@ -232,17 +196,11 @@ export default (
         printers: getSortedPrinters(printers)
       });
     case "USER_CLEAR_ENDED":
-      for (let job in webcamQueue) {
-        clearInterval(job.interval);
-      }
       for (let job in checkQueue) {
         clearInterval(job);
       }
       return Object.assign({}, initialState);
     case "USER_SWITCH_ORGANIZATION":
-      for (let job in webcamQueue) {
-        clearInterval(job.interval);
-      }
       for (let job in checkQueue) {
         clearInterval(job);
       }
