@@ -54,7 +54,9 @@ def printjob_create(org_uuid):
         network_client = network_clients.get_network_client(
             printer["network_client_uuid"]
         )
-        printer_inst = clients.get_printer_instance(printer.extend(network_client))
+        printer_data = dict(network_client)
+        printer_data.update(dict(printer))
+        printer_inst = clients.get_printer_instance(printer_data)
         uploaded = printer_inst.upload_and_start_job(
             gcode["absolute_path"], gcode["path"]
         )
