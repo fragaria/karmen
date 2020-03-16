@@ -85,7 +85,9 @@ class Heartbeat extends React.Component {
           result !== -1 &&
           version !== undefined &&
           (result !== version ||
-            [result, "@dev"].indexOf(process.env.REACT_APP_GIT_REV) === -1),
+            [result, "@dev", `v${result}`].indexOf(
+              process.env.REACT_APP_GIT_REV
+            ) === -1),
         timer: setTimeout(this.checkBackend, 5000)
       });
     });
