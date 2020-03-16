@@ -1,6 +1,8 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+
 import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import { FormInputs } from "../../components/forms/form-utils";
 import { addUserApiToken } from "../../actions/users-me";
@@ -11,6 +13,7 @@ class AddApiToken extends React.Component {
     super(props);
     const { activeOrganization, organizations } = this.props;
     this.state = {
+      copyButtonReady: true,
       showToken: false,
       createdToken: null,
       redirect: false,
@@ -38,6 +41,7 @@ class AddApiToken extends React.Component {
     };
 
     this.addApiToken = this.addApiToken.bind(this);
+    this.tokenCopied = this.tokenCopied.bind(this);
   }
 
   addApiToken(e) {
@@ -77,6 +81,17 @@ class AddApiToken extends React.Component {
     }
   }
 
+  tokenCopied() {
+    this.setState({
+      copyButtonReady: false
+    });
+    setTimeout(() => {
+      this.setState({
+        copyButtonReady: true
+      });
+    }, 600);
+  }
+
   render() {
     const {
       message,
@@ -84,7 +99,8 @@ class AddApiToken extends React.Component {
       redirect,
       form,
       showToken,
-      createdToken
+      createdToken,
+      copyButtonReady
     } = this.state;
     if (redirect) {
       return <Redirect to="/users/me" />;
@@ -130,8 +146,20 @@ class AddApiToken extends React.Component {
                   <pre>{createdToken}</pre>
                 </div>
                 <div className="cta-box text-center">
+                  <CopyToClipboard
+                    text={createdToken}
+                    onCopy={this.tokenCopied}
+                  >
+                    <button
+                      className="btn"
+                      type="button"
+                      disabled={!copyButtonReady}
+                    >
+                      {copyButtonReady ? "Copy" : "Copied to clipboard!"}
+                    </button>
+                  </CopyToClipboard>
                   <button
-                    className="btn"
+                    className="btn btn-plain"
                     type="submit"
                     onClick={e => {
                       e.preventDefault();
