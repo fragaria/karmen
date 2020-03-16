@@ -93,7 +93,11 @@ def printers_list(org_uuid):
     }
     for printer in printers.get_printers(organization_uuid=org_uuid):
         try:
-            printer_data = dict(network_clients_mapping[printer["network_client_uuid"]])
+            network_client = network_clients_mapping.get(printer["network_client_uuid"])
+            if network_client is None:
+                # This is a race condition handling, there should always be a network_client for every printer
+                continue
+            printer_data = dict(network_client)
             printer_data.update(dict(printer))
             futures.append(
                 executor.submit_stored(
@@ -371,7 +375,6 @@ def printer_change_connection(org_uuid, uuid):
         )
     else:
         return abort(make_response("", 400))
-    return "", 204
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/current-job", methods=["POST"])
@@ -507,12 +510,12 @@ def printer_set_lights(org_uuid, uuid):
     validate_uuid(uuid)
 
     printer = printers.get_printer(uuid)
+    if printer is None or printer.get("organization_uuid") != org_uuid:
+        return abort(make_response("", 404))
     network_client = network_clients.get_network_client(printer["network_client_uuid"])
     printer_data = dict(network_client)
     printer_data.update(dict(printer))
     printer_inst = clients.get_printer_instance(printer_data)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
     try:
         # TODO do not only toggle
         lights_on = printer_inst.are_lights_on()

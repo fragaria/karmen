@@ -88,7 +88,7 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/printers?fields=webcam,status,job" % UUID_ORG,
+                "/organizations/%s/printers?fields=webcam,status,job,lights" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
@@ -103,6 +103,7 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("webcam" in response.json["items"][1])
             self.assertTrue("status" in response.json["items"][1])
             self.assertTrue("job" in response.json["items"][1])
+            self.assertTrue("lights" in response.json["items"][1])
 
 
 class DetailRoute(unittest.TestCase):
@@ -1304,3 +1305,143 @@ class WebcamSnapshotRoute(unittest.TestCase):
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 404)
+
+
+class SetLightsRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid,
+            ip="192.168.%s" % ".".join([str(random.randint(0, 255)) for _ in range(2)]),
+            hostname="hostname",
+            client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={
+                "version": "123",
+                "connected": True,
+                "plugins": ["awesome_karmen_led"],
+            },
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/lights" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/lights"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    def test_lights_unavailable(self):
+        with app.test_client() as c:
+            puid = guid.uuid4()
+            printers.add_printer(
+                uuid=puid,
+                network_client_uuid=self.ncid,
+                organization_uuid=UUID_ORG2,
+                name="name",
+                client_props={"version": "123", "connected": True},
+            )
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post(
+                "/organizations/%s/printers/%s/lights" % (UUID_ORG2, puid),
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            data = response.json
+            self.assertEqual(data["status"], "unavailable")
+            self.assertEqual(response.status_code, 200)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"color": [0, 0, 0]}),
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.post",
+        return_value=Response(200, {"status": "OK"}),
+    )
+    def test_lights_put_on(self, mock_post, mock_get):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/lights" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            data = response.json
+            self.assertEqual(data["status"], "on")
+            self.assertEqual(response.status_code, 200)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"color": [0, 1, 0]}),
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.post",
+        return_value=Response(200, {"status": "OK"}),
+    )
+    def test_lights_put_off(self, mock_post, mock_get):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/lights" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            data = response.json
+            self.assertEqual(data["status"], "off")
+            self.assertEqual(response.status_code, 200)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"color": [0, 0, 0]}),
+    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_lights_change_fail_comms(self, mock_post, mock_get):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/lights" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            data = response.json
+            self.assertEqual(data["status"], "unavailable")
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.Session.get",
+        return_value=Response(200, {"color": [0, 0, 0]}),
+    )
+    @mock.patch(
+        "server.clients.octoprint.requests.post",
+        return_value=Response(200, {"status": "NOK"}),
+    )
+    def test_lights_change_fail_on_device(self, mock_post, mock_get):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/lights" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            data = response.json
+            self.assertEqual(data["status"], "unavailable")
+            self.assertEqual(response.status_code, 500)
