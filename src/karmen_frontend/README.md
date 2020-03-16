@@ -18,6 +18,21 @@ Visit `http://localhost:3000`.
 
 To make the code more readable, apply the automatic formatting by running `npm run lint -- --fix`.
 
+### Icons
+
+Do you need more icons? We are using [IcoMoon](https://icomoon.io/app/). To add more icons to the project:
+
+1. Visit the [IcoMoon app](https://icomoon.io/app/)
+1. Click Untitled Project (or Manage Projects)
+1. Use the *Import project* and upload the [selection.json](./src/assets/icons/selection.json) file
+1. Load the project
+1. Use the *search* function to add more icons. Try to keep the style consistent.
+1. When you are happy, select *Generate Font* and then download the zip file.
+1. Copy everything except `demo-files`, `Read Me.txt` and `demo.html` into `src/assets/icons`. The
+git diff should now show the added icons in `style.css`.
+1. Use your new icon like `<i className="icon-new"></i>`.
+
+
 ### Docker
  
 ```sh
