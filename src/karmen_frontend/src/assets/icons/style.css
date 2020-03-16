@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'karmen';
-  src:  url('fonts/karmen.eot?9r0rq9');
-  src:  url('fonts/karmen.eot?9r0rq9#iefix') format('embedded-opentype'),
-    url('fonts/karmen.ttf?9r0rq9') format('truetype'),
-    url('fonts/karmen.woff?9r0rq9') format('woff'),
-    url('fonts/karmen.svg?9r0rq9#karmen') format('svg');
+  src:  url('fonts/karmen.eot?1791l1');
+  src:  url('fonts/karmen.eot?1791l1#iefix') format('embedded-opentype'),
+    url('fonts/karmen.ttf?1791l1') format('truetype'),
+    url('fonts/karmen.woff?1791l1') format('woff'),
+    url('fonts/karmen.svg?1791l1#karmen') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,54 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-home:before {
+  content: "\e902";
+}
+.icon-house:before {
+  content: "\e902";
+}
+.icon-arrow-right:before {
+  content: "\e903";
+}
+.icon-right:before {
+  content: "\e903";
+}
+.icon-next:before {
+  content: "\e903";
+}
+.icon-arrow-left:before {
+  content: "\e904";
+}
+.icon-left:before {
+  content: "\e904";
+}
+.icon-previous:before {
+  content: "\e904";
+}
+.icon-arrow-down:before {
+  content: "\e905";
+}
+.icon-down1:before {
+  content: "\e905";
+}
+.icon-download:before {
+  content: "\e905";
+}
+.icon-bottom:before {
+  content: "\e905";
+}
+.icon-arrow-up:before {
+  content: "\e910";
+}
+.icon-up1:before {
+  content: "\e910";
+}
+.icon-upload:before {
+  content: "\e910";
+}
+.icon-top:before {
+  content: "\e910";
+}
 .icon-list:before {
   content: "\e90f";
 }
