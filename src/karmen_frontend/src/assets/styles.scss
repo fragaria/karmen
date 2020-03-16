@@ -515,7 +515,7 @@ footer {
   grid-column-gap: $base-unit;
 
   @media (min-width: $screen-sm-min) {
-    grid-template-columns: 25% 1fr;
+    grid-template-columns: 25fr 75fr;
     @include plumber(
       $font-size: 1.618,
       $line-height: 3,
@@ -545,6 +545,7 @@ footer {
   .description {
     font-weight: bold;
     overflow-x: hidden;
+    overflow-wrap: break-word;
 
     @include plumber(
       $font-size: 1.618,
@@ -1233,7 +1234,7 @@ select {
       }
 
       .dl-horizontal {
-        grid-template-columns: 35% 1fr;
+        grid-template-columns: 35fr 65fr;
       }
     }
 
