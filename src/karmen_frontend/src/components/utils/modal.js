@@ -1,7 +1,7 @@
 import React from "react";
 import useModal from "use-react-modal";
 
-export const useMyModal = ({ hideClose }) => {
+export const useMyModal = ({ hideClose } = {}) => {
   const { closeModal, isOpen, Modal, ...rest } = useModal({
     background: "rgba(0, 0, 0, 0.5)"
   });
