@@ -480,3 +480,47 @@ class Octoprint(PrinterClient):
             return data.get("status", "NOK") == "OK"
         except json.decoder.JSONDecodeError:
             return False
+
+    def move_head(self, axis, distance, absolute=False):
+        if axis not in ["x", "y", "z"]:
+            return False
+        command = {"absolute": absolute,
+                   axis: distance,
+                   "command": "jog"}
+        request = self._http_post("/api/printer/printhead", json=command)
+        if not request:
+            return False
+        if request.status_code != 204:
+            return False
+        return True
+
+    def home_head(self, axis):
+        for axe in axis:
+            if axe not in ["x", "y", "z"]:
+                return False
+
+        command =  {"axes": axis, "command": "home"}
+        request = self._http_post("/api/printer/printhead", json=command)
+        if not request:
+            return False
+        if request.status_code != 204:
+            return False
+        return True
+
+    def set_temperature(self, device, temp):
+        path = "/api/printer/"
+        if device == "tool":
+            path += "tool"
+            command = {"targets": {"tool0": temp}, "command": "target"}
+        elif device == "bed":
+            path += "bed"
+            command = {"target": temp, "command": "target"}
+        else:
+            return False
+        request = self._http_post(path, json=command)
+        if not request:
+            return False
+        if request.status_code != 204:
+            return False
+        return True
+
