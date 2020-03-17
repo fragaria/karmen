@@ -5,6 +5,7 @@ import { RoutedTabs, NavTab } from "react-router-tabs";
 
 import JobsTab from "../../components/tabs/printer/jobs-tab";
 import ControlsTab from "../../components/tabs/printer/controls-tab";
+import ConnectionTab from "../../components/tabs/printer/connection-tab";
 import Loader from "../../components/utils/loader";
 import BusyButton from "../../components/utils/busy-button";
 import { useMyModal } from "../../components/utils/modal";
@@ -15,8 +16,7 @@ import PrinterState from "../../components/printers/printer-state";
 import PrinterAuthorizationForm from "../../components/printers/printer-authorization-form";
 import {
   PrinterProperties,
-  PrinterProgress,
-  PrinterConnectionStatus
+  PrinterProgress
 } from "../../components/printers/printer-data";
 
 import { getJobsPage, clearJobsPages } from "../../actions/printjobs";
@@ -28,6 +28,7 @@ import {
   changeLights
 } from "../../actions/printers";
 import { setWebcamRefreshInterval } from "../../actions/webcams";
+
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,
   accessLevel,
@@ -268,7 +269,6 @@ const PrinterDetail = ({
             <dl className="dl-horizontal">
               <PrinterProgress printer={printer} />
               <PrinterProperties printer={printer} />
-              <PrinterConnectionStatus printer={printer} />
             </dl>
           </div>
         </div>
@@ -299,6 +299,7 @@ const PrinterDetail = ({
           >
             <NavTab to="/jobs">Jobs</NavTab>
             <NavTab to="/controls">Controls</NavTab>
+            <NavTab to="/connection">Connection</NavTab>
           </RoutedTabs>
 
           <Switch>
@@ -321,6 +322,10 @@ const PrinterDetail = ({
             <Route
               path={`${match.url}/controls`}
               render={props => <ControlsTab printerControl={printerControl} />}
+            />
+            <Route
+              path={`${match.url}/connection`}
+              render={props => <ConnectionTab printer={printer} />}
             />
           </Switch>
 
