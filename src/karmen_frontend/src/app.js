@@ -40,9 +40,11 @@ import {
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const fragment = pathname.split("/").pop();
+    if (fragment && !fragment.startsWith("tab-")) {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   return null;

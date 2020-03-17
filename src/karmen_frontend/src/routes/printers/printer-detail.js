@@ -297,19 +297,19 @@ const PrinterDetail = ({
             tabClassName="react-tabs__tab"
             activeTabClassName="react-tabs__tab--selected"
           >
-            <NavTab to="/jobs">Jobs</NavTab>
-            <NavTab to="/controls">Controls</NavTab>
-            <NavTab to="/connection">Connection</NavTab>
+            <NavTab to="/tab-jobs">Jobs</NavTab>
+            <NavTab to="/tab-controls">Controls</NavTab>
+            <NavTab to="/tab-connection">Connection</NavTab>
           </RoutedTabs>
 
           <Switch>
             <Route
               exact
               path={`${match.url}`}
-              render={() => <Redirect replace to={`${match.url}/jobs`} />}
+              render={() => <Redirect replace to={`${match.url}/tab-jobs`} />}
             />
             <Route
-              path={`${match.url}/jobs`}
+              path={`${match.url}/tab-jobs`}
               render={props => (
                 <JobsTab
                   orguuid={match.params.orguuid}
@@ -320,11 +320,11 @@ const PrinterDetail = ({
               )}
             />
             <Route
-              path={`${match.url}/controls`}
+              path={`${match.url}/tab-controls`}
               render={props => <ControlsTab printerControl={printerControl} />}
             />
             <Route
-              path={`${match.url}/connection`}
+              path={`${match.url}/tab-connection`}
               render={props => <ConnectionTab printer={printer} />}
             />
           </Switch>
