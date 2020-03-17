@@ -1,5 +1,6 @@
 import {
   getUserPreferences,
+  dropUserPreferences,
   persistUserPreferences
 } from "../services/backend";
 
@@ -93,6 +94,13 @@ export default (
       });
       return Object.assign({}, state, {
         orgs: newOrgs
+      });
+    case "USER_CLEAR_ENDED":
+      dropUserPreferences();
+      return Object.assign({}, state, {
+        activeOrganizationUuid: null,
+        identity: null,
+        orgs: {}
       });
     case "USER_SWITCH_ORGANIZATION":
       persistUserPreferences({
