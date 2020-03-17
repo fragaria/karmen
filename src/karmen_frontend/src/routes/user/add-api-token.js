@@ -103,7 +103,7 @@ class AddApiToken extends React.Component {
       copyButtonReady
     } = this.state;
     if (redirect) {
-      return <Redirect to="/users/me" />;
+      return <Redirect to="/users/me/tab-api-tokens" />;
     }
 
     return (
@@ -205,7 +205,7 @@ class AddApiToken extends React.Component {
                   >
                     Create token
                   </BusyButton>{" "}
-                  <Link to="/users/me/api-tokens" className="btn btn-plain">
+                  <Link to="/users/me/tab-api-tokens" className="btn btn-plain">
                     Cancel
                   </Link>
                 </div>

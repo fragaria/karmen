@@ -95,7 +95,7 @@ class AddUser extends React.Component {
     const { form, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
-      return <Redirect to={`/${match.params.orguuid}/settings/users`} />;
+      return <Redirect to={`/${match.params.orguuid}/settings/tab-users`} />;
     }
     return (
       <>
@@ -142,7 +142,7 @@ class AddUser extends React.Component {
                       Add user
                     </BusyButton>{" "}
                     <Link
-                      to={`/${match.params.orguuid}/settings/users`}
+                      to={`/${match.params.orguuid}/settings/tab-users`}
                       className="btn btn-plain"
                     >
                       Cancel
