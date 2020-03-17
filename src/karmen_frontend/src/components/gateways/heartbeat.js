@@ -6,11 +6,15 @@ import { heartbeat } from "../../services/backend";
 const NULL_EVENT = { currentTarget: true };
 
 const OfflineModal = ({ shouldShow }) => {
-  const { Modal, openModal, isOpen } = useMyModal({
+  const { Modal, openModal, isOpen, closeModal } = useMyModal({
     hideClose: true
   });
   if (shouldShow && !isOpen) {
     openModal(NULL_EVENT);
+  }
+
+  if (!shouldShow && isOpen) {
+    closeModal(NULL_EVENT);
   }
 
   return (
@@ -27,11 +31,15 @@ const OfflineModal = ({ shouldShow }) => {
 };
 
 const UpgradeModal = ({ shouldShow }) => {
-  const { Modal, openModal, isOpen } = useMyModal({
+  const { Modal, openModal, isOpen, closeModal } = useMyModal({
     hideClose: true
   });
   if (shouldShow && !isOpen) {
     openModal(NULL_EVENT);
+  }
+
+  if (!shouldShow && isOpen) {
+    closeModal(NULL_EVENT);
   }
 
   return (
@@ -66,7 +74,7 @@ class Heartbeat extends React.Component {
   state = {
     isOnline: true,
     shouldUpgrade: false,
-    version: undefined,
+    apiVersion: undefined,
     timer: null
   };
 
@@ -77,14 +85,13 @@ class Heartbeat extends React.Component {
 
   checkBackend() {
     heartbeat().then(result => {
-      const { version } = this.state;
+      const { apiVersion } = this.state;
       this.setState({
         isOnline: result !== -1,
-        version: result,
+        apiVersion: result === -1 ? apiVersion : result,
         shouldUpgrade:
           result !== -1 &&
-          version !== undefined &&
-          (result !== version ||
+          ((result !== apiVersion && apiVersion !== undefined) ||
             [result, "@dev", `v${result}`].indexOf(
               process.env.REACT_APP_GIT_REV
             ) === -1),
