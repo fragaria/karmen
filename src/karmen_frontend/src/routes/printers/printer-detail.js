@@ -163,7 +163,11 @@ const PrinterDetail = ({
   clearJobsPages,
   setWebcamRefreshInterval,
   changeLights,
-  printerControl
+  movePrinthead,
+  changeFanState,
+  changeMotorsState,
+  extrude,
+  setTemperature
 }) => {
   const changeConnectionModal = useMyModal();
   const [printerLoaded, setPrinterLoaded] = useState(false);
@@ -321,7 +325,25 @@ const PrinterDetail = ({
             />
             <Route
               path={`${match.url}/tab-controls`}
-              render={props => <ControlsTab printerControl={printerControl} />}
+              render={props => (
+                <ControlsTab
+                  available={
+                    !(
+                      printer.client.access_level === "unlocked" &&
+                      (["Offline", "Closed"].indexOf(
+                        printer.status && printer.status.state
+                      ) > -1 ||
+                        printer.status.state.match(/printer is not/i))
+                    )
+                  }
+                  temperatures={printer.status && printer.status.temperature}
+                  movePrinthead={movePrinthead}
+                  changeFanState={changeFanState}
+                  changeMotorsState={changeMotorsState}
+                  extrude={extrude}
+                  setTemperature={setTemperature}
+                />
+              )}
             />
             <Route
               path={`${match.url}/tab-connection`}
@@ -421,6 +443,10 @@ export default connect(
       dispatch(
         changeLights(ownProps.match.params.orguuid, ownProps.match.params.uuid)
       ),
-    printerControl: () => function() {}
+    movePrinthead: () => {},
+    changeFanState: () => {},
+    changeMotorsState: () => {},
+    extrude: () => {},
+    setTemperature: () => {}
   })
 )(PrinterDetail);

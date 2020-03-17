@@ -1,267 +1,309 @@
-import React from "react";
+import React, { useState } from "react";
 import BusyButton from "../../utils/busy-button";
 
-const ControlsTab = ({ printerControl }) => {
+const AxesXYControl = ({ movePrinthead }) => {
+  // TODO add amount picker
+  const [amount] = useState(10);
   return (
-    <div className="container">
-      <div className="printer-control-panel">
-        <div style={{ gridColumn: 2, gridRow: 1 }}>X/Y</div>
-        <div style={{ gridColumn: 2, gridRow: 2 }}>
+    <div>
+      <p>Move X/Y by {amount}mm</p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gridGap: "5px"
+        }}
+      >
+        <div style={{ gridColumn: 2, gridRow: 1 }}>
           <BusyButton
             className="btn btn-sm"
             type="button"
-            onClick={printerControl}
-            busyChildren="..."
+            onClick={() => {
+              movePrinthead("jog", {
+                y: amount,
+                absolute: false
+              });
+            }}
+            busyChildren="o"
           >
             <span className="icon-up1"></span>
           </BusyButton>
         </div>
-        <div style={{ gridColumn: 1, gridRow: 3 }}>
+        <div style={{ gridColumn: 1, gridRow: 2 }}>
           <BusyButton
             className="btn btn-sm"
             type="button"
-            onClick={printerControl}
-            busyChildren="..."
+            onClick={() => {
+              movePrinthead("jog", {
+                x: -amount,
+                absolute: false
+              });
+            }}
+            busyChildren="o"
           >
             <span className="icon-left"></span>
           </BusyButton>
         </div>
-        <div style={{ gridColumn: 2, gridRow: 3 }}>
+        <div style={{ gridColumn: 2, gridRow: 2 }}>
           <BusyButton
             className="btn btn-sm"
             type="button"
-            onClick={printerControl}
-            busyChildren="..."
+            onClick={() => {
+              movePrinthead("home", {
+                axes: ["x", "y"]
+              });
+            }}
+            busyChildren="o"
           >
             <span className="icon-home"></span>
           </BusyButton>
         </div>
-        <div style={{ gridColumn: 3, gridRow: 3 }}>
+        <div style={{ gridColumn: 3, gridRow: 2 }}>
           <BusyButton
             className="btn btn-sm"
             type="button"
-            onClick={printerControl}
-            busyChildren="..."
+            onClick={() => {
+              movePrinthead("jog", {
+                x: amount,
+                absolute: false
+              });
+            }}
+            busyChildren="o"
           >
             <span className="icon-right"></span>
           </BusyButton>
         </div>
 
-        <div style={{ gridColumn: 2, gridRow: 4 }}>
+        <div style={{ gridColumn: 2, gridRow: 3 }}>
           <BusyButton
             className="btn btn-sm"
             type="button"
-            onClick={printerControl}
-            busyChildren="..."
+            onClick={() => {
+              movePrinthead("jog", {
+                y: -amount,
+                absolute: false
+              });
+            }}
+            busyChildren="o"
           >
             <span className="icon-down1"></span>
-          </BusyButton>
-        </div>
-
-        <div style={{ gridColumn: 4, gridRow: 1 }}>Z</div>
-        <div style={{ gridColumn: 4, gridRow: 2 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-up1"></span>
-          </BusyButton>
-        </div>
-        <div style={{ gridColumn: 4, gridRow: 3 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-home"></span>
-          </BusyButton>
-        </div>
-        <div style={{ gridColumn: 4, gridRow: 4 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-down1"></span>
-          </BusyButton>
-        </div>
-
-        <div
-          style={{
-            gridColumn: 5,
-            gridRow: 1,
-            gridColumnEnd: 7,
-            height: 0
-          }}
-        >
-          Extrude
-        </div>
-        <div
-          style={{
-            gridColumn: 5,
-            gridRow: 2,
-            gridColumnEnd: 7,
-            height: 0
-          }}
-        >
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-up1"></span>
-          </BusyButton>
-        </div>
-        <div
-          style={{
-            gridColumn: 5,
-            gridRow: 3,
-            gridColumnEnd: 7,
-            height: 0
-          }}
-        >
-          <input style={{ maxWidth: 50 }} type="number" value="1" />
-        </div>
-        <div
-          style={{
-            gridColumn: 5,
-            gridRow: 4,
-            gridColumnEnd: 7,
-            height: 0
-          }}
-        >
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-down1"></span>
-          </BusyButton>
-        </div>
-
-        <div style={{ gridColumn: 4, gridRow: 1 }}>Z</div>
-        <div style={{ gridColumn: 4, gridRow: 2 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-up1"></span>
-          </BusyButton>
-        </div>
-        <div style={{ gridColumn: 4, gridRow: 3 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-home"></span>
-          </BusyButton>
-        </div>
-        <div style={{ gridColumn: 4, gridRow: 4 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            <span className="icon-down1"></span>
-          </BusyButton>
-        </div>
-
-        <div style={{ gridColumn: 7, gridRow: 1 }}>Fan</div>
-        <div style={{ gridColumn: 7, gridRow: 2 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            ON
-          </BusyButton>
-        </div>
-
-        <div style={{ gridColumn: 7, gridRow: 4 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            OFF
-          </BusyButton>
-        </div>
-
-        <div
-          style={{
-            gridColumn: 1,
-            gridRow: 6,
-            gridColumnEnd: 4,
-            height: 0
-          }}
-        >
-          <span>Bed temp</span>
-        </div>
-        <div
-          style={{
-            gridColumn: 4,
-            gridRow: 6,
-            gridColumnEnd: 7,
-            height: 0
-          }}
-        >
-          <input type="number" style={{ width: "100%" }} />
-        </div>
-        <div style={{ gridColumn: 7, gridRow: 6 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            SET
-          </BusyButton>
-        </div>
-
-        <div
-          style={{
-            gridColumn: 1,
-            gridRow: 7,
-            gridColumnEnd: 4,
-            height: 0
-          }}
-        >
-          <span>Hotend temp</span>
-        </div>
-        <div
-          style={{
-            gridColumn: 4,
-            gridRow: 7,
-            gridColumnEnd: 7,
-            height: 0
-          }}
-        >
-          <input type="number" style={{ width: "100%" }} />
-        </div>
-        <div style={{ gridColumn: 7, gridRow: 7 }}>
-          <BusyButton
-            className="btn btn-sm"
-            type="button"
-            onClick={printerControl}
-            busyChildren="..."
-          >
-            SET
           </BusyButton>
         </div>
       </div>
+    </div>
+  );
+};
+
+const AxesZControl = ({ movePrinthead }) => {
+  // TODO add amount picker
+  const [amount] = useState(10);
+  return (
+    <div>
+      <p>Move Z by {amount}mm</p>
+      <div>
+        <BusyButton
+          className="btn btn-sm"
+          type="button"
+          onClick={() => {
+            movePrinthead("jog", {
+              z: amount,
+              absolute: false
+            });
+          }}
+          busyChildren="o"
+        >
+          <span className="icon-up1"></span>
+        </BusyButton>
+      </div>
+      <div>
+        <BusyButton
+          className="btn btn-sm"
+          type="button"
+          onClick={() => {
+            movePrinthead("home", {
+              axes: ["z"]
+            });
+          }}
+          busyChildren="o"
+        >
+          <span className="icon-home"></span>
+        </BusyButton>
+      </div>
+      <div>
+        <BusyButton
+          className="btn btn-sm"
+          type="button"
+          onClick={() => {
+            movePrinthead("jog", {
+              z: -amount,
+              absolute: false
+            });
+          }}
+          busyChildren="o"
+        >
+          <span className="icon-down1"></span>
+        </BusyButton>
+      </div>
+    </div>
+  );
+};
+
+const ExtrusionControl = ({ extrude }) => {
+  const [amount, setAmount] = useState(5);
+  return (
+    <div>
+      <label htmlFor="extrusion">Extrude or retract material (mm)</label>
+      <input
+        name="extrusion"
+        id="extrusion"
+        type="number"
+        value={amount}
+        step="0.1"
+        min="0"
+        onChange={e => {
+          setAmount(e.target.value ? parseFloat(e.target.value) : "");
+        }}
+      />
+      <BusyButton
+        className="btn btn-sm"
+        type="button"
+        disabled={amount === 0 || amount === ""}
+        onClick={() => {
+          extrude(amount);
+        }}
+        busyChildren="Working..."
+      >
+        Extrude
+      </BusyButton>
+      <BusyButton
+        className="btn btn-sm"
+        type="button"
+        disabled={amount === 0 || amount === ""}
+        onClick={() => {
+          extrude(-amount);
+        }}
+        busyChildren="Working..."
+      >
+        Retract
+      </BusyButton>
+    </div>
+  );
+};
+
+const DirectControl = ({ changeFanState, changeMotorsState }) => {
+  return (
+    <div>
+      <BusyButton
+        className="btn btn-sm"
+        type="button"
+        onClick={() => {
+          changeFanState("on");
+        }}
+        busyChildren="Working..."
+      >
+        Fan on
+      </BusyButton>
+      <BusyButton
+        className="btn btn-sm"
+        type="button"
+        onClick={() => {
+          changeFanState("off");
+        }}
+        busyChildren="Working..."
+      >
+        Fan off
+      </BusyButton>
+      <BusyButton
+        className="btn btn-sm"
+        type="button"
+        onClick={() => {
+          changeMotorsState("off");
+        }}
+        busyChildren="Working..."
+      >
+        Motors off
+      </BusyButton>
+    </div>
+  );
+};
+
+const TemperatureControl = ({ name, current, partName, setTemperature }) => {
+  const [amount, setAmount] = useState(current);
+  return (
+    <div>
+      <label htmlFor="extrusion">
+        {name} (current {current}°C)
+      </label>
+      <input
+        name="extrusion"
+        id="extrusion"
+        type="number"
+        value={amount}
+        step="0.1"
+        min="0"
+        onChange={e => {
+          setAmount(e.target.value ? parseFloat(e.target.value) : "");
+        }}
+      />
+      <BusyButton
+        className="btn btn-sm"
+        type="button"
+        disabled={amount === 0}
+        onClick={() => {
+          setTemperature(partName, amount);
+        }}
+        busyChildren="Setting..."
+      >
+        Set
+      </BusyButton>
+    </div>
+  );
+};
+
+const ControlsTab = ({
+  available,
+  temperatures,
+  movePrinthead,
+  changeFanState,
+  changeMotorsState,
+  extrude,
+  setTemperature
+}) => {
+  return (
+    <div className="container">
+      {!available ? (
+        <p className="message-error">
+          Controls are not available for a disconnected printer
+        </p>
+      ) : (
+        <div className="printer-control-panel">
+          <div className="axes">
+            <AxesXYControl movePrinthead={movePrinthead} />
+            <AxesZControl movePrinthead={movePrinthead} />
+          </div>
+          <div>
+            <DirectControl
+              changeFanState={changeFanState}
+              changeMotorsState={changeMotorsState}
+            />
+          </div>
+          <div>
+            <ExtrusionControl extrude={extrude} />
+            <TemperatureControl
+              name="Tool temperature"
+              partName="tool0"
+              current={temperatures.tool0 && temperatures.tool0.actual}
+              setTemperature={setTemperature}
+            />
+            <TemperatureControl
+              name="Bed temperature"
+              partName="bed"
+              current={temperatures.bed && temperatures.bed.actual}
+              setTemperature={setTemperature}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

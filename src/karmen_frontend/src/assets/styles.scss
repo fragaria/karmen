@@ -1248,9 +1248,11 @@ select {
   }
 
   .printer-control-panel {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-gap: 5px;
+    .axes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 5px;
+    }
   }
 }
 

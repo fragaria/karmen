@@ -44,17 +44,17 @@ export const PrinterProperties = ({ printer }) => {
             </>
           )}
 
-          {props.bed_type && (
-            <>
-              <dt className="term">Bed type:</dt>
-              <dd className="description">{props.bed_type}</dd>
-            </>
-          )}
-
           {props.tool0_diameter && (
             <>
               <dt className="term">Tool diameter:</dt>
               <dd className="description">{props.tool0_diameter} mm</dd>
+            </>
+          )}
+
+          {props.bed_type && (
+            <>
+              <dt className="term">Bed type:</dt>
+              <dd className="description">{props.bed_type}</dd>
             </>
           )}
 
