@@ -1,0 +1,43 @@
+name: Build Karmen Hub docker images
+on: [push]
+
+jobs:
+  build-hub:
+    name: Build hub docker backend images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: sudo apt-get install --yes jq
+      - id: gitrev
+        # TODO change this to tag and/or branch like in ypicard/get-branch-name-github-action@v1
+        run: ::set_output name=tag::${GITHUB_SHA}
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: Build frontend
+        run: |
+          echo ${{ steps.gitrev.outputs.tag }}
+          cd src/karmen_frontend
+          docker build --build-arg REACT_APP_GIT_REV="${{ steps.gitrev.outputs.tag }}" -t fragaria/karmen-frontend:build -f Dockerfile.build .
+          docker create --name extract fragaria/karmen-frontend:build
+          docker cp extract:/usr/src/app/build ./build
+          docker rm -f extract
+          cd ..
+          cd ..
+          docker buildx build \
+            --platform linux/amd64,linux/arm/v7 \
+            --output "type=image,name=docker.io/fragaria/karmen-frontend:${{ steps.tagName.outputs.tag }},push=true" \
+            --file ./src/karmen_frontend/Dockerfile.serve \
+            ./src/karmen_frontend
+      - name: Build backend
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm/v7 \
+            --output "type=image,name=docker.io/fragaria/karmen-backend:${{ steps.tagName.outputs.tag }},push=true" \
+            --file ./src/karmen_backend/Dockerfile \
+            ./src/karmen_backend
+          docker images
