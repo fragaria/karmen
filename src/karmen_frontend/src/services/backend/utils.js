@@ -115,7 +115,9 @@ export const performRequest = opts => {
       if (opts.parseResponse) {
         return response.json().then(data => {
           return { status: response.status, ...opts.appendData, data };
-        });
+        }).catch((e) => {
+          return { status: response.status, ...opts.appendData };
+        })
       }
       return { status: response.status, ...opts.appendData };
     })
