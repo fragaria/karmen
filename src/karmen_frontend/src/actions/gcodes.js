@@ -1,6 +1,6 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
-import { retryIfUnauthorized } from "./users-me";
+import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
 export const clearGcodesPages = printerUuid => dispatch => {
   return dispatch({
@@ -20,27 +20,25 @@ export const getGcodesPage = createActionThunk(
     fields = [],
     { dispatch, getState }
   ) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getGcodes, dispatch)(
-      orguuid,
-      startWith,
-      orderBy,
-      filter,
-      limit,
-      fields
-    ).then(r => {
-      return {
-        status: r.status,
-        data: r.data,
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getGcodes, dispatch)(
+        orguuid,
         startWith,
         orderBy,
         filter,
         limit,
         fields
-      };
+      ).then(r => {
+        return {
+          status: r.status,
+          data: r.data,
+          startWith,
+          orderBy,
+          filter,
+          limit,
+          fields
+        };
+      });
     });
   }
 );
@@ -48,15 +46,13 @@ export const getGcodesPage = createActionThunk(
 export const loadGcode = createActionThunk(
   "GCODE_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getGcode, dispatch)(
-      orguuid,
-      uuid,
-      fields
-    );
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getGcode, dispatch)(
+        orguuid,
+        uuid,
+        fields
+      );
+    });
   }
 );
 
@@ -70,18 +66,16 @@ export const downloadGcode = createActionThunk(
 export const deleteGcode = createActionThunk(
   "GCODES_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.deleteGcode, dispatch)(
-      orguuid,
-      uuid
-    ).then(r => {
-      if (r.status !== 204) {
-        r.data.uuid = null;
-      }
-      return r;
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.deleteGcode, dispatch)(
+        orguuid,
+        uuid
+      ).then(r => {
+        if (r.status !== 204) {
+          r.data.uuid = null;
+        }
+        return r;
+      });
     });
   }
 );
@@ -89,14 +83,12 @@ export const deleteGcode = createActionThunk(
 export const uploadGcode = createActionThunk(
   "GCODES_UPLOAD",
   (orguuid, path, toUpload, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.uploadGcode, dispatch)(
-      orguuid,
-      path,
-      toUpload
-    );
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.uploadGcode, dispatch)(
+        orguuid,
+        path,
+        toUpload
+      );
+    });
   }
 );

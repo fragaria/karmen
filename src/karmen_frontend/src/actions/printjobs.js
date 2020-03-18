@@ -1,6 +1,6 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../services/backend";
-import { retryIfUnauthorized } from "./users-me";
+import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
 export const clearJobsPages = printerUuid => dispatch => {
   return dispatch({
@@ -23,26 +23,24 @@ export const getJobsPage = createActionThunk(
     limit = 15,
     { dispatch, getState }
   ) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
-      orguuid,
-      startWith,
-      orderBy,
-      printerUuid,
-      limit
-    ).then(r => {
-      return {
-        status: r.status,
-        data: r.data,
-        printer: printerUuid,
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
+        orguuid,
         startWith,
         orderBy,
-        filter: null, // TODO filter is ignored for now
+        printerUuid,
         limit
-      };
+      ).then(r => {
+        return {
+          status: r.status,
+          data: r.data,
+          printer: printerUuid,
+          startWith,
+          orderBy,
+          filter: null, // TODO filter is ignored for now
+          limit
+        };
+      });
     });
   }
 );
@@ -50,14 +48,12 @@ export const getJobsPage = createActionThunk(
 export const addPrintJob = createActionThunk(
   "JOBS_ADD",
   (orguuid, uuid, printer, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.printGcode, dispatch)(
-      orguuid,
-      uuid,
-      printer
-    );
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.printGcode, dispatch)(
+        orguuid,
+        uuid,
+        printer
+      );
+    });
   }
 );

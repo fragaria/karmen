@@ -1,6 +1,6 @@
 import { createActionThunk } from "redux-thunk-actions";
 import * as backend from "../../services/backend";
-import { retryIfUnauthorized } from "../users-me";
+import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -127,16 +127,14 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
 export const loadPrinters = createActionThunk(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getPrinters, dispatch)(
-      orguuid,
-      fields
-    ).then(data => {
-      return Object.assign(data, {
-        organizationUuid: orguuid
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinters, dispatch)(
+        orguuid,
+        fields
+      ).then(data => {
+        return Object.assign(data, {
+          organizationUuid: orguuid
+        });
       });
     });
   }
@@ -145,17 +143,15 @@ export const loadPrinters = createActionThunk(
 export const loadPrinter = createActionThunk(
   "PRINTERS_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getPrinter, dispatch)(
-      orguuid,
-      uuid,
-      fields
-    ).then(data => {
-      return Object.assign(data, {
-        organizationUuid: orguuid
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinter, dispatch)(
+        orguuid,
+        uuid,
+        fields
+      ).then(data => {
+        return Object.assign(data, {
+          organizationUuid: orguuid
+        });
       });
     });
   }
@@ -211,51 +207,50 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
 export const getWebcamSnapshot = createActionThunk(
   "WEBCAMS_GET_SNAPSHOT",
   (orguuid, uuid, { dispatch, getState }) => {
-    let { printers, me } = getState();
-    const printer = printers.printers.find(p => p.uuid === uuid);
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    if (!printer || !printer.webcam || !printer.webcam.url) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(
-      backend.getWebcamSnapshot,
-      dispatch
-    )(printer.webcam.url).then(r => {
-      if (r.status === 202 || r.status === 200) {
-        let { webcams } = getState();
-        if (webcams.queue && webcams.queue[uuid]) {
-          const timeoutData = webcams.queue[uuid];
-          if (timeoutData.interval > 0) {
-            const timeout = setTimeout(
-              () => dispatch(getWebcamSnapshot(orguuid, uuid)),
-              timeoutData.interval
-            );
-            dispatch({
-              type: "WEBCAMS_TIMEOUT_SET",
-              payload: {
-                uuid,
-                interval: timeoutData.interval,
-                timeout
-              }
-            });
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      let { printers } = getState();
+      const printer = printers.printers.find(p => p.uuid === uuid);
+      if (!printer || !printer.webcam || !printer.webcam.url) {
+        return Promise.resolve({});
+      }
+      return retryIfUnauthorized(
+        backend.getWebcamSnapshot,
+        dispatch
+      )(printer.webcam.url).then(r => {
+        if (r.status === 202 || r.status === 200) {
+          let { webcams } = getState();
+          if (webcams.queue && webcams.queue[uuid]) {
+            const timeoutData = webcams.queue[uuid];
+            if (timeoutData.interval > 0) {
+              const timeout = setTimeout(
+                () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+                timeoutData.interval
+              );
+              dispatch({
+                type: "WEBCAMS_TIMEOUT_SET",
+                payload: {
+                  uuid,
+                  interval: timeoutData.interval,
+                  timeout
+                }
+              });
+            }
           }
         }
-      }
-      if (r.data && r.data.prefix && r.data.data) {
+        if (r.data && r.data.prefix && r.data.data) {
+          return {
+            organizationUuid: orguuid,
+            uuid,
+            status: r.status,
+            ...r.data
+          };
+        }
         return {
           organizationUuid: orguuid,
           uuid,
-          status: r.status,
-          ...r.data
+          status: r.status
         };
-      }
-      return {
-        organizationUuid: orguuid,
-        uuid,
-        status: r.status
-      };
+      });
     });
   }
 );

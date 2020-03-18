@@ -25,6 +25,14 @@ export const retryIfUnauthorized = (func, dispatch) => {
   };
 };
 
+export const denyWithNoOrganizationAccess = (orguuid, getState, wrapped) => {
+  const { me } = getState();
+  if (!me.organizations || !me.organizations[orguuid]) {
+    return Promise.resolve({});
+  }
+  return wrapped();
+};
+
 export const loadUserFromToken = token => dispatch => {
   const decoded = jwt_decode(token);
   Cookies.set("access_token_cookie", token);
