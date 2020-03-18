@@ -21,6 +21,12 @@ export default (
       if (!action.payload.data) {
         return state;
       }
+      const existing = state.list.findIndex(
+        u => u.uuid === action.payload.data.uuid
+      );
+      if (existing) {
+        return state;
+      }
       return Object.assign({}, state, {
         list: [].concat(state.list).concat([action.payload.data]),
         listLoaded: true
@@ -51,9 +57,15 @@ export default (
       return Object.assign({}, state, {
         list: [].concat(state.list)
       });
+    case "USER_SWITCH_ORGANIZATION":
+      return Object.assign({}, state, {
+        list: [],
+        listLoaded: false
+      });
     case "USERS_CLEAR":
       return Object.assign({}, state, {
-        list: []
+        list: [],
+        listLoaded: false
       });
     default:
       return state;
