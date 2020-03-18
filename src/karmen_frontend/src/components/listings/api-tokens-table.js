@@ -9,9 +9,9 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
     <>
       {modal.isOpen && (
         <modal.Modal>
-          <h1 className="modal-title text-center">Revoke the token</h1>
+          <h1 className="modal-title text-center">Delete the token</h1>
           <h3 className="text-center">
-            Do you really want to revoke token <strong>"{token.name}"</strong>?
+            Do you really want to delete token <strong>"{token.name}"</strong>?
             This cannot be undone.
           </h3>
 
@@ -26,7 +26,7 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
               }}
               busyChildren="Working..."
             >
-              Yes, revoke this token
+              Yes, delete this token
             </BusyButton>
             <button className="btn btn-plain" onClick={modal.closeModal}>
               Cancel

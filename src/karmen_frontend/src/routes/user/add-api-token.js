@@ -128,7 +128,7 @@ class AddApiToken extends React.Component {
                       be used forever
                     </li>
                     <li>
-                      If you need to disable it, you have to revoke it on the
+                      If you need to disable it, you have to delete it on the
                       User preferences screen
                     </li>
                     <li>
