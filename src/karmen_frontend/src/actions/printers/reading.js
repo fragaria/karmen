@@ -131,11 +131,7 @@ export const loadPrinters = createActionThunk(
       return retryIfUnauthorized(backend.getPrinters, dispatch)(
         orguuid,
         fields
-      ).then(data => {
-        return Object.assign(data, {
-          organizationUuid: orguuid
-        });
-      });
+      );
     });
   }
 );
@@ -148,11 +144,7 @@ export const loadPrinter = createActionThunk(
         orguuid,
         uuid,
         fields
-      ).then(data => {
-        return Object.assign(data, {
-          organizationUuid: orguuid
-        });
-      });
+      );
     });
   }
 );

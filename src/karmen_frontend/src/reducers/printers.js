@@ -169,11 +169,9 @@ export default (
     case "PRINTERS_DELETE_SUCCEEDED":
       return Object.assign({}, state, {
         printers: printers.filter(p => {
-          return p.uuid !== action.payload.data.uuid;
+          return p.uuid !== action.payload.uuid;
         }),
-        toBeDeleted: state.toBeDeleted.filter(
-          d => d !== action.payload.data.uuid
-        )
+        toBeDeleted: state.toBeDeleted.filter(d => d !== action.payload.uuid)
       });
 
     case "PRINTERS_CHANGE_LIGHTS_SUCCEEDED":
@@ -182,7 +180,7 @@ export default (
         return state;
       }
       // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.uuid === newPrinter.data.uuid);
+      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
       if (!origPrinter && newPrinter) {
         return state;
       }

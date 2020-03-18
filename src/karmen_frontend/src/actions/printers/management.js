@@ -27,11 +27,7 @@ export const addPrinter = createActionThunk(
         token,
         name,
         apiKey
-      ).then(data => {
-        return Object.assign(data, {
-          organizationUuid: orguuid
-        });
-      });
+      );
     });
   }
 );
@@ -44,11 +40,7 @@ export const patchPrinter = createActionThunk(
         orguuid,
         uuid,
         data
-      ).then(data => {
-        return Object.assign(data, {
-          organizationUuid: orguuid
-        });
-      });
+      );
     });
   }
 );
@@ -62,7 +54,7 @@ export const deletePrinter = createActionThunk(
         uuid
       ).then(r => {
         if (r.status !== 204) {
-          r.data.uuid = null;
+          r.uuid = null;
         }
         return r;
       });

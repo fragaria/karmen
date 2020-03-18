@@ -1,6 +1,4 @@
-import { getHeaders } from "../utils";
-
-const BASE_URL = window.env.BACKEND_BASE;
+import { performRequest } from "../utils";
 
 export const addPrinter = (
   orgUuid,
@@ -13,10 +11,9 @@ export const addPrinter = (
   name,
   apiKey
 ) => {
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({
+  return performRequest({
+    uri: `/organizations/${orgUuid}/printers`,
+    data: {
       protocol,
       hostname,
       ip,
@@ -25,59 +22,30 @@ export const addPrinter = (
       token,
       name,
       api_key: apiKey
-    })
-  })
-    .then(response => {
-      if (response.status !== 201) {
-        console.error(`Cannot add a printer: ${response.status}`);
-        return { status: response.status };
-      }
-      return response.json().then(data => {
-        return {
-          status: response.status,
-          data
-        };
-      });
-    })
-    .catch(e => {
-      console.error(`Cannot add a printer: ${e}`);
-      return {};
-    });
+    },
+    appendData: {
+      organizationUuid: orgUuid
+    }
+  });
 };
 
 export const patchPrinter = (orgUuid, uuid, data) => {
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers/${uuid}`, {
+  return performRequest({
+    uri: `/organizations/${orgUuid}/printers/${uuid}`,
     method: "PATCH",
-    headers: getHeaders(),
-    body: JSON.stringify(data)
-  })
-    .then(response => {
-      if (response.status !== 200) {
-        console.error(`Cannot patch a printer: ${response.status}`);
-      }
-      return response.json().then(data => {
-        return { status: response.status, data };
-      });
-    })
-    .catch(e => {
-      console.error(`Cannot patch a printer: ${e}`);
-      return {};
-    });
+    data,
+    appendData: {
+      organizationUuid: orgUuid
+    }
+  });
 };
-
 export const deletePrinter = (orgUuid, uuid) => {
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/printers/${uuid}`, {
+  return performRequest({
+    uri: `/organizations/${orgUuid}/printers/${uuid}`,
     method: "DELETE",
-    headers: getHeaders()
-  })
-    .then(response => {
-      if (response.status !== 204) {
-        console.error(`Cannot remove a printer: ${response.status}`);
-      }
-      return { status: response.status, data: { uuid } };
-    })
-    .catch(e => {
-      console.error(`Cannot remove a printer: ${e}`);
-      return 500;
-    });
+    appendData: {
+      uuid
+    },
+    parseResponse: false
+  });
 };
