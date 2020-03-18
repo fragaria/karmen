@@ -20,18 +20,22 @@ app = Flask(__name__)
 
 CORS(app)
 
-job_state = "Printing"
-job_name = "fake-file-being-printed.gcode"
-lights_color = [0, 0, 0]
+STATE = {
+    "job_state": "Printing",
+    "job_name": "fake-file-being-printed.gcode",
+    "lights_color": [0, 0, 0],
+    "temperature_bed": 24.7,
+    "temperature_tool": 16.2,
+}
 
 
-@app.route("/api/version", methods=["GET", "OPTIONS"])
+@app.route("/api/version", methods=["GET"])
 @cross_origin()
 def version():
     return jsonify({"api": "0.1", "server": "0.0.1", "text": "octoprint fake"})
 
 
-@app.route("/api/settings", methods=["GET", "OPTIONS"])
+@app.route("/api/settings", methods=["GET"])
 @cross_origin()
 def settings():
     return jsonify(
@@ -49,13 +53,14 @@ def settings():
     )
 
 
-@app.route("/api/connection", methods=["GET", "OPTIONS"])
+@app.route("/api/connection", methods=["GET"])
 @cross_origin()
 def connection():
+    global STATE
     return jsonify(
         {
             "current": {
-                "state": job_state,
+                "state": STATE["job_state"],
                 "port": "/dev/ttyACM0",
                 "baudrate": 115200,
                 "printerProfile": "_default",
@@ -73,87 +78,73 @@ def connection():
     )
 
 
-@app.route("/api/connection", methods=["POST", "OPTIONS"])
+@app.route("/api/connection", methods=["POST"])
 @cross_origin()
 def modify_connection():
-    global job_state
+    global STATE
     data = request.json
     if "command" not in data:
         return abort(400)
     if data["command"] == "connect":
-        job_state = "Operational"
+        STATE["job_state"] = "Operational"
     if data["command"] == "disconnect":
-        job_state = "Offline"
+        STATE["job_state"] = "Offline"
     return "", 204
 
 
-@app.route("/api/printer", methods=["GET", "OPTIONS"])
-@cross_origin()
-def printer():
-    return jsonify(
-        {
-            "state": {"text": job_state},
-            "temperature": {
-                "bed": {"actual": 24.4, "target": 0.0},
-                "tool0": {"actual": 25.7, "target": 0.0},
-            },
-        }
-    )
-
-
-@app.route("/api/job", methods=["GET", "OPTIONS"])
+@app.route("/api/job", methods=["GET"])
 @cross_origin()
 def job():
-    global job_name
+    global STATE
     next_day = (STARTED + timedelta(days=1)).replace(hour=11, minute=59)
     return jsonify(
         {
-            "job": {"file": {"display": job_name}},
+            "job": {"file": {"display": STATE["job_name"]}},
             "progress": {
                 "completion": 66.666,
                 "printTimeLeft": abs((next_day - datetime.now()).seconds),
                 "printTime": abs((datetime.now() - STARTED).seconds),
             },
-            "state": job_state,
+            "state": STATE["job_state"],
         }
     )
 
 
-@app.route("/api/job", methods=["POST", "OPTIONS"])
+@app.route("/api/job", methods=["POST"])
 @cross_origin()
 def modify_job():
-    global job_state
+    global STATE
     data = request.json
     if "command" not in data:
         return abort(400)
-    if data["command"] == "restart" and job_state == "Paused":
+    if data["command"] == "restart" and STATE["job_state"] == "Paused":
         return abort(409)
     if data["command"] == "start":
-        if job_state == "Printing":
+        if STATE["job_state"] == "Printing":
             return abort(409)
-        job_state = "Printing"
+        STATE["job_state"] = "Printing"
     if data["command"] == "cancel":
-        if job_state not in ("Paused", "Printing"):
+        if STATE["job_state"] not in ("Paused", "Printing"):
             return abort(409)
-        job_state = "Operational"
+        STATE["job_state"] = "Operational"
     if data["command"] == "pause":
         action = data.get("action", "toggle")
         if action == "pause":
-            job_state = "Paused"
+            STATE["job_state"] = "Paused"
         if action == "resume":
-            job_state = "Printing"
+            STATE["job_state"] = "Printing"
         if action == "toggle":
-            if job_state == "Printing":
-                job_state = "Paused"
+            if STATE["job_state"] == "Printing":
+                STATE["job_state"] = "Paused"
             else:
-                job_state = "Printing"
+                STATE["job_state"] = "Printing"
     return "", 204
 
 
-@app.route("/api/files/local", methods=["POST", "OPTIONS"])
+@app.route("/api/files/local", methods=["POST"])
 @cross_origin()
 def upload():
-    global job_state, job_name
+    global STATE
     if "file" not in request.files:
         return abort(400)
     incoming = request.files["file"]
@@ -168,8 +159,8 @@ def upload():
     path = request.form.get("path", "/")
     destination_dir = os.path.join("/tmp/uploaded-files/", path)
     destination = os.path.join(destination_dir, filename)
-    job_state = "Printing"
-    job_name = filename
+    STATE["job_state"] = "Printing"
+    STATE["job_name"] = filename
     return (
         jsonify(
             {
@@ -187,9 +178,10 @@ def upload():
     )
 
 
-@app.route("/snapshot", methods=["GET", "OPTIONS"])
+@app.route("/snapshot", methods=["GET"])
 @cross_origin()
 def snapshot():
+    global STATE
     IMAGE = Image.open(os.path.join(os.path.dirname(__file__), "./printer.jpg"))
     imgio = io.BytesIO()
     draw = ImageDraw.Draw(IMAGE)
@@ -197,7 +189,7 @@ def snapshot():
     draw.text((10, 10), datetime.now().strftime("%d/%m/%Y %H:%M:%S"), font=font)
     draw.text(
         (10, 30),
-        "LIGHTS %s" % ("ON" if lights_color == [1, 1, 1] else "OFF"),
+        "LIGHTS %s" % ("ON" if STATE["lights_color"] == [1, 1, 1] else "OFF"),
         font=font,
     )
     IMAGE.save(imgio, "JPEG", quality=90)
@@ -208,12 +200,70 @@ def snapshot():
 @app.route("/api/plugin/awesome_karmen_led", methods=["GET"])
 @cross_origin()
 def get_lights():
-    return jsonify({"color": lights_color}), 200
+    global STATE
+    return jsonify({"color": STATE["lights_color"]}), 200
 
 
 @app.route("/api/plugin/awesome_karmen_led", methods=["POST"])
 @cross_origin()
 def set_lights():
-    global lights_color
-    lights_color = [1, 1, 1] if lights_color == [0, 0, 0] else [0, 0, 0]
+    global STATE
+    STATE["lights_color"] = (
+        [1, 1, 1] if STATE["lights_color"] == [0, 0, 0] else [0, 0, 0]
+    )
     return jsonify({"status": "OK"}), 200
+
+
+@app.route("/api/printer/printhead", methods=["POST"])
+@cross_origin()
+def printhead():
+    global STATE
+    return "", 204
+
+
+@app.route("/api/printer/tool", methods=["POST"])
+@cross_origin()
+def tool():
+    global STATE
+    data = request.json
+    if data and data.get("targets"):
+        STATE["temperature_bed"] = data.get("targets").get("tool0")
+    return "", 204
+
+
+@app.route("/api/printer/bed", methods=["POST"])
+@cross_origin()
+def bed():
+    global STATE
+    data = request.json
+    if data and data.get("target"):
+        STATE["temperature_bed"] = data.get("target")
+    return "", 204
+
+
+@app.route("/api/printer/command", methods=["POST"])
+@cross_origin()
+def command():
+    global STATE
+    return "", 204
+
+
+@app.route("/api/printer", methods=["GET"])
+@cross_origin()
+def printer():
+    global STATE
+    return jsonify(
+        {
+            "state": {"text": STATE["job_state"]},
+            "temperature": {
+                "bed": {
+                    "actual": STATE["temperature_bed"],
+                    "target": STATE["temperature_bed"],
+                },
+                "tool0": {
+                    "actual": STATE["temperature_tool"],
+                    "target": STATE["temperature_tool"],
+                },
+            },
+        }
+    )
