@@ -10,10 +10,16 @@ import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import UsersTab from "../../components/tabs/settings/users-tab";
 import PrintersTab from "../../components/tabs/settings/printers-tab";
 
-import { enqueueTask } from "../../actions/misc";
-import { setNetworkInterface } from "../../actions/preferences";
-import { loadPrinters, deletePrinter } from "../../actions/printers";
-import { addUser, getUsers, patchUser, deleteUser } from "../../actions/users";
+import {
+  enqueueTask,
+  setNetworkInterface,
+  loadPrinters,
+  deletePrinter,
+  addUser,
+  getUsers,
+  patchUser,
+  deleteUser
+} from "../../actions";
 
 const Settings = ({ match, ...rest }) => {
   return (

@@ -4,7 +4,7 @@ import { Link, Redirect, withRouter } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
 import Loader from "../../components/utils/loader";
-import { resetPassword } from "../../actions/users-me";
+import { resetPassword } from "../../actions";
 
 class ResetPassword extends React.Component {
   constructor(props) {

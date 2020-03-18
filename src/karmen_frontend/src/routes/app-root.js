@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import Loader from "../components/utils/loader";
-import { switchOrganization } from "../actions/users-me";
+import { switchOrganization } from "../actions";
 
 const AppRoot = ({
   preferredOrganization,

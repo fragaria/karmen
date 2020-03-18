@@ -5,9 +5,11 @@ import Loader from "../../components/utils/loader";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import PrinterState from "../../components/printers/printer-state";
 import WebcamStream from "../../components/printers/webcam-stream";
-import { loadAndQueuePrinters } from "../../actions/printers";
-import { setWebcamRefreshInterval } from "../../actions/webcams";
-import { setPrinterViewType } from "../../actions/preferences";
+import {
+  loadAndQueuePrinters,
+  setWebcamRefreshInterval,
+  setPrinterViewType
+} from "../../actions";
 import formatters from "../../services/formatters";
 
 const SwitchView = ({ viewType, onViewTypeChange }) => {

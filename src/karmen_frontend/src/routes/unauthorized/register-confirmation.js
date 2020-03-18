@@ -4,7 +4,7 @@ import { Link, Redirect, withRouter } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
 import Loader from "../../components/utils/loader";
-import { activate } from "../../actions/users-me";
+import { activate } from "../../actions";
 
 class RegisterConfirmation extends React.Component {
   constructor(props) {

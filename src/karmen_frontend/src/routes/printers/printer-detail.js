@@ -19,15 +19,16 @@ import {
   PrinterProgress
 } from "../../components/printers/printer-data";
 
-import { getJobsPage, clearJobsPages } from "../../actions/printjobs";
 import {
+  getJobsPage,
+  clearJobsPages,
   loadAndQueuePrinter,
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
-  changeLights
-} from "../../actions/printers";
-import { setWebcamRefreshInterval } from "../../actions/webcams";
+  changeLights,
+  setWebcamRefreshInterval
+} from "../../actions";
 
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,

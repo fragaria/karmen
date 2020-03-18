@@ -1,7 +1,7 @@
 import React from "react";
 import { withRouter, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
-import { switchOrganization } from "../../actions/users-me";
+import { switchOrganization } from "../../actions";
 
 const SetActiveOrganization = ({
   match,

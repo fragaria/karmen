@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import OrganizationsTable from "../components/listings/organizations-table";
-import { getOrganizations, patchOrganization } from "../actions/organizations";
+import { getOrganizations, patchOrganization } from "../actions";
 
 const ManageOrganizations = ({
   loadOrganizations,

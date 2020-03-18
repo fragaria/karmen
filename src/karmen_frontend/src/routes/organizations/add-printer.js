@@ -5,7 +5,7 @@ import SetActiveOrganization from "../../components/gateways/set-active-organiza
 import { FormInputs } from "../../components/forms/form-utils";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import BusyButton from "../../components/utils/busy-button";
-import { addPrinter } from "../../actions/printers";
+import { addPrinter } from "../../actions";
 
 class AddPrinter extends React.Component {
   state = {

@@ -7,7 +7,7 @@ import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gatewa
 import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import BusyButton from "../../components/utils/busy-button";
 import { isEmail } from "../../services/validators";
-import { addUser } from "../../actions/users";
+import { addUser } from "../../actions";
 
 class AddUser extends React.Component {
   state = {

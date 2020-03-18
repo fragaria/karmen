@@ -5,8 +5,8 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import { FormInputs } from "../../components/forms/form-utils";
-import { addUserApiToken } from "../../actions/users-me";
 import BusyButton from "../../components/utils/busy-button";
+import { addUserApiToken } from "../../actions";
 
 class AddApiToken extends React.Component {
   constructor(props) {
