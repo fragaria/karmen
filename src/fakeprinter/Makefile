@@ -1,5 +1,5 @@
 format:
-	black server/ tests/
+	black fakeprinter
 
 lint:
-	pylint server/ tests/
+	pylint fakeprinter

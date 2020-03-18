@@ -22,6 +22,7 @@ CORS(app)
 
 job_state = "Printing"
 job_name = "fake-file-being-printed.gcode"
+lights_color = [0, 0, 0]
 
 
 @app.route("/api/version", methods=["GET", "OPTIONS"])
@@ -42,7 +43,8 @@ def settings():
                 "flipH": False,
                 "flipV": False,
                 "rotate90": False,
-            }
+            },
+            "plugins": {"awesome_karmen_led": {"ready": True}},
         }
     )
 
@@ -98,15 +100,20 @@ def printer():
         }
     )
 
+
 @app.route("/api/job", methods=["GET", "OPTIONS"])
 @cross_origin()
 def job():
     global job_name
-    next_day = (STARTED + timedelta(days=1)).replace(hour=11,minute=59)
+    next_day = (STARTED + timedelta(days=1)).replace(hour=11, minute=59)
     return jsonify(
         {
             "job": {"file": {"display": job_name}},
-            "progress": {"completion": 66.666, "printTimeLeft": abs((next_day - datetime.now()).seconds), "printTime": abs((datetime.now() - STARTED).seconds)},
+            "progress": {
+                "completion": 66.666,
+                "printTimeLeft": abs((next_day - datetime.now()).seconds),
+                "printTime": abs((datetime.now() - STARTED).seconds),
+            },
             "state": job_state,
         }
     )
@@ -188,6 +195,25 @@ def snapshot():
     draw = ImageDraw.Draw(IMAGE)
     font = ImageFont.load_default()
     draw.text((10, 10), datetime.now().strftime("%d/%m/%Y %H:%M:%S"), font=font)
+    draw.text(
+        (10, 30),
+        "LIGHTS %s" % ("ON" if lights_color == [1, 1, 1] else "OFF"),
+        font=font,
+    )
     IMAGE.save(imgio, "JPEG", quality=90)
     imgio.seek(0)
     return send_file(imgio, mimetype="image/jpeg")
+
+
+@app.route("/api/plugin/awesome_karmen_led", methods=["GET"])
+@cross_origin()
+def get_lights():
+    return jsonify({"color": lights_color}), 200
+
+
+@app.route("/api/plugin/awesome_karmen_led", methods=["POST"])
+@cross_origin()
+def set_lights():
+    global lights_color
+    lights_color = [1, 1, 1] if lights_color == [0, 0, 0] else [0, 0, 0]
+    return jsonify({"status": "OK"}), 200
