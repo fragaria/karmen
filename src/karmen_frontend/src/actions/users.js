@@ -12,15 +12,7 @@ export const getUsers = createActionThunk(
   "USERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.getUsers, dispatch)(
-        orguuid,
-        fields
-      ).then(r => {
-        return {
-          status: r.status,
-          data: r.data
-        };
-      });
+      return retryIfUnauthorized(backend.getUsers, dispatch)(orguuid, fields);
     });
   }
 );

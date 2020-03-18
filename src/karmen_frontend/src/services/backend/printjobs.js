@@ -1,58 +1,41 @@
-import { getHeaders } from "./utils";
-
-const BASE_URL = window.env.BACKEND_BASE;
+import { performRequest } from "./utils";
 
 export const printGcode = (orgUuid, uuid, printer) => {
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/printjobs`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({
+  return performRequest({
+    uri: `/organizations/${orgUuid}/printjobs`,
+    data: {
       gcode: uuid,
-      printer: printer
-    })
-  })
-    .then(response => {
-      if (response.status !== 201) {
-        console.error(`Cannot start a printjob: ${response.status}`);
-      }
-      return response.status;
-    })
-    .catch(e => {
-      console.error(`Cannot start a printjob: ${e}`);
-      return 500;
-    });
+      printer
+    }
+  });
 };
 
 export const getPrinterJobs = (
   orgUuid,
   startWith = null,
   orderBy = null,
-  filter = null,
+  printerFilter = null,
   limit = 10
 ) => {
-  let uri = `${BASE_URL}/organizations/${orgUuid}/printjobs?limit=${limit}`;
+  let uri = `/organizations/${orgUuid}/printjobs?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${encodeURIComponent(startWith)}`;
   }
   if (orderBy) {
     uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
-  if (filter) {
-    uri += `&filter=printer_uuid:${encodeURIComponent(filter)}`;
+  if (printerFilter) {
+    uri += `&filter=printer_uuid:${encodeURIComponent(printerFilter)}`;
   }
-  return fetch(uri, {
-    headers: getHeaders()
-  })
-    .then(response => {
-      if (response.status !== 200) {
-        console.error(`Cannot get list of printjobs: ${response.status}`);
-      }
-      return response.json().then(data => {
-        return { status: response.status, data };
-      });
-    })
-    .catch(e => {
-      console.error(`Cannot get list of printjobs: ${e}`);
-      return {};
-    });
+  return performRequest({
+    uri,
+    method: "GET",
+    appendData: {
+      startWith,
+      orderBy,
+      filter: printerFilter,
+      limit,
+      printer: printerFilter
+    }
+  });
 };

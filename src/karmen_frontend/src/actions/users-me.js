@@ -156,8 +156,8 @@ export const changePassword = createActionThunk(
   }
 );
 
-export const patchUser = createActionThunk("USER_PATCH", (username, email) => {
-  return backend.patchUser(username, email);
+export const patchMe = createActionThunk("USER_PATCH", (username, email) => {
+  return backend.patchMe(username, email);
 });
 
 export const requestPasswordReset = createActionThunk(
@@ -219,8 +219,8 @@ export const deleteUserApiToken = createActionThunk(
     return retryIfUnauthorized(
       backend.deleteApiToken,
       dispatch
-    )(jti).then(status => {
-      if (status !== 204) {
+    )(jti).then(r => {
+      if (r.status !== 204) {
         jti = null;
       }
       return { jti };

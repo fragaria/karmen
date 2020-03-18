@@ -71,12 +71,10 @@ export const getUserProfile = () => {
   return profile;
 };
 
-export const getHeaders = (withAuth = true) => {
+export const getAuthHeaders = () => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
-  if (withAuth) {
-    headers.set("X-CSRF-TOKEN", Cookies.get("csrf_access_token"));
-  }
+  headers.set("X-CSRF-TOKEN", Cookies.get("csrf_access_token"));
   return headers;
 };
 
@@ -87,14 +85,22 @@ export const performRequest = opts => {
     method: "POST",
     successCodes: [200, 201, 202, 204],
     parseResponse: true,
-    appendData: {}
+    appendData: {},
+    headers: {
+      "Content-Type": "application/json"
+    },
+    useAuth: true
   };
   opts = Object.assign({}, defaults, opts);
 
   let fetchOpts = {
     method: opts.method,
-    headers: getHeaders()
+    headers: opts.headers
   };
+  // TODO this should probably merge with passed headers
+  if (opts.useAuth) {
+    fetchOpts.headers = getAuthHeaders();
+  }
   if (opts.data) {
     fetchOpts.body = JSON.stringify(opts.data);
   }

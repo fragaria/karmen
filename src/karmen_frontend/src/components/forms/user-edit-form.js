@@ -9,7 +9,7 @@ class UserEditForm extends React.Component {
     this.state = {
       message: null,
       messageOk: false,
-      patchUserForm: {
+      patchMeForm: {
         username: {
           name: "Username",
           val: props.username,
@@ -25,16 +25,16 @@ class UserEditForm extends React.Component {
         }
       }
     };
-    this.patchUser = this.patchUser.bind(this);
+    this.patchMe = this.patchMe.bind(this);
   }
 
-  patchUser(e) {
+  patchMe(e) {
     e.preventDefault();
-    const { patchUserForm } = this.state;
-    const { patchUser, username, email } = this.props;
+    const { patchMeForm } = this.state;
+    const { patchMe, username, email } = this.props;
     let hasError = false;
     // eslint-disable-next-line no-unused-vars
-    for (let field of Object.values(patchUserForm)) {
+    for (let field of Object.values(patchMeForm)) {
       if (field.required && !field.val) {
         field.error = `${field.name} is required!`;
         hasError = true;
@@ -42,26 +42,26 @@ class UserEditForm extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(patchUserForm.email.val)) {
+    if (!isEmail(patchMeForm.email.val)) {
       hasError = true;
-      patchUserForm.email.error = "That does not seem like an e-mail address";
+      patchMeForm.email.error = "That does not seem like an e-mail address";
     }
     if (hasError) {
       this.setState({
-        patchUserForm: Object.assign({}, patchUserForm)
+        patchMeForm: Object.assign({}, patchMeForm)
       });
       return;
     }
-    return patchUser(patchUserForm.username.val, email).then(r => {
+    return patchMe(patchMeForm.username.val, email).then(r => {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
           message: "Profile change unsuccessful, try again, please.",
-          patchUserForm: Object.assign({}, patchUserForm, {
-            username: Object.assign({}, patchUserForm.username, {
+          patchMeForm: Object.assign({}, patchMeForm, {
+            username: Object.assign({}, patchMeForm.username, {
               val: username
             }),
-            email: Object.assign({}, patchUserForm.email, {
+            email: Object.assign({}, patchMeForm.email, {
               val: email
             })
           })
@@ -76,14 +76,14 @@ class UserEditForm extends React.Component {
   }
 
   render() {
-    const { message, messageOk, patchUserForm } = this.state;
+    const { message, messageOk, patchMeForm } = this.state;
     const updateValue = (name, value) => {
-      const { patchUserForm } = this.state;
+      const { patchMeForm } = this.state;
       this.setState({
         message: "",
         messageOk: undefined,
-        patchUserForm: Object.assign({}, patchUserForm, {
-          [name]: Object.assign({}, patchUserForm[name], {
+        patchMeForm: Object.assign({}, patchMeForm, {
+          [name]: Object.assign({}, patchMeForm[name], {
             val: value,
             error: null
           })
@@ -97,12 +97,12 @@ class UserEditForm extends React.Component {
             {message}
           </p>
         )}
-        <FormInputs definition={patchUserForm} updateValue={updateValue} />
+        <FormInputs definition={patchMeForm} updateValue={updateValue} />
         <div className="cta-box text-center">
           <BusyButton
             className="btn"
             type="submit"
-            onClick={this.patchUser}
+            onClick={this.patchMe}
             busyChildren="Changing profile..."
           >
             Change profile

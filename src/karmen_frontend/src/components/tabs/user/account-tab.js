@@ -3,7 +3,7 @@ import React from "react";
 import UserEditForm from "../../forms/user-edit-form";
 import ChangePasswordForm from "../../forms/change-password-form";
 
-const Account = ({ changePassword, patchUser, username, email }) => {
+const Account = ({ changePassword, patchMe, username, email }) => {
   return (
     <>
       <div className="container">
@@ -12,7 +12,7 @@ const Account = ({ changePassword, patchUser, username, email }) => {
             Change profile
           </h1>
         </div>
-        <UserEditForm patchUser={patchUser} username={username} email={email} />
+        <UserEditForm patchMe={patchMe} username={username} email={email} />
       </div>
 
       <div className="container">

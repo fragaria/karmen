@@ -73,7 +73,7 @@ export default (
       const newPages = state.list.pages.map(p => {
         if (p.data && p.data.items) {
           const origItemIndex = p.data.items.findIndex(
-            p => p.uuid === action.payload.data.uuid
+            p => p.uuid === action.payload.uuid
           );
           if (origItemIndex > -1) {
             return Object.assign({}, p, {

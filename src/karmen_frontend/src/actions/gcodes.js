@@ -28,17 +28,7 @@ export const getGcodesPage = createActionThunk(
         filter,
         limit,
         fields
-      ).then(r => {
-        return {
-          status: r.status,
-          data: r.data,
-          startWith,
-          orderBy,
-          filter,
-          limit,
-          fields
-        };
-      });
+      );
     });
   }
 );
@@ -72,7 +62,7 @@ export const deleteGcode = createActionThunk(
         uuid
       ).then(r => {
         if (r.status !== 204) {
-          r.data.uuid = null;
+          r.uuid = null;
         }
         return r;
       });

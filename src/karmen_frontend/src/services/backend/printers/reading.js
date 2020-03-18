@@ -1,4 +1,4 @@
-import { getHeaders, performRequest } from "../utils";
+import { getAuthHeaders, performRequest } from "../utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -42,7 +42,7 @@ export const getWebcamSnapshot = snapshotUrl => {
   if (!snapshotUrl) {
     return Promise.resolve({ status: 404 });
   }
-  let headers = getHeaders();
+  let headers = getAuthHeaders();
   headers.set("pragma", "no-cache");
   headers.set("cache-control", "no-cache");
   // TODO test snapshotUrl
