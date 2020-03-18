@@ -182,7 +182,7 @@ export default (
         return state;
       }
       // TODO possibly switch to findIndex
-      origPrinter = printers.find(p => p.uuid === newPrinter.uuid);
+      origPrinter = printers.find(p => p.uuid === newPrinter.data.uuid);
       if (!origPrinter && newPrinter) {
         return state;
       }

@@ -42,3 +42,80 @@ export const changeLights = createActionThunk(
     return retryIfUnauthorized(backend.changeLights, dispatch)(orguuid, uuid);
   }
 );
+
+export const movePrinthead = createActionThunk(
+  "PRINTERS_MOVE_PRINTHEAD",
+  (orguuid, uuid, command, opts, { dispatch, getState }) => {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.movePrinthead, dispatch)(
+      orguuid,
+      uuid,
+      command,
+      opts
+    );
+  }
+);
+
+export const changeFanState = createActionThunk(
+  "PRINTERS_CHANGE_FAN_STATE",
+  (orguuid, uuid, targetState, { dispatch, getState }) => {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.changeFanState, dispatch)(
+      orguuid,
+      uuid,
+      targetState
+    );
+  }
+);
+
+export const changeMotorsState = createActionThunk(
+  "PRINTERS_CHANGE_MOTORS_STATE",
+  (orguuid, uuid, targetState, { dispatch, getState }) => {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.changeMotorsState, dispatch)(
+      orguuid,
+      uuid,
+      targetState
+    );
+  }
+);
+
+export const extrude = createActionThunk(
+  "PRINTERS_EXTRUDE",
+  (orguuid, uuid, amount, { dispatch, getState }) => {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.extrude, dispatch)(
+      orguuid,
+      uuid,
+      amount
+    );
+  }
+);
+
+export const setTemperature = createActionThunk(
+  "PRINTERS_SET_TEMPERATURE",
+  (orguuid, uuid, partName, amount, { dispatch, getState }) => {
+    const { me } = getState();
+    if (!me.organizations || !me.organizations[orguuid]) {
+      return Promise.resolve({});
+    }
+    return retryIfUnauthorized(backend.setTemperature, dispatch)(
+      orguuid,
+      uuid,
+      partName,
+      amount
+    );
+  }
+);

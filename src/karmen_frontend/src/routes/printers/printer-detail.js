@@ -27,7 +27,12 @@ import {
   setPrinterConnection,
   changeCurrentJob,
   changeLights,
-  setWebcamRefreshInterval
+  setWebcamRefreshInterval,
+  movePrinthead,
+  changeFanState,
+  changeMotorsState,
+  extrude,
+  setTemperature
 } from "../../actions";
 
 const ChangeConnectionModal = ({
@@ -444,10 +449,47 @@ export default connect(
       dispatch(
         changeLights(ownProps.match.params.orguuid, ownProps.match.params.uuid)
       ),
-    movePrinthead: () => {},
-    changeFanState: () => {},
-    changeMotorsState: () => {},
-    extrude: () => {},
-    setTemperature: () => {}
+    movePrinthead: (command, opts) =>
+      dispatch(
+        movePrinthead(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          command,
+          opts
+        )
+      ),
+    changeFanState: targetState =>
+      dispatch(
+        changeFanState(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          targetState
+        )
+      ),
+    changeMotorsState: targetState =>
+      dispatch(
+        changeMotorsState(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          targetState
+        )
+      ),
+    extrude: amount =>
+      dispatch(
+        extrude(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          amount
+        )
+      ),
+    setTemperature: (partName, amount) =>
+      dispatch(
+        setTemperature(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          partName,
+          amount
+        )
+      )
   })
 )(PrinterDetail);
