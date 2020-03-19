@@ -70,6 +70,18 @@ def make_printer_response(printer, fields):
     return data
 
 
+def get_printer_inst(org_uuid, uuid):
+    validate_uuid(uuid)
+    printer = printers.get_printer(uuid)
+    if printer is None or printer.get("organization_uuid") != org_uuid:
+        return abort(make_response("", 404))
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
+    return printer_inst
+
+
 @app.route("/organizations/<org_uuid>/printers", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
@@ -525,5 +537,165 @@ def printer_set_lights(org_uuid, uuid):
             return make_response(jsonify({"status": "unavailable"}), 500)
         # This is inverse because lights_on is BEFORE we actually change it
         return make_response(jsonify({"status": "off" if lights_on else "on"}), 200)
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/printhead", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_printhead(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+
+    try:
+        data = request.json
+        if "command" not in data:
+            return abort(make_response("", 400))
+        if data["command"] == "jog":
+            absolute = data.get("absolute", False)
+            for axis in ["x", "y", "z"]:
+                distance = data.get(axis)
+                if distance:
+                    try:
+                        distance = int(distance)
+                    except ValueError:
+                        return abort(make_response("Distance must be a number", 400))
+                    r = printer_inst.move_head(
+                        axis=axis, distance=int(distance), absolute=absolute
+                    )
+                    if not r:
+                        return make_response("", 500)
+                    return make_response("", 200)
+
+        elif data["command"] == "home":
+            axes = data.get("axes")
+            if axes is None:
+                return abort(make_response("", 400))
+            for axis in axes:
+                if axis not in ["x", "y", "z"]:
+                    return abort(make_response("", 400))
+            r = printer_inst.home_head(axes)
+            if not r:
+                return make_response("", 500)
+            return make_response("", 200)
+
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/fan", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_fan(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    try:
+        data = request.json
+        state = data.get("targetState")
+        if state is None:
+            return abort(make_response("", 400))
+        r = printer_inst.set_fan(state)
+        if not r:
+            return make_response("", 500)
+        return make_response("", 200)
+
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/motors", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_motors(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    try:
+        data = request.json
+        state = data.get("targetState")
+        if state is None:
+            return abort(make_response("", 400))
+        if state == "off":
+            r = printer_inst.motors_off()
+            if not r:
+                return make_response("", 500)
+            return make_response("", 200)
+        return abort(make_response("", 400))
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/extrusion", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_extrusion(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    try:
+        data = request.json
+        amount = data.get("amount")
+        if amount is None:
+            return abort(make_response("", 400))
+        try:
+            amount = int(amount)
+        except ValueError:
+            return abort(make_response("", 400))
+        r = printer_inst.extrude(amount)
+        if not r:
+            return make_response("", 500)
+        return make_response("", 200)
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route(
+    "/organizations/<org_uuid>/printers/<uuid>/temperatures/tool<tool_number>",
+    methods=["POST"],
+)
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_tool_temp(org_uuid, uuid, tool_number):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    if tool_number not in ["0", "1"]:
+        return abort(make_response("", 400))
+    try:
+        data = request.json
+        amount = data.get("amount")
+        if amount is None:
+            return abort(make_response("", 400))
+        try:
+            amount = float(amount)
+        except ValueError:
+            return abort(make_response("", 400))
+        r = printer_inst.set_temperature(device="tool" + tool_number, temp=amount)
+        if not r:
+            return make_response("a", 500)
+        return make_response("", 200)
+    except PrinterClientException:
+        return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route(
+    "/organizations/<org_uuid>/printers/<uuid>/temperatures/bed", methods=["POST"]
+)
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_bed_temp(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    try:
+        data = request.json
+        amount = data.get("amount")
+        if amount is None:
+            return abort(make_response("", 400))
+        try:
+            amount = float(amount)
+        except ValueError:
+            return abort(make_response("", 400))
+        r = printer_inst.set_temperature(device="bed", temp=amount)
+        if not r:
+            return make_response("", 500)
+        return make_response("", 200)
     except PrinterClientException:
         return make_response(jsonify({"status": "unavailable"}), 200)
