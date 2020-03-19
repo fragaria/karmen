@@ -40,11 +40,14 @@ export default (
       }
       let newImage = action.payload;
       if (!newImage || newImage.status !== 200) {
-        return state;
+        state.images = Object.assign({}, state.images, {
+          [newImage.uuid]: undefined
+        });
+      } else {
+        state.images = Object.assign({}, state.images, {
+          [newImage.uuid]: `${newImage.prefix}${newImage.data}`
+        });
       }
-      state.images = Object.assign({}, state.images, {
-        [newImage.uuid]: `${newImage.prefix}${newImage.data}`
-      });
       return state;
     case "USER_CLEAR_ENDED":
       for (let job in queue) {
