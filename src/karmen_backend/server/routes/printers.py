@@ -431,10 +431,10 @@ def _get_webcam_snapshot(snapshot_url):
         )
         if req is not None and req.status_code == 200:
             return req
-        return None
+        return False
     except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout,) as e:
         app.logger.debug("Cannot call %s because %s" % (snapshot_url, e))
-        return None
+        return False
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/webcam-snapshot", methods=["GET"])
@@ -488,18 +488,19 @@ def printer_webcam_snapshot(org_uuid, uuid):
         FUTURES_MICROCACHE[printer["network_client_uuid"]] = executor.submit(
             _get_webcam_snapshot, snapshot_url
         )
-
-    if WEBCAM_MICROCACHE.get(printer["network_client_uuid"]) is not None:
-        response = WEBCAM_MICROCACHE.get(printer["network_client_uuid"])
+    response = WEBCAM_MICROCACHE.get(printer["network_client_uuid"])
+    if response is not None and response is not False:
         return (
             response.content,
             200,
             {"Content-Type": response.headers.get("content-type", "image/jpeg")},
         )
-    # There should be a future running, if the client retries, they should
-    # eventually get a snapshot.
-    # We don't want to end with an error here, so the clients keep retrying
-    return "", 202
+    if response is not False:
+        # There should be a future running, if the client retries, they should
+        # eventually get a snapshot.
+        # We don't want to end with an error here, so the clients keep retrying
+        return "", 202
+    return abort(make_response("", 404))
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/lights", methods=["POST"])
