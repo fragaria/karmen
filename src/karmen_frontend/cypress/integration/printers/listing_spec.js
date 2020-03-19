@@ -1,6 +1,6 @@
 describe("Printers listing", function() {
   beforeEach(() => {
-    return cy.loginAsSuperadmin().visit("/");
+    return cy.loginAsTestAdmin().visit("/");
   });
 
   it("shows printers", function() {
