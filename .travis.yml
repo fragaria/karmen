@@ -54,6 +54,7 @@ matrix:
     - npm ci
     script:
     - npm run lint
+    - npm run test
     - npm run build
   - stage: build docker
     if: tag IS present
