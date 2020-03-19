@@ -43,7 +43,7 @@ matrix:
     - pipenv install --dev
     - make test
   - language: node_js
-    name: unit tests and build
+    name: frontend unit tests and build
     node_js: 10
     cache:
       directories:
@@ -57,7 +57,7 @@ matrix:
     - npm run test
     - npm run build
   - language: node_js
-    name: integration tests
+    name: frontend cypress tests
     stage: test
     node_js: 10
     cache:
