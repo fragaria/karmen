@@ -1,8 +1,8 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
-export const addPrinter = createActionThunk(
+export const addPrinter = createThunkedAction(
   "PRINTERS_ADD",
   (
     orguuid,
@@ -32,7 +32,7 @@ export const addPrinter = createActionThunk(
   }
 );
 
-export const patchPrinter = createActionThunk(
+export const patchPrinter = createThunkedAction(
   "PRINTERS_PATCH",
   (orguuid, uuid, data, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -45,19 +45,14 @@ export const patchPrinter = createActionThunk(
   }
 );
 
-export const deletePrinter = createActionThunk(
+export const deletePrinter = createThunkedAction(
   "PRINTERS_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.deletePrinter, dispatch)(
         orguuid,
         uuid
-      ).then(r => {
-        if (r.status !== 204) {
-          r.uuid = null;
-        }
-        return r;
-      });
+      );
     });
   }
 );

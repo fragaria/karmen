@@ -103,7 +103,7 @@ export const logout = () => {
     Cookies.remove("refresh_token_cookie");
     Cookies.remove("csrf_access_token");
     Cookies.remove("access_token_cookie");
-    return { status: response.status };
+    return { status: response.status, successCodes: [200] };
   });
 };
 
@@ -155,6 +155,7 @@ export const deleteApiToken = jti => {
   return performRequest({
     uri: `/users/me/tokens/${jti}`,
     method: "DELETE",
-    parseResponse: false
+    parseResponse: false,
+    successCodes: [204, 404]
   });
 };

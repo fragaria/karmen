@@ -1,4 +1,4 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
@@ -8,7 +8,7 @@ export const clearUsers = () => dispatch => {
   });
 };
 
-export const getUsers = createActionThunk(
+export const getUsers = createThunkedAction(
   "USERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -17,7 +17,7 @@ export const getUsers = createActionThunk(
   }
 );
 
-export const addUser = createActionThunk(
+export const addUser = createThunkedAction(
   "USERS_ADD",
   (orguuid, email, role, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -30,7 +30,7 @@ export const addUser = createActionThunk(
   }
 );
 
-export const patchUser = createActionThunk(
+export const patchUser = createThunkedAction(
   "USERS_EDIT",
   (orguuid, uuid, role, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -43,7 +43,7 @@ export const patchUser = createActionThunk(
   }
 );
 
-export const deleteUser = createActionThunk(
+export const deleteUser = createThunkedAction(
   "USERS_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

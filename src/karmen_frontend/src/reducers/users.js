@@ -8,20 +8,11 @@ export default (
   let userIndex;
   switch (action.type) {
     case "USERS_LOAD_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
-      if (!action.payload.data || !action.payload.data.items) {
-        return state;
-      }
       return Object.assign({}, state, {
         list: [].concat(action.payload.data.items),
         listLoaded: true
       });
     case "USERS_ADD_SUCCEEDED":
-      if (!action.payload.data) {
-        return state;
-      }
       const existing = state.list.findIndex(
         u => u.uuid === action.payload.data.uuid
       );

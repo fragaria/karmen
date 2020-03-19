@@ -46,6 +46,7 @@ export const deletePrinter = (orgUuid, uuid) => {
     appendData: {
       uuid
     },
-    parseResponse: false
+    parseResponse: false,
+    successCodes: [204, 404]
   });
 };

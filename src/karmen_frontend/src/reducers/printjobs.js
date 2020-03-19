@@ -8,43 +8,29 @@ const initialListState = {
 export default (state = {}, action) => {
   switch (action.type) {
     case "JOBS_LOAD_PAGE_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       let currentPrinter =
         state[action.payload.printer] || Object.assign({}, initialListState);
       let currentPages = currentPrinter.pages;
+      const newPage = {
+        data: action.payload.data,
+        startWith: action.payload.startWith
+      };
       // continue only with the same conditions
       if (
         currentPrinter.filter === action.payload.filter &&
         currentPrinter.orderBy === action.payload.orderBy &&
         currentPrinter.limit === action.payload.limit
       ) {
-        // TODO possibly switch to findIndex
-        const origPage = currentPages.find(
+        const origPageIndex = currentPages.findIndex(
           p => p.startWith === action.payload.startWith
         );
-        if (!origPage && action.payload.data) {
-          currentPages.push({
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          });
+        if (origPageIndex === -1) {
+          currentPages.push(newPage);
+        } else {
+          currentPages[origPageIndex] = newPage;
         }
-        if (origPage && action.payload.data) {
-          const origIndex = currentPages.indexOf(origPage);
-          currentPages[origIndex] = {
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          };
-        }
-        // if any option changes, reset pages
       } else {
-        currentPages = [
-          {
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          }
-        ];
+        currentPages = [newPage];
       }
       return Object.assign({}, state, {
         [action.payload.printer]: Object.assign({}, currentPrinter, {

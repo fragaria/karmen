@@ -55,7 +55,8 @@ export const deleteGcode = (orgUuid, uuid) => {
     appendData: {
       uuid
     },
-    parseResponse: false
+    parseResponse: false,
+    successCodes: [204, 404]
   });
 };
 
@@ -74,16 +75,17 @@ export const uploadGcode = (orgUuid, path, file) => {
       if (response.status !== 201) {
         console.error(`Cannot add a gcode: ${response.status}`);
         return {
-          status: response.status
+          status: response.status,
+          successCodes: [201]
         };
       }
       return response.json().then(data => {
-        return { status: response.status, data };
+        return { status: response.status, data, successCodes: [201] };
       });
     })
     .catch(e => {
       console.error(`Cannot add a gcode: ${e}`);
-      return {};
+      return { status: 500, successCodes: [201] };
     });
 };
 
@@ -99,14 +101,14 @@ export const downloadGcode = (dataLink, filename) => {
       if (response.status === 200) {
         return response.blob().then(d => {
           download(d, filename, d.type);
-          return { status: 200 };
+          return { status: 200, successCodes: [200] };
         });
       }
       console.error(`Cannot download a gcode: ${response.status}`);
-      return { status: response.status };
+      return { status: response.status, successCodes: [200] };
     })
     .catch(e => {
       console.error(`Cannot download a gcode: ${e}`);
-      return { status: 500 };
+      return { status: 500, successCodes: [200] };
     });
 };

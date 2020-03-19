@@ -1,8 +1,8 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
-export const enqueueTask = createActionThunk(
+export const enqueueTask = createThunkedAction(
   "ENQUEUE_TASK",
   (orguuid, task, opts, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -10,11 +10,7 @@ export const enqueueTask = createActionThunk(
         orguuid,
         task,
         opts
-      ).then(r => {
-        return {
-          status: r.status
-        };
-      });
+      );
     });
   }
 );

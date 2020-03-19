@@ -1,8 +1,8 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
-export const setPrinterConnection = createActionThunk(
+export const setPrinterConnection = createThunkedAction(
   "PRINTERS_SET_CONNECTION",
   (orguuid, uuid, state, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -15,7 +15,7 @@ export const setPrinterConnection = createActionThunk(
   }
 );
 
-export const changeCurrentJob = createActionThunk(
+export const changeCurrentJob = createThunkedAction(
   "PRINTERS_CHANGE_JOB",
   (orguuid, uuid, action, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -28,7 +28,7 @@ export const changeCurrentJob = createActionThunk(
   }
 );
 
-export const changeLights = createActionThunk(
+export const changeLights = createThunkedAction(
   "PRINTERS_CHANGE_LIGHTS",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -37,7 +37,7 @@ export const changeLights = createActionThunk(
   }
 );
 
-export const movePrinthead = createActionThunk(
+export const movePrinthead = createThunkedAction(
   "PRINTERS_MOVE_PRINTHEAD",
   (orguuid, uuid, command, opts, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -51,7 +51,7 @@ export const movePrinthead = createActionThunk(
   }
 );
 
-export const changeFanState = createActionThunk(
+export const changeFanState = createThunkedAction(
   "PRINTERS_CHANGE_FAN_STATE",
   (orguuid, uuid, targetState, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -64,7 +64,7 @@ export const changeFanState = createActionThunk(
   }
 );
 
-export const changeMotorsState = createActionThunk(
+export const changeMotorsState = createThunkedAction(
   "PRINTERS_CHANGE_MOTORS_STATE",
   (orguuid, uuid, targetState, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -77,7 +77,7 @@ export const changeMotorsState = createActionThunk(
   }
 );
 
-export const extrude = createActionThunk(
+export const extrude = createThunkedAction(
   "PRINTERS_EXTRUDE",
   (orguuid, uuid, amount, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -90,7 +90,7 @@ export const extrude = createActionThunk(
   }
 );
 
-export const setTemperature = createActionThunk(
+export const setTemperature = createThunkedAction(
   "PRINTERS_SET_TEMPERATURE",
   (orguuid, uuid, partName, amount, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

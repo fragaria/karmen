@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 
 export const retryIfUnauthorized = (func, dispatch) => {
@@ -9,14 +9,14 @@ export const retryIfUnauthorized = (func, dispatch) => {
     return func(...args).then(r => {
       if (r.status === 401) {
         if (!dispatch) {
-          return Promise.resolve({});
+          return Promise.reject();
         }
         return dispatch(refreshToken()).then(r => {
           if (r.status === 200) {
             return func(...args);
           } else {
             dispatch(clearUserIdentity());
-            return Promise.resolve({});
+            return Promise.reject();
           }
         });
       }
@@ -28,7 +28,7 @@ export const retryIfUnauthorized = (func, dispatch) => {
 export const denyWithNoOrganizationAccess = (orguuid, getState, wrapped) => {
   const { me } = getState();
   if (!me.organizations || !me.organizations[orguuid]) {
-    return Promise.resolve({});
+    return Promise.reject();
   }
   return wrapped();
 };
@@ -113,28 +113,28 @@ export const loadUserData = userData => dispatch => {
   }
 };
 
-export const authenticate = createActionThunk(
+export const authenticate = createThunkedAction(
   "USER_AUTHENTICATE",
   (username, password) => {
     return backend.authenticate(username, password);
   }
 );
 
-export const authenticateFresh = createActionThunk(
+export const authenticateFresh = createThunkedAction(
   "USER_AUTHENTICATE_FRESH",
   (username, password) => {
     return backend.authenticateFresh(username, password);
   }
 );
 
-export const refreshToken = createActionThunk(
+export const refreshToken = createThunkedAction(
   "USER_REFRESH_ACCESS_TOKEN",
   () => {
     return backend.refreshAccessToken();
   }
 );
 
-export const changePassword = createActionThunk(
+export const changePassword = createThunkedAction(
   "USER_CHANGE_PASSWORD",
   (
     password,
@@ -145,7 +145,7 @@ export const changePassword = createActionThunk(
     const { me } = getState();
     return dispatch(authenticateFresh(me.username, password)).then(r => {
       if (r.status !== 200) {
-        return Promise.resolve({ status: 500 });
+        return Promise.reject();
       }
       return backend.changePassword(
         password,
@@ -156,18 +156,18 @@ export const changePassword = createActionThunk(
   }
 );
 
-export const patchMe = createActionThunk("USER_PATCH", (username, email) => {
+export const patchMe = createThunkedAction("USER_PATCH", (username, email) => {
   return backend.patchMe(username, email);
 });
 
-export const requestPasswordReset = createActionThunk(
+export const requestPasswordReset = createThunkedAction(
   "USER_RESET_PASSWORD_REQUEST",
   email => {
     return backend.requestPasswordReset(email);
   }
 );
 
-export const resetPassword = createActionThunk(
+export const resetPassword = createThunkedAction(
   "USER_RESET_PASSWORD",
   (email, pwdResetKey, password, passwordConfirmation) => {
     return backend.resetPassword(
@@ -179,11 +179,11 @@ export const resetPassword = createActionThunk(
   }
 );
 
-export const register = createActionThunk("USER_REGISTER", email => {
+export const register = createThunkedAction("USER_REGISTER", email => {
   return backend.register(email);
 });
 
-export const activate = createActionThunk(
+export const activate = createThunkedAction(
   "USER_ACTIVATE",
   (email, activationKey, password, passwordConfirmation) => {
     return backend.activate(
@@ -195,35 +195,27 @@ export const activate = createActionThunk(
   }
 );
 
-export const clearUserIdentity = createActionThunk("USER_CLEAR", () => {
+export const clearUserIdentity = createThunkedAction("USER_CLEAR", () => {
   return backend.logout();
 });
 
-export const loadUserApiTokens = createActionThunk(
+export const loadUserApiTokens = createThunkedAction(
   "USER_LOAD_API_TOKENS",
   ({ dispatch, getState }) => {
     return retryIfUnauthorized(backend.loadApiTokens, dispatch)();
   }
 );
 
-export const addUserApiToken = createActionThunk(
+export const addUserApiToken = createThunkedAction(
   "USER_ADD_API_TOKEN",
   (orguuid, name, { dispatch, getState }) => {
     return retryIfUnauthorized(backend.addApiToken, dispatch)(orguuid, name);
   }
 );
 
-export const deleteUserApiToken = createActionThunk(
+export const deleteUserApiToken = createThunkedAction(
   "USER_DELETE_API_TOKEN",
   (jti, { dispatch }) => {
-    return retryIfUnauthorized(
-      backend.deleteApiToken,
-      dispatch
-    )(jti).then(r => {
-      if (r.status !== 204) {
-        jti = null;
-      }
-      return { jti };
-    });
+    return retryIfUnauthorized(backend.deleteApiToken, dispatch)(jti);
   }
 );

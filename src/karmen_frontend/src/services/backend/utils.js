@@ -116,16 +116,29 @@ export const performRequest = opts => {
         return response
           .json()
           .then(data => {
-            return { status: response.status, ...opts.appendData, data };
+            return {
+              status: response.status,
+              ...opts.appendData,
+              data,
+              successCodes: opts.successCodes
+            };
           })
           .catch(e => {
-            return { status: response.status, ...opts.appendData };
+            return {
+              status: response.status,
+              ...opts.appendData,
+              successCodes: opts.successCodes
+            };
           });
       }
-      return { status: response.status, ...opts.appendData };
+      return {
+        status: response.status,
+        ...opts.appendData,
+        successCodes: opts.successCodes
+      };
     })
     .catch(e => {
       console.error(`Request ${opts.uri} failed: ${e}`);
-      return { status: 500 };
+      return { status: 500, successCodes: opts.successCodes };
     });
 };

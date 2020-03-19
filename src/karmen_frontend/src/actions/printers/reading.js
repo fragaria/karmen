@@ -1,4 +1,4 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
@@ -124,7 +124,7 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
   }, delay);
 };
 
-export const loadPrinters = createActionThunk(
+export const loadPrinters = createThunkedAction(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -136,7 +136,19 @@ export const loadPrinters = createActionThunk(
   }
 );
 
-export const loadPrinter = createActionThunk(
+export const loadPrintersOld = createThunkedAction(
+  "PRINTERS_LOAD",
+  (orguuid, fields = [], { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinters, dispatch)(
+        orguuid,
+        fields
+      );
+    });
+  }
+);
+
+export const loadPrinter = createThunkedAction(
   "PRINTERS_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -196,14 +208,14 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
   }
 };
 
-export const getWebcamSnapshot = createActionThunk(
+export const getWebcamSnapshot = createThunkedAction(
   "WEBCAMS_GET_SNAPSHOT",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       let { printers } = getState();
       const printer = printers.printers.find(p => p.uuid === uuid);
       if (!printer || !printer.webcam || !printer.webcam.url) {
-        return Promise.resolve({});
+        return Promise.reject();
       }
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
@@ -229,18 +241,12 @@ export const getWebcamSnapshot = createActionThunk(
             }
           }
         }
-        if (r.data && r.data.prefix && r.data.data) {
-          return {
-            organizationUuid: orguuid,
-            uuid,
-            status: r.status,
-            ...r.data
-          };
-        }
         return {
           organizationUuid: orguuid,
           uuid,
-          status: r.status
+          status: r.status,
+          ...r.data,
+          successCodes: [200]
         };
       });
     });

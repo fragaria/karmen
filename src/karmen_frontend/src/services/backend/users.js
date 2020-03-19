@@ -39,6 +39,7 @@ export const deleteUser = (orgUuid, uuid) => {
     uri: `/organizations/${orgUuid}/users/${uuid}`,
     method: "DELETE",
     parseResponse: false,
+    successCodes: [204, 404],
     appendData: {
       uuid
     }

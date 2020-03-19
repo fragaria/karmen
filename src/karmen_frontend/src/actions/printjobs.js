@@ -1,4 +1,4 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
@@ -11,7 +11,7 @@ export const clearJobsPages = printerUuid => dispatch => {
   });
 };
 
-export const getJobsPage = createActionThunk(
+export const getJobsPage = createThunkedAction(
   "JOBS_LOAD_PAGE",
   // TODO Reflect the actual filter attribute
   (
@@ -30,22 +30,12 @@ export const getJobsPage = createActionThunk(
         orderBy,
         printerUuid,
         limit
-      ).then(r => {
-        return {
-          status: r.status,
-          data: r.data,
-          printer: printerUuid,
-          startWith,
-          orderBy,
-          filter: null, // TODO filter is ignored for now
-          limit
-        };
-      });
+      );
     });
   }
 );
 
-export const addPrintJob = createActionThunk(
+export const addPrintJob = createThunkedAction(
   "JOBS_ADD",
   (orguuid, uuid, printer, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
