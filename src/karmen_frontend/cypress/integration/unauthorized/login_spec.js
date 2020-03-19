@@ -26,7 +26,7 @@ describe("Login flow", function() {
     cy.get("input#username").type("test-user");
     cy.get("input#password").type("user-password");
     cy.get("button[type=submit]").click();
-    cy.get("main .content").should('have.class', "printer-list");
+    cy.get("main .content").should("have.class", "printer-list");
   });
 
   it("logs in with e-mail", function() {
@@ -34,7 +34,6 @@ describe("Login flow", function() {
     cy.get("input#username").type("test-user@karmen.local");
     cy.get("input#password").type("user-password");
     cy.get("button[type=submit]").click();
-    cy.get("main .content").should('have.class', "printer-list");
+    cy.get("main .content").should("have.class", "printer-list");
   });
-
 });

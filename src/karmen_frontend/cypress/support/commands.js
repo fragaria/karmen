@@ -1,25 +1,14 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+// TODO We should be doing test-run-specific users to not be dependent on a specific env setup here
+// but that needs mails and those need special overridden configuration
+Cypress.Commands.add("loginAsSuperadmin", () => {
+  return cy
+    .log("logging in as karmen")
+    .request("POST", `/api/users/me/authenticate`, {
+      username: "karmen",
+      password: "karmen3D"
+    })
+    .then(({ body }) => {
+      localStorage.setItem("karmen_profile", JSON.stringify(body));
+      return {};
+    });
+});
