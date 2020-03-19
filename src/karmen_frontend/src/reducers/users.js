@@ -24,7 +24,7 @@ export default (
       const existing = state.list.findIndex(
         u => u.uuid === action.payload.data.uuid
       );
-      if (existing) {
+      if (existing > -1) {
         return state;
       }
       return Object.assign({}, state, {
