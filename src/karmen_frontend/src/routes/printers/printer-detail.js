@@ -27,7 +27,6 @@ import {
   setPrinterConnection,
   changeCurrentJob,
   changeLights,
-  setWebcamRefreshInterval,
   movePrinthead,
   changeFanState,
   changeMotorsState,
@@ -158,7 +157,6 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
 const PrinterDetail = ({
   match,
   printer,
-  image,
   loadPrinter,
   setPrinterConnection,
   changeCurrentJobState,
@@ -167,7 +165,6 @@ const PrinterDetail = ({
   jobList,
   loadJobsPage,
   clearJobsPages,
-  setWebcamRefreshInterval,
   changeLights,
   movePrinthead,
   changeFanState,
@@ -205,10 +202,9 @@ const PrinterDetail = ({
       <div className="printer-detail">
         <div className="printer-detail-stream">
           <WebcamStream
-            {...printer.webcam}
             isPrinting={printer.status && printer.status.state === "Printing"}
-            image={image}
-            setWebcamRefreshInterval={setWebcamRefreshInterval}
+            printerUuid={printer.uuid}
+            orgUuid={match.params.orguuid}
           />
           <Progress {...printer.job} />
           <div className="cta-box text-center hidden-xs">
@@ -377,7 +373,6 @@ export default connect(
     printer: state.printers.printers.find(
       p => p.uuid === ownProps.match.params.uuid
     ),
-    image: state.webcams.images[ownProps.match.params.uuid],
     role: state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
@@ -435,14 +430,6 @@ export default connect(
         clearJobsPages(
           ownProps.match.params.orguuid,
           ownProps.match.params.uuid
-        )
-      ),
-    setWebcamRefreshInterval: interval =>
-      dispatch(
-        setWebcamRefreshInterval(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
-          interval
         )
       ),
     changeLights: () =>

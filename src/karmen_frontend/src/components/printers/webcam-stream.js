@@ -1,5 +1,7 @@
 import React from "react";
+import { connect } from "react-redux";
 import useModal from "use-react-modal";
+import { setWebcamRefreshInterval } from "../../actions";
 
 const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
@@ -37,7 +39,7 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   );
 };
 
-class WebcamStream extends React.Component {
+export class WebcamStream extends React.Component {
   componentDidMount() {
     const { setWebcamRefreshInterval } = this.props;
     setWebcamRefreshInterval(200);
@@ -88,4 +90,19 @@ class WebcamStream extends React.Component {
   }
 }
 
-export default WebcamStream;
+export default connect(
+  (state, ownProps) => ({
+    printer: state.printers.printers.find(p => p.uuid === ownProps.printerUuid),
+    image: state.webcams.images[ownProps.printerUuid]
+  }),
+  (dispatch, ownProps) => ({
+    setWebcamRefreshInterval: interval =>
+      dispatch(
+        setWebcamRefreshInterval(
+          ownProps.orgUuid,
+          ownProps.printerUuid,
+          interval
+        )
+      )
+  })
+)(WebcamStream);

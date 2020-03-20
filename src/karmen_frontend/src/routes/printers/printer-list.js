@@ -5,11 +5,7 @@ import Loader from "../../components/utils/loader";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import PrinterState from "../../components/printers/printer-state";
 import WebcamStream from "../../components/printers/webcam-stream";
-import {
-  loadAndQueuePrinters,
-  setWebcamRefreshInterval,
-  setPrinterViewType
-} from "../../actions";
+import { loadAndQueuePrinters, setPrinterViewType } from "../../actions";
 import formatters from "../../services/formatters";
 
 const SwitchView = ({ viewType, onViewTypeChange }) => {
@@ -89,8 +85,6 @@ class PrinterList extends React.Component {
       match,
       printersLoaded,
       printers,
-      images,
-      setWebcamRefreshInterval,
       viewType,
       setPrinterViewType
     } = this.props;
@@ -118,15 +112,12 @@ class PrinterList extends React.Component {
                 {viewType === "grid" && (
                   <div className="list-item-illustration">
                     <WebcamStream
-                      {...printer.webcam}
+                      printerUuid={printer.uuid}
+                      orgUuid={match.params.orguuid}
                       isPrinting={
                         printer.status && printer.status.state === "Printing"
                       }
                       allowFullscreen={false}
-                      image={images[printer.uuid]}
-                      setWebcamRefreshInterval={interval =>
-                        setWebcamRefreshInterval(printer.uuid, interval)
-                      }
                     />
                   </div>
                 )}
@@ -180,16 +171,11 @@ export default connect(
       state.preferences.orgs[ownProps.match.params.orguuid] &&
       state.preferences.orgs[ownProps.match.params.orguuid].printerViewType,
     printers: state.printers.printers,
-    images: state.webcams.images,
     printersLoaded: state.printers.printersLoaded
   }),
   (dispatch, ownProps) => ({
     loadPrinters: fields =>
       dispatch(loadAndQueuePrinters(ownProps.match.params.orguuid, fields)),
-    setWebcamRefreshInterval: (uuid, interval) =>
-      dispatch(
-        setWebcamRefreshInterval(ownProps.match.params.orguuid, uuid, interval)
-      ),
     setPrinterViewType: viewType => dispatch(setPrinterViewType(viewType))
   })
 )(PrinterList);
