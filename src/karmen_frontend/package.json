@@ -20,7 +20,7 @@
     "downloadjs": "^1.4.7", 
     "js-cookie": "^2.2.1", 
     "jwt-decode": "^2.2.0", 
-    "react": "^16.9.0", 
+    "react": "^16.13.1", 
     "react-app-polyfill": "^1.0.6", 
     "react-copy-to-clipboard": "^5.0.2", 
     "react-debounce-input": "^3.2.2", 
