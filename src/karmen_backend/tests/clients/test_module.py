@@ -6,6 +6,11 @@ from ..utils import UUID_ORG
 
 
 class GetWithFallbackTest(unittest.TestCase):
+    def test_throws_on_none(self):
+        with self.assertRaises(RuntimeError) as context:
+            get_printer_instance(None)
+            self.assertTrue("no client defined" in str(context.exception))
+
     def test_throws_on_missing_client(self):
         with self.assertRaises(RuntimeError) as context:
             get_printer_instance({})
