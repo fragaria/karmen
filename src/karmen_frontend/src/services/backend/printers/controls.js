@@ -86,14 +86,14 @@ export const extrude = (orgUuid, uuid, amount) => {
   });
 };
 
-export const setTemperature = (orgUuid, uuid, partName, amount) => {
+export const setTemperature = (orgUuid, uuid, partName, target) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/temperatures/${partName}`,
     appendData: {
       uuid
     },
     data: {
-      amount
+      target
     },
     parseResponse: false
   });

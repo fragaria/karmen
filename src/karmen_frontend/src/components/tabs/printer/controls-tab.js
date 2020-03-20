@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import BusyButton from "../../utils/busy-button";
 
 const AxesXYControl = ({ movePrinthead }) => {
-  // TODO add amount picker
-  const [amount] = useState(10);
+  // TODO add distance picker
+  const [distance] = useState(10);
   return (
     <div>
-      <p>Move X/Y by {amount}mm</p>
+      <p>Move X/Y by {distance}mm</p>
       <div
         style={{
           display: "grid",
@@ -20,7 +20,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             type="button"
             onClick={() => {
               movePrinthead("jog", {
-                y: amount,
+                y: distance,
                 absolute: false
               });
             }}
@@ -35,7 +35,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             type="button"
             onClick={() => {
               movePrinthead("jog", {
-                x: -amount,
+                x: -distance,
                 absolute: false
               });
             }}
@@ -64,7 +64,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             type="button"
             onClick={() => {
               movePrinthead("jog", {
-                x: amount,
+                x: distance,
                 absolute: false
               });
             }}
@@ -80,7 +80,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             type="button"
             onClick={() => {
               movePrinthead("jog", {
-                y: -amount,
+                y: -distance,
                 absolute: false
               });
             }}
@@ -95,18 +95,18 @@ const AxesXYControl = ({ movePrinthead }) => {
 };
 
 const AxesZControl = ({ movePrinthead }) => {
-  // TODO add amount picker
-  const [amount] = useState(10);
+  // TODO add distance picker
+  const [distance] = useState(10);
   return (
     <div>
-      <p>Move Z by {amount}mm</p>
+      <p>Move Z by {distance}mm</p>
       <div>
         <BusyButton
           className="btn btn-sm"
           type="button"
           onClick={() => {
             movePrinthead("jog", {
-              z: amount,
+              z: distance,
               absolute: false
             });
           }}
@@ -135,7 +135,7 @@ const AxesZControl = ({ movePrinthead }) => {
           type="button"
           onClick={() => {
             movePrinthead("jog", {
-              z: -amount,
+              z: -distance,
               absolute: false
             });
           }}
@@ -228,7 +228,7 @@ const DirectControl = ({ changeFanState, changeMotorsState }) => {
 };
 
 const TemperatureControl = ({ name, current, partName, setTemperature }) => {
-  const [amount, setAmount] = useState(current);
+  const [target, setTarget] = useState(current);
   return (
     <div>
       <label htmlFor="extrusion">
@@ -238,19 +238,19 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
         name="extrusion"
         id="extrusion"
         type="number"
-        value={amount}
+        value={target}
         step="0.1"
         min="0"
         onChange={e => {
-          setAmount(e.target.value ? parseFloat(e.target.value) : "");
+          setTarget(e.target.value ? parseFloat(e.target.value) : "");
         }}
       />
       <BusyButton
         className="btn btn-sm"
         type="button"
-        disabled={amount === 0}
+        disabled={target === 0}
         onClick={() => {
-          setTemperature(partName, amount);
+          setTemperature(partName, target);
         }}
         busyChildren="Setting..."
       >

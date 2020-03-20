@@ -469,13 +469,13 @@ export default connect(
           amount
         )
       ),
-    setTemperature: (partName, amount) =>
+    setTemperature: (partName, target) =>
       dispatch(
         setTemperature(
           ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           partName,
-          amount
+          target
         )
       )
   })

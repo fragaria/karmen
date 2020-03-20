@@ -92,13 +92,13 @@ export const extrude = createThunkedAction(
 
 export const setTemperature = createThunkedAction(
   "PRINTERS_SET_TEMPERATURE",
-  (orguuid, uuid, partName, amount, { dispatch, getState }) => {
+  (orguuid, uuid, partName, target, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.setTemperature, dispatch)(
         orguuid,
         uuid,
         partName,
-        amount
+        target
       );
     });
   }
