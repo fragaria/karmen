@@ -71,7 +71,7 @@ class Octoprint(PrinterClient):
         if self.token is not None and self.token != "":
             self.network_base = app.config.get("SOCKET_API_URL") % self.token
         else:
-            if self.port is not None:
+            if self.port is not None and self.port != 0:
                 network_host = "%s:%s" % (self.ip, self.port)
             else:
                 network_host = self.ip
@@ -481,10 +481,12 @@ class Octoprint(PrinterClient):
         except json.decoder.JSONDecodeError:
             return False
 
-    def move_head(self, axis, distance, absolute=False):
-        if axis not in ["x", "y", "z"]:
-            return False
-        command = {"absolute": absolute, axis: distance, "command": "jog"}
+    def move_head(self, movement, absolute=False):
+        for axis in movement.keys():
+            if axis not in ["x", "y", "z"]:
+                return False
+        command = {"absolute": absolute, "command": "jog"}
+        command.update(movement)
         request = self._http_post("/api/printer/printhead", json=command)
         if not request or request.status_code != 204:
             return False
@@ -524,7 +526,7 @@ class Octoprint(PrinterClient):
 
     def set_fan(self, state):
         command = {
-            "commands": ["M106 " + ("S255" if state else "S0")],
+            "commands": ["M106 " + ("S255" if state == "on" else "S0")],
             "parameters": {},
         }
         request = self._http_post("/api/printer/command", json=command)

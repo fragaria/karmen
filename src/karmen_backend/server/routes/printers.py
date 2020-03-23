@@ -504,24 +504,25 @@ def printer_set_lights(org_uuid, uuid):
 def control_printhead(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
-    if "command" not in data:
+    if data is None or "command" not in data:
         return abort(make_response("", 400))
     if data["command"] == "jog":
+        movement = {}
         absolute = data.get("absolute", False)
         for axis in ["x", "y", "z"]:
             distance = data.get(axis)
             if distance:
                 try:
-                    distance = int(distance)
+                    distance = float(distance)
                 except ValueError:
-                    return abort(make_response("Distance must be a number", 400))
-                # TODO this would be better to call only once and not separately for each axis
-                r = printer_inst.move_head(
-                    axis=axis, distance=distance, absolute=absolute
-                )
-                if not r:
-                    return make_response("", 500)
-                return make_response("", 200)
+                    return abort(
+                        make_response("Distance on %s must be a number" % axis, 400)
+                    )
+                movement[axis] = distance
+        r = printer_inst.move_head(movement, absolute)
+        if not r:
+            return make_response("", 500)
+        return make_response("", 204)
     elif data["command"] == "home":
         axes = data.get("axes")
         if axes is None:
@@ -532,7 +533,9 @@ def control_printhead(org_uuid, uuid):
         r = printer_inst.home_head(axes)
         if not r:
             return make_response("", 500)
-        return make_response("", 200)
+        return make_response("", 204)
+    else:
+        return make_response("", 400)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/fan", methods=["POST"])
@@ -542,13 +545,15 @@ def control_printhead(org_uuid, uuid):
 def control_fan(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
-    state = data.get("target")
-    if state is None:
+    if data is None:
         return abort(make_response("", 400))
-    r = printer_inst.set_fan(state)
+    target = data.get("target")
+    if target is None or target not in ["off", "on"]:
+        return abort(make_response("", 400))
+    r = printer_inst.set_fan(target)
     if not r:
         return make_response("", 500)
-    return make_response("", 200)
+    return make_response("", 204)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/motors", methods=["POST"])
@@ -558,13 +563,15 @@ def control_fan(org_uuid, uuid):
 def control_motors(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
-    state = data.get("target")
-    if state is None or state != "off":
+    if data is None or "target" not in data:
+        return abort(make_response("", 400))
+    target = data.get("target")
+    if target is None or target != "off":
         return abort(make_response("", 400))
     r = printer_inst.motors_off()
     if not r:
         return make_response("", 500)
-    return make_response("", 200)
+    return make_response("", 204)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/extrusion", methods=["POST"])
@@ -574,61 +581,39 @@ def control_motors(org_uuid, uuid):
 def control_extrusion(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
-    amount = data.get("amount")
-    if amount is None:
+    if data is None or "amount" not in data:
         return abort(make_response("", 400))
     try:
-        amount = float(amount)
+        amount = float(data.get("amount"))
     except ValueError:
         return abort(make_response("Amount must be a number", 400))
     r = printer_inst.extrude(amount)
     if not r:
         return make_response("", 500)
-    return make_response("", 200)
+    return make_response("", 204)
 
 
 @app.route(
-    "/organizations/<org_uuid>/printers/<uuid>/temperatures/tool<tool_number>",
+    "/organizations/<org_uuid>/printers/<uuid>/temperatures/<part_name>",
     methods=["POST"],
 )
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def control_tool_temp(org_uuid, uuid, tool_number):
-    printer_inst = get_printer_inst(org_uuid, uuid)
-    if tool_number not in ["0", "1"]:
+def control_tool_temperature(org_uuid, uuid, part_name):
+    if part_name not in ["tool0", "tool1", "bed"]:
         return abort(make_response("", 400))
-    data = request.json
-    target = data.get("target")
-    if target is None:
-        return abort(make_response("", 400))
-    try:
-        target = float(target)
-    except ValueError:
-        return abort(make_response("Target must be a number", 400))
-    r = printer_inst.set_temperature(device="tool" + tool_number, temp=target)
-    if not r:
-        return make_response("", 500)
-    return make_response("", 200)
-
-
-@app.route(
-    "/organizations/<org_uuid>/printers/<uuid>/temperatures/bed", methods=["POST"]
-)
-@jwt_force_password_change
-@validate_org_access()
-@cross_origin()
-def control_bed_temp(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
-    target = data.get("target")
-    if target is None:
+    if data is None or "target" not in data:
         return abort(make_response("", 400))
     try:
-        target = float(target)
+        target = float(data.get("target"))
     except ValueError:
         return abort(make_response("Target must be a number", 400))
-    r = printer_inst.set_temperature(device="bed", temp=target)
+    if target < 0:
+        return abort(make_response("", 400))
+    r = printer_inst.set_temperature(device=part_name, temp=target)
     if not r:
         return make_response("", 500)
-    return make_response("", 200)
+    return make_response("", 204)

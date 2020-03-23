@@ -1445,3 +1445,824 @@ class SetLightsRoute(unittest.TestCase):
             data = response.json
             self.assertEqual(data["status"], "unavailable")
             self.assertEqual(response.status_code, 500)
+
+
+class ControlFanRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={"version": "123", "connected": True, "plugins": [],},
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/fan" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/fan"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_fan_put_on(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/fan" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "on"},
+            )
+            mock_post.assert_called_with(
+                "http://%s/api/printer/command" % self.ip,
+                json={"commands": ["M106 S255"], "parameters": {}},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+            self.assertEqual(response.status_code, 204)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_fan_put_off(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/fan" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "off"},
+            )
+            mock_post.assert_called_with(
+                "http://%s/api/printer/command" % self.ip,
+                json={"commands": ["M106 S0"], "parameters": {}},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+            self.assertEqual(response.status_code, 204)
+
+    def test_bad_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/fan" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "something"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_no_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/fan" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_fan_state_change_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/fan" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "on"},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_fan_change_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/fan" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "on"},
+            )
+            self.assertEqual(response.status_code, 500)
+
+
+class ControlMotorsRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={"version": "123", "connected": True, "plugins": [],},
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/motors" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/motors"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_motors_turn_off(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/motors" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "off"},
+            )
+            mock_post.assert_called_with(
+                "http://%s/api/printer/command" % self.ip,
+                json={"commands": ["M18"], "parameters": {}},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+            self.assertEqual(response.status_code, 204)
+
+    def test_bad_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/motors" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "something"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_no_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/motors" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_motors_state_change_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/motors" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "off"},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_motors_change_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/motors" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "off"},
+            )
+            self.assertEqual(response.status_code, 500)
+
+
+class ControlExtrusionRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={"version": "123", "connected": True, "plugins": [],},
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/extrusion" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/v"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_extrusion(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/extrusion" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"amount": -6},
+            )
+            mock_post.assert_called_with(
+                "http://%s/api/printer/tool" % self.ip,
+                json={"command": "extrude", "amount": -6.0},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+            self.assertEqual(response.status_code, 204)
+
+    def test_bad_amount(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/extrusion" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"amount": "something"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_no_amount(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/extrusion" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_extrusion_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/extrusion" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"amount": -4},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_extrusion_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/extrusion" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"amount": 4},
+            )
+            self.assertEqual(response.status_code, 500)
+
+
+class ControlBedTemperatureRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={"version": "123", "connected": True, "plugins": [],},
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/temperatures/bed" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/v"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_bed_temp(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 6},
+            )
+            self.assertEqual(response.status_code, 204)
+            mock_post.assert_called_with(
+                "http://%s/api/printer/bed" % self.ip,
+                json={"command": "target", "target": 6.0},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+
+    def test_bad_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "something"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_negative_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": -12},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_no_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_extrusion_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 4},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_extrusion_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 4},
+            )
+            self.assertEqual(response.status_code, 500)
+
+
+class ControlTemperaturesRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={"version": "123", "connected": True, "plugins": [],},
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/temperatures/bed" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/v"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_bed_temp(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 6},
+            )
+            self.assertEqual(response.status_code, 204)
+            mock_post.assert_called_with(
+                "http://%s/api/printer/bed" % self.ip,
+                json={"command": "target", "target": 6.0},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_tool0_temp(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/tool0"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 6},
+            )
+            self.assertEqual(response.status_code, 204)
+            mock_post.assert_called_with(
+                "http://%s/api/printer/tool" % self.ip,
+                json={"command": "target", "targets": {"tool0": 6.0}},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+
+    def test_bad_part_name(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/tool1234"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 6},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_bad_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "something"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_negative_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": -12},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_no_target(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_extrusion_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 4},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_extrusion_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/bed"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": 4},
+            )
+            self.assertEqual(response.status_code, 500)
+
+
+class ControlPrintheadRoute(unittest.TestCase):
+    def setUp(self):
+        self.uuid = guid.uuid4()
+        self.ncid = guid.uuid4()
+        self.ip = "192.168.%s" % ".".join(
+            [str(random.randint(0, 255)) for _ in range(2)]
+        )
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+        network_clients.add_network_client(
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+        )
+        printers.add_printer(
+            uuid=self.uuid,
+            network_client_uuid=self.ncid,
+            organization_uuid=UUID_ORG,
+            name="name",
+            client_props={"version": "123", "connected": True, "plugins": [],},
+        )
+
+    def tearDown(self):
+        printers.delete_printer(self.uuid)
+        network_clients.delete_network_client(self.ncid)
+
+    def test_bad_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/notuuid/printhead" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_printer(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/v"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 404)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_jog_printhead(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "jog", "x": 6, "y": 3, "absolute": True},
+            )
+            self.assertEqual(response.status_code, 204)
+            self.assertEqual(mock_post.call_count, 1)
+            mock_post.assert_called_with(
+                "http://%s/api/printer/printhead" % self.ip,
+                json={"command": "jog", "x": 6.0, "y": 3.0, "absolute": True},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(204),
+    )
+    def test_home_printhead(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "home", "axes": ["x", "y"]},
+            )
+            self.assertEqual(response.status_code, 204)
+            self.assertEqual(mock_post.call_count, 1)
+            mock_post.assert_called_with(
+                "http://%s/api/printer/printhead" % self.ip,
+                json={"command": "home", "axes": ["x", "y"]},
+                data=None,
+                files=None,
+                headers={},
+                timeout=200,
+                verify=True,
+            )
+
+    def test_bad_command(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "something", "x": 1},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_home_no_axes(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "home"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_bad_axes(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "home", "axes": ["something"]},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_bad_distance(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "jog", "x": "something"},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_missing_command(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"x": 1},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_printhead_home_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "home", "axes": ["x", "y"]},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_printhead_home_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "home", "axes": ["x", "y"]},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch("server.clients.octoprint.requests.post", return_value=None)
+    def test_printhead_jog_fail_comms(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "jog", "x": 7},
+            )
+            self.assertEqual(response.status_code, 500)
+
+    @mock.patch(
+        "server.clients.octoprint.requests.post", return_value=Response(409),
+    )
+    def test_printhead_jog_fail_on_device(self, mock_post):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/printhead" % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"command": "jog", "x": 3},
+            )
+            self.assertEqual(response.status_code, 500)

@@ -132,7 +132,7 @@ def activate_user():
         pwd_hash=pwd_hash.decode("utf8"),
         force_pwd_change=False,
     )
-    return make_response("", 200)
+    return make_response("", 204)
 
 
 @app.route("/users/me/request-password-reset", methods=["POST"])
@@ -214,7 +214,7 @@ def reset_password():
     send_mail.delay(
         [email], "PASSWORD_RESET_CONFIRMATION", {"email": email,},
     )
-    return make_response("", 200)
+    return make_response("", 204)
 
 
 def get_user_identity(userdata, token_freshness):
