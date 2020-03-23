@@ -1249,9 +1249,11 @@ select {
 
   .printer-control-panel {
     @include plumber(
+      $font-size: 1.618,
+      $line-height: 3,
       $leading-top: 2,
+      $leading-bottom: 1
     );
-
 
     @media (min-width: $screen-sm-min) {
       display: grid;
@@ -1269,7 +1271,9 @@ select {
 
       input {
         width: 4em;
-        padding: $base-unit/2;
+        padding: 0 $base-unit/2;
+        border: $border-default;
+        border-radius: 0;
       }
 
       .btn {
@@ -1278,7 +1282,7 @@ select {
 
       .input-appendix {
         display: inline-block;
-        margin: 0 $base-unit/2;
+        margin: 0 $base-unit 0 $base-unit/2;
       }
 
 
@@ -1314,9 +1318,7 @@ select {
   }
 
   .printer-connection-status {
-    @include plumber(
-      $leading-top: 2,
-    );
+    padding-top: $spacing-default/2;
   }
 }
 
