@@ -55,7 +55,7 @@ class TasksRoute(unittest.TestCase):
                 json={"task": "scan_network"},
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 500)
             app.config["CLOUD_MODE"] = False
 
     @mock.patch("server.routes.tasks.scan_network.delay", return_value=None)

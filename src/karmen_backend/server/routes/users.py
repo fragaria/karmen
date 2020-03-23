@@ -19,16 +19,16 @@ from . import jwt_force_password_change, validate_org_access
 def add_user_to_org(org_uuid):
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", None)
     org_role = data.get("role", None)
     if not email or not org_role:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing email"), 400))
     if org_role not in ["admin", "user"]:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Bad role"), 400))
     email = email.lstrip().rstrip().lower()
     if not is_email(email):
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Invalid email"), 400))
 
     existing = users.get_by_email(email)
     # completely new user
@@ -54,7 +54,7 @@ def add_user_to_org(org_uuid):
             organization_roles.get_organization_role(org_uuid, user_uuid)
             and existing["activated"]
         ):
-            return abort(make_response("", 409))
+            return abort(make_response(jsonify(message="User already exists"), 409))
         # an account that is not activated but has already been sent an invite
         activation_key = guid.uuid4()
         activation_key_expires = datetime.now().astimezone() + timedelta(hours=24)
@@ -114,19 +114,19 @@ def add_user_to_org(org_uuid):
 def update_user(org_uuid, uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
-        return abort(make_response("", 409))
+        return abort(make_response(jsonify(message="Cannot update self"), 409))
     user_role = organization_roles.get_organization_role(org_uuid, uuid)
     user = users.get_by_uuid(uuid)
     if user is None or user_role is None:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
 
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
 
     role = data.get("role", user_role["role"])
     if role not in ["admin", "user"]:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Bad role"), 400))
 
     organization_roles.set_organization_role(org_uuid, uuid, role)
     return (
@@ -151,11 +151,11 @@ def update_user(org_uuid, uuid):
 def delete_user(org_uuid, uuid):
     admin_uuid = get_jwt_identity()
     if admin_uuid == uuid:
-        return abort(make_response("", 409))
+        return abort(make_response(jsonify(message="Cannot update self"), 409))
     user_role = organization_roles.get_organization_role(org_uuid, uuid)
     user = users.get_by_uuid(uuid)
     if user is None or user_role is None:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     organization = organizations.get_by_uuid(org_uuid)
     api_tokens.revoke_all_tokens(uuid, org_uuid)
     organization_roles.drop_organization_role(org_uuid, uuid)

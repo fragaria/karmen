@@ -53,7 +53,9 @@ def gcodes_list(org_uuid):
     gcode_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="order_by supports only one data field"), 400)
+        )
     try:
         limit = int(request.args.get("limit", 200))
         if limit and limit < 0:
@@ -126,7 +128,7 @@ def gcode_detail(org_uuid, uuid):
     validate_uuid(uuid)
     gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     user = users.get_by_uuid(gcode.get("user_uuid"))
     user_mapping = {}
     if user is not None:
@@ -140,13 +142,19 @@ def gcode_detail(org_uuid, uuid):
 @cross_origin()
 def gcode_create(org_uuid):
     if "file" not in request.files:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="No file uploaded"), 400))
     incoming = request.files["file"]
     if incoming.filename == "":
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="Uploaded file has to have a name"), 400)
+        )
 
     if not re.search(r"\.gco(de)?$", incoming.filename):
-        return abort(make_response("", 415))
+        return abort(
+            make_response(
+                jsonify(message="Uploaded file does not look like gcode"), 415
+            )
+        )
 
     try:
         saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
@@ -192,7 +200,7 @@ def gcode_file(org_uuid, uuid):
     validate_uuid(uuid)
     gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     try:
         return send_file(
             gcode["absolute_path"],
@@ -200,7 +208,7 @@ def gcode_file(org_uuid, uuid):
             attachment_filename=gcode["filename"],
         )
     except FileNotFoundError:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="File not found"), 404))
 
 
 @app.route("/organizations/<org_uuid>/gcodes/<uuid>", methods=["DELETE"])
@@ -211,7 +219,7 @@ def gcode_delete(org_uuid, uuid):
     validate_uuid(uuid)
     gcode = gcodes.get_gcode(uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     user = get_current_user()
     org_role = organization_roles.get_organization_role(org_uuid, user["uuid"])
     if (

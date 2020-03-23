@@ -478,7 +478,7 @@ class CreateRoute(unittest.TestCase):
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
 
-                self.assertEqual(response.status_code, 400)
+                self.assertEqual(response.status_code, 500)
         except Exception as e:
             raise e
         finally:

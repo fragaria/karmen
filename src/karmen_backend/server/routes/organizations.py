@@ -14,10 +14,10 @@ from . import jwt_force_password_change, validate_org_access
 def create_organization():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     name = data.get("name")
     if not name:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing name"), 400))
     uuid = guid.uuid4()
     user = get_current_user()
     name = name.lstrip().rstrip()
@@ -34,13 +34,13 @@ def create_organization():
 def update_organization(org_uuid):
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     name = data.get("name")
     if not name:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing name"), 400))
     existing = organizations.get_by_uuid(org_uuid)
     if not existing:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     organizations.update_organization(uuid=org_uuid, name=name)
     return jsonify({"uuid": org_uuid, "name": name}), 200
 
