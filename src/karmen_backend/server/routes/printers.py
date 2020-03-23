@@ -141,15 +141,9 @@ def printers_list(org_uuid):
 @validate_org_access()
 @cross_origin()
 def printer_detail(org_uuid, uuid):
-    validate_uuid(uuid)
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    return jsonify(make_printer_response(printer_data, fields))
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    return jsonify(make_printer_response(printer_inst, fields))
 
 
 @app.route("/organizations/<org_uuid>/printers", methods=["POST"])
@@ -292,27 +286,21 @@ def printer_delete(org_uuid, uuid):
 @validate_org_access("admin")
 @cross_origin()
 def printer_patch(org_uuid, uuid):
-    validate_uuid(uuid)
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+    printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
     if not data:
         return abort(make_response("", 400))
-    name = data.get("name", printer["name"])
-    api_key = data.get("api_key", printer["client_props"].get("api_key", None))
+    name = data.get("name", printer_inst.name)
+    api_key = data.get("api_key", printer_inst.client_info.api_key)
     printer_props = data.get("printer_props", {})
-
     if not name:
         return abort(make_response("", 400))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+
     printer_inst.add_api_key(api_key)
-    if data.get("api_key", "-1") != "-1" and data.get("api_key", "-1") != printer[
-        "client_props"
-    ].get("api_key", None):
+    if (
+        data.get("api_key", "-1") != "-1"
+        and data.get("api_key", "-1") != printer_inst.client_info.api_key
+    ):
         printer_inst.sniff()  # this can probably be offloaded to check_printer task
     if printer_props:
         if not printer_inst.get_printer_props():
@@ -358,19 +346,11 @@ def printer_patch(org_uuid, uuid):
 @cross_origin()
 def printer_change_connection(org_uuid, uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+    printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
     if not data:
         return abort(make_response("", 400))
     state = data.get("state", None)
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
     if state == "online":
         r = printer_inst.connect_printer()
         return (
@@ -400,21 +380,13 @@ def printer_modify_job(org_uuid, uuid):
     # and does not handle prints issued by bypassing Karmen Hub
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+    printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
     if not data:
         return abort(make_response("", 400))
     action = data.get("action", None)
     if not action:
         return abort(make_response("", 400))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
     try:
         if printer_inst.modify_current_job(action):
             user = get_current_user()
@@ -467,15 +439,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
     can emulate a video-like experience. Since we have no sound, this should be
     fine.
     """
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+    printer_inst = get_printer_inst(org_uuid, uuid)
     if printer_inst.client_info.webcam is None:
         return abort(make_response("", 404))
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
@@ -484,23 +448,23 @@ def printer_webcam_snapshot(org_uuid, uuid):
 
     # process current future if done
     if (
-        FUTURES_MICROCACHE.get(printer["network_client_uuid"])
-        and FUTURES_MICROCACHE.get(printer["network_client_uuid"]).done()
+        FUTURES_MICROCACHE.get(printer_inst.network_client_uuid)
+        and FUTURES_MICROCACHE.get(printer_inst.network_client_uuid).done()
     ):
-        WEBCAM_MICROCACHE[printer["network_client_uuid"]] = FUTURES_MICROCACHE[
-            printer["network_client_uuid"]
+        WEBCAM_MICROCACHE[printer_inst.network_client_uuid] = FUTURES_MICROCACHE[
+            printer_inst.network_client_uuid
         ].result()
         try:
-            del FUTURES_MICROCACHE[printer["network_client_uuid"]]
+            del FUTURES_MICROCACHE[printer_inst.network_client_uuid]
         except Exception:
             # that's ok, probably a race condition
             pass
     # issue a new future if not present
-    if not FUTURES_MICROCACHE.get(printer["network_client_uuid"]):
-        FUTURES_MICROCACHE[printer["network_client_uuid"]] = executor.submit(
+    if not FUTURES_MICROCACHE.get(printer_inst.network_client_uuid):
+        FUTURES_MICROCACHE[printer_inst.network_client_uuid] = executor.submit(
             _get_webcam_snapshot, snapshot_url
         )
-    response = WEBCAM_MICROCACHE.get(printer["network_client_uuid"])
+    response = WEBCAM_MICROCACHE.get(printer_inst.network_client_uuid)
     if response is not None and response is not False:
         return (
             response.content,
@@ -520,15 +484,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
 @validate_org_access()
 @cross_origin()
 def printer_set_lights(org_uuid, uuid):
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+    printer_inst = get_printer_inst(org_uuid, uuid)
     try:
         # TODO do not only toggle
         lights_on = printer_inst.are_lights_on()
@@ -547,41 +503,36 @@ def printer_set_lights(org_uuid, uuid):
 @cross_origin()
 def control_printhead(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
-
-    try:
-        data = request.json
-        if "command" not in data:
+    data = request.json
+    if "command" not in data:
+        return abort(make_response("", 400))
+    if data["command"] == "jog":
+        absolute = data.get("absolute", False)
+        for axis in ["x", "y", "z"]:
+            distance = data.get(axis)
+            if distance:
+                try:
+                    distance = int(distance)
+                except ValueError:
+                    return abort(make_response("Distance must be a number", 400))
+                # TODO this would be better to call only once and not separately for each axis
+                r = printer_inst.move_head(
+                    axis=axis, distance=distance, absolute=absolute
+                )
+                if not r:
+                    return make_response("", 500)
+                return make_response("", 200)
+    elif data["command"] == "home":
+        axes = data.get("axes")
+        if axes is None:
             return abort(make_response("", 400))
-        if data["command"] == "jog":
-            absolute = data.get("absolute", False)
-            for axis in ["x", "y", "z"]:
-                distance = data.get(axis)
-                if distance:
-                    try:
-                        distance = int(distance)
-                    except ValueError:
-                        return abort(make_response("Distance must be a number", 400))
-                    r = printer_inst.move_head(
-                        axis=axis, distance=int(distance), absolute=absolute
-                    )
-                    if not r:
-                        return make_response("", 500)
-                    return make_response("", 200)
-
-        elif data["command"] == "home":
-            axes = data.get("axes")
-            if axes is None:
+        for axis in axes:
+            if axis not in ["x", "y", "z"]:
                 return abort(make_response("", 400))
-            for axis in axes:
-                if axis not in ["x", "y", "z"]:
-                    return abort(make_response("", 400))
-            r = printer_inst.home_head(axes)
-            if not r:
-                return make_response("", 500)
-            return make_response("", 200)
-
-    except PrinterClientException:
-        return make_response(jsonify({"status": "unavailable"}), 200)
+        r = printer_inst.home_head(axes)
+        if not r:
+            return make_response("", 500)
+        return make_response("", 200)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/fan", methods=["POST"])
@@ -590,18 +541,14 @@ def control_printhead(org_uuid, uuid):
 @cross_origin()
 def control_fan(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
-    try:
-        data = request.json
-        state = data.get("targetState")
-        if state is None:
-            return abort(make_response("", 400))
-        r = printer_inst.set_fan(state)
-        if not r:
-            return make_response("", 500)
-        return make_response("", 200)
-
-    except PrinterClientException:
-        return make_response(jsonify({"status": "unavailable"}), 200)
+    data = request.json
+    state = data.get("target")
+    if state is None:
+        return abort(make_response("", 400))
+    r = printer_inst.set_fan(state)
+    if not r:
+        return make_response("", 500)
+    return make_response("", 200)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/motors", methods=["POST"])
@@ -610,19 +557,14 @@ def control_fan(org_uuid, uuid):
 @cross_origin()
 def control_motors(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
-    try:
-        data = request.json
-        state = data.get("targetState")
-        if state is None:
-            return abort(make_response("", 400))
-        if state == "off":
-            r = printer_inst.motors_off()
-            if not r:
-                return make_response("", 500)
-            return make_response("", 200)
+    data = request.json
+    state = data.get("target")
+    if state is None or state != "off":
         return abort(make_response("", 400))
-    except PrinterClientException:
-        return make_response(jsonify({"status": "unavailable"}), 200)
+    r = printer_inst.motors_off()
+    if not r:
+        return make_response("", 500)
+    return make_response("", 200)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/extrusion", methods=["POST"])
@@ -631,21 +573,18 @@ def control_motors(org_uuid, uuid):
 @cross_origin()
 def control_extrusion(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    amount = data.get("amount")
+    if amount is None:
+        return abort(make_response("", 400))
     try:
-        data = request.json
-        amount = data.get("amount")
-        if amount is None:
-            return abort(make_response("", 400))
-        try:
-            amount = int(amount)
-        except ValueError:
-            return abort(make_response("", 400))
-        r = printer_inst.extrude(amount)
-        if not r:
-            return make_response("", 500)
-        return make_response("", 200)
-    except PrinterClientException:
-        return make_response(jsonify({"status": "unavailable"}), 200)
+        amount = float(amount)
+    except ValueError:
+        return abort(make_response("Amount must be a number", 400))
+    r = printer_inst.extrude(amount)
+    if not r:
+        return make_response("", 500)
+    return make_response("", 200)
 
 
 @app.route(
@@ -659,21 +598,18 @@ def control_tool_temp(org_uuid, uuid, tool_number):
     printer_inst = get_printer_inst(org_uuid, uuid)
     if tool_number not in ["0", "1"]:
         return abort(make_response("", 400))
+    data = request.json
+    target = data.get("target")
+    if target is None:
+        return abort(make_response("", 400))
     try:
-        data = request.json
-        amount = data.get("amount")
-        if amount is None:
-            return abort(make_response("", 400))
-        try:
-            amount = float(amount)
-        except ValueError:
-            return abort(make_response("", 400))
-        r = printer_inst.set_temperature(device="tool" + tool_number, temp=amount)
-        if not r:
-            return make_response("a", 500)
-        return make_response("", 200)
-    except PrinterClientException:
-        return make_response(jsonify({"status": "unavailable"}), 200)
+        target = float(target)
+    except ValueError:
+        return abort(make_response("Target must be a number", 400))
+    r = printer_inst.set_temperature(device="tool" + tool_number, temp=target)
+    if not r:
+        return make_response("", 500)
+    return make_response("", 200)
 
 
 @app.route(
@@ -684,18 +620,15 @@ def control_tool_temp(org_uuid, uuid, tool_number):
 @cross_origin()
 def control_bed_temp(org_uuid, uuid):
     printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    target = data.get("target")
+    if target is None:
+        return abort(make_response("", 400))
     try:
-        data = request.json
-        amount = data.get("amount")
-        if amount is None:
-            return abort(make_response("", 400))
-        try:
-            amount = float(amount)
-        except ValueError:
-            return abort(make_response("", 400))
-        r = printer_inst.set_temperature(device="bed", temp=amount)
-        if not r:
-            return make_response("", 500)
-        return make_response("", 200)
-    except PrinterClientException:
-        return make_response(jsonify({"status": "unavailable"}), 200)
+        target = float(target)
+    except ValueError:
+        return abort(make_response("Target must be a number", 400))
+    r = printer_inst.set_temperature(device="bed", temp=target)
+    if not r:
+        return make_response("", 500)
+    return make_response("", 200)

@@ -56,7 +56,7 @@ export const changeFanState = (orgUuid, uuid, targetState) => {
       uuid
     },
     data: {
-      targetState
+      target: targetState
     },
     parseResponse: false
   });
@@ -67,7 +67,7 @@ export const changeMotorsState = (orgUuid, uuid, targetState) => {
     uri: `/organizations/${orgUuid}/printers/${uuid}/motors`,
     uuid,
     data: {
-      targetState
+      target: targetState
     },
     parseResponse: false
   });

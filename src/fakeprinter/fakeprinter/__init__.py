@@ -227,7 +227,7 @@ def tool():
     global STATE
     data = request.json
     if data and data.get("targets"):
-        STATE["temperature_bed"] = data.get("targets").get("tool0")
+        STATE["temperature_tool"] = data.get("targets").get("tool0")
     return "", 204
 
 
