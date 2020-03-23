@@ -81,79 +81,6 @@ const ChangeConnectionModal = ({
   );
 };
 
-const CancelPrintModal = ({ modal, onCurrentJobStateChange }) => {
-  return (
-    <>
-      {modal.isOpen && (
-        <modal.Modal>
-          <h1 className="modal-title text-center">
-            Are you sure? You are about to cancel the whole print!
-          </h1>
-          <div className="cta-box text-center">
-            <button
-              className="btn"
-              onClick={() => {
-                onCurrentJobStateChange("cancel").then(() => {
-                  modal.closeModal();
-                });
-              }}
-            >
-              Cancel the print!
-            </button>{" "}
-            <button className="btn btn-plain" onClick={modal.closeModal}>
-              Close
-            </button>
-          </div>
-        </modal.Modal>
-      )}
-    </>
-  );
-};
-
-const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
-  const cancelPrintModal = useMyModal();
-
-  if (
-    !printer.status ||
-    !printer.client ||
-    ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
-    printer.client.access_level !== "unlocked"
-  ) {
-    return <></>;
-  }
-
-  return (
-    <>
-      {printer.status.state === "Paused" ? (
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            onCurrentJobStateChange("resume");
-          }}
-        >
-          Resume print
-        </button>
-      ) : (
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            onCurrentJobStateChange("pause");
-          }}
-        >
-          Pause print
-        </button>
-      )}
-      <button className="btn btn-sm" onClick={cancelPrintModal.openModal}>
-        Cancel print
-      </button>
-      <CancelPrintModal
-        modal={cancelPrintModal}
-        onCurrentJobStateChange={onCurrentJobStateChange}
-      />
-    </>
-  );
-};
-
 const PrinterDetail = ({
   match,
   printer,
@@ -207,22 +134,16 @@ const PrinterDetail = ({
             orgUuid={match.params.orguuid}
           />
           <Progress {...printer.job} />
-          <div className="cta-box text-center hidden-xs">
-            <PrinterCurrentPrintControl
-              printer={printer}
-              onCurrentJobStateChange={changeCurrentJobState}
-            />
-            {printer.lights !== "unavailable" && (
-              <BusyButton
-                className="btn btn-sm"
-                type="button"
-                onClick={changeLights}
-                busyChildren="Switching lights..."
+
+          {role === "admin" && (
+            <div className="cta-box text-center hidden-xs">
+              <Link
+                to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
               >
-                {`Lights ${printer.lights === "on" ? "off" : "on"}`}
-              </BusyButton>
-            )}
-          </div>
+                <button className="btn btn-sm btn-outline">Printer settings</button>
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="printer-detail-meta">
@@ -279,22 +200,15 @@ const PrinterDetail = ({
           </div>
         </div>
 
-        <div className="cta-box text-center visible-xs">
-          <PrinterCurrentPrintControl
-            printer={printer}
-            onCurrentJobStateChange={changeCurrentJobState}
-          />
-          {printer.lights !== "unavailable" && (
-            <BusyButton
-              className="btn btn-sm"
-              type="button"
-              onClick={changeLights}
-              busyChildren="Switching lights..."
+        {role === "admin" && (
+          <div className="cta-box text-center visible-xs">
+            <Link
+              to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
             >
-              {`Lights ${printer.lights === "on" ? "off" : "on"}`}
-            </BusyButton>
-          )}
-        </div>
+              <button className="btn btn-sm btn-outline">Printer settings</button>
+            </Link>
+          </div>
+        )}
 
         <div className="printer-detail-jobs">
           <RoutedTabs
@@ -329,6 +243,7 @@ const PrinterDetail = ({
               path={`${match.url}/tab-controls`}
               render={props => (
                 <ControlsTab
+                  printer={printer}
                   available={
                     !(
                       printer.client.access_level === "unlocked" &&
@@ -342,6 +257,8 @@ const PrinterDetail = ({
                   movePrinthead={movePrinthead}
                   changeFanState={changeFanState}
                   changeMotorsState={changeMotorsState}
+                  changeCurrentJobState={changeCurrentJobState}
+                  changeLights={changeLights}
                   extrude={extrude}
                   setTemperature={setTemperature}
                 />
@@ -352,16 +269,6 @@ const PrinterDetail = ({
               render={props => <ConnectionTab printer={printer} />}
             />
           </Switch>
-
-          {role === "admin" && (
-            <div className="cta-box text-center">
-              <Link
-                to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
-              >
-                <button className="btn btn-outline">Printer settings</button>
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </section>

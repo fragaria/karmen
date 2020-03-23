@@ -1248,16 +1248,24 @@ select {
   }
 
   .printer-control-panel {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-gap: $spacing-default;
-    padding-top: $spacing-default;
+    @include plumber(
+      $leading-top: 2,
+    );
+
+
+    @media (min-width: $screen-sm-min) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-gap: $spacing-default;
+    }
 
     .controls {
-      display: grid;
-      grid-gap: $base-unit;
-      align-items: center;
-      grid-template-columns: auto minmax(0, 1fr);
+      @media (min-width: $screen-sm-min) {
+        display: grid;
+        grid-gap: $base-unit;
+        align-items: center;
+        grid-template-columns: auto minmax(0, 1fr);
+      }
 
       input {
         width: 4em;
@@ -1272,6 +1280,13 @@ select {
         display: inline-block;
         margin: 0 $base-unit/2;
       }
+
+
+      @media (max-width: $screen-sm-min) {
+        > div {
+          margin-bottom: $spacing-default/2;
+        }
+      }
     }
 
     .axes {
@@ -1283,6 +1298,11 @@ select {
         display: block;
         margin-bottom: $spacing-default/2;
         text-align: center;
+        white-space: nowrap;
+
+        @media (max-width: $screen-sm-min) {
+          margin-bottom: $spacing-default/2;
+        }
       }
 
       .axes-content-grid {
@@ -1291,6 +1311,12 @@ select {
         grid-gap: 5px;
       }
     }
+  }
+
+  .printer-connection-status {
+    @include plumber(
+      $leading-top: 2,
+    );
   }
 }
 

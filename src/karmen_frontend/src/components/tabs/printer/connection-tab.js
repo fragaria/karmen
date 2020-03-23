@@ -4,7 +4,9 @@ import { PrinterConnectionStatus } from "../../printers/printer-data";
 const ControlsTab = ({ printer }) => {
   return (
     <div className="container">
-      <PrinterConnectionStatus printer={printer} />
+      <div className="printer-connection-status">
+        <PrinterConnectionStatus printer={printer} />
+      </div>
     </div>
   );
 };

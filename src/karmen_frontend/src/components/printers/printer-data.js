@@ -116,7 +116,7 @@ export const PrinterProgress = ({ printer }) => {
 
 export const PrinterConnectionStatus = ({ printer }) => {
   return (
-    <>
+    <dl className="dl-horizontal">
       {printer.client && (
         <>
           <dt className="term">Client: </dt>
@@ -175,7 +175,7 @@ export const PrinterConnectionStatus = ({ printer }) => {
           <dd className="decription">{printer.client.api_key}</dd>
         </>
       )}
-    </>
+    </dl>
   );
 };
 

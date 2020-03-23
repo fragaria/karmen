@@ -1,5 +1,83 @@
 import React, { useState } from "react";
 import BusyButton from "../../utils/busy-button";
+import { useMyModal } from "../../utils/modal";
+
+const CancelPrintModal = ({ modal, onCurrentJobStateChange }) => {
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">
+            Are you sure? You are about to cancel the whole print!
+          </h1>
+          <div className="cta-box text-center">
+            <button
+              className="btn"
+              onClick={() => {
+                onCurrentJobStateChange("cancel").then(() => {
+                  modal.closeModal();
+                });
+              }}
+            >
+              Cancel the print!
+            </button>{" "}
+            <button className="btn btn-plain" onClick={modal.closeModal}>
+              Close
+            </button>
+          </div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
+
+const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
+  const cancelPrintModal = useMyModal();
+
+  if (
+    !printer.status ||
+    !printer.client ||
+    ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
+    printer.client.access_level !== "unlocked"
+  ) {
+    return <></>;
+  }
+
+  return (
+    <>
+      <label>Print</label>
+
+      <div>
+        {printer.status.state === "Paused" ? (
+          <button
+            className="btn btn-xs"
+            onClick={() => {
+              onCurrentJobStateChange("resume");
+            }}
+          >
+            Resume print
+          </button>
+        ) : (
+          <button
+            className="btn btn-xs"
+            onClick={() => {
+              onCurrentJobStateChange("pause");
+            }}
+          >
+            Pause print
+          </button>
+        )}
+        <button className="btn btn-xs" onClick={cancelPrintModal.openModal}>
+          Cancel print
+        </button>
+        <CancelPrintModal
+          modal={cancelPrintModal}
+          onCurrentJobStateChange={onCurrentJobStateChange}
+        />
+      </div>
+    </>
+  );
+};
 
 const AxesXYControl = ({ movePrinthead }) => {
   // TODO add distance picker
@@ -193,7 +271,7 @@ const ExtrusionControl = ({ extrude }) => {
   );
 };
 
-const DirectControl = ({ changeFanState, changeMotorsState }) => {
+const DirectControl = ({ changeFanState, changeMotorsState, changeLightsState, printer }) => {
   return (
     <>
       <label>Fan</label>
@@ -233,6 +311,22 @@ const DirectControl = ({ changeFanState, changeMotorsState }) => {
           Off
         </BusyButton>
       </div>
+
+      {printer.lights !== "unavailable" && (
+        <>
+          <label>Lights</label>
+          <div>
+            <BusyButton
+              className="btn btn-xs"
+              type="button"
+              onClick={changeLightsState}
+              busyChildren="Switching lights..."
+            >
+              {printer.lights === "on" ? "Off" : "On"}
+            </BusyButton>
+          </div>
+        </>
+      )}
     </>
   );
 };
@@ -277,11 +371,14 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
 };
 
 const ControlsTab = ({
+  printer,
   available,
   temperatures,
   movePrinthead,
   changeFanState,
   changeMotorsState,
+  changeLights,
+  changeCurrentJobState,
   extrude,
   setTemperature
 }) => {
@@ -294,17 +391,28 @@ const ControlsTab = ({
       ) : (
         <div className="printer-control-panel">
           <div className="controls">
+
+            <PrinterCurrentPrintControl
+              printer={printer}
+              onCurrentJobStateChange={changeCurrentJobState}
+            />
+
             <DirectControl
               changeFanState={changeFanState}
               changeMotorsState={changeMotorsState}
+              changeLightsState={changeLights}
+              printer={printer}
             />
+
             <ExtrusionControl extrude={extrude} />
+
             <TemperatureControl
               name="Tool temperature"
               partName="tool0"
               current={temperatures.tool0 && temperatures.tool0.actual}
               setTemperature={setTemperature}
             />
+
             <TemperatureControl
               name="Bed temperature"
               partName="bed"
