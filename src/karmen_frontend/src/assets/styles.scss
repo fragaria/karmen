@@ -1248,10 +1248,48 @@ select {
   }
 
   .printer-control-panel {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-gap: $spacing-default;
+    padding-top: $spacing-default;
+
+    .controls {
+      display: grid;
+      grid-gap: $base-unit;
+      align-items: center;
+      grid-template-columns: auto minmax(0, 1fr);
+
+      input {
+        width: 4em;
+        padding: $base-unit/2;
+      }
+
+      .btn {
+        margin-right: $base-unit/2;
+      }
+
+      .input-appendix {
+        display: inline-block;
+        margin: 0 $base-unit/2;
+      }
+    }
+
     .axes {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-gap: 5px;
+      grid-gap: $spacing-default;
+
+      .axes-content-title {
+        display: block;
+        margin-bottom: $spacing-default/2;
+        text-align: center;
+      }
+
+      .axes-content-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 5px;
+      }
     }
   }
 }

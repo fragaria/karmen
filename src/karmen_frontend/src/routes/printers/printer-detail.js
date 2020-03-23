@@ -303,8 +303,8 @@ const PrinterDetail = ({
             tabClassName="react-tabs__tab"
             activeTabClassName="react-tabs__tab--selected"
           >
-            <NavTab to="/tab-jobs">Jobs</NavTab>
             <NavTab to="/tab-controls">Controls</NavTab>
+            <NavTab to="/tab-jobs">Jobs</NavTab>
             <NavTab to="/tab-connection">Connection</NavTab>
           </RoutedTabs>
 
@@ -312,7 +312,7 @@ const PrinterDetail = ({
             <Route
               exact
               path={`${match.url}`}
-              render={() => <Redirect replace to={`${match.url}/tab-jobs`} />}
+              render={() => <Redirect replace to={`${match.url}/tab-controls`} />}
             />
             <Route
               path={`${match.url}/tab-jobs`}

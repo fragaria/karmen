@@ -5,15 +5,9 @@ const AxesXYControl = ({ movePrinthead }) => {
   // TODO add distance picker
   const [distance] = useState(10);
   return (
-    <div>
-      <p>Move X/Y by {distance}mm</p>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gridGap: "5px"
-        }}
-      >
+    <div className="axes-content">
+      <span className="axes-content-title">Move on X/Y axis <br/>by {distance}mm</span>
+      <div className="axes-content-grid">
         <div style={{ gridColumn: 2, gridRow: 1 }}>
           <BusyButton
             className="btn btn-sm"
@@ -26,7 +20,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             }}
             busyChildren="o"
           >
-            <span className="icon-up1"></span>
+            <span className="icon-arrow-up"></span>
           </BusyButton>
         </div>
         <div style={{ gridColumn: 1, gridRow: 2 }}>
@@ -41,7 +35,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             }}
             busyChildren="o"
           >
-            <span className="icon-left"></span>
+            <span className="icon-arrow-left"></span>
           </BusyButton>
         </div>
         <div style={{ gridColumn: 2, gridRow: 2 }}>
@@ -70,10 +64,9 @@ const AxesXYControl = ({ movePrinthead }) => {
             }}
             busyChildren="o"
           >
-            <span className="icon-right"></span>
+            <span className="icon-arrow-right"></span>
           </BusyButton>
         </div>
-
         <div style={{ gridColumn: 2, gridRow: 3 }}>
           <BusyButton
             className="btn btn-sm"
@@ -86,7 +79,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             }}
             busyChildren="o"
           >
-            <span className="icon-down1"></span>
+            <span className="icon-arrow-down"></span>
           </BusyButton>
         </div>
       </div>
@@ -98,51 +91,53 @@ const AxesZControl = ({ movePrinthead }) => {
   // TODO add distance picker
   const [distance] = useState(10);
   return (
-    <div>
-      <p>Move Z by {distance}mm</p>
-      <div>
-        <BusyButton
-          className="btn btn-sm"
-          type="button"
-          onClick={() => {
-            movePrinthead("jog", {
-              z: distance,
-              absolute: false
-            });
-          }}
-          busyChildren="o"
-        >
-          <span className="icon-up1"></span>
-        </BusyButton>
-      </div>
-      <div>
-        <BusyButton
-          className="btn btn-sm"
-          type="button"
-          onClick={() => {
-            movePrinthead("home", {
-              axes: ["z"]
-            });
-          }}
-          busyChildren="o"
-        >
-          <span className="icon-home"></span>
-        </BusyButton>
-      </div>
-      <div>
-        <BusyButton
-          className="btn btn-sm"
-          type="button"
-          onClick={() => {
-            movePrinthead("jog", {
-              z: -distance,
-              absolute: false
-            });
-          }}
-          busyChildren="o"
-        >
-          <span className="icon-down1"></span>
-        </BusyButton>
+    <div className="axes-content">
+      <span className="axes-content-title">Move on Z axis <br/>by {distance}mm</span>
+      <div className="axes-content-grid">
+        <div style={{ gridColumn: 2, gridRow: 1 }}>
+          <BusyButton
+            className="btn btn-sm"
+            type="button"
+            onClick={() => {
+              movePrinthead("jog", {
+                z: distance,
+                absolute: false
+              });
+            }}
+            busyChildren="o"
+          >
+            <span className="icon-arrow-up"></span>
+          </BusyButton>
+        </div>
+        <div style={{ gridColumn: 2, gridRow: 2 }}>
+          <BusyButton
+            className="btn btn-sm"
+            type="button"
+            onClick={() => {
+              movePrinthead("home", {
+                axes: ["z"]
+              });
+            }}
+            busyChildren="o"
+          >
+            <span className="icon-home"></span>
+          </BusyButton>
+        </div>
+        <div style={{ gridColumn: 2, gridRow: 3 }}>
+          <BusyButton
+            className="btn btn-sm"
+            type="button"
+            onClick={() => {
+              movePrinthead("jog", {
+                z: -distance,
+                absolute: false
+              });
+            }}
+            busyChildren="o"
+          >
+            <span className="icon-arrow-down"></span>
+          </BusyButton>
+        </div>
       </div>
     </div>
   );
@@ -151,112 +146,133 @@ const AxesZControl = ({ movePrinthead }) => {
 const ExtrusionControl = ({ extrude }) => {
   const [amount, setAmount] = useState(5);
   return (
-    <div>
-      <label htmlFor="extrusion">Extrude or retract material (mm)</label>
-      <input
-        name="extrusion"
-        id="extrusion"
-        type="number"
-        value={amount}
-        step="0.1"
-        min="0"
-        onChange={e => {
-          setAmount(e.target.value ? parseFloat(e.target.value) : "");
-        }}
-      />
-      <BusyButton
-        className="btn btn-sm"
-        type="button"
-        disabled={amount === 0 || amount === ""}
-        onClick={() => {
-          extrude(amount);
-        }}
-        busyChildren="Working..."
-      >
-        Extrude
-      </BusyButton>
-      <BusyButton
-        className="btn btn-sm"
-        type="button"
-        disabled={amount === 0 || amount === ""}
-        onClick={() => {
-          extrude(-amount);
-        }}
-        busyChildren="Working..."
-      >
-        Retract
-      </BusyButton>
-    </div>
+    <>
+      <label htmlFor="extrusion">Move material by</label>
+
+      <div>
+        <input
+          name="extrusion"
+          id="extrusion"
+          type="number"
+          value={amount}
+          step="1"
+          min="0"
+          size="3"
+          onChange={e => {
+            setAmount(e.target.value ? parseFloat(e.target.value) : "");
+          }}
+        />
+
+        <span className="input-appendix">mm</span>
+
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          disabled={amount === 0 || amount === ""}
+          onClick={() => {
+            extrude(amount);
+          }}
+          busyChildren="Working..."
+        >
+          Extrude
+        </BusyButton>
+
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          disabled={amount === 0 || amount === ""}
+          onClick={() => {
+            extrude(-amount);
+          }}
+          busyChildren="Working..."
+        >
+          Retract
+        </BusyButton>
+      </div>
+    </>
   );
 };
 
 const DirectControl = ({ changeFanState, changeMotorsState }) => {
   return (
-    <div>
-      <BusyButton
-        className="btn btn-sm"
-        type="button"
-        onClick={() => {
-          changeFanState("on");
-        }}
-        busyChildren="Working..."
-      >
-        Fan on
-      </BusyButton>
-      <BusyButton
-        className="btn btn-sm"
-        type="button"
-        onClick={() => {
-          changeFanState("off");
-        }}
-        busyChildren="Working..."
-      >
-        Fan off
-      </BusyButton>
-      <BusyButton
-        className="btn btn-sm"
-        type="button"
-        onClick={() => {
-          changeMotorsState("off");
-        }}
-        busyChildren="Working..."
-      >
-        Motors off
-      </BusyButton>
-    </div>
+    <>
+      <label>Fan</label>
+      <div>
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          onClick={() => {
+            changeFanState("on");
+          }}
+          busyChildren="Working..."
+        >
+          Force ON
+        </BusyButton>
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          onClick={() => {
+            changeFanState("off");
+          }}
+          busyChildren="Working..."
+        >
+          Force OFF
+        </BusyButton>
+      </div>
+
+      <label>Motors</label>
+      <div>
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          onClick={() => {
+            changeMotorsState("off");
+          }}
+          busyChildren="Working..."
+        >
+          Off
+        </BusyButton>
+      </div>
+    </>
   );
 };
 
 const TemperatureControl = ({ name, current, partName, setTemperature }) => {
   const [target, setTarget] = useState(current);
   return (
-    <div>
+    <>
       <label htmlFor="extrusion">
-        {name} (current {current}°C)
+        {name}
       </label>
-      <input
-        name="extrusion"
-        id="extrusion"
-        type="number"
-        value={target}
-        step="0.1"
-        min="0"
-        onChange={e => {
-          setTarget(e.target.value ? parseFloat(e.target.value) : "");
-        }}
-      />
-      <BusyButton
-        className="btn btn-sm"
-        type="button"
-        disabled={target === 0}
-        onClick={() => {
-          setTemperature(partName, target);
-        }}
-        busyChildren="Setting..."
-      >
-        Set
-      </BusyButton>
-    </div>
+
+      <div>
+        <input
+          name="extrusion"
+          id="extrusion"
+          type="number"
+          value={target}
+          step="0.1"
+          min="0"
+          onChange={e => {
+            setTarget(e.target.value ? parseFloat(e.target.value) : "");
+          }}
+        />
+
+        <span className="input-appendix">°C</span>
+
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          disabled={target === 0}
+          onClick={() => {
+            setTemperature(partName, target);
+          }}
+          busyChildren="Setting..."
+        >
+          Set
+        </BusyButton>
+      </div>
+    </>
   );
 };
 
@@ -277,17 +293,11 @@ const ControlsTab = ({
         </p>
       ) : (
         <div className="printer-control-panel">
-          <div className="axes">
-            <AxesXYControl movePrinthead={movePrinthead} />
-            <AxesZControl movePrinthead={movePrinthead} />
-          </div>
-          <div>
+          <div className="controls">
             <DirectControl
               changeFanState={changeFanState}
               changeMotorsState={changeMotorsState}
             />
-          </div>
-          <div>
             <ExtrusionControl extrude={extrude} />
             <TemperatureControl
               name="Tool temperature"
@@ -301,6 +311,11 @@ const ControlsTab = ({
               current={temperatures.bed && temperatures.bed.actual}
               setTemperature={setTemperature}
             />
+          </div>
+
+          <div className="axes">
+            <AxesXYControl movePrinthead={movePrinthead} />
+            <AxesZControl movePrinthead={movePrinthead} />
           </div>
         </div>
       )}
