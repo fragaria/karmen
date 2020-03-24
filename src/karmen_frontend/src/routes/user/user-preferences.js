@@ -11,7 +11,7 @@ import {
   loadUserApiTokens,
   deleteUserApiToken,
   changePassword,
-  patchMe
+  patchMe,
 } from "../../actions/users-me";
 
 const UserPreferences = ({ match, ...rest }) => {
@@ -42,11 +42,11 @@ const UserPreferences = ({ match, ...rest }) => {
           />
           <Route
             path={`${match.url}/tab-api-tokens`}
-            render={props => <ApiTokensTab {...rest} />}
+            render={(props) => <ApiTokensTab {...rest} />}
           />
           <Route
             path={`${match.url}/tab-account`}
-            render={props => <AccountTab {...rest} />}
+            render={(props) => <AccountTab {...rest} />}
           />
         </Switch>
       </div>
@@ -55,19 +55,19 @@ const UserPreferences = ({ match, ...rest }) => {
 };
 
 export default connect(
-  state => ({
+  (state) => ({
     apiTokens: state.me.apiTokens,
     apiTokensLoaded: state.me.apiTokensLoaded,
     username: state.me.username,
-    email: state.me.email
+    email: state.me.email,
   }),
-  dispatch => ({
+  (dispatch) => ({
     loadApiTokens: () => dispatch(loadUserApiTokens()),
-    onTokenDelete: jti => dispatch(deleteUserApiToken(jti)),
+    onTokenDelete: (jti) => dispatch(deleteUserApiToken(jti)),
     changePassword: (password, new_password, new_password_confirmation) =>
       dispatch(
         changePassword(password, new_password, new_password_confirmation)
       ),
-    patchMe: (username, email) => dispatch(patchMe(username, email))
+    patchMe: (username, email) => dispatch(patchMe(username, email)),
   })
 )(UserPreferences);

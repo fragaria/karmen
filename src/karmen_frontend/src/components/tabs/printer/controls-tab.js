@@ -96,7 +96,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             onClick={() => {
               movePrinthead("jog", {
                 y: distance,
-                absolute: false
+                absolute: false,
               });
             }}
             busyChildren="o"
@@ -111,7 +111,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             onClick={() => {
               movePrinthead("jog", {
                 x: -distance,
-                absolute: false
+                absolute: false,
               });
             }}
             busyChildren="o"
@@ -125,7 +125,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             type="button"
             onClick={() => {
               movePrinthead("home", {
-                axes: ["x", "y"]
+                axes: ["x", "y"],
               });
             }}
             busyChildren="o"
@@ -140,7 +140,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             onClick={() => {
               movePrinthead("jog", {
                 x: distance,
-                absolute: false
+                absolute: false,
               });
             }}
             busyChildren="o"
@@ -155,7 +155,7 @@ const AxesXYControl = ({ movePrinthead }) => {
             onClick={() => {
               movePrinthead("jog", {
                 y: -distance,
-                absolute: false
+                absolute: false,
               });
             }}
             busyChildren="o"
@@ -185,7 +185,7 @@ const AxesZControl = ({ movePrinthead }) => {
             onClick={() => {
               movePrinthead("jog", {
                 z: distance,
-                absolute: false
+                absolute: false,
               });
             }}
             busyChildren="o"
@@ -199,7 +199,7 @@ const AxesZControl = ({ movePrinthead }) => {
             type="button"
             onClick={() => {
               movePrinthead("home", {
-                axes: ["z"]
+                axes: ["z"],
               });
             }}
             busyChildren="o"
@@ -214,7 +214,7 @@ const AxesZControl = ({ movePrinthead }) => {
             onClick={() => {
               movePrinthead("jog", {
                 z: -distance,
-                absolute: false
+                absolute: false,
               });
             }}
             busyChildren="o"
@@ -242,7 +242,7 @@ const ExtrusionControl = ({ extrude }) => {
           step="1"
           min="0"
           size="3"
-          onChange={e => {
+          onChange={(e) => {
             setAmount(e.target.value ? parseFloat(e.target.value) : "");
           }}
         />
@@ -281,7 +281,7 @@ const DirectControl = ({
   changeFanState,
   changeMotorsState,
   changeLightsState,
-  printer
+  printer,
 }) => {
   return (
     <>
@@ -356,7 +356,7 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
           value={target}
           step="0.1"
           min="0"
-          onChange={e => {
+          onChange={(e) => {
             setTarget(e.target.value ? parseFloat(e.target.value) : "");
           }}
         />
@@ -389,7 +389,7 @@ const ControlsTab = ({
   changeLights,
   changeCurrentJobState,
   extrude,
-  setTemperature
+  setTemperature,
 }) => {
   return (
     <div className="container">

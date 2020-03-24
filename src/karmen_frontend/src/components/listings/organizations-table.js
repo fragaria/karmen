@@ -7,7 +7,7 @@ const OrganizationsTableRow = ({
   organization,
   onOrganizationChange,
   onOrganizationDelete,
-  onResendInvitation
+  onResendInvitation,
 }) => {
   const [ctaListExpanded, setCtaListExpanded] = useState();
 
@@ -49,7 +49,7 @@ const OrganizationsTable = ({
   organizationsList,
   onOrganizationChange,
   onOrganizationDelete,
-  onResendInvitation
+  onResendInvitation,
 }) => {
   return (
     <NoPaginationListing
@@ -60,7 +60,7 @@ const OrganizationsTable = ({
       enableFiltering={true}
       sortByColumns={["name"]}
       filterByColumns={["name"]}
-      rowFactory={u => {
+      rowFactory={(u) => {
         return (
           <OrganizationsTableRow
             key={u.uuid}

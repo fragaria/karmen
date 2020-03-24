@@ -1,13 +1,13 @@
 const initialState = {
   images: {},
-  queue: {}
+  queue: {},
 };
 
 export default (
   state = {
     images: {},
     queue: {},
-    activeOrganizationUuid: null
+    activeOrganizationUuid: null,
   },
   action
 ) => {
@@ -20,19 +20,19 @@ export default (
             {},
             state.queue[action.payload.uuid],
             {
-              interval: action.payload.interval
+              interval: action.payload.interval,
             }
-          )
-        })
+          ),
+        }),
       });
     case "WEBCAMS_TIMEOUT_SET":
       return Object.assign({}, state, {
         queue: Object.assign({}, state.queue, {
           [action.payload.uuid]: {
             interval: action.payload.interval,
-            timeout: action.payload.timeout
-          }
-        })
+            timeout: action.payload.timeout,
+          },
+        }),
       });
     case "WEBCAMS_GET_SNAPSHOT_SUCCEEDED":
       if (action.payload.organizationUuid !== activeOrganizationUuid) {
@@ -41,11 +41,11 @@ export default (
       let newImage = action.payload;
       if (!newImage || newImage.status !== 200) {
         state.images = Object.assign({}, state.images, {
-          [newImage.uuid]: undefined
+          [newImage.uuid]: undefined,
         });
       } else {
         state.images = Object.assign({}, state.images, {
-          [newImage.uuid]: `${newImage.prefix}${newImage.data}`
+          [newImage.uuid]: `${newImage.prefix}${newImage.data}`,
         });
       }
       return state;
@@ -59,7 +59,7 @@ export default (
         clearInterval(job.interval);
       }
       return Object.assign({}, initialState, {
-        activeOrganizationUuid: action.payload.data.uuid
+        activeOrganizationUuid: action.payload.data.uuid,
       });
     default:
       return state;

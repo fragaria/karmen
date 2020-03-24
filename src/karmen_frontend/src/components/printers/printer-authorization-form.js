@@ -3,7 +3,7 @@ import BusyButton from "../utils/busy-button";
 
 class PrinterAuthorizationForm extends React.Component {
   state = {
-    apiKey: ""
+    apiKey: "",
   };
 
   constructor(props) {
@@ -16,10 +16,10 @@ class PrinterAuthorizationForm extends React.Component {
     const { apiKey } = this.state;
     const { onPrinterAuthorizationChanged } = this.props;
     return onPrinterAuthorizationChanged({
-      api_key: apiKey
-    }).then(r => {
+      api_key: apiKey,
+    }).then((r) => {
       this.setState({
-        apiKey: ""
+        apiKey: "",
       });
     });
   }
@@ -27,7 +27,7 @@ class PrinterAuthorizationForm extends React.Component {
   render() {
     const { printer } = this.props;
     const { apiKey } = this.state;
-    const getAccessLevelString = level => {
+    const getAccessLevelString = (level) => {
       switch (level) {
         case "read_only":
         case "protected":
@@ -55,9 +55,9 @@ class PrinterAuthorizationForm extends React.Component {
             id="apiKey"
             name="apiKey"
             value={apiKey || ""}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({
-                apiKey: e.target.value
+                apiKey: e.target.value,
               });
             }}
           />

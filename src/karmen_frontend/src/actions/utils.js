@@ -1,13 +1,13 @@
 // inspired by https://github.com/machadogj/redux-thunk-actions/blob/master/src/index.js
 
-const createActionFactory = type => {
-  return payload => ({
+const createActionFactory = (type) => {
+  return (payload) => ({
     type,
-    payload
+    payload,
   });
 };
 
-const isPromise = p => {
+const isPromise = (p) => {
   return p && p.then && p.catch;
 };
 
@@ -16,7 +16,7 @@ export const createThunkedAction = (name, func) => {
     let result;
     dispatch(createActionFactory(`${name}_STARTED`)());
     // when action is successful...
-    const succeeded = result => {
+    const succeeded = (result) => {
       // ...fire success only if http status code is considered a success
       if (
         result &&
@@ -31,7 +31,7 @@ export const createThunkedAction = (name, func) => {
       return result;
     };
     // when action is not successful because it throws...
-    const failed = result => {
+    const failed = (result) => {
       // ... fire fail and end ...
       dispatch(createActionFactory(`${name}_FAILED`)(result));
       dispatch(createActionFactory(`${name}_ENDED`)(result));

@@ -13,7 +13,7 @@ const FreshTokenGateway = ({
   doAuthenticate,
   hasFreshToken,
   accessTokenExpiresOn,
-  history
+  history,
 }) => {
   if (!userState || userState === "unknown") {
     return (
@@ -48,15 +48,15 @@ const FreshTokenGateway = ({
 
 export default withRouter(
   connect(
-    state => ({
+    (state) => ({
       userState: state.me.currentState,
       username: state.me.username,
       hasFreshToken: state.me.hasFreshToken,
-      accessTokenExpiresOn: state.me.accessTokenExpiresOn
+      accessTokenExpiresOn: state.me.accessTokenExpiresOn,
     }),
-    dispatch => ({
+    (dispatch) => ({
       doAuthenticate: (username, password) =>
-        dispatch(authenticateFresh(username, password))
+        dispatch(authenticateFresh(username, password)),
     })
   )(FreshTokenGateway)
 );

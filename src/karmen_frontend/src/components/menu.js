@@ -9,14 +9,14 @@ class Menu extends React.Component {
     this.dropdownItems = React.createRef();
     this.state = {
       navigation: false,
-      orgListExpanded: false
+      orgListExpanded: false,
     };
   }
 
   componentDidUpdate() {
     const dropdownItems = this.dropdownItems.current;
 
-    const countViewportHeight = dropdownItems => {
+    const countViewportHeight = (dropdownItems) => {
       const vh = window.innerHeight * 0.01;
       dropdownItems.style.setProperty("--vh", `${vh}px`);
     };
@@ -34,13 +34,13 @@ class Menu extends React.Component {
       children,
       activeOrganization,
       onToggle,
-      expanded
+      expanded,
     }) => {
       return (
         <div className="dropdown">
           <button
             className="dropdown-toggle btn-reset"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
               onToggle && onToggle();
             }}
@@ -70,16 +70,18 @@ class Menu extends React.Component {
       organizations,
       role,
       logout,
-      switchOrganization
+      switchOrganization,
     } = this.props;
     const { navigation, orgListExpanded } = this.state;
     const orgList = organizations
       ? Object.values(organizations)
-          .filter(o => activeOrganization && o.uuid !== activeOrganization.uuid)
+          .filter(
+            (o) => activeOrganization && o.uuid !== activeOrganization.uuid
+          )
           .sort((o, p) =>
             o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
           )
-          .map(o => {
+          .map((o) => {
             return (
               <button
                 className="dropdown-item"
@@ -94,7 +96,7 @@ class Menu extends React.Component {
               </button>
             );
           })
-          .filter(o => !!o)
+          .filter((o) => !!o)
       : [];
 
     return (
@@ -115,8 +117,8 @@ class Menu extends React.Component {
                 <OrganizationSwitch
                   activeOrganization={activeOrganization}
                   onToggle={() => {
-                    this.setState(prevState => ({
-                      orgListExpanded: !prevState.orgListExpanded
+                    this.setState((prevState) => ({
+                      orgListExpanded: !prevState.orgListExpanded,
                     }));
                   }}
                   expanded={orgListExpanded}
@@ -190,7 +192,7 @@ class Menu extends React.Component {
                     <button
                       className="btn-reset"
                       title="Logout"
-                      onClick={e => {
+                      onClick={(e) => {
                         e.preventDefault();
                         logout();
                         history.push("/");
@@ -204,7 +206,7 @@ class Menu extends React.Component {
               )}
               <button
                 className="navigation-toggle"
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault();
                   const { navigation } = this.state;
                   this.setState({ navigation: !navigation });
@@ -228,16 +230,16 @@ class Menu extends React.Component {
 
 export default withRouter(
   connect(
-    state => ({
+    (state) => ({
       userState: state.me.currentState,
       username: state.me.username,
       activeOrganization: state.me.activeOrganization,
       organizations: state.me.organizations,
-      role: state.me.activeOrganization && state.me.activeOrganization.role
+      role: state.me.activeOrganization && state.me.activeOrganization.role,
     }),
-    dispatch => ({
+    (dispatch) => ({
       logout: () => dispatch(clearUserIdentity()),
-      switchOrganization: uuid => dispatch(switchOrganization(uuid))
+      switchOrganization: (uuid) => dispatch(switchOrganization(uuid)),
     })
   )(Menu)
 );

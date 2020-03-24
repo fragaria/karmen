@@ -32,8 +32,8 @@ export const getGcodes = (
       orderBy,
       filter: displayFilter,
       limit,
-      fields
-    }
+      fields,
+    },
   });
 };
 
@@ -44,7 +44,7 @@ export const getGcode = (orgUuid, uuid, fields = []) => {
   }
   return performRequest({
     uri,
-    method: "GET"
+    method: "GET",
   });
 };
 
@@ -53,10 +53,10 @@ export const deleteGcode = (orgUuid, uuid) => {
     uri: `/organizations/${orgUuid}/gcodes/${uuid}`,
     method: "DELETE",
     appendData: {
-      uuid
+      uuid,
     },
     parseResponse: false,
-    successCodes: [204, 404]
+    successCodes: [204, 404],
   });
 };
 
@@ -69,21 +69,21 @@ export const uploadGcode = (orgUuid, path, file) => {
   return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes`, {
     method: "POST",
     headers: headers,
-    body: data
+    body: data,
   })
-    .then(response => {
+    .then((response) => {
       if (response.status !== 201) {
         console.error(`Cannot add a gcode: ${response.status}`);
         return {
           status: response.status,
-          successCodes: [201]
+          successCodes: [201],
         };
       }
-      return response.json().then(data => {
+      return response.json().then((data) => {
         return { status: response.status, data, successCodes: [201] };
       });
     })
-    .catch(e => {
+    .catch((e) => {
       console.error(`Cannot add a gcode: ${e}`);
       return { status: 500, successCodes: [201] };
     });
@@ -94,12 +94,12 @@ export const downloadGcode = (dataLink, filename) => {
     `${BASE_URL}/${dataLink[0] === "/" ? dataLink.substr(1) : dataLink}`,
     {
       method: "GET",
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     }
   )
-    .then(response => {
+    .then((response) => {
       if (response.status === 200) {
-        return response.blob().then(d => {
+        return response.blob().then((d) => {
           download(d, filename, d.type);
           return { status: 200, successCodes: [200] };
         });
@@ -107,7 +107,7 @@ export const downloadGcode = (dataLink, filename) => {
       console.error(`Cannot download a gcode: ${response.status}`);
       return { status: response.status, successCodes: [200] };
     })
-    .catch(e => {
+    .catch((e) => {
       console.error(`Cannot download a gcode: ${e}`);
       return { status: 500, successCodes: [200] };
     });

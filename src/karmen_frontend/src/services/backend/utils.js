@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-const _removeStorage = key => {
+const _removeStorage = (key) => {
   try {
     if (window.localStorage && window.localStorage.removeItem) {
       window.localStorage.removeItem(key);
@@ -30,7 +30,7 @@ const _setStorage = (key, value) => {
   }
 };
 
-const _getStorage = key => {
+const _getStorage = (key) => {
   try {
     if (window.localStorage && window.localStorage.getItem) {
       return window.localStorage.getItem(key);
@@ -43,7 +43,7 @@ const _getStorage = key => {
   return null;
 };
 
-export const persistUserProfile = data => {
+export const persistUserProfile = (data) => {
   _setStorage("karmen_profile", JSON.stringify(data));
 };
 
@@ -51,7 +51,7 @@ export const dropUserProfile = () => {
   _setStorage("karmen_profile", null);
 };
 
-export const persistUserPreferences = data => {
+export const persistUserPreferences = (data) => {
   _setStorage("karmen_preferences", JSON.stringify(data));
 };
 
@@ -78,7 +78,7 @@ export const getAuthHeaders = () => {
   return headers;
 };
 
-export const performRequest = opts => {
+export const performRequest = (opts) => {
   const defaults = {
     uri: undefined,
     data: undefined,
@@ -87,15 +87,15 @@ export const performRequest = opts => {
     parseResponse: true,
     appendData: {},
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    useAuth: true
+    useAuth: true,
   };
   opts = Object.assign({}, defaults, opts);
 
   let fetchOpts = {
     method: opts.method,
-    headers: opts.headers
+    headers: opts.headers,
   };
   // TODO this should probably merge with passed headers
   if (opts.useAuth) {
@@ -108,36 +108,36 @@ export const performRequest = opts => {
     opts.uri = `/${opts.uri}`;
   }
   return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
-    .then(response => {
+    .then((response) => {
       if (opts.successCodes.indexOf(response.status) === -1) {
         console.error(`Request ${opts.uri} failed: ${response.status}`);
       }
       if (opts.parseResponse) {
         return response
           .json()
-          .then(data => {
+          .then((data) => {
             return {
               status: response.status,
               ...opts.appendData,
               data,
-              successCodes: opts.successCodes
+              successCodes: opts.successCodes,
             };
           })
-          .catch(e => {
+          .catch((e) => {
             return {
               status: response.status,
               ...opts.appendData,
-              successCodes: opts.successCodes
+              successCodes: opts.successCodes,
             };
           });
       }
       return {
         status: response.status,
         ...opts.appendData,
-        successCodes: opts.successCodes
+        successCodes: opts.successCodes,
       };
     })
-    .catch(e => {
+    .catch((e) => {
       console.error(`Request ${opts.uri} failed: ${e}`);
       return { status: 500, successCodes: opts.successCodes };
     });

@@ -11,7 +11,7 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
     hasFreshToken: data.fresh,
     accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
     organizations: data.organizations,
-    activeOrganization: activeOrganization
+    activeOrganization: activeOrganization,
   };
 };
 
@@ -29,7 +29,7 @@ export default (
     apiTokensLoaded: false,
     accessTokenExpiresOn: null,
     organizations: {},
-    activeOrganization: null
+    activeOrganization: null,
   },
   action
 ) => {
@@ -42,7 +42,7 @@ export default (
       return Object.assign({}, state, {
         ...userData,
         apiTokens: [],
-        apiTokensLoaded: false
+        apiTokensLoaded: false,
       });
     case "USER_AUTHENTICATE_FRESH_SUCCEEDED":
       userData = getUserDataFromApiResponse(
@@ -53,7 +53,7 @@ export default (
       return Object.assign({}, state, {
         ...userData,
         apiTokens: [],
-        apiTokensLoaded: false
+        apiTokensLoaded: false,
       });
     case "USER_AUTHENTICATE_SUCCEEDED":
       userData = getUserDataFromApiResponse(
@@ -64,7 +64,7 @@ export default (
       return Object.assign({}, state, {
         ...userData,
         apiTokens: [],
-        apiTokensLoaded: false
+        apiTokensLoaded: false,
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
       userData = getUserDataFromApiResponse(
@@ -76,7 +76,7 @@ export default (
     case "USER_PATCH_SUCCEEDED":
       userData = Object.assign({}, state, {
         username: action.payload.data.username,
-        email: action.payload.data.email
+        email: action.payload.data.email,
       });
       persistUserProfile(userData);
       return Object.assign({}, state, userData);
@@ -100,7 +100,7 @@ export default (
         apiTokens: [],
         apiTokensLoaded: false,
         organizations: {},
-        activeOrganization: null
+        activeOrganization: null,
       });
     case "USER_SWITCH_ORGANIZATION":
       if (action.payload.data && state.organizations) {
@@ -108,7 +108,7 @@ export default (
           state.organizations[action.payload.data.uuid];
         if (newActiveOrganization) {
           return Object.assign({}, state, {
-            activeOrganization: newActiveOrganization
+            activeOrganization: newActiveOrganization,
           });
         }
       }
@@ -116,18 +116,18 @@ export default (
     case "USER_LOAD_API_TOKENS_SUCCEEDED":
       return Object.assign({}, state, {
         apiTokens: action.payload.data.items,
-        apiTokensLoaded: true
+        apiTokensLoaded: true,
       });
     case "USER_ADD_API_TOKEN_SUCCEEDED":
       apiTokens.push(action.payload.data);
       return Object.assign({}, state, {
-        apiTokens: [].concat(apiTokens)
+        apiTokens: [].concat(apiTokens),
       });
     case "USER_DELETE_API_TOKEN_SUCCEEDED":
       return Object.assign({}, state, {
-        apiTokens: apiTokens.filter(t => {
+        apiTokens: apiTokens.filter((t) => {
           return t.jti !== action.payload.jti;
-        })
+        }),
       });
     case "ORGANIZATIONS_ADD_SUCCEEDED":
       if (action.payload && action.payload.data && action.payload.data.uuid) {
@@ -135,16 +135,16 @@ export default (
           organizations: Object.assign({}, state.organizations, {
             [action.payload.data.uuid]: {
               ...action.payload.data,
-              role: "admin"
-            }
-          })
+              role: "admin",
+            },
+          }),
         });
       }
       return state;
     case "ORGANIZATIONS_EDIT_SUCCEEDED":
       let newOrganizations = Object.assign({}, state.organizations);
       const existing = Object.values(state.organizations).find(
-        o => o.uuid === action.payload.data.uuid
+        (o) => o.uuid === action.payload.data.uuid
       );
       if (existing) {
         newOrganizations[action.payload.data.uuid] = Object.assign(
@@ -163,7 +163,7 @@ export default (
       }
       return Object.assign({}, state, {
         organizations: newOrganizations,
-        activeOrganization: newActiveOrganization
+        activeOrganization: newActiveOrganization,
       });
     default:
       return state;

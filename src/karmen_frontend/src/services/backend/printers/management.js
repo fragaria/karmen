@@ -21,11 +21,11 @@ export const addPrinter = (
       path,
       token,
       name,
-      api_key: apiKey
+      api_key: apiKey,
     },
     appendData: {
-      organizationUuid: orgUuid
-    }
+      organizationUuid: orgUuid,
+    },
   });
 };
 
@@ -35,8 +35,8 @@ export const patchPrinter = (orgUuid, uuid, data) => {
     method: "PATCH",
     data,
     appendData: {
-      organizationUuid: orgUuid
-    }
+      organizationUuid: orgUuid,
+    },
   });
 };
 export const deletePrinter = (orgUuid, uuid) => {
@@ -44,9 +44,9 @@ export const deletePrinter = (orgUuid, uuid) => {
     uri: `/organizations/${orgUuid}/printers/${uuid}`,
     method: "DELETE",
     appendData: {
-      uuid
+      uuid,
     },
     parseResponse: false,
-    successCodes: [204, 404]
+    successCodes: [204, 404],
   });
 };

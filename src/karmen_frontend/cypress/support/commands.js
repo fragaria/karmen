@@ -5,11 +5,10 @@ Cypress.Commands.add("loginAsTestAdmin", () => {
     .log("logging in as karmen")
     .request("POST", `/api/users/me/authenticate`, {
       username: "test-admin",
-      password: "admin-password"
+      password: "admin-password",
     })
     .then(({ body }) => {
       localStorage.setItem("karmen_profile", JSON.stringify(body));
       return {};
     });
 });
-

@@ -1,14 +1,14 @@
 import Cookies from "js-cookie";
 import { performRequest } from "./utils";
 
-export const requestPasswordReset = email => {
+export const requestPasswordReset = (email) => {
   return performRequest({
     uri: `/users/me/request-password-reset`,
     useAuth: false,
     data: {
-      email
+      email,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -25,20 +25,20 @@ export const resetPassword = (
       email,
       pwd_reset_key: pwdResetKey,
       password,
-      password_confirmation: passwordConfirmation
+      password_confirmation: passwordConfirmation,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
-export const register = email => {
+export const register = (email) => {
   return performRequest({
     uri: `/users/me`,
     useAuth: false,
     data: {
-      email
+      email,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -55,9 +55,9 @@ export const activate = (
       email,
       activation_key: activationKey,
       password,
-      password_confirmation: passwordConfirmation
+      password_confirmation: passwordConfirmation,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -67,8 +67,8 @@ export const authenticate = (username, password) => {
     useAuth: false,
     data: {
       username,
-      password
-    }
+      password,
+    },
   });
 };
 
@@ -78,8 +78,8 @@ export const authenticateFresh = (username, password) => {
     useAuth: false,
     data: {
       username,
-      password
-    }
+      password,
+    },
   });
 };
 
@@ -89,16 +89,16 @@ export const refreshAccessToken = () => {
     useAuth: false,
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token")
-    }
+      "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token"),
+    },
   });
 };
 
 export const logout = () => {
   return performRequest({
     uri: `/users/me/logout`,
-    parseResponse: false
-  }).then(response => {
+    parseResponse: false,
+  }).then((response) => {
     Cookies.remove("csrf_refresh_token");
     Cookies.remove("refresh_token_cookie");
     Cookies.remove("csrf_access_token");
@@ -118,8 +118,8 @@ export const changePassword = (
     data: {
       password,
       new_password,
-      new_password_confirmation
-    }
+      new_password_confirmation,
+    },
   });
 };
 
@@ -129,15 +129,15 @@ export const patchMe = (username, email) => {
     method: "PATCH",
     data: {
       username,
-      email
-    }
+      email,
+    },
   });
 };
 
 export const loadApiTokens = () => {
   return performRequest({
     uri: `/users/me/tokens`,
-    method: "GET"
+    method: "GET",
   });
 };
 
@@ -146,16 +146,16 @@ export const addApiToken = (orgUuid, name) => {
     uri: `/users/me/tokens`,
     data: {
       name: name,
-      organization_uuid: orgUuid
-    }
+      organization_uuid: orgUuid,
+    },
   });
 };
 
-export const deleteApiToken = jti => {
+export const deleteApiToken = (jti) => {
   return performRequest({
     uri: `/users/me/tokens/${jti}`,
     method: "DELETE",
     parseResponse: false,
-    successCodes: [204, 404]
+    successCodes: [204, 404],
   });
 };

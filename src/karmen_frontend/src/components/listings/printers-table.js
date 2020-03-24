@@ -31,7 +31,7 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
           <div className="cta-box text-center">
             <button
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 onPrinterDelete(printer.uuid).then(() => {
                   modal.closeModal(e);
                 });
@@ -92,7 +92,7 @@ const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
         </Link>
         <button
           className="dropdown-item text-secondary"
-          onClick={e => {
+          onClick={(e) => {
             setCtaListExpanded(false);
             deletePrinterModal.openModal(e);
           }}
@@ -115,7 +115,7 @@ const PrintersTable = ({
   onPrinterDelete,
   loadPrinters,
   printersLoaded,
-  printersList
+  printersList,
 }) => {
   return (
     <NoPaginationListing
@@ -126,7 +126,7 @@ const PrintersTable = ({
       enableFiltering={true}
       sortByColumns={["name"]}
       filterByColumns={["name"]}
-      rowFactory={p => {
+      rowFactory={(p) => {
         return (
           <PrintersTableRow
             key={p.uuid}

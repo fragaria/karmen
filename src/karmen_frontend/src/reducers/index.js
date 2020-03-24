@@ -16,5 +16,5 @@ export default combineReducers({
   printers,
   printjobs,
   users,
-  webcams
+  webcams,
 });

@@ -6,10 +6,10 @@ export const Progress = ({
   printTime,
   printTimeLeft,
   withProgressBar = true,
-  withProgressInfo = false
+  withProgressInfo = false,
 }) => {
   let progressBarWidth = {
-    width: (printTime > 0 ? completion.toFixed(2) : "0") + "%"
+    width: (printTime > 0 ? completion.toFixed(2) : "0") + "%",
   };
   let approxPrintTimeLeft = printTimeLeft;
   if (!approxPrintTimeLeft && printTime > 0) {

@@ -18,23 +18,23 @@ class AddPrinter extends React.Component {
         val: "",
         type: "text",
         required: true,
-        error: null
+        error: null,
       },
       address: {
         name: window.env.IS_CLOUD_INSTALL ? "Printer token" : "Printer address",
         val: "",
         type: "text",
         required: true,
-        error: null
+        error: null,
       },
       apiKey: {
         name: "API key",
         val: "",
         type: "text",
         required: false,
-        error: null
-      }
-    }
+        error: null,
+      },
+    },
   };
 
   constructor(props) {
@@ -46,7 +46,7 @@ class AddPrinter extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false
+      messageOk: false,
     });
     const { form } = this.state;
     let hasErrors = false;
@@ -69,7 +69,7 @@ class AddPrinter extends React.Component {
         "Printer address is required in a proper format (like http://1.2.3.4:81 or karmen-pill.local/octoprint/)";
     }
     this.setState({
-      form: updatedForm
+      form: updatedForm,
     });
     const { createPrinter } = this.props;
     if (!hasErrors) {
@@ -106,21 +106,21 @@ class AddPrinter extends React.Component {
         token,
         form.name.val,
         form.apiKey.val
-      ).then(r => {
+      ).then((r) => {
         switch (r.status) {
           case 201:
             this.setState({
-              redirect: true
+              redirect: true,
             });
             break;
           case 409:
             this.setState({
-              message: "Printer on this address is already registered"
+              message: "Printer on this address is already registered",
             });
             break;
           default:
             this.setState({
-              message: "Cannot add printer, check server logs"
+              message: "Cannot add printer, check server logs",
             });
         }
       });
@@ -155,9 +155,9 @@ class AddPrinter extends React.Component {
                       form: Object.assign({}, form, {
                         [name]: Object.assign({}, form[name], {
                           val: value,
-                          error: null
-                        })
-                      })
+                          error: null,
+                        }),
+                      }),
                     });
                   }}
                 />
@@ -200,5 +200,5 @@ export default connect(null, (dispatch, ownProps) => ({
         name,
         apiKey
       )
-    )
+    ),
 }))(AddPrinter);

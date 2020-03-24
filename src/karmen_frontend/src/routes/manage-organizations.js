@@ -9,7 +9,7 @@ const ManageOrganizations = ({
   loadOrganizations,
   organizationsList,
   organizationsLoaded,
-  onOrganizationChange
+  onOrganizationChange,
 }) => {
   return (
     <section className="content">
@@ -24,7 +24,7 @@ const ManageOrganizations = ({
 
       <OrganizationsTable
         loadOrganizations={loadOrganizations}
-        organizationsList={organizationsList.filter(o => o.role === "admin")}
+        organizationsList={organizationsList.filter((o) => o.role === "admin")}
         organizationsLoaded={organizationsLoaded}
         onOrganizationChange={onOrganizationChange}
       />
@@ -33,12 +33,12 @@ const ManageOrganizations = ({
 };
 
 export default connect(
-  state => ({
+  (state) => ({
     organizationsList: state.organizations.list,
-    organizationsLoaded: state.organizations.listLoaded
+    organizationsLoaded: state.organizations.listLoaded,
   }),
-  dispatch => ({
+  (dispatch) => ({
     loadOrganizations: () => dispatch(getOrganizations()),
-    onOrganizationChange: name => dispatch(patchOrganization(name))
+    onOrganizationChange: (name) => dispatch(patchOrganization(name)),
   })
 )(ManageOrganizations);

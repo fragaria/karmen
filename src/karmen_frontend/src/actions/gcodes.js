@@ -2,10 +2,10 @@ import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
-export const clearGcodesPages = printerUuid => dispatch => {
+export const clearGcodesPages = (printerUuid) => (dispatch) => {
   return dispatch({
     type: "GCODES_CLEAR_PAGES",
-    payload: {}
+    payload: {},
   });
 };
 

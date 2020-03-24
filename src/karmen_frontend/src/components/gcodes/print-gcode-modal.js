@@ -5,7 +5,7 @@ export const usePrintGcodeModal = ({
   gcode,
   printGcode,
   onSchedulePrint,
-  availablePrinters
+  availablePrinters,
 }) => {
   const { Modal, openModal, ...printModal } = useMyModal();
 
@@ -20,7 +20,7 @@ export const usePrintGcodeModal = ({
   const [showPrinterSelect, setShowPrinterSelect] = useState(true);
 
   const SelectPrinter = () => {
-    const availablePrinterOpts = availablePrinters.map(p => {
+    const availablePrinterOpts = availablePrinters.map((p) => {
       return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
     });
     return (
@@ -32,7 +32,7 @@ export const usePrintGcodeModal = ({
               id="selectedPrinter"
               name="selectedPrinter"
               value={selectedPrinter}
-              onChange={e => setSelectedPrinter(e.target.value)}
+              onChange={(e) => setSelectedPrinter(e.target.value)}
             >
               {availablePrinterOpts}
             </select>
@@ -45,7 +45,7 @@ export const usePrintGcodeModal = ({
   };
 
   const schedulePrint = (gcodeUuid, printerUuid) => {
-    onSchedulePrint(gcodeUuid, printerUuid).then(r => {
+    onSchedulePrint(gcodeUuid, printerUuid).then((r) => {
       switch (r.status) {
         case 201:
           setMessage("Print was scheduled");
@@ -60,7 +60,7 @@ export const usePrintGcodeModal = ({
 
   return {
     ...printModal,
-    openModal: e => {
+    openModal: (e) => {
       setSelectedPrinter(
         availablePrinters.length ? availablePrinters[0].uuid : null
       );
@@ -125,10 +125,10 @@ export const usePrintGcodeModal = ({
                 <div className="cta-box text-center">
                   <button
                     className="btn"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.preventDefault();
                       const selected = availablePrinters.find(
-                        p => p.uuid === selectedPrinter
+                        (p) => p.uuid === selectedPrinter
                       );
                       if (
                         selected &&
@@ -185,7 +185,7 @@ export const usePrintGcodeModal = ({
           </>
         </Modal>
       );
-    }
+    },
   };
 };
 

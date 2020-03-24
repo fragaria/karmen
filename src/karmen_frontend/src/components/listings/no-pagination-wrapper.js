@@ -7,7 +7,7 @@ class Wrapper extends React.Component {
     super(props);
     this.state = {
       filter: "",
-      orderBy: props.defaultOrderBy
+      orderBy: props.defaultOrderBy,
     };
   }
 
@@ -26,10 +26,10 @@ class Wrapper extends React.Component {
       rowFactory,
       enableFiltering,
       sortByColumns,
-      filterByColumns
+      filterByColumns,
     } = this.props;
     const itemRows = items
-      .filter(p => {
+      .filter((p) => {
         for (let c of filterByColumns || []) {
           if (p[c].toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
             return 1;
@@ -67,9 +67,9 @@ class Wrapper extends React.Component {
                   id="filter"
                   minLength={3}
                   debounceTimeout={300}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.setState({
-                      filter: e.target.value
+                      filter: e.target.value,
                     });
                   }}
                 />
@@ -80,12 +80,12 @@ class Wrapper extends React.Component {
           <Sorting
             active={orderBy}
             columns={sortByColumns || []}
-            onChange={column => {
+            onChange={(column) => {
               return () => {
                 const { orderBy } = this.state;
                 this.setState({
                   orderBy:
-                    orderBy === `+${column}` ? `-${column}` : `+${column}`
+                    orderBy === `+${column}` ? `-${column}` : `+${column}`,
                 });
               };
             }}

@@ -1,7 +1,7 @@
 import React from "react";
 import formatters from "../../services/formatters";
 
-export const ClientVersion = printerObject => {
+export const ClientVersion = (printerObject) => {
   if (printerObject) {
     const objectLength = Object.keys(printerObject).length;
     return Object.keys(printerObject).map((key, idx) => {
@@ -183,5 +183,5 @@ export default {
   PrinterProgress,
   PrinterProperties,
   ClientVersion,
-  PrinterConnectionStatus
+  PrinterConnectionStatus,
 };

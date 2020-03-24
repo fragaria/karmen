@@ -2,12 +2,12 @@ import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
-export const clearJobsPages = printerUuid => dispatch => {
+export const clearJobsPages = (printerUuid) => (dispatch) => {
   return dispatch({
     type: "JOBS_CLEAR_PAGES",
     payload: {
-      printer: printerUuid
-    }
+      printer: printerUuid,
+    },
   });
 };
 

@@ -4,8 +4,8 @@ const initialListState = {
     orderBy: "-uploaded",
     filter: null,
     limit: 10,
-    fields: []
-  }
+    fields: [],
+  },
 };
 
 export default (
@@ -15,8 +15,8 @@ export default (
       orderBy: "-uploaded",
       filter: null,
       limit: 10,
-      fields: []
-    }
+      fields: [],
+    },
   },
   action
 ) => {
@@ -25,7 +25,7 @@ export default (
       const { orderBy, filter, limit, fields } = state.list;
       const newPage = {
         data: action.payload.data,
-        startWith: action.payload.startWith
+        startWith: action.payload.startWith,
       };
       let { pages } = state.list;
       // continue only with the same conditions
@@ -36,7 +36,7 @@ export default (
         fields.length === action.payload.fields.length // TODO This is a bad check, it should compare array contents
       ) {
         const origPageIndex = pages.findIndex(
-          p => p.startWith === action.payload.startWith
+          (p) => p.startWith === action.payload.startWith
         );
         if (origPageIndex === -1) {
           pages.push(newPage);
@@ -52,14 +52,14 @@ export default (
           orderBy: action.payload.orderBy,
           filter: action.payload.filter,
           limit: action.payload.limit,
-          fields: action.payload.fields
-        }
+          fields: action.payload.fields,
+        },
       });
     case "GCODES_DELETE_SUCCEEDED":
-      const newPages = state.list.pages.map(p => {
+      const newPages = state.list.pages.map((p) => {
         if (p.data && p.data.items) {
           const origItemIndex = p.data.items.findIndex(
-            p => p.uuid === action.payload.uuid
+            (p) => p.uuid === action.payload.uuid
           );
           if (origItemIndex > -1) {
             return Object.assign({}, p, {
@@ -68,8 +68,8 @@ export default (
                   p.data.items
                     .slice(0, origItemIndex)
                     .concat(p.data.items.slice(origItemIndex + 1))
-                )
-              })
+                ),
+              }),
             });
           }
         }
@@ -77,8 +77,8 @@ export default (
       });
       return Object.assign({}, state, {
         list: Object.assign({}, state.list, {
-          pages: newPages
-        })
+          pages: newPages,
+        }),
       });
     case "USER_SWITCH_ORGANIZATION":
       return Object.assign({}, state, initialListState);

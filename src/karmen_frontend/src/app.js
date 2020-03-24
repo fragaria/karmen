@@ -35,7 +35,7 @@ import configureStore from "./store";
 
 import {
   loadUserFromLocalStorage,
-  clearUserIdentity
+  clearUserIdentity,
 } from "./actions/users-me";
 
 const ScrollToTop = () => {
@@ -55,7 +55,7 @@ class ConnectedAppBase extends React.Component {
     super(props);
     this.state = {
       initialized: false,
-      tokenTimer: null
+      tokenTimer: null,
     };
     this.myRef = React.createRef();
   }
@@ -66,7 +66,7 @@ class ConnectedAppBase extends React.Component {
     if (!initialized) {
       loadUserFromStorage().then(() => {
         this.setState({
-          initialized: true
+          initialized: true,
         });
       });
     } else {
@@ -273,13 +273,13 @@ class ConnectedAppBase extends React.Component {
 }
 
 export const ConnectedApp = connect(
-  state => ({
+  (state) => ({
     accessTokenExpiresOn: state.me.accessTokenExpiresOn,
-    userState: state.me.currentState
+    userState: state.me.currentState,
   }),
-  dispatch => ({
+  (dispatch) => ({
     loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
-    logout: () => dispatch(clearUserIdentity())
+    logout: () => dispatch(clearUserIdentity()),
   })
 )(ConnectedAppBase);
 

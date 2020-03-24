@@ -5,7 +5,7 @@ class NetworkScan extends React.Component {
   state = {
     error: null,
     message: null,
-    messageOk: false
+    messageOk: false,
   };
 
   constructor(props) {
@@ -17,28 +17,28 @@ class NetworkScan extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false
+      messageOk: false,
     });
     const { scanNetwork, networkInterface } = this.props;
     if (!networkInterface) {
       this.setState({
-        error: "Network name cannot be empty!"
+        error: "Network name cannot be empty!",
       });
       return;
     }
-    return scanNetwork(networkInterface).then(r => {
+    return scanNetwork(networkInterface).then((r) => {
       switch (r.status) {
         case 202:
           this.setState({
             message:
               "Network scan initiated, the printers should start popping up at any moment",
-            messageOk: true
+            messageOk: true,
           });
           break;
         case 400:
         default:
           this.setState({
-            message: "Cannot scan the network, check server logs"
+            message: "Cannot scan the network, check server logs",
           });
       }
     });
@@ -64,7 +64,7 @@ class NetworkScan extends React.Component {
               id="networkInterface"
               name="networkInterface"
               value={networkInterface}
-              onChange={e => {
+              onChange={(e) => {
                 onNetworkInterfaceChange(e.target.value);
               }}
             />

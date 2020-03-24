@@ -6,5 +6,5 @@ import "@testing-library/jest-dom/extend-expect";
 
 global.window = window || {};
 window.env = window.env || {
-  BACKEND_BASE: "http://local.test"
+  BACKEND_BASE: "http://local.test",
 };

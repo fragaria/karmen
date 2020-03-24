@@ -95,7 +95,7 @@ const UsersTableRow = ({
   user,
   onUserChange,
   onUserDelete,
-  onResendInvitation
+  onResendInvitation,
 }) => {
   const toggleUserModal = useMyModal();
   const changeUserRoleModal = useMyModal();
@@ -133,7 +133,7 @@ const UsersTableRow = ({
           {!user.activated && (
             <button
               className="dropdown-item"
-              onClick={e => {
+              onClick={(e) => {
                 setCtaListExpanded(false);
                 onResendInvitation(user.email, user.role);
                 invitationSentModal.openModal(e);
@@ -145,7 +145,7 @@ const UsersTableRow = ({
           )}
           <button
             className="dropdown-item"
-            onClick={e => {
+            onClick={(e) => {
               setCtaListExpanded(false);
               changeUserRoleModal.openModal(e);
             }}
@@ -155,7 +155,7 @@ const UsersTableRow = ({
           </button>
           <button
             className="dropdown-item text-secondary"
-            onClick={e => {
+            onClick={(e) => {
               setCtaListExpanded(false);
               toggleUserModal.openModal(e);
             }}
@@ -187,7 +187,7 @@ const UsersTable = ({
   usersList,
   onUserChange,
   onUserDelete,
-  onResendInvitation
+  onResendInvitation,
 }) => {
   return (
     <NoPaginationListing
@@ -198,7 +198,7 @@ const UsersTable = ({
       enableFiltering={true}
       sortByColumns={["username", "uuid", "role"]}
       filterByColumns={["username"]}
-      rowFactory={u => {
+      rowFactory={(u) => {
         return (
           <UsersTableRow
             key={u.uuid}

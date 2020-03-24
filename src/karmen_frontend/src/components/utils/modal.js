@@ -3,7 +3,7 @@ import useModal from "use-react-modal";
 
 export const useMyModal = ({ hideClose } = {}) => {
   const { closeModal, isOpen, Modal, ...rest } = useModal({
-    background: "rgba(0, 0, 0, 0.5)"
+    background: "rgba(0, 0, 0, 0.5)",
   });
 
   return {
@@ -17,7 +17,7 @@ export const useMyModal = ({ hideClose } = {}) => {
       ),
     isOpen,
     closeModal,
-    ...rest
+    ...rest,
   };
 };
 
