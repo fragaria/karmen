@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 

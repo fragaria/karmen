@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 DIR=$(dirname $(realpath -s $0))
 cd $DIR
