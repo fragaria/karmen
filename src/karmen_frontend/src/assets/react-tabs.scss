@@ -19,6 +19,7 @@
     align-items: center;
     border-bottom: 1px solid $border-color;
     list-style: none;
+    overflow: auto;
 
     @include plumber(
       $leading-top: 1,
@@ -30,6 +31,7 @@
     position: relative;
     padding: 0 $base-unit*2;
     color: $color-light;
+    white-space: nowrap;
 
     @include plumber(
       $font-size: 1.618,

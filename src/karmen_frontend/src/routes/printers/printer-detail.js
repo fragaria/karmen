@@ -190,7 +190,7 @@ const PrinterDetail = ({
           </div>
         </div>
 
-        <div className="printer-detail-jobs">
+        <div className="printer-detail-controls">
           <RoutedTabs
             startPathWith={match.url}
             className="react-tabs__tab-list"

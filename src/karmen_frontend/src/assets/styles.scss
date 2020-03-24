@@ -1212,11 +1212,18 @@ select {
     );
   }
 
+  @media (max-width: $screen-sm-max) {
+    .printer-detail-controls {
+      margin-top: $spacing-default;
+    }
+  }
+
+
   @media (min-width: $screen-sm-min) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "meta stream"
-    "jobs jobs";
+    "controls controls";
     grid-gap: $spacing-default;
 
     .printer-detail-stream {
@@ -1240,12 +1247,8 @@ select {
       }
     }
 
-    .printer-detail-jobs {
-      grid-area: jobs;
-    }
-
     .printer-detail-controls {
-      margin-top: $spacing-default / 4;
+      grid-area: controls;
     }
   }
 
