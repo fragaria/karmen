@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Link, Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import { RoutedTabs, NavTab } from "react-router-tabs";
 
 import JobsTab from "../../components/tabs/printer/jobs-tab";
@@ -134,18 +134,6 @@ const PrinterDetail = ({
             orgUuid={match.params.orguuid}
           />
           <Progress {...printer.job} />
-
-          {role === "admin" && (
-            <div className="cta-box text-center hidden-xs">
-              <Link
-                to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
-              >
-                <button className="btn btn-sm btn-outline">
-                  Printer settings
-                </button>
-              </Link>
-            </div>
-          )}
         </div>
 
         <div className="printer-detail-meta">
@@ -202,18 +190,6 @@ const PrinterDetail = ({
           </div>
         </div>
 
-        {role === "admin" && (
-          <div className="cta-box text-center visible-xs">
-            <Link
-              to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
-            >
-              <button className="btn btn-sm btn-outline">
-                Printer settings
-              </button>
-            </Link>
-          </div>
-        )}
-
         <div className="printer-detail-jobs">
           <RoutedTabs
             startPathWith={match.url}
@@ -224,6 +200,7 @@ const PrinterDetail = ({
             <NavTab to="/tab-controls">Controls</NavTab>
             <NavTab to="/tab-jobs">Jobs</NavTab>
             <NavTab to="/tab-connection">Connection</NavTab>
+            {role === "admin" && <NavTab to={`/settings`}>Settings</NavTab>}
           </RoutedTabs>
 
           <Switch>
