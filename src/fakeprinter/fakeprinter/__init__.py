@@ -24,6 +24,11 @@ STATE = {
     "job_state": "Printing",
     "job_name": "fake-file-being-printed.gcode",
     "lights_color": [0, 0, 0],
+    "fan_state": "off",
+    "motors_state": "on",
+    "x": 100.0,
+    "y": 100.0,
+    "z": 100.0,
     "temperature_bed": 24.7,
     "temperature_tool": 16.2,
 }
@@ -161,6 +166,7 @@ def upload():
     destination = os.path.join(destination_dir, filename)
     STATE["job_state"] = "Printing"
     STATE["job_name"] = filename
+    STATE["motors_state"] = "on"
     return (
         jsonify(
             {
@@ -192,6 +198,21 @@ def snapshot():
         "LIGHTS %s" % ("ON" if STATE["lights_color"] == [1, 1, 1] else "OFF"),
         font=font,
     )
+    draw.text(
+        (10, 50), "FAN %s" % STATE["fan_state"], font=font,
+    )
+    draw.text(
+        (10, 70), "MOTORS %s" % STATE["motors_state"], font=font,
+    )
+    draw.text(
+        (10, 90), "x %s" % STATE["x"], font=font,
+    )
+    draw.text(
+        (10, 110), "y %s" % STATE["y"], font=font,
+    )
+    draw.text(
+        (10, 130), "z %s" % STATE["z"], font=font,
+    )
     IMAGE.save(imgio, "JPEG", quality=90)
     imgio.seek(0)
     return send_file(imgio, mimetype="image/jpeg")
@@ -214,13 +235,6 @@ def set_lights():
     return jsonify({"status": "OK"}), 200
 
 
-@app.route("/api/printer/printhead", methods=["POST"])
-@cross_origin()
-def printhead():
-    global STATE
-    return "", 204
-
-
 @app.route("/api/printer/tool", methods=["POST"])
 @cross_origin()
 def tool():
@@ -241,10 +255,31 @@ def bed():
     return "", 204
 
 
+@app.route("/api/printer/printhead", methods=["POST"])
+@cross_origin()
+def printhead():
+    global STATE
+    data = request.json
+    if data:
+        for i in ["x", "y", "z"]:
+            STATE[i] = STATE[i] + float(data.get(i, 0))
+        for i in data.get("axes", []):
+            STATE[i] = 100.0
+    return "", 204
+
+
 @app.route("/api/printer/command", methods=["POST"])
 @cross_origin()
 def command():
     global STATE
+    data = request.json
+    if "commands" in data:
+        if data["commands"][0] == "M18":
+            STATE["motors_state"] = "off"
+        elif data["commands"][0] == "M106 S255":
+            STATE["fan_state"] = "on"
+        elif data["commands"][0] == "M106 S0":
+            STATE["fan_state"] = "off"
     return "", 204
 
 
