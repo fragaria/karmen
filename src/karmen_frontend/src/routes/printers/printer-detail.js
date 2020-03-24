@@ -140,7 +140,9 @@ const PrinterDetail = ({
               <Link
                 to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
               >
-                <button className="btn btn-sm btn-outline">Printer settings</button>
+                <button className="btn btn-sm btn-outline">
+                  Printer settings
+                </button>
               </Link>
             </div>
           )}
@@ -205,7 +207,9 @@ const PrinterDetail = ({
             <Link
               to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
             >
-              <button className="btn btn-sm btn-outline">Printer settings</button>
+              <button className="btn btn-sm btn-outline">
+                Printer settings
+              </button>
             </Link>
           </div>
         )}
@@ -226,7 +230,9 @@ const PrinterDetail = ({
             <Route
               exact
               path={`${match.url}`}
-              render={() => <Redirect replace to={`${match.url}/tab-controls`} />}
+              render={() => (
+                <Redirect replace to={`${match.url}/tab-controls`} />
+              )}
             />
             <Route
               path={`${match.url}/tab-jobs`}

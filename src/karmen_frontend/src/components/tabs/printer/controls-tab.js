@@ -84,7 +84,10 @@ const AxesXYControl = ({ movePrinthead }) => {
   const [distance] = useState(10);
   return (
     <div className="axes-content">
-      <span className="axes-content-title">Move on X/Y axis <br/>by {distance}mm</span>
+      <span className="axes-content-title">
+        Move on X/Y axis <br />
+        by {distance}mm
+      </span>
       <div className="axes-content-grid">
         <div style={{ gridColumn: 2, gridRow: 1 }}>
           <BusyButton
@@ -170,7 +173,10 @@ const AxesZControl = ({ movePrinthead }) => {
   const [distance] = useState(10);
   return (
     <div className="axes-content">
-      <span className="axes-content-title">Move on Z axis <br/>by {distance}mm</span>
+      <span className="axes-content-title">
+        Move on Z axis <br />
+        by {distance}mm
+      </span>
       <div className="axes-content-grid">
         <div style={{ gridColumn: 2, gridRow: 1 }}>
           <BusyButton
@@ -271,7 +277,12 @@ const ExtrusionControl = ({ extrude }) => {
   );
 };
 
-const DirectControl = ({ changeFanState, changeMotorsState, changeLightsState, printer }) => {
+const DirectControl = ({
+  changeFanState,
+  changeMotorsState,
+  changeLightsState,
+  printer
+}) => {
   return (
     <>
       <label>Fan</label>
@@ -335,9 +346,7 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
   const [target, setTarget] = useState(current);
   return (
     <>
-      <label htmlFor="extrusion">
-        {name}
-      </label>
+      <label htmlFor="extrusion">{name}</label>
 
       <div>
         <input
@@ -391,7 +400,6 @@ const ControlsTab = ({
       ) : (
         <div className="printer-control-panel">
           <div className="controls">
-
             <PrinterCurrentPrintControl
               printer={printer}
               onCurrentJobStateChange={changeCurrentJobState}
