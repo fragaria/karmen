@@ -22,6 +22,7 @@ services:
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
     ports:
       - 127.0.0.1:3000:9765
+    tty: true
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
