@@ -1223,7 +1223,9 @@ select {
       grid-area: stream;
       @include plumber(
         $leading-top: 14,
+        $leading-bottom: 0
       );
+      padding-top: 0;
     }
 
     .printer-detail-meta {

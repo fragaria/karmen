@@ -394,9 +394,11 @@ const ControlsTab = ({
   return (
     <div className="container">
       {!available ? (
-        <p className="message-error">
-          Controls are not available for a disconnected printer
-        </p>
+        <div className="printer-control-panel">
+          <strong>
+            Controls are not available for a disconnected printer
+          </strong>
+        </div>
       ) : (
         <div className="printer-control-panel">
           <div className="controls">
