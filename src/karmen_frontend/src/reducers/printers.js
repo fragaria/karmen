@@ -100,8 +100,9 @@ export default (
         printers: getSortedPrinters(printers)
       });
     case "PRINTERS_CHANGE_JOB_SUCCEEDED":
-      newPrinter = action.payload.data;
-      origPrinterIndex = printers.findIndex(p => p.uuid === newPrinter.uuid);
+      origPrinterIndex = printers.findIndex(
+        p => p.uuid === action.payload.uuid
+      );
       if (origPrinterIndex === -1) {
         return state;
       }
@@ -110,7 +111,7 @@ export default (
         printers[origPrinterIndex],
         {
           status: Object.assign({}, printers[origPrinterIndex].status, {
-            state: statesMapping[newPrinter.action] || "Unknown"
+            state: statesMapping[action.payload.action] || "Unknown"
           })
         }
       );
@@ -118,8 +119,9 @@ export default (
         printers: getSortedPrinters(printers)
       });
     case "PRINTERS_SET_CONNECTION_SUCCEEDED":
-      newPrinter = action.payload.data;
-      origPrinterIndex = printers.findIndex(p => p.uuid === newPrinter.uuid);
+      origPrinterIndex = printers.findIndex(
+        p => p.uuid === action.payload.uuid
+      );
       if (origPrinterIndex === -1) {
         return state;
       }
@@ -128,7 +130,7 @@ export default (
         printers[origPrinterIndex],
         {
           status: Object.assign({}, printers[origPrinterIndex].status, {
-            state: statesMapping[newPrinter.state] || "Unknown"
+            state: statesMapping[action.payload.state] || "Unknown"
           })
         }
       );
@@ -152,8 +154,9 @@ export default (
         toBeDeleted: state.toBeDeleted.filter(d => d !== action.payload.uuid)
       });
     case "PRINTERS_CHANGE_LIGHTS_SUCCEEDED":
-      newPrinter = action.payload;
-      origPrinterIndex = printers.findIndex(p => p.uuid === newPrinter.uuid);
+      origPrinterIndex = printers.findIndex(
+        p => p.uuid === action.payload.uuid
+      );
       if (origPrinterIndex === -1) {
         return state;
       }

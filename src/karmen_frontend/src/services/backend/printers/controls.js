@@ -4,7 +4,8 @@ export const setPrinterConnection = (orgUuid, uuid, state) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/connection`,
     appendData: {
-      uuid
+      uuid,
+      state
     },
     data: {
       state
@@ -17,7 +18,8 @@ export const changeCurrentJob = (orgUuid, uuid, action) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/current-job`,
     appendData: {
-      uuid
+      uuid,
+      action
     },
     data: {
       action
