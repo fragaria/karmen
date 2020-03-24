@@ -37,19 +37,21 @@ def make_printjob_response(printjob, fields=None, user_mapping=None):
 def printjob_create(org_uuid):
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     gcode_uuid = data.get("gcode", None)
     printer_uuid = data.get("printer", None)
     if not gcode_uuid or not printer_uuid:
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="Missing gcode_uuid or printer_uuid"), 400)
+        )
     validate_uuid(gcode_uuid)
     validate_uuid(printer_uuid)
     printer = printers.get_printer(printer_uuid)
     if printer is None or printer["organization_uuid"] != org_uuid:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     gcode = gcodes.get_gcode(gcode_uuid)
     if gcode is None:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     try:
         network_client = network_clients.get_network_client(
             printer["network_client_uuid"]
@@ -91,8 +93,13 @@ def printjob_create(org_uuid):
             jsonify({"uuid": printjob_uuid, "user_uuid": get_current_user()["uuid"]}),
             201,
         )
-    except clients.utils.PrinterClientException:
-        return abort(make_response("", 409))
+    except clients.utils.PrinterClientException as e:
+        app.logger.error(e)
+        return abort(
+            make_response(
+                jsonify(message="Cannot schedule a printjob: %s" % str(e)), 409
+            )
+        )
 
 
 @app.route("/organizations/<org_uuid>/printjobs", methods=["GET"])
@@ -103,7 +110,9 @@ def printjobs_list(org_uuid):
     printjob_list = []
     order_by = request.args.get("order_by", "")
     if "," in order_by:
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="order_by supports only one data field"), 400)
+        )
     if order_by in ["gcode_data", "printer_data"]:
         order_by = ""
     try:
@@ -176,7 +185,7 @@ def printjob_detail(org_uuid, uuid):
     validate_uuid(uuid)
     printjob = printjobs.get_printjob(uuid)
     if printjob is None or printjob["organization_uuid"] != org_uuid:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     user = users.get_by_uuid(printjob.get("user_uuid"))
     user_mapping = {}
     user_mapping[printjob.get("user_uuid")] = user.get("username")

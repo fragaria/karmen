@@ -21,9 +21,6 @@ export default (
   let settings, newOrgs;
   switch (action.type) {
     case "USER_AUTHENTICATE_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       settings = getUserPreferences();
       if (!settings || settings.identity !== action.payload.data.identity) {
         persistUserPreferences({

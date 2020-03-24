@@ -44,17 +44,17 @@ export const PrinterProperties = ({ printer }) => {
             </>
           )}
 
-          {props.bed_type && (
-            <>
-              <dt className="term">Bed type:</dt>
-              <dd className="description">{props.bed_type}</dd>
-            </>
-          )}
-
           {props.tool0_diameter && (
             <>
               <dt className="term">Tool diameter:</dt>
               <dd className="description">{props.tool0_diameter} mm</dd>
+            </>
+          )}
+
+          {props.bed_type && (
+            <>
+              <dt className="term">Bed type:</dt>
+              <dd className="description">{props.bed_type}</dd>
             </>
           )}
 
@@ -116,7 +116,7 @@ export const PrinterProgress = ({ printer }) => {
 
 export const PrinterConnectionStatus = ({ printer }) => {
   return (
-    <>
+    <dl className="dl-horizontal">
       {printer.client && (
         <>
           <dt className="term">Client: </dt>
@@ -175,7 +175,7 @@ export const PrinterConnectionStatus = ({ printer }) => {
           <dd className="decription">{printer.client.api_key}</dd>
         </>
       )}
-    </>
+    </dl>
   );
 };
 

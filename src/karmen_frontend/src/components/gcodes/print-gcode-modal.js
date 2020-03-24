@@ -46,7 +46,7 @@ export const usePrintGcodeModal = ({
 
   const schedulePrint = (gcodeUuid, printerUuid) => {
     onSchedulePrint(gcodeUuid, printerUuid).then(r => {
-      switch (r) {
+      switch (r.status) {
         case 201:
           setMessage("Print was scheduled");
           setMessageOk(true);

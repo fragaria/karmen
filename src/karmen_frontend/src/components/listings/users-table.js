@@ -9,7 +9,7 @@ const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
       {modal.isOpen && (
         <modal.Modal>
           <h1 className="modal-title text-center">Change user role</h1>
-          <h3 className="modal-content text-center">
+          <h3 className="text-center">
             Do you really want to {user.role === "admin" ? "demote" : "promote"}{" "}
             <strong>{user.username}</strong> to{" "}
             {user.role === "admin" ? "user" : "admin"}?

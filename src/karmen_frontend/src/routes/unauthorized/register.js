@@ -3,8 +3,8 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
-import { register } from "../../actions/users-me";
 import { isEmail } from "../../services/validators";
+import { register } from "../../actions";
 
 class Register extends React.Component {
   constructor(props) {

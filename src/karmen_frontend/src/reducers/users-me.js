@@ -45,9 +45,6 @@ export default (
         apiTokensLoaded: false
       });
     case "USER_AUTHENTICATE_FRESH_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       userData = getUserDataFromApiResponse(
         action.payload.data,
         state.activeOrganization
@@ -59,9 +56,6 @@ export default (
         apiTokensLoaded: false
       });
     case "USER_AUTHENTICATE_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       userData = getUserDataFromApiResponse(
         action.payload.data,
         state.activeOrganization
@@ -73,9 +67,6 @@ export default (
         apiTokensLoaded: false
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       userData = getUserDataFromApiResponse(
         action.payload.data,
         state.activeOrganization
@@ -83,9 +74,6 @@ export default (
       persistUserProfile(userData);
       return Object.assign({}, state, userData);
     case "USER_PATCH_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       userData = Object.assign({}, state, {
         username: action.payload.data.username,
         email: action.payload.data.email
@@ -93,9 +81,6 @@ export default (
       persistUserProfile(userData);
       return Object.assign({}, state, userData);
     case "USER_CHANGE_PASSWORD_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       userData = getUserDataFromApiResponse(
         action.payload.data,
         state.activeOrganization

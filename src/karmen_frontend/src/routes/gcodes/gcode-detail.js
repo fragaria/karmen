@@ -6,9 +6,12 @@ import Loader from "../../components/utils/loader";
 import BusyButton from "../../components/utils/busy-button";
 import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 
-import { loadGcode, downloadGcode } from "../../actions/gcodes";
-import { addPrintJob } from "../../actions/printjobs";
-import { loadPrinters } from "../../actions/printers";
+import {
+  loadGcode,
+  downloadGcode,
+  loadPrinters,
+  addPrintJob
+} from "../../actions";
 import formatters from "../../services/formatters";
 
 const GcodePrint = ({

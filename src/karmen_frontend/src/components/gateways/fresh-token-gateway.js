@@ -4,7 +4,7 @@ import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import LoginForm from "../forms/login-form";
 import Loader from "../utils/loader";
-import { authenticateFresh } from "../../actions/users-me";
+import { authenticateFresh } from "../../actions";
 
 const FreshTokenGateway = ({
   children,

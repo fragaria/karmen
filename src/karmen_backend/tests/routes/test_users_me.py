@@ -238,7 +238,7 @@ class ActivateNewUserRoute(unittest.TestCase):
                     "password_confirmation": "aaa",
                 },
             )
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 204)
             user = users.get_by_uuid(self.user_uuid)
             self.assertTrue(user is not None)
             self.assertTrue(user["activated"] is not None)
@@ -259,7 +259,7 @@ class ActivateNewUserRoute(unittest.TestCase):
                     "password_confirmation": "aaa",
                 },
             )
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 204)
             response = c.post(
                 "/users/me/activate",
                 json={
@@ -471,7 +471,7 @@ class ResetPasswordRoute(unittest.TestCase):
                     "password_confirmation": "aaa",
                 },
             )
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 204)
             local_user = local_users.get_local_user(self.user_uuid)
             self.assertTrue(local_user["pwd_reset_key_hash"] is None)
             self.assertTrue(local_user["pwd_reset_key_expires"] is None)

@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import ChangePasswordForm from "../forms/change-password-form";
-import { changePassword } from "../../actions/users-me";
+import { changePassword } from "../../actions";
 import Loader from "../utils/loader";
 
 const ForcePwdChangeGateway = ({ children, userState, changePassword }) => {

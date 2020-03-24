@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { FormInputs } from "../components/forms/form-utils";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
-import { addOrganization } from "../actions/organizations";
+import { addOrganization } from "../actions";
 
 class AddOrganization extends React.Component {
   state = {

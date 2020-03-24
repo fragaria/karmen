@@ -71,7 +71,7 @@ class Octoprint(PrinterClient):
         if self.token is not None and self.token != "":
             self.network_base = app.config.get("SOCKET_API_URL") % self.token
         else:
-            if self.port is not None:
+            if self.port is not None and self.port != 0:
                 network_host = "%s:%s" % (self.ip, self.port)
             else:
                 network_host = self.ip
@@ -480,3 +480,63 @@ class Octoprint(PrinterClient):
             return data.get("status", "NOK") == "OK"
         except json.decoder.JSONDecodeError:
             return False
+
+    def move_head(self, movement, absolute=False):
+        for axis in movement.keys():
+            if axis not in ["x", "y", "z"]:
+                return False
+        command = {"absolute": absolute, "command": "jog"}
+        command.update(movement)
+        request = self._http_post("/api/printer/printhead", json=command)
+        if not request or request.status_code != 204:
+            return False
+        return True
+
+    def home_head(self, axes):
+        for axis in axes:
+            if axis not in ["x", "y", "z"]:
+                return False
+        command = {"axes": axes, "command": "home"}
+        request = self._http_post("/api/printer/printhead", json=command)
+        if not request or request.status_code != 204:
+            return False
+        return True
+
+    def set_temperature(self, device, temp):
+        path = "/api/printer/"
+        if device in ["tool0", "tool1"]:
+            path += "tool"
+            command = {"targets": {device: temp}, "command": "target"}
+        elif device == "bed":
+            path += "bed"
+            command = {"target": temp, "command": "target"}
+        else:
+            return False
+        request = self._http_post(path, json=command)
+        if not request or request.status_code != 204:
+            return False
+        return True
+
+    def extrude(self, length):
+        command = {"amount": length, "command": "extrude"}
+        request = self._http_post("/api/printer/tool", json=command)
+        if not request or request.status_code != 204:
+            return False
+        return True
+
+    def set_fan(self, state):
+        command = {
+            "commands": ["M106 " + ("S255" if state == "on" else "S0")],
+            "parameters": {},
+        }
+        request = self._http_post("/api/printer/command", json=command)
+        if not request or request.status_code != 204:
+            return False
+        return True
+
+    def motors_off(self):
+        command = {"commands": ["M18"], "parameters": {}}
+        request = self._http_post("/api/printer/command", json=command)
+        if not request or request.status_code != 204:
+            return False
+        return True

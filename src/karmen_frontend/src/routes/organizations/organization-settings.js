@@ -10,10 +10,16 @@ import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import UsersTab from "../../components/tabs/settings/users-tab";
 import PrintersTab from "../../components/tabs/settings/printers-tab";
 
-import { enqueueTask } from "../../actions/misc";
-import { setNetworkInterface } from "../../actions/preferences";
-import { loadPrinters, deletePrinter } from "../../actions/printers";
-import { addUser, getUsers, patchUser, deleteUser } from "../../actions/users";
+import {
+  enqueueTask,
+  setNetworkInterface,
+  loadPrinters,
+  deletePrinter,
+  addUser,
+  getUsers,
+  patchUser,
+  deleteUser
+} from "../../actions";
 
 const Settings = ({ match, ...rest }) => {
   return (
@@ -32,23 +38,25 @@ const Settings = ({ match, ...rest }) => {
               tabClassName="react-tabs__tab"
               activeTabClassName="react-tabs__tab--selected"
             >
-              <NavTab to="/printers">Printers</NavTab>
-              <NavTab to="/users">Users</NavTab>
+              <NavTab to="/tab-printers">Printers</NavTab>
+              <NavTab to="/tab-users">Users</NavTab>
             </RoutedTabs>
             <Switch>
               <Route
                 exact
                 path={`${match.url}`}
-                render={() => <Redirect replace to={`${match.url}/printers`} />}
+                render={() => (
+                  <Redirect replace to={`${match.url}/tab-printers`} />
+                )}
               />
               <Route
-                path={`${match.url}/printers`}
+                path={`${match.url}/tab-printers`}
                 render={props => (
                   <PrintersTab {...rest} orguuid={match.params.orguuid} />
                 )}
               />
               <Route
-                path={`${match.url}/users`}
+                path={`${match.url}/tab-users`}
                 render={props => (
                   <UsersTab {...rest} orguuid={match.params.orguuid} />
                 )}

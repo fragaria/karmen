@@ -16,9 +16,9 @@ def validate_uuid(uuid):
     try:
         uuidm = guid.UUID(str(uuid), version=4)
         if str(uuidm) != uuid:
-            return abort(make_response("", 400))
+            return abort(make_response(jsonify(message="Invalid uuid"), 400))
     except ValueError:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Invalid uuid"), 400))
 
 
 def validate_org_access(required_role=None):
@@ -29,7 +29,7 @@ def validate_org_access(required_role=None):
             validate_uuid(org_uuid)
             user = get_current_user()
             if not user:
-                return abort(make_response("", 401))
+                return abort(make_response(jsonify(message="Unauthorized"), 401))
             role = organization_roles.get_organization_role(org_uuid, user["uuid"])
             if role is None:
                 return abort(
@@ -63,7 +63,7 @@ def jwt_requires_system_role(required_role):
                 return func(*args, **kwargs)
             user = get_current_user()
             if not user:
-                return abort(make_response("", 401))
+                return abort(make_response(jsonify(message="Unauthorized"), 401))
             if user["system_role"] != required_role or user["system_role"] != "admin":
                 return abort(
                     make_response(
@@ -91,7 +91,7 @@ def jwt_force_password_change(func):
         force_pwd_change = claims.get("force_pwd_change", None)
         user = get_current_user()
         if not user:
-            return abort(make_response("", 401))
+            return abort(make_response(jsonify(message="Unauthorized"), 401))
         if "local" in user["providers"] and force_pwd_change:
             luser = db_local_users.get_local_user(user["uuid"])
             if luser["force_pwd_change"]:

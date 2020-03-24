@@ -10,10 +10,10 @@ import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 import {
   getGcodesPage,
   clearGcodesPages,
-  deleteGcode
-} from "../../actions/gcodes";
-import { addPrintJob } from "../../actions/printjobs";
-import { loadPrinters } from "../../actions/printers";
+  deleteGcode,
+  addPrintJob,
+  loadPrinters
+} from "../../actions";
 import formatters from "../../services/formatters";
 
 const DeleteModal = ({ modal, path, display, onRowDelete }) => {

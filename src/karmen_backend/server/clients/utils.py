@@ -84,6 +84,30 @@ class PrinterClient(abc.ABC):
     def set_lights(self, color=None, heartbeat=None):
         pass
 
+    @abc.abstractmethod
+    def move_head(self, axis, distance, absolute=False):
+        pass
+
+    @abc.abstractmethod
+    def home_head(self, axis):
+        pass
+
+    @abc.abstractmethod
+    def set_temperature(self, device, temp):
+        pass
+
+    @abc.abstractmethod
+    def extrude(self, length):
+        pass
+
+    @abc.abstractmethod
+    def set_fan(self, state):
+        pass
+
+    @abc.abstractmethod
+    def motors_off(self):
+        pass
+
 
 class PrinterClientException(Exception):
     pass

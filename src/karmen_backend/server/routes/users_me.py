@@ -37,14 +37,14 @@ REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
 def create_inactive_user():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
     if not email or not is_email(email):
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing or bad email"), 400))
     existing = users.get_by_email(email)
     # activated users
     if existing and existing["activated"] is not None:
-        return abort(make_response("", 202))
+        return "", 202
 
     activation_key = guid.uuid4()
     activation_key_expires = datetime.now().astimezone() + timedelta(minutes=10)
@@ -79,7 +79,7 @@ def create_inactive_user():
             "email": email,
         },
     )
-    return make_response("", 202)
+    return "", 202
 
 
 # sets a first password to a user
@@ -87,32 +87,34 @@ def create_inactive_user():
 def activate_user():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
     activation_key = data.get("activation_key", None)
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
 
     if not email or not is_email(email):
-        return abort(make_response("", 400))
-    if not password or not activation_key:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    if not password:
+        return abort(make_response(jsonify(message="Missing password"), 400))
+    if not activation_key:
+        return abort(make_response(jsonify(message="Missing activation_key"), 400))
     if password != password_confirmation:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Passwords do not match"), 400))
 
     existing = users.get_by_email(email)
     if not existing:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Cannot activate"), 400))
     if existing["activated"] is not None:
-        return abort(make_response("", 409))
+        return abort(make_response(jsonify(message="Already activated"), 409))
 
     if (
         hashlib.sha256(str(activation_key).encode("utf-8")).hexdigest()
         != existing["activation_key_hash"]
     ):
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Cannot activate"), 400))
     if existing["activation_key_expires"] < datetime.now().astimezone():
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Activation key expired"), 400))
 
     memberships = organization_roles.get_by_user_uuid(existing["uuid"])
     if len(memberships) == 0:
@@ -132,24 +134,26 @@ def activate_user():
         pwd_hash=pwd_hash.decode("utf8"),
         force_pwd_change=False,
     )
-    return make_response("", 200)
+    return "", 204
 
 
 @app.route("/users/me/request-password-reset", methods=["POST"])
 def request_password_reset():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
     if not email or not is_email(email):
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing or bad email"), 400))
     existing = users.get_by_email(email)
     # we are not leaking used or unused e-mails, that's why this responds 202
     if not existing or existing["activated"] is None:
-        return abort(make_response("", 202))
+        return "", 202
     local = local_users.get_local_user(existing["uuid"])
     if not local:
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="User does not have a password"), 400)
+        )
     pwd_reset_key = guid.uuid4()
     pwd_reset_key_expires = datetime.now().astimezone() + timedelta(hours=1)
     local_users.update_local_user(
@@ -168,40 +172,44 @@ def request_password_reset():
             "email": email,
         },
     )
-    return make_response("", 202)
+    return "", 202
 
 
 @app.route("/users/me/reset-password", methods=["POST"])
 def reset_password():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
     pwd_reset_key = data.get("pwd_reset_key", None)
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
 
     if not email or not is_email(email):
-        return abort(make_response("", 400))
-    if not password or not pwd_reset_key:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    if not password:
+        return abort(make_response(jsonify(message="Missing password"), 400))
+    if not pwd_reset_key:
+        return abort(make_response(jsonify(message="Missing reset key"), 400))
     if password != password_confirmation:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Password mismatch"), 400))
 
     existing = users.get_by_email(email)
     if not existing:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Cannot reset"), 400))
     local = local_users.get_local_user(existing["uuid"])
     if not local:
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="User does not have a password"), 400)
+        )
 
     if (
         hashlib.sha256(str(pwd_reset_key).encode("utf-8")).hexdigest()
         != local["pwd_reset_key_hash"]
     ):
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Cannot reset"), 400))
     if local["pwd_reset_key_expires"] < datetime.now().astimezone():
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Reset key expired"), 400))
 
     pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
     local_users.update_local_user(
@@ -214,7 +222,7 @@ def reset_password():
     send_mail.delay(
         [email], "PASSWORD_RESET_CONFIRMATION", {"email": email,},
     )
-    return make_response("", 200)
+    return "", 204
 
 
 def get_user_identity(userdata, token_freshness):
@@ -240,7 +248,7 @@ def get_user_identity(userdata, token_freshness):
 def authenticate_base(include_refresh_token):
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     username = data.get("username", None)
     password = data.get("password", None)
     if not username or not password:
@@ -302,11 +310,11 @@ def authenticate_fresh():
 def authenticate_refresh():
     user = get_current_user()
     if not user:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
     userdata = dict(user)
     userdata.update(local)
     response = jsonify(get_user_identity(userdata, False))
@@ -333,7 +341,7 @@ def logout():
 def change_password():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     password = data.get("password", None)
     new_password = data.get("new_password", None)
     new_password_confirmation = data.get("new_password_confirmation", None)
@@ -343,18 +351,18 @@ def change_password():
         or not new_password_confirmation
         or new_password != new_password_confirmation
     ):
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Password issues"), 400))
 
     user = get_current_user()
     if not user:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
 
     local = local_users.get_local_user(user["uuid"])
     if not local:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
 
     if not bcrypt.checkpw(password.encode("utf8"), local["pwd_hash"].encode("utf8")):
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
 
     pwd_hash = bcrypt.hashpw(new_password.encode("utf8"), bcrypt.gensalt())
     local_users.update_local_user(
@@ -377,18 +385,18 @@ def change_password():
 def patch_user():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     username = data.get("username", None)
     if not username:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing username"), 400))
 
     user = get_current_user()
     if not user:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
 
     existing = users.get_by_username(username)
     if existing and existing["uuid"] != user["uuid"]:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Cannot patch"), 400))
 
     users.update_user(uuid=user["uuid"], username=username)
     userdata = dict(user)
@@ -432,21 +440,20 @@ def list_api_tokens():
 def create_api_token():
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     name = data.get("name", None)
     if not name:
-        return abort(make_response("", 400))
-
+        return abort(make_response(jsonify(message="Missing name"), 400))
     org_uuid = data.get("organization_uuid", None)
     if not org_uuid:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing organization_uuid"), 400))
 
     user = get_current_user()
     if not user:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
     is_member = organization_roles.get_organization_role(org_uuid, user["uuid"])
     if not is_member:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
     organization = organizations.get_by_uuid(org_uuid)
     token = create_access_token(
         identity=user,
@@ -479,8 +486,8 @@ def create_api_token():
 def revoke_api_token(jti):
     token = api_tokens.get_token(jti)
     if token is None or token["revoked"]:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     if get_jwt_identity() != token["user_uuid"]:
-        return abort(make_response("", 401))
+        return abort(make_response(jsonify(message="Unauthorized"), 401))
     api_tokens.revoke_token(jti)
     return "", 204

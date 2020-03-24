@@ -5,8 +5,8 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import { FormInputs } from "../../components/forms/form-utils";
-import { addUserApiToken } from "../../actions/users-me";
 import BusyButton from "../../components/utils/busy-button";
+import { addUserApiToken } from "../../actions";
 
 class AddApiToken extends React.Component {
   constructor(props) {
@@ -103,7 +103,7 @@ class AddApiToken extends React.Component {
       copyButtonReady
     } = this.state;
     if (redirect) {
-      return <Redirect to="/users/me" />;
+      return <Redirect to="/users/me/tab-api-tokens" />;
     }
 
     return (
@@ -128,7 +128,7 @@ class AddApiToken extends React.Component {
                       be used forever
                     </li>
                     <li>
-                      If you need to disable it, you have to revoke it on the
+                      If you need to disable it, you have to delete it on the
                       User preferences screen
                     </li>
                     <li>
@@ -205,7 +205,7 @@ class AddApiToken extends React.Component {
                   >
                     Create token
                   </BusyButton>{" "}
-                  <Link to="/users/me/api-tokens" className="btn btn-plain">
+                  <Link to="/users/me/tab-api-tokens" className="btn btn-plain">
                     Cancel
                   </Link>
                 </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { loadUserFromToken } from "../../actions/users-me";
+import { loadUserFromToken } from "../../actions";
 
 const CatchLoginTokenFromUrl = ({
   history,

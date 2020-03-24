@@ -22,10 +22,11 @@ export default (
 ) => {
   switch (action.type) {
     case "GCODES_LOAD_PAGE_SUCCEEDED":
-      if (action.payload.status !== 200) {
-        return state;
-      }
       const { orderBy, filter, limit, fields } = state.list;
+      const newPage = {
+        data: action.payload.data,
+        startWith: action.payload.startWith
+      };
       let { pages } = state.list;
       // continue only with the same conditions
       if (
@@ -34,31 +35,16 @@ export default (
         limit === action.payload.limit &&
         fields.length === action.payload.fields.length // TODO This is a bad check, it should compare array contents
       ) {
-        // TODO possibly switch to findIndex
-        const origPage = pages.find(
+        const origPageIndex = pages.findIndex(
           p => p.startWith === action.payload.startWith
         );
-        if (!origPage && action.payload.data) {
-          pages.push({
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          });
+        if (origPageIndex === -1) {
+          pages.push(newPage);
+        } else {
+          pages[origPageIndex] = newPage;
         }
-        if (origPage && action.payload.data) {
-          const origIndex = pages.indexOf(origPage);
-          pages[origIndex] = {
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          };
-        }
-        // if any option changes, reset pages
       } else {
-        pages = [
-          {
-            data: action.payload.data,
-            startWith: action.payload.startWith
-          }
-        ];
+        pages = [newPage];
       }
       return Object.assign({}, state, {
         list: {
@@ -73,7 +59,7 @@ export default (
       const newPages = state.list.pages.map(p => {
         if (p.data && p.data.items) {
           const origItemIndex = p.data.items.findIndex(
-            p => p.uuid === action.payload.data.uuid
+            p => p.uuid === action.payload.uuid
           );
           if (origItemIndex > -1) {
             return Object.assign({}, p, {

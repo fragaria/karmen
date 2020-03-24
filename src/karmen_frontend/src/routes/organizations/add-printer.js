@@ -5,7 +5,7 @@ import SetActiveOrganization from "../../components/gateways/set-active-organiza
 import { FormInputs } from "../../components/forms/form-utils";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import BusyButton from "../../components/utils/busy-button";
-import { addPrinter } from "../../actions/printers";
+import { addPrinter } from "../../actions";
 
 class AddPrinter extends React.Component {
   state = {
@@ -131,7 +131,7 @@ class AddPrinter extends React.Component {
     const { form, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
-      return <Redirect to={`/${match.params.orguuid}/settings/printers`} />;
+      return <Redirect to={`/${match.params.orguuid}/settings/tab-printers`} />;
     }
     return (
       <>
@@ -171,7 +171,7 @@ class AddPrinter extends React.Component {
                     Add printer
                   </BusyButton>{" "}
                   <Link
-                    to={`/${match.params.orguuid}/settings/printers`}
+                    to={`/${match.params.orguuid}/settings/tab-printers`}
                     className="btn btn-plain"
                   >
                     Cancel

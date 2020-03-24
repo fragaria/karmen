@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Route, Switch, Redirect } from "react-router-dom";
+import { RoutedTabs, NavTab } from "react-router-tabs";
 
+import JobsTab from "../../components/tabs/printer/jobs-tab";
+import ControlsTab from "../../components/tabs/printer/controls-tab";
+import ConnectionTab from "../../components/tabs/printer/connection-tab";
 import Loader from "../../components/utils/loader";
 import BusyButton from "../../components/utils/busy-button";
 import { useMyModal } from "../../components/utils/modal";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
-import Listing from "../../components/listings/wrapper";
 import Progress from "../../components/printers/progress";
 import WebcamStream from "../../components/printers/webcam-stream";
 import PrinterState from "../../components/printers/printer-state";
 import PrinterAuthorizationForm from "../../components/printers/printer-authorization-form";
 import {
   PrinterProperties,
-  PrinterProgress,
-  PrinterConnectionStatus
+  PrinterProgress
 } from "../../components/printers/printer-data";
-import formatters from "../../services/formatters";
 
-import { getJobsPage, clearJobsPages } from "../../actions/printjobs";
 import {
+  getJobsPage,
+  clearJobsPages,
   loadAndQueuePrinter,
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
-  changeLights
-} from "../../actions/printers";
-import { setWebcamRefreshInterval } from "../../actions/webcams";
+  changeLights,
+  movePrinthead,
+  changeFanState,
+  changeMotorsState,
+  extrude,
+  setTemperature
+} from "../../actions";
+
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,
   accessLevel,
@@ -74,116 +81,9 @@ const ChangeConnectionModal = ({
   );
 };
 
-const CancelPrintModal = ({ modal, onCurrentJobStateChange }) => {
-  return (
-    <>
-      {modal.isOpen && (
-        <modal.Modal>
-          <h1 className="modal-title text-center">
-            Are you sure? You are about to cancel the whole print!
-          </h1>
-          <div className="cta-box text-center">
-            <button
-              className="btn"
-              onClick={() => {
-                onCurrentJobStateChange("cancel").then(() => {
-                  modal.closeModal();
-                });
-              }}
-            >
-              Cancel the print!
-            </button>{" "}
-            <button className="btn btn-plain" onClick={modal.closeModal}>
-              Close
-            </button>
-          </div>
-        </modal.Modal>
-      )}
-    </>
-  );
-};
-
-const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
-  const cancelPrintModal = useMyModal();
-
-  if (
-    !printer.status ||
-    !printer.client ||
-    ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
-    printer.client.access_level !== "unlocked"
-  ) {
-    return <></>;
-  }
-
-  return (
-    <>
-      {printer.status.state === "Paused" ? (
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            onCurrentJobStateChange("resume");
-          }}
-        >
-          Resume print
-        </button>
-      ) : (
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            onCurrentJobStateChange("pause");
-          }}
-        >
-          Pause print
-        </button>
-      )}
-      <button className="btn btn-sm" onClick={cancelPrintModal.openModal}>
-        Cancel print
-      </button>
-      <CancelPrintModal
-        modal={cancelPrintModal}
-        onCurrentJobStateChange={onCurrentJobStateChange}
-      />
-    </>
-  );
-};
-
-class PrintJobRow extends React.Component {
-  render() {
-    const { orguuid, gcode_data, started, username } = this.props;
-    if (!gcode_data) {
-      return <div className="list-item"></div>;
-    }
-    return (
-      <div className="list-item">
-        <div className="list-item-content">
-          {gcode_data && gcode_data.available ? (
-            <Link
-              className="list-item-subtitle"
-              to={`/${orguuid}/gcodes/${gcode_data.uuid}`}
-            >
-              {gcode_data.filename}
-            </Link>
-          ) : (
-            <span className="list-item-subtitle">{gcode_data.filename}</span>
-          )}
-
-          <small>
-            {formatters.bytes(gcode_data.size)}
-            {", "}
-            {formatters.datetime(started)}
-            {", "}
-            {username}
-          </small>
-        </div>
-      </div>
-    );
-  }
-}
-
 const PrinterDetail = ({
   match,
   printer,
-  image,
   loadPrinter,
   setPrinterConnection,
   changeCurrentJobState,
@@ -192,8 +92,12 @@ const PrinterDetail = ({
   jobList,
   loadJobsPage,
   clearJobsPages,
-  setWebcamRefreshInterval,
-  changeLights
+  changeLights,
+  movePrinthead,
+  changeFanState,
+  changeMotorsState,
+  extrude,
+  setTemperature
 }) => {
   const changeConnectionModal = useMyModal();
   const [printerLoaded, setPrinterLoaded] = useState(false);
@@ -225,28 +129,23 @@ const PrinterDetail = ({
       <div className="printer-detail">
         <div className="printer-detail-stream">
           <WebcamStream
-            {...printer.webcam}
             isPrinting={printer.status && printer.status.state === "Printing"}
-            image={image}
-            setWebcamRefreshInterval={setWebcamRefreshInterval}
+            printerUuid={printer.uuid}
+            orgUuid={match.params.orguuid}
           />
           <Progress {...printer.job} />
-          <div className="cta-box text-center hidden-xs">
-            <PrinterCurrentPrintControl
-              printer={printer}
-              onCurrentJobStateChange={changeCurrentJobState}
-            />
-            {printer.lights !== "unavailable" && (
-              <BusyButton
-                className="btn btn-sm"
-                type="button"
-                onClick={changeLights}
-                busyChildren="Switching lights..."
+
+          {role === "admin" && (
+            <div className="cta-box text-center hidden-xs">
+              <Link
+                to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
               >
-                {`Lights ${printer.lights === "on" ? "off" : "on"}`}
-              </BusyButton>
-            )}
-          </div>
+                <button className="btn btn-sm btn-outline">
+                  Printer settings
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="printer-detail-meta">
@@ -299,61 +198,83 @@ const PrinterDetail = ({
             <dl className="dl-horizontal">
               <PrinterProgress printer={printer} />
               <PrinterProperties printer={printer} />
-              <PrinterConnectionStatus printer={printer} />
             </dl>
           </div>
         </div>
 
-        <div className="cta-box text-center visible-xs">
-          <PrinterCurrentPrintControl
-            printer={printer}
-            onCurrentJobStateChange={changeCurrentJobState}
-          />
-          {printer.lights !== "unavailable" && (
-            <BusyButton
-              className="btn btn-sm"
-              type="button"
-              onClick={changeLights}
-              busyChildren="Switching lights..."
+        {role === "admin" && (
+          <div className="cta-box text-center visible-xs">
+            <Link
+              to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
             >
-              {`Lights ${printer.lights === "on" ? "off" : "on"}`}
-            </BusyButton>
-          )}
-        </div>
+              <button className="btn btn-sm btn-outline">
+                Printer settings
+              </button>
+            </Link>
+          </div>
+        )}
 
         <div className="printer-detail-jobs">
-          <div className="react-tabs__tab-list">
-            <span className="react-tabs__tab react-tabs__tab--selected">
-              Jobs
-            </span>
-          </div>
+          <RoutedTabs
+            startPathWith={match.url}
+            className="react-tabs__tab-list"
+            tabClassName="react-tabs__tab"
+            activeTabClassName="react-tabs__tab--selected"
+          >
+            <NavTab to="/tab-controls">Controls</NavTab>
+            <NavTab to="/tab-jobs">Jobs</NavTab>
+            <NavTab to="/tab-connection">Connection</NavTab>
+          </RoutedTabs>
 
-          <Listing
-            enableFiltering={false}
-            itemList={jobList}
-            loadPage={loadJobsPage}
-            rowFactory={j => {
-              return (
-                <PrintJobRow
-                  key={j.uuid}
-                  {...j}
+          <Switch>
+            <Route
+              exact
+              path={`${match.url}`}
+              render={() => (
+                <Redirect replace to={`${match.url}/tab-controls`} />
+              )}
+            />
+            <Route
+              path={`${match.url}/tab-jobs`}
+              render={props => (
+                <JobsTab
                   orguuid={match.params.orguuid}
+                  jobList={jobList}
+                  loadJobsPage={loadJobsPage}
+                  clearJobsPages={clearJobsPages}
                 />
-              );
-            }}
-            sortByColumns={["started"]}
-            clearItemsPages={clearJobsPages}
-          />
-
-          {role === "admin" && (
-            <div className="cta-box text-center">
-              <Link
-                to={`/${match.params.orguuid}/printers/${printer.uuid}/settings`}
-              >
-                <button className="btn btn-outline">Printer settings</button>
-              </Link>
-            </div>
-          )}
+              )}
+            />
+            <Route
+              path={`${match.url}/tab-controls`}
+              render={props => (
+                <ControlsTab
+                  printer={printer}
+                  available={
+                    !(
+                      printer.client.access_level === "unlocked" &&
+                      (["Offline", "Closed"].indexOf(
+                        printer.status && printer.status.state
+                      ) > -1 ||
+                        printer.status.state.match(/printer is not/i))
+                    )
+                  }
+                  temperatures={printer.status && printer.status.temperature}
+                  movePrinthead={movePrinthead}
+                  changeFanState={changeFanState}
+                  changeMotorsState={changeMotorsState}
+                  changeCurrentJobState={changeCurrentJobState}
+                  changeLights={changeLights}
+                  extrude={extrude}
+                  setTemperature={setTemperature}
+                />
+              )}
+            />
+            <Route
+              path={`${match.url}/tab-connection`}
+              render={props => <ConnectionTab printer={printer} />}
+            />
+          </Switch>
         </div>
       </div>
     </section>
@@ -365,7 +286,6 @@ export default connect(
     printer: state.printers.printers.find(
       p => p.uuid === ownProps.match.params.uuid
     ),
-    image: state.webcams.images[ownProps.match.params.uuid],
     role: state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
@@ -425,17 +345,51 @@ export default connect(
           ownProps.match.params.uuid
         )
       ),
-    setWebcamRefreshInterval: interval =>
-      dispatch(
-        setWebcamRefreshInterval(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
-          interval
-        )
-      ),
     changeLights: () =>
       dispatch(
         changeLights(ownProps.match.params.orguuid, ownProps.match.params.uuid)
+      ),
+    movePrinthead: (command, opts) =>
+      dispatch(
+        movePrinthead(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          command,
+          opts
+        )
+      ),
+    changeFanState: targetState =>
+      dispatch(
+        changeFanState(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          targetState
+        )
+      ),
+    changeMotorsState: targetState =>
+      dispatch(
+        changeMotorsState(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          targetState
+        )
+      ),
+    extrude: amount =>
+      dispatch(
+        extrude(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          amount
+        )
+      ),
+    setTemperature: (partName, target) =>
+      dispatch(
+        setTemperature(
+          ownProps.match.params.orguuid,
+          ownProps.match.params.uuid,
+          partName,
+          target
+        )
       )
   })
 )(PrinterDetail);

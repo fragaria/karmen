@@ -1,6 +1,6 @@
-import { createActionThunk } from "redux-thunk-actions";
+import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
-import { retryIfUnauthorized } from "./users-me";
+import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
 export const clearJobsPages = printerUuid => dispatch => {
   return dispatch({
@@ -11,7 +11,7 @@ export const clearJobsPages = printerUuid => dispatch => {
   });
 };
 
-export const getJobsPage = createActionThunk(
+export const getJobsPage = createThunkedAction(
   "JOBS_LOAD_PAGE",
   // TODO Reflect the actual filter attribute
   (
@@ -23,41 +23,27 @@ export const getJobsPage = createActionThunk(
     limit = 15,
     { dispatch, getState }
   ) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
-      orguuid,
-      startWith,
-      orderBy,
-      printerUuid,
-      limit
-    ).then(r => {
-      return {
-        status: r.status,
-        data: r.data,
-        printer: printerUuid,
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinterJobs, dispatch)(
+        orguuid,
         startWith,
         orderBy,
-        filter: null, // TODO filter is ignored for now
+        printerUuid,
         limit
-      };
+      );
     });
   }
 );
 
-export const addPrintJob = createActionThunk(
+export const addPrintJob = createThunkedAction(
   "JOBS_ADD",
   (orguuid, uuid, printer, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.printGcode, dispatch)(
-      orguuid,
-      uuid,
-      printer
-    );
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.printGcode, dispatch)(
+        orguuid,
+        uuid,
+        printer
+      );
+    });
   }
 );

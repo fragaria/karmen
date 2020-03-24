@@ -1,6 +1,6 @@
-import { createActionThunk } from "redux-thunk-actions";
-import * as backend from "../services/backend";
-import { retryIfUnauthorized } from "./users-me";
+import { createThunkedAction } from "../utils";
+import * as backend from "../../services/backend";
+import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -124,154 +124,131 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
   }, delay);
 };
 
-export const loadPrinters = createActionThunk(
+export const loadPrinters = createThunkedAction(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getPrinters, dispatch)(
-      orguuid,
-      fields
-    ).then(data => {
-      return Object.assign(data, {
-        organizationUuid: orguuid
-      });
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinters, dispatch)(
+        orguuid,
+        fields
+      );
     });
   }
 );
 
-export const loadPrinter = createActionThunk(
+export const loadPrintersOld = createThunkedAction(
+  "PRINTERS_LOAD",
+  (orguuid, fields = [], { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinters, dispatch)(
+        orguuid,
+        fields
+      );
+    });
+  }
+);
+
+export const loadPrinter = createThunkedAction(
   "PRINTERS_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.getPrinter, dispatch)(
-      orguuid,
-      uuid,
-      fields
-    ).then(data => {
-      return Object.assign(data, {
-        organizationUuid: orguuid
-      });
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.getPrinter, dispatch)(
+        orguuid,
+        uuid,
+        fields
+      );
     });
   }
 );
 
-export const addPrinter = createActionThunk(
-  "PRINTERS_ADD",
-  (
-    orguuid,
-    protocol,
-    hostname,
-    ip,
-    port,
-    path,
-    token,
-    name,
-    apiKey,
-    { dispatch, getState }
-  ) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.addPrinter, dispatch)(
-      orguuid,
-      protocol,
-      hostname,
-      ip,
-      port,
-      path,
-      token,
-      name,
-      apiKey
-    ).then(data => {
-      return Object.assign(data, {
-        organizationUuid: orguuid
-      });
-    });
-  }
-);
-
-export const patchPrinter = createActionThunk(
-  "PRINTERS_PATCH",
-  (orguuid, uuid, data, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.patchPrinter, dispatch)(
-      orguuid,
-      uuid,
-      data
-    ).then(data => {
-      return Object.assign(data, {
-        organizationUuid: orguuid
-      });
-    });
-  }
-);
-
-export const deletePrinter = createActionThunk(
-  "PRINTERS_DELETE",
-  (orguuid, uuid, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.deletePrinter, dispatch)(
-      orguuid,
-      uuid
-    ).then(r => {
-      if (r.status !== 204) {
-        r.data.uuid = null;
+export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
+  dispatch,
+  getState
+) => {
+  const { webcams } = getState();
+  if (webcams.queue && webcams.queue[uuid] === undefined) {
+    // we need to delay this so interval_set is run before
+    const timeout = setTimeout(
+      () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+      300
+    );
+    return dispatch({
+      type: "WEBCAMS_TIMEOUT_SET",
+      payload: {
+        uuid,
+        interval: interval > 0 ? interval : 60 * 1000,
+        timeout
       }
-      return r;
     });
   }
-);
-
-export const setPrinterConnection = createActionThunk(
-  "PRINTERS_SET_CONNECTION",
-  (orguuid, uuid, state, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.setPrinterConnection, dispatch)(
-      orguuid,
-      uuid,
-      state
+  if (webcams.queue[uuid].interval > interval) {
+    clearTimeout(webcams.queue[uuid].timeout);
+    // we need to delay this so interval_set is run before
+    const timeout = setTimeout(
+      () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+      300
     );
+    return dispatch({
+      type: "WEBCAMS_TIMEOUT_SET",
+      payload: {
+        uuid,
+        interval: interval > 0 ? interval : 60 * 1000,
+        timeout
+      }
+    });
   }
-);
-
-export const changeCurrentJob = createActionThunk(
-  "PRINTERS_CHANGE_JOB",
-  (orguuid, uuid, action, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.changeCurrentJob, dispatch)(
-      orguuid,
-      uuid,
-      action
-    );
+  if (webcams.queue[uuid].interval !== interval) {
+    return dispatch({
+      type: "WEBCAMS_INTERVAL_SET",
+      payload: {
+        uuid,
+        interval: interval > 0 ? interval : 60 * 1000
+      }
+    });
   }
-);
+};
 
-export const changeLights = createActionThunk(
-  "PRINTERS_CHANGE_LIGHTS",
+export const getWebcamSnapshot = createThunkedAction(
+  "WEBCAMS_GET_SNAPSHOT",
   (orguuid, uuid, { dispatch, getState }) => {
-    const { me } = getState();
-    if (!me.organizations || !me.organizations[orguuid]) {
-      return Promise.resolve({});
-    }
-    return retryIfUnauthorized(backend.changeLights, dispatch)(orguuid, uuid);
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      let { printers } = getState();
+      const printer = printers.printers.find(p => p.uuid === uuid);
+      if (!printer || !printer.webcam || !printer.webcam.url) {
+        return Promise.reject();
+      }
+      return retryIfUnauthorized(
+        backend.getWebcamSnapshot,
+        dispatch
+      )(printer.webcam.url).then(r => {
+        if (r.status === 202 || r.status === 200) {
+          let { webcams } = getState();
+          if (webcams.queue && webcams.queue[uuid]) {
+            const timeoutData = webcams.queue[uuid];
+            if (timeoutData.interval > 0) {
+              const timeout = setTimeout(
+                () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+                timeoutData.interval
+              );
+              dispatch({
+                type: "WEBCAMS_TIMEOUT_SET",
+                payload: {
+                  uuid,
+                  interval: timeoutData.interval,
+                  timeout
+                }
+              });
+            }
+          }
+        }
+        return {
+          organizationUuid: orguuid,
+          uuid,
+          status: r.status,
+          ...r.data,
+          successCodes: [200]
+        };
+      });
+    });
   }
 );

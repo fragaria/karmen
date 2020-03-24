@@ -1027,7 +1027,7 @@ select {
     input[type=search],
     input[type=password],
     select {
-      height: $form-elements-height-sm;
+      height: 4rem;
     }
   }
 }
@@ -1245,6 +1245,80 @@ select {
     .printer-detail-controls {
       margin-top: $spacing-default / 4;
     }
+  }
+
+  .printer-control-panel {
+    @include plumber(
+      $font-size: 1.618,
+      $line-height: 3,
+      $leading-top: 2,
+      $leading-bottom: 1
+    );
+
+    @media (min-width: $screen-sm-min) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-gap: $spacing-default;
+    }
+
+    .controls {
+      @media (min-width: $screen-sm-min) {
+        display: grid;
+        grid-gap: $base-unit;
+        align-items: center;
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      input {
+        width: 4em;
+        padding: 0 $base-unit/2;
+        border: $border-default;
+        border-radius: 0;
+      }
+
+      .btn {
+        margin-right: $base-unit/2;
+      }
+
+      .input-appendix {
+        display: inline-block;
+        margin: 0 $base-unit 0 $base-unit/2;
+      }
+
+
+      @media (max-width: $screen-sm-min) {
+        > div {
+          margin-bottom: $spacing-default/2;
+        }
+      }
+    }
+
+    .axes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: $spacing-default;
+
+      .axes-content-title {
+        display: block;
+        margin-bottom: $spacing-default/2;
+        text-align: center;
+        white-space: nowrap;
+
+        @media (max-width: $screen-sm-min) {
+          margin-bottom: $spacing-default/2;
+        }
+      }
+
+      .axes-content-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 5px;
+      }
+    }
+  }
+
+  .printer-connection-status {
+    padding-top: $spacing-default/2;
   }
 }
 

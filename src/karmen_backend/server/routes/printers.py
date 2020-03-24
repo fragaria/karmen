@@ -70,6 +70,18 @@ def make_printer_response(printer, fields):
     return data
 
 
+def get_printer_inst(org_uuid, uuid):
+    validate_uuid(uuid)
+    printer = printers.get_printer(uuid)
+    if printer is None or printer.get("organization_uuid") != org_uuid:
+        return abort(make_response(jsonify(message="Not found"), 404))
+    network_client = network_clients.get_network_client(printer["network_client_uuid"])
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
+    return printer_inst
+
+
 @app.route("/organizations/<org_uuid>/printers", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
@@ -129,15 +141,9 @@ def printers_list(org_uuid):
 @validate_org_access()
 @cross_origin()
 def printer_detail(org_uuid, uuid):
-    validate_uuid(uuid)
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    return jsonify(make_printer_response(printer_data, fields))
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    return jsonify(make_printer_response(printer_inst, fields))
 
 
 @app.route("/organizations/<org_uuid>/printers", methods=["POST"])
@@ -147,7 +153,7 @@ def printer_detail(org_uuid, uuid):
 def printer_create(org_uuid):
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     uuid = guid.uuid4()
     ip = data.get("ip", None)
     port = data.get("port", None)
@@ -160,7 +166,7 @@ def printer_create(org_uuid):
 
     if token is not None and token != "":
         if not app.config.get("CLOUD_MODE"):
-            return abort(make_response("", 400))
+            return abort(make_response(jsonify(message="Missing token"), 400))
         existing_network_client = network_clients.get_network_client_by_socket_token(
             token
         )
@@ -169,7 +175,7 @@ def printer_create(org_uuid):
                 org_uuid, existing_network_client.get("uuid")
             )
             if existing_printer is not None:
-                return abort(make_response("", 409))
+                return abort(make_response(jsonify(message="Printer exists"), 409))
         path = ""
         hostname = ""
         ip = ""
@@ -177,7 +183,12 @@ def printer_create(org_uuid):
         port = 0
     else:
         if app.config.get("CLOUD_MODE"):
-            return abort(make_response("", 400))
+            return abort(
+                make_response(
+                    jsonify(message="Cannot add printer without a token in CLOUD_MODE"),
+                    500,
+                )
+            )
         if (
             (not ip and not hostname)
             or not name
@@ -186,13 +197,19 @@ def printer_create(org_uuid):
             or (ip and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip) is None)
             or (port and re.match(r"^\d{0,5}$", str(port)) is None)
         ):
-            return abort(make_response("", 400))
+            return abort(
+                make_response(
+                    jsonify(message="Missing some network data about the printer"), 400
+                )
+            )
 
         if hostname and not ip:
             ip = network.get_avahi_address(hostname)
             if not ip:
                 return abort(
-                    make_response("Cannot resolve %s with mDNS" % hostname, 500)
+                    make_response(
+                        jsonify(message="Cannot resolve %s with mDNS" % hostname), 500
+                    )
                 )
         if ip and not hostname:
             hostname = network.get_avahi_hostname(ip)
@@ -205,7 +222,7 @@ def printer_create(org_uuid):
                 org_uuid, existing_network_client.get("uuid")
             )
             if existing_printer is not None:
-                return abort(make_response("", 409))
+                return abort(make_response(jsonify(message="Printer exists"), 409))
 
     if not existing_network_client:
         existing_network_client = {
@@ -265,7 +282,7 @@ def printer_delete(org_uuid, uuid):
     validate_uuid(uuid)
     printer = printers.get_printer(uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     printers.delete_printer(uuid)
     network_client_records = printers.get_printers_by_network_client_uuid(
         printer["network_client_uuid"]
@@ -280,27 +297,21 @@ def printer_delete(org_uuid, uuid):
 @validate_org_access("admin")
 @cross_origin()
 def printer_patch(org_uuid, uuid):
-    validate_uuid(uuid)
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+    printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
     if not data:
-        return abort(make_response("", 400))
-    name = data.get("name", printer["name"])
-    api_key = data.get("api_key", printer["client_props"].get("api_key", None))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
+    name = data.get("name", printer_inst.name)
+    api_key = data.get("api_key", printer_inst.client_info.api_key)
     printer_props = data.get("printer_props", {})
-
     if not name:
-        return abort(make_response("", 400))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+        return abort(make_response(jsonify(message="Missing name"), 400))
+
     printer_inst.add_api_key(api_key)
-    if data.get("api_key", "-1") != "-1" and data.get("api_key", "-1") != printer[
-        "client_props"
-    ].get("api_key", None):
+    if (
+        data.get("api_key", "-1") != "-1"
+        and data.get("api_key", "-1") != printer_inst.client_info.api_key
+    ):
         printer_inst.sniff()  # this can probably be offloaded to check_printer task
     if printer_props:
         if not printer_inst.get_printer_props():
@@ -346,19 +357,11 @@ def printer_patch(org_uuid, uuid):
 @cross_origin()
 def printer_change_connection(org_uuid, uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+    printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     state = data.get("state", None)
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
     if state == "online":
         r = printer_inst.connect_printer()
         return (
@@ -374,7 +377,9 @@ def printer_change_connection(org_uuid, uuid):
             else ("Cannot change printer's connection state to offline", 500)
         )
     else:
-        return abort(make_response("", 400))
+        return abort(
+            make_response(jsonify(message="%s is an unknown state" % state), 400)
+        )
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/current-job", methods=["POST"])
@@ -388,21 +393,13 @@ def printer_modify_job(org_uuid, uuid):
     # and does not handle prints issued by bypassing Karmen Hub
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
+    printer_inst = get_printer_inst(org_uuid, uuid)
     data = request.json
     if not data:
-        return abort(make_response("", 400))
+        return abort(make_response(jsonify(message="Missing payload"), 400))
     action = data.get("action", None)
     if not action:
-        return abort(make_response("", 400))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+        return abort(make_response(jsonify(message="Missing action"), 400))
     try:
         if printer_inst.modify_current_job(action):
             user = get_current_user()
@@ -413,8 +410,9 @@ def printer_modify_job(org_uuid, uuid):
                 uuid,
             )
             return "", 204
-        return abort(make_response("", 409))
+        return abort(make_response(jsonify(message="Nothing is running"), 409))
     except clients.utils.PrinterClientException as e:
+        app.logger.error(e)
         return abort(make_response(jsonify(message=str(e)), 400))
 
 
@@ -455,40 +453,32 @@ def printer_webcam_snapshot(org_uuid, uuid):
     can emulate a video-like experience. Since we have no sound, this should be
     fine.
     """
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+    printer_inst = get_printer_inst(org_uuid, uuid)
     if printer_inst.client_info.webcam is None:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
     if snapshot_url is None:
-        return abort(make_response("", 404))
+        return abort(make_response(jsonify(message="Not found"), 404))
 
     # process current future if done
     if (
-        FUTURES_MICROCACHE.get(printer["network_client_uuid"])
-        and FUTURES_MICROCACHE.get(printer["network_client_uuid"]).done()
+        FUTURES_MICROCACHE.get(printer_inst.network_client_uuid)
+        and FUTURES_MICROCACHE.get(printer_inst.network_client_uuid).done()
     ):
-        WEBCAM_MICROCACHE[printer["network_client_uuid"]] = FUTURES_MICROCACHE[
-            printer["network_client_uuid"]
+        WEBCAM_MICROCACHE[printer_inst.network_client_uuid] = FUTURES_MICROCACHE[
+            printer_inst.network_client_uuid
         ].result()
         try:
-            del FUTURES_MICROCACHE[printer["network_client_uuid"]]
+            del FUTURES_MICROCACHE[printer_inst.network_client_uuid]
         except Exception:
             # that's ok, probably a race condition
             pass
     # issue a new future if not present
-    if not FUTURES_MICROCACHE.get(printer["network_client_uuid"]):
-        FUTURES_MICROCACHE[printer["network_client_uuid"]] = executor.submit(
+    if not FUTURES_MICROCACHE.get(printer_inst.network_client_uuid):
+        FUTURES_MICROCACHE[printer_inst.network_client_uuid] = executor.submit(
             _get_webcam_snapshot, snapshot_url
         )
-    response = WEBCAM_MICROCACHE.get(printer["network_client_uuid"])
+    response = WEBCAM_MICROCACHE.get(printer_inst.network_client_uuid)
     if response is not None and response is not False:
         return (
             response.content,
@@ -500,7 +490,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
         # eventually get a snapshot.
         # We don't want to end with an error here, so the clients keep retrying
         return "", 202
-    return abort(make_response("", 404))
+    return abort(make_response(jsonify(message="Not found"), 404))
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>/lights", methods=["POST"])
@@ -508,15 +498,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
 @validate_org_access()
 @cross_origin()
 def printer_set_lights(org_uuid, uuid):
-    validate_uuid(uuid)
-
-    printer = printers.get_printer(uuid)
-    if printer is None or printer.get("organization_uuid") != org_uuid:
-        return abort(make_response("", 404))
-    network_client = network_clients.get_network_client(printer["network_client_uuid"])
-    printer_data = dict(network_client)
-    printer_data.update(dict(printer))
-    printer_inst = clients.get_printer_instance(printer_data)
+    printer_inst = get_printer_inst(org_uuid, uuid)
     try:
         # TODO do not only toggle
         lights_on = printer_inst.are_lights_on()
@@ -525,5 +507,141 @@ def printer_set_lights(org_uuid, uuid):
             return make_response(jsonify({"status": "unavailable"}), 500)
         # This is inverse because lights_on is BEFORE we actually change it
         return make_response(jsonify({"status": "off" if lights_on else "on"}), 200)
-    except PrinterClientException:
+    except PrinterClientException as e:
+        app.logger.error(e)
         return make_response(jsonify({"status": "unavailable"}), 200)
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/printhead", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_printhead(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    if data is None or "command" not in data:
+        return abort(make_response(jsonify(message="Missing payload or command"), 400))
+    if data["command"] == "jog":
+        movement = {}
+        absolute = data.get("absolute", False)
+        for axis in ["x", "y", "z"]:
+            distance = data.get(axis)
+            if distance:
+                try:
+                    distance = float(distance)
+                except ValueError:
+                    return abort(
+                        make_response(
+                            jsonify(message="Distance on %s must be a number" % axis),
+                            400,
+                        )
+                    )
+                movement[axis] = distance
+        r = printer_inst.move_head(movement, absolute)
+        if not r:
+            return make_response(jsonify(message="Cannot move printhead"), 500)
+        return "", 204
+    elif data["command"] == "home":
+        axes = data.get("axes")
+        if axes is None:
+            return abort(make_response(jsonify(message="Missing axes"), 400))
+        for axis in axes:
+            if axis not in ["x", "y", "z"]:
+                return abort(
+                    make_response(
+                        jsonify(message="%s is not a valid axes value" % axis), 400
+                    )
+                )
+        r = printer_inst.home_head(axes)
+        if not r:
+            return make_response(jsonify(message="Cannot move printhead"), 500)
+        return "", 204
+    else:
+        return make_response(jsonify(message="Unknown command"), 400)
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/fan", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_fan(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    if data is None:
+        return abort(make_response(jsonify(message="Missing payload"), 400))
+    target = data.get("target")
+    if target is None or target not in ["off", "on"]:
+        return abort(make_response(jsonify(message="Missing or invalid target"), 400))
+    r = printer_inst.set_fan(target)
+    if not r:
+        return abort(make_response(jsonify(message="Cannot control fan"), 500))
+    return "", 204
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/motors", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_motors(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    if data is None or "target" not in data:
+        return abort(make_response(jsonify(message="Missing payload or target"), 400))
+    target = data.get("target")
+    if target is None or target != "off":
+        return abort(make_response(jsonify(message="Missing or invalid target"), 400))
+    r = printer_inst.motors_off()
+    if not r:
+        return make_response(jsonify(message="Cannot control motors"), 500)
+    return "", 204
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/extrusion", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_extrusion(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    if data is None or "amount" not in data:
+        return abort(make_response(jsonify(message="Missing payload or amount"), 400))
+    try:
+        amount = float(data.get("amount"))
+    except ValueError:
+        return abort(make_response(jsonify(message="Amount must be a number"), 400))
+    r = printer_inst.extrude(amount)
+    if not r:
+        return make_response(jsonify(message="Cannot extrude"), 500)
+    return "", 204
+
+
+@app.route(
+    "/organizations/<org_uuid>/printers/<uuid>/temperatures/<part_name>",
+    methods=["POST"],
+)
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def control_tool_temperature(org_uuid, uuid, part_name):
+    if part_name not in ["tool0", "tool1", "bed"]:
+        return abort(
+            make_response(
+                jsonify(message="%s is not a valid part choice" % part_name), 400
+            )
+        )
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    data = request.json
+    if data is None or "target" not in data:
+        return abort(make_response(jsonify(message="Missing payload or target"), 400))
+    try:
+        target = float(data.get("target"))
+    except ValueError:
+        return abort(make_response(jsonify(message="Target must be a number"), 400))
+    if target < 0:
+        return abort(
+            make_response(jsonify(message="Cannot set negative temperature"), 400)
+        )
+    r = printer_inst.set_temperature(device=part_name, temp=target)
+    if not r:
+        return make_response(jsonify(message="Cannot set temperature"), 500)
+    return "", 204

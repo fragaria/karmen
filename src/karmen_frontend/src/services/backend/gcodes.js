@@ -1,4 +1,4 @@
-import { getHeaders } from "./utils";
+import { getAuthHeaders, performRequest } from "./utils";
 import download from "downloadjs";
 
 const BASE_URL = window.env.BACKEND_BASE;
@@ -11,7 +11,7 @@ export const getGcodes = (
   limit = 15,
   fields = []
 ) => {
-  let uri = `${BASE_URL}/organizations/${orgUuid}/gcodes?limit=${limit}`;
+  let uri = `/organizations/${orgUuid}/gcodes?limit=${limit}`;
   if (fields) {
     uri += `&fields=${fields.join(",")}`;
   }
@@ -24,67 +24,47 @@ export const getGcodes = (
   if (displayFilter) {
     uri += `&filter=display:${encodeURIComponent(displayFilter)}`;
   }
-  return fetch(uri, {
-    headers: getHeaders()
-  })
-    .then(response => {
-      if (response.status !== 200) {
-        console.error(`Cannot get list of gcodes: ${response.status}`);
-      }
-      return response.json().then(data => {
-        return { status: response.status, data };
-      });
-    })
-    .catch(e => {
-      console.error(`Cannot get list of gcodes: ${e}`);
-      return {};
-    });
+  return performRequest({
+    uri,
+    method: "GET",
+    appendData: {
+      startWith,
+      orderBy,
+      filter: displayFilter,
+      limit,
+      fields
+    }
+  });
 };
 
 export const getGcode = (orgUuid, uuid, fields = []) => {
-  let uri = `${BASE_URL}/organizations/${orgUuid}/gcodes/${uuid}`;
+  let uri = `/organizations/${orgUuid}/gcodes/${uuid}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
-  return fetch(uri, {
-    headers: getHeaders()
-  })
-    .then(response => {
-      if (response.status !== 200) {
-        console.error(`Cannot get a gcode: ${response.status}`);
-      }
-      return response.json().then(data => {
-        return { status: response.status, data };
-      });
-    })
-    .catch(e => {
-      console.error(`Cannot get a gcode: ${e}`);
-      return {};
-    });
+  return performRequest({
+    uri,
+    method: "GET"
+  });
 };
 
 export const deleteGcode = (orgUuid, uuid) => {
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes/${uuid}`, {
+  return performRequest({
+    uri: `/organizations/${orgUuid}/gcodes/${uuid}`,
     method: "DELETE",
-    headers: getHeaders()
-  })
-    .then(response => {
-      if (response.status !== 204) {
-        console.error(`Cannot remove a gcode: ${response.status}`);
-      }
-      return { status: response.status, data: { uuid } };
-    })
-    .catch(e => {
-      console.error(`Cannot remove a gcode: ${e}`);
-      return 500;
-    });
+    appendData: {
+      uuid
+    },
+    parseResponse: false,
+    successCodes: [204, 404]
+  });
 };
 
 export const uploadGcode = (orgUuid, path, file) => {
   var data = new FormData();
   data.append("file", file);
   data.append("path", path);
-  const headers = getHeaders();
+  const headers = getAuthHeaders();
   headers.delete("content-type");
   return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes`, {
     method: "POST",
@@ -95,16 +75,17 @@ export const uploadGcode = (orgUuid, path, file) => {
       if (response.status !== 201) {
         console.error(`Cannot add a gcode: ${response.status}`);
         return {
-          status: response.status
+          status: response.status,
+          successCodes: [201]
         };
       }
       return response.json().then(data => {
-        return { status: response.status, data };
+        return { status: response.status, data, successCodes: [201] };
       });
     })
     .catch(e => {
       console.error(`Cannot add a gcode: ${e}`);
-      return {};
+      return { status: 500, successCodes: [201] };
     });
 };
 
@@ -113,21 +94,21 @@ export const downloadGcode = (dataLink, filename) => {
     `${BASE_URL}/${dataLink[0] === "/" ? dataLink.substr(1) : dataLink}`,
     {
       method: "GET",
-      headers: getHeaders()
+      headers: getAuthHeaders()
     }
   )
     .then(response => {
       if (response.status === 200) {
         return response.blob().then(d => {
           download(d, filename, d.type);
-          return { status: 200 };
+          return { status: 200, successCodes: [200] };
         });
       }
       console.error(`Cannot download a gcode: ${response.status}`);
-      return { status: response.status };
+      return { status: response.status, successCodes: [200] };
     })
     .catch(e => {
       console.error(`Cannot download a gcode: ${e}`);
-      return { status: 500 };
+      return { status: 500, successCodes: [200] };
     });
 };

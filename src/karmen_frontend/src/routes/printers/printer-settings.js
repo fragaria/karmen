@@ -5,7 +5,7 @@ import Loader from "../../components/utils/loader";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import PrinterEditForm from "../../components/forms/printer-edit-form";
 
-import { loadPrinter, patchPrinter } from "../../actions/printers";
+import { loadPrinter, patchPrinter } from "../../actions";
 
 class PrinterSettings extends React.Component {
   state = {

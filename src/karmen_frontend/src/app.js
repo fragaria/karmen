@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
-import { connect } from "react-redux";
+import { Provider, connect } from "react-redux";
 import { BrowserRouter, Switch, Route, useLocation } from "react-router-dom";
-
 import Menu from "./components/menu";
 import Loader from "./components/utils/loader";
 import Heartbeat from "./components/gateways/heartbeat";
@@ -32,6 +31,7 @@ import ManageOrganizations from "./routes/manage-organizations";
 import AddOrganization from "./routes/add-organization";
 import Page404 from "./routes/page404";
 import AppRoot from "./routes/app-root";
+import configureStore from "./store";
 
 import {
   loadUserFromLocalStorage,
@@ -40,15 +40,17 @@ import {
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const fragment = pathname.split("/").pop();
+    if (fragment && !fragment.startsWith("tab-")) {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   return null;
 };
 
-class App extends React.Component {
+class ConnectedAppBase extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -202,7 +204,6 @@ class App extends React.Component {
               <AuthenticatedRoute
                 userState={userState}
                 path="/:orguuid/printers/:uuid"
-                exact
                 component={PrinterDetail}
               />
               <AuthenticatedRoute
@@ -271,7 +272,7 @@ class App extends React.Component {
   }
 }
 
-export default connect(
+export const ConnectedApp = connect(
   state => ({
     accessTokenExpiresOn: state.me.accessTokenExpiresOn,
     userState: state.me.currentState
@@ -280,4 +281,12 @@ export default connect(
     loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
     logout: () => dispatch(clearUserIdentity())
   })
-)(App);
+)(ConnectedAppBase);
+
+export default () => {
+  return (
+    <Provider store={configureStore()}>
+      <ConnectedApp />
+    </Provider>
+  );
+};

@@ -11,7 +11,7 @@ import {
   loadUserApiTokens,
   deleteUserApiToken,
   changePassword,
-  patchUser
+  patchMe
 } from "../../actions/users-me";
 
 const UserPreferences = ({ match, ...rest }) => {
@@ -28,22 +28,24 @@ const UserPreferences = ({ match, ...rest }) => {
           tabClassName="react-tabs__tab"
           activeTabClassName="react-tabs__tab--selected"
         >
-          <NavTab to="/api-tokens">API tokens</NavTab>
-          <NavTab to="/account">Account</NavTab>
+          <NavTab to="/tab-api-tokens">API tokens</NavTab>
+          <NavTab to="/tab-account">Account</NavTab>
         </RoutedTabs>
 
         <Switch>
           <Route
             exact
             path={`${match.url}`}
-            render={() => <Redirect replace to={`${match.url}/api-tokens`} />}
+            render={() => (
+              <Redirect replace to={`${match.url}/tab-api-tokens`} />
+            )}
           />
           <Route
-            path={`${match.url}/api-tokens`}
+            path={`${match.url}/tab-api-tokens`}
             render={props => <ApiTokensTab {...rest} />}
           />
           <Route
-            path={`${match.url}/account`}
+            path={`${match.url}/tab-account`}
             render={props => <AccountTab {...rest} />}
           />
         </Switch>
@@ -66,6 +68,6 @@ export default connect(
       dispatch(
         changePassword(password, new_password, new_password_confirmation)
       ),
-    patchUser: (username, email) => dispatch(patchUser(username, email))
+    patchMe: (username, email) => dispatch(patchMe(username, email))
   })
 )(UserPreferences);

@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
 
+const BASE_URL = window.env.BACKEND_BASE;
+
 const _removeStorage = key => {
   try {
     if (window.localStorage && window.localStorage.removeItem) {
@@ -69,11 +71,74 @@ export const getUserProfile = () => {
   return profile;
 };
 
-export const getHeaders = (withAuth = true) => {
+export const getAuthHeaders = () => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
-  if (withAuth) {
-    headers.set("X-CSRF-TOKEN", Cookies.get("csrf_access_token"));
-  }
+  headers.set("X-CSRF-TOKEN", Cookies.get("csrf_access_token"));
   return headers;
+};
+
+export const performRequest = opts => {
+  const defaults = {
+    uri: undefined,
+    data: undefined,
+    method: "POST",
+    successCodes: [200, 201, 202, 204],
+    parseResponse: true,
+    appendData: {},
+    headers: {
+      "Content-Type": "application/json"
+    },
+    useAuth: true
+  };
+  opts = Object.assign({}, defaults, opts);
+
+  let fetchOpts = {
+    method: opts.method,
+    headers: opts.headers
+  };
+  // TODO this should probably merge with passed headers
+  if (opts.useAuth) {
+    fetchOpts.headers = getAuthHeaders();
+  }
+  if (opts.data) {
+    fetchOpts.body = JSON.stringify(opts.data);
+  }
+  if (!opts.uri.startsWith("/")) {
+    opts.uri = `/${opts.uri}`;
+  }
+  return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
+    .then(response => {
+      if (opts.successCodes.indexOf(response.status) === -1) {
+        console.error(`Request ${opts.uri} failed: ${response.status}`);
+      }
+      if (opts.parseResponse) {
+        return response
+          .json()
+          .then(data => {
+            return {
+              status: response.status,
+              ...opts.appendData,
+              data,
+              successCodes: opts.successCodes
+            };
+          })
+          .catch(e => {
+            return {
+              status: response.status,
+              ...opts.appendData,
+              successCodes: opts.successCodes
+            };
+          });
+      }
+      return {
+        status: response.status,
+        ...opts.appendData,
+        successCodes: opts.successCodes
+      };
+    })
+    .catch(e => {
+      console.error(`Request ${opts.uri} failed: ${e}`);
+      return { status: 500, successCodes: opts.successCodes };
+    });
 };
