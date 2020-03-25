@@ -24,7 +24,7 @@ services:
       SERVICE_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
       SERVICE_PORT: ${KARMEN_FRONTEND_PORT:-9765}
       SENTRY_DSN: ${KARMEN_FRONTEND_SENTRY_DSN}
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
   backend_flask:
     image: fragaria/karmen-backend
     restart: unless-stopped
@@ -32,7 +32,7 @@ services:
     environment:
       ENV: production
       SERVICE: flask
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
@@ -94,7 +94,7 @@ services:
     environment:
       ENV: production
       SERVICE: celery-worker
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
@@ -128,7 +128,7 @@ services:
     environment:
       ENV: production
       SERVICE: celery-beat
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
       FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}

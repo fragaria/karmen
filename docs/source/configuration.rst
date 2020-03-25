@@ -28,7 +28,7 @@ These should always be setup so your instance works as expected.
     ``KARMEN_SECRET_KEY``, None, "A unique key that is used for session encryption."
     ``KARMEN_FRONTEND_BASE_URL``, None, "Base URL of Karmen Hub frontend. This is used as a base URL in e-mails
     that Karmen Hub is sending ocassionally."
-    ``KARMEN_CLOUD_MODE``, 1, "If on, the network scan feature is disabled and printers can be connected only via
+    ``KARMEN_CLOUD_MODE``, 0, "If on, the network scan feature is disabled and printers can be connected only via
     `websocket-proxy <https://github.com/fragaria/websocket-proxy>`_. If off, you can connect to printers via
     ``http`` or ``https``."
     ``KARMEN_SOCKET_API_URL``, None, "Base URL such as ``http://path.to/websocket/api/%s`` where the
