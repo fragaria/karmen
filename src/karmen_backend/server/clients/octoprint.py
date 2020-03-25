@@ -313,7 +313,9 @@ class Octoprint(PrinterClient):
             return
         self.client_info.connected = True
         settings_req = self._http_get("/api/settings", force=True)
-        plugin_list = list(dict(settings_req.json().get("plugins", {})).keys())
+        plugin_list = []
+        if settings_req is not None:
+            plugin_list = list(dict(settings_req.json().get("plugins", {})).keys())
         self.client_info = PrinterClientInfo(
             data,
             connected=True,
