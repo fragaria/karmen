@@ -23,7 +23,7 @@ accept a slightly different format.
 
 In Karmen Hub you can then easily choose on which printer it should get printed.
 
-Instead of the API token that you would copy over from Octoprint, you should create Karmen
+Instead of the App key that you would copy over from Octoprint, you should create Karmen
 API token that can be safely stored in the Slicer's configuration. Remember that Karmen Hub
 API tokens are always  scoped to a certain organization, so your G-Code will be available only there.
 

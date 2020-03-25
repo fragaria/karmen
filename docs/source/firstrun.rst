@@ -30,7 +30,7 @@ password *karmen3D* for you. The application will prompt you to change the passw
 the first login. So make sure that you log in right after the installation is complete
 so nobody else can hijack the installation from you.
 
-There is also a Default organization ready for you. You can rename it at anytime. As an
+There is also a Default organization ready for you. You can rename it at any time. As an
 administrator, you can invite more users to your organization. That requires a working mailing
 service.
 

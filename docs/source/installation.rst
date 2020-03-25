@@ -10,7 +10,10 @@ Installation
 Making your printer Karmen-ready
 --------------------------------
 
-The de-facto standard for making your 3D printer accessible over the network
+The easiest way is to get yourself a fully plug'n'play
+`Karmen Pill <https://karmen.tech/en/#products>`_.
+
+For hobbyists, the de-facto standard for making your 3D printer accessible over the network
 is `Octoprint <https://octoprint.org>`_. Its installation can be greatly
 simplified by using a Raspbian-derived image with a pre-configured installation
 called `OctoPi <https://github.com/guysoft/OctoPi>`_ that is designed for Raspberry Pi
@@ -18,13 +21,7 @@ microcomputers.
 
 .. note::
   There might be other viable solutions, but at the moment, Karmen Hub supports only
-  Octoprint.
-
-After the initial Octoprint/OctoPi setup that connects your printer is performed,
-you are ready to connect the printer to Karmen. Please note, that any issues you
-might have with a webcam stream or other specifics, are related to Octoprint/OctoPi
-and not to Karmen Hub. *Karmen Hub is only using Octoprint's API to communicate with the
-printer.*
+  Karmen Pill and Octoprint.
 
 Karmen Hub supports `password-protected Octoprint <http://docs.octoprint.org/en/master/features/accesscontrol.html>`_
 instances as well, it is possible to attach an API token to a printer on the printer settings screen (the option is
@@ -58,7 +55,7 @@ The last command should spit out a bunch of information about your docker instal
 
 The next step is to get a production bundle for Karmen Hub. You can get these in the
 `Releases section on our GitHub <https://github.com/fragaria/karmen/releases>`_.
-Just download the latest ``release.zip`` to your Raspberry Pi's home directory and unzip it.
+Just download the latest stable ``release.zip`` to your Raspberry Pi's home directory and unzip it.
 
 .. code-block:: sh
 
@@ -83,6 +80,16 @@ Karmen Hub requires a little bit of :ref:`configuration <configuration>` that is
 with environment variables. The only required one is ``KARMEN_SECRET_KEY`` which you should
 set to something secret. It is used for session encryption and should be unique for each installation.
 
+Another super important environment variable is ``KARMEN_CLOUD_MODE``. If it is set to ``0``, Hub will
+try to work with Pills, Octoprints and printers available directly over the network. If it is set to
+``1``, the application presumes that it is running somewhere on the internet and the devices are
+connected over a specialized `websocket proxy <https://github.com/fragaria/websocket-proxy>`_ that comes
+preconfigured with Karmen Pill. When you are setting ``KARMEN_CLOUD_MODE`` to ``1``, you also need to provide
+``KARMEN_SOCKET_API_URL`` variable which points to the websocket proxy instance.
+
+If you want to allow users registration, tou need to configure a mailing service as well. Consult the
+:ref:`configuration <configuration>` section for more information.
+
 Finally, you can start all of the services. During the first startup, the script will automatically
 download (from `Docker Hub <https://hub.docker.com/search?q=fragaria%2Fkarmen&type=image>`_) and run
 all of the necessary containers. This might take a few minutes. For the first and
@@ -90,20 +97,10 @@ all other starts, you can use the shorthand script like this:
 
 .. code-block:: sh
 
-   KARMEN_SECRET_KEY=something-secr3t ./run-karmen.sh
+   KARMEN_CLOUD_MODE=0 KARMEN_SECRET_KEY=something-secr3t ./run-karmen.sh
 
-The browser-accessible frontend is then accessible on the standard HTTP port 80. There are other useful
-options such as ``KARMEN_FRONTEND_BASE_URL`` that should be set so Karmen Hub works as expected. Consult
-the :ref:`configuration <configuration>` page for more options.
-
-It is possible to modify the listening host and port like this:
-
-.. code-block:: sh
-
-   KARMEN_HOST=127.0.0.1 KARMEN_PORT=3776 ./run-karmen.sh
-
-This will run Karmen Hub on port 3776 bound only to the local interface so Karmen Hub will not be
-accessible from other computers. By default, Karmen listens on all interfaces (``0.0.0.0``) and on port ``80``.
+The browser-accessible frontend is then accessible on the standard HTTP port 80. Again, consult
+the :ref:`configuration <configuration>` page for more configruation options including the used ports.
 
 You can access the UI by accessing the public IP address of your machine, or by accessing the
 ``<hostname>.local`` address which is automatically provided by Raspbian. The default hostname
@@ -123,12 +120,12 @@ You can stop everything by running
    ./stop-karmen.sh
 
 
-You probably want to start Karmen every time your Raspberry Pi boots up. The easiest (but in no way perfect) method
+You probably want to start Karmen every time your Raspberry Pi boots up. Arguably the easiest (but in no way perfect) method
 is to add the following line at the end of your ``/etc/rc.local`` file just before the ``exit 0`` line:
 
 .. code-block:: sh
 
-   /home/pi/karmen/run-karmen.sh >> /home/pi/karmen/startup.log
+   KARMEN_CLOUD_MODE=0 KARMEN_SECRET_KEY=something-secr3t /home/pi/karmen/run-karmen.sh >> /home/pi/karmen/startup.log
 
 This will also put all of the startup information into a logfile in case you need to debug a broken start of Karmen.
 Be aware that this method starts all of the containers under a ``root`` account, which might not be the best idea.
@@ -144,6 +141,8 @@ which might be setup with a file like this:
   After=docker.service
 
   [Service]
+  Environment="KARMEN_CLOUD_MODE=0"
+  Environment="KARMEN_SECRET_KEY=something-secr3t"
   Environment="KARMEN_HOST=127.0.0.1"
   Environment="KARMEN_PORT=3776"
   User=pi

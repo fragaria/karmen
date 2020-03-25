@@ -14,6 +14,13 @@ from anywhere in the world.
 There are multiple ways of doing that, take the following list as an inspiration on
 how it can be done.
 
+Karmen Cloud
+------------
+
+To most straitforward solution is to get our Karmen Pill and register into our cloud
+service that launches in 2020. See our `product page <https://karmen.tech>`_ for more
+information.
+
 Deployment accessible from the internet
 ---------------------------------------
 
