@@ -101,7 +101,7 @@ class RegisterConfirmation extends React.Component {
       passwordForm.password.val,
       passwordForm.passwordConfirmation.val
     ).then((r) => {
-      if (r.status !== 200) {
+      if (r.status !== 204) {
         this.setState({
           messageOk: false,
           message: (
