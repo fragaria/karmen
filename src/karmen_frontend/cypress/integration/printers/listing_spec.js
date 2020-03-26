@@ -1,10 +1,26 @@
+import { Chance } from "chance";
+const chance = new Chance();
+
 describe("Printers listing", function () {
+  let email, password, organizationUuid;
   beforeEach(() => {
-    return cy.loginAsTestAdmin().visit("/");
+    email = chance.email();
+    password = chance.string();
+    return cy
+      .createUser(email, password)
+      .login(email, password)
+      .then((data) => {
+        organizationUuid = Object.keys(data.organizations)[0];
+      });
   });
 
-  it("shows printers", function () {
-    cy.visit("/b3060e41-e319-4a9b-8ac4-e0936c75f275/printers");
+  it("redirects root to printers list", function () {
+    cy.visit("/");
+    cy.get("main h1").contains("Printers");
+  });
+
+  it("redirects organization root to printers list", function () {
+    cy.visit(`/${organizationUuid}`);
     cy.get("main h1").contains("Printers");
   });
 });
