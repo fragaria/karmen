@@ -14,7 +14,7 @@ RUN jq -r '.default | to_entries[] | .key + .value.version' \
 
 ENV PYTHONPATH=$PYTHONPATH:/usr/src/app
 ENV SERVICE_HOST 0.0.0.0
-ENV SERVICE_PORT 8080
+ENV SERVICE_PORT 9766
 
 COPY . .
 CMD ["./scripts/docker-start.sh"]
