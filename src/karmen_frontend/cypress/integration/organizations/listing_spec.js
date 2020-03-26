@@ -31,4 +31,17 @@ describe("Organizations: Listing", function () {
   it("has the create button", function () {
     cy.get(".main-title a").should("have.attr", "href", "/add-organization");
   });
+
+  it("has link to organization settings", function () {
+    cy.get(".list-item .list-cta")
+      .click()
+      .then(() => {
+        cy.get(".dropdown-item").should("be.visible").click();
+        cy.location().then((loc) => {
+          expect(loc.pathname).to.eq(
+            `/organizations/${organizationUuid}/settings`
+          );
+        });
+      });
+  });
 });

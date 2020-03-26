@@ -1,8 +1,8 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
-describe("Organizations: Adding", function () {
-  let email, password;
+describe("Organizations: Editing", function () {
+  let email, password, organizationUuid;
   beforeEach(() => {
     email = chance.email();
     password = chance.string();
@@ -11,21 +11,22 @@ describe("Organizations: Adding", function () {
       .createUser(email, password)
       .login(email, password)
       .then((data) => {
-        return cy.visit("/add-organization");
+        organizationUuid = Object.keys(data.organizations)[0];
+        return cy.visit(`/organizations/${organizationUuid}/settings`);
       });
   });
 
   it("fails with no name", function () {
+    cy.get("input#name").clear();
     cy.get('button[type="submit"]').click();
-    cy.get("form").contains("Name is required");
+    cy.get("form").contains("Name cannot be empty");
   });
 
-  it("adds organization", function () {
+  it("changes organization name", function () {
     const name = chance.string();
-    cy.get("input#name").type(name);
+    cy.get("input#name").clear().type(name);
     cy.get('button[type="submit"]')
       .click()
-      .wait(3000)
       .then(() => {
         cy.location().then((loc) => {
           expect(loc.pathname).to.eq("/organizations");

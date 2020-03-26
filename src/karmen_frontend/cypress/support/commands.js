@@ -5,7 +5,9 @@ const getActivationToken = (email) => {
     .request(`http://localhost:8088/mail/${email}`)
     .then(({ body }) => {
       if (!body || !body.to) {
-        return getActivationToken(email);
+        return cy.wait(2000).then(() => {
+          return getActivationToken(email);
+        });
       } else {
         const matched = body.text.match(/http:\/\/.*confirmation.*/i);
         const url = new URL(matched);
@@ -73,5 +75,30 @@ Cypress.Commands.add("logout", () => {
     .request("POST", `/api/users/me/logout`)
     .then(() => {
       localStorage.removeItem("karmen_profile");
+    });
+});
+
+Cypress.Commands.add("addPrinter", (organizationUuid, name, ip, port) => {
+  return cy
+    .log(`adding printer`)
+    .getCookie("csrf_access_token")
+    .then((token) => {
+      return cy
+        .request({
+          method: "POST",
+          url: `/api/organizations/${organizationUuid}/printers`,
+          body: {
+            ip,
+            port,
+            name,
+            protocol: "http",
+          },
+          headers: {
+            "X-CSRF-TOKEN": token.value,
+          },
+        })
+        .then(({ body }) => {
+          return body;
+        });
     });
 });
