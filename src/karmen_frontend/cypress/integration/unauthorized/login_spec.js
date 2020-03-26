@@ -1,4 +1,4 @@
-describe("Login flow", function () {
+describe("Unauthorized: Login flow", function () {
   it("fails on empty username", function () {
     cy.visit("/login");
     cy.get("input#password").type("not a password");

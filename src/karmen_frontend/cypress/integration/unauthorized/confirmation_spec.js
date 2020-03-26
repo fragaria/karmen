@@ -13,7 +13,7 @@ const getActivationLink = (email) => {
     });
 };
 
-describe("Activation flow", function () {
+describe("Unauthorized: Activation flow", function () {
   let token = null;
   let email = null;
   beforeEach(() => {

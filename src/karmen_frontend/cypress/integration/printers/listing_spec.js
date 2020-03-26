@@ -1,12 +1,13 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
-describe("Printers listing", function () {
+describe("Printers: listing", function () {
   let email, password, organizationUuid;
   beforeEach(() => {
     email = chance.email();
     password = chance.string();
     return cy
+      .logout()
       .createUser(email, password)
       .login(email, password)
       .then((data) => {
