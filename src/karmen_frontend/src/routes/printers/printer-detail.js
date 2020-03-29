@@ -187,6 +187,7 @@ const PrinterDetail = ({
               <PrinterProgress printer={printer} />
               <PrinterProperties printer={printer} />
             </dl>
+            <a href={'/api/organizations/'+printer.organization_uuid+'/printers/'+printer.uuid+'/proxy/'}>Web control proxy</a>
           </div>
         </div>
 

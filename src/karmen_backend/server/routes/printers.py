@@ -3,7 +3,7 @@ import random
 import string
 import uuid as guid
 import requests
-from flask import jsonify, request, abort, make_response
+from flask import jsonify, request, abort, make_response, Response, redirect
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
 from server import app, __version__
@@ -645,3 +645,97 @@ def control_tool_temperature(org_uuid, uuid, part_name):
     if not r:
         return make_response(jsonify(message="Cannot set temperature"), 500)
     return "", 204
+
+
+@app.route("/organizations/<org_uuid>/printers/<uuid>/proxy", methods=["POST", "GET"])
+@app.route("/organizations/<org_uuid>/printers/<uuid>/proxy/", methods=["POST", "GET"])
+@app.route(
+    "/organizations/<org_uuid>/printers/<uuid>/proxy/<path:urlpath>",
+    methods=["POST", "GET"],
+)
+# @jwt_force_password_change
+# @validate_org_access()
+# @cross_origin()
+def printer_web_proxy(org_uuid, uuid, urlpath="/"):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+    app.logger.debug(f"Request to {request.url}")
+    if not printer_inst.client_info.connected:
+        return make_response("Client not connected", 610)
+
+    if not urlpath.startswith("/"):
+        urlpath = "/" + urlpath
+
+    sockjspath = f"http://localhost:4000/ws-api-proxy/{printer_inst.token}/"
+
+    basepath = f"/api/organizations/{org_uuid}/printers/{uuid}/proxy/"
+
+    if "/proxy/sockjs/" in request.url and "iframe.html" not in request.url:
+        redirpath = request.url.split("/proxy/sockjs/")[-1]
+        redirpath = f"{sockjspath}sockjs/{redirpath}"
+        # return redirect(redirpath, 307)
+
+    if "xhr" in urlpath and False:
+        for h, v in request.headers.items():
+            app.logger.error(f"{h}: {v}")
+
+    resp = None
+    for i in range(3):
+        resp = printer_inst.proxy_web_control(
+            path=urlpath,
+            method=request.method,
+            headers=request.headers,
+            body=request.data,
+            params=request.args,
+        )
+        if resp is not None:
+            break
+
+    # app.logger.error(str(resp))
+
+    if resp is None:
+        return make_response("None", 601)
+
+    if resp.status_code == 500:
+        app.logger.error(f"request to {resp.url} returned 500")
+        return make_response("request was 500", 500)
+
+    content = resp.content
+
+    if request.method == "GET":
+        content = content.replace(b'href="/', bytes(f'href="{basepath}', "utf8"))
+        content = content.replace(b'src="/', bytes(f'src="{basepath}', "utf8"))
+        content = content.replace(
+            b'var SOCKJS_URI = "/" + "sockjs";',
+            bytes(f'var SOCKJS_URI = "{sockjspath}"+ "sockjs";', "utf8"),
+        )
+        content = content.replace(
+            b'var BASEURL = "/";', bytes(f'var BASEURL = "{basepath}";', "utf8")
+        )
+        content = content.replace(
+            b'var GCODE_WORKER = "/', bytes(f'var GCODE_WORKER = "{basepath}', "utf8")
+        )
+        if "sockjs/iframe.html" in urlpath:
+            content = content.replace(
+                b'src="../../static/', bytes(f'src="{basepath}static/', "utf8")
+            )
+        if "packed_client.js" in request.url:
+            content = content.replace(
+                b"var url = self.base.options.baseurl;",
+                bytes(f'var url = "{sockjspath}";', "utf8"),
+            )
+
+    # app.logger.error(resp.headers.items())
+    proxyresponse = Response(content)
+
+    # for h, v in resp.headers.items():
+    #    proxyresponse.headers[h] = v
+    copy_headers = ["Content-Type"]
+
+    for ch in copy_headers:
+        if ch in resp.headers:
+            proxyresponse.headers[ch] = resp.headers[ch]
+
+    # proxyresponse.headers = resp.headers.items()
+    return proxyresponse
+    return content
+    return resp.raw.read(), resp.status_code, resp.headers.items()

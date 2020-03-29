@@ -83,5 +83,9 @@ http {
       proxy_send_timeout 86400s;
     }
 
+    location /ws-api-proxy/ {
+        proxy_pass http://130.193.12.231:5555/api/;
+    }
+
   }
 }

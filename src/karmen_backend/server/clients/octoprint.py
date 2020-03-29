@@ -96,6 +96,7 @@ class Octoprint(PrinterClient):
         if not self.client_info.connected and not force:
             return None
         uri = "%s%s" % (self.network_base, path)
+        app.logger.error("=\n" * 5 + str(uri))
         try:
             req = self.http_session.get(
                 uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
@@ -542,3 +543,18 @@ class Octoprint(PrinterClient):
         if not request or request.status_code != 204:
             return False
         return True
+
+    def proxy_web_control(
+        self, path, method="GET", body=None, headers=None, params=None
+    ):
+        if method == "GET":
+            # app.logger.error("SENDING REQUEST TO" + path)
+            return requests.get(url="%s%s" % (self.network_base, path), params=params)
+        elif method == "POST":
+            req = requests.post(
+                url="%s%s" % (self.network_base, path), headers=headers, params=params
+            )
+            return req
+            return self._http_post(path=path)
+        else:
+            app.logger.error("METHOD NOT IMPLEMENTED: " + method)
