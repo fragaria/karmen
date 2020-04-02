@@ -13,23 +13,23 @@ class LoginForm extends React.Component {
       loginForm: {
         email: {
           type: "honeypot",
-          val: ""
+          val: "",
         },
         username: {
           name: "Username",
           val: "",
           type: "text",
           required: true,
-          autocomplete: "username"
+          autocomplete: "username",
         },
         password: {
           name: "Password",
           val: "",
           type: "password",
           required: true,
-          autocomplete: "current-password"
-        }
-      }
+          autocomplete: "current-password",
+        },
+      },
     };
     this.login = this.login.bind(this);
   }
@@ -39,9 +39,9 @@ class LoginForm extends React.Component {
       return {
         loginForm: Object.assign({}, prevState.loginForm, {
           username: Object.assign({}, prevState.loginForm.username, {
-            val: nextProps.username
-          })
-        })
+            val: nextProps.username,
+          }),
+        }),
       };
     }
     return null;
@@ -74,12 +74,12 @@ class LoginForm extends React.Component {
     }
     if (hasError) {
       this.setState({
-        loginForm: Object.assign({}, loginForm)
+        loginForm: Object.assign({}, loginForm),
       });
       return;
     }
     return doAuthenticate(loginForm.username.val, loginForm.password.val).then(
-      r => {
+      (r) => {
         if (r.status !== 200) {
           this._ismounted &&
             this.setState({
@@ -88,8 +88,8 @@ class LoginForm extends React.Component {
                 (r.data && r.data.message) ||
                 "Login unsuccessful, try again, please.",
               loginForm: Object.assign({}, loginForm, {
-                password: Object.assign({}, loginForm.password, { val: "" })
-              })
+                password: Object.assign({}, loginForm.password, { val: "" }),
+              }),
             });
         } else {
           this._ismounted &&
@@ -98,8 +98,8 @@ class LoginForm extends React.Component {
               messageOk: true,
               loginForm: Object.assign({}, loginForm, {
                 password: Object.assign({}, loginForm.password, { val: "" }),
-                username: Object.assign({}, loginForm.username, { val: "" })
-              })
+                username: Object.assign({}, loginForm.username, { val: "" }),
+              }),
             });
         }
       }
@@ -116,9 +116,9 @@ class LoginForm extends React.Component {
         loginForm: Object.assign({}, loginForm, {
           [name]: Object.assign({}, loginForm[name], {
             val: value,
-            error: null
-          })
-        })
+            error: null,
+          }),
+        }),
       });
     };
     return (

@@ -10,7 +10,7 @@ class Sorting extends React.Component {
   componentDidUpdate() {
     const dropdownItems = this.dropdownItems.current;
 
-    const countViewportHeight = dropdownItems => {
+    const countViewportHeight = (dropdownItems) => {
       const vh = window.innerHeight * 0.01;
       dropdownItems.style.setProperty("--vh", `${vh}px`);
     };
@@ -28,18 +28,18 @@ class Sorting extends React.Component {
     const toggle = () => {
       const { expand } = this.state;
       this.setState({
-        expand: !expand
+        expand: !expand,
       });
     };
 
-    const handleClick = sortBy => {
+    const handleClick = (sortBy) => {
       return () => {
         toggle();
         return onChange(sortBy)();
       };
     };
 
-    const list = columns.map(item => {
+    const list = columns.map((item) => {
       return (
         <button
           key={item}
@@ -64,7 +64,7 @@ class Sorting extends React.Component {
       <div className="dropdown sorting">
         <button
           className="dropdown-toggle btn-reset"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             if (columns.length === 1) {
               return onChange(columns[0])();

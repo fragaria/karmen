@@ -5,12 +5,12 @@ export const setPrinterConnection = (orgUuid, uuid, state) => {
     uri: `/organizations/${orgUuid}/printers/${uuid}/connection`,
     appendData: {
       uuid,
-      state
+      state,
     },
     data: {
-      state
+      state,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -19,12 +19,12 @@ export const changeCurrentJob = (orgUuid, uuid, action) => {
     uri: `/organizations/${orgUuid}/printers/${uuid}/current-job`,
     appendData: {
       uuid,
-      action
+      action,
     },
     data: {
-      action
+      action,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -32,8 +32,8 @@ export const changeLights = (orgUuid, uuid) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/lights`,
     appendData: {
-      uuid
-    }
+      uuid,
+    },
   });
 };
 
@@ -41,13 +41,13 @@ export const movePrinthead = (orgUuid, uuid, command, opts) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/printhead`,
     appendData: {
-      uuid
+      uuid,
     },
     data: {
       command,
-      ...opts
+      ...opts,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -55,12 +55,12 @@ export const changeFanState = (orgUuid, uuid, targetState) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/fan`,
     appendData: {
-      uuid
+      uuid,
     },
     data: {
-      target: targetState
+      target: targetState,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -69,9 +69,9 @@ export const changeMotorsState = (orgUuid, uuid, targetState) => {
     uri: `/organizations/${orgUuid}/printers/${uuid}/motors`,
     uuid,
     data: {
-      target: targetState
+      target: targetState,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -79,12 +79,12 @@ export const extrude = (orgUuid, uuid, amount) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/extrusion`,
     appendData: {
-      uuid
+      uuid,
     },
     data: {
-      amount
+      amount,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };
 
@@ -92,11 +92,11 @@ export const setTemperature = (orgUuid, uuid, partName, target) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/${uuid}/temperatures/${partName}`,
     appendData: {
-      uuid
+      uuid,
     },
     data: {
-      target
+      target,
     },
-    parseResponse: false
+    parseResponse: false,
   });
 };

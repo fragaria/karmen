@@ -19,23 +19,23 @@ class RegisterConfirmation extends React.Component {
       passwordForm: {
         email: {
           type: "honeypot",
-          val: ""
+          val: "",
         },
         password: {
           name: "New password",
           val: "",
           type: "password",
           required: true,
-          autocomplete: "new-password"
+          autocomplete: "new-password",
         },
         passwordConfirmation: {
           name: "New password confirmation",
           val: "",
           type: "password",
           required: true,
-          autocomplete: "new-password"
-        }
-      }
+          autocomplete: "new-password",
+        },
+      },
     };
     this.activate = this.activate.bind(this);
   }
@@ -50,7 +50,7 @@ class RegisterConfirmation extends React.Component {
           email: tokenData.email,
           activationKey: tokenData.activation_key,
           activationKeyExpires: tokenData.activation_key_expires,
-          tokenProcessed: true
+          tokenProcessed: true,
         });
       } catch (e) {
         console.error(e);
@@ -58,7 +58,7 @@ class RegisterConfirmation extends React.Component {
       }
     }
     this.setState({
-      tokenProcessed: true
+      tokenProcessed: true,
     });
   }
 
@@ -90,7 +90,7 @@ class RegisterConfirmation extends React.Component {
 
     if (hasError) {
       this.setState({
-        passwordForm: Object.assign({}, passwordForm)
+        passwordForm: Object.assign({}, passwordForm),
       });
       return;
     }
@@ -100,7 +100,7 @@ class RegisterConfirmation extends React.Component {
       activationKey,
       passwordForm.password.val,
       passwordForm.passwordConfirmation.val
-    ).then(r => {
+    ).then((r) => {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
@@ -112,15 +112,15 @@ class RegisterConfirmation extends React.Component {
               </Link>{" "}
               again?
             </>
-          )
+          ),
         });
       } else {
         this.setState({
           message: "Account activated, please login with your new password",
           messageOk: true,
           passwordForm: Object.assign({}, passwordForm, {
-            email: Object.assign({}, passwordForm.email, { val: "" })
-          })
+            email: Object.assign({}, passwordForm.email, { val: "" }),
+          }),
         });
       }
     });
@@ -134,7 +134,7 @@ class RegisterConfirmation extends React.Component {
       tokenProcessed,
       email,
       activationKey,
-      activationKeyExpires
+      activationKeyExpires,
     } = this.state;
     const updateValue = (name, value) => {
       const { passwordForm } = this.state;
@@ -142,9 +142,9 @@ class RegisterConfirmation extends React.Component {
         passwordForm: Object.assign({}, passwordForm, {
           [name]: Object.assign({}, passwordForm[name], {
             val: value,
-            error: null
-          })
-        })
+            error: null,
+          }),
+        }),
       });
     };
 
@@ -221,8 +221,8 @@ class RegisterConfirmation extends React.Component {
 }
 
 export default withRouter(
-  connect(undefined, dispatch => ({
+  connect(undefined, (dispatch) => ({
     doActivate: (email, activationKey, password, passwordConfirmation) =>
-      dispatch(activate(email, activationKey, password, passwordConfirmation))
+      dispatch(activate(email, activationKey, password, passwordConfirmation)),
   }))(RegisterConfirmation)
 );

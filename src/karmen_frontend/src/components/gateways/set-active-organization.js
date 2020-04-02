@@ -7,7 +7,7 @@ const SetActiveOrganization = ({
   match,
   organizations,
   activeOrganization,
-  switchOrganization
+  switchOrganization,
 }) => {
   if (match.params.orguuid) {
     if (!organizations[match.params.orguuid]) {
@@ -27,12 +27,12 @@ const SetActiveOrganization = ({
 
 export default withRouter(
   connect(
-    state => ({
+    (state) => ({
       organizations: state.me.organizations,
-      activeOrganization: state.me.activeOrganization
+      activeOrganization: state.me.activeOrganization,
     }),
-    dispatch => ({
-      switchOrganization: uuid => dispatch(switchOrganization(uuid))
+    (dispatch) => ({
+      switchOrganization: (uuid) => dispatch(switchOrganization(uuid)),
     })
   )(SetActiveOrganization)
 );

@@ -6,12 +6,12 @@ import * as backend from "../services/backend";
 
 export const retryIfUnauthorized = (func, dispatch) => {
   return (...args) => {
-    return func(...args).then(r => {
+    return func(...args).then((r) => {
       if (r.status === 401) {
         if (!dispatch) {
           return Promise.reject();
         }
-        return dispatch(refreshToken()).then(r => {
+        return dispatch(refreshToken()).then((r) => {
           if (r.status === 200) {
             return func(...args);
           } else {
@@ -33,7 +33,7 @@ export const denyWithNoOrganizationAccess = (orguuid, getState, wrapped) => {
   return wrapped();
 };
 
-export const loadUserFromToken = token => dispatch => {
+export const loadUserFromToken = (token) => (dispatch) => {
   const decoded = jwt_decode(token);
   Cookies.set("access_token_cookie", token);
   Cookies.set("csrf_access_token", decoded.csrf);
@@ -46,17 +46,17 @@ export const loadUserFromToken = token => dispatch => {
         [decoded.user_claims && decoded.user_claims.organization_uuid]: {
           role: "user",
           uuid: decoded.user_claims && decoded.user_claims.organization_uuid,
-          name: decoded.user_claims && decoded.user_claims.organization_name
-        }
+          name: decoded.user_claims && decoded.user_claims.organization_name,
+        },
       },
       systemRole: "user",
       hasFreshToken: decoded.fresh,
-      accessTokenExpiresOn: undefined
+      accessTokenExpiresOn: undefined,
     })
   );
 };
 
-export const loadUserFromLocalStorage = () => dispatch => {
+export const loadUserFromLocalStorage = () => (dispatch) => {
   const profile = backend.getUserProfile();
   // no profile - bail
   if (!profile) {
@@ -67,7 +67,7 @@ export const loadUserFromLocalStorage = () => dispatch => {
     profile.accessTokenExpiresOn &&
     dayjs().isAfter(profile.accessTokenExpiresOn.subtract(90, "seconds"))
   ) {
-    return backend.refreshAccessToken().then(r => {
+    return backend.refreshAccessToken().then((r) => {
       if (r.status === 200) {
         return Promise.resolve(dispatch(loadUserData(r.data)));
       }
@@ -77,23 +77,23 @@ export const loadUserFromLocalStorage = () => dispatch => {
   return Promise.resolve(dispatch(loadUserData(profile)));
 };
 
-export const switchOrganization = uuid => dispatch => {
+export const switchOrganization = (uuid) => (dispatch) => {
   dispatch({
     type: "USER_SWITCH_ORGANIZATION",
     payload: {
       data: {
-        uuid
-      }
-    }
+        uuid,
+      },
+    },
   });
 };
 
-export const loadUserData = userData => dispatch => {
+export const loadUserData = (userData) => (dispatch) => {
   dispatch({
     type: "USER_DATA_LOADED",
     payload: {
-      data: userData
-    }
+      data: userData,
+    },
   });
   if (userData.activeOrganization) {
     dispatch(switchOrganization(userData.activeOrganization.uuid));
@@ -143,7 +143,7 @@ export const changePassword = createThunkedAction(
     { dispatch, getState }
   ) => {
     const { me } = getState();
-    return dispatch(authenticateFresh(me.username, password)).then(r => {
+    return dispatch(authenticateFresh(me.username, password)).then((r) => {
       if (r.status !== 200) {
         return Promise.reject();
       }
@@ -162,7 +162,7 @@ export const patchMe = createThunkedAction("USER_PATCH", (username, email) => {
 
 export const requestPasswordReset = createThunkedAction(
   "USER_RESET_PASSWORD_REQUEST",
-  email => {
+  (email) => {
     return backend.requestPasswordReset(email);
   }
 );
@@ -179,7 +179,7 @@ export const resetPassword = createThunkedAction(
   }
 );
 
-export const register = createThunkedAction("USER_REGISTER", email => {
+export const register = createThunkedAction("USER_REGISTER", (email) => {
   return backend.register(email);
 });
 

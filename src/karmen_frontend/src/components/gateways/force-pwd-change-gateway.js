@@ -29,13 +29,13 @@ const ForcePwdChangeGateway = ({ children, userState, changePassword }) => {
 };
 
 export default connect(
-  state => ({
-    userState: state.me.currentState
+  (state) => ({
+    userState: state.me.currentState,
   }),
-  dispatch => ({
+  (dispatch) => ({
     changePassword: (password, new_password, new_password_confirmation) =>
       dispatch(
         changePassword(password, new_password, new_password_confirmation)
-      )
+      ),
   })
 )(ForcePwdChangeGateway);

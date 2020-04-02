@@ -18,7 +18,7 @@ const SwitchView = ({ viewType, onViewTypeChange }) => {
               ? "btn-reset icon-list"
               : "btn-reset icon-list active"
           }
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             if (e.target.className.indexOf("active") < 0) {
               onViewTypeChange("list");
@@ -31,7 +31,7 @@ const SwitchView = ({ viewType, onViewTypeChange }) => {
               ? "btn-reset icon-grid active"
               : "btn-reset icon-grid"
           }
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
             if (e.target.className.indexOf("active") < 0) {
               onViewTypeChange("grid");
@@ -47,7 +47,7 @@ class PrinterList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      timer: null
+      timer: null,
     };
     this.getPrinters = this.getPrinters.bind(this);
   }
@@ -70,7 +70,7 @@ class PrinterList extends React.Component {
     // But we are checking only for the local db data, so it should be blazing fast.
     load.then(() => {
       this.setState({
-        timer: setTimeout(this.getPrinters, 60 * 1000)
+        timer: setTimeout(this.getPrinters, 60 * 1000),
       });
     });
   }
@@ -86,7 +86,7 @@ class PrinterList extends React.Component {
       printersLoaded,
       printers,
       viewType,
-      setPrinterViewType
+      setPrinterViewType,
     } = this.props;
     if (!printersLoaded) {
       return (
@@ -100,8 +100,8 @@ class PrinterList extends React.Component {
     const printerElements =
       printers &&
       printers
-        .filter(p => !!p)
-        .map(printer => {
+        .filter((p) => !!p)
+        .map((printer) => {
           return (
             <Link
               className="list-item"
@@ -171,11 +171,11 @@ export default connect(
       state.preferences.orgs[ownProps.match.params.orguuid] &&
       state.preferences.orgs[ownProps.match.params.orguuid].printerViewType,
     printers: state.printers.printers,
-    printersLoaded: state.printers.printersLoaded
+    printersLoaded: state.printers.printersLoaded,
   }),
   (dispatch, ownProps) => ({
-    loadPrinters: fields =>
+    loadPrinters: (fields) =>
       dispatch(loadAndQueuePrinters(ownProps.match.params.orguuid, fields)),
-    setPrinterViewType: viewType => dispatch(setPrinterViewType(viewType))
+    setPrinterViewType: (viewType) => dispatch(setPrinterViewType(viewType)),
   })
 )(PrinterList);

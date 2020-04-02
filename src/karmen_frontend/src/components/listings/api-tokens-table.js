@@ -19,7 +19,7 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
             <BusyButton
               className="btn btn-sm"
               type="submit"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 onTokenDelete(token.jti);
                 modal.closeModal();
@@ -68,7 +68,7 @@ const ApiTokensTable = ({
   loadTokens,
   tokensLoaded,
   tokensList,
-  onTokenDelete
+  onTokenDelete,
 }) => {
   return (
     <NoPaginationListing
@@ -79,7 +79,7 @@ const ApiTokensTable = ({
       enableFiltering={true}
       sortByColumns={["name", "created"]}
       filterByColumns={["name"]}
-      rowFactory={t => {
+      rowFactory={(t) => {
         return (
           <ApiTokensTableRow
             key={t.jti}

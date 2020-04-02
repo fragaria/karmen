@@ -11,8 +11,8 @@ export const getPrinters = (orgUuid, fields = []) => {
     method: "GET",
     uri,
     appendData: {
-      organizationUuid: orgUuid
-    }
+      organizationUuid: orgUuid,
+    },
   });
 };
 
@@ -25,8 +25,8 @@ export const getPrinter = (orgUuid, uuid, fields = []) => {
     method: "GET",
     uri,
     appendData: {
-      organizationUuid: orgUuid
-    }
+      organizationUuid: orgUuid,
+    },
   });
 };
 
@@ -34,11 +34,11 @@ export const getPrinter = (orgUuid, uuid, fields = []) => {
 function arrayBufferToBase64(buffer) {
   var binary = "";
   var bytes = [].slice.call(new Uint8Array(buffer));
-  bytes.forEach(b => (binary += String.fromCharCode(b)));
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
   return window.btoa(binary);
 }
 
-export const getWebcamSnapshot = snapshotUrl => {
+export const getWebcamSnapshot = (snapshotUrl) => {
   if (!snapshotUrl) {
     return Promise.resolve({ status: 404, successCodes: [200, 202] });
   }
@@ -52,19 +52,19 @@ export const getWebcamSnapshot = snapshotUrl => {
     }`,
     {
       method: "GET",
-      headers: headers
+      headers: headers,
     }
   )
-    .then(response => {
+    .then((response) => {
       if (response.status === 200) {
         let contentType = response.headers.get("content-type");
-        return response.arrayBuffer().then(buffer => ({
+        return response.arrayBuffer().then((buffer) => ({
           status: 200,
           successCodes: [200, 202],
           data: {
             prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
-            data: arrayBufferToBase64(buffer)
-          }
+            data: arrayBufferToBase64(buffer),
+          },
         }));
       }
       if (response.status !== 202) {
@@ -72,7 +72,7 @@ export const getWebcamSnapshot = snapshotUrl => {
       }
       return { status: response.status, successCodes: [200, 202] };
     })
-    .catch(e => {
+    .catch((e) => {
       console.error(`Cannot get webcam snapshot: ${e}`);
       return { status: 500, successCodes: [200, 202] };
     });

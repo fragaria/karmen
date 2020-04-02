@@ -10,7 +10,7 @@ import {
   loadGcode,
   downloadGcode,
   loadPrinters,
-  addPrintJob
+  addPrintJob,
 } from "../../actions";
 import formatters from "../../services/formatters";
 
@@ -18,19 +18,19 @@ const GcodePrint = ({
   gcode,
   printGcode,
   onSchedulePrint,
-  availablePrinters
+  availablePrinters,
 }) => {
   const printModal = usePrintGcodeModal({
     gcode,
     printGcode,
     onSchedulePrint,
-    availablePrinters
+    availablePrinters,
   });
   return (
     <>
       <button
         className="btn"
-        onClick={e => {
+        onClick={(e) => {
           printModal.openModal(e);
         }}
       >
@@ -52,7 +52,7 @@ class GcodeDetail extends React.Component {
     messageOk: true,
     showFilamentTypeWarningMessage: false,
     printerFilamentType: "",
-    gcodeFilamentType: ""
+    gcodeFilamentType: "",
   };
 
   constructor(props) {
@@ -62,10 +62,10 @@ class GcodeDetail extends React.Component {
 
   loadGcode() {
     const { match, getGcode } = this.props;
-    getGcode(match.params.uuid, []).then(r => {
+    getGcode(match.params.uuid, []).then((r) => {
       this.setState({
         gcode: r.data,
-        gcodeLoaded: true
+        gcodeLoaded: true,
       });
     });
   }
@@ -211,11 +211,11 @@ class GcodeDetail extends React.Component {
               gcode={gcode}
               printGcode={printGcode}
               onSchedulePrint={(gcodeId, printerUuid) => {
-                return printGcode(gcodeId, printerUuid).then(r => {
+                return printGcode(gcodeId, printerUuid).then((r) => {
                   if (r === 201) {
                     printedOn.push(printerUuid);
                     this.setState({
-                      printedOn: [].concat(printedOn)
+                      printedOn: [].concat(printedOn),
                     });
                   }
                   return r;
@@ -252,14 +252,14 @@ class GcodeDetail extends React.Component {
 }
 
 export default connect(
-  state => ({
+  (state) => ({
     printersLoaded: state.printers.printersLoaded,
     getAvailablePrinters: (without = []) =>
       state.printers.printers
-        .filter(p => p.status && p.status.state === "Operational")
-        .filter(p => p.client && p.client.connected)
-        .filter(p => p.client && p.client.access_level === "unlocked")
-        .filter(p => without.indexOf(p.uuid) === -1)
+        .filter((p) => p.status && p.status.state === "Operational")
+        .filter((p) => p.client && p.client.connected)
+        .filter((p) => p.client && p.client.access_level === "unlocked")
+        .filter((p) => without.indexOf(p.uuid) === -1),
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
@@ -268,12 +268,13 @@ export default connect(
           "job",
           "status",
           "webcam",
-          "lights"
+          "lights",
         ])
       ),
-    getGcode: id => dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
+    getGcode: (id) =>
+      dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
     printGcode: (id, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orguuid, id, printer)),
-    downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename))
+    downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename)),
   })
 )(GcodeDetail);

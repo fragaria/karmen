@@ -7,7 +7,7 @@ export const getUsers = (orgUuid, fields = []) => {
   }
   return performRequest({
     uri,
-    method: "GET"
+    method: "GET",
   });
 };
 
@@ -16,8 +16,8 @@ export const addUser = (orgUuid, email, role) => {
     uri: `/organizations/${orgUuid}/users`,
     data: {
       email,
-      role
-    }
+      role,
+    },
   });
 };
 
@@ -26,11 +26,11 @@ export const patchUser = (orgUuid, uuid, role) => {
     uri: `/organizations/${orgUuid}/users/${uuid}`,
     method: "PATCH",
     data: {
-      role
+      role,
     },
     appendData: {
-      uuid
-    }
+      uuid,
+    },
   });
 };
 
@@ -41,7 +41,7 @@ export const deleteUser = (orgUuid, uuid) => {
     parseResponse: false,
     successCodes: [204, 404],
     appendData: {
-      uuid
-    }
+      uuid,
+    },
   });
 };

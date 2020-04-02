@@ -43,7 +43,7 @@ const JobsTab = ({ orguuid, jobList, loadJobsPage, clearJobsPages }) => {
         enableFiltering={false}
         itemList={jobList}
         loadPage={loadJobsPage}
-        rowFactory={j => {
+        rowFactory={(j) => {
           return <PrintJobRow key={j.uuid} {...j} orguuid={orguuid} />;
         }}
         sortByColumns={["started"]}

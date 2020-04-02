@@ -11,7 +11,7 @@ const Users = ({
   usersList,
   onUserDelete,
   onUserChange,
-  onResendInvitation
+  onResendInvitation,
 }) => {
   return (
     <>
