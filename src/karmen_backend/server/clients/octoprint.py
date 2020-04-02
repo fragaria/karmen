@@ -98,7 +98,7 @@ class Octoprint(PrinterClient):
             return None
         uri = "%s%s" % (self.network_base, path)
         if timeout is None:
-            app.config.get("NETWORK_TIMEOUT", 10)
+            timeout = app.config.get("NETWORK_TIMEOUT", 10)
         try:
             req = self.http_session.get(uri, timeout=timeout)
             if req is None:

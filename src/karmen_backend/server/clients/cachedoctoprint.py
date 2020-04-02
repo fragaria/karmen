@@ -80,7 +80,7 @@ class CachedOctoprint(Octoprint):
 
     def _perform_http_get(self, uri, timeout=None):
         if timeout is None:
-            app.config.get("NETWORK_TIMEOUT", 10)
+            timeout = app.config.get("NETWORK_TIMEOUT", 10)
         try:
             req = self.http_session.get(uri, timeout=timeout)
             if req is None:

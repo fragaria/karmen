@@ -75,6 +75,7 @@ class CheckPrinterTest(unittest.TestCase):
                     "api_key": None,
                     "webcam": {"message": "Webcam not accessible"},
                     "plugins": [],
+                    "pill_info": None,
                 },
             }
         )
@@ -178,6 +179,7 @@ class CheckPrinterTest(unittest.TestCase):
                         "rotate90": False,
                     },
                     "plugins": [],
+                    "pill_info": None,
                 },
             }
         )
@@ -354,6 +356,7 @@ class CheckPrinterTest(unittest.TestCase):
                     "api_key": None,
                     "webcam": {"message": "Webcam not accessible"},
                     "plugins": [],
+                    "pill_info": None,
                 },
             }
         )
@@ -459,8 +462,18 @@ class CheckPrinterTest(unittest.TestCase):
         mock_octoprint_redis.get.return_value = None
 
         def mock_call(uri, **kwargs):
+            print("=======CALLING: ", uri)
             if "/api/settings" in uri:
                 return Response(200, {"plugins": {"aaa": {},}},)
+            if "/karmen-pill-info/get" in uri:
+                return Response(
+                    200,
+                    {
+                        "system": {
+                            "karmen_version": "fb89a94ed5e0bf3b4e30a50e41acc1a19fcc90ee 0.1.0-alpha",
+                        }
+                    },
+                )
             return Response(200, {"text": "octoprint"})
 
         mock_get_data.side_effect = mock_call
@@ -473,7 +486,7 @@ class CheckPrinterTest(unittest.TestCase):
         mock_get_data.assert_any_call("https://1234/api/settings", timeout=2)
         # webcam, TODO this is not ideal
         mock_get_data.assert_any_call("https://1234/api/settings", timeout=2)
-        self.assertEqual(mock_get_data.call_count, 3)
+        self.assertEqual(mock_get_data.call_count, 4)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_any_call(
             **{
@@ -485,6 +498,11 @@ class CheckPrinterTest(unittest.TestCase):
                     "api_key": None,
                     "webcam": {"message": "Webcam disabled in octoprint"},
                     "plugins": ["aaa"],
+                    "pill_info": {
+                        "karmen_version": "fb89a94ed5e0bf3b4e30a50e41acc1a19fcc90ee 0.1.0-alpha",
+                        "version_number": "0.1.0-alpha",
+                        "update_available": None,
+                    },
                 },
             }
         )
