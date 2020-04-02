@@ -20,7 +20,7 @@ class AddUser extends React.Component {
         val: "",
         type: "text",
         required: true,
-        error: null,
+        error: null
       },
       role: {
         name: "Role",
@@ -29,10 +29,10 @@ class AddUser extends React.Component {
         required: true,
         options: [
           { val: "user", name: "User" },
-          { val: "admin", name: "Admin" },
-        ],
-      },
-    },
+          { val: "admin", name: "Admin" }
+        ]
+      }
+    }
   };
 
   constructor(props) {
@@ -44,7 +44,7 @@ class AddUser extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false,
+      messageOk: false
     });
     const { form } = this.state;
     let hasErrors = false;
@@ -64,27 +64,27 @@ class AddUser extends React.Component {
 
     if (hasErrors) {
       this.setState({
-        form: Object.assign({}, form),
+        form: Object.assign({}, form)
       });
       return;
     }
     const { createUser } = this.props;
     if (!hasErrors) {
-      return createUser(form.email.val, form.role.val).then((r) => {
+      return createUser(form.email.val, form.role.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
-              redirect: true,
+              redirect: true
             });
             break;
           case 409:
             this.setState({
-              message: "User with such email is already registered",
+              message: "User with such email is already registered"
             });
             break;
           default:
             this.setState({
-              message: "Cannot add user, check server logs",
+              message: "Cannot add user, check server logs"
             });
         }
       });
@@ -113,9 +113,9 @@ class AddUser extends React.Component {
                         form: Object.assign({}, form, {
                           [name]: Object.assign({}, form[name], {
                             val: value,
-                            error: null,
-                          }),
-                        }),
+                            error: null
+                          })
+                        })
                       });
                     }}
                   />
@@ -160,5 +160,5 @@ class AddUser extends React.Component {
 
 export default connect(null, (dispatch, ownProps) => ({
   createUser: (email, role) =>
-    dispatch(addUser(ownProps.match.params.orguuid, email, role)),
+    dispatch(addUser(ownProps.match.params.orguuid, email, role))
 }))(AddUser);

@@ -7,7 +7,7 @@ const ApiTokens = ({
   loadApiTokens,
   apiTokens,
   apiTokensLoaded,
-  onTokenDelete,
+  onTokenDelete
 }) => {
   return (
     <>

@@ -10,7 +10,7 @@ import { getOrganizations, patchOrganization } from "../../actions";
 
 class OrganizationProperties extends React.Component {
   state = {
-    organizationLoaded: false,
+    organizationLoaded: false
   };
 
   constructor(props) {
@@ -20,29 +20,27 @@ class OrganizationProperties extends React.Component {
 
   changeOrganization(newParameters) {
     const { patchOrganization, organization } = this.props;
-    return patchOrganization(organization.uuid, newParameters.name).then(
-      (r) => {
-        switch (r.status) {
-          case 200:
-            this.props.history.push(`/organizations`);
-            return {
-              ok: true,
-              message: "Changes saved successfully",
-            };
-          case 409:
-            return {
-              ok: false,
-              message:
-                "Pick a different name, there is already an organization of such name",
-            };
-          default:
-            return {
-              ok: false,
-              message: "Cannot save your changes, check server logs",
-            };
-        }
+    return patchOrganization(organization.uuid, newParameters.name).then(r => {
+      switch (r.status) {
+        case 200:
+          this.props.history.push(`/organizations`);
+          return {
+            ok: true,
+            message: "Changes saved successfully"
+          };
+        case 409:
+          return {
+            ok: false,
+            message:
+              "Pick a different name, there is already an organization of such name"
+          };
+        default:
+          return {
+            ok: false,
+            message: "Cannot save your changes, check server logs"
+          };
       }
-    );
+    });
   }
 
   componentDidMount() {
@@ -50,12 +48,12 @@ class OrganizationProperties extends React.Component {
     if (!organization) {
       getOrganizations().then(() => {
         this.setState({
-          organizationLoaded: true,
+          organizationLoaded: true
         });
       });
     } else {
       this.setState({
-        organizationLoaded: true,
+        organizationLoaded: true
       });
     }
   }
@@ -83,7 +81,7 @@ class OrganizationProperties extends React.Component {
               </h1>
               <OrganizationEditForm
                 defaults={{
-                  name: organization.name,
+                  name: organization.name
                 }}
                 onSubmit={this.changeOrganization}
                 onCancel={() => {
@@ -101,11 +99,11 @@ class OrganizationProperties extends React.Component {
 export default connect(
   (state, ownProps) => ({
     organization: state.organizations.list.find(
-      (o) => o.uuid === ownProps.match.params.orguuid
-    ),
+      o => o.uuid === ownProps.match.params.orguuid
+    )
   }),
-  (dispatch) => ({
+  dispatch => ({
     getOrganizations: () => dispatch(getOrganizations()),
-    patchOrganization: (uuid, name) => dispatch(patchOrganization(uuid, name)),
+    patchOrganization: (uuid, name) => dispatch(patchOrganization(uuid, name))
   })
 )(OrganizationProperties);

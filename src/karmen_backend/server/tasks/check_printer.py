@@ -25,8 +25,9 @@ def check_printer(printer_uuid):
             printer.hostname = hostname
             printer.update_network_base()
     now = datetime.now()
-    if now.minute % 15 == 0 and printer.client_info.connected:
+    if True or (now.minute % 15 == 0 and printer.client_info.connected):
         printer.sniff()
+        printer.karmen_sniff()
     else:
         printer.is_alive()
 
@@ -46,5 +47,6 @@ def check_printer(printer_uuid):
             "api_key": printer.client_info.api_key,
             "webcam": printer.client_info.webcam,
             "plugins": printer.client_info.plugins,
+            "pill_info": printer.client_info.pill_info,
         },
     )

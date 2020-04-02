@@ -9,7 +9,7 @@ import { loadPrinter, patchPrinter } from "../../actions";
 
 class PrinterSettings extends React.Component {
   state = {
-    printerLoaded: false,
+    printerLoaded: false
   };
 
   constructor(props) {
@@ -19,7 +19,7 @@ class PrinterSettings extends React.Component {
 
   changePrinter(newParameters) {
     const { match, patchPrinter, printer } = this.props;
-    return patchPrinter(newParameters).then((r) => {
+    return patchPrinter(newParameters).then(r => {
       switch (r.status) {
         case 200:
           this.props.history.push(
@@ -27,12 +27,12 @@ class PrinterSettings extends React.Component {
           );
           return {
             ok: true,
-            message: "Changes saved successfully",
+            message: "Changes saved successfully"
           };
         default:
           return {
             ok: false,
-            message: "Cannot save your changes, check server logs",
+            message: "Cannot save your changes, check server logs"
           };
       }
     });
@@ -43,12 +43,12 @@ class PrinterSettings extends React.Component {
     if (!printer) {
       loadPrinter().then(() => {
         this.setState({
-          printerLoaded: true,
+          printerLoaded: true
         });
       });
     } else {
       this.setState({
-        printerLoaded: true,
+        printerLoaded: true
       });
     }
   }
@@ -90,7 +90,7 @@ class PrinterSettings extends React.Component {
                     printer.printer_props.tool0_diameter) ||
                   "",
                 note:
-                  (printer.printer_props && printer.printer_props.note) || "",
+                  (printer.printer_props && printer.printer_props.note) || ""
               }}
               onSubmit={this.changePrinter}
               onCancel={() => {
@@ -109,8 +109,8 @@ class PrinterSettings extends React.Component {
 export default connect(
   (state, ownProps) => ({
     printer: state.printers.printers.find(
-      (p) => p.uuid === ownProps.match.params.uuid
-    ),
+      p => p.uuid === ownProps.match.params.uuid
+    )
   }),
   (dispatch, ownProps) => ({
     loadPrinter: () =>
@@ -119,16 +119,16 @@ export default connect(
           "job",
           "status",
           "webcam",
-          "lights",
+          "lights"
         ])
       ),
-    patchPrinter: (data) =>
+    patchPrinter: data =>
       dispatch(
         patchPrinter(
           ownProps.match.params.orguuid,
           ownProps.match.params.uuid,
           data
         )
-      ),
+      )
   })
 )(PrinterSettings);

@@ -14,16 +14,16 @@ class UserEditForm extends React.Component {
           name: "Username",
           val: props.username,
           type: "text",
-          required: true,
+          required: true
         },
         email: {
           name: "E-mail",
           val: props.email,
           type: "text",
           required: true,
-          disabled: true,
-        },
-      },
+          disabled: true
+        }
+      }
     };
     this.patchMe = this.patchMe.bind(this);
   }
@@ -48,28 +48,28 @@ class UserEditForm extends React.Component {
     }
     if (hasError) {
       this.setState({
-        patchMeForm: Object.assign({}, patchMeForm),
+        patchMeForm: Object.assign({}, patchMeForm)
       });
       return;
     }
-    return patchMe(patchMeForm.username.val, email).then((r) => {
+    return patchMe(patchMeForm.username.val, email).then(r => {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
           message: "Profile change unsuccessful, try again, please.",
           patchMeForm: Object.assign({}, patchMeForm, {
             username: Object.assign({}, patchMeForm.username, {
-              val: username,
+              val: username
             }),
             email: Object.assign({}, patchMeForm.email, {
-              val: email,
-            }),
-          }),
+              val: email
+            })
+          })
         });
       } else {
         this.setState({
           message: "Profile changed successfully.",
-          messageOk: true,
+          messageOk: true
         });
       }
     });
@@ -85,9 +85,9 @@ class UserEditForm extends React.Component {
         patchMeForm: Object.assign({}, patchMeForm, {
           [name]: Object.assign({}, patchMeForm[name], {
             val: value,
-            error: null,
-          }),
-        }),
+            error: null
+          })
+        })
       });
     };
     return (

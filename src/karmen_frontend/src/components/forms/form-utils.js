@@ -1,7 +1,7 @@
 import React from "react";
 
 export const FormInputs = ({ definition, updateValue }) => {
-  const optionRows = Object.keys(definition).map((name) => {
+  const optionRows = Object.keys(definition).map(name => {
     switch (definition[name].type) {
       case "text":
       case "password":
@@ -15,7 +15,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               autoComplete={definition[name].autocomplete}
               value={definition[name].val}
               disabled={definition[name].disabled}
-              onChange={(e) => updateValue(name, e.target.value)}
+              onChange={e => updateValue(name, e.target.value)}
             />
             <span>
               {definition[name].error && (
@@ -33,7 +33,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               name={name}
               value={definition[name].val}
               disabled={definition[name].disabled}
-              onChange={(e) => updateValue(name, e.target.value)}
+              onChange={e => updateValue(name, e.target.value)}
             ></textarea>
             <span>
               {definition[name].error && (
@@ -52,7 +52,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               name={name}
               checked={definition[name].val}
               disabled={definition[name].disabled}
-              onChange={(e) => updateValue(name, e.target.checked)}
+              onChange={e => updateValue(name, e.target.checked)}
             />
             <span>
               {definition[name].error && (
@@ -62,7 +62,7 @@ export const FormInputs = ({ definition, updateValue }) => {
           </React.Fragment>
         );
       case "select":
-        const opts = definition[name].options.map((opt) => {
+        const opts = definition[name].options.map(opt => {
           return (
             <option key={opt.val} value={opt.val}>
               {opt.name}
@@ -77,7 +77,7 @@ export const FormInputs = ({ definition, updateValue }) => {
               name={name}
               value={definition[name].val}
               disabled={definition[name].disabled}
-              onChange={(e) => updateValue(name, e.target.value)}
+              onChange={e => updateValue(name, e.target.value)}
             >
               {opts}
             </select>
@@ -93,12 +93,16 @@ export const FormInputs = ({ definition, updateValue }) => {
           <input
             key={name}
             type="text"
-            id={`hpot56-${name}-${Math.random().toString(36).substring(7)}`}
-            name={`hpot56-${name}-${Math.random().toString(36).substring(7)}`}
+            id={`hpot56-${name}-${Math.random()
+              .toString(36)
+              .substring(7)}`}
+            name={`hpot56-${name}-${Math.random()
+              .toString(36)
+              .substring(7)}`}
             autoComplete="new-password"
             className="honeypot-field"
             disabled={definition[name].disabled}
-            onChange={(e) => updateValue(name, e.target.value)}
+            onChange={e => updateValue(name, e.target.value)}
           />
         );
       default:

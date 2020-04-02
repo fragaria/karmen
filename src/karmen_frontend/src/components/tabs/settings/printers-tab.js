@@ -12,7 +12,7 @@ const Printers = ({
   onPrinterDelete,
   networkInterface,
   onNetworkInterfaceChange,
-  scanNetwork,
+  scanNetwork
 }) => {
   return (
     <>

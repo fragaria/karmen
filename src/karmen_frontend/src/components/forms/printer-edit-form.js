@@ -12,34 +12,34 @@ class PrinterEditForm extends React.Component {
         name: "Printer's name",
         val: "",
         type: "text",
-        required: true,
+        required: true
       },
       filament_type: {
         name: "Loaded filament type (PLA, PETG, ABS...)",
         val: "",
-        type: "text",
+        type: "text"
       },
       filament_color: {
         name: "Loaded filament color",
         val: "",
-        type: "text",
+        type: "text"
       },
       bed_type: {
         name: "Bed type",
         val: "",
-        type: "text",
+        type: "text"
       },
       tool0_diameter: {
         name: "Tool diameter",
         val: "",
-        type: "text",
+        type: "text"
       },
       note: {
         name: "Note",
         val: "",
-        type: "textarea",
-      },
-    },
+        type: "textarea"
+      }
+    }
   };
 
   constructor(props) {
@@ -56,29 +56,29 @@ class PrinterEditForm extends React.Component {
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
             val: defaults.name,
-            error: null,
+            error: null
           }),
           filament_type: Object.assign({}, form.filament_type, {
             val: defaults.filament_type,
-            error: null,
+            error: null
           }),
           filament_color: Object.assign({}, form.filament_color, {
             val: defaults.filament_color,
-            error: null,
+            error: null
           }),
           bed_type: Object.assign({}, form.bed_type, {
             val: defaults.bed_type,
-            error: null,
+            error: null
           }),
           tool0_diameter: Object.assign({}, form.tool0_diameter, {
             val: defaults.tool0_diameter,
-            error: null,
+            error: null
           }),
           note: Object.assign({}, form.note, {
             val: defaults.note,
-            error: null,
-          }),
-        }),
+            error: null
+          })
+        })
       });
     }
   }
@@ -87,7 +87,7 @@ class PrinterEditForm extends React.Component {
     e.preventDefault();
     this.setState({
       messageOk: false,
-      message: null,
+      message: null
     });
     const { form } = this.state;
     const { onSubmit } = this.props;
@@ -95,9 +95,9 @@ class PrinterEditForm extends React.Component {
       this.setState({
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
-            error: "Name cannot be empty",
-          }),
-        }),
+            error: "Name cannot be empty"
+          })
+        })
       });
       return;
     }
@@ -105,9 +105,9 @@ class PrinterEditForm extends React.Component {
       this.setState({
         form: Object.assign({}, form, {
           tool0_diameter: Object.assign({}, form.tool0_diameter, {
-            error: "Tool diameter has to be a decimal number",
-          }),
-        }),
+            error: "Tool diameter has to be a decimal number"
+          })
+        })
       });
       return;
     }
@@ -118,19 +118,19 @@ class PrinterEditForm extends React.Component {
         filament_color: form.filament_color.val,
         bed_type: form.bed_type.val,
         tool0_diameter: form.tool0_diameter.val,
-        note: form.note.val,
-      },
+        note: form.note.val
+      }
     })
-      .then((result) => {
+      .then(result => {
         this.setState({
           message: result.message,
-          messageOk: result.ok,
+          messageOk: result.ok
         });
       })
-      .catch((e) => {
+      .catch(e => {
         this.setState({
           message: e,
-          messageOk: false,
+          messageOk: false
         });
       });
   }
@@ -142,8 +142,8 @@ class PrinterEditForm extends React.Component {
       const { form } = this.state;
       this.setState({
         form: Object.assign({}, form, {
-          [name]: Object.assign({}, form[name], { val: value, error: null }),
-        }),
+          [name]: Object.assign({}, form[name], { val: value, error: null })
+        })
       });
     };
     return (

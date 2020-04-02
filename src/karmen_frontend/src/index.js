@@ -14,7 +14,7 @@ import "./assets/styles.scss";
 if (window.env.SENTRY_DSN) {
   Sentry.init({
     dsn: window.env.SENTRY_DSN,
-    release: `karmen@${process.env.REACT_APP_GIT_REV}`,
+    release: `karmen@${process.env.REACT_APP_GIT_REV}`
   });
 }
 

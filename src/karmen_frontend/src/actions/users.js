@@ -2,9 +2,9 @@ import { createThunkedAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
-export const clearUsers = () => (dispatch) => {
+export const clearUsers = () => dispatch => {
   return dispatch({
-    type: "USERS_CLEAR",
+    type: "USERS_CLEAR"
   });
 };
 

@@ -12,7 +12,7 @@ import {
   clearGcodesPages,
   deleteGcode,
   addPrintJob,
-  loadPrinters,
+  loadPrinters
 } from "../../actions";
 import formatters from "../../services/formatters";
 
@@ -36,7 +36,7 @@ const DeleteModal = ({ modal, path, display, onRowDelete }) => {
           <div className="cta-box text-center">
             <button
               className="btn"
-              onClick={(e) => {
+              onClick={e => {
                 onRowDelete().then(() => {
                   modal.closeModal(e);
                 });
@@ -67,17 +67,17 @@ const GcodeTableRow = ({
   printGcode,
   onSchedulePrint,
   availablePrinters,
-  onRowDelete,
+  onRowDelete
 }) => {
   const deleteModal = useMyModal();
   const printModal = usePrintGcodeModal({
     gcode: {
       uuid,
-      analysis,
+      analysis
     },
     printGcode,
     onSchedulePrint,
-    availablePrinters,
+    availablePrinters
   });
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
@@ -104,7 +104,7 @@ const GcodeTableRow = ({
         <span className="dropdown-title">{display}</span>
         <button
           className="dropdown-item"
-          onClick={(e) => {
+          onClick={e => {
             setCtaListExpanded(false);
             printModal.openModal(e);
           }}
@@ -115,7 +115,7 @@ const GcodeTableRow = ({
 
         <button
           className="dropdown-item text-secondary"
-          onClick={(e) => {
+          onClick={e => {
             setCtaListExpanded(false);
             deleteModal.openModal(e);
           }}
@@ -138,7 +138,7 @@ const GcodeTableRow = ({
 
 class GcodeList extends React.Component {
   state = {
-    printedOn: [],
+    printedOn: []
   };
 
   componentDidMount() {
@@ -157,7 +157,7 @@ class GcodeList extends React.Component {
       loadGcodesPage,
       clearGcodesPages,
       deleteGcode,
-      printGcode,
+      printGcode
     } = this.props;
 
     return (
@@ -176,7 +176,7 @@ class GcodeList extends React.Component {
         </div>
 
         <Listing
-          rowFactory={(g) => {
+          rowFactory={g => {
             return (
               <GcodeTableRow
                 key={g.uuid}
@@ -184,11 +184,11 @@ class GcodeList extends React.Component {
                 {...g}
                 printGcode={printGcode}
                 onSchedulePrint={(gcodeUuid, printerUuid) => {
-                  return printGcode(gcodeUuid, printerUuid).then((r) => {
+                  return printGcode(gcodeUuid, printerUuid).then(r => {
                     if (r === 201) {
                       printedOn.push(printerUuid);
                       this.setState({
-                        printedOn: [].concat(printedOn),
+                        printedOn: [].concat(printedOn)
                       });
                     }
                     return r;
@@ -222,7 +222,7 @@ class GcodeList extends React.Component {
             "uploaded",
             "analysis",
             "user_uuid",
-            "username",
+            "username"
           ]}
         />
       </section>
@@ -231,15 +231,15 @@ class GcodeList extends React.Component {
 }
 
 export default connect(
-  (state) => ({
+  state => ({
     printersLoaded: state.printers.printersLoaded,
     gcodesList: state.gcodes.list,
     getAvailablePrinters: (without = []) =>
       state.printers.printers
-        .filter((p) => p.status && p.status.state === "Operational")
-        .filter((p) => p.client && p.client.connected)
-        .filter((p) => p.client && p.client.access_level === "unlocked")
-        .filter((p) => without.indexOf(p.uuid) === -1),
+        .filter(p => p.status && p.status.state === "Operational")
+        .filter(p => p.client && p.client.connected)
+        .filter(p => p.client && p.client.access_level === "unlocked")
+        .filter(p => without.indexOf(p.uuid) === -1)
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
@@ -248,7 +248,7 @@ export default connect(
           "job",
           "status",
           "webcam",
-          "lights",
+          "lights"
         ])
       ),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>
@@ -263,9 +263,9 @@ export default connect(
         )
       ),
     clearGcodesPages: () => dispatch(clearGcodesPages()),
-    deleteGcode: (uuid) =>
+    deleteGcode: uuid =>
       dispatch(deleteGcode(ownProps.match.params.orguuid, uuid)),
     printGcode: (uuid, printer) =>
-      dispatch(addPrintJob(ownProps.match.params.orguuid, uuid, printer)),
+      dispatch(addPrintJob(ownProps.match.params.orguuid, uuid, printer))
   })
 )(GcodeList);

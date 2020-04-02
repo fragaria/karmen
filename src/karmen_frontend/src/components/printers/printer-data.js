@@ -1,7 +1,7 @@
 import React from "react";
 import formatters from "../../services/formatters";
 
-export const ClientVersion = (printerObject) => {
+export const ClientVersion = printerObject => {
   if (printerObject) {
     const objectLength = Object.keys(printerObject).length;
     return Object.keys(printerObject).map((key, idx) => {
@@ -126,6 +126,18 @@ export const PrinterConnectionStatus = ({ printer }) => {
               <small>{ClientVersion(printer.client.version)}</small>
             </div>
           </dd>
+          {printer.client.pill_info != null ? (
+            <>
+              <dt className="term">Pill version:</dt>
+              <dd className="description">
+                {printer.client.pill_info.version_number}
+              </dd>
+              <dt className="term">Update available:</dt>
+              <dd className="description">
+                {printer.client.pill_info.update_available ? "Yes" : "No"}
+              </dd>
+            </>
+          ) : null}
         </>
       )}
       {!window.env.IS_CLOUD_INSTALL && (printer.hostname || printer.ip) && (
@@ -183,5 +195,5 @@ export default {
   PrinterProgress,
   PrinterProperties,
   ClientVersion,
-  PrinterConnectionStatus,
+  PrinterConnectionStatus
 };

@@ -17,9 +17,9 @@ class AddOrganization extends React.Component {
         val: "",
         type: "text",
         required: true,
-        error: null,
-      },
-    },
+        error: null
+      }
+    }
   };
 
   constructor(props) {
@@ -31,7 +31,7 @@ class AddOrganization extends React.Component {
     e.preventDefault();
     this.setState({
       message: null,
-      messageOk: false,
+      messageOk: false
     });
     const { form } = this.state;
     let hasErrors = false;
@@ -46,27 +46,27 @@ class AddOrganization extends React.Component {
     }
     if (hasErrors) {
       this.setState({
-        form: Object.assign({}, form),
+        form: Object.assign({}, form)
       });
       return;
     }
     const { createOrganization } = this.props;
     if (!hasErrors) {
-      return createOrganization(form.name.val).then((r) => {
+      return createOrganization(form.name.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
-              redirect: true,
+              redirect: true
             });
             break;
           case 409:
             this.setState({
-              message: "Organization with such name is already registered",
+              message: "Organization with such name is already registered"
             });
             break;
           default:
             this.setState({
-              message: "Cannot add organization, check server logs",
+              message: "Cannot add organization, check server logs"
             });
         }
       });
@@ -91,9 +91,9 @@ class AddOrganization extends React.Component {
                     form: Object.assign({}, form, {
                       [name]: Object.assign({}, form[name], {
                         val: value,
-                        error: null,
-                      }),
-                    }),
+                        error: null
+                      })
+                    })
                   });
                 }}
               />
@@ -129,6 +129,6 @@ class AddOrganization extends React.Component {
   }
 }
 
-export default connect(null, (dispatch) => ({
-  createOrganization: (name) => dispatch(addOrganization(name)),
+export default connect(null, dispatch => ({
+  createOrganization: name => dispatch(addOrganization(name))
 }))(AddOrganization);

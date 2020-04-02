@@ -9,6 +9,6 @@ const OrgRoleBasedGateway = ({ requiredRole, userRole, children }) => {
   return <Redirect to="/" />;
 };
 
-export default connect((state) => ({
-  userRole: state.me.activeOrganization.role,
+export default connect(state => ({
+  userRole: state.me.activeOrganization.role
 }))(OrgRoleBasedGateway);

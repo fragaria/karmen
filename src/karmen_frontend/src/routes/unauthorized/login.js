@@ -7,7 +7,7 @@ const Login = ({ userState, doAuthenticate }) => {
   return <LoginForm doAuthenticate={doAuthenticate} />;
 };
 
-export default connect(undefined, (dispatch) => ({
+export default connect(undefined, dispatch => ({
   doAuthenticate: (username, password) =>
-    dispatch(authenticate(username, password)),
+    dispatch(authenticate(username, password))
 }))(Login);

@@ -9,7 +9,7 @@ export const loadAndQueuePrinter = (orguuid, uuid, fields) => (
   dispatch,
   getState
 ) => {
-  return dispatch(loadPrinter(orguuid, uuid, fields)).then((result) => {
+  return dispatch(loadPrinter(orguuid, uuid, fields)).then(result => {
     const { printers } = getState();
     if (result && result.data && printers.checkQueue) {
       const existing = printers.checkQueue[uuid];
@@ -39,7 +39,7 @@ export const loadAndQueuePrinters = (orguuid, fields) => (
   dispatch,
   getState
 ) => {
-  return dispatch(loadPrinters(orguuid, fields)).then((result) => {
+  return dispatch(loadPrinters(orguuid, fields)).then(result => {
     const { printers } = getState();
     // eslint-disable-next-line no-unused-vars
     if (result && result.data && result.data.items) {
@@ -73,8 +73,8 @@ export const setPrinterPollInterval = (orguuid, uuid, interval) => {
     type: "PRINTERS_POLL_INTERVAL_SET",
     payload: {
       uuid,
-      interval,
-    },
+      interval
+    }
   };
 };
 
@@ -85,8 +85,8 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
   setTimeout(() => {
     const { printers } = getState();
     const previousInfo =
-      printers.printers && printers.printers.find((p) => p.uuid === uuid);
-    dispatch(loadPrinter(orguuid, uuid, fields)).then((result) => {
+      printers.printers && printers.printers.find(p => p.uuid === uuid);
+    dispatch(loadPrinter(orguuid, uuid, fields)).then(result => {
       const { printers } = getState();
       if (printers.checkQueue[uuid] > 0) {
         let interval = printers.checkQueue[uuid];
@@ -177,8 +177,8 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
       payload: {
         uuid,
         interval: interval > 0 ? interval : 60 * 1000,
-        timeout,
-      },
+        timeout
+      }
     });
   }
   if (webcams.queue[uuid].interval > interval) {
@@ -193,8 +193,8 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
       payload: {
         uuid,
         interval: interval > 0 ? interval : 60 * 1000,
-        timeout,
-      },
+        timeout
+      }
     });
   }
   if (webcams.queue[uuid].interval !== interval) {
@@ -202,8 +202,8 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
       type: "WEBCAMS_INTERVAL_SET",
       payload: {
         uuid,
-        interval: interval > 0 ? interval : 60 * 1000,
-      },
+        interval: interval > 0 ? interval : 60 * 1000
+      }
     });
   }
 };
@@ -213,14 +213,14 @@ export const getWebcamSnapshot = createThunkedAction(
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       let { printers } = getState();
-      const printer = printers.printers.find((p) => p.uuid === uuid);
+      const printer = printers.printers.find(p => p.uuid === uuid);
       if (!printer || !printer.webcam || !printer.webcam.url) {
         return Promise.reject();
       }
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch
-      )(printer.webcam.url).then((r) => {
+      )(printer.webcam.url).then(r => {
         if (r.status === 202 || r.status === 200) {
           let { webcams } = getState();
           if (webcams.queue && webcams.queue[uuid]) {
@@ -235,8 +235,8 @@ export const getWebcamSnapshot = createThunkedAction(
                 payload: {
                   uuid,
                   interval: timeoutData.interval,
-                  timeout,
-                },
+                  timeout
+                }
               });
             }
           }
@@ -246,7 +246,7 @@ export const getWebcamSnapshot = createThunkedAction(
           uuid,
           status: r.status,
           ...r.data,
-          successCodes: [200],
+          successCodes: [200]
         };
       });
     });

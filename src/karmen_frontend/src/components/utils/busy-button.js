@@ -3,7 +3,7 @@ import React from "react";
 class BusyButton extends React.Component {
   state = {
     isDisabled: undefined,
-    isBusy: false,
+    isBusy: false
   };
 
   componentDidMount() {
@@ -21,7 +21,7 @@ class BusyButton extends React.Component {
       type,
       children,
       busyChildren,
-      disabled,
+      disabled
     } = this.props;
     const { isBusy, isDisabled } = this.state;
     let isInDisabledState = isDisabled !== undefined ? isDisabled : disabled;
@@ -37,12 +37,12 @@ class BusyButton extends React.Component {
         className={classNames}
         type={type || "button"}
         disabled={isInDisabledState}
-        onClick={(e) => {
+        onClick={e => {
           this.setState({
             isBusy: true,
-            isDisabled: true,
+            isDisabled: true
           });
-          return Promise.resolve(onClick(e)).then((r) => {
+          return Promise.resolve(onClick(e)).then(r => {
             this._ismounted &&
               this.setState({ isBusy: false, isDisabled: undefined });
             return r;

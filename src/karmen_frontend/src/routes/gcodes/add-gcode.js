@@ -11,7 +11,7 @@ class AddGcode extends React.Component {
     path: "",
     message: null,
     messageOk: false,
-    gcodeUuid: null,
+    gcodeUuid: null
   };
 
   constructor(props) {
@@ -25,15 +25,15 @@ class AddGcode extends React.Component {
     const { toUpload, path } = this.state;
     if (!toUpload) {
       this.setState({
-        message: "You need to select a file!",
+        message: "You need to select a file!"
       });
       return;
     }
     this.setState({
       message: null,
-      messageOk: false,
+      messageOk: false
     });
-    return uploadGcode(path, toUpload).then((r) => {
+    return uploadGcode(path, toUpload).then(r => {
       switch (r.status) {
         case 201:
           this.setState({
@@ -41,17 +41,17 @@ class AddGcode extends React.Component {
             path: "",
             messageOk: true,
             redirect: true,
-            gcodeUuid: r.data.uuid,
+            gcodeUuid: r.data.uuid
           });
           break;
         case 415:
           this.setState({
-            message: "This does not seem like a G-Code file.",
+            message: "This does not seem like a G-Code file."
           });
           break;
         default:
           this.setState({
-            message: "Cannot upload G-Code, check server logs",
+            message: "Cannot upload G-Code, check server logs"
           });
       }
     });
@@ -76,9 +76,9 @@ class AddGcode extends React.Component {
                 <input
                   type="file"
                   name="file"
-                  onChange={(e) => {
+                  onChange={e => {
                     this.setState({
-                      toUpload: e.target.files[0],
+                      toUpload: e.target.files[0]
                     });
                   }}
                 />
@@ -90,9 +90,9 @@ class AddGcode extends React.Component {
                   id="path"
                   name="path"
                   value={path}
-                  onChange={(e) =>
+                  onChange={e =>
                     this.setState({
-                      path: e.target.value,
+                      path: e.target.value
                     })
                   }
                 />
@@ -136,5 +136,5 @@ class AddGcode extends React.Component {
 
 export default connect(null, (dispatch, ownProps) => ({
   uploadGcode: (path, toUpload) =>
-    dispatch(uploadGcode(ownProps.match.params.orguuid, path, toUpload)),
+    dispatch(uploadGcode(ownProps.match.params.orguuid, path, toUpload))
 }))(AddGcode);

@@ -25,19 +25,19 @@ class AddApiToken extends React.Component {
           val: "",
           type: "text",
           required: true,
-          error: null,
+          error: null
         },
         orguuid: {
           name: "Organization",
           val: activeOrganization.uuid,
           type: "select",
           required: true,
-          options: Object.values(organizations).map((o) => ({
+          options: Object.values(organizations).map(o => ({
             val: o.uuid,
-            name: o.name,
-          })),
-        },
-      },
+            name: o.name
+          }))
+        }
+      }
     };
 
     this.addApiToken = this.addApiToken.bind(this);
@@ -50,7 +50,7 @@ class AddApiToken extends React.Component {
       message: null,
       messageOk: false,
       showToken: false,
-      createdToken: null,
+      createdToken: null
     });
     const { form } = this.state;
     let hasErrors = false;
@@ -60,21 +60,21 @@ class AddApiToken extends React.Component {
       updatedForm.name.error = "Name is required";
     }
     this.setState({
-      form: updatedForm,
+      form: updatedForm
     });
     const { addApiToken } = this.props;
     if (!hasErrors) {
-      return addApiToken(form.orguuid.val, form.name.val).then((r) => {
+      return addApiToken(form.orguuid.val, form.name.val).then(r => {
         switch (r.status) {
           case 201:
             this.setState({
               showToken: true,
-              createdToken: r.data.access_token,
+              createdToken: r.data.access_token
             });
             break;
           default:
             this.setState({
-              message: "Cannot add API token, check server logs",
+              message: "Cannot add API token, check server logs"
             });
         }
       });
@@ -83,11 +83,11 @@ class AddApiToken extends React.Component {
 
   tokenCopied() {
     this.setState({
-      copyButtonReady: false,
+      copyButtonReady: false
     });
     setTimeout(() => {
       this.setState({
-        copyButtonReady: true,
+        copyButtonReady: true
       });
     }, 600);
   }
@@ -100,7 +100,7 @@ class AddApiToken extends React.Component {
       form,
       showToken,
       createdToken,
-      copyButtonReady,
+      copyButtonReady
     } = this.state;
     if (redirect) {
       return <Redirect to="/users/me/tab-api-tokens" />;
@@ -161,12 +161,12 @@ class AddApiToken extends React.Component {
                   <button
                     className="btn btn-plain"
                     type="submit"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       this.setState({
                         showToken: false,
                         createdToken: null,
-                        redirect: true,
+                        redirect: true
                       });
                     }}
                   >
@@ -190,9 +190,9 @@ class AddApiToken extends React.Component {
                       form: Object.assign({}, form, {
                         [name]: Object.assign({}, form[name], {
                           val: value,
-                          error: null,
-                        }),
-                      }),
+                          error: null
+                        })
+                      })
                     });
                   }}
                 />
@@ -219,11 +219,11 @@ class AddApiToken extends React.Component {
 }
 
 export default connect(
-  (state) => ({
+  state => ({
     activeOrganization: state.me.activeOrganization,
-    organizations: state.me.organizations,
+    organizations: state.me.organizations
   }),
-  (dispatch) => ({
-    addApiToken: (orguuid, name) => dispatch(addUserApiToken(orguuid, name)),
+  dispatch => ({
+    addApiToken: (orguuid, name) => dispatch(addUserApiToken(orguuid, name))
   })
 )(AddApiToken);

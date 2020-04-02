@@ -6,7 +6,7 @@ import formatters from "../../services/formatters";
 class Wrapper extends React.Component {
   state = {
     itemsLoaded: false,
-    currentPageIndex: 0,
+    currentPageIndex: 0
   };
   constructor(props) {
     super(props);
@@ -45,7 +45,7 @@ class Wrapper extends React.Component {
       this.state.currentPageIndex - 1 >= 0
     ) {
       this.setState({
-        currentPageIndex: this.state.currentPageIndex - 1,
+        currentPageIndex: this.state.currentPageIndex - 1
       });
       return;
     }
@@ -59,7 +59,7 @@ class Wrapper extends React.Component {
           const uri = new URL(formatters.absoluteUrl(prevPage.data.next));
           nextStartWith = uri.searchParams.get("start_with");
         }
-        if (!itemList.pages.find((p) => p.startWith === nextStartWith)) {
+        if (!itemList.pages.find(p => p.startWith === nextStartWith)) {
           this.reloadTableWith(
             nextStartWith,
             itemList.orderBy,
@@ -75,12 +75,12 @@ class Wrapper extends React.Component {
   reloadTableWith(nextStart, orderBy, filter, limit, currentPageIndex) {
     const { loadPage, fields } = this.props;
     this.setState({
-      itemsLoaded: false,
+      itemsLoaded: false
     });
     return loadPage(nextStart, orderBy, filter, limit, fields).then(() => {
       this.setState({
         currentPageIndex: currentPageIndex || 0,
-        itemsLoaded: true,
+        itemsLoaded: true
       });
     });
   }
@@ -105,7 +105,7 @@ class Wrapper extends React.Component {
                   id="filter"
                   minLength={3}
                   debounceTimeout={300}
-                  onChange={(e) => {
+                  onChange={e => {
                     const { itemList } = this.props;
                     this.reloadTableWith(
                       null,
@@ -122,7 +122,7 @@ class Wrapper extends React.Component {
           <Sorting
             active={itemList.orderBy || ""}
             columns={sortByColumns || []}
-            onChange={(column) => {
+            onChange={column => {
               return () => {
                 const { itemList } = this.props;
                 return this.reloadTableWith(
@@ -151,7 +151,7 @@ class Wrapper extends React.Component {
                   className="btn btn-sm"
                   onClick={() => {
                     this.setState({
-                      currentPageIndex: Math.max(0, currentPageIndex - 1),
+                      currentPageIndex: Math.max(0, currentPageIndex - 1)
                     });
                   }}
                 >
@@ -166,7 +166,7 @@ class Wrapper extends React.Component {
                   className="btn btn-sm"
                   onClick={() => {
                     this.setState({
-                      currentPageIndex: currentPageIndex + 1,
+                      currentPageIndex: currentPageIndex + 1
                     });
                   }}
                 >

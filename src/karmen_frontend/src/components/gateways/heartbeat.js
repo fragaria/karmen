@@ -7,7 +7,7 @@ const NULL_EVENT = { currentTarget: true };
 
 const OfflineModal = ({ shouldShow }) => {
   const { Modal, openModal, isOpen, closeModal } = useMyModal({
-    hideClose: true,
+    hideClose: true
   });
   if (shouldShow && !isOpen) {
     openModal(NULL_EVENT);
@@ -32,7 +32,7 @@ const OfflineModal = ({ shouldShow }) => {
 
 const UpgradeModal = ({ shouldShow }) => {
   const { Modal, openModal, isOpen, closeModal } = useMyModal({
-    hideClose: true,
+    hideClose: true
   });
   if (shouldShow && !isOpen) {
     openModal(NULL_EVENT);
@@ -75,7 +75,7 @@ class Heartbeat extends React.Component {
     isOnline: true,
     shouldUpgrade: false,
     apiVersion: undefined,
-    timer: null,
+    timer: null
   };
 
   constructor(props) {
@@ -84,7 +84,7 @@ class Heartbeat extends React.Component {
   }
 
   checkBackend() {
-    heartbeat().then((result) => {
+    heartbeat().then(result => {
       const { apiVersion } = this.state;
       this.setState({
         isOnline: result !== -1,
@@ -95,7 +95,7 @@ class Heartbeat extends React.Component {
             [result, "@dev", `v${result}`].indexOf(
               process.env.REACT_APP_GIT_REV
             ) === -1),
-        timer: setTimeout(this.checkBackend, 5000),
+        timer: setTimeout(this.checkBackend, 5000)
       });
     });
   }

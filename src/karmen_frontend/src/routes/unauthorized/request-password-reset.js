@@ -15,16 +15,16 @@ class PasswordReset extends React.Component {
       resetForm: {
         email: {
           type: "honeypot",
-          val: "",
+          val: ""
         },
         realemail: {
           name: "Your e-mail",
           val: "",
           type: "text",
           required: true,
-          autocomplete: "email",
-        },
-      },
+          autocomplete: "email"
+        }
+      }
     };
     this.reset = this.reset.bind(this);
   }
@@ -53,25 +53,25 @@ class PasswordReset extends React.Component {
 
     if (hasError) {
       this.setState({
-        resetForm: Object.assign({}, resetForm),
+        resetForm: Object.assign({}, resetForm)
       });
       return;
     }
 
-    return doRequest(resetForm.realemail.val).then((r) => {
+    return doRequest(resetForm.realemail.val).then(r => {
       if (r.status !== 202) {
         this.setState({
           messageOk: false,
           message:
-            "We cannot send you the e-mail at this moment, try again later, please.",
+            "We cannot send you the e-mail at this moment, try again later, please."
         });
       } else {
         this.setState({
           message: "An e-mail will be sent shortly. Check your Inbox, please",
           messageOk: true,
           resetForm: Object.assign({}, resetForm, {
-            realemail: Object.assign({}, resetForm.realemail, { val: "" }),
-          }),
+            realemail: Object.assign({}, resetForm.realemail, { val: "" })
+          })
         });
       }
     });
@@ -85,9 +85,9 @@ class PasswordReset extends React.Component {
         resetForm: Object.assign({}, resetForm, {
           [name]: Object.assign({}, resetForm[name], {
             val: value,
-            error: null,
-          }),
-        }),
+            error: null
+          })
+        })
       });
     };
 
@@ -135,6 +135,6 @@ class PasswordReset extends React.Component {
   }
 }
 
-export default connect(undefined, (dispatch) => ({
-  doRequest: (email) => dispatch(requestPasswordReset(email)),
+export default connect(undefined, dispatch => ({
+  doRequest: email => dispatch(requestPasswordReset(email))
 }))(PasswordReset);

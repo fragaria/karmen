@@ -18,6 +18,6 @@ const OrganizationRoot = ({ organizations, match }) => {
   );
 };
 
-export default connect((state) => ({
-  organizations: state.me.organizations,
+export default connect(state => ({
+  organizations: state.me.organizations
 }))(OrganizationRoot);

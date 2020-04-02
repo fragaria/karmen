@@ -36,6 +36,7 @@ def make_printer_response(printer, fields):
             if printer_inst.client_info.api_key
             else None,
             "plugins": printer_inst.client_info.plugins,
+            "pill_info": printer_inst.client_info.pill_info,
         },
         "printer_props": printer_inst.get_printer_props(),
         "name": printer_inst.name,

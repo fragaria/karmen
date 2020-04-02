@@ -13,21 +13,21 @@ class ChangePasswordForm extends React.Component {
           name: "Password",
           val: "",
           type: "password",
-          required: true,
+          required: true
         },
         new_password: {
           name: "New password",
           val: "",
           type: "password",
-          required: true,
+          required: true
         },
         new_password_confirmation: {
           name: "New password confirmation",
           val: "",
           type: "password",
-          required: true,
-        },
-      },
+          required: true
+        }
+      }
     };
     this.changePwd = this.changePwd.bind(this);
   }
@@ -59,7 +59,7 @@ class ChangePasswordForm extends React.Component {
     }
     if (hasError) {
       this.setState({
-        changePwdForm: Object.assign({}, changePwdForm),
+        changePwdForm: Object.assign({}, changePwdForm)
       });
       return;
     }
@@ -67,7 +67,7 @@ class ChangePasswordForm extends React.Component {
       changePwdForm.password.val,
       changePwdForm.new_password.val,
       changePwdForm.new_password_confirmation.val
-    ).then((r) => {
+    ).then(r => {
       if (r.status !== 200) {
         this.setState({
           messageOk: false,
@@ -75,14 +75,14 @@ class ChangePasswordForm extends React.Component {
           changePwdForm: Object.assign({}, changePwdForm, {
             password: Object.assign({}, changePwdForm.password, { val: "" }),
             new_password: Object.assign({}, changePwdForm.new_password, {
-              val: "",
+              val: ""
             }),
             new_password_confirmation: Object.assign(
               {},
               changePwdForm.new_password_confirmation,
               { val: "" }
-            ),
-          }),
+            )
+          })
         });
       } else {
         this.setState({
@@ -90,17 +90,17 @@ class ChangePasswordForm extends React.Component {
           messageOk: true,
           changePwdForm: Object.assign({}, changePwdForm, {
             password: Object.assign({}, changePwdForm.password, {
-              val: "",
+              val: ""
             }),
             new_password: Object.assign({}, changePwdForm.new_password, {
-              val: "",
+              val: ""
             }),
             new_password_confirmation: Object.assign(
               {},
               changePwdForm.new_password_confirmation,
               { val: "" }
-            ),
-          }),
+            )
+          })
         });
       }
     });
@@ -116,9 +116,9 @@ class ChangePasswordForm extends React.Component {
         changePwdForm: Object.assign({}, changePwdForm, {
           [name]: Object.assign({}, changePwdForm[name], {
             val: value,
-            error: null,
-          }),
-        }),
+            error: null
+          })
+        })
       });
     };
     return (

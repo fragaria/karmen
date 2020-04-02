@@ -57,6 +57,7 @@ class Octoprint(PrinterClient):
             api_key=client_props.get("api_key", None),
             webcam=client_props.get("webcam", None),
             plugins=client_props.get("plugins", []),
+            pill_info=client_props.get("pill_info", None),
         )
         self.http_session = requests.Session()
         self.http_session.verify = app.config.get("NETWORK_VERIFY_CERTIFICATES", True)
@@ -92,14 +93,14 @@ class Octoprint(PrinterClient):
         self.client_info.api_key = api_key
         self.http_session.headers.update({"X-Api-Key": api_key})
 
-    def _http_get(self, path, force=False):
+    def _http_get(self, path, force=False, timeout=None):
         if not self.client_info.connected and not force:
             return None
         uri = "%s%s" % (self.network_base, path)
+        if timeout is None:
+            app.config.get("NETWORK_TIMEOUT", 10)
         try:
-            req = self.http_session.get(
-                uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
-            )
+            req = self.http_session.get(uri, timeout=timeout)
             if req is None:
                 self.client_info.connected = False
             elif bool(self.client_info.api_key):
@@ -112,7 +113,10 @@ class Octoprint(PrinterClient):
             requests.exceptions.ConnectionError,
             requests.exceptions.ReadTimeout,
         ) as e:
-            app.logger.debug("Cannot call %s because %s" % (uri, e))
+            app.logger.debug(
+                "Cannot call %s because %s %s"
+                % (uri, app.config.get("NETWORK_TIMEOUT", 10), e)
+            )
             self.client_info.connected = False
             return None
 
@@ -324,6 +328,38 @@ class Octoprint(PrinterClient):
             plugins=plugin_list,
             webcam=self.webcam(),
         )
+
+    def karmen_sniff(self):
+        """
+        Check, wheter the printer is karmen pill or not, and gather data
+        :return:
+        """
+
+        r = self._http_get("/karmen-pill-info/get", timeout=30)
+        if not r:
+            app.logger.debug(
+                "%s is not reachable with karmen sniff: %s"
+                % (self.network_base, str(r))
+            )
+            return False
+        if r.status_code == 404:
+            app.logger.debug(
+                "/karmen-pill-info/ was not found on %s - propably not karmen pill"
+                % (self.network_base)
+            )
+            self.client_info.pill_info = None
+        if r.status_code == 200:
+
+            karmen_version = r.json().get("system", {}).get("karmen_version")
+
+            pill_info = {
+                "karmen_version": karmen_version,
+                "version_number": karmen_version.split(" ")[-1]
+                if karmen_version
+                else None,
+                "update_available": None,
+            }
+            self.client_info.pill_info = pill_info
 
     def status(self):
         return self.uncached_status(force=False)

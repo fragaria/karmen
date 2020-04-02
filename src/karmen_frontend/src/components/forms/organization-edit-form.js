@@ -12,9 +12,9 @@ class OrganizationEditForm extends React.Component {
         name: "Organization's name",
         val: "",
         type: "text",
-        required: true,
-      },
-    },
+        required: true
+      }
+    }
   };
 
   constructor(props) {
@@ -31,9 +31,9 @@ class OrganizationEditForm extends React.Component {
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
             val: defaults.name,
-            error: null,
-          }),
-        }),
+            error: null
+          })
+        })
       });
     }
   }
@@ -42,7 +42,7 @@ class OrganizationEditForm extends React.Component {
     e.preventDefault();
     this.setState({
       messageOk: false,
-      message: null,
+      message: null
     });
     const { form } = this.state;
     const { onSubmit } = this.props;
@@ -50,25 +50,25 @@ class OrganizationEditForm extends React.Component {
       this.setState({
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
-            error: "Name cannot be empty",
-          }),
-        }),
+            error: "Name cannot be empty"
+          })
+        })
       });
       return;
     }
     onSubmit({
-      name: form.name.val,
+      name: form.name.val
     })
-      .then((result) => {
+      .then(result => {
         this.setState({
           message: result.message,
-          messageOk: result.ok,
+          messageOk: result.ok
         });
       })
-      .catch((e) => {
+      .catch(e => {
         this.setState({
           message: e.toString(),
-          messageOk: false,
+          messageOk: false
         });
       });
   }
@@ -80,8 +80,8 @@ class OrganizationEditForm extends React.Component {
       const { form } = this.state;
       this.setState({
         form: Object.assign({}, form, {
-          [name]: Object.assign({}, form[name], { val: value, error: null }),
-        }),
+          [name]: Object.assign({}, form[name], { val: value, error: null })
+        })
       });
     };
     return (

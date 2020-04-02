@@ -5,25 +5,25 @@ export const enqueueTask = (orgUuid, task, opts) => {
     uri: `/organizations/${orgUuid}/tasks`,
     data: {
       task,
-      ...opts,
+      ...opts
     },
-    parseResponse: false,
+    parseResponse: false
   });
 };
 
 export const heartbeat = () => {
   return performRequest({
     uri: "/",
-    method: "GET",
+    method: "GET"
   })
-    .then((response) => {
+    .then(response => {
       if (response.status !== 200) {
         console.error(`Heartbeat fail: ${response.status}`);
         return -1;
       }
       return response.data.version;
     })
-    .catch((e) => {
+    .catch(e => {
       console.error(`Heartbeat fail: ${e}`);
       return -1;
     });

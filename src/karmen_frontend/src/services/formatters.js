@@ -10,11 +10,11 @@ export const bytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-export const datetime = (isotime) => {
+export const datetime = isotime => {
   return dayjs(isotime).format("YYYY-MM-DD HH:mm:ss");
 };
 
-export const timespan = (seconds) => {
+export const timespan = seconds => {
   if (seconds === null || seconds === undefined) {
     return "N/A";
   }
@@ -42,7 +42,7 @@ export const timespan = (seconds) => {
   return result;
 };
 
-export const bool = (value) => {
+export const bool = value => {
   if (value === true || ["true", "1", 1, "yes", "on"].indexOf(value) > -1) {
     return true;
   } else if (
@@ -54,7 +54,7 @@ export const bool = (value) => {
   return value;
 };
 
-export const absoluteUrl = (partial) => {
+export const absoluteUrl = partial => {
   if (partial.indexOf("http://") > -1 || partial.indexOf("https://") > -1) {
     return partial;
   }
@@ -72,5 +72,5 @@ export default {
   datetime,
   timespan,
   bool,
-  absoluteUrl,
+  absoluteUrl
 };

@@ -8,7 +8,7 @@ const AppRoot = ({
   preferredOrganization,
   activeOrganization,
   organizations,
-  switchOrganization,
+  switchOrganization
 }) => {
   // This should be catching a situation right after login
   if (
@@ -28,12 +28,12 @@ const AppRoot = ({
 };
 
 export default connect(
-  (state) => ({
+  state => ({
     preferredOrganization: state.preferences.activeOrganizationUuid,
     organizations: state.me.organizations,
-    activeOrganization: state.me.activeOrganization,
+    activeOrganization: state.me.activeOrganization
   }),
-  (dispatch) => ({
-    switchOrganization: (uuid) => dispatch(switchOrganization(uuid)),
+  dispatch => ({
+    switchOrganization: uuid => dispatch(switchOrganization(uuid))
   })
 )(AppRoot);

@@ -5,7 +5,7 @@ import { setWebcamRefreshInterval } from "../../actions";
 
 const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
-    background: "rgba(0, 0, 0, .95)",
+    background: "rgba(0, 0, 0, .95)"
   });
 
   return (
@@ -14,7 +14,7 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
         className={classNames.join(" ")}
         alt={`Current state from ${url}`}
         src={source}
-        onClick={(e) => {
+        onClick={e => {
           if (allowFullscreen !== false) {
             openModal(e);
           }
@@ -57,7 +57,7 @@ export class WebcamStream extends React.Component {
       flipHorizontal,
       flipVertical,
       rotate90,
-      allowFullscreen,
+      allowFullscreen
     } = this.props;
     let klass = [];
     if (flipHorizontal) {
@@ -92,19 +92,17 @@ export class WebcamStream extends React.Component {
 
 export default connect(
   (state, ownProps) => ({
-    printer: state.printers.printers.find(
-      (p) => p.uuid === ownProps.printerUuid
-    ),
-    image: state.webcams.images[ownProps.printerUuid],
+    printer: state.printers.printers.find(p => p.uuid === ownProps.printerUuid),
+    image: state.webcams.images[ownProps.printerUuid]
   }),
   (dispatch, ownProps) => ({
-    setWebcamRefreshInterval: (interval) =>
+    setWebcamRefreshInterval: interval =>
       dispatch(
         setWebcamRefreshInterval(
           ownProps.orgUuid,
           ownProps.printerUuid,
           interval
         )
-      ),
+      )
   })
 )(WebcamStream);

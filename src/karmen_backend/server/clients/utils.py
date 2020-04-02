@@ -18,6 +18,7 @@ class PrinterClientInfo:
         api_key=None,
         webcam=None,
         plugins=None,
+        pill_info=None,
     ):
         self.version = version
         self.connected = connected
@@ -25,6 +26,7 @@ class PrinterClientInfo:
         self.api_key = api_key
         self.webcam = webcam or {"message": "Webcam not accessible"}
         self.plugins = plugins or []
+        self.pill_info = pill_info
 
 
 class PrinterClient(abc.ABC):

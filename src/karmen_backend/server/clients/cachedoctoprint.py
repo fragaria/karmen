@@ -78,11 +78,11 @@ class CachedOctoprint(Octoprint):
         uri = "%s%s" % (self.network_base, path)
         redisinstance.delete(self.get_cache_key(uri))
 
-    def _perform_http_get(self, uri):
+    def _perform_http_get(self, uri, timeout=None):
+        if timeout is None:
+            app.config.get("NETWORK_TIMEOUT", 10)
         try:
-            req = self.http_session.get(
-                uri, timeout=app.config.get("NETWORK_TIMEOUT", 10)
-            )
+            req = self.http_session.get(uri, timeout=timeout)
             if req is None:
                 self.client_info.connected = False
             elif bool(self.client_info.api_key):
@@ -99,7 +99,7 @@ class CachedOctoprint(Octoprint):
             self.client_info.connected = False
             return None
 
-    def _http_get(self, path, force=False):
+    def _http_get(self, path, force=False, timeout=None):
         """
         Use the force if you want to skip caching and local state checking altogether
         """
@@ -116,7 +116,7 @@ class CachedOctoprint(Octoprint):
             future_wrap = CachedOctoprint.running_requests.get(cache_key)
             future_wrap["users"] = future_wrap["users"] + 1
         else:
-            future = self.executor.submit(self._perform_http_get, uri)
+            future = self.executor.submit(self._perform_http_get, uri, timeout)
             CachedOctoprint.running_requests[cache_key] = {"future": future, "users": 1}
 
         fut = CachedOctoprint.running_requests.get(cache_key)

@@ -5,8 +5,8 @@ export const printGcode = (orgUuid, uuid, printer) => {
     uri: `/organizations/${orgUuid}/printjobs`,
     data: {
       gcode: uuid,
-      printer,
-    },
+      printer
+    }
   });
 };
 
@@ -35,7 +35,7 @@ export const getPrinterJobs = (
       orderBy,
       filter: printerFilter,
       limit,
-      printer: printerFilter,
-    },
+      printer: printerFilter
+    }
   });
 };

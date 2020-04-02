@@ -15,16 +15,16 @@ class Register extends React.Component {
       registerForm: {
         email: {
           type: "honeypot",
-          val: "",
+          val: ""
         },
         realemail: {
           name: "Your e-mail",
           val: "",
           type: "text",
           required: true,
-          autocomplete: "email",
-        },
-      },
+          autocomplete: "email"
+        }
+      }
     };
     this.register = this.register.bind(this);
   }
@@ -54,25 +54,25 @@ class Register extends React.Component {
 
     if (hasError) {
       this.setState({
-        registerForm: Object.assign({}, registerForm),
+        registerForm: Object.assign({}, registerForm)
       });
       return;
     }
 
-    return doRegister(registerForm.realemail.val).then((r) => {
+    return doRegister(registerForm.realemail.val).then(r => {
       if (r.status !== 202) {
         this.setState({
           messageOk: false,
           message:
-            "We cannot send you the e-mail at this moment, try again later, please.",
+            "We cannot send you the e-mail at this moment, try again later, please."
         });
       } else {
         this.setState({
           message: "An e-mail will be sent shortly. Check your Inbox, please",
           messageOk: true,
           registerForm: Object.assign({}, registerForm, {
-            realemail: Object.assign({}, registerForm.realemail, { val: "" }),
-          }),
+            realemail: Object.assign({}, registerForm.realemail, { val: "" })
+          })
         });
       }
     });
@@ -86,9 +86,9 @@ class Register extends React.Component {
         registerForm: Object.assign({}, registerForm, {
           [name]: Object.assign({}, registerForm[name], {
             val: value,
-            error: null,
-          }),
-        }),
+            error: null
+          })
+        })
       });
     };
 
@@ -136,6 +136,6 @@ class Register extends React.Component {
   }
 }
 
-export default connect(undefined, (dispatch) => ({
-  doRegister: (email) => dispatch(register(email)),
+export default connect(undefined, dispatch => ({
+  doRegister: email => dispatch(register(email))
 }))(Register);

@@ -7,7 +7,7 @@ const CatchLoginTokenFromUrl = ({
   history,
   location,
   userState,
-  loadUserFromToken,
+  loadUserFromToken
 }) => {
   const params = new URLSearchParams(location.search);
   if (params.has("token")) {
@@ -16,7 +16,7 @@ const CatchLoginTokenFromUrl = ({
     }
     params.delete("token");
     history.push({
-      search: `?${params.toString()}`,
+      search: `?${params.toString()}`
     });
   }
   return <></>;
@@ -24,12 +24,11 @@ const CatchLoginTokenFromUrl = ({
 
 export default withRouter(
   connect(
-    (state) => ({
-      userState: state.me.currentState,
+    state => ({
+      userState: state.me.currentState
     }),
-    (dispatch) => ({
-      loadUserFromToken: (accessToken) =>
-        dispatch(loadUserFromToken(accessToken)),
+    dispatch => ({
+      loadUserFromToken: accessToken => dispatch(loadUserFromToken(accessToken))
     })
   )(CatchLoginTokenFromUrl)
 );

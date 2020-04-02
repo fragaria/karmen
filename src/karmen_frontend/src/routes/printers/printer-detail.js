@@ -16,7 +16,7 @@ import PrinterState from "../../components/printers/printer-state";
 import PrinterAuthorizationForm from "../../components/printers/printer-authorization-form";
 import {
   PrinterProperties,
-  PrinterProgress,
+  PrinterProgress
 } from "../../components/printers/printer-data";
 
 import {
@@ -31,14 +31,14 @@ import {
   changeFanState,
   changeMotorsState,
   extrude,
-  setTemperature,
+  setTemperature
 } from "../../actions";
 
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,
   accessLevel,
   state,
-  modal,
+  modal
 }) => {
   const printerTargetState =
     accessLevel === "unlocked" &&
@@ -62,7 +62,7 @@ const ChangeConnectionModal = ({
             <BusyButton
               className="btn btn-sm"
               type="submit"
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault();
                 onPrinterConnectionChanged(printerTargetState);
                 modal.closeModal();
@@ -97,7 +97,7 @@ const PrinterDetail = ({
   changeFanState,
   changeMotorsState,
   extrude,
-  setTemperature,
+  setTemperature
 }) => {
   const changeConnectionModal = useMyModal();
   const [printerLoaded, setPrinterLoaded] = useState(false);
@@ -149,7 +149,7 @@ const PrinterDetail = ({
                   <button
                     className="btn btn-xs"
                     type="submit"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       changeConnectionModal.openModal(e);
                     }}
@@ -160,7 +160,7 @@ const PrinterDetail = ({
                   <button
                     className="btn btn-xs"
                     type="submit"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       changeConnectionModal.openModal(e);
                     }}
@@ -213,7 +213,7 @@ const PrinterDetail = ({
             />
             <Route
               path={`${match.url}/tab-jobs`}
-              render={(props) => (
+              render={props => (
                 <JobsTab
                   orguuid={match.params.orguuid}
                   jobList={jobList}
@@ -224,7 +224,7 @@ const PrinterDetail = ({
             />
             <Route
               path={`${match.url}/tab-controls`}
-              render={(props) => (
+              render={props => (
                 <ControlsTab
                   printer={printer}
                   available={
@@ -249,7 +249,7 @@ const PrinterDetail = ({
             />
             <Route
               path={`${match.url}/tab-connection`}
-              render={(props) => <ConnectionTab printer={printer} />}
+              render={props => <ConnectionTab printer={printer} />}
             />
           </Switch>
         </div>
@@ -261,15 +261,15 @@ const PrinterDetail = ({
 export default connect(
   (state, ownProps) => ({
     printer: state.printers.printers.find(
-      (p) => p.uuid === ownProps.match.params.uuid
+      p => p.uuid === ownProps.match.params.uuid
     ),
     role: state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
       orderBy: "-started",
       filter: null,
-      limit: 10,
-    },
+      limit: 10
+    }
   }),
   (dispatch, ownProps) => ({
     loadPrinter: () =>
@@ -280,7 +280,7 @@ export default connect(
           ["job", "status", "webcam", "lights"]
         )
       ),
-    changeCurrentJobState: (action) =>
+    changeCurrentJobState: action =>
       dispatch(
         changeCurrentJob(
           ownProps.match.params.orguuid,
@@ -288,7 +288,7 @@ export default connect(
           action
         )
       ),
-    patchPrinter: (data) =>
+    patchPrinter: data =>
       dispatch(
         patchPrinter(
           ownProps.match.params.orguuid,
@@ -296,7 +296,7 @@ export default connect(
           data
         )
       ),
-    setPrinterConnection: (state) =>
+    setPrinterConnection: state =>
       dispatch(
         setPrinterConnection(
           ownProps.match.params.orguuid,
@@ -335,7 +335,7 @@ export default connect(
           opts
         )
       ),
-    changeFanState: (targetState) =>
+    changeFanState: targetState =>
       dispatch(
         changeFanState(
           ownProps.match.params.orguuid,
@@ -343,7 +343,7 @@ export default connect(
           targetState
         )
       ),
-    changeMotorsState: (targetState) =>
+    changeMotorsState: targetState =>
       dispatch(
         changeMotorsState(
           ownProps.match.params.orguuid,
@@ -351,7 +351,7 @@ export default connect(
           targetState
         )
       ),
-    extrude: (amount) =>
+    extrude: amount =>
       dispatch(
         extrude(
           ownProps.match.params.orguuid,
@@ -367,6 +367,6 @@ export default connect(
           partName,
           target
         )
-      ),
+      )
   })
 )(PrinterDetail);
