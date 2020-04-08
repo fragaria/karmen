@@ -3,6 +3,7 @@ import re
 from urllib import parse as urlparse
 import requests
 
+from server.database import props_storage
 from server import app
 from server.clients.utils import (
     PrinterClientAccessLevel,
@@ -351,13 +352,25 @@ class Octoprint(PrinterClient):
         if r.status_code == 200:
 
             karmen_version = r.json().get("system", {}).get("karmen_version")
+            build_version = karmen_version.split(" ")[-1] if karmen_version else None
+            update_avail = None
+            if build_version:
+                versions = props_storage.get_props("versions")
+                if versions is not None:
+                    match = False
+                    for v in versions:
+                        if match:
+                            update_avail = v
+                            break
+                        if build_version == v:
+                            match = True
 
             pill_info = {
                 "karmen_version": karmen_version,
                 "version_number": karmen_version.split(" ")[-1]
                 if karmen_version
                 else None,
-                "update_available": None,
+                "update_available": update_avail,
             }
             self.client_info.pill_info = pill_info
 

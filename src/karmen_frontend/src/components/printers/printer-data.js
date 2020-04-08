@@ -134,7 +134,9 @@ export const PrinterConnectionStatus = ({ printer }) => {
               </dd>
               <dt className="term">Update available:</dt>
               <dd className="description">
-                {printer.client.pill_info.update_available ? "Yes" : "No"}
+                {printer.client.pill_info.update_available
+                  ? `Yes (${printer.client.pill_info.update_available})`
+                  : "No"}
               </dd>
             </>
           ) : null}

@@ -37,7 +37,6 @@ def check_printer(printer_uuid):
         network_clients.update_network_client(
             uuid=raw_client["uuid"], hostname=printer.hostname, ip=printer.ip,
         )
-    print(printer.client_info.pill_info)
     printers.update_printer(
         uuid=printer.uuid,
         client_props={

@@ -76,7 +76,7 @@ CONFIG_KEYS = {
     "SECRET_KEY": None,
     "SOCKET_API_URL": "http://pathset-your-proxy-api-address-here/%s",
     "UPLOAD_FOLDER": "/tmp/karmen-files",
-    "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}}}',
+    "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}, "get_versions_list": {"task":"get_versions_list", "schedule": 300.0}}}',
 }
 
 for key, defaults in CONFIG_KEYS.items():

@@ -169,6 +169,11 @@ const PrinterDetail = ({
                   </button>
                 ))}
             </div>
+            {printer.client.pill_info
+              ? printer.client.pill_info.update_available
+                ? "There is update available for your pill"
+                : ""
+              : ""}
             <ChangeConnectionModal
               modal={changeConnectionModal}
               accessLevel={
