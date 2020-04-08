@@ -60,6 +60,11 @@ http {
       proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header   X-Forwarded-Host $server_name;
       proxy_pass http://karmen_backend/$1$is_args$args;
+      # timeout to prevent long post on API to return 504 Gateway Timeout.
+      # Occures when sending large GCode over slow network.
+      # This can be removed when the scheduling becomes async.
+      proxy_read_timeout    600s;
+
     }
 
     location / {
