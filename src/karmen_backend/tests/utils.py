@@ -10,6 +10,13 @@ class Response:
         return self.contents
 
 
+class SimpleResponse:
+    def __init__(self, status_code, contents=""):
+        self.status_code = status_code
+        self.text = contents
+
+
+
 # Keep these in sync with db/test-users.sql and db/migrations/V0013__organizations.sql and db/test-organizations.sql
 UUID_ADMIN = "6480fa7d-ce18-4ae2-818b-f1d200050806"
 UUID_USER = "77315957-8ebb-4a44-976c-758dbf28bb9f"

@@ -3,27 +3,37 @@ import unittest
 from server.database import props_storage
 
 
-class GetUser(unittest.TestCase):
+class PropsStorage(unittest.TestCase):
     def test_unsaved_Storage(self):
-        p = props_storage.get_props("testpro")
+        p = props_storage.get_props("test_nonexisting_prop")
         self.assertEqual(p, None)
 
-    def test_save_json(self):
-        data = {"some variable": 123456, "maybe array": [1, 6, 5, 8, 4, 1, 6, 58], "and some other": {"Stuff": "stuff"}}
-        props_storage.set_props("prop", data)
+    def test_save_props(self):
+        mock_data = {
+            "here we just make up some data": "so we can later check they survived",
+            "it would be really bad if this array": [1, 2, 3, 4, 5, 6],
+            "20": "changed during the storing",
+            "and some other": {
+                "Stuff": ["stuff", "eptstein didn't killed himself", "stuff"]
+            },
+        }
+        props_storage.set_props("prop", mock_data)
         p = props_storage.get_props("prop")
-        self.assertEqual(p, data)
+        print(p)
+        print(mock_data)
+
+        self.assertEqual(p, mock_data)
 
     def test_delete(self):
-        propName = "deletedProp"
+        prop_name = "deletedProp"
         data = [1, 2, 3]
-        p = props_storage.get_props(propName)
+        p = props_storage.get_props(prop_name)
         self.assertEqual(p, None)
-        props_storage.set_props(propName, data)
+        props_storage.set_props(prop_name, data)
 
-        p = props_storage.get_props(propName)
+        p = props_storage.get_props(prop_name)
         self.assertEqual(p, data)
-        props_storage.delete_props(propName)
+        props_storage.delete_props(prop_name)
 
-        p = props_storage.get_props(propName)
+        p = props_storage.get_props(prop_name)
         self.assertEqual(p, None)
