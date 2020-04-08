@@ -14,7 +14,7 @@
     ]
   },
   "dependencies": {
-    "@sentry/browser": "^5.14.2",
+    "@sentry/browser": "^5.15.4",
     "core-js": "^3.4.5",
     "dayjs": "^1.8.23",
     "downloadjs": "^1.4.7",
@@ -35,18 +35,18 @@
   },
   "description": "A common interface for multiple 3D printers",
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.2.0",
-    "@testing-library/react": "^10.0.1",
-    "@testing-library/user-event": "^10.0.0",
+    "@testing-library/jest-dom": "^5.4.0",
+    "@testing-library/react": "^10.0.2",
+    "@testing-library/user-event": "^10.0.1",
     "chance": "^1.1.4",
-    "cypress": "^4.2.0",
+    "cypress": "^4.3.0",
     "eslint": "^6.3.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-cypress": "^2.10.3",
     "eslint-plugin-prettier": "^3.1.2",
     "node-sass": "^4.12.0",
     "plumber-sass": "^0.7.7",
-    "prettier": "^2.0.2"
+    "prettier": "^2.0.4"
   },
   "eslintConfig": {
     "extends": [
