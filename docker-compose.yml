@@ -95,6 +95,16 @@ services:
       - default
     links:
       - postgres
+  dummymailserver:
+    image: fragaria/karmen-dummymailserver
+    build: ./src/dummymailserver
+    environment:
+      SERVICE_PORT: 8088
+    networks:
+      - backend
+      - default
+    ports:
+      - 127.0.0.1:8088:8088
   fake_printer1:
     image: fragaria/karmen-fakeprinter
     build: ./src/fakeprinter

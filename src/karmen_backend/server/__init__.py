@@ -62,7 +62,7 @@ CONFIG_KEYS = {
     "CLOUD_MODE": False,
     "FRONTEND_BASE_URL": "http://set-your-karmen-address-here.com",
     "MAILER": "dummy",
-    "MAILER_CONFIG": "{}",
+    "MAILER_CONFIG": '{"url": "http://dummymailserver:8088/mail"}',
     "MAILER_FROM": "Karmen <karmen@karmen.local>",
     "NETWORK_TIMEOUT": 2,
     "NETWORK_VERIFY_CERTIFICATES": True,
@@ -80,7 +80,13 @@ CONFIG_KEYS = {
 }
 
 for key, defaults in CONFIG_KEYS.items():
-    app.config[key] = normalize_val(os.environ.get(key, defaults))
+    if key in ["MAILER_CONFIG", "CELERY_CONFIG"]:
+        passed = os.environ.get(key)
+        app.config[key] = normalize_val(
+            defaults if passed is None or passed == "" else passed
+        )
+    else:
+        app.config[key] = normalize_val(os.environ.get(key, defaults))
 
 # This is hardcoded for 1GB
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024

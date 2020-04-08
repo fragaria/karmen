@@ -3,15 +3,19 @@ import { persistUserProfile, dropUserProfile } from "../services/backend";
 
 const getUserDataFromApiResponse = (data, activeOrganization) => {
   return {
-    currentState: data.force_pwd_change ? "pwd-change-required" : "logged-in",
+    currentState:
+      data.currentState ||
+      (data.force_pwd_change ? "pwd-change-required" : "logged-in"),
     identity: data.identity,
     username: data.username,
     email: data.email,
-    systemRole: data.system_role,
-    hasFreshToken: data.fresh,
-    accessTokenExpiresOn: data.expires_on ? dayjs(data.expires_on) : undefined,
+    systemRole: data.system_role || data.systemRole,
+    hasFreshToken: data.fresh || data.hasFreshToken,
+    accessTokenExpiresOn:
+      data.accessTokenExpiresOn ||
+      (data.expires_on ? dayjs(data.expires_on) : undefined),
     organizations: data.organizations,
-    activeOrganization: activeOrganization,
+    activeOrganization: data.activeOrganization || activeOrganization,
   };
 };
 

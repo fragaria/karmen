@@ -67,10 +67,9 @@ matrix:
     before_script:
     - cd src/karmen_frontend && npm ci
     script:
-    - docker-compose up --build -d
+    - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
     - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
     - npm run test:cypress
-    - kill $(jobs -p) || true
   - stage: build docker
     if: tag IS present
     language: generic

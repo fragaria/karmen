@@ -10,6 +10,17 @@ Python based REST API backend for Karmen.
 The preferred way is to use the composed docker package as [described in here](../../README.md).
 You don't have to bother with setup of database and other services.
 
+## Contributing
+
+Before commiting, format the code. This can be done from pipenv shell. Pipenv is described below.
+ 
+```sh
+cd src/karmen_backend
+pipenv shell
+make format
+```
+ 
+
 ### Testing
 
 There are two options:
@@ -17,7 +28,7 @@ There are two options:
 1. docker - just run `make test-isolated`
 2. `pipenv`
     - You need `pipenv`, `python3-dev`, `libpq-dev`, `postgresql-client` dependencies
-    - Run `make test` or `make test-watch`
+    - Run `make test` or `make test-watch` from `pipenv shell`
 
 ### Docker
 
