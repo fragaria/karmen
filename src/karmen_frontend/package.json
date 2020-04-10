@@ -16,7 +16,7 @@
   "dependencies": {
     "@sentry/browser": "^5.15.4", 
     "core-js": "^3.4.5", 
-    "dayjs": "^1.8.23", 
+    "dayjs": "^1.8.24", 
     "downloadjs": "^1.4.7", 
     "js-cookie": "^2.2.1", 
     "jwt-decode": "^2.2.0", 
