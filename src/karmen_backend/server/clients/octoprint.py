@@ -121,12 +121,22 @@ class Octoprint(PrinterClient):
             self.client_info.connected = False
             return None
 
-    def _http_post(self, path, data=None, files=None, json=None, force=False):
+    def _http_post(
+        self,
+        path,
+        data=None,
+        files=None,
+        json=None,
+        force=False,
+        headers={},
+        timeout=None,
+    ):
         if not self.client_info.connected and not force:
             return None
+        if timeout is None:
+            int(app.config.get("NETWORK_TIMEOUT", 10)) * 100
         uri = "%s%s" % (self.network_base, path)
         try:
-            headers = {}
             if self.client_info.api_key:
                 headers.update({"X-Api-Key": self.client_info.api_key})
             # Because requests session shares the connection pool, timeout actually
@@ -138,7 +148,7 @@ class Octoprint(PrinterClient):
                 files=files,
                 json=json,
                 headers=headers,
-                timeout=int(app.config.get("NETWORK_TIMEOUT", 10)) * 100,
+                timeout=timeout,
                 verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
             )
             if req is None:
@@ -365,12 +375,48 @@ class Octoprint(PrinterClient):
                         if build_version == v:
                             match = True
 
+            update_status = r.json().get("system", {}).get("update_status")
+            app.logger.debug(update_status)
+            app.logger.debug(r.json())
+            if update_status:
+                if update_status == "downloading":
+                    # we have to call for status to refresh wizard indicators
+                    r = self._http_post(
+                        "/update-system",
+                        timeout=30,
+                        force=True,
+                        data='{"action": "download-status"}',
+                        headers={"Content-Type": "application/json"},
+                    )
+                    if r and r.text == "DONE":
+                        update_status = "downloaded"
+                if update_status == "downloaded":
+                    # start update if it is downloaded
+                    r = self._http_post(
+                        "/update-system",
+                        timeout=30,
+                        force=True,
+                        data='{"action": "update-start"}',
+                        headers={"Content-Type": "application/json"},
+                    )
+                if update_status == "updating":
+                    r = self._http_post(
+                        "/update-system",
+                        timeout=30,
+                        force=True,
+                        data='{"action": "update-status"}',
+                        headers={"Content-Type": "application/json"},
+                    )
+                if update_status == "done":
+                    pass
+
             pill_info = {
                 "karmen_version": karmen_version,
                 "version_number": karmen_version.split(" ")[-1]
                 if karmen_version
                 else None,
                 "update_available": update_avail,
+                "update_status": update_status,
             }
             self.client_info.pill_info = pill_info
 
@@ -591,3 +637,18 @@ class Octoprint(PrinterClient):
         if not request or request.status_code != 204:
             return False
         return True
+
+    def start_update(self):
+        r = self._http_post(
+            "/update-system",
+            force=True,
+            data='{"action": "update-start"}',
+            headers={"Content-Type": "application/json"},
+        )
+        app.logger.debug(r)
+        app.logger.debug(r.text)
+        print(r, r.text)
+        if r and r.json()["status"] == "OK":
+            self.client_info.pill_info["upadate_status"] = "downloading"
+            return True
+        return False
