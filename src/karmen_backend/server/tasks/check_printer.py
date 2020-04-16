@@ -25,7 +25,7 @@ def check_printer(printer_uuid):
             printer.hostname = hostname
             printer.update_network_base()
     now = datetime.now()
-    if now.minute % 15 == 0 and printer.client_info.connected:
+    if now.minute % 15 and printer.client_info.connected:
         printer.sniff()
         printer.karmen_sniff()
     else:

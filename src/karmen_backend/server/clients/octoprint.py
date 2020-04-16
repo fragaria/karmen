@@ -3,7 +3,7 @@ import re
 from urllib import parse as urlparse
 import requests
 
-from server.database import props_storage
+from server.database import props_storage, printers
 from server import app
 from server.clients.utils import (
     PrinterClientAccessLevel,
@@ -358,7 +358,7 @@ class Octoprint(PrinterClient):
                 "/karmen-pill-info/ was not found on %s - propably not karmen pill"
                 % (self.network_base)
             )
-            self.client_info.pill_info = None
+            # self.client_info.pill_info = None
         if r.status_code == 200:
 
             karmen_version = r.json().get("system", {}).get("karmen_version")
@@ -408,7 +408,12 @@ class Octoprint(PrinterClient):
                         headers={"Content-Type": "application/json"},
                     )
                 if update_status == "done":
-                    pass
+                    r = self._http_post(
+                        "/reboot",
+                        timeout=30,
+                        force=True,
+                        headers={"Content-Type": "application/json"},
+                    )
 
             pill_info = {
                 "karmen_version": karmen_version,
@@ -642,13 +647,26 @@ class Octoprint(PrinterClient):
         r = self._http_post(
             "/update-system",
             force=True,
-            data='{"action": "update-start"}',
+            data='{"action": "download-start"}',
             headers={"Content-Type": "application/json"},
         )
         app.logger.debug(r)
         app.logger.debug(r.text)
         print(r, r.text)
         if r and r.json()["status"] == "OK":
-            self.client_info.pill_info["upadate_status"] = "downloading"
+            self.client_info.pill_info["update_status"] = "downloading"
+            printer = self
+            printers.update_printer(
+                uuid=self.uuid,
+                client_props={
+                    "version": printer.client_info.version,
+                    "connected": printer.client_info.connected,
+                    "access_level": printer.client_info.access_level,
+                    "api_key": printer.client_info.api_key,
+                    "webcam": printer.client_info.webcam,
+                    "plugins": printer.client_info.plugins,
+                    "pill_info": printer.client_info.pill_info,
+                },
+            )
             return True
         return False

@@ -138,25 +138,35 @@ export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
                 {printer.client.pill_info.update_available ? (
                   <>
                     Yes ({printer.client.pill_info.update_available})
-                    <button
-                      className="btn btn-xs"
-                      type="submit"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        startUpdate();
-                      }}
-                    >
-                      Update
-                    </button>
+                    {printer.client.pill_info.update_status ? (
+                      ""
+                    ) : (
+                      <button
+                        className="btn btn-xs"
+                        type="submit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          startUpdate();
+                        }}
+                      >
+                        Update
+                      </button>
+                    )}
                   </>
                 ) : (
                   "No"
                 )}
               </dd>{" "}
-              <dt className="term">Update progress:</dt>
-              <dd className="description">
-                {printer.client.pill_info.update_status}
-              </dd>
+              {printer.client.pill_info.update_status ? (
+                <>
+                  <dt className="term">Update progress:</dt>
+                  <dd className="description">
+                    {printer.client.pill_info.update_status}
+                  </dd>
+                </>
+              ) : (
+                ""
+              )}
             </>
           ) : null}
         </>
