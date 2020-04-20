@@ -134,7 +134,7 @@ class Octoprint(PrinterClient):
         if not self.client_info.connected and not force:
             return None
         if timeout is None:
-            int(app.config.get("NETWORK_TIMEOUT", 10)) * 100
+            timeout = int(app.config.get("NETWORK_TIMEOUT", 10)) * 100
         uri = "%s%s" % (self.network_base, path)
         try:
             if self.client_info.api_key:
