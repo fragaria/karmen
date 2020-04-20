@@ -1,6 +1,5 @@
 import React from "react";
 import formatters from "../../services/formatters";
-import { startUpdate } from "../../actions/printers";
 
 export const ClientVersion = (printerObject) => {
   if (printerObject) {
