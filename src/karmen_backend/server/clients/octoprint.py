@@ -12,6 +12,8 @@ from server.clients.utils import (
     PrinterClientException,
 )
 
+import traceback
+
 
 class Octoprint(PrinterClient):
     __client_name__ = "octoprint"
@@ -128,9 +130,11 @@ class Octoprint(PrinterClient):
         files=None,
         json=None,
         force=False,
-        headers={},
+        headers=None,
         timeout=None,
     ):
+        if headers is None:
+            headers = {}
         if not self.client_info.connected and not force:
             return None
         if timeout is None:
