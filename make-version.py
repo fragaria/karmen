@@ -19,7 +19,7 @@ def update_json(version, pathname):
         data['version'] = version
         fp.seek(0)
         fp.truncate()
-        json.dump(data, fp, indent=2, sort_keys=True)
+        json.dump(data, fp, indent=2)
 
 def update_py(version, pathname):
     with open(pathname, 'r+') as fp:
