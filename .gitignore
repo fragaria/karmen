@@ -7,4 +7,4 @@ tmp
 .travis/karmen
 .travis/*.zip
 .idea
-
+.vscode
