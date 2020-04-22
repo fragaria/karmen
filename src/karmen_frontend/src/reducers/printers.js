@@ -164,7 +164,7 @@ export default (
         {},
         printers[origPrinterIndex],
         {
-          lights: newPrinter.data.status,
+          lights: action.payload.data.status,
         }
       );
       return Object.assign({}, state, {
