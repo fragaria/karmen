@@ -11,7 +11,7 @@ addons:
     - jq
 matrix:
   allow_failures:
-    - python: '3.8-dev'
+  - python: 3.8-dev
   include:
   - stage: test
     language: python
@@ -116,7 +116,7 @@ matrix:
     deploy:
       provider: releases
       api_key:
-        secure: fX5tzCz++RH9sPWynZku1RYCTCb+xTDEQb4Pq1dNFezK08hohr/nG9oNsk641xU3U0tNyTU05OlcfkDG6K7sl2Ri2dwFTGPV+ZlEHEvm8uAo01Of0XcHf2E6rX4L2wdWAkNrjReA2NTKORaUvzURuwABj+EVFYu61BfrFhWpe+mks/6FVQAbcc50q1EGcojgLwYqhjB1PwPMI0a9bfL3VGJ6akkjIcGy5h48CDo99T6ht5Wumrz2IukXV7wdxXblXkxcRdeYA1wfLJrmcO/BK1LAU2yrcZ6ySoLT77MR+xC8EXea6mRpQIEa3KuptHHgUssaeOHLC3d4mgad2Qf8Pv8FWp7JBciU40VWBRXbzk4JJPLN+/5OVJnrQ5qlLbepTSEEJZuT7Mup5NUILSq7dpt9oEkfPb4+rhpG5SwiwGye/8l868Pu8uAkxvat0BT6FXnDAIMFl4Lq1dybJesCdWbswZHrlL8YdRG0tg/ZE06TKNGlcRfHk7euZizD/VA/zE8c4iLWxx9F7xcCzml/hj4iRnSY7boBvU20AKXkrtc+c05kdx/W7Ny0hgAEoF+3aLngQgJLVZntm/TgLxpA+vyuqXH5fMZpPKUyncRUzDIdKCiSrd524KAWWaQspPXnEC0FXK9L0GDenhRnp11NFN7z5B5895+kPglC7+/yec8=
+        secure: dSIYgVccdzCl3jIBEYIbadFbzu1fY8ZhXd0F0sDMXUo+V8fDDZIPpSZnhBWdO0CT2HpUfq8IaqVhUlMfvtdt+r+76AQSTB4bteqfODBU4r4s9NPVQYdyRK7dgI3JAFw7JBgQ/adD1MdXbUbhQT9f1YMzPwPDHQuAKwa+8mgkjQyOF7ZRT1M8aSVGs14z13udpOSubQJHO38Flq8bBs4wEp+DjjCZeVDzezwrdUNVRbpPJniQcLiKIyKyMG63/T6K6Jnsv2hrUa6TDhtda94ikNlgQzwx3jhvQ5gLBmPI0CZ5JL0FjtiAm+HyD9/QSwPj9hpH/pgiPZBPNw/AN3r/jE9jJw2m+1X2rN1GlctKgNJfhfpnhlq/puxE9T0eXnh5jsP7jzcGogRjaGe82OfGZJ6y9ild0Ut+ppA06r7eFv2knA0OTp2rMXK6PdKDn2OfKjnqbGiGFNx+60thnddFsBoKgWrTkXZn6ttaxYd1AvhDrE8E5+oDLxs6qNuihVDdv8PO2AuLF3HsUGN37b4x4KJs+kBY4UKLGlpk/F4yxTEBe5KIuyAsSXOfWLYc4pg0UJH5zEfPi2f+bG++Rxh2Pm6ITrVvabZUtMSIx1LbZmDZ537c9bTpguJbE1RwUDUkDi3175xbN68EOeDraNv/wPv5iIfweCE8lEGervIbtaA=
       file: ./.travis/release.zip
       skip_cleanup: true
       prerelease: true
@@ -132,14 +132,13 @@ matrix:
     deploy:
       provider: releases
       api_key:
-        secure: fX5tzCz++RH9sPWynZku1RYCTCb+xTDEQb4Pq1dNFezK08hohr/nG9oNsk641xU3U0tNyTU05OlcfkDG6K7sl2Ri2dwFTGPV+ZlEHEvm8uAo01Of0XcHf2E6rX4L2wdWAkNrjReA2NTKORaUvzURuwABj+EVFYu61BfrFhWpe+mks/6FVQAbcc50q1EGcojgLwYqhjB1PwPMI0a9bfL3VGJ6akkjIcGy5h48CDo99T6ht5Wumrz2IukXV7wdxXblXkxcRdeYA1wfLJrmcO/BK1LAU2yrcZ6ySoLT77MR+xC8EXea6mRpQIEa3KuptHHgUssaeOHLC3d4mgad2Qf8Pv8FWp7JBciU40VWBRXbzk4JJPLN+/5OVJnrQ5qlLbepTSEEJZuT7Mup5NUILSq7dpt9oEkfPb4+rhpG5SwiwGye/8l868Pu8uAkxvat0BT6FXnDAIMFl4Lq1dybJesCdWbswZHrlL8YdRG0tg/ZE06TKNGlcRfHk7euZizD/VA/zE8c4iLWxx9F7xcCzml/hj4iRnSY7boBvU20AKXkrtc+c05kdx/W7Ny0hgAEoF+3aLngQgJLVZntm/TgLxpA+vyuqXH5fMZpPKUyncRUzDIdKCiSrd524KAWWaQspPXnEC0FXK9L0GDenhRnp11NFN7z5B5895+kPglC7+/yec8=
+        secure: dSIYgVccdzCl3jIBEYIbadFbzu1fY8ZhXd0F0sDMXUo+V8fDDZIPpSZnhBWdO0CT2HpUfq8IaqVhUlMfvtdt+r+76AQSTB4bteqfODBU4r4s9NPVQYdyRK7dgI3JAFw7JBgQ/adD1MdXbUbhQT9f1YMzPwPDHQuAKwa+8mgkjQyOF7ZRT1M8aSVGs14z13udpOSubQJHO38Flq8bBs4wEp+DjjCZeVDzezwrdUNVRbpPJniQcLiKIyKyMG63/T6K6Jnsv2hrUa6TDhtda94ikNlgQzwx3jhvQ5gLBmPI0CZ5JL0FjtiAm+HyD9/QSwPj9hpH/pgiPZBPNw/AN3r/jE9jJw2m+1X2rN1GlctKgNJfhfpnhlq/puxE9T0eXnh5jsP7jzcGogRjaGe82OfGZJ6y9ild0Ut+ppA06r7eFv2knA0OTp2rMXK6PdKDn2OfKjnqbGiGFNx+60thnddFsBoKgWrTkXZn6ttaxYd1AvhDrE8E5+oDLxs6qNuihVDdv8PO2AuLF3HsUGN37b4x4KJs+kBY4UKLGlpk/F4yxTEBe5KIuyAsSXOfWLYc4pg0UJH5zEfPi2f+bG++Rxh2Pm6ITrVvabZUtMSIx1LbZmDZ537c9bTpguJbE1RwUDUkDi3175xbN68EOeDraNv/wPv5iIfweCE8lEGervIbtaA=
       file: ./.travis/release.zip
       skip_cleanup: true
       on:
         repo: fragaria/karmen
         tags: true
         condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*$'
-
 env:
   global:
   - secure: OSoA7AOTIf0Ias9w/TkA+Rw55e/z+Gu1whBSsZp/ncwHmBJom3+uyF/Ry7Hu+7rHwkk29t6pXTvgfGar/BUWZ9FfJAiM+1ixrVaKpxkotJqNfcXDCSCBLznRBy5Odmqv+czMHvYAdLSIPL3p6fcsfy79u4ju1XM2ZluRMXQYycqk0xpe/tIw8KhhhKTZgnuWE57YhoC8m02lcuhkTCUylYsCxhabjghbxgUc4wXq76Tk1EDSjaCM9LMdqP4mUGuj0aYhAvX2v4JTOb55dS+UhlOPlmQ4ZahpopJKFz8HfYQCuaRZGP/L9ap9GLx/Q4BhFvz+7S+CjpJ0dS+i9IdJthufBmrRTcLObBTPF6DiTAXsqxRw2psf1W60+8zHLdzvxYAvAlLmTqR86+yCip83DyGNfnWKBWeJI+Jy309n/tJUxZmsxE4eFjv9oU5i4qRjZVZ7t5eO+evxTSKYuYCf8F7ALv1FA0wG0xq8x77ydrPn+pndSVa+xP3tX/ifqlmSMHr+jMivfqYhqptLTZAwxWKBK2mRc7Xh2TSvlcVNoahNiwOawQQjelOC+1v/5IVh925UVY3PiepuUlSlJc0Cf+Ee/oMxsTyAjd2V2baCgKfrtV28Du36QkLIyrEBU8GNd/KfdnfhBwLHXJEn/SoB8UpD3/BxfnZU6FwAUIYbUAI=
