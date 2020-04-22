@@ -14,6 +14,8 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+__version__ = "v0.9.0-rc8"
+
 
 # -- Project information -----------------------------------------------------
 
@@ -22,7 +24,7 @@ copyright = '2019, <a href="https://fragaria.cz">Fragaria s.r.o.</a>'
 author = 'Fragaria s.r.o.'
 
 # The full version, including alpha/beta/rc tags
-release = "0.9.0-rc7"
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
