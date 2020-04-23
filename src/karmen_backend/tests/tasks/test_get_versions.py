@@ -12,12 +12,13 @@ class GetVersionsList(unittest.TestCase):
         def mock_call(uri, **kwargs):
             return SimpleResponse(
                 200,
-                """# version number and file name are separated by one tab
-# this is important as the check version script is using split("\t") to break the line into version name and update filename
-# also, lines starting with # (without any whitespace before it) are skipped
-0.0.1\tsomeupdatesname.sh
-# here we just make something that could look like file returned from updates server
-0.1.0\tand-filename-updates-are-not-important-as-karmen-doesnt-care-about-them.sh
+                r"""# only lines not starting with # AND containing 2x :: are processed
+# all 3 parts are stripped for whitespace before processing via python's str.strip()
+
+0\.1\.[123](-alpha)? :: 0.2.0  :: https://karmen-updates.f1.f-app.it/pill/updates/v0.2.0.sh
+0\.0\.[12](-alpha)?  :: dev-fake-0.2.0 :: https://karmen-updates.f1.f-app.it/pill/updates/fake-just-for-developing.sh
+0\.2\.[01] :: 0.2.2 :: https://karmen-updates.f1.f-app.it/pill/updates/v0.2.2.img
+
 """,
             )
 
@@ -26,4 +27,14 @@ class GetVersionsList(unittest.TestCase):
             props_storage.get_props("version"), None
         )  # make sure we start with empty versions
         get_versions_list()
-        self.assertEqual(props_storage.get_props("versions"), ["0.0.1", "0.1.0"])
+        self.assertEqual(
+            props_storage.get_props("versions"),
+            [
+                {"pattern": r"""0\.1\.[123](-alpha)?""", "new_version_name": "0.2.0"},
+                {
+                    "pattern": r"""0\.0\.[12](-alpha)?""",
+                    "new_version_name": "dev-fake-0.2.0",
+                },
+                {"pattern": r"""0\.2\.[01]""", "new_version_name": "0.2.2"},
+            ],
+        )

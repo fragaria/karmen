@@ -371,13 +371,16 @@ class Octoprint(PrinterClient):
             if build_version:
                 versions = props_storage.get_props("versions")
                 if versions is not None:
-                    match = False
+
+                    def match(p, s):
+                        res = re.match(p, s, re.IGNORECASE)
+                        if not res:
+                            return False
+                        return res.group() == s
+
                     for v in versions:
-                        if match:
-                            update_avail = v
-                            break
-                        if build_version == v:
-                            match = True
+                        if match(v["pattern"], build_version):
+                            update_avail = v["new_version_name"]
 
             update_status = r.json().get("system", {}).get("update_status")
             app.logger.debug(update_status)
@@ -403,6 +406,7 @@ class Octoprint(PrinterClient):
                         data='{"action": "update-start"}',
                         headers={"Content-Type": "application/json"},
                     )
+
                 if update_status == "updating":
                     r = self._http_post(
                         "/update-system",
