@@ -144,21 +144,36 @@ class PrinterList extends React.Component {
             </Link>
           );
         });
+    const noPrinters = (
+      <>
+        <p>
+          Looks like you didn't add any printers yet. Click the button below to
+          get you started with Karmen.
+        </p>
+        <div className="cta-box text-center">
+          <Link to={`/${match.params.orguuid}/add-printer`} className="btn">
+            Add your first printer
+          </Link>
+        </div>
+      </>
+    );
 
     return (
       <>
         <div className="content printer-list">
           <div className="container">
             <h1 className="main-title">Printers</h1>
+            {printerElements.length === 0 && noPrinters}
           </div>
-
-          <div className={viewType === "grid" ? "list grid" : "list"}>
-            <SwitchView
-              viewType={viewType}
-              onViewTypeChange={setPrinterViewType}
-            />
-            <div className="list-items">{printerElements}</div>
-          </div>
+          {printerElements.length > 0 && (
+            <div className={viewType === "grid" ? "list grid" : "list"}>
+              <SwitchView
+                viewType={viewType}
+                onViewTypeChange={setPrinterViewType}
+              />
+              <div className="list-items">{printerElements}</div>
+            </div>
+          )}
         </div>
       </>
     );
