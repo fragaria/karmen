@@ -12,8 +12,6 @@ from server.clients.utils import (
     PrinterClientException,
 )
 
-import traceback
-
 
 class Octoprint(PrinterClient):
     __client_name__ = "octoprint"
@@ -350,22 +348,22 @@ class Octoprint(PrinterClient):
         :return:
         """
 
-        r = self._http_get("/karmen-pill-info/get", timeout=30)
-        if not r:
+        response = self._http_get("/karmen-pill-info/get", timeout=30)
+        if not response:
             app.logger.debug(
                 "%s is not reachable with karmen sniff: %s"
-                % (self.network_base, str(r))
+                % (self.network_base, str(response))
             )
             return False
-        if r.status_code == 404:
+        if response.status_code == 404:
             app.logger.debug(
                 "/karmen-pill-info/ was not found on %s - propably not karmen pill"
                 % (self.network_base)
             )
             # self.client_info.pill_info = None
-        if r.status_code == 200:
+        if response.status_code == 200:
 
-            karmen_version = r.json().get("system", {}).get("karmen_version")
+            karmen_version = response.json().get("system", {}).get("karmen_version")
             build_version = karmen_version.split(" ")[-1] if karmen_version else None
             update_avail = None
             if build_version:
@@ -382,24 +380,24 @@ class Octoprint(PrinterClient):
                         if match(v["pattern"], build_version):
                             update_avail = v["new_version_name"]
 
-            update_status = r.json().get("system", {}).get("update_status")
+            update_status = response.json().get("system", {}).get("update_status")
             app.logger.debug(update_status)
-            app.logger.debug(r.json())
+            app.logger.debug(response.json())
             if update_status:
                 if update_status == "downloading":
                     # we have to call for status to refresh wizard indicators
-                    r = self._http_post(
+                    response = self._http_post(
                         "/update-system",
                         timeout=30,
                         force=True,
                         data='{"action": "download-status"}',
                         headers={"Content-Type": "application/json"},
                     )
-                    if r and r.text == "DONE":
+                    if response and response.text == "DONE":
                         update_status = "downloaded"
                 if update_status == "downloaded":
                     # start update if it is downloaded
-                    r = self._http_post(
+                    response = self._http_post(
                         "/update-system",
                         timeout=30,
                         force=True,
@@ -408,7 +406,7 @@ class Octoprint(PrinterClient):
                     )
 
                 if update_status == "updating":
-                    r = self._http_post(
+                    response = self._http_post(
                         "/update-system",
                         timeout=30,
                         force=True,
@@ -416,7 +414,7 @@ class Octoprint(PrinterClient):
                         headers={"Content-Type": "application/json"},
                     )
                 if update_status == "done":
-                    r = self._http_post(
+                    response = self._http_post(
                         "/reboot",
                         timeout=30,
                         force=True,
@@ -652,16 +650,20 @@ class Octoprint(PrinterClient):
         return True
 
     def start_update(self):
-        r = self._http_post(
+        response = self._http_post(
             "/update-system",
             force=True,
             data='{"action": "download-start"}',
             headers={"Content-Type": "application/json"},
         )
-        app.logger.debug(r)
-        app.logger.debug(r.text)
-        print(r, r.text)
-        if r and r.json()["status"] == "OK":
+        app.logger.debug(response)
+        app.logger.debug(response.text)
+        print(response, response.text)
+        if (
+            response
+            and response.status_code == 200
+            and response.json()["status"] == "OK"
+        ):
             self.client_info.pill_info["update_status"] = "downloading"
             printer = self
             printers.update_printer(

@@ -655,22 +655,16 @@ def control_tool_temperature(org_uuid, uuid, part_name):
 @validate_org_access()
 @cross_origin()
 def start_pill_update(org_uuid, uuid):
-    data = request.json
     printer_inst = get_printer_inst(org_uuid, uuid)
 
-    if data["action"] == "start":
+    if printer_inst.client_info.pill_info is None:
+        return abort(make_response(jsonify(message="Can update only pill"), 400))
 
-        if printer_inst.client_info.pill_info is None:
-            return abort(make_response(jsonify(message="Can update only pill"), 400))
+    if not printer_inst.client_info.pill_info["update_available"]:
+        return abort(make_response(jsonify(message="Update is not available"), 400))
 
-        if not printer_inst.client_info.pill_info["update_available"]:
-            return abort(make_response(jsonify(message="Update is not available"), 400))
-
-        r = printer_inst.start_update()
-
-        if r:
-            return make_response("OK", 200)
-        else:
-            return make_response("NOK", 400)
+    r = printer_inst.start_update()
+    if r:
+        return make_response("OK", 200)
     else:
-        return abort(make_response("", 400))
+        return make_response("Unable to start update", 500)

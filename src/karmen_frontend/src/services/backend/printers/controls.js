@@ -107,9 +107,6 @@ export const startUpdate = (orgUuid, uuid) => {
     appendData: {
       uuid,
     },
-    data: {
-      action: "start",
-    },
     parseResponse: false,
   });
 };
