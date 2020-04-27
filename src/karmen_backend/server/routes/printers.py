@@ -664,6 +664,8 @@ def start_pill_update(org_uuid, uuid):
         return abort(make_response(jsonify(message="Update is not available for the device."), 400))
 
     r = printer_inst.start_update()
+    # FIXME: Error handling should be solved by standard Python error handling
+    # (raise, except, finally).
     if r:
         return make_response("OK", 200)
     else:
