@@ -80,19 +80,8 @@ class LoginForm extends React.Component {
     }
     return doAuthenticate(loginForm.username.val, loginForm.password.val).then(
       (r) => {
-        if (r.status !== 200) {
-          this._ismounted &&
-            this.setState({
-              messageOk: false,
-              message:
-                (r.data && r.data.message) ||
-                "Login unsuccessful, try again, please.",
-              loginForm: Object.assign({}, loginForm, {
-                password: Object.assign({}, loginForm.password, { val: "" }),
-              }),
-            });
-        } else {
-          this._ismounted &&
+        if (this._ismounted) {
+          if (r.status === 200) {
             this.setState({
               message: "",
               messageOk: true,
@@ -101,6 +90,27 @@ class LoginForm extends React.Component {
                 username: Object.assign({}, loginForm.username, { val: "" }),
               }),
             });
+            return;
+          }
+          if (r.status === 401) {
+            this.setState({
+              messageOk: false,
+              message: "Invalid email or password, try again, please.",
+              loginForm: Object.assign({}, loginForm, {
+                password: Object.assign({}, loginForm.password, { val: "" }),
+              }),
+            });
+            return;
+          }
+          this.setState({
+            messageOk: false,
+            message:
+              (r.data && r.data.message) ||
+              "Internal server problem, try again, please.",
+            loginForm: Object.assign({}, loginForm, {
+              password: Object.assign({}, loginForm.password, { val: "" }),
+            }),
+          });
         }
       }
     );
