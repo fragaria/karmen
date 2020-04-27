@@ -4,7 +4,6 @@
 
 # Karmen - monitor and manage your 3D printers
 
-[![Documentation Status](https://readthedocs.org/projects/karmen/badge/?version=latest)](https://karmen.readthedocs.io/en/latest/?badge=latest)
 [![Build status](https://api.travis-ci.com/fragaria/karmen.svg?branch=master)](https://travis-ci.com/fragaria/karmen)
 [![Gitter chat](https://badges.gitter.im/fragaria/karmen.png)](https://gitter.im/fragaria/karmen)
 
@@ -25,11 +24,11 @@ If you would like to take part in this project, hit us up on karmen@fragaria.cz
 or leave us a note on [Gitter](https://gitter.im/fragaria/karmen). You can read
 more in our [contributing rules](./CONTRIBUTING.md).
 
-If you are interested in a more in-depth documentation, go visit our [docsite](https://karmen.readthedocs.io).
+If you are interested in a more in-depth documentation, go visit our [docsite](https://docs.karmen.tech).
 
 ## Installation and usage
 
-Check our [documentation](https://karmen.readthedocs.io/en/latest/installation.html) for up to date instructions.
+Check our [documentation](https://docs.karmen.tech/#/on-premise) for up to date instructions.
 
 ## Development
 
