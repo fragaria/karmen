@@ -367,6 +367,7 @@ class Octoprint(PrinterClient):
             build_version = karmen_version.split(" ")[-1] if karmen_version else None
             update_avail = None
             if build_version:
+                # TODO: technický dluh, duplicitní kód s pillem, přesunout kontrou verzí na pill
                 versions = props_storage.get_props("versions")
                 if versions is not None:
 
