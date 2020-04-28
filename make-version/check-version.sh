@@ -8,6 +8,9 @@
 set -eu 
 set -o pipefail
 
+cd "$(dirname "`realpath $0`")"
+cd ..
+
 files_containing_version="
   src/karmen_frontend/package.json
   src/karmen_frontend/package-lock.json
