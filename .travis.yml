@@ -107,32 +107,40 @@ matrix:
     install: true
     script:
     - bash .travis/build-images-proxy.sh
+
+# deploy to GitHub releases
+#
+# versions ending on -something ("-" and some text) are considered prerelease
+# while versions without "-" character are considered stable
+
+  # PRE-RELEASE
   - stage: github release
-    if: tag IS present
     language: generic
     install: true
     script:
     - bash .travis/make-github-release.sh
     deploy:
+      prerelease: true
       provider: releases
       api_key:
-        secure: gFA34DqXsUi4Z3XMVjDPf3lG2A5+qo9b7mAMpIbdaQUhZmvM2V+8XYFw/tl372/emJVqopWTkkHY9cvsUuhNmvwVCQ4A6d9UDL3SxxNnUHmowGuRKJhX1tO6HNdzWSJRsCnlFbzqg/EwVoBRm3np8gyJG8Cvbw5kpMpDxCsfJMZUGdEM38RqCHqY1uMzDbqjgRI5RYEE4Pyt03p2ZHNgUsF3JJkx0GT3tni5bgKAK65p+A/Cy+TolBmMrVFcyTdTdDyOE5FYN9OFRS8iZADvrLJXukUwq5xgZbaY0aRJVtojA6cT1CdT6gSN1pLenQWAXxF4CE8lD6URgoGpaK/QKIyFXIy7QQDlH2ZoKwH2IHmuy/UtcFEad4mVuOF8/j/DjFDuW+OPO+EJ03hl4Bfy5F1gipiLvigtHoj7O7uoKqAqOjEj3lhnZNy9YNOxhbRcb1jfGPihho3h67N5leNjri8inTU6caj/K+5YhUSSYWryUUfqCnsWX7uto01mptiMlCBJpoNt9iG6qoRc9HzagebplNYJ684aYooqIUVcY7wlAW2KB4QjdOtcgd0tZ5VFCsERdD+JRq6KzCBAdWq/dMefGnXUMIqd+FKBkJa1yIaMUMOH4zlIvQ79aU4eiKzNMfh0UMKb+EsvLUC4k5weI8Um6FiRIfOY7HKCRQdOF5k=
+        secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
       file: ./.travis/release.zip
       skip_cleanup: true
-      prerelease: true
       on:
         repo: fragaria/karmen
         tags: true
         condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*-.*$'
-  - if: tag IS present
-    language: generic
+
+  # STABLE RELEASE
+  - language: generic
     install: true
     script:
     - bash .travis/make-github-release.sh
     deploy:
+      prerelease: false
       provider: releases
       api_key:
-        secure: gFA34DqXsUi4Z3XMVjDPf3lG2A5+qo9b7mAMpIbdaQUhZmvM2V+8XYFw/tl372/emJVqopWTkkHY9cvsUuhNmvwVCQ4A6d9UDL3SxxNnUHmowGuRKJhX1tO6HNdzWSJRsCnlFbzqg/EwVoBRm3np8gyJG8Cvbw5kpMpDxCsfJMZUGdEM38RqCHqY1uMzDbqjgRI5RYEE4Pyt03p2ZHNgUsF3JJkx0GT3tni5bgKAK65p+A/Cy+TolBmMrVFcyTdTdDyOE5FYN9OFRS8iZADvrLJXukUwq5xgZbaY0aRJVtojA6cT1CdT6gSN1pLenQWAXxF4CE8lD6URgoGpaK/QKIyFXIy7QQDlH2ZoKwH2IHmuy/UtcFEad4mVuOF8/j/DjFDuW+OPO+EJ03hl4Bfy5F1gipiLvigtHoj7O7uoKqAqOjEj3lhnZNy9YNOxhbRcb1jfGPihho3h67N5leNjri8inTU6caj/K+5YhUSSYWryUUfqCnsWX7uto01mptiMlCBJpoNt9iG6qoRc9HzagebplNYJ684aYooqIUVcY7wlAW2KB4QjdOtcgd0tZ5VFCsERdD+JRq6KzCBAdWq/dMefGnXUMIqd+FKBkJa1yIaMUMOH4zlIvQ79aU4eiKzNMfh0UMKb+EsvLUC4k5weI8Um6FiRIfOY7HKCRQdOF5k=
+        secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
       file: ./.travis/release.zip
       skip_cleanup: true
       on:
