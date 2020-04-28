@@ -2,6 +2,10 @@
 
 DIR=$(dirname $(realpath -s $0))
 cd $DIR
+
+
+./../make-version/check-version.sh || exit 1
+
 DEST="karmen"
 
 # Create release bundle

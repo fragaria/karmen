@@ -1,0 +1,5 @@
+src/karmen_frontend/package.json
+src/karmen_frontend/package-lock.json
+src/karmen_backend/server/__init__.py
+src/fakeprinter/fakeprinter/__init__.py
+docs/source/conf.py
