@@ -8,9 +8,12 @@
 set -eu 
 set -o pipefail
 
+<<<<<<< HEAD
 cd "$(dirname "`realpath $0`")"
 cd ..
 
+=======
+>>>>>>> version checking
 files_containing_version="
   src/karmen_frontend/package.json
   src/karmen_frontend/package-lock.json
