@@ -31,6 +31,12 @@ def check_printer(printer_uuid):
     else:
         printer.is_alive()
 
+    if (
+        printer.client_info.pill_info
+        and printer.client_info.pill_info["update_status"] is not None
+    ):
+        printer.karmen_sniff()
+
     if printer.hostname != raw_client.get("hostname") or printer.ip != raw_client.get(
         "ip"
     ):

@@ -32,6 +32,7 @@ import {
   changeMotorsState,
   extrude,
   setTemperature,
+  startUpdate,
 } from "../../actions";
 
 const ChangeConnectionModal = ({
@@ -98,6 +99,7 @@ const PrinterDetail = ({
   changeMotorsState,
   extrude,
   setTemperature,
+  startUpdate,
 }) => {
   const changeConnectionModal = useMyModal();
   const [printerLoaded, setPrinterLoaded] = useState(false);
@@ -254,7 +256,9 @@ const PrinterDetail = ({
             />
             <Route
               path={`${match.url}/tab-connection`}
-              render={(props) => <ConnectionTab printer={printer} />}
+              render={(props) => (
+                <ConnectionTab printer={printer} startUpdate={startUpdate} />
+              )}
             />
           </Switch>
         </div>
@@ -372,6 +376,10 @@ export default connect(
           partName,
           target
         )
+      ),
+    startUpdate: () =>
+      dispatch(
+        startUpdate(ownProps.match.params.orguuid, ownProps.match.params.uuid)
       ),
   })
 )(PrinterDetail);

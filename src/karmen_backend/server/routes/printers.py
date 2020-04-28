@@ -646,3 +646,27 @@ def control_tool_temperature(org_uuid, uuid, part_name):
     if not r:
         return make_response(jsonify(message="Cannot set temperature"), 500)
     return "", 204
+
+
+@app.route(
+    "/organizations/<org_uuid>/printers/<uuid>/update/", methods=["POST"],
+)
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def start_pill_update(org_uuid, uuid):
+    printer_inst = get_printer_inst(org_uuid, uuid)
+
+    if printer_inst.client_info.pill_info is None:
+        return abort(make_response(jsonify(message="The automatic update is supported on original Pill devices only."), 400))
+
+    if not printer_inst.client_info.pill_info["update_available"]:
+        return abort(make_response(jsonify(message="Update is not available for the device."), 400))
+
+    r = printer_inst.start_update()
+    # FIXME: Error handling should be solved by standard Python error handling
+    # (raise, except, finally).
+    if r:
+        return make_response("OK", 200)
+    else:
+        return make_response("Unable to start update", 500)

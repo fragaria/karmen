@@ -3,7 +3,7 @@ import re
 from urllib import parse as urlparse
 import requests
 
-from server.database import props_storage
+from server.database import props_storage, printers
 from server import app
 from server.clients.utils import (
     PrinterClientAccessLevel,
@@ -121,12 +121,24 @@ class Octoprint(PrinterClient):
             self.client_info.connected = False
             return None
 
-    def _http_post(self, path, data=None, files=None, json=None, force=False):
+    def _http_post(
+        self,
+        path,
+        data=None,
+        files=None,
+        json=None,
+        force=False,
+        headers=None,
+        timeout=None,
+    ):
+        if headers is None:
+            headers = {}
         if not self.client_info.connected and not force:
             return None
+        if timeout is None:
+            timeout = int(app.config.get("NETWORK_TIMEOUT", 10)) * 100
         uri = "%s%s" % (self.network_base, path)
         try:
-            headers = {}
             if self.client_info.api_key:
                 headers.update({"X-Api-Key": self.client_info.api_key})
             # Because requests session shares the connection pool, timeout actually
@@ -138,7 +150,7 @@ class Octoprint(PrinterClient):
                 files=files,
                 json=json,
                 headers=headers,
-                timeout=int(app.config.get("NETWORK_TIMEOUT", 10)) * 100,
+                timeout=timeout,
                 verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
             )
             if req is None:
@@ -336,34 +348,79 @@ class Octoprint(PrinterClient):
         :return:
         """
 
-        r = self._http_get("/karmen-pill-info/get", timeout=30)
-        if not r:
+        response = self._http_get("/karmen-pill-info/get", timeout=30)
+        if not response:
             app.logger.debug(
                 "%s is not reachable with karmen sniff: %s"
-                % (self.network_base, str(r))
+                % (self.network_base, str(response))
             )
             return False
-        if r.status_code == 404:
+        if response.status_code == 404:
             app.logger.debug(
                 "/karmen-pill-info/ was not found on %s - propably not karmen pill"
                 % (self.network_base)
             )
-            self.client_info.pill_info = None
-        if r.status_code == 200:
+            # self.client_info.pill_info = None
+        if response.status_code == 200:
 
-            karmen_version = r.json().get("system", {}).get("karmen_version")
+            karmen_version = response.json().get("system", {}).get("karmen_version")
             build_version = karmen_version.split(" ")[-1] if karmen_version else None
             update_avail = None
             if build_version:
+                # TODO: technický dluh, duplicitní kód s pillem, přesunout kontrou verzí na pill
                 versions = props_storage.get_props("versions")
                 if versions is not None:
-                    match = False
+
+                    def match(p, s):
+                        res = re.match(p, s, re.IGNORECASE)
+                        if not res:
+                            return False
+                        return res.group() == s
+
                     for v in versions:
-                        if match:
-                            update_avail = v
-                            break
-                        if build_version == v:
-                            match = True
+                        if match(v["pattern"], build_version):
+                            update_avail = v["new_version_name"]
+
+            update_status = response.json().get("system", {}).get("update_status")
+            app.logger.debug(update_status)
+            app.logger.debug(response.json())
+            if update_status:
+                if update_status == "downloading":
+                    # we have to call for status to refresh wizard indicators
+                    response = self._http_post(
+                        "/update-system",
+                        timeout=30,
+                        force=True,
+                        data='{"action": "download-status"}',
+                        headers={"Content-Type": "application/json"},
+                    )
+                    if response and response.text == "DONE":
+                        update_status = "downloaded"
+                if update_status == "downloaded":
+                    # start update if it is downloaded
+                    response = self._http_post(
+                        "/update-system",
+                        timeout=30,
+                        force=True,
+                        data='{"action": "update-start"}',
+                        headers={"Content-Type": "application/json"},
+                    )
+
+                if update_status == "updating":
+                    response = self._http_post(
+                        "/update-system",
+                        timeout=30,
+                        force=True,
+                        data='{"action": "update-status"}',
+                        headers={"Content-Type": "application/json"},
+                    )
+                if update_status == "done":
+                    response = self._http_post(
+                        "/reboot",
+                        timeout=30,
+                        force=True,
+                        headers={"Content-Type": "application/json"},
+                    )
 
             pill_info = {
                 "karmen_version": karmen_version,
@@ -371,6 +428,7 @@ class Octoprint(PrinterClient):
                 if karmen_version
                 else None,
                 "update_available": update_avail,
+                "update_status": update_status,
             }
             self.client_info.pill_info = pill_info
 
@@ -591,3 +649,35 @@ class Octoprint(PrinterClient):
         if not request or request.status_code != 204:
             return False
         return True
+
+    def start_update(self):
+        response = self._http_post(
+            "/update-system",
+            force=True,
+            data='{"action": "download-start"}',
+            headers={"Content-Type": "application/json"},
+        )
+        app.logger.debug(response)
+        app.logger.debug(response.text)
+        print(response, response.text)
+        if (
+            response
+            and response.status_code == 200
+            and response.json()["status"] == "OK"
+        ):
+            self.client_info.pill_info["update_status"] = "downloading"
+            printer = self
+            printers.update_printer(
+                uuid=self.uuid,
+                client_props={
+                    "version": printer.client_info.version,
+                    "connected": printer.client_info.connected,
+                    "access_level": printer.client_info.access_level,
+                    "api_key": printer.client_info.api_key,
+                    "webcam": printer.client_info.webcam,
+                    "plugins": printer.client_info.plugins,
+                    "pill_info": printer.client_info.pill_info,
+                },
+            )
+            return True
+        return False
