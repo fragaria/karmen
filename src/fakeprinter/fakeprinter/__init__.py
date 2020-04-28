@@ -8,7 +8,14 @@ from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 
+<<<<<<< HEAD
 __version__ = "0.9.0-rc15"
+=======
+__version__ = "0.9.0-rc12+versiontest2"
+__author__ = "Jirka Chadima"
+__copyright__ = (
+    "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
+>>>>>>> version raised to 0.9.0-rc12+versiontest2
 )
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 
