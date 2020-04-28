@@ -345,15 +345,16 @@ footer {
 
   @include plumber(
     $font-size: 3,
-    $leading-bottom: 2,
-    $line-height: 6
+    $leading-top: 1,
+    $leading-bottom: 0,
+    $line-height: 4
   );
 
   @media (min-width: $screen-sm-min) {
     @include plumber(
       $font-size: 3.5,
       $leading-top: 4,
-      $leading-bottom: 3,
+      $leading-bottom: 0,
       $line-height: 4
     );
   }
@@ -519,7 +520,7 @@ footer {
     @include plumber(
       $font-size: 1.618,
       $line-height: 3,
-      $leading-top: 1,
+      $leading-top: 0,
       $leading-bottom: 1
     );
   }
@@ -1199,6 +1200,7 @@ select {
 .printer-detail {
   .printer-detail-meta .main-title {
     margin-bottom: 0;
+    word-break: break-all;
 
     @media (max-width: $screen-xs-max) {
       margin-top: $base-unit;
@@ -1218,21 +1220,25 @@ select {
     }
   }
 
+  .printer-detail-name {
+    word-break: break-all;
+  }
+
 
   @media (min-width: $screen-sm-min) {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "meta stream"
+    grid-template-areas:  "title title"
+    "meta stream"
     "controls controls";
-    grid-gap: $spacing-default;
+    grid-gap: $base-unit*3 $spacing-default;
+
+    .printer-detail-name {
+      grid-area: title;
+    }
 
     .printer-detail-stream {
       grid-area: stream;
-      @include plumber(
-        $leading-top: 14,
-        $leading-bottom: 0
-      );
-      padding-top: 0;
     }
 
     .printer-detail-meta {

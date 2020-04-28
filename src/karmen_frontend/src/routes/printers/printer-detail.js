@@ -138,7 +138,7 @@ const PrinterDetail = ({
           <Progress {...printer.job} />
         </div>
 
-        <div className="printer-detail-meta">
+        <div className="printer-detail-name">
           <div className="container">
             <h1 className="main-title">{printer.name}</h1>
             <div className="printer-state">
@@ -171,6 +171,11 @@ const PrinterDetail = ({
                   </button>
                 ))}
             </div>
+          </div>
+        </div>
+
+        <div className="printer-detail-meta">
+          <div className="container">
             {printer.client.pill_info
               ? printer.client.pill_info.update_available
                 ? "There is update available for your pill"

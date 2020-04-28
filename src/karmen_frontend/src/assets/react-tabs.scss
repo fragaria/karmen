@@ -22,7 +22,7 @@
     overflow: auto;
 
     @include plumber(
-      $leading-top: 1,
+      $leading-top: 2,
       $leading-bottom: 0
     );
   }
