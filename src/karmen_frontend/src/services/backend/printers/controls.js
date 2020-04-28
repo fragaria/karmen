@@ -100,3 +100,13 @@ export const setTemperature = (orgUuid, uuid, partName, target) => {
     parseResponse: false,
   });
 };
+
+export const startUpdate = (orgUuid, uuid) => {
+  return performRequest({
+    uri: `/organizations/${orgUuid}/printers/${uuid}/update/`,
+    appendData: {
+      uuid,
+    },
+    parseResponse: false,
+  });
+};

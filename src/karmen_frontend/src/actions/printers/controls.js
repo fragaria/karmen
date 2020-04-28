@@ -103,3 +103,12 @@ export const setTemperature = createThunkedAction(
     });
   }
 );
+
+export const startUpdate = createThunkedAction(
+  "PRINTERS_START_UPDATE",
+  (orguuid, uuid, { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.startUpdate, dispatch)(orguuid, uuid);
+    });
+  }
+);

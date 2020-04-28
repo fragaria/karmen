@@ -7,7 +7,7 @@ import mock
 from server import app
 from server.clients.utils import PrinterClientException, PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint
-from ..utils import Response, UUID_ORG
+from ..utils import Response, SimpleResponse, UUID_ORG
 
 
 class OctoprintConstructor(unittest.TestCase):
@@ -1522,3 +1522,262 @@ class OctoprintSetLightsTest(unittest.TestCase):
         )
         r = printer.set_lights()
         self.assertFalse(r)
+
+
+class KarmenSniffPrinterTest(unittest.TestCase):
+    @mock.patch("server.clients.octoprint.Octoprint._http_get")
+    @mock.patch("server.database.props_storage.get_props")
+    def test_karmen_sniff_default_pill(self, mock_props, mock_get):
+        def mock_call(uri, **kwargs):
+            if uri.startswith("/karmen-pill-info/"):
+                return Response(
+                    200,
+                    {
+                        "networking": {
+                            "mode": "client",
+                            "ssid": "Alexa",
+                            "has_passphrase": False,
+                            "country": "CZ",
+                        },
+                        "system": {
+                            "karmen_version": "0.2.0",
+                            "karmen_version_hash": "cdcd7749e47dbaeea6482bd2b745eba4ac6c32ec 0.2.0",
+                            "hostname": "kpz-1016",
+                            "timezone": "Europe/Prague",
+                            "device_key": "206b22a3126644eb8dd73c8e276961c6",
+                            "update_status": None,
+                        },
+                    },
+                )
+
+        def get_props(prop):
+            if prop == "versions":
+                return [
+                    {"pattern": r"""0\.2\.[01]""", "new_version_name": "0.2.3"},
+                ]
+
+        mock_get.side_effect = mock_call
+        mock_props.side_effect = get_props
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+        )
+        printer.karmen_sniff()
+        self.assertEqual(
+            printer.client_info.pill_info,
+            {
+                "karmen_version": "0.2.0",
+                "version_number": "0.2.0",
+                "update_available": "0.2.3",
+                "update_status": None,
+            },
+        )
+
+    @mock.patch("server.clients.octoprint.Octoprint._http_get")
+    def test_karmen_snif_no_pill(self, mock_get):
+        def mock_call(uri, **kwargs):
+            if uri.startswith("/karmen-pill-info/"):
+                return Response(404, None)
+
+        mock_get.side_effect = mock_call
+
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+        )
+        printer.karmen_sniff()
+        self.assertEqual(printer.client_info.pill_info, None)
+
+    @mock.patch("server.clients.octoprint.Octoprint._http_get")
+    @mock.patch("server.clients.octoprint.Octoprint._http_post")
+    @mock.patch("server.database.props_storage.get_props")
+    def test_karmen_sniff_update_downloading_finished(
+        self, mock_props, mock_post, mock_get
+    ):
+        def mock_call(uri, **kwargs):
+            if uri.startswith("/karmen-pill-info/"):
+                return Response(
+                    200,
+                    {
+                        "networking": {
+                            "mode": "client",
+                            "ssid": "Alexa",
+                            "has_passphrase": False,
+                            "country": "CZ",
+                        },
+                        "system": {
+                            "karmen_version": "0.2.0",
+                            "karmen_version_hash": "cdcd7749e47dbaeea6482bd2b745eba4ac6c32ec 0.2.0",
+                            "hostname": "kpz-1016",
+                            "timezone": "Europe/Prague",
+                            "device_key": "206b22a3126644eb8dd73c8e276961c6",
+                            "update_status": "downloading",
+                        },
+                    },
+                )
+
+        def mock_call_post(uri, data, **kwargs):
+            if uri == "/update-system":
+                if data == '{"action": "download-status"}':
+                    return SimpleResponse(200, "DONE")
+
+        def get_props(prop):
+            if prop == "versions":
+                return [
+                    {"pattern": r"""0\.2\.[01]""", "new_version_name": "0.2.3"},
+                ]
+
+        mock_get.side_effect = mock_call
+        mock_post.side_effect = mock_call_post
+        mock_props.side_effect = get_props
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+        )
+        printer.karmen_sniff()
+        self.assertEqual(
+            printer.client_info.pill_info,
+            {
+                "karmen_version": "0.2.0",
+                "version_number": "0.2.0",
+                "update_available": "0.2.3",
+                "update_status": "downloaded",
+            },
+        )
+
+    @mock.patch("server.clients.octoprint.Octoprint._http_get")
+    @mock.patch("server.clients.octoprint.Octoprint._http_post")
+    @mock.patch("server.database.props_storage.get_props")
+    def test_karmen_sniff_start_update(self, mock_props, mock_post, mock_get):
+        def mock_call(uri, **kwargs):
+            if uri.startswith("/karmen-pill-info/"):
+                return Response(
+                    200,
+                    {
+                        "networking": {
+                            "mode": "client",
+                            "ssid": "Alexa",
+                            "has_passphrase": False,
+                            "country": "CZ",
+                        },
+                        "system": {
+                            "karmen_version": "0.2.0",
+                            "karmen_version_hash": "cdcd7749e47dbaeea6482bd2b745eba4ac6c32ec 0.2.0",
+                            "hostname": "kpz-1016",
+                            "timezone": "Europe/Prague",
+                            "device_key": "206b22a3126644eb8dd73c8e276961c6",
+                            "update_status": "downloaded",
+                        },
+                    },
+                )
+
+        def mock_call_post(path, data, **kwargs):
+            if path == "/update-system":
+                if data == '{"action": "update-start"}':
+                    return SimpleResponse(200, "OK")
+
+        def get_props(prop):
+            if prop == "versions":
+                return [
+                    {"pattern": r"""0\.2\.[01]""", "new_version_name": "0.2.3"},
+                ]
+
+        mock_get.side_effect = mock_call
+        mock_post.side_effect = mock_call_post
+        mock_props.side_effect = get_props
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+        )
+        printer.karmen_sniff()
+        self.assertEqual(
+            printer.client_info.pill_info,
+            {
+                "karmen_version": "0.2.0",
+                "version_number": "0.2.0",
+                "update_available": "0.2.3",
+                "update_status": "downloaded",
+            },
+        )
+        mock_post.assert_called_with(
+            "/update-system",
+            **{
+                "timeout": 30,
+                "force": True,
+                "data": '{"action": "update-start"}',
+                "headers": {"Content-Type": "application/json"},
+            }
+        )
+
+    @mock.patch("server.clients.octoprint.Octoprint._http_get")
+    @mock.patch("server.clients.octoprint.Octoprint._http_post")
+    @mock.patch("server.database.props_storage.get_props")
+    def test_karmen_sniff_finished_update(self, mock_props, mock_post, mock_get):
+        def mock_call(uri, **kwargs):
+            if uri.startswith("/karmen-pill-info/"):
+                return Response(
+                    200,
+                    {
+                        "networking": {
+                            "mode": "client",
+                            "ssid": "Alexa",
+                            "has_passphrase": False,
+                            "country": "CZ",
+                        },
+                        "system": {
+                            "karmen_version": "0.2.0",
+                            "karmen_version_hash": "cdcd7749e47dbaeea6482bd2b745eba4ac6c32ec 0.2.0",
+                            "hostname": "kpz-1016",
+                            "timezone": "Europe/Prague",
+                            "device_key": "206b22a3126644eb8dd73c8e276961c6",
+                            "update_status": "done",
+                        },
+                    },
+                )
+
+        def mock_call_post(path, data=None, **kwargs):
+            if path == "/update-system":
+                if data == '{"action": "update-start"}':
+                    return SimpleResponse(200, "OK")
+
+        def get_props(prop):
+            if prop == "versions":
+                return [
+                    {"pattern": r"""0\.2\.[01]""", "new_version_name": "0.2.3"},
+                ]
+
+        mock_get.side_effect = mock_call
+        mock_post.side_effect = mock_call_post
+        mock_props.side_effect = get_props
+        printer = Octoprint(
+            "900c73b8-1f12-4027-941a-e4b29531e8e3",
+            "d501f4f0-48d5-468e-a137-1f3803cd836c",
+            UUID_ORG,
+            ip="192.168.1.15",
+        )
+        printer.karmen_sniff()
+        self.assertEqual(
+            printer.client_info.pill_info,
+            {
+                "karmen_version": "0.2.0",
+                "version_number": "0.2.0",
+                "update_available": "0.2.3",
+                "update_status": "done",
+            },
+        )
+        mock_post.assert_called_with(
+            "/reboot",
+            **{
+                "timeout": 30,
+                "force": True,
+                "headers": {"Content-Type": "application/json"},
+            }
+        )

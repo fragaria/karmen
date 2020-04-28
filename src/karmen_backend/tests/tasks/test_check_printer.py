@@ -502,6 +502,7 @@ class CheckPrinterTest(unittest.TestCase):
                         "karmen_version": "fb89a94ed5e0bf3b4e30a50e41acc1a19fcc90ee 0.1.0-alpha",
                         "version_number": "0.1.0-alpha",
                         "update_available": None,
+                        "update_status": None,
                     },
                 },
             }
