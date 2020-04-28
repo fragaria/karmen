@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 import sys
 import os
+from os.path import join
 import re
 import json
 
 
-FILES_TO_UPDATE = (
-    'src/karmen_frontend/package.json',
-    'src/karmen_frontend/package-lock.json',
-    'src/karmen_backend/server/__init__.py',
-    'src/fakeprinter/fakeprinter/__init__.py',
-    'docs/source/conf.py',
-)
 
 def update_json(version, pathname):
     with open(pathname, 'r+') as fp:
@@ -30,17 +24,22 @@ def update_py(version, pathname):
         fp.write(data)
 
 if __name__ == '__main__':
+    from pathlib import Path
+    script_path = Path(__file__).parent.absolute()
+    project_root = script_path.parent.absolute()
     if len(sys.argv) != 2:
         print('Usage: python make-version.py 1.2.3')
         sys.exit(1)
     version = sys.argv[1]
     print("Updating to version '%s'." % version)
-    for filepath in FILES_TO_UPDATE:
+    with script_path.joinpath('./files-to-update').open() as file_list:
+        files_to_update = [p.strip() for p in file_list.readlines()]
+    for filepath in files_to_update:
         print('... %s' % filepath)
         if filepath.endswith('.py'):
-            update_py(version, filepath)
+            update_py(version, project_root.joinpath(filepath))
         elif filepath.endswith('.json'):
-            update_json(version, filepath)
+            update_json(version, project_root.joinpath(filepath))
         else:
             raise ValueError("Invalid file extension '%s'." % filepath)
     print('''Done.
@@ -48,8 +47,8 @@ if __name__ == '__main__':
     Don't forget to:
 
     git commit %(files)s -m 'version raised to %(version)s'
-    git tag %(version)s
+    git tag v%(version)s
     ''' % {
         'version':version,
-        'files': '\\\n        '.join(FILES_TO_UPDATE),
+        'files': '\\\n        '.join(files_to_update),
         })
