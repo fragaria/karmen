@@ -19,7 +19,8 @@
     align-items: center;
     border-bottom: 1px solid $border-color;
     list-style: none;
-    overflow: auto;
+    overflow: hidden;
+    overflow-x: auto;
 
     @include plumber(
       $leading-top: 2,
