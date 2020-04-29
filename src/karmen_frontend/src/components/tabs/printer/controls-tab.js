@@ -277,6 +277,27 @@ const ExtrusionControl = ({ extrude }) => {
   );
 };
 
+const PrinterLightsControl = ({ printer, changeLightsState }) => {
+  if (printer.lights === "unavailable") {
+    return null;
+  }
+  return (
+    <>
+      <label>Lights</label>
+      <div>
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          onClick={changeLightsState}
+          busyChildren="Switching lights..."
+        >
+          {printer.lights === "on" ? "Off" : "On"}
+        </BusyButton>
+      </div>
+    </>
+  );
+};
+
 const DirectControl = ({
   changeFanState,
   changeMotorsState,
@@ -322,22 +343,10 @@ const DirectControl = ({
           Off
         </BusyButton>
       </div>
-
-      {printer.lights !== "unavailable" && (
-        <>
-          <label>Lights</label>
-          <div>
-            <BusyButton
-              className="btn btn-xs"
-              type="button"
-              onClick={changeLightsState}
-              busyChildren="Switching lights..."
-            >
-              {printer.lights === "on" ? "Off" : "On"}
-            </BusyButton>
-          </div>
-        </>
-      )}
+      <PrinterLightsControl
+        printer={printer}
+        changeLightsState={changeLightsState}
+      />
     </>
   );
 };
@@ -396,6 +405,10 @@ const ControlsTab = ({
       {!available ? (
         <div className="printer-control-panel">
           <strong>Controls are not available for a disconnected printer</strong>
+          <PrinterLightsControl
+            printer={printer}
+            changeLightsState={changeLights}
+          />
         </div>
       ) : (
         <div className="printer-control-panel">
