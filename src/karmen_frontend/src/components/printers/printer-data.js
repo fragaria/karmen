@@ -70,11 +70,38 @@ export const PrinterProperties = ({ printer }) => {
   );
 };
 
+const PrinterTemperatures = ({ printer }) => {
+  const temperatures = printer.status && printer.status.temperature;
+
+  if (!temperatures) {
+    return null;
+  }
+  return (
+    <>
+      {temperatures.tool0 && (
+        <>
+          <dt className="term">Tool:</dt>
+          <dd className="description">
+            {temperatures.tool0.actual}°C/{temperatures.tool0.target}°C
+          </dd>
+        </>
+      )}
+      {temperatures.bed && (
+        <>
+          <dt className="term">Bed:</dt>
+          <dd className="description">
+            {temperatures.bed.actual}°C/{temperatures.bed.target}°C
+          </dd>
+        </>
+      )}
+    </>
+  );
+};
+
 export const PrinterProgress = ({ printer }) => {
   const progress = printer.job;
-  const temperatures = printer.status && printer.status.temperature;
   if (!progress || !progress.name) {
-    return <></>;
+    return <PrinterTemperatures printer={printer} />;
   }
   return (
     <>
@@ -90,26 +117,7 @@ export const PrinterProgress = ({ printer }) => {
       <dd className="description">
         {formatters.timespan(progress.printTimeLeft)}
       </dd>
-      {temperatures && (
-        <>
-          {temperatures.tool0 && (
-            <>
-              <dt className="term">Tool:</dt>
-              <dd className="description">
-                {temperatures.tool0.actual}°C/{temperatures.tool0.target}°C
-              </dd>
-            </>
-          )}
-          {temperatures.bed && (
-            <>
-              <dt className="term">Bed:</dt>
-              <dd className="description">
-                {temperatures.bed.actual}°C/{temperatures.bed.target}°C
-              </dd>
-            </>
-          )}
-        </>
-      )}
+      <PrinterTemperatures printer={printer} />
     </>
   );
 };
