@@ -302,3 +302,25 @@ def printer():
             },
         }
     )
+
+
+@app.route("/karmen-pill-info/get")
+def karmen_pill_info():
+    return jsonify(
+        {
+            "networking": {
+                "mode": "client",
+                "ssid": "Printfarm-WiFi",
+                "has_passphrase": False,
+                "country": "CZ",
+            },
+            "system": {
+                "karmen_version": "0.2.0",
+                "karmen_version_hash": "cdcd7749e47dbaeea6482bd2b745eba4ac6c32ec 0.2.0",
+                "hostname": "kpz-1016",
+                "timezone": "Europe/Prague",
+                "device_key": "206b22a3126644eb8dd73c8e276961c6",
+                "update_status": None,
+            },
+        },
+    )
