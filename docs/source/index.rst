@@ -1,7 +1,9 @@
 .. _index:
 
-############################################
-Karmen - monitor and manage your 3D printers
-############################################
 
-        The documentation has moved to `<https://docs.karment.tech>`_
+
+####################
+Karmen Documentation
+####################
+
+        Superseded by `<docs.karmen.tech>`_, please read the current documentation `there <https://docs.karmen.tech>`_.
