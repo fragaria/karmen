@@ -402,10 +402,9 @@ const ControlsTab = ({
 }) => {
   return (
     <div className="container">
-      {!available &&
-        !printer.client.connected(
-          <strong>Controls are not available for a disconnected printer</strong>
-        )}
+      {!available && !printer.client.connected && (
+        <strong>Controls are not available for a disconnected printer</strong>
+      )}
       {!available && printer.client.connected ? (
         <div className="printer-control-panel">
           <div className="controls">
