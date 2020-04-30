@@ -58,6 +58,7 @@ export class WebcamStream extends React.Component {
       flipVertical,
       rotate90,
       allowFullscreen,
+      printer,
     } = this.props;
     let klass = [];
     if (flipHorizontal) {
@@ -74,7 +75,7 @@ export class WebcamStream extends React.Component {
     return (
       <>
         <div className={`webcam-stream ${image ? "" : "unavailable"}`}>
-          {image ? (
+          {image && printer.client && printer.client.connected ? (
             <WebcamModal
               classNames={klass}
               source={image}
