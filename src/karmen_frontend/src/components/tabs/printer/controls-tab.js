@@ -402,52 +402,73 @@ const ControlsTab = ({
 }) => {
   return (
     <div className="container">
-      {!available ? (
-        <div className="printer-control-panel">
-          <strong>Controls are not available for a disconnected printer</strong>
-          <PrinterLightsControl
-            printer={printer}
-            changeLightsState={changeLights}
-          />
-        </div>
-      ) : (
-        <div className="printer-control-panel">
-          <div className="controls">
-            <PrinterCurrentPrintControl
-              printer={printer}
-              onCurrentJobStateChange={changeCurrentJobState}
-            />
-
-            <DirectControl
-              changeFanState={changeFanState}
-              changeMotorsState={changeMotorsState}
-              changeLightsState={changeLights}
-              printer={printer}
-            />
-
-            <ExtrusionControl extrude={extrude} />
-
-            <TemperatureControl
-              name="Tool temperature"
-              partName="tool0"
-              current={temperatures.tool0 && temperatures.tool0.actual}
-              setTemperature={setTemperature}
-            />
-
-            <TemperatureControl
-              name="Bed temperature"
-              partName="bed"
-              current={temperatures.bed && temperatures.bed.actual}
-              setTemperature={setTemperature}
-            />
-          </div>
-
-          <div className="axes">
-            <AxesXYControl movePrinthead={movePrinthead} />
-            <AxesZControl movePrinthead={movePrinthead} />
-          </div>
-        </div>
+      {!printer.client.connected && (
+        <strong>Controls are not available for a disconnected printer</strong>
       )}
+      {printer.client.connected &&
+        printer.client.access_level !== "unlocked" && (
+          <strong>
+            Printer is locked and therefore controls are not available
+          </strong>
+        )}
+      {printer.client.connected &&
+        printer.client.access_level === "unlocked" &&
+        !["Offline", "Closed"].includes(printer.status.state) && (
+          <div className="printer-control-panel">
+            <div className="controls">
+              <PrinterCurrentPrintControl
+                printer={printer}
+                onCurrentJobStateChange={changeCurrentJobState}
+              />
+
+              <DirectControl
+                changeFanState={changeFanState}
+                changeMotorsState={changeMotorsState}
+                changeLightsState={changeLights}
+                printer={printer}
+              />
+
+              <ExtrusionControl extrude={extrude} />
+
+              <TemperatureControl
+                name="Tool temperature"
+                partName="tool0"
+                current={temperatures.tool0 && temperatures.tool0.actual}
+                setTemperature={setTemperature}
+              />
+
+              <TemperatureControl
+                name="Bed temperature"
+                partName="bed"
+                current={temperatures.bed && temperatures.bed.actual}
+                setTemperature={setTemperature}
+              />
+            </div>
+
+            <div className="axes">
+              <AxesXYControl movePrinthead={movePrinthead} />
+              <AxesZControl movePrinthead={movePrinthead} />
+            </div>
+          </div>
+        )}
+      {printer.client.connected &&
+        printer.client.access_level === "unlocked" &&
+        ["Offline", "Closed"].includes(printer.status.state) && (
+          <div className="printer-control-panel">
+            <div className="controls">
+              <PrinterLightsControl
+                printer={printer}
+                changeLightsState={changeLights}
+              />
+            </div>
+            <br clear="all" />
+            <p>
+              <strong>
+                Some controls are not available for a disconnected printer
+              </strong>
+            </p>
+          </div>
+        )}
     </div>
   );
 };
