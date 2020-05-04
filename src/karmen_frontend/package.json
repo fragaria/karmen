@@ -21,7 +21,7 @@
   }, 
   "dependencies": {
     "core-js": "^3.6.5", 
-    "@sentry/browser": "^5.15.4", 
+    "@sentry/browser": "^5.15.5", 
     "react-redux": "^7.2.0", 
     "use-react-modal": "0.0.9", 
     "redux-thunk": "^2.3.0", 
