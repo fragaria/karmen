@@ -33,7 +33,7 @@ def check_printer(printer_uuid):
 
     if (
         printer.client_info.pill_info
-        and printer.client_info.pill_info["update_status"] is not None
+        and printer.client_info.pill_info.get("update_status", None) is not None
     ):
         printer.karmen_sniff()
 
