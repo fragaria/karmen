@@ -278,7 +278,7 @@ export const ConnectedApp = connect(
     userState: state.me.currentState,
   }),
   (dispatch) => ({
-    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage()),
+    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage(true)),
     logout: () => dispatch(clearUserIdentity()),
   })
 )(ConnectedAppBase);
