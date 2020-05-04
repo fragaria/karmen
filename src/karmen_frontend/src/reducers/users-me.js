@@ -177,6 +177,15 @@ export default (
           action.payload.data
         );
       }
+      debugger;
+      if (action.payload.data.uuid) {
+        let profile = getUserProfile();
+        profile.organizations[action.payload.data.uuid] = {
+          role: "admin",
+          ...action.payload.data,
+        };
+        persistUserProfile(profile);
+      }
       return Object.assign({}, state, {
         organizations: newOrganizations,
         activeOrganization: newActiveOrganization,
