@@ -25,7 +25,7 @@
     "react-redux": "^7.2.0", 
     "use-react-modal": "0.0.9", 
     "redux-thunk": "^2.3.0", 
-    "dayjs": "^1.8.25", 
+    "dayjs": "^1.8.26", 
     "react-dom": "^16.9.0", 
     "react-copy-to-clipboard": "^5.0.2", 
     "react-scripts": "^3.4.1", 
