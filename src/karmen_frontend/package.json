@@ -66,7 +66,7 @@
     "eslint-plugin-cypress": "^2.10.3", 
     "chance": "^1.1.4", 
     "eslint": "^6.3.0", 
-    "node-sass": "^4.12.0", 
+    "node-sass": "^4.14.0", 
     "@testing-library/user-event": "^10.0.2", 
     "prettier": "^2.0.5"
   }, 
