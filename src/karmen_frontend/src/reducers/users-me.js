@@ -1,5 +1,9 @@
 import dayjs from "dayjs";
-import { persistUserProfile, dropUserProfile } from "../services/backend";
+import {
+  persistUserProfile,
+  dropUserProfile,
+  getUserProfile,
+} from "../services/backend";
 
 const getUserDataFromApiResponse = (data, activeOrganization) => {
   return {
@@ -135,6 +139,14 @@ export default (
       });
     case "ORGANIZATIONS_ADD_SUCCEEDED":
       if (action.payload && action.payload.data && action.payload.data.uuid) {
+        //persist changes made to current profiles
+        //this fixes organization vanishing after page refresh
+        let profile = getUserProfile();
+        profile.organizations[action.payload.data.uuid] = {
+          role: "admin",
+          ...action.payload.data,
+        };
+        persistUserProfile(profile);
         return Object.assign({}, state, {
           organizations: Object.assign({}, state.organizations, {
             [action.payload.data.uuid]: {
