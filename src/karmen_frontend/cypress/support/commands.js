@@ -68,6 +68,11 @@ Cypress.Commands.add("login", (email, password) => {
       return body;
     });
 });
+Cypress.Commands.add("reLogin", (cy, email, password) => {
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    return cy.get('button[type="submit"]').click()
+});
 
 Cypress.Commands.add("logout", () => {
   return cy

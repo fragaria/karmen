@@ -16,29 +16,37 @@ describe("Organizations: Adding", function () {
   });
 
   it("fails with no name", function () {
-    cy.get('button[type="submit"]').click();
-    cy.get("form").contains("Name is required");
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    cy.get('button[type="submit"]').click().wait(5000).then(() => {
+      cy.get('button[type="submit"]').click();
+      cy.get("form").contains("Name is required");
+    });
   });
 
   it("adds organization", function () {
     const name = chance.string();
-    cy.get("input#name").type(name);
-    cy.get('button[type="submit"]')
-      .click()
-      .wait(3000)
-      .then(() => {
-        cy.location().then((loc) => {
-          expect(loc.pathname).to.eq("/organizations");
-          cy.get(".list-item-title").then((items) => {
-            let foundOrganization = false;
-            for (let i of items) {
-              if (i.innerText.indexOf(name) > -1) {
-                foundOrganization = true;
-              }
-            }
-            expect(foundOrganization).to.eq(true);
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    cy.get('button[type="submit"]').click().wait(5000).then(() => {
+      cy.get("input#name").type(name);
+      cy.get('button[type="submit"]')
+          .click()
+          .wait(3000)
+          .then(() => {
+            cy.location().then((loc) => {
+              expect(loc.pathname).to.eq("/organizations");
+              cy.get(".list-item-title").then((items) => {
+                let foundOrganization = false;
+                for (let i of items) {
+                  if (i.innerText.indexOf(name) > -1) {
+                    foundOrganization = true;
+                  }
+                }
+                expect(foundOrganization).to.eq(true);
+              });
+            });
           });
-        });
-      });
+    });
   });
 });

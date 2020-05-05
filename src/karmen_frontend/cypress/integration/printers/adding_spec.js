@@ -38,26 +38,34 @@ describe("Printers: Adding", function () {
 
   it("adds printer", function () {
     const name = chance.string();
-    cy.get("input#name").type(name);
-    cy.get("input#address").type("172.16.236.11:8080");
-    cy.get('button[type="submit"]')
-      .click()
-      .wait(3000)
-      .then(() => {
-        cy.location().then((loc) => {
-          expect(loc.pathname).to.eq(
-            `/${organizationUuid}/settings/tab-printers`
-          );
-          cy.get(".list-item-title").then((items) => {
-            let foundPrinter = false;
-            for (let i of items) {
-              if (i.innerText.indexOf(name) > -1) {
-                foundPrinter = true;
-              }
-            }
-            expect(foundPrinter).to.eq(true);
+
+      cy.get("input#name").type(name);
+      cy.get("input#address").type("172.16.236.11:8080");
+      cy.get('button[type="submit"]')
+          .click()
+          .wait(3000)
+          .then(() => {
+            cy.location().then((loc) => {
+              expect(loc.pathname).to.eq(
+                  `/${organizationUuid}/settings/tab-printers`
+              );
+              //This is a tricky one. Tests start at add printer page and then go to settings.
+              //User starts at settings and then goes to add printer page.
+              //Because of this, tests get login screen here, as they skip the page with sensitive data first
+              cy.get("input#username").type(email);
+              cy.get("input#password").type(password);
+              cy.get('button[type="submit"]').click().wait(5000).then(() => {
+              cy.get(".list-item-title").then((items) => {
+                let foundPrinter = false;
+                for (let i of items) {
+                  if (i.innerText.indexOf(name) > -1) {
+                    foundPrinter = true;
+                  }
+                }
+                expect(foundPrinter).to.eq(true);
+              });
+            });
           });
-        });
-      });
+    });
   });
 });

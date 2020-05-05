@@ -28,24 +28,32 @@ describe("Printers: Listing", function () {
   });
 
   it("has the create button", function () {
-    cy.get(".react-tabs__tab-panel__header a").should(
-      "have.attr",
-      "href",
-      `/${organizationUuid}/add-printer`
-    );
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    cy.get('button[type="submit"]').click().wait(5000).then(() => {
+      cy.get(".react-tabs__tab-panel__header a").should(
+          "have.attr",
+          "href",
+          `/${organizationUuid}/add-printer`
+      );
+    });
   });
 
   it("has link to organization settings", function () {
-    cy.get(".list-item .list-cta")
-      .click()
-      .then(() => {
-        cy.get(".dropdown-item:first")
-          .should("be.visible")
-          .should(
-            "have.attr",
-            "href",
-            `/${organizationUuid}/printers/${printerUuid}/settings`
-          );
-      });
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    cy.get('button[type="submit"]').click().wait(5000).then(() => {
+      cy.get(".list-item .list-cta")
+          .click()
+          .then(() => {
+            cy.get(".dropdown-item:first")
+                .should("be.visible")
+                .should(
+                    "have.attr",
+                    "href",
+                    `/${organizationUuid}/printers/${printerUuid}/settings`
+                );
+          });
+    });
   });
 });
