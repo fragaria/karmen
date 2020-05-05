@@ -4,7 +4,7 @@ DIR=$(dirname $(realpath -s $0))
 cd $DIR
 
 
-./../make-version/check-version.sh || exit 1
+./../make-version/check-version.sh --ignore-missing-tag|| exit 1
 
 DEST="karmen"
 
