@@ -20,23 +20,23 @@
     "type": "git"
   }, 
   "dependencies": {
-    "core-js": "^3.6.5", 
-    "@sentry/browser": "^5.15.4", 
-    "react-redux": "^7.2.0", 
+    "react-router-tabs": "^1.3.2", 
+    "react-scripts": "^3.4.1", 
     "use-react-modal": "0.0.9", 
     "redux-thunk": "^2.3.0", 
-    "dayjs": "^1.8.25", 
-    "react-dom": "^16.9.0", 
+    "dayjs": "^1.8.26", 
     "react-copy-to-clipboard": "^5.0.2", 
-    "react-scripts": "^3.4.1", 
+    "react-redux": "^7.2.0", 
     "react-debounce-input": "^3.2.2", 
     "react-router-dom": "^5.0.1", 
-    "react-router-tabs": "^1.3.2", 
+    "@sentry/browser": "^5.15.5", 
+    "core-js": "^3.6.5", 
     "react": "^16.13.1", 
     "react-app-polyfill": "^1.0.6", 
+    "redux": "^4.0.4", 
     "js-cookie": "^2.2.1", 
     "downloadjs": "^1.4.7", 
-    "redux": "^4.0.4", 
+    "react-dom": "^16.9.0", 
     "jwt-decode": "^2.2.0"
   }, 
   "eslintConfig": {
@@ -45,7 +45,7 @@
       "plugin:prettier/recommended"
     ]
   }, 
-  "version": "0.9.0-rc15", 
+  "version": "0.9.0-rc16", 
   "scripts": {
     "eject": "react-scripts eject", 
     "cypress": "cypress open", 
@@ -59,16 +59,16 @@
   "devDependencies": {
     "eslint-plugin-prettier": "^3.1.3", 
     "plumber-sass": "^0.7.7", 
-    "@testing-library/react": "^10.0.3", 
-    "cypress": "^4.4.1", 
-    "eslint-config-prettier": "^6.10.1", 
+    "eslint-config-prettier": "^6.11.0", 
+    "cypress": "^4.5.0", 
+    "@testing-library/react": "^10.0.4", 
     "@testing-library/jest-dom": "^5.5.0", 
     "eslint-plugin-cypress": "^2.10.3", 
     "chance": "^1.1.4", 
     "eslint": "^6.3.0", 
-    "node-sass": "^4.12.0", 
-    "@testing-library/user-event": "^10.0.2", 
-    "prettier": "^2.0.4"
+    "node-sass": "^4.14.0", 
+    "@testing-library/user-event": "^10.1.0", 
+    "prettier": "^2.0.5"
   }, 
   "name": "karmen"
 }
