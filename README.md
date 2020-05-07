@@ -74,12 +74,12 @@ All of the g-codes are currently shared across all user accounts in an organizat
 
 If you are making a new release, you need to tag this repository and Travis does the rest. You also
 want to bump the version numbers in the appropriate places in source code, such as `package.json`, Python
-modules etc. That's exactly what the `make-version.py` script does. So the release procedure would be:
+modules etc. That's exactly what the `make-version/make-version.py` script does. So the release procedure would be:
 
 ```sh
-$ VERSION=1.2.3
-$ python make-version.py "${VERSION}"
-$ git add src/ docs/ && git commit -m "Version $VERSION" && git tag "v${VERSION}"
+$ VERSION=1.2.3  # without 'v'
+$ python3 make-version/make-version.py "${VERSION}"
+$ git add src/ docs/ && git commit -m "Version $VERSION" && git tag "v${VERSION}"  # notice the tag version string has 'v' prefix
 ```
 
 If the VERSION variable contains a `-` (e. g. `1.2.3-rc.1`), it is considered as a prerelease.

@@ -16,7 +16,6 @@
 
 __version__ = "0.9.0-rc16"
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'Karmen'
