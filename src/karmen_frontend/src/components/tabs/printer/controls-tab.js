@@ -413,7 +413,8 @@ const ControlsTab = ({
         )}
       {printer.client.connected &&
         printer.client.access_level === "unlocked" &&
-        !["Offline", "Closed"].includes(printer.status.state) && (
+        !["Offline", "Closed"].includes(printer.status.state) &&
+        !printer.status.state.match(/printer is not/i) && (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterCurrentPrintControl
@@ -453,7 +454,8 @@ const ControlsTab = ({
         )}
       {printer.client.connected &&
         printer.client.access_level === "unlocked" &&
-        ["Offline", "Closed"].includes(printer.status.state) && (
+        (["Offline", "Closed"].includes(printer.status.state) ||
+          printer.status.state.match(/printer is not/i)) && (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterLightsControl
