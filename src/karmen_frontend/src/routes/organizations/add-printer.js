@@ -21,7 +21,7 @@ class AddPrinter extends React.Component {
         error: null,
       },
       address: {
-        name: window.env.IS_CLOUD_INSTALL ? "Printer token" : "Printer address",
+        name: window.env.IS_CLOUD_INSTALL ? "Printer code" : "Printer address",
         val: "",
         type: "text",
         required: true,
