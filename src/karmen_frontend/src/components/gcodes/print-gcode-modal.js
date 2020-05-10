@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useMyModal } from "../utils/modal";
+import Loader from "../utils/loader";
 
 export const usePrintGcodeModal = ({
   gcode,
@@ -13,6 +14,7 @@ export const usePrintGcodeModal = ({
   const [printerFilamentType, setPrinterFilamentType] = useState();
   const [gcodeFilamentType, setGcodeFilamentType] = useState();
   const [message, setMessage] = useState();
+  const [schedulingPrint, setSchedulingPrint] = useState();
   const [messageOk, setMessageOk] = useState();
   const [selectedPrinter, setSelectedPrinter] = useState(
     availablePrinters.length ? availablePrinters[0].uuid : null
@@ -50,10 +52,12 @@ export const usePrintGcodeModal = ({
         case 201:
           setMessage("Print was scheduled");
           setMessageOk(true);
+          setSchedulingPrint(false);
           break;
         default:
           setMessage("Print was not scheduled");
           setMessageOk(false);
+          setSchedulingPrint(false);
       }
     });
   };
@@ -68,6 +72,8 @@ export const usePrintGcodeModal = ({
       setShowFilamentTypeWarning(false);
       setMessage(undefined);
       setMessageOk(undefined);
+      setSchedulingPrint(false);
+
       return openModal(e);
     },
     Modal: () => {
@@ -84,6 +90,19 @@ export const usePrintGcodeModal = ({
               </p>
             )}
 
+            {schedulingPrint && (
+              <div className="modal-content-narrow">
+                <h2 className="modal-subtitle text-center">Scheduling a print...</h2>
+                <Loader image />
+                <p>
+                  Print task is being scheduled to the print queue.
+                  Please be patient as it can take several seconds.
+                  Closing this dialog or reloading browser window <strong>will end the print!</strong>
+                </p>
+              </div>
+            )}
+
+
             {showFilamentTypeWarning && (
               <>
                 <div className="message-error">
@@ -99,7 +118,7 @@ export const usePrintGcodeModal = ({
                     onClick={() => {
                       setShowPrinterSelect(false);
                       setShowFilamentTypeWarning(false);
-                      setMessage("Scheduling a print");
+                      setSchedulingPrint(true);
                       setMessageOk(true);
                       schedulePrint(gcode.uuid, selectedPrinter);
                     }}
@@ -122,51 +141,53 @@ export const usePrintGcodeModal = ({
             {!showFilamentTypeWarning &&
               !message &&
               !!availablePrinters.length && (
-                <div className="cta-box text-center">
-                  <button
-                    className="btn"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const selected = availablePrinters.find(
-                        (p) => p.uuid === selectedPrinter
-                      );
-                      if (
-                        selected &&
-                        selected.printer_props &&
-                        selected.printer_props.filament_type &&
-                        gcode.analysis &&
-                        gcode.analysis.filament &&
-                        gcode.analysis.filament.type &&
-                        gcode.analysis.filament.type !==
-                          selected.printer_props.filament_type
-                      ) {
-                        setShowPrinterSelect(false);
-                        setShowFilamentTypeWarning(true);
-                        setPrinterFilamentType(
-                          selected.printer_props.filament_type
+                <div>
+                  <div className="cta-box text-center">
+                    <button
+                      className="btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const selected = availablePrinters.find(
+                          (p) => p.uuid === selectedPrinter
                         );
-                        setGcodeFilamentType(gcode.analysis.filament.type);
-                        return;
-                      }
+                        if (
+                          selected &&
+                          selected.printer_props &&
+                          selected.printer_props.filament_type &&
+                          gcode.analysis &&
+                          gcode.analysis.filament &&
+                          gcode.analysis.filament.type &&
+                          gcode.analysis.filament.type !==
+                            selected.printer_props.filament_type
+                        ) {
+                          setShowPrinterSelect(false);
+                          setShowFilamentTypeWarning(true);
+                          setPrinterFilamentType(
+                            selected.printer_props.filament_type
+                          );
+                          setGcodeFilamentType(gcode.analysis.filament.type);
+                          return;
+                        }
 
-                      setShowPrinterSelect(false);
-                      setShowFilamentTypeWarning(false);
-                      setMessage("Scheduling a print");
-                      setMessageOk(true);
-                      schedulePrint(gcode.uuid, selectedPrinter);
-                    }}
-                  >
-                    Print
-                  </button>
+                        setShowPrinterSelect(false);
+                        setShowFilamentTypeWarning(false);
+                        setSchedulingPrint(true);
+                        setMessageOk(true);
+                        schedulePrint(gcode.uuid, selectedPrinter);
+                      }}
+                    >
+                      Print
+                    </button>
 
-                  <button
-                    className="btn btn-plain"
-                    onClick={() => {
-                      printModal.closeModal();
-                    }}
-                  >
-                    Cancel
-                  </button>
+                    <button
+                      className="btn btn-plain"
+                      onClick={() => {
+                        printModal.closeModal();
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               )}
 

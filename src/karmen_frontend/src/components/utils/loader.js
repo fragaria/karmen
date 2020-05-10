@@ -1,9 +1,15 @@
 import React from "react";
 
-const Loader = () => {
+import loaderImage from "../../assets/img/loader.gif";
+
+const Loader = ({ image }) => {
   return (
     <p className="loader">
-      <span>Loading...</span>
+      {image ? (
+        <img src={loaderImage} alt="Loading..." />
+        ) : (
+        <span>Loading...</span>
+      )}
     </p>
   );
 };
