@@ -1,5 +1,7 @@
 import React from "react";
 
+import Collapsible from "../utils/collapsible";
+
 export const FormInputs = ({ definition, updateValue }) => {
   const optionRows = Object.keys(definition).map((name) => {
     switch (definition[name].type) {
