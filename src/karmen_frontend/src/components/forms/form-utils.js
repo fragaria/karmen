@@ -2,8 +2,8 @@ import React from "react";
 
 import Collapsible from "../utils/collapsible";
 
-export const FormInputs = ({ definition, updateValue }) => {
-  const optionRows = Object.keys(definition).map((name) => {
+const InputSwitch = ({ definition, updateValue }) => {
+  return Object.keys(definition).map((name) => {
     switch (definition[name].type) {
       case "text":
       case "password":
@@ -107,7 +107,29 @@ export const FormInputs = ({ definition, updateValue }) => {
         return null;
     }
   });
+};
 
+export const FormInputs = ({
+  definition,
+  updateValue,
+  collapsibleDefinition,
+}) => {
+  const optionRows = [
+    <InputSwitch definition={definition} updateValue={updateValue} />,
+  ];
+  if (collapsibleDefinition) {
+    optionRows.push(
+      <Collapsible
+        collapsedStateText={collapsibleDefinition.collapsedStateText}
+        expandedStateText={collapsibleDefinition.expandedStateText}
+      >
+        <InputSwitch
+          definition={collapsibleDefinition.definition}
+          updateVateValue={collapsibleDefinition.updateValue}
+        />
+      </Collapsible>
+    );
+  }
   return <div className="input-group">{optionRows}</div>;
 };
 

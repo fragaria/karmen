@@ -27,6 +27,8 @@ class AddPrinter extends React.Component {
         required: true,
         error: null,
       },
+    },
+    collapsibleForm: {
       apiKey: {
         name: "API key",
         val: "",
@@ -48,9 +50,10 @@ class AddPrinter extends React.Component {
       message: null,
       messageOk: false,
     });
-    const { form } = this.state;
+    const { form, collapsibleForm } = this.state;
     let hasErrors = false;
     let updatedForm = Object.assign({}, form);
+    let updatedCollapsibleForm = Object.assign({}, collapsibleForm);
     if (!form.name.val) {
       hasErrors = true;
       updatedForm.name.error = "Name is required";
@@ -70,6 +73,7 @@ class AddPrinter extends React.Component {
     }
     this.setState({
       form: updatedForm,
+      collapsibleForm: updatedCollapsibleForm,
     });
     const { createPrinter } = this.props;
     if (!hasErrors) {
@@ -105,7 +109,7 @@ class AddPrinter extends React.Component {
         path,
         token,
         form.name.val,
-        form.apiKey.val
+        collapsibleForm.apiKey.val
       ).then((r) => {
         switch (r.status) {
           case 201:
@@ -127,8 +131,17 @@ class AddPrinter extends React.Component {
     }
   }
 
+  updateValue(form, name, value) {
+    return Object.assign({}, form, {
+      [name]: Object.assign({}, form[name], {
+        val: value,
+        error: null,
+      }),
+    });
+  }
+
   render() {
-    const { form, message, messageOk, redirect } = this.state;
+    const { form, collapsibleForm, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
       return <Redirect to={`/${match.params.orguuid}/settings/tab-printers`} />;
@@ -150,14 +163,19 @@ class AddPrinter extends React.Component {
                 )}
                 <FormInputs
                   definition={form}
+                  collapsibleDefinition={{
+                    definition: collapsibleForm,
+                    collapsedStateText: "collapsed-text-state",
+                    expandedStateText: "expanded-text-state",
+                    updateValue: (name, value) => {
+                      this.setState({
+                        form: this.updateValue(collapsibleForm, name, value),
+                      });
+                    },
+                  }}
                   updateValue={(name, value) => {
                     this.setState({
-                      form: Object.assign({}, form, {
-                        [name]: Object.assign({}, form[name], {
-                          val: value,
-                          error: null,
-                        }),
-                      }),
+                      form: this.updateValue(form, name, value),
                     });
                   }}
                 />

@@ -5,17 +5,13 @@ const Collapsible = ({ children, collapsedStateText, expandedStateText }) => {
   return (
     <React.Fragment>
       {!expanded && (
-        <button onClick={setExpanded(true)}>
-          {collapsedStateText}
-        </button>
+        <button onClick={() => setExpanded(true)}>{collapsedStateText}</button>
       )}
 
       {expanded && children}
 
       {expanded && (
-        <button onClick={setExpanded(false)}>
-          {expandedStateText}
-        </button>
+        <button onClick={() => setExpanded(false)}>{expandedStateText}</button>
       )}
     </React.Fragment>
   );
