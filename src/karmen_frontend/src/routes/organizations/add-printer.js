@@ -165,8 +165,8 @@ class AddPrinter extends React.Component {
                   definition={form}
                   collapsibleDefinition={{
                     definition: collapsibleForm,
-                    collapsedStateText: "collapsed-text-state",
-                    expandedStateText: "expanded-text-state",
+                    collapsedStateText: "Advanced options",
+                    expandedStateText: "Hide advanced options",
                     updateValue: (name, value) => {
                       this.setState({
                         form: this.updateValue(collapsibleForm, name, value),

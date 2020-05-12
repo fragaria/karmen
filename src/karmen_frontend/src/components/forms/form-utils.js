@@ -119,15 +119,20 @@ export const FormInputs = ({
   ];
   if (collapsibleDefinition) {
     optionRows.push(
-      <Collapsible
-        collapsedStateText={collapsibleDefinition.collapsedStateText}
-        expandedStateText={collapsibleDefinition.expandedStateText}
-      >
-        <InputSwitch
-          definition={collapsibleDefinition.definition}
-          updateVateValue={collapsibleDefinition.updateValue}
-        />
-      </Collapsible>
+      <>
+        <span></span>
+        <Collapsible
+          collapsedStateText={collapsibleDefinition.collapsedStateText}
+          expandedStateText={collapsibleDefinition.expandedStateText}
+          isInForm
+        >
+          <InputSwitch
+            definition={collapsibleDefinition.definition}
+            updateVateValue={collapsibleDefinition.updateValue}
+          />
+        </Collapsible>
+        <span></span>
+      </>
     );
   }
   return <div className="input-group">{optionRows}</div>;
