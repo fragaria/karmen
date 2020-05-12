@@ -92,16 +92,19 @@ export const usePrintGcodeModal = ({
 
             {schedulingPrint && (
               <div className="modal-content-narrow">
-                <h2 className="modal-subtitle text-center">Scheduling a print...</h2>
+                <h2 className="modal-subtitle text-center">
+                  Scheduling your print task...
+                </h2>
                 <Loader image />
                 <p>
-                  Print task is being scheduled to the print queue.
-                  Please be patient as it can take several seconds.
-                  Closing this dialog or reloading browser window <strong>will end the print!</strong>
+                  Your print file is being uploaded to the printer. Please be
+                  patient as this can take some time depending on the gcode size
+                  and printer network speed. Do not close this dialog nor your
+                  browser window during the upload. Otherwise, the upload will
+                  be interrupted and the print <strong>won't start</strong>.
                 </p>
               </div>
             )}
-
 
             {showFilamentTypeWarning && (
               <>

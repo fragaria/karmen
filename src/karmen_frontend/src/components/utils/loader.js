@@ -7,7 +7,7 @@ const Loader = ({ image }) => {
     <p className="loader">
       {image ? (
         <img src={loaderImage} alt="Loading..." />
-        ) : (
+      ) : (
         <span>Loading...</span>
       )}
     </p>
