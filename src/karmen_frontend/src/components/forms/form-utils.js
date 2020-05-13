@@ -2,7 +2,7 @@ import React from "react";
 
 import Collapsible from "../utils/collapsible";
 
-const InputSwitch = ({ definition, updateValue }) => {
+const FormFields = ({ definition, updateValue }) => {
   return Object.keys(definition).map((name) => {
     switch (definition[name].type) {
       case "text":
@@ -103,39 +103,35 @@ const InputSwitch = ({ definition, updateValue }) => {
             onChange={(e) => updateValue(name, e.target.value)}
           />
         );
+      case "collapsible":
+        return (
+          <>
+            <span></span>
+            <Collapsible
+              collapsedStateText={definition[name].collapsedStateText}
+              expandedStateText={definition[name].expandedStateText}
+              isInForm
+            >
+              <FormFields
+                definition={definition[name].inputs}
+                updateValue={updateValue}
+              />
+            </Collapsible>
+            <span></span>
+          </>
+        );
       default:
         return null;
     }
   });
 };
 
-export const FormInputs = ({
-  definition,
-  updateValue,
-  collapsibleDefinition,
-}) => {
-  const optionRows = [
-    <InputSwitch definition={definition} updateValue={updateValue} />,
-  ];
-  if (collapsibleDefinition) {
-    optionRows.push(
-      <>
-        <span></span>
-        <Collapsible
-          collapsedStateText={collapsibleDefinition.collapsedStateText}
-          expandedStateText={collapsibleDefinition.expandedStateText}
-          isInForm
-        >
-          <InputSwitch
-            definition={collapsibleDefinition.definition}
-            updateVateValue={collapsibleDefinition.updateValue}
-          />
-        </Collapsible>
-        <span></span>
-      </>
-    );
-  }
-  return <div className="input-group">{optionRows}</div>;
+export const FormInputs = ({ definition, updateValue }) => {
+  return (
+    <div className="input-group">
+      <FormFields definition={definition} updateValue={updateValue} />
+    </div>
+  );
 };
 
 export default FormInputs;

@@ -27,14 +27,19 @@ class AddPrinter extends React.Component {
         required: true,
         error: null,
       },
-    },
-    collapsibleForm: {
-      apiKey: {
-        name: "API key",
-        val: "",
-        type: "text",
-        required: false,
-        error: null,
+      collapsible: {
+        type: "collapsible",
+        collapsedStateText: "Advanced options",
+        expandedStateText: "Hide advanced options",
+        inputs: {
+          apiKey: {
+            name: "API key",
+            val: "",
+            type: "text",
+            required: false,
+            error: null,
+          },
+        },
       },
     },
   };
@@ -50,10 +55,9 @@ class AddPrinter extends React.Component {
       message: null,
       messageOk: false,
     });
-    const { form, collapsibleForm } = this.state;
+    const { form } = this.state;
     let hasErrors = false;
     let updatedForm = Object.assign({}, form);
-    let updatedCollapsibleForm = Object.assign({}, collapsibleForm);
     if (!form.name.val) {
       hasErrors = true;
       updatedForm.name.error = "Name is required";
@@ -73,7 +77,6 @@ class AddPrinter extends React.Component {
     }
     this.setState({
       form: updatedForm,
-      collapsibleForm: updatedCollapsibleForm,
     });
     const { createPrinter } = this.props;
     if (!hasErrors) {
@@ -109,7 +112,7 @@ class AddPrinter extends React.Component {
         path,
         token,
         form.name.val,
-        collapsibleForm.apiKey.val
+        form.collapsible.inputs.apiKey.val
       ).then((r) => {
         switch (r.status) {
           case 201:
@@ -132,16 +135,21 @@ class AddPrinter extends React.Component {
   }
 
   updateValue(form, name, value) {
-    return Object.assign({}, form, {
-      [name]: Object.assign({}, form[name], {
-        val: value,
-        error: null,
-      }),
-    });
+    const out = Object.assign({}, form);
+    for (const key in form) {
+      if (form[key].type === "collapsible" && form[key].inputs[name]) {
+        out[key].inputs[name].val = value;
+        out[key].inputs[name].error = null;
+      } else if (key === name) {
+        out[key].val = value;
+        out[key].error = null;
+      }
+    }
+    return out;
   }
 
   render() {
-    const { form, collapsibleForm, message, messageOk, redirect } = this.state;
+    const { form, message, messageOk, redirect } = this.state;
     const { match } = this.props;
     if (redirect) {
       return <Redirect to={`/${match.params.orguuid}/settings/tab-printers`} />;
@@ -163,16 +171,6 @@ class AddPrinter extends React.Component {
                 )}
                 <FormInputs
                   definition={form}
-                  collapsibleDefinition={{
-                    definition: collapsibleForm,
-                    collapsedStateText: "Advanced options",
-                    expandedStateText: "Hide advanced options",
-                    updateValue: (name, value) => {
-                      this.setState({
-                        form: this.updateValue(collapsibleForm, name, value),
-                      });
-                    },
-                  }}
                   updateValue={(name, value) => {
                     this.setState({
                       form: this.updateValue(form, name, value),
