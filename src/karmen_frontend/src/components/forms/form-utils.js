@@ -1,7 +1,9 @@
 import React from "react";
 
-export const FormInputs = ({ definition, updateValue }) => {
-  const optionRows = Object.keys(definition).map((name) => {
+import Collapsible from "../utils/collapsible";
+
+const FormFields = ({ definition, updateValue }) => {
+  return Object.keys(definition).map((name) => {
     switch (definition[name].type) {
       case "text":
       case "password":
@@ -101,12 +103,35 @@ export const FormInputs = ({ definition, updateValue }) => {
             onChange={(e) => updateValue(name, e.target.value)}
           />
         );
+      case "collapsible":
+        return (
+          <>
+            <span></span>
+            <Collapsible
+              collapsedStateText={definition[name].collapsedStateText}
+              expandedStateText={definition[name].expandedStateText}
+              isInForm
+            >
+              <FormFields
+                definition={definition[name].inputs}
+                updateValue={updateValue}
+              />
+            </Collapsible>
+            <span></span>
+          </>
+        );
       default:
         return null;
     }
   });
+};
 
-  return <div className="input-group">{optionRows}</div>;
+export const FormInputs = ({ definition, updateValue }) => {
+  return (
+    <div className="input-group">
+      <FormFields definition={definition} updateValue={updateValue} />
+    </div>
+  );
 };
 
 export default FormInputs;
