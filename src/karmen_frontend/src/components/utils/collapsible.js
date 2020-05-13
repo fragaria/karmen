@@ -8,31 +8,17 @@ const Collapsible = ({
 }) => {
   const [expanded, setExpanded] = useState();
 
-  const toggleTo = (evt, val) => {
+  const toggle = (evt) => {
     evt.preventDefault();
-    setExpanded(val);
+    setExpanded(!expanded);
   };
 
   return (
     <React.Fragment>
-      {expanded ? (
-        <button
-          className="btn-reset anchor"
-          onClick={($event) => toggleTo($event, false)}
-        >
-          {expandedStateText}
-        </button>
-      ) : (
-        <button
-          className="btn-reset anchor"
-          onClick={($event) => toggleTo($event, true)}
-        >
-          {collapsedStateText}
-        </button>
-      )}
-
+      <button className="btn-reset anchor" onClick={toggle}>
+        {expanded ? expandedStateText : collapsedStateText}
+      </button>
       {isInForm && <span></span>}
-
       {expanded && children}
     </React.Fragment>
   );
