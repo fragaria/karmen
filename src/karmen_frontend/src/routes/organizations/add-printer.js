@@ -21,18 +21,25 @@ class AddPrinter extends React.Component {
         error: null,
       },
       address: {
-        name: window.env.IS_CLOUD_INSTALL ? "Printer token" : "Printer address",
+        name: window.env.IS_CLOUD_INSTALL ? "Printer code" : "Printer address",
         val: "",
         type: "text",
         required: true,
         error: null,
       },
-      apiKey: {
-        name: "API key",
-        val: "",
-        type: "text",
-        required: false,
-        error: null,
+      collapsible: {
+        type: "collapsible",
+        collapsedStateText: "Advanced options",
+        expandedStateText: "Hide advanced options",
+        inputs: {
+          apiKey: {
+            name: "API key",
+            val: "",
+            type: "text",
+            required: false,
+            error: null,
+          },
+        },
       },
     },
   };
@@ -105,7 +112,7 @@ class AddPrinter extends React.Component {
         path,
         token,
         form.name.val,
-        form.apiKey.val
+        form.collapsible.inputs.apiKey.val
       ).then((r) => {
         switch (r.status) {
           case 201:
@@ -125,6 +132,20 @@ class AddPrinter extends React.Component {
         }
       });
     }
+  }
+
+  updateValue(form, name, value) {
+    const out = Object.assign({}, form);
+    for (const key in form) {
+      if (form[key].type === "collapsible" && form[key].inputs[name]) {
+        out[key].inputs[name].val = value;
+        out[key].inputs[name].error = null;
+      } else if (key === name) {
+        out[key].val = value;
+        out[key].error = null;
+      }
+    }
+    return out;
   }
 
   render() {
@@ -152,12 +173,7 @@ class AddPrinter extends React.Component {
                   definition={form}
                   updateValue={(name, value) => {
                     this.setState({
-                      form: Object.assign({}, form, {
-                        [name]: Object.assign({}, form[name], {
-                          val: value,
-                          error: null,
-                        }),
-                      }),
+                      form: this.updateValue(form, name, value),
                     });
                   }}
                 />
