@@ -510,6 +510,10 @@ footer {
   @include button-reset;
 }
 
+.anchor {
+  color: map-get($palette, red);
+}
+
 .dl-horizontal {
   display: grid;
   grid-template-columns: 1fr;
