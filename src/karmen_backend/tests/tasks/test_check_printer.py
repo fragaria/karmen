@@ -4,6 +4,7 @@ import mock
 import pickle
 
 from server.tasks.check_printer import check_printer
+from server.database.printers import update_printer
 from server.clients.utils import PrinterClientAccessLevel
 from ..utils import Response, UUID_ORG
 
@@ -507,6 +508,83 @@ class CheckPrinterTest(unittest.TestCase):
                 },
             }
         )
+
+    """This one is to make sure that during keepalive sniff, when there is no big sniff at the beggining of
+    check_printers that kinda normalizes pill_info, we do not fail on  index errors"""
+
+    @mock.patch(
+        "server.database.printers.get_printer",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "network_client_uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "organization_uuid": UUID_ORG,
+            "client_props": {
+                "connected": True,
+                "version": {},
+                "access_level": PrinterClientAccessLevel.UNLOCKED,
+                "pill_info": {
+                    "karmen_version": "fb89a94ed5e0bf3b4e30a50e41acc1a19fcc90ee 0.1.0-alpha",
+                    "version_number": "0.1.0-alpha",
+                    "update_available": None,
+                },
+            },
+            "printer_props": {"filament_type": "PETG"},
+        },
+    )
+    @mock.patch(
+        "server.database.network_clients.get_network_client",
+        return_value={
+            "uuid": "298819f5-0119-4e9b-8191-350d931f7ecf",
+            "ip": "1234",
+            "client": "octoprint",
+            "protocol": "https",
+        },
+    )
+    @mock.patch("server.database.printers.update_printer")
+    @mock.patch("server.database.network_clients.update_network_client")
+    @mock.patch(
+        "server.tasks.check_printer.network.get_avahi_hostname",
+        return_value="router.asus.com",
+    )
+    @mock.patch(
+        "server.tasks.check_printer.network.get_avahi_address", return_value="5678",
+    )
+    @mock.patch("server.clients.octoprint.requests.Session.get")
+    @mock.patch("server.tasks.check_printer.datetime")
+    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    def test_karmen_sniff_no_pill(
+        self,
+        mock_octoprint_redis,
+        mock_datetime,
+        mock_get_data,
+        mock_address,
+        mock_hostname,
+        mock_update_network_client,
+        mock_update_printer,
+        mock_get_network_client,
+        mock_get_printer,
+    ):
+        date = datetime.strptime("06 Mar 2020", "%d %b %Y")
+        mock_datetime.now.return_value = date.replace(minute=29)
+        mock_octoprint_redis.get.return_value = None
+
+        def mock_call(uri, **kwargs):
+            print("=======CALLING: ", uri)
+            if "/api/settings" in uri:
+                return Response(200, {"plugins": {"aaa": {},}},)
+            if "/karmen-pill-info/get" in uri:
+                return Response(502,)
+            return Response(200, {"text": "octoprint"})
+
+        mock_get_data.side_effect = mock_call
+
+        check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
+        self.assertEqual(mock_hostname.call_count, 1)
+        self.assertEqual(mock_address.call_count, 0)
+        self.assertEqual(mock_get_printer.call_count, 1)
+
+        self.assertEqual(mock_get_data.call_count, 1)
+        self.assertEqual(mock_update_printer.call_count, 1)
 
     @mock.patch(
         "server.database.printers.get_printer",
