@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import Collapsible from "../utils/collapsible";
 
-const ClipboardButton = ({ valueToCopy }) => {
+export const ClipboardButton = ({ valueToCopy }) => {
   const [copied, setCopied] = useState(false);
 
   const copy = (evt) => {
@@ -99,7 +99,11 @@ const FormFields = ({ definition, updateValue }) => {
       case "select":
         const opts = definition[name].options.map((opt) => {
           return (
-            <option key={opt.val} value={opt.val}>
+            <option
+              key={opt.val}
+              value={opt.val}
+              data-testid={`${name}--${opt.val}`}
+            >
               {opt.name}
             </option>
           );
