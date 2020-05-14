@@ -22,7 +22,7 @@ def setup_celery(flask_app):
         app.config["REDIS_PORT"],
     )
     celery_inst = Celery(
-        flask_app.import_name, backend=redis_backend, broker=redis_backend,
+        flask_app.import_name, backend=redis_backend, broker=redis_backend
     )
     celery_inst.conf.update(json.loads(flask_app.config["CELERY_CONFIG"]))
 
@@ -75,6 +75,7 @@ CONFIG_KEYS = {
     "REDIS_PORT": 6379,
     "SECRET_KEY": None,
     "SOCKET_API_URL": "http://pathset-your-proxy-api-address-here/%s",
+    "TOKEN_SERVER_API_URL": None,  # None defaults to a fake token server, set the address *without trailing slash*.
     "UPLOAD_FOLDER": "/tmp/karmen-files",
     "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}, "get_versions_list": {"task":"get_versions_list", "schedule": 300.0}}}',
 }
