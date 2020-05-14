@@ -27,6 +27,7 @@ describe("Organizations: Editing", function () {
     cy.get("input#name").clear().type(name);
     cy.get('button[type="submit"]')
       .click()
+      .wait(3000)
       .then(() => {
         cy.location().then((loc) => {
           expect(loc.pathname).to.eq("/organizations");
