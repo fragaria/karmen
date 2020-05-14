@@ -74,9 +74,7 @@ const createValidStore = (printer) => {
 };
 
 const expectStreamUnavailable = (queryByTitle, getByText) => {
-  expect(
-    queryByTitle("Current state from undefined")
-  ).not.toBeInTheDocument();
+  expect(queryByTitle("Current state from undefined")).not.toBeInTheDocument();
   expect(getByText("Stream unavailable")).toBeInTheDocument();
 };
 
