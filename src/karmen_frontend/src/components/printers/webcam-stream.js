@@ -72,10 +72,14 @@ export class WebcamStream extends React.Component {
     if (rotate90) {
       klass.push("rotate-90");
     }
+    const isStreamAvailable =
+      image && printer.client && printer.client.connected;
     return (
       <>
-        <div className={`webcam-stream ${image ? "" : "unavailable"}`}>
-          {image && printer.client && printer.client.connected ? (
+        <div
+          className={`webcam-stream ${isStreamAvailable ? "" : "unavailable"}`}
+        >
+          {isStreamAvailable ? (
             <WebcamModal
               classNames={klass}
               source={image}
