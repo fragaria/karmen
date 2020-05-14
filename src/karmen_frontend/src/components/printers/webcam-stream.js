@@ -10,17 +10,15 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
 
   return (
     <>
-      <img
-        className={classNames.join(" ")}
-        alt={`Current state from ${url}`}
-        src={source}
+      <div
+        className={"webcam-stream-image " + classNames.join(" ")}
+        style={{ backgroundImage: `url(${source})` }}
         onClick={(e) => {
           if (allowFullscreen !== false) {
             openModal(e);
           }
         }}
-      />
-
+      ></div>
       {isOpen && (
         <Modal>
           <div className="webcam-modal">
@@ -87,7 +85,7 @@ export class WebcamStream extends React.Component {
               allowFullscreen={allowFullscreen}
             />
           ) : (
-            <div>Stream unavailable</div>
+            <div className="webcam-stream-image"></div>
           )}
         </div>
       </>

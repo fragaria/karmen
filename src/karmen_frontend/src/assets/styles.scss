@@ -593,7 +593,6 @@ footer {
       grid-template-columns: 1fr;
       grid-template-rows: 1fr;
       align-items: start;
-      grid-column-gap: $base-unit*2;
       grid-row-gap: $base-unit*4;
 
       @media (min-width: $screen-landscape-xs-min) {
@@ -1092,12 +1091,30 @@ select {
   cursor: pointer;
 
   &.unavailable {
-    padding: $spacing-default*3 $spacing-default;
     cursor: auto;
   }
+}
 
-  img {
-    width: 100%
+.webcam-stream-image {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  padding-bottom: 75%;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.unavailable {
+  .webcam-stream-image {
+    &:before {
+      position: absolute;
+      display: flex;
+      content: "Stream unavailable";
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+    }
   }
 }
 
