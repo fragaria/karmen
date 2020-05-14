@@ -73,9 +73,9 @@ const createValidStore = (printer) => {
   );
 };
 
-const expectStreamUnavailable = (queryByAltText, getByText) => {
+const expectStreamUnavailable = (queryByTitle, getByText) => {
   expect(
-    queryByAltText("Current state from undefined")
+    queryByTitle("Current state from undefined")
   ).not.toBeInTheDocument();
   expect(getByText("Stream unavailable")).toBeInTheDocument();
 };
@@ -83,24 +83,24 @@ const expectStreamUnavailable = (queryByAltText, getByText) => {
 it("WebcamStream: is available", async () => {
   const printer = createPrinter(true);
   const store = createValidStore(printer);
-  const { queryByText, getByAltText } = renderWebcamStream(store, printer);
+  const { queryByText, getByTitle } = renderWebcamStream(store, printer);
 
-  expect(getByAltText("Current state from undefined")).toBeInTheDocument();
+  expect(getByTitle("Current state from undefined")).toBeInTheDocument();
   expect(queryByText("Stream unavailable")).not.toBeInTheDocument();
 });
 
 it("WebcamStream: is not available due to absence of image", async () => {
   const printer = createPrinter(true);
   const store = createStore();
-  const { getByText, queryByAltText } = renderWebcamStream(store, printer);
+  const { getByText, queryByTitle } = renderWebcamStream(store, printer);
 
-  expectStreamUnavailable(queryByAltText, getByText);
+  expectStreamUnavailable(queryByTitle, getByText);
 });
 
 it("WebcamStream: is not available due to client is disconnected", async () => {
   const printer = createPrinter(false);
   const store = createValidStore(printer);
-  const { getByText, queryByAltText } = renderWebcamStream(store, printer);
+  const { getByText, queryByTitle } = renderWebcamStream(store, printer);
 
-  expectStreamUnavailable(queryByAltText, getByText);
+  expectStreamUnavailable(queryByTitle, getByText);
 });

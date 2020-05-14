@@ -1102,6 +1102,10 @@ select {
   padding-bottom: 75%;
   background-repeat: no-repeat;
   background-size: contain;
+
+  span {
+    display: none;
+  }
 }
 
 .unavailable {
