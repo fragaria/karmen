@@ -50,3 +50,10 @@ export const deletePrinter = (orgUuid, uuid) => {
     successCodes: [204, 404],
   });
 };
+
+export const issuePrinterToken = (orgUuid) => {
+  return performRequest({
+    uri: `/organizations/${orgUuid}/printers/issue-token`,
+    method: "POST",
+  });
+};

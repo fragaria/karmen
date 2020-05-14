@@ -5,14 +5,59 @@ import SetActiveOrganization from "../../components/gateways/set-active-organiza
 import { FormInputs } from "../../components/forms/form-utils";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import BusyButton from "../../components/utils/busy-button";
-import { addPrinter } from "../../actions";
+import { addPrinter, issuePrinterToken } from "../../actions";
 
 class AddPrinter extends React.Component {
+  onpremiseAddressConfig = {
+    name: "Printer address",
+    helpText: <span>Please enter full address to your machine.</span>,
+  };
+
+  pillAddressConfig = {
+    name: "Printer code",
+    helpText: (
+      <span>Please enter code from the Pill configuration wizard.</span>
+    ),
+    disabled: false,
+    clipboardSupport: false,
+  };
+
+  otherAddressConfig = {
+    name: "Connection key",
+    helpText: (
+      <span>
+        Use this connection key for connecting your device via{" "}
+        <a
+          href="https://github.com/fragaria/websocket-proxy"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          websocket-proxy
+        </a>
+        .
+      </span>
+    ),
+    disabled: true,
+    clipboardSupport: true,
+  };
+
   state = {
     redirect: false,
     message: null,
     messageOk: false,
+    issuedToken: null,
     form: {
+      deviceType: {
+        name: "I'm adding",
+        val: "pill",
+        type: "select",
+        options: [
+          { name: "Karmen Pill", val: "pill" },
+          { name: "Other device", val: "other" },
+        ],
+        required: true,
+        error: null,
+      },
       name: {
         name: "New printer's name",
         val: "",
@@ -21,11 +66,13 @@ class AddPrinter extends React.Component {
         error: null,
       },
       address: {
-        name: window.env.IS_CLOUD_INSTALL ? "Printer code" : "Printer address",
         val: "",
         type: "text",
         required: true,
         error: null,
+        ...(window.env.IS_CLOUD_INSTALL
+          ? this.pillAddressConfig
+          : this.onpremiseAddressConfig),
       },
       collapsible: {
         type: "collapsible",
@@ -134,8 +181,55 @@ class AddPrinter extends React.Component {
     }
   }
 
-  updateValue(form, name, value) {
+  async getPrinterToken() {
+    if (!this.state.issuedToken) {
+      this.setState({
+        issuedToken: await this.props.issueToken(),
+      });
+    }
+    return this.state.issuedToken;
+  }
+
+  onUpdate(form, name, value) {
+    const updatedForm = this.updateFormValue(form, name, value);
+
+    this.setState({ form: updatedForm }, async () => {
+      if (name === "deviceType" && window.env.IS_CLOUD_INSTALL) {
+        if (value === "other") {
+          const token = await this.getPrinterToken();
+
+          // Only set if the value didn't change in the meantime
+          if (this.state.form.deviceType.val === "other") {
+            this.setState({
+              form: Object.assign({}, this.state.form, {
+                address: Object.assign({}, this.state.form.address, {
+                  val: token,
+                }),
+              }),
+            });
+          }
+        } else {
+          this.setState({
+            form: Object.assign({}, this.state.form, {
+              address: Object.assign({}, this.state.form.address, { val: "" }),
+            }),
+          });
+        }
+      }
+    });
+  }
+
+  updateFormValue(form, name, value) {
     const out = Object.assign({}, form);
+
+    if (name === "deviceType" && window.env.IS_CLOUD_INSTALL) {
+      out.address = Object.assign(out.address, {
+        ...(value === "pill"
+          ? this.pillAddressConfig
+          : this.otherAddressConfig),
+      });
+    }
+
     for (const key in form) {
       if (form[key].type === "collapsible" && form[key].inputs[name]) {
         out[key].inputs[name].val = value;
@@ -145,6 +239,7 @@ class AddPrinter extends React.Component {
         out[key].error = null;
       }
     }
+
     return out;
   }
 
@@ -171,11 +266,9 @@ class AddPrinter extends React.Component {
                 )}
                 <FormInputs
                   definition={form}
-                  updateValue={(name, value) => {
-                    this.setState({
-                      form: this.updateValue(form, name, value),
-                    });
-                  }}
+                  updateValue={(name, value) =>
+                    this.onUpdate(form, name, value)
+                  }
                 />
                 <div className="cta-box text-center">
                   <BusyButton
@@ -203,6 +296,7 @@ class AddPrinter extends React.Component {
 }
 
 export default connect(null, (dispatch, ownProps) => ({
+  issueToken: () => dispatch(issuePrinterToken(ownProps.match.params.orguuid)),
   createPrinter: (protocol, hostname, ip, port, path, token, name, apiKey) =>
     dispatch(
       addPrinter(

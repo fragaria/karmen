@@ -469,6 +469,12 @@ footer {
     vertical-align: middle;
   }
 
+  &.btn-formsized {
+    height: $form-elements-height;
+    padding: $base-unit $base-unit*2;
+    font-size: 1.4rem;
+  }
+
   &:disabled {
     background: #adadad;
 
@@ -1002,6 +1008,10 @@ select {
     @media (max-width: $screen-sm-min) {
       margin-top: -12px;
     }
+
+    &.help {
+      color: $color-light;
+    }
   }
 
   @media (min-width: $screen-sm-min) {
@@ -1022,6 +1032,11 @@ select {
       padding: 0 0 0 $spacing-default;
     }
   }
+}
+
+.input-group-line {
+  display: flex;
+  align-items: center;
 }
 
 .inline-form {
