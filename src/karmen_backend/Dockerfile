@@ -48,6 +48,7 @@ ENV POSTGRES_DB_USER print3d
 
 ENV SERVICE_HOST 0.0.0.0
 ENV SERVICE_PORT 9764
+ENV TOKEN_SERVER_API_URL ''
 
 COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY ./scripts/uwsgi.ini /etc/uwsgi/uwsgi.ini

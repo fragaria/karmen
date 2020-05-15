@@ -52,6 +52,7 @@ services:
       SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
       SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
       UPLOAD_FOLDER: ${KARMEN_UPLOAD_FOLDER:-/tmp/karmen-files}
+      TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-}
     volumes:
       - ${KARMEN_UPLOAD_FOLDER:-./karmen-files}:/tmp/karmen-files
       - /var/run/dbus:/var/run/dbus # for mdns resolution
