@@ -49,6 +49,7 @@ services:
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
       MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
+      TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
