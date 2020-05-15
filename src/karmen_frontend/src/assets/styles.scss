@@ -1144,6 +1144,7 @@ select {
     width: 100%;
     min-width: 80rem;
     height: auto;
+    padding: 0 $spacing-default * 2;
 
     @include plumber(
       $leading-top: 0,
@@ -1172,6 +1173,21 @@ select {
       $leading-top: 2,
       $leading-bottom: 8
     );
+  }
+
+  .loader {
+    @include plumber(
+      $leading-top: 6,
+      $leading-bottom: 6
+    );
+  }
+}
+
+.modal-content-narrow {
+  padding: 0 $spacing-default;
+
+  @media (min-width: $screen-sm-min) {
+    padding: 0 $spacing-default * 4;
   }
 }
 
