@@ -185,9 +185,17 @@ export class AddPrinterForm extends React.Component {
 
   async getPrinterToken() {
     if (!this.state.issuedToken) {
-      this.setState({
-        issuedToken: await this.props.issueToken(),
-      });
+      try {
+        this.setState({
+          issuedToken: await this.props.issueToken(),
+        });
+      } catch (err) {
+        this.setState({
+          message:
+            "Could not retreive a new connection key for you, please try refreshing this page.",
+        });
+        return null;
+      }
     }
     return this.state.issuedToken;
   }
@@ -201,7 +209,7 @@ export class AddPrinterForm extends React.Component {
           const token = await this.getPrinterToken();
 
           // Only set if the value didn't change in the meantime
-          if (this.state.form.deviceType.val === "other") {
+          if (this.state.form.deviceType.val === "other" && token) {
             this.setState({
               form: Object.assign({}, this.state.form, {
                 address: Object.assign({}, this.state.form.address, {
