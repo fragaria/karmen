@@ -56,3 +56,12 @@ export const deletePrinter = createThunkedAction(
     });
   }
 );
+
+export const issuePrinterToken = createThunkedAction(
+  "PRINTERS_ISSUE_TOKEN",
+  (orguuid, { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+      return retryIfUnauthorized(backend.issuePrinterToken, dispatch)(orguuid);
+    }).then(({ data }) => data.token);
+  }
+);

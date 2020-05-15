@@ -9,7 +9,7 @@ from flask_jwt_extended import get_current_user
 from server import app, __version__
 from server.database import network_clients, printers
 from server import clients, executor
-from server.services import network
+from server.services import network, printer_tokens
 from . import jwt_force_password_change, validate_org_access, validate_uuid
 from server.clients.utils import PrinterClientException
 
@@ -56,7 +56,7 @@ def make_printer_response(printer, fields):
         webcam_data = printer_inst.client_info.webcam or {}
         data["webcam"] = {
             "url": "/organizations/%s/printers/%s/webcam-snapshot"
-            % (printer_inst.organization_uuid, printer_inst.uuid,),
+            % (printer_inst.organization_uuid, printer_inst.uuid),
             "flipHorizontal": webcam_data.get("flipHorizontal"),
             "flipVertical": webcam_data.get("flipVertical"),
             "rotate90": webcam_data.get("rotate90"),
@@ -135,6 +135,34 @@ def printers_list(org_uuid):
             executor.futures.pop("%s:%s" % (uqid, data["uuid"]))
 
     return jsonify({"items": device_list}), 200
+
+
+@app.route("/organizations/<org_uuid>/printers/issue-token", methods=["POST"])
+@jwt_force_password_change
+@validate_org_access()
+@cross_origin()
+def issue_printer_token(org_uuid):
+    """Issue a signed printer token using the key server."""
+    user_uuid = get_current_user()["uuid"]
+    issuer = printer_tokens.get_issuer()
+
+    try:
+        token = issuer.issue_token(user_uuid)
+    except (
+        printer_tokens.TokenIssuerResponseMalformed,
+        printer_tokens.TokenIssuerUnavailable,
+    ) as exc:
+        app.logger.error("Trouble talking to the token issuer: %s" % exc)
+        return abort(
+            make_response(
+                jsonify(
+                    message="Token could not be issued due to a failure on the issuer server"
+                ),
+                503,
+            )
+        )
+
+    return make_response(jsonify(token=token), 201)
 
 
 @app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["GET"])
@@ -431,7 +459,7 @@ def _get_webcam_snapshot(snapshot_url):
         if req is not None and req.status_code == 200:
             return req
         return False
-    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout,) as e:
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
         app.logger.debug("Cannot call %s because %s" % (snapshot_url, e))
         return False
 
@@ -648,9 +676,7 @@ def control_tool_temperature(org_uuid, uuid, part_name):
     return "", 204
 
 
-@app.route(
-    "/organizations/<org_uuid>/printers/<uuid>/update/", methods=["POST"],
-)
+@app.route("/organizations/<org_uuid>/printers/<uuid>/update/", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()

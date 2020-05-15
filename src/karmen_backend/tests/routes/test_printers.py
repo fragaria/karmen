@@ -446,7 +446,7 @@ class CreateRoute(unittest.TestCase):
             )
             response = c.post(
                 "/organizations/%s/printers" % UUID_ORG,
-                json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
+                json={"ip": ip, "port": 81, "name": "random-test-printer-name"},
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             uuid = response.json["uuid"]
@@ -474,7 +474,7 @@ class CreateRoute(unittest.TestCase):
                 )
                 response = c.post(
                     "/organizations/%s/printers" % UUID_ORG,
-                    json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
+                    json={"ip": ip, "port": 81, "name": "random-test-printer-name"},
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
 
@@ -650,13 +650,13 @@ class CreateRoute(unittest.TestCase):
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
             response = c.post(
                 "/organizations/%s/printers" % UUID_ORG,
-                json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
+                json={"ip": ip, "port": 81, "name": "random-test-printer-name"},
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 201)
             response = c.post(
                 "/organizations/%s/printers" % UUID_ORG,
-                json={"ip": ip, "port": 81, "name": "random-test-printer-name",},
+                json={"ip": ip, "port": 81, "name": "random-test-printer-name"},
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
             )
             self.assertEqual(response.status_code, 409)
@@ -891,7 +891,7 @@ class PatchRoute(unittest.TestCase):
             response = c.patch(
                 "/organizations/%s/printers/%s" % (UUID_ORG, self.uuid),
                 headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
-                json={"name": "random-test-printer-name", "api_key": "1234",},
+                json={"name": "random-test-printer-name", "api_key": "1234"},
             )
             self.assertEqual(response.status_code, 200)
             p = printers.get_printer(self.uuid)
@@ -1457,14 +1457,14 @@ class ControlFanRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
         network_clients.delete_network_client(self.ncid)
         network_clients.add_network_client(
-            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint"
         )
         printers.add_printer(
             uuid=self.uuid,
             network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            client_props={"version": "123", "connected": True, "plugins": [],},
+            client_props={"version": "123", "connected": True, "plugins": []},
         )
 
     def tearDown(self):
@@ -1490,9 +1490,7 @@ class ControlFanRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_fan_put_on(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1512,9 +1510,7 @@ class ControlFanRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 204)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_fan_put_off(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1564,9 +1560,7 @@ class ControlFanRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_fan_change_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1588,14 +1582,14 @@ class ControlMotorsRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
         network_clients.delete_network_client(self.ncid)
         network_clients.add_network_client(
-            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint"
         )
         printers.add_printer(
             uuid=self.uuid,
             network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            client_props={"version": "123", "connected": True, "plugins": [],},
+            client_props={"version": "123", "connected": True, "plugins": []},
         )
 
     def tearDown(self):
@@ -1621,9 +1615,7 @@ class ControlMotorsRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_motors_turn_off(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1673,9 +1665,7 @@ class ControlMotorsRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_motors_change_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1697,14 +1687,14 @@ class ControlExtrusionRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
         network_clients.delete_network_client(self.ncid)
         network_clients.add_network_client(
-            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint"
         )
         printers.add_printer(
             uuid=self.uuid,
             network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            client_props={"version": "123", "connected": True, "plugins": [],},
+            client_props={"version": "123", "connected": True, "plugins": []},
         )
 
     def tearDown(self):
@@ -1730,9 +1720,7 @@ class ControlExtrusionRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_extrusion(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1782,9 +1770,7 @@ class ControlExtrusionRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_extrusion_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1806,14 +1792,14 @@ class ControlBedTemperatureRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
         network_clients.delete_network_client(self.ncid)
         network_clients.add_network_client(
-            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint"
         )
         printers.add_printer(
             uuid=self.uuid,
             network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            client_props={"version": "123", "connected": True, "plugins": [],},
+            client_props={"version": "123", "connected": True, "plugins": []},
         )
 
     def tearDown(self):
@@ -1839,9 +1825,7 @@ class ControlBedTemperatureRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_bed_temp(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1906,9 +1890,7 @@ class ControlBedTemperatureRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_extrusion_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1931,14 +1913,14 @@ class ControlTemperaturesRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
         network_clients.delete_network_client(self.ncid)
         network_clients.add_network_client(
-            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint"
         )
         printers.add_printer(
             uuid=self.uuid,
             network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            client_props={"version": "123", "connected": True, "plugins": [],},
+            client_props={"version": "123", "connected": True, "plugins": []},
         )
 
     def tearDown(self):
@@ -1964,9 +1946,7 @@ class ControlTemperaturesRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_bed_temp(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -1987,9 +1967,7 @@ class ControlTemperaturesRoute(unittest.TestCase):
                 verify=True,
             )
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_tool0_temp(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -2065,9 +2043,7 @@ class ControlTemperaturesRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_extrusion_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -2090,14 +2066,14 @@ class ControlPrintheadRoute(unittest.TestCase):
         printers.delete_printer(self.uuid)
         network_clients.delete_network_client(self.ncid)
         network_clients.add_network_client(
-            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint",
+            uuid=self.ncid, ip=self.ip, hostname="hostname", client="octoprint"
         )
         printers.add_printer(
             uuid=self.uuid,
             network_client_uuid=self.ncid,
             organization_uuid=UUID_ORG,
             name="name",
-            client_props={"version": "123", "connected": True, "plugins": [],},
+            client_props={"version": "123", "connected": True, "plugins": []},
         )
 
     def tearDown(self):
@@ -2123,9 +2099,7 @@ class ControlPrintheadRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 404)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_jog_printhead(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -2146,9 +2120,7 @@ class ControlPrintheadRoute(unittest.TestCase):
                 verify=True,
             )
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(204),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(204))
     def test_home_printhead(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -2230,9 +2202,7 @@ class ControlPrintheadRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_printhead_home_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -2254,9 +2224,7 @@ class ControlPrintheadRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 500)
 
-    @mock.patch(
-        "server.clients.octoprint.requests.post", return_value=Response(409),
-    )
+    @mock.patch("server.clients.octoprint.requests.post", return_value=Response(409))
     def test_printhead_jog_fail_on_device(self, mock_post):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
@@ -2266,3 +2234,34 @@ class ControlPrintheadRoute(unittest.TestCase):
                 json={"command": "jog", "x": 3},
             )
             self.assertEqual(response.status_code, 500)
+
+
+class IssueTokenRoute(unittest.TestCase):
+    def test_issue_token(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/issue-token" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertTrue("token" in response.json)
+            self.assertTrue(response.json["token"] is not None)
+
+    def test_issue_token_fail_org(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/printers/issue-token",
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 403)
+
+    def test_issue_token_fail_perms(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post(
+                "/organizations/5ed0c35f-8d69-48c8-8c45-8cd8f93cfc52/printers/issue-token",
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 403)

@@ -1,6 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 
 import Collapsible from "../utils/collapsible";
+
+export const ClipboardButton = ({ valueToCopy }) => {
+  const [copied, setCopied] = useState(false);
+
+  const copy = (evt) => {
+    evt.preventDefault();
+    navigator.clipboard.writeText(valueToCopy);
+    setCopied(true);
+  };
+
+  return (
+    <button className="btn btn-formsized" onClick={copy}>
+      {copied ? "Copied!" : "Copy"}
+    </button>
+  );
+};
 
 const FormFields = ({ definition, updateValue }) => {
   return Object.keys(definition).map((name) => {
@@ -10,16 +26,25 @@ const FormFields = ({ definition, updateValue }) => {
         return (
           <React.Fragment key={name}>
             <label htmlFor={name}>{definition[name].name}</label>
-            <input
-              type={definition[name].type}
-              id={name}
-              name={name}
-              autoComplete={definition[name].autocomplete}
-              value={definition[name].val}
-              disabled={definition[name].disabled}
-              onChange={(e) => updateValue(name, e.target.value)}
-            />
+            <div className="input-group-line">
+              <input
+                type={definition[name].type}
+                id={name}
+                name={name}
+                autoComplete={definition[name].autocomplete}
+                value={definition[name].val}
+                disabled={definition[name].disabled}
+                readOnly={definition[name].readOnly}
+                onChange={(e) => updateValue(name, e.target.value)}
+              />
+              {definition[name].clipboardSupport && (
+                <ClipboardButton valueToCopy={definition[name].val} />
+              )}
+            </div>
             <span>
+              {definition[name].helpText && (
+                <small className="help">{definition[name].helpText}</small>
+              )}
               {definition[name].error && (
                 <small>{definition[name].error}</small>
               )}
@@ -35,9 +60,13 @@ const FormFields = ({ definition, updateValue }) => {
               name={name}
               value={definition[name].val}
               disabled={definition[name].disabled}
+              readOnly={definition[name].readOnly}
               onChange={(e) => updateValue(name, e.target.value)}
             ></textarea>
             <span>
+              {definition[name].helpText && (
+                <small className="help">{definition[name].helpText}</small>
+              )}
               {definition[name].error && (
                 <small>{definition[name].error}</small>
               )}
@@ -54,9 +83,13 @@ const FormFields = ({ definition, updateValue }) => {
               name={name}
               checked={definition[name].val}
               disabled={definition[name].disabled}
+              readOnly={definition[name].readOnly}
               onChange={(e) => updateValue(name, e.target.checked)}
             />
             <span>
+              {definition[name].helpText && (
+                <small className="help">{definition[name].helpText}</small>
+              )}
               {definition[name].error && (
                 <small>{definition[name].error}</small>
               )}
@@ -66,7 +99,11 @@ const FormFields = ({ definition, updateValue }) => {
       case "select":
         const opts = definition[name].options.map((opt) => {
           return (
-            <option key={opt.val} value={opt.val}>
+            <option
+              key={opt.val}
+              value={opt.val}
+              data-testid={`${name}--${opt.val}`}
+            >
               {opt.name}
             </option>
           );
@@ -79,11 +116,15 @@ const FormFields = ({ definition, updateValue }) => {
               name={name}
               value={definition[name].val}
               disabled={definition[name].disabled}
+              readOnly={definition[name].readOnly}
               onChange={(e) => updateValue(name, e.target.value)}
             >
               {opts}
             </select>
             <span>
+              {definition[name].helpText && (
+                <small className="help">{definition[name].helpText}</small>
+              )}
               {definition[name].error && (
                 <small>{definition[name].error}</small>
               )}
@@ -105,7 +146,7 @@ const FormFields = ({ definition, updateValue }) => {
         );
       case "collapsible":
         return (
-          <>
+          <React.Fragment key={name}>
             <span></span>
             <Collapsible
               collapsedStateText={definition[name].collapsedStateText}
@@ -118,7 +159,7 @@ const FormFields = ({ definition, updateValue }) => {
               />
             </Collapsible>
             <span></span>
-          </>
+          </React.Fragment>
         );
       default:
         return null;
