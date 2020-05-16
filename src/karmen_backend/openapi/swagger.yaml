@@ -27,7 +27,7 @@ paths:
                 $ref: '#/components/schemas/printer_response'
         '404':
           description: >-
-            Printer not found. It either doesn't exists, or is not in this
+            Printer not found. It either doesn't exists, or belongs to another
             organization
           content:
             application/json:
@@ -38,7 +38,7 @@ paths:
         '400':
            $ref: '#/components/responses/invalid_UUID'
     patch:
-      summary: Change printer properties, update name or change API key
+      summary: Change printer properties, modify it's name or change API key
       operationId: server.routes.printers.printer_patch
       tags:
         - printers
@@ -93,7 +93,7 @@ paths:
 
         '404':
           description: >-
-            Printer not found. It either doesn't exists, or is not in this
+            Printer not found. It either doesn't exists, or belongs to another
             organization
           content:
             application/json:
@@ -106,7 +106,7 @@ paths:
 
   '/organizations/{org_uuid}/printers':
     get:
-      summary: Get list of printers in organization
+      summary: Get list of printers in an organization
       operationId: server.routes.printers.printers_list
       tags:
         - printers
@@ -128,7 +128,7 @@ paths:
            $ref: '#/components/responses/invalid_UUID'
         '403':
           description: >-
-            User is not a member of this organization, or it doesn't exists
+            User is not a member of this organization, or doesn't exists at all
           content:
             application/json:
               schema:
@@ -141,11 +141,12 @@ paths:
       tags:
         - printers
       description: >-
-        Post to this endpoint to create a printer. In CLOUD_MODE, you can add printer by token.
-        In non-CLOUD mode, printer must be added by network properties.
+        Post to this endpoint to add a printer. In CLOUD_MODE, you can add printer by token.
+        In non-CLOUD mode, printer addition requires specifying the network address (IP or hostname)
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -154,14 +155,14 @@ paths:
                 - $ref: '#/components/schemas/printer_by_network_props'
             examples:
               by_token:
-                summary: Printer added by token
+                summary: Add printer by token
                 value:
                   name: Printer name
                   token: ABC123
                   protocol: https
                   api_key: ""
               by_net_props:
-                summary: Printer added by network props
+                summary: Add printer by network address
                 value:
                   name: Printer name
                   ip: 192.1368.5.42
@@ -174,7 +175,7 @@ paths:
 
       responses:
         '200':
-          description: 'OK, printer_response is returned withou additional fields'
+          description: 'OK, printer_response is returned without additional fields'
           content:
             application/json:
               schema:
@@ -205,10 +206,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/api_err_response'
               example:
-                message: Printer exists
+                message: Printer already exists
         '500':
           description: >-
-            Erro while adding printer
+            Error while adding printer
           content:
             application/json:
               schema:
@@ -216,12 +217,12 @@ paths:
               examples:
                 unresolved_hostname:
                   summary: Unresolved hostname
-                  description:  You are trying to add printer via hostname, but the server was unable to resolve that hostname to an IP.
+                  description:  You are trying to add printer via hostname, but the server was unable to resolve that hostname to an IP
                   value:
                     message: Cannot resolve {hostname} with mDNS
                 invalid_mode:
                   summary: Wrong CLOUD mode
-                  description: You are trying to add printer in non-cloud mode, but not enough data to identify the printer in network was supplied.
+                  description: You are trying to add printer in non-cloud mode, but not enough data to identify the printer in network was supplied
                   value:
                     message: Cannot add printer without a token in CLOUD_MODE
 
@@ -235,7 +236,7 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
-
+        required: true
         content:
           application/json:
             schema:
@@ -266,7 +267,7 @@ paths:
                 message: <state> is an uknown state
         '500':
           description: >-
-            Cannot change printers state
+            Cannot change printer's state
           content:
             application/json:
               schema:
@@ -284,6 +285,7 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -326,7 +328,7 @@ paths:
 
   '/organizations/{org_uuid}/printers/{printer_uuid}/webcam-snapshot':
     get:
-      summary: Get snapshot from webcam
+      summary: Get snapshot from the webcam
       operationId: server.routes.printers.printer_webcam_snapshot
       tags:
         - printers
@@ -336,8 +338,13 @@ paths:
       responses:
         '200':
           description: 'OK, image is returned'
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
         '202':
-          description: Karmen is initializing connection. Keep trying, image will be returned in following requests
+          description: Karmen is establishing connection with the printer. Please try again later
 
         '404':
           description: >-
@@ -351,7 +358,7 @@ paths:
 
   '/organizations/{org_uuid}/printers/{printer_uuid}/lights':
     post:
-      summary: Change  state of printer light
+      summary: Toggle state of printer light
       operationId: server.routes.printers.printer_set_lights
       tags:
         - printers
@@ -359,6 +366,7 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -386,7 +394,7 @@ paths:
 
         '500':
           description: >-
-            Light is no available on this printer
+            Light is no available with this printer
           content:
             application/json:
               schema:
@@ -405,6 +413,7 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -466,17 +475,17 @@ paths:
 
         '500':
           description: >-
-            Printer refued to move
+            Printer refused to move the head
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/api_err_response'
               example:
-                message: Cannot mode printhead
+                message: Cannot move the printhead
 
   '/organizations/{org_uuid}/printers/{printer_uuid}/fan':
     post:
-      summary: Change  state of printer fan
+      summary: Toggle state of the printer fan
       operationId: server.routes.printers.control_fan
       tags:
         - printers
@@ -484,6 +493,7 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -513,7 +523,7 @@ paths:
 
         '500':
           description: >-
-            Printer refused to control fan
+            Printer has refused to toggle the fan
           content:
             application/json:
               schema:
@@ -531,13 +541,14 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               properties:
                 target:
                   type: string
-                  enum: [ off]
+                  enum: [off]
             examples:
               disable:
                 value:
@@ -557,7 +568,7 @@ paths:
 
         '500':
           description: >-
-            Printer refused to control motors
+            Printer refused to disable motors
           content:
             application/json:
               schema:
@@ -567,7 +578,7 @@ paths:
 
   '/organizations/{org_uuid}/printers/{printer_uuid}/extrusion':
     post:
-      summary: Extrude or retrract filament
+      summary: Extrude or retract filament
       operationId: server.routes.printers.control_extrusion
       tags:
         - printers
@@ -575,6 +586,7 @@ paths:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -604,17 +616,17 @@ paths:
 
         '500':
           description: >-
-            Printer refused to control fan
+            Printer refused to extract or retrude filament
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/api_err_response'
               example:
-                message: Cannot control fan
+                message: Cannot control extruder motor
 
   '/organizations/{org_uuid}/printers/{printer_uuid}/temperatures/{part_name}':
     post:
-      summary: Set temperatures for part
+      summary: Set desired temperatures for part
       operationId: server.routes.printers.control_tool_temperature
       tags:
         - printers
@@ -627,10 +639,11 @@ paths:
             type: string
             enum: [tool0, tool1, bed]
           required: true
-          description: Part to set semperature
+          description: Part to set semperature for
 
 
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -668,7 +681,7 @@ paths:
 
         '500':
           description: >-
-            Printer refued to set temo
+            Printer has refused to adjust the temperature
           content:
             application/json:
               schema:
@@ -700,14 +713,14 @@ paths:
               examples:
                 Not a pill:
                   value:
-                    message: The automatic update is supported on original Pill devices only.
+                    message: The automatic update is supported on original Pill devices only
                 No update available:
                   value:
-                    message: pdate is not available for the device.
+                    message: Update is not available for the device at the moment
 
         '500':
           description: >-
-            Pill was unable to start an update.
+            Pill was unable to start the update process,
           content:
             application/json:
               schema:
@@ -724,6 +737,7 @@ paths:
       tags:
         - users-me
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -754,6 +768,7 @@ paths:
       summary: 'Change username'
       operationId: server.routes.users_me.patch_user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -777,6 +792,7 @@ paths:
       tags:
         - users-me
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -804,6 +820,7 @@ paths:
       tags:
         - users-me
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -823,6 +840,7 @@ paths:
       tags:
         - users-me
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -845,11 +863,12 @@ paths:
           description: 'Password reset unsuccessfull'
   '/users/me/authenticate':
     post:
-      summary: 'Login via username and password and get refresh token'
+      summary: 'Login using username and password and get refresh token'
       operationId: server.routes.users_me.authenticate
       tags:
         - users-me
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -868,9 +887,10 @@ paths:
           description: Wrong login
   '/users/me/authenticate-fresh':
     post:
-      summary: 'Get new access token'
+      summary: 'Get new access token and no refresh token'
       operationId: server.routes.users_me.authenticate_fresh
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -891,7 +911,7 @@ paths:
 
   '/users/me/authenticate-refresh':
     post:
-      summary: 'Refresh fresh token'
+      summary: 'Get new refresh token'
       operationId: server.routes.users_me.authenticate_refresh
       tags:
         - users-me
@@ -912,6 +932,7 @@ paths:
       summary: 'Change password'
       operationId: server.routes.users_me.change_password
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -935,7 +956,7 @@ paths:
 
   '/users/me/tokens':
     get:
-      summary: 'List users API tokens'
+      summary: List current user's API tokens
       operationId: server.routes.users_me.list_api_tokens
       tags:
         - users-me
@@ -943,11 +964,12 @@ paths:
         '200':
           description: 'List of tokens'
     post:
-      summary: 'Create API token'
+      summary: 'Create new API token'
       operationId: server.routes.users_me.create_api_token
       tags:
         - users-me
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -959,7 +981,7 @@ paths:
           description: 'OK'
   '/users/me/tokens/{jti}':
     delete:
-      summary: 'Create API token'
+      summary: 'Revoke API token'
       operationId: server.routes.users_me.revoke_api_token
       tags:
         - users-me
@@ -973,14 +995,15 @@ paths:
 
   '/organizations/{org_uuid}/users':
     post:
-      summary: Add user to organization.
-      description: If user exists, he is added to the org. If he does not, an account is created and he receives an email
+      summary: Add user to organization by his email
+      description: If user exists, he is added to the org. Otherwise, new account is created and invitation is sent to him
       operationId: server.routes.users.add_user_to_org
       tags:
         - users
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1011,7 +1034,7 @@ paths:
                   value:
                     message: Invalid email
     get:
-      summary: 'Get list of users in organization'
+      summary: 'Get list of users in an organization'
       operationId: server.routes.users.list_users
       tags:
         - users
@@ -1022,7 +1045,7 @@ paths:
           description: 'List of users'
   '/organizations/{org_uuid}/users/{user_uuid}':
     patch:
-      summary: 'Change user role in organization'
+      summary: Change user's role in an organization
       operationId: server.routes.users.update_user
       tags:
         - users
@@ -1030,6 +1053,7 @@ paths:
         - $ref: '#/components/parameters/organization_uuid_param'
         - $ref: '#/components/parameters/user_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1043,7 +1067,7 @@ paths:
         '400':
           description: 'Bad role'
     delete:
-      summary: 'Remove user from organization'
+      summary: 'Remove user from an organization'
       operationId: server.routes.users.delete_user
       tags:
         - users
@@ -1059,7 +1083,7 @@ paths:
 
   '/organizations/{org_uuid}/gcodes':
     get:
-      summary: 'List gcodes'
+      summary: 'List new gcodes'
       operationId: server.routes.gcodes.gcodes_list
       tags:
         - gcodes
@@ -1076,17 +1100,18 @@ paths:
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           text/plain:
             schema:
               type: string
               format: binary
       responses:
-        '200':
+        '201':
           description: 'Created'
   '/organizations/{org_uuid}/gcodes/{gcode_uuid}':
     get:
-      summary: 'Get gcode detail'
+      summary: 'Get gcode details'
       operationId: server.routes.gcodes.gcode_detail
       tags:
         - gcodes
@@ -1121,7 +1146,9 @@ paths:
           description: 'Gcode file'
   '/octoprint-emulator/api/version':
     get:
-      summary: 'Get octoprint version'
+      summary: >-
+        Get octoprint version - this returns dummy version to trick some slicers into thinking
+        this is a valid Octoprint, otherwise they won't talk to us
       operationId: server.routes.octoprintemulator.version
       tags:
         - octoprint-emulator
@@ -1130,7 +1157,9 @@ paths:
           description: ''
   '/octoprint-emulator/api/settings':
     get:
-      summary: 'Get octo settings'
+      summary: >-
+        Gect octoprint settings - this returns dummy settings to trick some slicers into thinking
+        this is a valid Octoprint, otherwise they won't talk to us
       operationId: server.routes.octoprintemulator.settings
       tags:
         - octoprint-emulator
@@ -1139,7 +1168,9 @@ paths:
           description: ''
   '/octoprint-emulator/api/printer':
     get:
-      summary: 'Get printer status'
+      summary: >-
+        Get printer status - this returns dummy status to trick some slicers into thinking
+        this is a valid Octoprint, otherwise they won't talk to us
       operationId: server.routes.octoprintemulator.printer
       tags:
         - octoprint-emulator
@@ -1148,7 +1179,9 @@ paths:
           description: ''
   '/octoprint-emulator/api/job':
     get:
-      summary: 'Get job status'
+      summary: >-
+        Get job status - this returns dummy status to trick some slicers into thinking
+        this is a valid Octoprint, otherwise they won't talk to us
       operationId: server.routes.octoprintemulator.job
       tags:
         - octoprint-emulator
@@ -1157,7 +1190,9 @@ paths:
           description: ''
   '/octoprint-emulator/api/files/local':
     post:
-      summary: 'Upload gcode'
+      summary: >-
+        Upload gcode to Karmen. Pretends to be Octoprint so you can use "Send gcode to octoprint" option
+        in some slicers
       operationId: server.routes.octoprintemulator.upload
       tags:
         - octoprint-emulator
@@ -1166,11 +1201,12 @@ paths:
           description: ''
   '/organizations':
     post:
-      summary: 'Create organization'
+      summary: 'Create new organization'
       operationId: server.routes.organizations.create_organization
       tags:
         - organizations
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1190,9 +1226,10 @@ paths:
           description: 'List of organizations'
   '/organizations/{org_uuid}':
     patch:
-      summary: 'Reanme orgaization'
+      summary: 'Rename orgaization'
       operationId: server.routes.organizations.update_organization
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1215,6 +1252,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1254,9 +1292,12 @@ paths:
           description: 'Printjob detail'
   '/organizations/{org_uuid}/tasks':
     post:
-      summary: 'Schedule a task for organization'
+      summary: >-
+        Schedule a background task for an orgaization. Currently we have only on, scan_network,
+        supported only in non-cloud mode. This one scans the network for any octoprint boxes.
       operationId: server.routes.tasks.enqueue_task
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1288,29 +1329,34 @@ components:
       required: true
       schema:
         type: string
+        format: uuid
     organization_uuid_param:
       name: org_uuid
       in: path
       required: true
       schema:
+        format: uuid
         type: string
     printjob_uuid_param:
       name: printjob_uuid
       in: path
       required: true
       schema:
+        format: uuid
         type: string
     user_uuid_param:
       name: user_uuid
       in: path
       required: true
       schema:
+        format: uuid
         type: string
     gcode_uuid_param:
       name: gcode_uuid
       in: path
       required: true
       schema:
+        format: uuid
         type: string
     jti:
       name: jti
@@ -1378,9 +1424,11 @@ components:
         hostname:
           type: string
           example: karmen_printer.local
+          format: hostname
         ip:
           type: string
           example: 192.168.1.42
+          format: ipv4
         job:
           type: object
           properties:
@@ -1393,9 +1441,11 @@ components:
             printTime:
               type: number
               example: 3066
+              description: Time in seconds
             printTimeLeft:
               type: number
               example: 6060
+              description: Time in seconds
         lights:
           type: string
           enum: [off, on, unavailable]
@@ -1461,6 +1511,7 @@ components:
         uuid:
           type: string
           example: 20e91c14-c3e4-4fe9-a066-e69d53324a20
+          format: uuid
         webcam:
           type: object
           properties:
