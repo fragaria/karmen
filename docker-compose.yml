@@ -49,7 +49,7 @@ services:
       MAILER: ${KARMEN_MAILER:-DUMMY}
       MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
       MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-}
+      TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-http://key_issuer:8422}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
@@ -130,6 +130,13 @@ services:
     networks:
       - default
       - printers
+  key_issuer:
+    image: fragaria/karmen-key-master
+    environment:
+      SECRET: 'your-super-secret-and-backed-up-private-keymaster-key'
+    networks:
+      - default
+      - backend
   backend_celery_worker:
     image: fragaria/karmen-backend
     build: ./src/karmen_backend

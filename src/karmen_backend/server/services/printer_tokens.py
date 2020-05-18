@@ -16,6 +16,10 @@ class TokenIssuerResponseMalformed(Exception):
     pass
 
 
+class TokenIssuerCommunicationError(Exception):
+    pass
+
+
 class FakeTokenIssuer:
     def issue_token(self, user_uuid, iss="kcf"):
         """Issue a fake random token with a length of 20."""
@@ -35,16 +39,22 @@ class TokenIssuer:
 
     def issue_token(self, user_uuid, iss="kcf"):
         try:
-            resp = self.session.post(
-                f"{self.api_url}/key", data={"iss": iss, "sub": user_uuid}
-            )
+            resp = self.session.post(f"{self.api_url}/key?iss={iss}&sub={user_uuid}")
         except (requests.ConnectionError, requests.ConnectTimeout) as exc:
-            raise TokenIssuerUnavailable() from exc
+            raise TokenIssuerUnavailable(exc) from exc
+
+        if resp.status_code != 200:
+            raise TokenIssuerCommunicationError(
+                f"Unexpected status code: {resp.status_code}"
+            )
 
         try:
-            return resp.json()["token"]
+            data = resp.json()
+            return data["token"]
+        except KeyError as exc:
+            raise TokenIssuerResponseMalformed(exc) from exc
         except Exception as exc:
-            raise TokenIssuerResponseMalformed() from exc
+            raise TokenIssuerCommunicationError(exc) from exc
 
 
 def get_issuer():
