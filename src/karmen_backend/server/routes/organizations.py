@@ -7,7 +7,7 @@ from server.database import organizations, organization_roles
 from . import jwt_force_password_change, validate_org_access
 
 
-@app.route("/organizations", methods=["POST"])
+# @app.route("/organizations", methods=["POST"])
 @cross_origin()
 @fresh_jwt_required
 @jwt_force_password_change
@@ -26,7 +26,7 @@ def create_organization():
     return jsonify({"uuid": uuid, "name": name}), 201
 
 
-@app.route("/organizations/<org_uuid>", methods=["PATCH"])
+# @app.route("/organizations/<org_uuid>", methods=["PATCH"])
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
@@ -45,7 +45,7 @@ def update_organization(org_uuid):
     return jsonify({"uuid": org_uuid, "name": name}), 200
 
 
-@app.route("/organizations", methods=["GET"])
+# @app.route("/organizations", methods=["GET"])
 @cross_origin()
 @jwt_force_password_change
 def list_organizations():

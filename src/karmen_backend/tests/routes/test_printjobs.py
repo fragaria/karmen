@@ -197,15 +197,14 @@ class ListRoute(unittest.TestCase):
                 in response.json["next"]
             )
 
-    def test_ignore_start_with_str(self):
+    def test_fail_start_with_str(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/printjobs?limit=3&start_with=asdfasdf" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
     def test_ignore_negative_limit(self):
         with app.test_client() as c:
@@ -217,25 +216,23 @@ class ListRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
 
-    def test_survive_ignore_start_with_negative(self):
+    def test_fail_start_with_negative(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/printjobs?limit=3&start_with=-1" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
-    def test_survive_ignore_limit_str(self):
+    def test_fail_limit_str(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/printjobs?limit=asdfasdf&start_with=5" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
     def test_filter_absent(self):
         with app.test_client() as c:

@@ -498,6 +498,7 @@ class CreateRoute(unittest.TestCase):
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
+                print(response, response.data, dir(response))
                 uuid = response.json["uuid"]
                 self.assertEqual(response.status_code, 201)
                 response = c.get(
@@ -586,7 +587,8 @@ class CreateRoute(unittest.TestCase):
             response = c.post(
                 "/organizations/%s/printers" % UUID_ORG,
                 json={
-                    "host": "172.16.236.200:81",
+                    "ip": "172.16.236.200",
+                    "port": 81,
                     "name": "random-test-printer-name",
                     "protocol": "https",
                 },
