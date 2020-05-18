@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import Cookies from "js-cookie";
 
 const BASE_URL = window.env.BACKEND_BASE;
+const RAISE_ERRORS = window.env.RAISE_ERRORS || false;
 
 const _removeStorage = (key) => {
   try {
@@ -90,7 +91,7 @@ export const performRequest = (opts) => {
       "Content-Type": "application/json",
     },
     useAuth: true,
-    raiseErrors: false,
+    raiseErrors: RAISE_ERRORS,
   };
   opts = Object.assign({}, defaults, opts);
 
