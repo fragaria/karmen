@@ -35,7 +35,9 @@ class TokenIssuer:
 
     def issue_token(self, user_uuid, iss="kcf"):
         try:
-            resp = self.session.post("/key", data={"iss": iss, "sub": user_uuid})
+            resp = self.session.post(
+                f"{self.api_url}/key", data={"iss": iss, "sub": user_uuid}
+            )
         except (requests.ConnectionError, requests.ConnectTimeout) as exc:
             raise TokenIssuerUnavailable() from exc
 

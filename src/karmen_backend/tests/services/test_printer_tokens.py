@@ -8,10 +8,13 @@ from server.services import printer_tokens
 from ..utils import UUID_USER, Response
 
 
+TOKEN_SERVER_FAKE_URL = "https://token-server.org"
+
+
 @pytest.fixture
 def mock_issuer():
     original = app.config["TOKEN_SERVER_API_URL"]
-    app.config["TOKEN_SERVER_API_URL"] = "https://token-server.org"
+    app.config["TOKEN_SERVER_API_URL"] = TOKEN_SERVER_FAKE_URL
     yield printer_tokens.get_issuer()
     app.config["TOKEN_SERVER_API_URL"] = original
 
@@ -20,7 +23,7 @@ def mock_issuer():
     "issuer_url, issuer_cls",
     (
         (None, printer_tokens.FakeTokenIssuer),
-        ("https://token-server.org", printer_tokens.TokenIssuer),
+        (TOKEN_SERVER_FAKE_URL, printer_tokens.TokenIssuer),
     ),
 )
 def test_proper_issuer_is_created(issuer_url, issuer_cls):
@@ -42,6 +45,9 @@ def test_proper_issuer_is_created(issuer_url, issuer_cls):
 )
 def test_key_issuer(session_mock, mock_issuer):
     token = mock_issuer.issue_token(UUID_USER)
+    session_mock.assert_called_with(
+        f"{TOKEN_SERVER_FAKE_URL}/key", data={"iss": "kcf", "sub": UUID_USER}
+    )
     assert token == "atoken"
 
 
