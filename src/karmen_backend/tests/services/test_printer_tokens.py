@@ -46,7 +46,7 @@ def test_proper_issuer_is_created(issuer_url, issuer_cls):
 def test_key_issuer(session_mock, mock_issuer):
     token = mock_issuer.issue_token(UUID_USER)
     session_mock.assert_called_with(
-        f"{TOKEN_SERVER_FAKE_URL}/key", data={"iss": "kcf", "sub": UUID_USER}
+        f"{TOKEN_SERVER_FAKE_URL}/key?iss=kcf&sub={UUID_USER}"
     )
     assert token == "atoken"
 
@@ -65,4 +65,13 @@ def test_key_issuer_raises_malformed(session_mock, mock_issuer):
 )
 def test_key_issuer_raises_connection_error(session_mock, mock_issuer):
     with pytest.raises(printer_tokens.TokenIssuerUnavailable):
+        mock_issuer.issue_token(UUID_USER)
+
+
+@mock.patch(
+    "server.clients.octoprint.requests.Session.post",
+    return_value=Response(400, {"message": "Some message"}),
+)
+def test_key_issuer_raises_comm_error(session_mock, mock_issuer):
+    with pytest.raises(printer_tokens.TokenIssuerCommunicationError):
         mock_issuer.issue_token(UUID_USER)
