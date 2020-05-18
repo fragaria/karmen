@@ -1,3 +1,5 @@
+const RAISE_ERRORS = window.env.RAISE_ERRORS || false;
+
 // inspired by https://github.com/machadogj/redux-thunk-actions/blob/master/src/index.js
 
 const createActionFactory = (type) => {
@@ -11,7 +13,11 @@ const isPromise = (p) => {
   return p && p.then && p.catch;
 };
 
-export const createThunkedAction = (name, func) => {
+export const createThunkedAction = (
+  name,
+  func,
+  { raiseErrors = RAISE_ERRORS } = {}
+) => {
   return (...args) => (dispatch, getState, extra) => {
     let result;
     dispatch(createActionFactory(`${name}_STARTED`)());
@@ -31,11 +37,16 @@ export const createThunkedAction = (name, func) => {
       return result;
     };
     // when action is not successful because it throws...
-    const failed = (result) => {
+    const failed = (err) => {
       // ... fire fail and end ...
-      dispatch(createActionFactory(`${name}_FAILED`)(result));
-      dispatch(createActionFactory(`${name}_ENDED`)(result));
-      // ... but always return the result
+      dispatch(createActionFactory(`${name}_FAILED`)(err));
+      dispatch(createActionFactory(`${name}_ENDED`)(err));
+
+      // ... if raise is requested, bubble the error up
+      if (raiseErrors) {
+        throw err;
+      }
+      // ... otherwise, return the result
       return result;
     };
 
