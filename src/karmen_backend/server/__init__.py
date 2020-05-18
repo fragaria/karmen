@@ -123,5 +123,5 @@ import server.routes
 import server.tasks
 import server
 
-connexion_app.add_api("swagger.yaml", strict_validation=True)
+connexion_app.add_api("swagger.yaml")
 

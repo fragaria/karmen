@@ -83,7 +83,7 @@ def get_printer_inst(org_uuid, uuid):
     return printer_inst
 
 
-@app.route("/organizations/<org_uuid>/printers", methods=["GET"])
+# @app.route("/organizations/<org_uuid>/printers", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -137,17 +137,17 @@ def printers_list(org_uuid):
     return jsonify({"items": device_list}), 200
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["GET"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printer_detail(org_uuid, uuid):
+def printer_detail(org_uuid, printer_uuid):
     fields = request.args.get("fields").split(",") if request.args.get("fields") else []
-    printer_inst = get_printer_inst(org_uuid, uuid)
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     return jsonify(make_printer_response(printer_inst, fields))
 
 
-@app.route("/organizations/<org_uuid>/printers", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access("admin")
 @cross_origin()
@@ -275,16 +275,16 @@ def printer_create(org_uuid):
     return jsonify(make_printer_response(printer, ["status", "webcam", "job"])), 201
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["DELETE"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>", methods=["DELETE"])
 @jwt_force_password_change
 @validate_org_access("admin")
 @cross_origin()
-def printer_delete(org_uuid, uuid):
-    validate_uuid(uuid)
-    printer = printers.get_printer(uuid)
+def printer_delete(org_uuid, printer_uuid):
+    validate_uuid(printer_uuid)
+    printer = printers.get_printer(printer_uuid)
     if printer is None or printer.get("organization_uuid") != org_uuid:
         return abort(make_response(jsonify(message="Not found"), 404))
-    printers.delete_printer(uuid)
+    printers.delete_printer(printer_uuid)
     network_client_records = printers.get_printers_by_network_client_uuid(
         printer["network_client_uuid"]
     )
@@ -293,12 +293,12 @@ def printer_delete(org_uuid, uuid):
     return "", 204
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>", methods=["PATCH"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>", methods=["PATCH"])
 @jwt_force_password_change
 @validate_org_access("admin")
 @cross_origin()
-def printer_patch(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def printer_patch(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
@@ -352,13 +352,13 @@ def printer_patch(org_uuid, uuid):
     )
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/connection", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/connection", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printer_change_connection(org_uuid, uuid):
+def printer_change_connection(org_uuid, printer_uuid):
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
-    printer_inst = get_printer_inst(org_uuid, uuid)
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
@@ -383,18 +383,18 @@ def printer_change_connection(org_uuid, uuid):
         )
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/current-job", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/current-job", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printer_modify_job(org_uuid, uuid):
+def printer_modify_job(org_uuid, printer_uuid):
     # TODO allow users to pause/cancel only their own prints via printjob_id
     # And allow admins to pause/cancel anything
     # but that means creating a new tracking of current jobs on each printer
     # and does not handle prints issued by bypassing Karmen Hub
     # Alternative is to log who modified the current job into an admin-accessible eventlog
     # See https://trello.com/c/uiv0luZ8/142 for details
-    printer_inst = get_printer_inst(org_uuid, uuid)
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
@@ -408,7 +408,7 @@ def printer_modify_job(org_uuid, uuid):
                 "User %s successfully issued a modification (%s) of current job on printer %s",
                 user["uuid"],
                 action,
-                uuid,
+                printer_uuid,
             )
             return "", 204
         return abort(make_response(jsonify(message="Nothing is running"), 409))
@@ -436,11 +436,11 @@ def _get_webcam_snapshot(snapshot_url):
         return False
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/webcam-snapshot", methods=["GET"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/webcam-snapshot", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printer_webcam_snapshot(org_uuid, uuid):
+def printer_webcam_snapshot(org_uuid, printer_uuid):
     """
     Instead of direct streaming from the end-devices, we are deferring
     the video-like feature to the clients. This (in case of MJPEG) brings
@@ -454,7 +454,7 @@ def printer_webcam_snapshot(org_uuid, uuid):
     can emulate a video-like experience. Since we have no sound, this should be
     fine.
     """
-    printer_inst = get_printer_inst(org_uuid, uuid)
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     if printer_inst.client_info.webcam is None:
         return abort(make_response(jsonify(message="Not found"), 404))
     snapshot_url = printer_inst.client_info.webcam.get("snapshot")
@@ -494,12 +494,12 @@ def printer_webcam_snapshot(org_uuid, uuid):
     return abort(make_response(jsonify(message="Not found"), 404))
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/lights", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/lights", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printer_set_lights(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def printer_set_lights(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     try:
         # TODO do not only toggle
         lights_on = printer_inst.are_lights_on()
@@ -513,12 +513,12 @@ def printer_set_lights(org_uuid, uuid):
         return make_response(jsonify({"status": "unavailable"}), 200)
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/printhead", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/printhead", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def control_printhead(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def control_printhead(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if data is None or "command" not in data:
         return abort(make_response(jsonify(message="Missing payload or command"), 400))
@@ -561,12 +561,12 @@ def control_printhead(org_uuid, uuid):
         return make_response(jsonify(message="Unknown command"), 400)
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/fan", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/fan", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def control_fan(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def control_fan(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if data is None:
         return abort(make_response(jsonify(message="Missing payload"), 400))
@@ -579,12 +579,12 @@ def control_fan(org_uuid, uuid):
     return "", 204
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/motors", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/motors", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def control_motors(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def control_motors(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if data is None or "target" not in data:
         return abort(make_response(jsonify(message="Missing payload or target"), 400))
@@ -597,12 +597,12 @@ def control_motors(org_uuid, uuid):
     return "", 204
 
 
-@app.route("/organizations/<org_uuid>/printers/<uuid>/extrusion", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/extrusion", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def control_extrusion(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def control_extrusion(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if data is None or "amount" not in data:
         return abort(make_response(jsonify(message="Missing payload or amount"), 400))
@@ -616,21 +616,21 @@ def control_extrusion(org_uuid, uuid):
     return "", 204
 
 
-@app.route(
-    "/organizations/<org_uuid>/printers/<uuid>/temperatures/<part_name>",
-    methods=["POST"],
-)
+# @app.route(
+#    "/organizations/<org_uuid>/printers/<printer_uuid>/temperatures/<part_name>",
+#    methods=["POST"],
+# )
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def control_tool_temperature(org_uuid, uuid, part_name):
+def control_tool_temperature(org_uuid, printer_uuid, part_name):
     if part_name not in ["tool0", "tool1", "bed"]:
         return abort(
             make_response(
                 jsonify(message="%s is not a valid part choice" % part_name), 400
             )
         )
-    printer_inst = get_printer_inst(org_uuid, uuid)
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if data is None or "target" not in data:
         return abort(make_response(jsonify(message="Missing payload or target"), 400))
@@ -648,14 +648,14 @@ def control_tool_temperature(org_uuid, uuid, part_name):
     return "", 204
 
 
-@app.route(
-    "/organizations/<org_uuid>/printers/<uuid>/update/", methods=["POST"],
-)
+# @app.route(
+#     "/organizations/<org_uuid>/printers/<printer_uuid>/update/", methods=["POST"],
+# )
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def start_pill_update(org_uuid, uuid):
-    printer_inst = get_printer_inst(org_uuid, uuid)
+def start_pill_update(org_uuid, printer_uuid):
+    printer_inst = get_printer_inst(org_uuid, printer_uuid)
 
     if printer_inst.client_info.pill_info is None:
         return abort(

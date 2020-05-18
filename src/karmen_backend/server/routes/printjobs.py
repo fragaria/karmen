@@ -30,7 +30,7 @@ def make_printjob_response(printjob, fields=None, user_mapping=None):
     return response
 
 
-@app.route("/organizations/<org_uuid>/printjobs", methods=["POST"])
+# @app.route("/organizations/<org_uuid>/printjobs", methods=["POST"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -102,7 +102,7 @@ def printjob_create(org_uuid):
         )
 
 
-@app.route("/organizations/<org_uuid>/printjobs", methods=["GET"])
+# @app.route("/organizations/<org_uuid>/printjobs", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -177,13 +177,13 @@ def printjobs_list(org_uuid):
     return jsonify(response), 200
 
 
-@app.route("/organizations/<org_uuid>/printjobs/<uuid>", methods=["GET"])
+# @app.route("/organizations/<org_uuid>/printjobs/<printjob_uuid>", methods=["GET"])
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printjob_detail(org_uuid, uuid):
-    validate_uuid(uuid)
-    printjob = printjobs.get_printjob(uuid)
+def printjob_detail(org_uuid, printjob_uuid):
+    validate_uuid(printjob_uuid)
+    printjob = printjobs.get_printjob(printjob_uuid)
     if printjob is None or printjob["organization_uuid"] != org_uuid:
         return abort(make_response(jsonify(message="Not found"), 404))
     user = users.get_by_uuid(printjob.get("user_uuid"))

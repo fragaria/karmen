@@ -18,6 +18,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/printer_uuid_param'
         - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/fields_filter'
+
       responses:
         '200':
           description: 'OK, printer object is returned'
@@ -112,6 +114,8 @@ paths:
         - printers
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/fields_filter'
+
       responses:
         '200':
           description: 'OK, list of printer objects is returned'
@@ -142,7 +146,10 @@ paths:
         - printers
       description: >-
         Post to this endpoint to add a printer. In CLOUD_MODE, you can add printer by token.
-        In non-CLOUD mode, printer addition requires specifying the network address (IP or hostname)
+        In non-CLOUD mode, printer addition requires specifying the network address (IP or hostname).
+        Now, we only specify printer_by_network_props, and printer_by_token is commented. This is because
+        of a bug in connexion https://github.com/zalando/connexion/issues/691 because of which oneOf doesn't work
+        in request bodies
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
@@ -150,9 +157,11 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/printer_by_token'
-                - $ref: '#/components/schemas/printer_by_network_props'
+              #oneOf:
+              # $ref: '#/components/schemas/printer_by_token'
+              # $ref: '#/components/schemas/printer_by_network_props'
+              $ref: '#/components/schemas/printer_by_network_props'
+              # bug in connexion https://github.com/zalando/connexion/issues/691 prevent us from using oneOf
             examples:
               by_token:
                 summary: Add printer by token
@@ -500,7 +509,7 @@ paths:
               properties:
                 target:
                   type: string
-                  enum: [on, off]
+                  enum: ['on', 'off']
             examples:
               turn on:
                 value:
@@ -548,7 +557,7 @@ paths:
               properties:
                 target:
                   type: string
-                  enum: [off]
+                  enum: ['off']
             examples:
               disable:
                 value:
@@ -1089,6 +1098,14 @@ paths:
         - gcodes
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/limit_count_filter'
+        - $ref: '#/components/parameters/order_by_filter'
+        - $ref: '#/components/parameters/fields_filter'
+        - $ref: '#/components/parameters/filter_filter'
+        - in: query
+          name: start_with
+          schema:
+            $ref: '#/components/schemas/uuid_or_positive_integer'
       responses:
         '200':
           description: 'List of gcodes'
@@ -1102,10 +1119,16 @@ paths:
       requestBody:
         required: true
         content:
-          text/plain:
+          multipart/form-data:
             schema:
-              type: string
-              format: binary
+              type: object
+              properties:
+                path:
+                  type: string
+                  format: binary
+                file:
+                  type: string
+                  format: binary
       responses:
         '201':
           description: 'Created'
@@ -1258,11 +1281,9 @@ paths:
             schema:
               properties:
                 gcode:
-                  type: string
-                  format: uuid
+                  $ref: '#/components/schemas/uuid'
                 printer:
-                  type: string
-                  format: uuid
+                  $ref: '#/components/schemas/uuid'
       responses:
         '201':
           description: 'Printjob scheduled'
@@ -1275,6 +1296,13 @@ paths:
         - printjobs
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/limit_count_filter'
+        - $ref: '#/components/parameters/start_with_filter'
+        - $ref: '#/components/parameters/order_by_filter'
+        - $ref: '#/components/parameters/fields_filter'
+        - $ref: '#/components/parameters/filter_filter'
+
+
       responses:
         '200':
           description: 'List of printjobs'
@@ -1328,43 +1356,71 @@ components:
       in: path
       required: true
       schema:
-        type: string
-        format: uuid
+        $ref: '#/components/schemas/uuid'
     organization_uuid_param:
       name: org_uuid
       in: path
       required: true
       schema:
-        format: uuid
-        type: string
+        $ref: '#/components/schemas/uuid'
     printjob_uuid_param:
       name: printjob_uuid
       in: path
       required: true
       schema:
-        format: uuid
-        type: string
+        $ref: '#/components/schemas/uuid'
     user_uuid_param:
       name: user_uuid
       in: path
       required: true
       schema:
-        format: uuid
-        type: string
+        $ref: '#/components/schemas/uuid'
     gcode_uuid_param:
       name: gcode_uuid
       in: path
       required: true
       schema:
-        format: uuid
-        type: string
+        $ref: '#/components/schemas/uuid'
     jti:
       name: jti
       in: path
       required: true
       schema:
         type: string
+    limit_count_filter:
+      in: query
+      name: limit
+      schema:
+        type: integer
+    start_with_filter:
+      in: query
+      name: start_with
+      schema:
+        $ref: '#/components/schemas/uuid'
+    order_by_filter:
+      in: query
+      name: order_by
+      schema:
+        type: string
+    fields_filter:
+      in: query
+      name: fields
+      schema:
+        type: string
+    filter_filter:
+      in: query
+      name: filter
+      schema:
+        type: string
+
   schemas:
+    uuid:
+      type: string
+      format: uuid
+      pattern: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+    uuid_or_positive_integer:
+      type: string
+      pattern: '^((\d+$)|([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}))'
     api_err_response:
       type: object
       properties:
@@ -1546,7 +1602,6 @@ components:
       required:
         - name
         - token
-        - protocol
     printer_by_network_props:
       type: object
       properties:
@@ -1576,10 +1631,6 @@ components:
           example: ""
       required:
         - name
-        - protocol
-        - path
-        - port
-        - api_key
 
 
 
