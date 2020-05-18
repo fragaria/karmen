@@ -45,7 +45,7 @@ class TokenIssuer:
 
         if resp.status_code != 200:
             raise TokenIssuerCommunicationError(
-                f"Unexpected status code: {resp.status_code}"
+                f"Unexpected status code: {resp.status_code} ({resp.text})"
             )
 
         try:

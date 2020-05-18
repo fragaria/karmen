@@ -134,6 +134,7 @@ services:
     image: fragaria/karmen-key-master
     environment:
       SECRET: 'your-super-secret-and-backed-up-private-keymaster-key'
+      MAX_SUB_LENGTH: 64
     networks:
       - default
       - backend
