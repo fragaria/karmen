@@ -55,5 +55,6 @@ export const issuePrinterToken = (orgUuid) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/issue-token`,
     method: "POST",
+    raiseErrors: true,
   });
 };

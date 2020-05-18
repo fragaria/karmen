@@ -90,6 +90,7 @@ export const performRequest = (opts) => {
       "Content-Type": "application/json",
     },
     useAuth: true,
+    raiseErrors: false,
   };
   opts = Object.assign({}, defaults, opts);
 
@@ -110,8 +111,17 @@ export const performRequest = (opts) => {
   return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
     .then((response) => {
       if (opts.successCodes.indexOf(response.status) === -1) {
-        console.error(`Request ${opts.uri} failed: ${response.status}`);
+        if (opts.raiseErrors) {
+          return Promise.reject(
+            new Error(`Unexpected status code "${response.status}"`)
+          );
+        }
+
+        console.error(
+          `Request ${opts.uri} failed: unexpected status code "${response.status}"`
+        );
       }
+
       if (opts.parseResponse) {
         return response
           .json()
@@ -124,6 +134,12 @@ export const performRequest = (opts) => {
             };
           })
           .catch((e) => {
+            console.error(`Could not parse ${opts.uri} response as JSON: ${e}`);
+
+            if (opts.raiseErrors) {
+              return Promise.reject(e);
+            }
+
             return {
               status: response.status,
               ...opts.appendData,
@@ -139,6 +155,10 @@ export const performRequest = (opts) => {
     })
     .catch((e) => {
       console.error(`Request ${opts.uri} failed: ${e}`);
+
+      if (opts.raiseErrors) {
+        return Promise.reject(e);
+      }
       return { status: 500, successCodes: opts.successCodes };
     });
 };
