@@ -1,6 +1,7 @@
 import functools
 import uuid as guid
-from flask import jsonify, request, abort, make_response
+import os
+from flask import jsonify, request, abort, make_response, send_from_directory
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required, get_jwt_claims, get_current_user
 from server import app, jwt, __version__
@@ -150,6 +151,16 @@ def index():
             "docs": "https://karmen.readthedocs.io",
             "version": __version__,
         }
+    )
+
+
+@app.route("/doc", methods=["GET"])
+@cross_origin()
+def doc():
+    return send_from_directory(
+        os.path.join(app.root_path, "..", "openapi"),
+        "swagger.yaml",
+        mimetype="text/yaml",
     )
 
 
