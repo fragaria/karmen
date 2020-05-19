@@ -166,17 +166,32 @@ const PrinterDetail = ({
                     Disconnect
                   </button>
                 ))}
+
+            {printer.client.pill_info
+              ? printer.client.pill_info.update_available
+                ? (
+                  <div className="printer-state-announcement">
+                    There is update available for your pill{" "}
+                    <button
+                      className="btn btn-sm"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        startUpdate();
+                      }}
+                    >
+                      Update
+                    </button>
+                  </div>
+                )
+                : ""
+              : ""}
             </div>
           </div>
         </div>
 
         <div className="printer-detail-meta">
           <div className="container">
-            {printer.client.pill_info
-              ? printer.client.pill_info.update_available
-                ? "There is update available for your pill"
-                : ""
-              : ""}
             <ChangeConnectionModal
               modal={changeConnectionModal}
               accessLevel={
