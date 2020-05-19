@@ -8,3 +8,4 @@ tmp
 .travis/*.zip
 .idea
 .vscode
+src/karmen_frontend/cypress/screenshots
