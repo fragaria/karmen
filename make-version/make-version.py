@@ -3,7 +3,7 @@ import sys
 import os
 import re
 import json
-
+import fileinput
 
 
 def update_json(version, pathname):
@@ -13,6 +13,20 @@ def update_json(version, pathname):
         fp.seek(0)
         fp.truncate()
         json.dump(data, fp, indent=2)
+
+
+# UPDATES VERSION ONLY IN TOP-LEVEL INFO SECTION
+def update_yaml(version, pathname):
+    is_info = False  # to make sure we are in info: part
+    for line in fileinput.input(pathname, inplace=True):
+        if not line.startswith(" "):
+            is_info = False  # is line does not start with whitespace, we entered another major section
+        if line.startswith("info:"):
+            is_info = True  # we entered info: part
+        if is_info and "version" in line:
+            line = "%s: '%s'\n" % (line.split(":")[0], version)
+        print(line, end='')
+
 
 def update_py(version, pathname):
     with open(pathname, 'r+') as fp:
@@ -38,6 +52,8 @@ if __name__ == '__main__':
         if filepath.endswith('.py'):
             update_py(version, project_root.joinpath(filepath))
         elif filepath.endswith('.json'):
+            update_json(version, project_root.joinpath(filepath))
+        elif filepath.endswith('.yaml'):
             update_json(version, project_root.joinpath(filepath))
         else:
             raise ValueError("Invalid file extension '%s'." % filepath)
