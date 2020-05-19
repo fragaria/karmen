@@ -1,3 +1,5 @@
+import json
+
 from server import app
 
 
@@ -5,6 +7,7 @@ class Response:
     def __init__(self, status_code, contents={}):
         self.status_code = status_code
         self.contents = contents
+        self.text = json.dumps(contents)
 
     def json(self):
         return self.contents
