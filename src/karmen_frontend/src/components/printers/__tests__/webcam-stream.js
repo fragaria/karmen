@@ -54,7 +54,7 @@ const renderWebcamStreamRenderer = (printer, imageData = null) => {
 
 const expectStreamUnavailable = (queryByAltText, getByText) => {
   expect(
-    queryByAltText("Last image from from undefined")
+    queryByAltText("Last screenshot from undefined")
   ).not.toBeInTheDocument();
   expect(getByText("Stream unavailable")).toBeInTheDocument();
 };
@@ -66,7 +66,7 @@ it("WebcamStreamRenderer: is available", async () => {
     "image-data"
   );
 
-  expect(getByAltText("Last image from undefined")).toBeInTheDocument();
+  expect(getByAltText("Last screenshot from undefined")).toBeInTheDocument();
   expect(queryByText("Stream unavailable")).not.toBeInTheDocument();
 });
 
