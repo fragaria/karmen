@@ -40,16 +40,15 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   );
 };
 
-export const WebcamStreamRenderer = (props) => {
-  const {
-    url,
-    image,
-    flipHorizontal,
-    flipVertical,
-    rotate90,
-    allowFullscreen,
-    printer,
-  } = props;
+export const WebcamStreamRenderer = ({
+  url,
+  image,
+  flipHorizontal,
+  flipVertical,
+  rotate90,
+  allowFullscreen,
+  printer,
+}) => {
   let klass = [];
   if (flipHorizontal) {
     klass.push("flip-horizontal");
