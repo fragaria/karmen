@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import useModal from "use-react-modal";
 import { setWebcamRefreshInterval } from "../../actions";
+import * as printerUtils from "./utils";
 
 const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
@@ -12,7 +13,7 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
     <>
       <img
         className={classNames.join(" ")}
-        alt={`Current state from ${url}`}
+        alt={`Last screenshot from ${url}`}
         src={source}
         onClick={(e) => {
           if (allowFullscreen !== false) {
@@ -39,6 +40,48 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   );
 };
 
+export const WebcamStreamRenderer = ({
+  url,
+  image,
+  flipHorizontal,
+  flipVertical,
+  rotate90,
+  allowFullscreen,
+  printer,
+}) => {
+  let klass = [];
+  if (flipHorizontal) {
+    klass.push("flip-horizontal");
+  }
+
+  if (flipVertical) {
+    klass.push("flip-vertical");
+  }
+
+  if (rotate90) {
+    klass.push("rotate-90");
+  }
+  const isStreamAvailable = image && printerUtils.isConnected(printer);
+  return (
+    <>
+      <div
+        className={`webcam-stream ${isStreamAvailable ? "" : "unavailable"}`}
+      >
+        {isStreamAvailable ? (
+          <WebcamModal
+            classNames={klass}
+            source={image}
+            url={url}
+            allowFullscreen={allowFullscreen}
+          />
+        ) : (
+          <div>Stream unavailable</div>
+        )}
+      </div>
+    </>
+  );
+};
+
 export class WebcamStream extends React.Component {
   componentDidMount() {
     const { setWebcamRefreshInterval } = this.props;
@@ -51,59 +94,20 @@ export class WebcamStream extends React.Component {
   }
 
   render() {
-    const {
-      url,
-      image,
-      flipHorizontal,
-      flipVertical,
-      rotate90,
-      allowFullscreen,
-      printer,
-    } = this.props;
-    let klass = [];
-    if (flipHorizontal) {
-      klass.push("flip-horizontal");
-    }
-
-    if (flipVertical) {
-      klass.push("flip-vertical");
-    }
-
-    if (rotate90) {
-      klass.push("rotate-90");
-    }
-    return (
-      <>
-        <div className={`webcam-stream ${image ? "" : "unavailable"}`}>
-          {image && printer.client && printer.client.connected ? (
-            <WebcamModal
-              classNames={klass}
-              source={image}
-              url={url}
-              allowFullscreen={allowFullscreen}
-            />
-          ) : (
-            <div>Stream unavailable</div>
-          )}
-        </div>
-      </>
-    );
+    return <WebcamStreamRenderer {...this.props} />;
   }
 }
 
 export default connect(
   (state, ownProps) => ({
-    printer: state.printers.printers.find(
-      (p) => p.uuid === ownProps.printerUuid
-    ),
-    image: state.webcams.images[ownProps.printerUuid],
+    image: state.webcams.images[ownProps.printer.uuid],
   }),
   (dispatch, ownProps) => ({
     setWebcamRefreshInterval: (interval) =>
       dispatch(
         setWebcamRefreshInterval(
           ownProps.orgUuid,
-          ownProps.printerUuid,
+          ownProps.printer.uuid,
           interval
         )
       ),

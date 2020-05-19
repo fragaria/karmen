@@ -130,11 +130,7 @@ const PrinterDetail = ({
     <section className="content">
       <div className="printer-detail">
         <div className="printer-detail-stream">
-          <WebcamStream
-            isPrinting={printer.status && printer.status.state === "Printing"}
-            printerUuid={printer.uuid}
-            orgUuid={match.params.orguuid}
-          />
+          <WebcamStream printer={printer} orgUuid={match.params.orguuid} />
           <Progress {...printer.job} />
         </div>
 
