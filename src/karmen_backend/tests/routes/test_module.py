@@ -14,7 +14,7 @@ class IndexRoute(unittest.TestCase):
 
     def test_openapi_endpoint(self):
         with app.test_client() as c:
-            response = c.get("/openapi-specs.yaml")
+            response = c.get("/openapi-spec.yaml")
             self.assertEqual(response.status_code, 200)
             self.assertIn(b"title: 'Karmen API'", response.data)
             specs = yaml.safe_load(str(response.data, "utf8"))

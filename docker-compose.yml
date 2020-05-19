@@ -210,10 +210,10 @@ services:
       - backend
   api_doc:
     image: redocly/redoc
-    environment: 
+    environment:
       PAGE_TITLE: "Karmen OpenAPI"
       PAGE_FAVICON: ${FRONTEND_BASE_URL:-http://localhost:4000}/favicon.ico
-      SPEC_URL: ${BACKEND_BASE_URL:-http://localhost:4000}/api/openapi-specs.yaml
+      SPEC_URL: ${BACKEND_BASE_URL:-http://localhost:4000}/api/openapi-spec.yaml
       PORT: 9898
     networks:
       - default

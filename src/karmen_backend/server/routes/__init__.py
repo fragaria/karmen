@@ -154,7 +154,7 @@ def index():
     )
 
 
-@app.route("/openapi-specs.yaml", methods=["GET"])
+@app.route("/openapi-spec.yaml", methods=["GET"])
 @cross_origin()
 def doc():
     return send_from_directory(
