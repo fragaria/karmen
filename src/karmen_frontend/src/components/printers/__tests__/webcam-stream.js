@@ -3,11 +3,15 @@ import { render } from "@testing-library/react";
 import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
-import WebcamStream from "../webcam-stream";
+import WebcamStream, { WebcamStreamRenderer } from "../webcam-stream";
 
 require("jest-fetch-mock").enableMocks();
+
 const printerUuid = "20e91c14-c3e4-4fe9-a066-e69d53324a20";
 const orgUuid = "randomUuidOfOrganisation";
+
+const middlewares = [thunk];
+const mockStore = configureMockStore(middlewares);
 
 const createPrinter = (connected) => {
   return {
@@ -33,74 +37,72 @@ const createPrinter = (connected) => {
   };
 };
 
-const middlewares = [thunk];
-const mockStore = configureMockStore(middlewares);
-
-const renderWebcamStream = (store, printer) => {
+const renderWebcamStreamRenderer = (printer, imageData = null) => {
   return render(
-    <Provider store={store}>
-      <WebcamStream
-        url={undefined}
-        flipHorizontal={false}
-        flipVertical={false}
-        rotate90={false}
-        allowFullscreen={false}
-        printerUuid={printer.uuid}
-        orgUuid={orgUuid}
-        isPrinting={false}
-      />
-    </Provider>
-  );
-};
-
-const createStore = (printers = [], images = {}, queue = {}) => {
-  return mockStore({
-    printers: {
-      printers,
-    },
-    webcams: {
-      images,
-      queue,
-    },
-  });
-};
-
-const createValidStore = (printer) => {
-  return createStore(
-    [printer],
-    { [printerUuid]: "data-url image" },
-    { [printerUuid]: { interval: 200, timeout: 20 } }
+    <WebcamStreamRenderer
+      printer={printer}
+      url={undefined}
+      flipHorizontal={false}
+      flipVertical={false}
+      rotate90={false}
+      allowFullscreen={false}
+      orgUuid={orgUuid}
+      image={imageData}
+    />
   );
 };
 
 const expectStreamUnavailable = (queryByAltText, getByText) => {
   expect(
-    queryByAltText("Current state from undefined")
+    queryByAltText("Last image from from undefined")
   ).not.toBeInTheDocument();
   expect(getByText("Stream unavailable")).toBeInTheDocument();
 };
 
-it("WebcamStream: is available", async () => {
+it("WebcamStreamRenderer: is available", async () => {
   const printer = createPrinter(true);
-  const store = createValidStore(printer);
-  const { queryByText, getByAltText } = renderWebcamStream(store, printer);
+  const { queryByText, getByAltText } = renderWebcamStreamRenderer(
+    printer,
+    "image-data"
+  );
 
-  expect(getByAltText("Current state from undefined")).toBeInTheDocument();
+  expect(getByAltText("Last image from undefined")).toBeInTheDocument();
   expect(queryByText("Stream unavailable")).not.toBeInTheDocument();
 });
 
-it("WebcamStream: is not available due to absence of image", async () => {
+it("WebcamStreamRenderer: is not available due to absence of image", async () => {
   const printer = createPrinter(true);
-  const store = createStore();
-  const { getByText, queryByAltText } = renderWebcamStream(store, printer);
+  const { getByText, queryByAltText } = renderWebcamStreamRenderer(printer);
 
   expectStreamUnavailable(queryByAltText, getByText);
 });
 
-it("WebcamStream: is not available due to client is disconnected", async () => {
+it("WebcamStreamRenderer: is not available due to client is disconnected", async () => {
   const printer = createPrinter(false);
-  const store = createValidStore(printer);
-  const { getByText, queryByAltText } = renderWebcamStream(store, printer);
+  const { getByText, queryByAltText } = renderWebcamStreamRenderer(
+    printer,
+    "image-data"
+  );
 
   expectStreamUnavailable(queryByAltText, getByText);
+});
+
+it("WebcamStream", async () => {
+  const printer = createPrinter(false);
+  const store = mockStore({
+    webcams: {
+      images: { [printerUuid]: "data-url image" },
+      queue: { [printerUuid]: { interval: 200, timeout: 20 } },
+    },
+  });
+
+  return render(
+    <Provider store={store}>
+      <WebcamStream
+        orgUuid={orgUuid}
+        allowFullscreen={false}
+        printer={printer}
+      />
+    </Provider>
+  );
 });

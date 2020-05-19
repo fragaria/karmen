@@ -112,12 +112,9 @@ class PrinterList extends React.Component {
                 {viewType === "grid" && (
                   <div className="list-item-illustration">
                     <WebcamStream
-                      printerUuid={printer.uuid}
                       orgUuid={match.params.orguuid}
-                      isPrinting={
-                        printer.status && printer.status.state === "Printing"
-                      }
                       allowFullscreen={false}
+                      printer={printer}
                     />
                   </div>
                 )}
