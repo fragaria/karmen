@@ -1,6 +1,6 @@
 import React from "react";
 import ControlsTab from "../controls-tab";
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 require("jest-fetch-mock").enableMocks();
 

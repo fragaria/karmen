@@ -1,5 +1,3 @@
-import React from "react";
-
 export const isPrinting = (printer) => {
   return printer.status && printer.status.state === "Printing";
 };

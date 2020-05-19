@@ -13,7 +13,7 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
     <>
       <img
         className={classNames.join(" ")}
-        alt={`Last image from ${url}`}
+        alt={`Last screenshot from ${url}`}
         src={source}
         onClick={(e) => {
           if (allowFullscreen !== false) {
