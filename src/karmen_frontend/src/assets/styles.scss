@@ -398,6 +398,17 @@ footer {
       margin-right: 0
     }
   }
+
+  small {
+    display: block;
+
+    @include plumber(
+      $font-size: 1.2,
+      $leading-top: 4,
+      $leading-bottom: 0,
+      $line-height: 2
+    );
+  }
 }
 
 .text-secondary {
