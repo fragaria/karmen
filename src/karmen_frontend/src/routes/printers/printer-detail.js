@@ -166,10 +166,8 @@ const PrinterDetail = ({
                     Disconnect
                   </button>
                 ))}
-
-            {printer.client.pill_info
-              ? printer.client.pill_info.update_available
-                ? (
+              {printer.client.pill_info ? (
+                printer.client.pill_info.update_available ? (
                   <div className="printer-state-announcement">
                     There is update available for your pill{" "}
                     <button
@@ -183,9 +181,12 @@ const PrinterDetail = ({
                       Update
                     </button>
                   </div>
+                ) : (
+                  ""
                 )
-                : ""
-              : ""}
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </div>
