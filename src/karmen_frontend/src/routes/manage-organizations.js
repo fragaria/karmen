@@ -16,8 +16,11 @@ const ManageOrganizations = ({
       <div className="container">
         <h1 className="main-title">
           Organizations
-          <Link to="/add-organization" className="btn btn-sm"
-          id="btn-create_organization">
+          <Link
+            to="/add-organization"
+            className="btn btn-sm"
+            id="btn-create_organization"
+          >
             + Create new organization
           </Link>
         </h1>
