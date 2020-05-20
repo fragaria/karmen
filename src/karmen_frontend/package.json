@@ -28,7 +28,7 @@
     "react-copy-to-clipboard": "^5.0.2",
     "react-redux": "^7.2.0",
     "react-debounce-input": "^3.2.2",
-    "react-router-dom": "^5.0.1",
+    "react-router-dom": "^5.2.0",
     "@sentry/browser": "^5.15.5",
     "core-js": "^3.6.5",
     "react": "^16.13.1",
