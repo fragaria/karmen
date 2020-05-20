@@ -40,33 +40,25 @@ Cypress.Commands.add("createUser", (email, password) => {
     });
 });
 
-Cypress.Commands.add("login", (email, password) => {
-  return cy
-    .log(`logging in as ${email} with ${password}`)
-    .request("POST", `/api/users/me/authenticate`, {
-      username: email,
-      password: password,
-    })
-    .then(({ body }) => {
-      localStorage.setItem(
-        "karmen_profile",
-        JSON.stringify({
-          currentState: body.force_pwd_change
-            ? "pwd-change-required"
-            : "logged-in",
-          identity: body.identity,
-          username: body.username,
-          email: body.email,
-          systemRole: body.system_role,
-          hasFreshToken: body.fresh,
-          accessTokenExpiresOn: body.expires_on
-            ? dayjs(body.expires_on)
-            : undefined,
-          organizations: body.organizations,
-        })
-      );
-      return body;
+Cypress.Commands.add("login", function loginCommand(email, password) {
+
+    //Cypress. Not supporting fetch since 2016 https://github.com/cypress-io/cypress/issues/95.
+    Cypress.on('window:before:load', win => {
+      delete win.fetch;
     });
+
+    cy.visit("/");
+
+    cy.server();
+    cy.route("POST","/api/users/me/authenticate").as('login-post');
+    cy.get("input#username").type(email);
+    cy.get("input#password").type(password);
+    return cy.get('button[type="submit"]').click().wait(3000)
+        .then(()=>{
+        let profile = JSON.parse(window.localStorage.getItem("karmen_profile"))
+        return cy.wrap(profile);
+    });
+
 });
 Cypress.Commands.add("reLogin", (cy, email, password) => {
     cy.get("input#username").type(email);

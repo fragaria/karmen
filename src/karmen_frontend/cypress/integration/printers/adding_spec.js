@@ -12,7 +12,10 @@ describe("Printers: Adding", function () {
       .login(email, password)
       .then((data) => {
         organizationUuid = Object.keys(data.organizations)[0];
-        return cy.visit(`/${organizationUuid}/add-printer`);
+        cy.get('button[id="navigation-menu-toggle"]').click();
+        cy.get('a[id="navigation-settings"]').click();
+        return cy.get('a[id="btn-add_printer"]').click();
+
       });
   });
 
@@ -49,12 +52,7 @@ describe("Printers: Adding", function () {
               expect(loc.pathname).to.eq(
                   `/${organizationUuid}/settings/tab-printers`
               );
-              //This is a tricky one. Tests start at add printer page and then go to settings.
-              //User starts at settings and then goes to add printer page.
-              //Because of this, tests get login screen here, as they skip the page with sensitive data first
-              cy.get("input#username").type(email);
-              cy.get("input#password").type(password);
-              cy.get('button[type="submit"]').click().wait(5000).then(() => {
+
               cy.get(".list-item-title").then((items) => {
                 let foundPrinter = false;
                 for (let i of items) {
@@ -66,6 +64,5 @@ describe("Printers: Adding", function () {
               });
             });
           });
-    });
   });
 });

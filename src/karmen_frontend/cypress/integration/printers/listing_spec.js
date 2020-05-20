@@ -1,4 +1,5 @@
-import { Chance } from "chance";
+import {Chance} from "chance";
+
 const chance = new Chance();
 
 describe("Printers: Listing", function () {
@@ -23,37 +24,32 @@ describe("Printers: Listing", function () {
       })
       .then((response) => {
         printerUuid = response.uuid;
-        return cy.visit(`/${organizationUuid}/settings/tab-printers`);
+        cy.logout().login(email, password).then(() => {
+          cy.get('button[id="navigation-menu-toggle"]').click();
+          return cy.get('a[id="navigation-settings"]').click();
+        });
       });
   });
 
   it("has the create button", function () {
-    cy.get("input#username").type(email);
-    cy.get("input#password").type(password);
-    cy.get('button[type="submit"]').click().wait(5000).then(() => {
-      cy.get(".react-tabs__tab-panel__header a").should(
-          "have.attr",
-          "href",
-          `/${organizationUuid}/add-printer`
-      );
-    });
+    cy.get(".react-tabs__tab-panel__header a").should(
+      "have.attr",
+      "href",
+      `/${organizationUuid}/add-printer`
+    );
   });
 
   it("has link to organization settings", function () {
-    cy.get("input#username").type(email);
-    cy.get("input#password").type(password);
-    cy.get('button[type="submit"]').click().wait(5000).then(() => {
-      cy.get(".list-item .list-cta")
-          .click()
-          .then(() => {
-            cy.get(".dropdown-item:first")
-                .should("be.visible")
-                .should(
-                    "have.attr",
-                    "href",
-                    `/${organizationUuid}/printers/${printerUuid}/settings`
-                );
-          });
-    });
+    cy.get(".list-item .list-cta")
+      .click()
+      .then(() => {
+        cy.get(".dropdown-item:first")
+          .should("be.visible")
+          .should(
+            "have.attr",
+            "href",
+            `/${organizationUuid}/printers/${printerUuid}/settings`
+          );
+      });
   });
 });

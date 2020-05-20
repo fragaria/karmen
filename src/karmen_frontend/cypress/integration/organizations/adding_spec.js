@@ -11,24 +11,19 @@ describe("Organizations: Adding", function () {
       .createUser(email, password)
       .login(email, password)
       .then((data) => {
-        return cy.visit("/add-organization");
+          cy.get('button[id="navigation-menu-toggle"]').click()
+          cy.get('a[id="navigation-organizations"]').click()
+          return cy.get('a[id="btn-create_organization"]').click()
       });
   });
 
   it("fails with no name", function () {
-    cy.get("input#username").type(email);
-    cy.get("input#password").type(password);
-    cy.get('button[type="submit"]').click().wait(5000).then(() => {
       cy.get('button[type="submit"]').click();
       cy.get("form").contains("Name is required");
-    });
   });
 
   it("adds organization", function () {
     const name = chance.string();
-    cy.get("input#username").type(email);
-    cy.get("input#password").type(password);
-    cy.get('button[type="submit"]').click().wait(5000).then(() => {
       cy.get("input#name").type(name);
       cy.get('button[type="submit"]')
           .click()
@@ -46,7 +41,6 @@ describe("Organizations: Adding", function () {
                 expect(foundOrganization).to.eq(true);
               });
             });
-          });
     });
   });
 });

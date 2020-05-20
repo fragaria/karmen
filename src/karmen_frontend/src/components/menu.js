@@ -158,6 +158,7 @@ class Menu extends React.Component {
                     <Link
                       to={`/${activeOrganization.uuid}/printers`}
                       onClick={() => this.setState({ navigation: false })}
+                      id="navigation-printers"
                     >
                       Printers
                     </Link>
@@ -166,6 +167,7 @@ class Menu extends React.Component {
                     <Link
                       to={`/${activeOrganization.uuid}/gcodes`}
                       onClick={() => this.setState({ navigation: false })}
+                      id="navigation-gcodes"
                     >
                       G-Codes
                     </Link>
@@ -175,6 +177,7 @@ class Menu extends React.Component {
                       <Link
                         to={`/${activeOrganization.uuid}/settings`}
                         onClick={() => this.setState({ navigation: false })}
+                        id="navigation-settings"
                       >
                         Settings
                       </Link>
@@ -184,6 +187,7 @@ class Menu extends React.Component {
                     <Link
                       to="/organizations"
                       onClick={() => this.setState({ navigation: false })}
+                      id="navigation-organizations"
                     >
                       Organizations
                     </Link>
@@ -211,6 +215,7 @@ class Menu extends React.Component {
                   const { navigation } = this.state;
                   this.setState({ navigation: !navigation });
                 }}
+                id="navigation-menu-toggle"
               >
                 {navigation && <span className="icon-close"></span>}
                 {!navigation && (
