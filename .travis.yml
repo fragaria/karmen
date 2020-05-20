@@ -3,151 +3,158 @@ notifications:
 sudo: true
 dist: xenial
 services:
-- docker
+  - docker
 addons:
   apt:
     packages:
-    - docker-ce
-    - jq
+      - docker-ce
+      - jq
 matrix:
   allow_failures:
-  - python: 3.8-dev
+    - python: 3.8-dev
   include:
-  - stage: test
-    language: python
-    python: '3.6'
-    install:
-    - pip install pipenv
-    before_script:
-    - cd src/karmen_backend
-    script:
-    - pipenv install --dev
-    - make test
-  - language: python
-    python: '3.7'
-    install:
-    - pip install pipenv
-    before_script:
-    - cd src/karmen_backend
-    script:
-    - pipenv install --dev
-    - make coverage
-    - make coveralls
-  - language: python
-    python: 3.8-dev
-    install:
-    - pip install pipenv
-    before_script:
-    - cd src/karmen_backend
-    script:
-    - pipenv install --dev
-    - make test
-  - language: node_js
-    name: frontend unit tests and build
-    node_js: 10
-    cache:
-      directories:
-      - node_modules
-      - "$HOME/.npm"
-    before_script:
-    - cd src/karmen_frontend
-    - npm ci
-    script:
-    - npm run lint
-    - npm run test
-    - npm run build
-  - language: node_js
-    name: frontend cypress tests
-    stage: test
-    node_js: 10
-    cache:
-      directories:
-      - node_modules
-      - "$HOME/.npm"
-    before_script:
-    - cd src/karmen_frontend && npm ci
-    script:
-    - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
-    - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-    - npm run test:cypress
-  - stage: build docker
-    if: tag IS present
-    language: generic
-    before_install:
-    - sudo docker run --privileged linuxkit/binfmt:v0.6
-    - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-      --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-      linux/armhf
-    - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-    - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-    install: true
-    script:
-    - travis_wait 30 bash .travis/build-images-backend.sh
-  - if: tag IS present
-    language: generic
-    before_install:
-    - sudo docker run --privileged linuxkit/binfmt:v0.6
-    - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-      --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-      linux/armhf
-    - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-    - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-    install: true
-    script:
-    - bash .travis/build-images-frontend.sh
-  - if: tag IS present
-    language: generic
-    before_install:
-    - sudo docker run --privileged linuxkit/binfmt:v0.6
-    - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-      --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-      linux/armhf
-    - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-    - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-    install: true
-    script:
-    - bash .travis/build-images-proxy.sh
+    - stage: Run tests
+      language: python
+      name: backend tests @ Python 3.6
+      python: "3.6"
+      install:
+        - pip install pipenv
+      before_script:
+        - cd src/karmen_backend
+      script:
+        - pipenv install --dev
+        - make test
+    - language: python
+      name: backend coverage @ Python 3.7
+      python: "3.7"
+      install:
+        - pip install pipenv
+      before_script:
+        - cd src/karmen_backend
+      script:
+        - pipenv install --dev
+        - make coverage
+        - make coveralls
+    - language: python
+      name: backend tests @ Python 3.8-dev
+      python: 3.8-dev
+      install:
+        - pip install pipenv
+      before_script:
+        - cd src/karmen_backend
+      script:
+        - pipenv install --dev
+        - make test
+    - language: node_js
+      name: frontend Jest tests and build
+      node_js: 10
+      cache:
+        directories:
+          - node_modules
+          - "$HOME/.npm"
+      before_script:
+        - cd src/karmen_frontend
+        - npm ci
+      script:
+        - npm run lint
+        - npm run test
+        - npm run build
+    - language: node_js
+      name: frontend E2E cypress tests
+      node_js: 10
+      cache:
+        directories:
+          - node_modules
+          - "$HOME/.npm"
+      before_script:
+        - cd src/karmen_frontend && npm ci
+      script:
+        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
+        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+        - npm run test:cypress
+    - stage: Build Docker images
+      name: "backend image"
+      if: tag IS present
+      language: generic
+      before_install:
+        - sudo docker run --privileged linuxkit/binfmt:v0.6
+        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
+          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
+          linux/armhf
+        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+      install: true
+      script:
+        - travis_wait 30 bash .travis/build-images-backend.sh
+    - if: tag IS present
+      name: "frontend image"
+      language: generic
+      before_install:
+        - sudo docker run --privileged linuxkit/binfmt:v0.6
+        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
+          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
+          linux/armhf
+        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+      install: true
+      script:
+        - bash .travis/build-images-frontend.sh
+    - if: tag IS present
+      name: "proxy image"
+      language: generic
+      before_install:
+        - sudo docker run --privileged linuxkit/binfmt:v0.6
+        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
+          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
+          linux/armhf
+        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+      install: true
+      script:
+        - bash .travis/build-images-proxy.sh
 
-# deploy to GitHub releases
-#
-# versions ending on -something ("-" and some text) are considered prerelease
-# while versions without "-" character are considered stable
+    # deploy to GitHub releases
+    #
+    # versions ending on -something ("-" and some text) are considered prerelease
+    # while versions without "-" character are considered stable
 
-  # PRE-RELEASE
-  - stage: github release
-    language: generic
-    install: true
-    script:
-    - bash .travis/make-github-release.sh
-    deploy:
-      prerelease: true
-      provider: releases
-      api_key:
-        secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
-      file: ./.travis/release.zip
-      skip_cleanup: true
-      on:
-        repo: fragaria/karmen
-        tags: true
-        condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*-.*$'
+    # PRE-RELEASE
+    - stage: Create GitHub release
+      name: "Pre-release"
+      language: generic
+      install: true
+      script:
+        - bash .travis/make-github-release.sh
+      deploy:
+        prerelease: true
+        provider: releases
+        api_key:
+          secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
+        file: ./.travis/release.zip
+        skip_cleanup: true
+        on:
+          repo: fragaria/karmen
+          tags: true
+          condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*-.*$'
 
-  # STABLE RELEASE
-  - language: generic
-    install: true
-    script:
-    - bash .travis/make-github-release.sh
-    deploy:
-      prerelease: false
-      provider: releases
-      api_key:
-        secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
-      file: ./.travis/release.zip
-      skip_cleanup: true
-      on:
-        repo: fragaria/karmen
-        tags: true
-        condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*$'
+    # STABLE RELEASE
+    - language: generic
+      name: "Stable release"
+      install: true
+      script:
+        - bash .travis/make-github-release.sh
+      deploy:
+        prerelease: false
+        provider: releases
+        api_key:
+          secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
+        file: ./.travis/release.zip
+        skip_cleanup: true
+        on:
+          repo: fragaria/karmen
+          tags: true
+          condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*$'
 env:
   global:
-  - secure: OSoA7AOTIf0Ias9w/TkA+Rw55e/z+Gu1whBSsZp/ncwHmBJom3+uyF/Ry7Hu+7rHwkk29t6pXTvgfGar/BUWZ9FfJAiM+1ixrVaKpxkotJqNfcXDCSCBLznRBy5Odmqv+czMHvYAdLSIPL3p6fcsfy79u4ju1XM2ZluRMXQYycqk0xpe/tIw8KhhhKTZgnuWE57YhoC8m02lcuhkTCUylYsCxhabjghbxgUc4wXq76Tk1EDSjaCM9LMdqP4mUGuj0aYhAvX2v4JTOb55dS+UhlOPlmQ4ZahpopJKFz8HfYQCuaRZGP/L9ap9GLx/Q4BhFvz+7S+CjpJ0dS+i9IdJthufBmrRTcLObBTPF6DiTAXsqxRw2psf1W60+8zHLdzvxYAvAlLmTqR86+yCip83DyGNfnWKBWeJI+Jy309n/tJUxZmsxE4eFjv9oU5i4qRjZVZ7t5eO+evxTSKYuYCf8F7ALv1FA0wG0xq8x77ydrPn+pndSVa+xP3tX/ifqlmSMHr+jMivfqYhqptLTZAwxWKBK2mRc7Xh2TSvlcVNoahNiwOawQQjelOC+1v/5IVh925UVY3PiepuUlSlJc0Cf+Ee/oMxsTyAjd2V2baCgKfrtV28Du36QkLIyrEBU8GNd/KfdnfhBwLHXJEn/SoB8UpD3/BxfnZU6FwAUIYbUAI=
-  - secure: e4YXgh+O63zgWYWD12WltX1BSLChLVkRcWh3bmVJjZhALnVZ8z/1ygW5L6/nNiJG+2Iwr09mQhHZWd9jE04RUpvGI08z0uqJb5urTri0+dvYrNAE1mNETJRo6br8GZLbhb68VDrg1HNO/p4/HpGCVQPSZaICFZocnH9PN/Tx87zjabko0Fb5XkQpUhBVVMLHYvET08bgQdkXttrsfNdZSvpUXF+A0I7wQ5TSYMJHklA29aN201ZJa6CWsiom93IOzQ9MpDX6f4v1QcyhB9eir9SnfvDvHyR2O0zhYUrXBtEw3XMO4kbPZ77V/pOpQLk497BHnIG+K5c+Wj2SYnGQ0sTzHsWjQsUPWoS9axn/VYDJFEAI5hnFxfUFSQO4rQFc5+RdWTExkjrkr2PhvPJll1AJfQF45I6NRUBr6kz4F4WJulYCUOAADIVN3xDO1ukMjuAmMIY/DNDMUlVRd1iFvksUkiAMnBR+D3YGKCaLxxvk7/sRDa8CyycoWwglCQ0eaPIwBcDO5vbazyAxiO/pm7gIdQAQRbGus+GKqNzsFGyMtZhodmwu8amdll5hsrLi+YRZ5sSjaLEtlHJprGEkMCw1y/6CV+2OysSOLZMBbIhJyqmlsb+hLjp9xpLrhJl03jDiUvaNGV7isZfUF3jE4eCKRYRHECNQB8k8yjdygOk=
+    - secure: OSoA7AOTIf0Ias9w/TkA+Rw55e/z+Gu1whBSsZp/ncwHmBJom3+uyF/Ry7Hu+7rHwkk29t6pXTvgfGar/BUWZ9FfJAiM+1ixrVaKpxkotJqNfcXDCSCBLznRBy5Odmqv+czMHvYAdLSIPL3p6fcsfy79u4ju1XM2ZluRMXQYycqk0xpe/tIw8KhhhKTZgnuWE57YhoC8m02lcuhkTCUylYsCxhabjghbxgUc4wXq76Tk1EDSjaCM9LMdqP4mUGuj0aYhAvX2v4JTOb55dS+UhlOPlmQ4ZahpopJKFz8HfYQCuaRZGP/L9ap9GLx/Q4BhFvz+7S+CjpJ0dS+i9IdJthufBmrRTcLObBTPF6DiTAXsqxRw2psf1W60+8zHLdzvxYAvAlLmTqR86+yCip83DyGNfnWKBWeJI+Jy309n/tJUxZmsxE4eFjv9oU5i4qRjZVZ7t5eO+evxTSKYuYCf8F7ALv1FA0wG0xq8x77ydrPn+pndSVa+xP3tX/ifqlmSMHr+jMivfqYhqptLTZAwxWKBK2mRc7Xh2TSvlcVNoahNiwOawQQjelOC+1v/5IVh925UVY3PiepuUlSlJc0Cf+Ee/oMxsTyAjd2V2baCgKfrtV28Du36QkLIyrEBU8GNd/KfdnfhBwLHXJEn/SoB8UpD3/BxfnZU6FwAUIYbUAI=
+    - secure: e4YXgh+O63zgWYWD12WltX1BSLChLVkRcWh3bmVJjZhALnVZ8z/1ygW5L6/nNiJG+2Iwr09mQhHZWd9jE04RUpvGI08z0uqJb5urTri0+dvYrNAE1mNETJRo6br8GZLbhb68VDrg1HNO/p4/HpGCVQPSZaICFZocnH9PN/Tx87zjabko0Fb5XkQpUhBVVMLHYvET08bgQdkXttrsfNdZSvpUXF+A0I7wQ5TSYMJHklA29aN201ZJa6CWsiom93IOzQ9MpDX6f4v1QcyhB9eir9SnfvDvHyR2O0zhYUrXBtEw3XMO4kbPZ77V/pOpQLk497BHnIG+K5c+Wj2SYnGQ0sTzHsWjQsUPWoS9axn/VYDJFEAI5hnFxfUFSQO4rQFc5+RdWTExkjrkr2PhvPJll1AJfQF45I6NRUBr6kz4F4WJulYCUOAADIVN3xDO1ukMjuAmMIY/DNDMUlVRd1iFvksUkiAMnBR+D3YGKCaLxxvk7/sRDa8CyycoWwglCQ0eaPIwBcDO5vbazyAxiO/pm7gIdQAQRbGus+GKqNzsFGyMtZhodmwu8amdll5hsrLi+YRZ5sSjaLEtlHJprGEkMCw1y/6CV+2OysSOLZMBbIhJyqmlsb+hLjp9xpLrhJl03jDiUvaNGV7isZfUF3jE4eCKRYRHECNQB8k8yjdygOk=
