@@ -12,7 +12,8 @@ describe("Organizations: Listing", function () {
       .login(email, password)
       .then((data) => {
         organizationUuid = Object.keys(data.organizations)[0];
-        return cy.visit("/organizations");
+          cy.get('button[id="navigation-menu-toggle"]').click()
+          return cy.get('a[id="navigation-organizations"]').click()
       });
   });
 

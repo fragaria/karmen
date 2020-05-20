@@ -12,7 +12,10 @@ describe("Printers: Adding", function () {
       .login(email, password)
       .then((data) => {
         organizationUuid = Object.keys(data.organizations)[0];
-        return cy.visit(`/${organizationUuid}/add-printer`);
+        cy.get('button[id="navigation-menu-toggle"]').click();
+        cy.get('a[id="navigation-settings"]').click();
+        return cy.get('a[id="btn-add_printer"]').click();
+
       });
   });
 
@@ -38,26 +41,28 @@ describe("Printers: Adding", function () {
 
   it("adds printer", function () {
     const name = chance.string();
-    cy.get("input#name").type(name);
-    cy.get("input#address").type("172.16.236.11:8080");
-    cy.get('button[type="submit"]')
-      .click()
-      .wait(3000)
-      .then(() => {
-        cy.location().then((loc) => {
-          expect(loc.pathname).to.eq(
-            `/${organizationUuid}/settings/tab-printers`
-          );
-          cy.get(".list-item-title").then((items) => {
-            let foundPrinter = false;
-            for (let i of items) {
-              if (i.innerText.indexOf(name) > -1) {
-                foundPrinter = true;
-              }
-            }
-            expect(foundPrinter).to.eq(true);
+
+      cy.get("input#name").type(name);
+      cy.get("input#address").type("172.16.236.11:8080");
+      cy.get('button[type="submit"]')
+          .click()
+          .wait(3000)
+          .then(() => {
+            cy.location().then((loc) => {
+              expect(loc.pathname).to.eq(
+                  `/${organizationUuid}/settings/tab-printers`
+              );
+
+              cy.get(".list-item-title").then((items) => {
+                let foundPrinter = false;
+                for (let i of items) {
+                  if (i.innerText.indexOf(name) > -1) {
+                    foundPrinter = true;
+                  }
+                }
+                expect(foundPrinter).to.eq(true);
+              });
+            });
           });
-        });
-      });
   });
 });

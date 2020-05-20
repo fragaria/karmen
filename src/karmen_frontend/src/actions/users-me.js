@@ -56,7 +56,9 @@ export const loadUserFromToken = (token) => (dispatch) => {
   );
 };
 
-export const loadUserFromLocalStorage = () => (dispatch) => {
+export const loadUserFromLocalStorage = (force_refresh = false) => (
+  dispatch
+) => {
   const profile = backend.getUserProfile();
   // no profile - bail
   if (!profile) {
@@ -64,8 +66,9 @@ export const loadUserFromLocalStorage = () => (dispatch) => {
   }
   // try refresh if the expiration is set and near
   if (
-    profile.accessTokenExpiresOn &&
-    dayjs().isAfter(profile.accessTokenExpiresOn.subtract(90, "seconds"))
+    (profile.accessTokenExpiresOn &&
+      dayjs().isAfter(profile.accessTokenExpiresOn.subtract(90, "seconds"))) ||
+    force_refresh
   ) {
     return backend.refreshAccessToken().then((r) => {
       if (r.status === 200) {
