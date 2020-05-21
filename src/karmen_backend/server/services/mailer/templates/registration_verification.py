@@ -3,12 +3,12 @@ import json
 from textwrap import dedent
 
 from server import app
-from .mail_template import MailTemplate
+from .mail_template import BrandedMailTemplate
 
 
-class RegistrationVerification(MailTemplate):
+class RegistrationVerification(BrandedMailTemplate):
     def subject(self):
-        return "Karmen - Registration verification"
+        return "Verify your Karmen account email"
 
     def prepare_variables(self, variables={}):
         # TODO handle organization_name and organization_uuid in activation_link and mail contents
@@ -27,33 +27,35 @@ class RegistrationVerification(MailTemplate):
         )
 
     def textbody(self):
-        return (
-            dedent(
-                """
+        return dedent(
+            f"""
             Welcome to Karmen!
 
             Please verify your email address by opening the link below in order to get started:
 
-            %s
-
-            ---
-
-            © 2020 Fragaria s.r.o.
+            {self.variables["activation_link"]}
             """
-            )
-            % (self.variables["activation_link"])
         )
 
     def htmlbody(self):
-        return (
-            dedent(
-                """
-                <h1>Welcome to Karmen!</h1>
-
-                <p>Please verify your email address by <a href="%s" target="_blank">clicking here</a> in order to get started.</p>
-
-                © 2020 Fragaria s.r.o.
-                """
-            )
-            % self.variables["activation_link"]
+        return dedent(
+            f"""
+            <h1>Welcome to Karmen!</h1>
+            <p>Please verify your email address in order to get started:</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+                <tbody>
+                <tr>
+                    <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                        <tr>
+                            <td><a href="{self.variables["activation_link"]}" target="_blank">Verify my email</a> </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            """
         )
