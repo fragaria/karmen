@@ -59,8 +59,8 @@ const UpgradeModal = ({ shouldShow }) => {
           </button>
 
           <small className="text-center">
-            If the button does not work,<br/> try pressing <code>Ctrl+R</code> or{" "}
-            <code>&#8984;+R</code>.
+            If the button does not work,
+            <br /> try pressing <code>Ctrl+R</code> or <code>&#8984;+R</code>.
           </small>
         </div>
       </Modal>
