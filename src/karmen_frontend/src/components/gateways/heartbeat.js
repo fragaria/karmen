@@ -46,7 +46,7 @@ const UpgradeModal = ({ shouldShow }) => {
     isOpen && (
       <Modal>
         <h1 className="modal-title text-center">
-          Application has been upgraded, please reload the page to continue.
+          Karmen has been updated, please reload the page to continue working.
         </h1>
         <div className="cta-box text-center">
           <button
@@ -55,7 +55,7 @@ const UpgradeModal = ({ shouldShow }) => {
               window.location.reload(true);
             }}
           >
-            Reload
+            Reload now
           </button>
 
           <small className="text-center">
