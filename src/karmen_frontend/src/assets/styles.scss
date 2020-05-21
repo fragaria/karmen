@@ -358,7 +358,7 @@ footer {
     @include plumber(
       $font-size: 3.5,
       $leading-top: 4,
-      $leading-bottom: 0,
+      $leading-bottom: 3,
       $line-height: 4
     );
   }
@@ -1074,6 +1074,7 @@ select {
   );
 }
 
+.message-default,
 .message-success,
 .message-error {
   text-align: center;

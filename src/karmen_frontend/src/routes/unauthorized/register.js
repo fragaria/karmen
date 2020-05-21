@@ -99,7 +99,9 @@ class Register extends React.Component {
             We will send You an email with a verification link.
           </h2>
           <form>
-            <FormInputs definition={registerForm} updateValue={updateValue} />
+            {!messageOk && (
+              <FormInputs definition={registerForm} updateValue={updateValue} />
+            )}
 
             <div className="form-messages">
               {message && (
@@ -112,19 +114,21 @@ class Register extends React.Component {
               )}
             </div>
 
-            <div className="cta-box text-center">
-              <BusyButton
-                className="btn"
-                type="submit"
-                onClick={this.register}
-                busyChildren="Sending link..."
-              >
-                Register
-              </BusyButton>{" "}
-              <Link to="/login" className="btn btn-plain">
-                Cancel
-              </Link>
-            </div>
+            {!messageOk && (
+              <div className="cta-box text-center">
+                <BusyButton
+                  className="btn"
+                  type="submit"
+                  onClick={this.register}
+                  busyChildren="Sending link..."
+                >
+                  Register
+                </BusyButton>{" "}
+                <Link to="/login" className="btn btn-plain">
+                  Cancel
+                </Link>
+              </div>
+            )}
           </form>
         </div>
       </div>
