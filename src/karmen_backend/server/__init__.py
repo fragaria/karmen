@@ -46,7 +46,7 @@ if os.environ.get("SENTRY_DSN") is not None:
 
 
 app = Flask(__name__)
-connexion_app = connexion.FlaskApp(__name__, specification_dir='../openapi/')
+connexion_app = connexion.FlaskApp(__name__, specification_dir="../openapi/")
 app = connexion_app.app
 
 
@@ -124,4 +124,3 @@ import server.tasks
 import server
 
 connexion_app.add_api("swagger.yaml")
-
