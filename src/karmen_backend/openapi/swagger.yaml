@@ -756,7 +756,7 @@ paths:
                   format: email
       responses:
         '202':
-          description: 'User created'
+          description: 'User created, empty response'
         '400':
           description: Unable to create user
           content:
@@ -790,6 +790,10 @@ paths:
       responses:
         '200':
           description: 'Username changed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_full_response'
         '401':
           description: Unauthorized
         '400':
@@ -839,7 +843,7 @@ paths:
                   format: email
       responses:
         '202':
-          description: 'Password reset requested'
+          description: 'Password reset requested, empty response'
         '400':
           description: Request not valid
   '/users/me/reset-password':
@@ -892,6 +896,10 @@ paths:
       responses:
         '200':
           description: 'Login successfull'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_full_response'
         '401':
           description: Wrong login
   '/users/me/authenticate-fresh':
@@ -915,6 +923,10 @@ paths:
       responses:
         '200':
           description: 'Ok'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_full_response'
         '401':
           description: 'Unauthorized'
 
@@ -927,6 +939,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_full_response'
   '/users/me/logout':
     post:
       summary: 'Invalidate current token'
@@ -936,6 +952,14 @@ paths:
       responses:
         '200':
           description: 'Logged out'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logout:
+                    type: boolean
+                    example: true
   '/users/me/password':
     patch:
       summary: 'Change password'
@@ -960,6 +984,10 @@ paths:
       responses:
         '200':
           description: 'Ok'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_full_response'
         '401':
           description: 'Unauthorized'
 
@@ -972,6 +1000,10 @@ paths:
       responses:
         '200':
           description: 'List of tokens'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_access_token_brief'
     post:
       summary: 'Create new API token'
       operationId: server.routes.users_me.create_api_token
@@ -988,6 +1020,10 @@ paths:
       responses:
         '200':
           description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_access_token_new'
   '/users/me/tokens/{jti}':
     delete:
       summary: 'Revoke API token'
@@ -1026,6 +1062,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization_user_profile'
         '400':
           description: Unable to create or add user
           content:
@@ -1052,6 +1092,13 @@ paths:
       responses:
         '200':
           description: 'List of users'
+          content:
+            application/json:
+              schema:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/organization_user_profile'
   '/organizations/{org_uuid}/users/{user_uuid}':
     patch:
       summary: Change user's role in an organization
@@ -1073,6 +1120,10 @@ paths:
       responses:
         '200':
           description: 'Role changed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization_user_profile'
         '400':
           description: 'Bad role'
     delete:
@@ -1109,6 +1160,13 @@ paths:
       responses:
         '200':
           description: 'List of gcodes'
+          content:
+            application/json:
+              schema:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/gcode_detail'
     post:
       summary: 'Upload gcode'
       operationId: server.routes.gcodes.gcode_create
@@ -1132,6 +1190,11 @@ paths:
       responses:
         '201':
           description: 'Created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gcode_detail'
+
   '/organizations/{org_uuid}/gcodes/{gcode_uuid}':
     get:
       summary: 'Get gcode details'
@@ -1144,6 +1207,11 @@ paths:
       responses:
         '200':
           description: 'Gcode details'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gcode_detail'
+
     delete:
       summary: 'Delete gcode'
       operationId: server.routes.gcodes.gcode_delete
@@ -1167,6 +1235,13 @@ paths:
       responses:
         '200':
           description: 'Gcode file'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+
   '/octoprint-emulator/api/version':
     get:
       summary: >-
@@ -1178,6 +1253,23 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    api:
+                      type: string
+                      example: karmen
+                    text:
+                      type: string
+                      example: "OctoPrint emulator by Karmen"
+                    server:
+                      type: string
+                      description: karmen version
+                      example: v0.9.0
+
+
   '/octoprint-emulator/api/settings':
     get:
       summary: >-
@@ -1189,6 +1281,11 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+
   '/octoprint-emulator/api/printer':
     get:
       summary: >-
@@ -1200,6 +1297,65 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sd:
+                    type: object
+                    properties:
+                      ready:
+                        type: boolean
+                        example: True
+                  state:
+                    type: object
+                    properties:
+                      text:
+                        type: sting
+                        example: Operational
+                      flags:
+                        type: object
+                        properties:
+                          cancelling:
+                            type: boolean
+                            example: false
+                          closedOnError:
+                            type: boolean
+                            example: false
+                          error:
+                            type: boolean
+                            example: false
+                          finishing:
+                            type: boolean
+                            example: false
+                          operational:
+                            type: boolean
+                            example: true
+                          paused:
+                            type: boolean
+                            example: false
+                          pausing:
+                            type: boolean
+                            example: false
+                          printing:
+                            type: boolean
+                            example: false
+                          ready:
+                            type: boolean
+                            example: true
+                          resuming:
+                            type: boolean
+                            example: false
+                          sdReady:
+                             type: boolean
+                             example: true
+
+
+
+
+
+
   '/octoprint-emulator/api/job':
     get:
       summary: >-
@@ -1211,6 +1367,14 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job:
+                    type: object
+
   '/octoprint-emulator/api/files/local':
     post:
       summary: >-
@@ -1222,6 +1386,27 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: object
+                    properties:
+                      local:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          display:
+                            type: string
+                          path:
+                            type: string
+                          origin:
+                            type: string
+                            example: local
+
   '/organizations':
     post:
       summary: 'Create new organization'
@@ -1239,6 +1424,11 @@ paths:
       responses:
         '201':
           description: 'Created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization_entity'
+
     get:
       summary: 'List organizations'
       operationId: server.routes.organizations.list_organizations
@@ -1247,6 +1437,17 @@ paths:
       responses:
         '200':
           description: 'List of organizations'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: list
+                    items:
+                      $ref: '#/components/schemas/organization_entity_for_user'
+
+
   '/organizations/{org_uuid}':
     patch:
       summary: 'Rename orgaization'
@@ -1266,6 +1467,10 @@ paths:
       responses:
         '200':
           description: 'Renamed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization_entity'
   '/organizations/{org_uuid}/printjobs':
     post:
       summary: 'Start printing gcode on a printer'
@@ -1287,6 +1492,15 @@ paths:
       responses:
         '201':
           description: 'Printjob scheduled'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_uuid:
+                    $ref: '#/components/schemas/uuid'
+                  uuid:
+                    $ref: '#/components/schemas/uuid'
         '409':
           description: Could ot schedule a printjob
     get:
@@ -1301,11 +1515,19 @@ paths:
         - $ref: '#/components/parameters/order_by_filter'
         - $ref: '#/components/parameters/fields_filter'
         - $ref: '#/components/parameters/filter_filter'
-
-
+        - in: query
+          name: printer_uuid
+          description: Printer to list printjobs for
+          schema:
+            $ref: '#/components/schemas/uuid'
       responses:
         '200':
           description: 'List of printjobs'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/printjob_detail'
+
   '/organizations/{org_uuid}/printjobs/{printjob_uuid}':
     get:
       summary: 'Get printjob detail'
@@ -1318,6 +1540,17 @@ paths:
       responses:
         '200':
           description: 'Printjob detail'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: list
+                    items:
+                      $ref: '#/components/schemas/printjob_detail'
+
+
   '/organizations/{org_uuid}/tasks':
     post:
       summary: >-
@@ -1631,6 +1864,204 @@ components:
           example: ""
       required:
         - name
+    organization_entity:
+      description: basic organization response
+      type: object
+      properties:
+        name:
+          type: string
+        uuid:
+          $ref: '#/components/schemas/uuid'
+    organization_entity_for_user:
+      description: basic organization response
+      type: object
+      properties:
+        name:
+          type: string
+        uuid:
+          $ref: '#/components/schemas/uuid'
+        role:
+          type: string
+          enum: [user, admin]
+          description: User role in organization
+
+    organization_user_profile:
+      description: User profile for specific organization, contains basic user info and role in organization
+      type: object
+      properties:
+          activated:
+              type: boolean
+              example: false
+          role:
+            type: string
+            enum: [user, admin]
+          email:
+            type: string
+            format: email
+          username:
+            type: string
+          uuid:
+            $ref: '#/components/schemas/uuid'
+    gcode_detail:
+      description: Contains all details about said gcode, like path, analysis, etc
+      type: object
+      properties:
+        absolute_path:
+          type: string
+          format: path
+          description: Absolute path to gcode on karmen's filesystem. Sent only on non-cloud mode
+          example: "/tmp/karmen-files/b3060e41-e319-4a9b-8ac4-e0936c75f275/USB_SD_holder27x.gcode"
+        analysis:
+          type: object
+          description: Analysis of gcode
+          properties:
+            filament:
+              type: object
+              properties:
+                length_mm:
+                  type: number
+                  example: 183441.1
+                type:
+                  type: string
+                  description: Filament type. Could be PLA, PET, and anything else that the slicer puts there
+                volume_cm3:
+                  type: number
+                  description: Filament volume in cumic centimeters
+            slicer:
+              type: string
+              description: Signature of the slicer
+              example: PrusaSlicer 2.2.0-alpha2+linux-x64
+            temperatures:
+              type: object
+              description: print temperatures for bed and tools
+              properties:
+                bed:
+                  type: number
+                bed_first:
+                  type: number
+                  description: temperature for bed for first layer
+                tool0:
+                  type: number
+                tool0_first:
+                  type: number
+                  description: temperature for printhead for first layer
+        data:
+          type: string
+          format: path
+          description: path on karmen API to download gcode file
+        display:
+          type: string
+          description: Display name
+        filename:
+          type: string
+          description: Actual filename on filesystem, could be different from display name
+        path:
+          type: string
+          format: path
+          description: "Path to gcode in user's folder"
+        size:
+          type: integer
+          description: filesize in bytes
+        uploaded:
+          type: string
+          example: 2020-05-11T20:55:54.267945+00:00
+          description: "Timestamp with timezone: YYYY-MM-DDTHH:MM:SS+HH:MM"
+        user_uuid:
+          $ref:  '#/components/schemas/uuid'
+        username:
+          type: string
+        uuid:
+          $ref: '#/components/schemas/uuid'
+    printjob_detail:
+      type: object
+      properties:
+        gcode_data:
+          type: object
+          properties:
+            available:
+              type: boolean
+            fileame:
+              type: string
+            size:
+              type: integer
+            uuid:
+              $ref: '#/components/schemas/uuid'
+        printer_data:
+          oneOf:
+            - $ref: '#/components/schemas/printer_by_network_props'
+            - $ref: '#/components/schemas/printer_by_token'
+        printer_uuid:
+          $ref: '#/components/schemas/uuid'
+        user_uuid:
+          $ref: '#/components/schemas/uuid'
+        uuid:
+          $ref: '#/components/schemas/uuid'
+        started:
+          type: string
+          example: "2020-05-21T11:36:53.621361+00:00"
+        username:
+          type: string
+    user_full_response:
+      description: User profile info
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        expires_on:
+          type: string
+          format: date-time
+        force_pwd_change:
+          type: boolean
+        fresh:
+          type: boolean
+        identity:
+          $ref: '#/components/schemas/uuid'
+        system_role:
+          type: string
+          enum: [admin, user]
+        username:
+          type: string
+        organizations:
+          type: list
+          items:
+            $ref: '#/components/schemas/organization_entity'
+    user_access_token_new:
+      type: object
+      properties:
+        access_token:
+          type: string
+        created:
+          type: string
+          format: date-time
+        jti:
+          $ref: '#/components/schemas/uuid'
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/organization_entity'
+    user_access_token_brief:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        jti:
+          $ref: '#/components/schemas/uuid'
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/organization_entity'
+
+
+
+
+
+
+
+
+
+
 
 
 
