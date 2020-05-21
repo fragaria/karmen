@@ -32,10 +32,28 @@ class RegistrationVerification(MailTemplate):
                 """
             Welcome to Karmen!
 
-            Verify Email on %s
+            Please verify your email address by opening the link below in order to get started:
+
+            %s
+
+            ---
 
             © 2020 Fragaria s.r.o.
             """
             )
             % (self.variables["activation_link"])
+        )
+
+    def htmlbody(self):
+        return (
+            dedent(
+                """
+                <h1>Welcome to Karmen!</h1>
+
+                <p>Please verify your email address by <a href="%s" target="_blank">clicking here</a> in order to get started.</p>
+
+                © 2020 Fragaria s.r.o.
+                """
+            )
+            % self.variables["activation_link"]
         )
