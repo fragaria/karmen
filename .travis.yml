@@ -10,8 +10,6 @@ addons:
       - docker-ce
       - jq
 matrix:
-  allow_failures:
-    - python: 3.8-dev
   include:
     - stage: Run tests
       language: node_js
@@ -77,39 +75,42 @@ matrix:
       if: tag IS present
       language: generic
       before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
+        - curl -fsSL https://get.docker.com | sh
+        - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+        - mkdir -p $HOME/.docker
+        - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+        - sudo service docker start
+      install:
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --name xbuilder --use
       script:
-        - travis_wait 30 bash .travis/build-images-backend.sh
+        - bash .travis/build-images-backend.sh
     - if: tag IS present
       name: "frontend image"
       language: generic
       before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
+        - curl -fsSL https://get.docker.com | sh
+        - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+        - mkdir -p $HOME/.docker
+        - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+        - sudo service docker start
+      install:
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --name xbuilder --use
       script:
         - bash .travis/build-images-frontend.sh
     - if: tag IS present
       name: "proxy image"
       language: generic
       before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
+        - curl -fsSL https://get.docker.com | sh
+        - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+        - mkdir -p $HOME/.docker
+        - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+        - sudo service docker start
+      install:
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --name xbuilder --use
       script:
         - bash .travis/build-images-proxy.sh
 
