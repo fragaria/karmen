@@ -1315,13 +1315,6 @@ select {
   }
 
   .printer-control-panel {
-    @include plumber(
-      $font-size: 1.618,
-      $line-height: 3,
-      $leading-top: 2,
-      $leading-bottom: 1
-    );
-
     @media (min-width: $screen-sm-min) {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -1334,13 +1327,6 @@ select {
         grid-gap: $base-unit;
         align-items: center;
         grid-template-columns: auto minmax(0, 1fr);
-      }
-
-      input {
-        width: 4em;
-        padding: 0 $base-unit/2;
-        border: $border-default;
-        border-radius: 0;
       }
 
       .btn {
@@ -1384,7 +1370,32 @@ select {
     }
   }
 
-  .printer-connection-status {
+  .printer-control-panel,
+  .printer-settings {
+    @include plumber(
+      $font-size: 1.618,
+      $line-height: 3,
+      $leading-top: 2,
+      $leading-bottom: 1
+    );
+
+    input {
+      width: 4em;
+      height: auto;
+      margin: $base-unit/2 0;
+      padding: 0 $base-unit/2;
+      border: $border-default;
+      border-radius: 0;
+    }
+
+    label {
+      text-align: left;
+      color: map-get($palette, black);
+    }
+  }
+
+  .printer-connection-status,
+  .printer-settings {
     padding-top: $spacing-default/2;
   }
 }

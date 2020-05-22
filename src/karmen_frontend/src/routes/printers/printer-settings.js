@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import Loader from "../../components/utils/loader";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
-import PrinterEditForm from "../../components/forms/printer-edit-form";
+import PrinterSettingsForm from "../../components/printers/printer-settings";
 
 import { loadPrinter, patchPrinter } from "../../actions";
 
@@ -52,7 +52,7 @@ class PrinterSettings extends React.Component {
     }
   }
 
-  render() {
+  render(patchPrinter) {
     const { printerLoaded } = this.state;
     const { match, printer } = this.props;
     if (!printerLoaded) {
@@ -70,34 +70,17 @@ class PrinterSettings extends React.Component {
             <h1 className="main-title text-center">
               Change properties of {printer.name}
             </h1>
-            <PrinterEditForm
-              defaults={{
-                name: printer.name,
-                filament_type:
-                  (printer.printer_props &&
-                    printer.printer_props.filament_type) ||
-                  "",
-                filament_color:
-                  (printer.printer_props &&
-                    printer.printer_props.filament_color) ||
-                  "",
-                bed_type:
-                  (printer.printer_props && printer.printer_props.bed_type) ||
-                  "",
-                tool0_diameter:
-                  (printer.printer_props &&
-                    printer.printer_props.tool0_diameter) ||
-                  "",
-                note:
-                  (printer.printer_props && printer.printer_props.note) || "",
-              }}
-              onSubmit={this.changePrinter}
-              onCancel={() => {
+
+            <PrinterSettingsForm
+              printer={printer}
+              onPrinterSettingsChanged={patchPrinter}
+              onPrinterSettingsCancelled={() => {
                 this.props.history.push(
                   `/${match.params.orguuid}/printers/${printer.uuid}`
                 );
               }}
             />
+
           </div>
         </section>
       </OrgRoleBasedGateway>
