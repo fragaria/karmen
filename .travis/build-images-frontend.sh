@@ -4,6 +4,7 @@ set -e
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
 DIR=$(dirname $(realpath -s $0))
+DOCKER_REPO=fragaria/karmen_frontend
 
 cd "${DIR}/../src/karmen_frontend"
 
@@ -17,21 +18,14 @@ docker cp extract:/usr/src/app/build ./build
 docker rm -f extract
 
 # Build for amd64 and push
-buildctl build --frontend dockerfile.v0 \
+docker buildx build --frontend dockerfile.v0 \
             --local dockerfile=. \
             --local context=. \
-            --output type=image,name=docker.io/fragaria/karmen-frontend:$TRAVIS_BRANCH-amd64,push=true \
-            --opt platform=linux/amd64 \
-            --opt filename=./Dockerfile.serve
+            --opt platform=linux/amd64,linux/arm/v7 \
+            --opt filename=./Dockerfile.serve \
+            --push
 
 
-# Build for armhf and push
-buildctl build --frontend dockerfile.v0 \
-            --local dockerfile=. \
-            --local context=. \
-            --output type=image,name=docker.io/fragaria/karmen-frontend:$TRAVIS_BRANCH-armhf,push=true \
-            --opt platform=linux/armhf \
-            --opt filename=./Dockerfile.serve
 
 
 export DOCKER_CLI_EXPERIMENTAL=enabled

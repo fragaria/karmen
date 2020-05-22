@@ -11,21 +11,14 @@ echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdi
 docker info
 
 # Build for amd64 and push
-buildctl build --frontend dockerfile.v0 \
+docker buildx build --frontend dockerfile.v0 \
             --local dockerfile=. \
             --local context=. \
-            --output type=image,name=docker.io/fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64,push=true \
-            --opt platform=linux/amd64 \
-            --opt filename=./Dockerfile
+            --opt platform=linux/amd64,linux/arm/v7 \
+            --opt filename=./Dockerfile \
+            --push
 
 
-# Build for armhf and push
-buildctl build --frontend dockerfile.v0 \
-            --local dockerfile=. \
-            --local context=. \
-            --output type=image,name=docker.io/fragaria/karmen-proxy:$TRAVIS_BRANCH-armhf,push=true \
-            --opt platform=linux/armhf \
-            --opt filename=./Dockerfile
 
 
 export DOCKER_CLI_EXPERIMENTAL=enabled
