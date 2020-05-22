@@ -10,7 +10,7 @@ mock = "*"
 pylint = "*"
 black = "==19.*"
 coverage = "*"
-coveralls = "*"
+python-coveralls = "*"
 
 [packages]
 flask = "*"
