@@ -9,7 +9,7 @@ pytest-xdist = "*"
 mock = "*"
 pylint = "*"
 black = "==19.*"
-coverage = "*"
+coverage = "==4.5.4"
 python-coveralls = "*"
 
 [packages]
