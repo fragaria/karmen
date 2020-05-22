@@ -34,7 +34,7 @@ matrix:
       script:
         - pipenv install --dev
         - make coverage
-        - make coveralls
+        # - make coveralls
     - language: python
       name: backend tests @ Python 3.8-dev
       python: 3.8-dev
