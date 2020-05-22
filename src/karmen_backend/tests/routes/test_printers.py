@@ -279,6 +279,15 @@ class CreateRoute(unittest.TestCase):
             self.assertEqual(response.json["name"], "random-test-printer-name")
             self.assertEqual(response.json["client"]["name"], "octoprint")
 
+    def test_create_empty_data(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     @mock.patch("server.services.network.get_avahi_hostname", return_value=None)
     @mock.patch("server.clients.octoprint.requests.Session.get", return_value=None)
     def test_create_same_network_client(self, mock_get_uri, mock_avahi):
@@ -1847,6 +1856,17 @@ class ControlBedTemperatureRoute(unittest.TestCase):
                 timeout=200,
                 verify=True,
             )
+
+    def test_bad_tool(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/printers/%s/temperatures/lasergun"
+                % (UUID_ORG, self.uuid),
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"target": "50"},
+            )
+            self.assertEqual(response.status_code, 400)
 
     def test_bad_target(self):
         with app.test_client() as c:

@@ -225,6 +225,16 @@ class ListRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
+    def test_fail_start_with_not_uuid(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/printjobs?limit=3&start_with=definitelly not uuid"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_fail_limit_str(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
@@ -563,6 +573,19 @@ class CreateRoute(unittest.TestCase):
                 json={"gcode": -3, "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20"},
             )
             self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_gcode(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post(
+                "/organizations/%s/printjobs" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+                json={
+                    "gcode": "c0b2f373-4d1a-4d3e-a4ed-1f09a4d1b9d3",
+                    "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+                },
+            )
+            self.assertEqual(response.status_code, 404)
 
     @mock.patch(
         "server.routes.printjobs.clients.get_printer_instance", return_value=None

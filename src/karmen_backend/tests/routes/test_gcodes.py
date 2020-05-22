@@ -140,6 +140,26 @@ class ListRoute(unittest.TestCase):
                 in response.json["next"]
             )
 
+    def test_float_limit(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes?limit=33.5&order_by=filename&fields=uuid,filename"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_wrong_limit(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes?limit=selpesdolesa&order_by=filename&fields=uuid,filename"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_no_multi_order_by(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)

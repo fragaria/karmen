@@ -24,11 +24,7 @@ def add_user_to_org(org_uuid):
     org_role = data.get("role", None)
     if not email or not org_role:
         return abort(make_response(jsonify(message="Missing email"), 400))
-    if org_role not in ["admin", "user"]:
-        return abort(make_response(jsonify(message="Bad role"), 400))
     email = email.lstrip().rstrip().lower()
-    if not is_email(email):
-        return abort(make_response(jsonify(message="Invalid email"), 400))
 
     existing = users.get_by_email(email)
     # completely new user
@@ -125,8 +121,6 @@ def update_user(org_uuid, user_uuid):
         return abort(make_response(jsonify(message="Missing payload"), 400))
 
     role = data.get("role", user_role["role"])
-    if role not in ["admin", "user"]:
-        return abort(make_response(jsonify(message="Bad role"), 400))
 
     organization_roles.set_organization_role(org_uuid, user_uuid, role)
     return (

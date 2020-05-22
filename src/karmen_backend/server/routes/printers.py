@@ -405,10 +405,6 @@ def printer_change_connection(org_uuid, printer_uuid):
             if r
             else ("Cannot change printer's connection state to offline", 500)
         )
-    else:
-        return abort(
-            make_response(jsonify(message="%s is an unknown state" % state), 400)
-        )
 
 
 # @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/current-job", methods=["POST"])
@@ -427,8 +423,6 @@ def printer_modify_job(org_uuid, printer_uuid):
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     action = data.get("action", None)
-    if not action:
-        return abort(make_response(jsonify(message="Missing action"), 400))
     try:
         if printer_inst.modify_current_job(action):
             user = get_current_user()
@@ -556,15 +550,7 @@ def control_printhead(org_uuid, printer_uuid):
         for axis in ["x", "y", "z"]:
             distance = data.get(axis)
             if distance:
-                try:
-                    distance = float(distance)
-                except ValueError:
-                    return abort(
-                        make_response(
-                            jsonify(message="Distance on %s must be a number" % axis),
-                            400,
-                        )
-                    )
+                distance = float(distance)
                 movement[axis] = distance
         r = printer_inst.move_head(movement, absolute)
         if not r:
@@ -585,8 +571,6 @@ def control_printhead(org_uuid, printer_uuid):
         if not r:
             return make_response(jsonify(message="Cannot move printhead"), 500)
         return "", 204
-    else:
-        return make_response(jsonify(message="Unknown command"), 400)
 
 
 # @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/fan", methods=["POST"])
@@ -599,8 +583,6 @@ def control_fan(org_uuid, printer_uuid):
     if data is None:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     target = data.get("target")
-    if target is None or target not in ["off", "on"]:
-        return abort(make_response(jsonify(message="Missing or invalid target"), 400))
     r = printer_inst.set_fan(target)
     if not r:
         return abort(make_response(jsonify(message="Cannot control fan"), 500))
@@ -617,8 +599,6 @@ def control_motors(org_uuid, printer_uuid):
     if data is None or "target" not in data:
         return abort(make_response(jsonify(message="Missing payload or target"), 400))
     target = data.get("target")
-    if target is None or target != "off":
-        return abort(make_response(jsonify(message="Missing or invalid target"), 400))
     r = printer_inst.motors_off()
     if not r:
         return make_response(jsonify(message="Cannot control motors"), 500)
@@ -652,20 +632,11 @@ def control_extrusion(org_uuid, printer_uuid):
 @validate_org_access()
 @cross_origin()
 def control_tool_temperature(org_uuid, printer_uuid, part_name):
-    if part_name not in ["tool0", "tool1", "bed"]:
-        return abort(
-            make_response(
-                jsonify(message="%s is not a valid part choice" % part_name), 400
-            )
-        )
     printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
     if data is None or "target" not in data:
         return abort(make_response(jsonify(message="Missing payload or target"), 400))
-    try:
-        target = float(data.get("target"))
-    except ValueError:
-        return abort(make_response(jsonify(message="Target must be a number"), 400))
+    target = float(data.get("target"))
     if target < 0:
         return abort(
             make_response(jsonify(message="Cannot set negative temperature"), 400)

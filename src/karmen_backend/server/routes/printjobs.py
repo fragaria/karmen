@@ -115,24 +115,19 @@ def printjobs_list(org_uuid):
         )
     if order_by in ["gcode_data", "printer_data"]:
         order_by = ""
-    try:
-        limit = int(request.args.get("limit", 200))
-        if limit and limit < 0:
-            limit = 200
-    except ValueError:
+    limit = int(request.args.get("limit", 200))
+    if limit and limit < 0:
         limit = 200
-    try:
-        start_with = (
-            guid.UUID(request.args.get("start_with"), version=4)
-            if request.args.get("start_with")
-            else None
-        )
-        # There is a hidden side effect in uuid module. When version is specified,
-        # it does not break, but instead silently modifies the content. Ugly!
-        if str(start_with) != request.args.get("start_with"):
-            start_with = None
-    except ValueError:
+    start_with = (
+        guid.UUID(request.args.get("start_with"), version=4)
+        if request.args.get("start_with")
+        else None
+    )
+    # There is a hidden side effect in uuid module. When version is specified,
+    # it does not break, but instead silently modifies the content. Ugly!
+    if str(start_with) != request.args.get("start_with"):
         start_with = None
+
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
     printjobs_record_set = printjobs.get_printjobs(

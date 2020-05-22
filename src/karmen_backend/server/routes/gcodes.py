@@ -58,12 +58,11 @@ def gcodes_list(org_uuid):
         return abort(
             make_response(jsonify(message="order_by supports only one data field"), 400)
         )
-    try:
-        limit = int(request.args.get("limit", 200))
-        if limit and limit < 0:
-            limit = 200
-    except ValueError:
+
+    limit = int(request.args.get("limit", 200))
+    if limit and limit < 0:
         limit = 200
+
     try:
         start_with = (
             guid.UUID(request.args.get("start_with"), version=4)
