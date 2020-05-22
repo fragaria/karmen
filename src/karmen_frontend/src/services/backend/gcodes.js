@@ -1,4 +1,4 @@
-import { getAuthHeaders, performRequest } from "./utils";
+import { getJsonPostHeaders, performRequest } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -63,7 +63,7 @@ export const uploadGcode = (orgUuid, path, file) => {
   var data = new FormData();
   data.append("file", file);
   data.append("path", path);
-  const headers = getAuthHeaders();
+  const headers = getJsonPostHeaders();
   headers.delete("content-type");
   return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes`, {
     method: "POST",
