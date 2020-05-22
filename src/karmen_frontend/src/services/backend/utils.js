@@ -72,7 +72,7 @@ export const getUserProfile = () => {
   return profile;
 };
 
-export const getAuthHeaders = () => {
+export const getJsonPostHeaders = () => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   headers.set("X-CSRF-TOKEN", Cookies.get("csrf_access_token"));
@@ -101,7 +101,7 @@ export const performRequest = (opts) => {
   };
   // TODO this should probably merge with passed headers
   if (opts.useAuth) {
-    fetchOpts.headers = getAuthHeaders();
+    fetchOpts.headers = getJsonPostHeaders();
   }
   if (opts.data) {
     fetchOpts.body = JSON.stringify(opts.data);

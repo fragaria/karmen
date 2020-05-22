@@ -46,13 +46,6 @@ export const loadGcode = createThunkedAction(
   }
 );
 
-export const downloadGcode = createThunkedAction(
-  "GCODE_DOWNLOAD_DETAIL",
-  (data, filename, { dispatch }) => {
-    return retryIfUnauthorized(backend.downloadGcode, dispatch)(data, filename);
-  }
-);
-
 export const deleteGcode = createThunkedAction(
   "GCODES_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {

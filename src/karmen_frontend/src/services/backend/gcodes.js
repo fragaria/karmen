@@ -1,5 +1,4 @@
-import { getAuthHeaders, performRequest } from "./utils";
-import download from "downloadjs";
+import { getJsonPostHeaders, performRequest } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -64,7 +63,7 @@ export const uploadGcode = (orgUuid, path, file) => {
   var data = new FormData();
   data.append("file", file);
   data.append("path", path);
-  const headers = getAuthHeaders();
+  const headers = getJsonPostHeaders();
   headers.delete("content-type");
   return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes`, {
     method: "POST",
@@ -86,29 +85,5 @@ export const uploadGcode = (orgUuid, path, file) => {
     .catch((e) => {
       console.error(`Cannot add a gcode: ${e}`);
       return { status: 500, successCodes: [201] };
-    });
-};
-
-export const downloadGcode = (dataLink, filename) => {
-  return fetch(
-    `${BASE_URL}/${dataLink[0] === "/" ? dataLink.substr(1) : dataLink}`,
-    {
-      method: "GET",
-      headers: getAuthHeaders(),
-    }
-  )
-    .then((response) => {
-      if (response.status === 200) {
-        return response.blob().then((d) => {
-          download(d, filename, d.type);
-          return { status: 200, successCodes: [200] };
-        });
-      }
-      console.error(`Cannot download a gcode: ${response.status}`);
-      return { status: response.status, successCodes: [200] };
-    })
-    .catch((e) => {
-      console.error(`Cannot download a gcode: ${e}`);
-      return { status: 500, successCodes: [200] };
     });
 };
