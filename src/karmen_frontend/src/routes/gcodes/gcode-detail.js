@@ -5,11 +5,7 @@ import SetActiveOrganization from "../../components/gateways/set-active-organiza
 import Loader from "../../components/utils/loader";
 import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 
-import {
-  loadGcode,
-  loadPrinters,
-  addPrintJob,
-} from "../../actions";
+import { loadGcode, loadPrinters, addPrintJob } from "../../actions";
 import formatters from "../../services/formatters";
 
 const BASE_URL = window.env.BACKEND_BASE;
@@ -40,7 +36,6 @@ const GcodePrint = ({
     </>
   );
 };
-
 
 class GcodeDetail extends React.Component {
   state = {
