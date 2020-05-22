@@ -18,11 +18,10 @@ docker cp extract:/usr/src/app/build ./build
 docker rm -f extract
 
 # Build for amd64 and push
-docker buildx build --frontend dockerfile.v0 \
+docker buildx build  \
             --local dockerfile=. \
             --local context=. \
             --opt platform=linux/amd64,linux/arm/v7 \
-            --opt filename=./Dockerfile.serve \
             --push
 
 
