@@ -10,68 +10,7 @@ addons:
       - docker-ce
       - jq
 matrix:
-  allow_failures:
-    - python: 3.8-dev
   include:
-    - stage: Run tests
-      language: python
-      name: backend tests @ Python 3.6
-      python: "3.6"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install --dev
-        - make test
-    - language: python
-      name: backend coverage @ Python 3.7
-      python: "3.7"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install --dev
-        - make coverage
-        - make coveralls
-    - language: python
-      name: backend tests @ Python 3.8-dev
-      python: 3.8-dev
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install --dev
-        - make test
-    - language: node_js
-      name: frontend Jest tests and build
-      node_js: 10
-      cache:
-        directories:
-          - node_modules
-          - "$HOME/.npm"
-      before_script:
-        - cd src/karmen_frontend
-        - npm ci
-      script:
-        - npm run lint
-        - npm run test
-        - npm run build
-    - language: node_js
-      name: frontend E2E cypress tests
-      node_js: 10
-      cache:
-        directories:
-          - node_modules
-          - "$HOME/.npm"
-      before_script:
-        - cd src/karmen_frontend && npm ci
-      script:
-        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
-        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        - npm run test:cypress
     - stage: Build Docker images
       name: "backend image"
       if: tag IS present
@@ -90,26 +29,28 @@ matrix:
       name: "frontend image"
       language: generic
       before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
+        - curl -fsSL https://get.docker.com | sh
+        - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+        - mkdir -p $HOME/.docker
+        - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+        - sudo service docker start
+      install:
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --name xbuilder --use
       script:
         - bash .travis/build-images-frontend.sh
     - if: tag IS present
       name: "proxy image"
       language: generic
       before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
+        - curl -fsSL https://get.docker.com | sh
+        - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+        - mkdir -p $HOME/.docker
+        - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+        - sudo service docker start
+      install:
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --name xbuilder --use
       script:
         - bash .travis/build-images-proxy.sh
 
