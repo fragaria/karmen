@@ -10,6 +10,13 @@ Python based REST API backend for Karmen.
 The preferred way is to use the composed docker package as [described in here](../../README.md).
 You don't have to bother with setup of database and other services.
 
+### API
+
+This project has OpenAPI specifications of the API. The yaml files can be found in `openapi` directory.
+Development docker bundle also contains [Redoc](http://localhost:4000/openapi/) at `/openapi/`, so you can 
+browse the API documentation. If you prefer your own tool, the yaml is accessible at  `http://localhost:4000/api/openapi-spec.yaml`
+
+
 ## Contributing
 
 Before commiting, format the code. This can be done from pipenv shell. Pipenv is described below.
