@@ -3,16 +3,16 @@ import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import Loader from "../../components/utils/loader";
-import BusyButton from "../../components/utils/busy-button";
 import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 
 import {
   loadGcode,
-  downloadGcode,
   loadPrinters,
   addPrintJob,
 } from "../../actions";
 import formatters from "../../services/formatters";
+
+const BASE_URL = window.env.BACKEND_BASE;
 
 const GcodePrint = ({
   gcode,
@@ -41,9 +41,11 @@ const GcodePrint = ({
   );
 };
 
+
 class GcodeDetail extends React.Component {
   state = {
     gcode: null,
+    downloadUrl: null,
     gcodeLoaded: false,
     selectedPrinter: "",
     printedOn: [],
@@ -63,8 +65,11 @@ class GcodeDetail extends React.Component {
   loadGcode() {
     const { match, getGcode } = this.props;
     getGcode(match.params.uuid, []).then((r) => {
+      let downloadPath = r.data.data;
+      if (downloadPath[0] === "/") downloadPath = downloadPath.substr(1);
       this.setState({
         gcode: r.data,
+        downloadUrl: `${BASE_URL}/${downloadPath}`,
         gcodeLoaded: true,
       });
     });
@@ -80,7 +85,7 @@ class GcodeDetail extends React.Component {
 
   render() {
     const { gcode, gcodeLoaded, printedOn } = this.state;
-    const { match, downloadGcode, printGcode } = this.props;
+    const { match, printGcode } = this.props;
 
     if (!gcodeLoaded) {
       return (
@@ -226,15 +231,9 @@ class GcodeDetail extends React.Component {
           </div>
 
           <div className="cta-box text-center">
-            <BusyButton
-              className="btn"
-              onClick={() => {
-                return downloadGcode(gcode.data, gcode.filename);
-              }}
-              busyChildren="Downloading..."
-            >
+            <a href={this.state.downloadUrl} download className="btn">
               Download G-code
-            </BusyButton>
+            </a>
           </div>
 
           <div className="cta-box text-center">
@@ -275,6 +274,5 @@ export default connect(
       dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
     printGcode: (id, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orguuid, id, printer)),
-    downloadGcode: (data, filename) => dispatch(downloadGcode(data, filename)),
   })
 )(GcodeDetail);
