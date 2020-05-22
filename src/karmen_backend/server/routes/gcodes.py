@@ -42,6 +42,8 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
             response[field] = gcode.get(field, None)
     if "uploaded" in response:
         response["uploaded"] = response["uploaded"].isoformat()
+    if app.config.get("CLOUD_MODE"):
+        response.pop("absolute_path", None)
     return response
 
 

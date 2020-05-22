@@ -89,6 +89,19 @@ class ListRoute(unittest.TestCase):
             self.assertTrue("data" in response.json["items"][0])
             self.assertTrue(response.json["items"][0]["username"] is not None)
 
+    def test_no_path_in_cloudmode(self):
+        app.config["CLOUD_MODE"] = True
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+
+            self.assertTrue("absolute_path" not in response.json["items"][0])
+
+        app.config["CLOUD_MODE"] = False
+
     def test_order_by(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)

@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager
 from flask_executor import Executor
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-__version__ = "0.11.0-rc2"
+__version__ = "0.11.0-rc3"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
