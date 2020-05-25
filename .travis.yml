@@ -25,7 +25,7 @@ matrix:
         - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         - docker buildx create --name xbuilder --use
       script:
-        - travis_wait 30 bash .travis/build-images-backend.sh
+        - bash .travis/build-images-backend.sh
     - if: tag IS present
       name: "frontend image"
       language: generic
