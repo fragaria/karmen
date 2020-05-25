@@ -20,10 +20,12 @@ docker create --name extract fragaria/karmen-frontend:build
 docker cp extract:/usr/src/app/build ./build
 docker rm -f extract
 
+docker buildx create --use
 # Build for amd64 and push
 docker buildx build  \
             --platform=linux/amd64,linux/arm/v7 \
-            --push
+            --push \
+            .
 
 
 
