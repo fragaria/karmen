@@ -25,6 +25,7 @@ docker buildx create --use
 docker buildx build  \
             --platform=linux/amd64,linux/arm/v7 \
             --push \
+            --tag fragaria/karmen-frontend:$TRAVIS_BRANCH \ 
             .
 
 
