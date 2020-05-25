@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+exit 0
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
 DIR=$(dirname $(realpath -s $0))
