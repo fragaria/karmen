@@ -16,7 +16,7 @@ docker info
 # Build for amd64 and push
 docker buildx build --platform=linux/amd64,linux/arm/v7 \
             --push \
-            -- tag fragaria/karmen-proxy:$TRAVIS_BRANCH \
+            --tag fragaria/karmen-proxy:$TRAVIS_BRANCH \
             .
 
 
