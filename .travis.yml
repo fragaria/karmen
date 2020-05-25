@@ -21,9 +21,9 @@ matrix:
         - mkdir -p $HOME/.docker
         - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
         - sudo service docker start
-        install:
-          - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          - docker buildx create --name xbuilder --use
+      install:
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --name xbuilder --use
       script:
         - travis_wait 30 bash .travis/build-images-backend.sh
     - if: tag IS present
