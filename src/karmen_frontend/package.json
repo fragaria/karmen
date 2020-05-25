@@ -45,7 +45,7 @@
       "plugin:prettier/recommended"
     ]
   },
-  "version": "0.11.0-ts18",
+  "version": "0.11.0-ts19",
   "scripts": {
     "eject": "react-scripts eject",
     "cypress": "cypress open",
