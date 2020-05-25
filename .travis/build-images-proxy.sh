@@ -13,10 +13,21 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
 
+echo buildng for $TRAVIS_BRANCH $TRAVIS_TAG
+
+DOCKER_PUBLISH_TAG="fragaria/karmen-proxy:$TRAVIS_BRANCH"
+
+# latest only if this is not a pre release
+if [[ "$TRAVIS_TAG" =~ ^v[0-9.]*$ ]]; then
+
+DOCKER_PUBLISH_TAG="fragaria/karmen-proxy:lastest"
+
+fi
+
 # Build for amd64 and push
 docker buildx build --platform=linux/amd64,linux/arm/v7 \
             --push \
-            --tag fragaria/karmen-proxy:$TRAVIS_BRANCH \
+            --tag "$DOCKER_PUBLISH_TAG" \
             .
 
 
@@ -45,6 +56,8 @@ if [[ "$TRAVIS_TAG" =~ ^v[0-9.]*$ ]]; then
 
   docker manifest push fragaria/karmen-proxy:latest
 fi
+
+exit 0
 
 # Delete unnecessary tags
 DOCKER_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${DOCKER_USER}'", "password": "'${DOCKER_PASSWORD}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
