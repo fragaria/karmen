@@ -23,15 +23,6 @@ docker buildx build --platform=linux/amd64,linux/arm/v7 \
 
 
 
-# Create manifest list and push that
-docker manifest create fragaria/karmen-proxy:$TRAVIS_BRANCH \
-            fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64 \
-            fragaria/karmen-proxy:$TRAVIS_BRANCH-armhf
-
-docker manifest annotate fragaria/karmen-proxy:$TRAVIS_BRANCH fragaria/karmen-proxy:$TRAVIS_BRANCH-armhf --arch arm
-docker manifest annotate fragaria/karmen-proxy:$TRAVIS_BRANCH fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64 --arch amd64
-
-docker manifest push fragaria/karmen-proxy:$TRAVIS_BRANCH
 
 # latest only if not rc
 if [[ "$TRAVIS_TAG" =~ ^v[0-9.]*$ ]]; then
