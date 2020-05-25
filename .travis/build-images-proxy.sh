@@ -7,6 +7,9 @@ DIR=$(dirname $(realpath -s $0))
 
 cd "${DIR}/../src/proxy"
 
+export DOCKER_CLI_EXPERIMENTAL=enabled
+
+
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
 
@@ -17,7 +20,6 @@ docker buildx build --platform=linux/amd64,linux/arm/v7 \
 
 
 
-export DOCKER_CLI_EXPERIMENTAL=enabled
 
 # Create manifest list and push that
 docker manifest create fragaria/karmen-proxy:$TRAVIS_BRANCH \

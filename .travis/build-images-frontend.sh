@@ -8,6 +8,9 @@ DOCKER_REPO=fragaria/karmen_frontend
 
 cd "${DIR}/../src/karmen_frontend"
 
+export DOCKER_CLI_EXPERIMENTAL=enabled
+
+
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
 
@@ -25,7 +28,6 @@ docker buildx build  \
 
 
 
-export DOCKER_CLI_EXPERIMENTAL=enabled
 
 # Create manifest list and push that
 docker manifest create fragaria/karmen-frontend:$TRAVIS_BRANCH \
