@@ -52,9 +52,9 @@ class PrinterSettings extends React.Component {
     }
   }
 
-  render(patchPrinter) {
+  render() {
     const { printerLoaded } = this.state;
-    const { match, printer } = this.props;
+    const { match, printer, patchPrinter } = this.props;
     if (!printerLoaded) {
       return (
         <div>
