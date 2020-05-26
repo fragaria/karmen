@@ -1037,6 +1037,80 @@ paths:
         '204':
           description: 'Revoked'
 
+  '/tests-admin/users/create':
+    post:
+      summary: Create new user for tests. User is instantly activated.
+      # operationId: server.routes.tests-admin.create_test_user
+      tags:
+        - users-me
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                local-tests-token:
+                  $ref: '#/components/schemas/local-tests-token'
+      responses:
+        '202':
+          description: 'User created, empty response'
+        '400':
+          description: Unable to create user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+              examples:
+                Missing email:
+                  value:
+                    message: Missing email
+                Bad role:
+                  value:
+                    message: Bad role
+                Invalid email:
+                  value:
+                    message: Invalid email
+  '/tests-admin/organizations/{org_uuid}/users':
+    post:
+      summary: Add user to organization by his UUID
+      description: Used only for local tests. User must already exist
+      #operationId: server.routes.tests-admin.add_user_to_org
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/organization_uuid_param'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                uuid:
+                 $ref: '#/components/schemas/uuid'
+                role:
+                  type: string
+                  enum: [user, admin]
+                local-tests-token:
+                  $ref: '#/components/schemas/local-tests-token'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization_user_profile'
+        '400':
+          description: Unable to create or add user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+
 
 
   '/organizations/{org_uuid}/users':
@@ -1662,6 +1736,9 @@ components:
       properties:
         message:
           type: string
+    local-tests-token:
+      type: string
+      description: Token provided via env variables to authenticate modifications for tests
     printer_response:
       type: object
       properties:
