@@ -54,7 +54,7 @@ if __name__ == '__main__':
         elif filepath.endswith('.json'):
             update_json(version, project_root.joinpath(filepath))
         elif filepath.endswith('.yaml'):
-            update_json(version, project_root.joinpath(filepath))
+            update_yaml(version, project_root.joinpath(filepath))
         else:
             raise ValueError("Invalid file extension '%s'." % filepath)
     print('''Done.

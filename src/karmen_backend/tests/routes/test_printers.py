@@ -507,7 +507,6 @@ class CreateRoute(unittest.TestCase):
                     },
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
-                print(response, response.data, dir(response))
                 uuid = response.json["uuid"]
                 self.assertEqual(response.status_code, 201)
                 response = c.get(

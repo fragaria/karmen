@@ -489,7 +489,6 @@ class CreateRoute(unittest.TestCase):
                 content_type="multipart/form-data",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            print(response.data)
             self.assertEqual(response.status_code, 201)
             args, kwargs = mocked_save.call_args
             self.assertEqual(args[2], "/a/b")
