@@ -1040,9 +1040,9 @@ paths:
   '/tests-admin/users/create':
     post:
       summary: Create new user for tests. User is instantly activated.
-      # operationId: server.routes.tests-admin.create_test_user
+      operationId: server.routes.tests_admin.create_test_user
       tags:
-        - users-me
+        - tests-admin
       requestBody:
         required: true
         content:
@@ -1079,9 +1079,9 @@ paths:
     post:
       summary: Add user to organization by his UUID
       description: Used only for local tests. User must already exist
-      #operationId: server.routes.tests-admin.add_user_to_org
+      operationId: server.routes.tests_admin.add_user_to_org
       tags:
-        - users
+        - tests-admin
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
       requestBody:
