@@ -200,15 +200,14 @@ class ListRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    def test_ignore_negative_limit(self):
+    def test_fail_negative_limit(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/gcodes?limit=-3" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
     def test_fail_start_with_negative(self):
         with app.test_client() as c:

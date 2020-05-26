@@ -116,8 +116,7 @@ def printjobs_list(org_uuid):
     if order_by in ["gcode_data", "printer_data"]:
         order_by = ""
     limit = int(request.args.get("limit", 200))
-    if limit and limit < 0:
-        limit = 200
+
     start_with = (
         guid.UUID(request.args.get("start_with"), version=4)
         if request.args.get("start_with")

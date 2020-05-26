@@ -659,6 +659,7 @@ paths:
               properties:
                 target:
                   type: number
+                  minimum: 0
               required:
                 - target
 
@@ -1625,6 +1626,8 @@ components:
       name: limit
       schema:
         type: integer
+        minimum: 1
+        default: 200
     start_with_filter:
       in: query
       name: start_with

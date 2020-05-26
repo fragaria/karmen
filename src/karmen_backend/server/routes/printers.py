@@ -637,10 +637,6 @@ def control_tool_temperature(org_uuid, printer_uuid, part_name):
     if data is None or "target" not in data:
         return abort(make_response(jsonify(message="Missing payload or target"), 400))
     target = float(data.get("target"))
-    if target < 0:
-        return abort(
-            make_response(jsonify(message="Cannot set negative temperature"), 400)
-        )
     r = printer_inst.set_temperature(device=part_name, temp=target)
     if not r:
         return make_response(jsonify(message="Cannot set temperature"), 500)

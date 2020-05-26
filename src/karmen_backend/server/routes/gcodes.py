@@ -60,8 +60,6 @@ def gcodes_list(org_uuid):
         )
 
     limit = int(request.args.get("limit", 200))
-    if limit and limit < 0:
-        limit = 200
 
     try:
         start_with = (
