@@ -47,7 +47,7 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
     return response
 
 
-# @app.route("/organizations/<org_uuid>/gcodes", methods=["GET"])
+# /organizations/<org_uuid>/gcodes, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -121,7 +121,7 @@ def gcodes_list(org_uuid):
     return jsonify(response)
 
 
-# @app.route("/organizations/<org_uuid>/gcodes/<gcode_uuid>", methods=["GET"])
+# /organizations/<org_uuid>/gcodes/<gcode_uuid>, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -137,7 +137,7 @@ def gcode_detail(org_uuid, gcode_uuid):
     return jsonify(make_gcode_response(gcode, None, user_mapping))
 
 
-# @app.route("/organizations/<org_uuid>/gcodes", methods=["POST"])
+# /organizations/<org_uuid>/gcodes, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -193,7 +193,7 @@ def gcode_create(org_uuid):
     )
 
 
-# @app.route("/organizations/<org_uuid>/gcodes/<gcode_uuid>/data", methods=["GET"])
+# /organizations/<org_uuid>/gcodes/<gcode_uuid>/data, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -212,7 +212,7 @@ def gcode_file(org_uuid, gcode_uuid):
         return abort(make_response(jsonify(message="File not found"), 404))
 
 
-# @app.route("/organizations/<org_uuid>/gcodes/<gcode_uuid>", methods=["DELETE"])
+# /organizations/<org_uuid>/gcodes/<gcode_uuid>, DELETE
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()

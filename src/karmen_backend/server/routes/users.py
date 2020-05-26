@@ -11,7 +11,7 @@ from server.tasks.send_mail import send_mail
 from . import jwt_force_password_change, validate_org_access
 
 
-# @app.route("/organizations/<org_uuid>/users", methods=["POST"])
+# /organizations/<org_uuid>/users, POST
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
@@ -102,7 +102,7 @@ def add_user_to_org(org_uuid):
     )
 
 
-# @app.route("/organizations/<org_uuid>/users/<user_uuid>", methods=["PATCH"])
+# /organizations/<org_uuid>/users/<user_uuid>, PATCH
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
@@ -137,7 +137,7 @@ def update_user(org_uuid, user_uuid):
     )
 
 
-# @app.route("/organizations/<org_uuid>/users/<user_uuid>", methods=["DELETE"])
+# /organizations/<org_uuid>/users/<user_uuid>, DELETE
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
@@ -166,7 +166,7 @@ def delete_user(org_uuid, user_uuid):
     return "", 204
 
 
-# @app.route("/organizations/<org_uuid>/users", methods=["GET"])
+# /organizations/<org_uuid>/users, GET
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required

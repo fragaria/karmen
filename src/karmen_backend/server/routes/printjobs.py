@@ -30,7 +30,7 @@ def make_printjob_response(printjob, fields=None, user_mapping=None):
     return response
 
 
-# @app.route("/organizations/<org_uuid>/printjobs", methods=["POST"])
+# /organizations/<org_uuid>/printjobs, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -102,7 +102,7 @@ def printjob_create(org_uuid):
         )
 
 
-# @app.route("/organizations/<org_uuid>/printjobs", methods=["GET"])
+# /organizations/<org_uuid>/printjobs, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -172,7 +172,7 @@ def printjobs_list(org_uuid):
     return jsonify(response), 200
 
 
-# @app.route("/organizations/<org_uuid>/printjobs/<printjob_uuid>", methods=["GET"])
+# /organizations/<org_uuid>/printjobs/<printjob_uuid>, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()

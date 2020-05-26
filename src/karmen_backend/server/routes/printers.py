@@ -83,7 +83,7 @@ def get_printer_inst(org_uuid, uuid):
     return printer_inst
 
 
-# @app.route("/organizations/<org_uuid>/printers", methods=["GET"])
+# /organizations/<org_uuid>/printers, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -165,7 +165,7 @@ def issue_printer_token(org_uuid):
     return make_response(jsonify(token=token), 201)
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>", methods=["GET"])
+# /organizations/<org_uuid>/printers/<printer_uuid>, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -175,7 +175,7 @@ def printer_detail(org_uuid, printer_uuid):
     return jsonify(make_printer_response(printer_inst, fields))
 
 
-# @app.route("/organizations/<org_uuid>/printers", methods=["POST"])
+# /organizations/<org_uuid>/printers, POST
 @jwt_force_password_change
 @validate_org_access("admin")
 @cross_origin()
@@ -303,7 +303,7 @@ def printer_create(org_uuid):
     return jsonify(make_printer_response(printer, ["status", "webcam", "job"])), 201
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>", methods=["DELETE"])
+# /organizations/<org_uuid>/printers/<printer_uuid>, DELETE
 @jwt_force_password_change
 @validate_org_access("admin")
 @cross_origin()
@@ -321,7 +321,7 @@ def printer_delete(org_uuid, printer_uuid):
     return "", 204
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>", methods=["PATCH"])
+# /organizations/<org_uuid>/printers/<printer_uuid>, PATCH
 @jwt_force_password_change
 @validate_org_access("admin")
 @cross_origin()
@@ -380,7 +380,7 @@ def printer_patch(org_uuid, printer_uuid):
     )
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/connection", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/connection, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -407,7 +407,7 @@ def printer_change_connection(org_uuid, printer_uuid):
         )
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/current-job", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/current-job, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -458,7 +458,7 @@ def _get_webcam_snapshot(snapshot_url):
         return False
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/webcam-snapshot", methods=["GET"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/webcam-snapshot, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -516,7 +516,7 @@ def printer_webcam_snapshot(org_uuid, printer_uuid):
     return abort(make_response(jsonify(message="Not found"), 404))
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/lights", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/lights, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -535,7 +535,7 @@ def printer_set_lights(org_uuid, printer_uuid):
         return make_response(jsonify({"status": "unavailable"}), 200)
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/printhead", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/printhead, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -573,7 +573,7 @@ def control_printhead(org_uuid, printer_uuid):
         return "", 204
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/fan", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/fan, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -589,7 +589,7 @@ def control_fan(org_uuid, printer_uuid):
     return "", 204
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/motors", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/motors, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -605,7 +605,7 @@ def control_motors(org_uuid, printer_uuid):
     return "", 204
 
 
-# @app.route("/organizations/<org_uuid>/printers/<printer_uuid>/extrusion", methods=["POST"])
+# /organizations/<org_uuid>/printers/<printer_uuid>/extrusion, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
