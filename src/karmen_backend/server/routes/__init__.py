@@ -179,3 +179,4 @@ import server.routes.printers
 import server.routes.printjobs
 import server.routes.tasks
 import server.routes.users
+import server.routes.tests_admin
