@@ -19,6 +19,7 @@ from ..utils import (
     UUID_USER2,
     UUID_ORG,
     UUID_ORG2,
+    UUID_GCODE,
 )
 
 
@@ -139,6 +140,26 @@ class ListRoute(unittest.TestCase):
                 in response.json["next"]
             )
 
+    def test_float_limit(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes?limit=33.5&order_by=filename&fields=uuid,filename"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_wrong_limit(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.get(
+                "/organizations/%s/gcodes?limit=selpesdolesa&order_by=filename&fields=uuid,filename"
+                % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_no_multi_order_by(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
@@ -170,45 +191,41 @@ class ListRoute(unittest.TestCase):
                 in response.json["next"]
             )
 
-    def test_ignore_start_with_str(self):
+    def test_fail_start_with_str(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/gcodes?limit=3&start_with=asdfasdf" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
-    def test_ignore_negative_limit(self):
+    def test_fail_negative_limit(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/gcodes?limit=-3" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
-    def test_survive_ignore_start_with_negative(self):
+    def test_fail_start_with_negative(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/gcodes?limit=3&start_with=-1" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
-    def test_survive_ignore_limit_str(self):
+    def test_fail_limit_str(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
                 "/organizations/%s/gcodes?limit=asdfasdf&start_with=5" % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
+            self.assertEqual(response.status_code, 400)
 
     def test_filter(self):
         with app.test_client() as c:
@@ -326,7 +343,7 @@ class ListRoute(unittest.TestCase):
 
     def test_no_token(self):
         with app.test_client() as c:
-            response = c.get("/organizations/%s/gcodes")
+            response = c.get(f"/organizations/{UUID_ORG}/gcodes")
             self.assertEqual(response.status_code, 401)
 
 
@@ -694,7 +711,7 @@ class DeleteRoute(unittest.TestCase):
 class GetDataRoute(unittest.TestCase):
     def test_download_no_token(self):
         with app.test_client() as c:
-            response = c.get("/organizations/%s/gcodes/12/data" % UUID_ORG)
+            response = c.get(f"/organizations/{UUID_ORG}/gcodes/{UUID_GCODE}/data")
             self.assertEqual(response.status_code, 401)
 
     def test_bad_uuid_format(self):
