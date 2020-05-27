@@ -59,3 +59,6 @@ class RegistrationVerification(BrandedMailTemplate):
             </table>
             """
         )
+
+    def excerpt(self):
+        return f"Karmen needs you to verify your account first"

@@ -56,7 +56,7 @@ def test_mail_template_compiles(template_key, template_variables, headline):
     assert "%%YEAR%%" not in html
 
     # A little data to expect for each template
-    assert f"&copy;{date.today().year}" in html
+    assert f"©{date.today().year}" in html
     assert f"©{date.today().year}" in text
     assert headline in text
     assert headline in html

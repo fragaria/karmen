@@ -2,6 +2,7 @@ import abc
 import os
 from textwrap import dedent
 from datetime import datetime
+from premailer import transform
 
 from server import app
 
@@ -20,9 +21,7 @@ Ječná 507/6, 120 00 Praha 2, Czech Republic
 
 BRANDED_TEMPLATE_HTML = ""
 
-with open(
-    os.path.join(os.path.dirname(__file__), "assets/base-inlined.html"), "r"
-) as file:
+with open(os.path.join(os.path.dirname(__file__), "assets/base.html"), "r") as file:
     BRANDED_TEMPLATE_HTML = file.read()
 
 
@@ -44,6 +43,10 @@ class MailTemplate:
     def htmlbody(self):
         """Get template body in HTML."""
         return "<br />\n".join(self.textbody().split("\n"))
+
+    def excerpt(self):
+        """Get email excerpt."""
+        return None
 
     def render(self, content_type):
         """Render the template using stored variables as context.
@@ -68,9 +71,13 @@ class BrandedMailTemplate(MailTemplate):
 
         if content_type == "html":
             out = BRANDED_TEMPLATE_HTML.replace("%%CONTENT%%", self.htmlbody())
+            out = transform(out)
         else:
             out = BRANDED_TEMPLATE_TEXT.replace("%%CONTENT%%", self.textbody())
 
         out = out.replace("%%YEAR%%", str(datetime.now().year))
+
+        if self.excerpt() is not None:
+            out = out.replace("%%EXCERPT%%", self.excerpt())
 
         return out

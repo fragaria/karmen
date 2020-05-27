@@ -24,3 +24,6 @@ class PasswordResetConfirmation(BrandedMailTemplate):
             <p>Sounds suspicious? Please contact us at <a href="mailto:info@karmen.tech">info@karmen.tech</a>.
             """
         )
+
+    def excerpt(self):
+        return f"Your password has just been changed"
