@@ -169,6 +169,10 @@ footer {
   }
 }
 
+.pointer {
+  cursor: pointer;
+}
+
 .navigation {
   position: fixed;
   top: 0;
@@ -1100,11 +1104,9 @@ select {
   background: #adadad;
   color: map-get($palette, "gray-light");
   font-size: 2rem;
-  cursor: pointer;
 
   &.unavailable {
     padding: $spacing-default*3 $spacing-default;
-    cursor: auto;
   }
 
   img {

@@ -18,7 +18,6 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
         "path",
         "filename",
         "display",
-        "absolute_path",
         "uploaded",
         "size",
         "data",
@@ -42,12 +41,10 @@ def make_gcode_response(gcode, fields=None, user_mapping=None):
             response[field] = gcode.get(field, None)
     if "uploaded" in response:
         response["uploaded"] = response["uploaded"].isoformat()
-    if app.config.get("CLOUD_MODE"):
-        response.pop("absolute_path", None)
     return response
 
 
-@app.route("/organizations/<org_uuid>/gcodes", methods=["GET"])
+# /organizations/<org_uuid>/gcodes, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -58,12 +55,9 @@ def gcodes_list(org_uuid):
         return abort(
             make_response(jsonify(message="order_by supports only one data field"), 400)
         )
-    try:
-        limit = int(request.args.get("limit", 200))
-        if limit and limit < 0:
-            limit = 200
-    except ValueError:
-        limit = 200
+
+    limit = int(request.args.get("limit", 200))
+
     try:
         start_with = (
             guid.UUID(request.args.get("start_with"), version=4)
@@ -122,13 +116,13 @@ def gcodes_list(org_uuid):
     return jsonify(response)
 
 
-@app.route("/organizations/<org_uuid>/gcodes/<uuid>", methods=["GET"])
+# /organizations/<org_uuid>/gcodes/<gcode_uuid>, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcode_detail(org_uuid, uuid):
-    validate_uuid(uuid)
-    gcode = gcodes.get_gcode(uuid)
+def gcode_detail(org_uuid, gcode_uuid):
+    validate_uuid(gcode_uuid)
+    gcode = gcodes.get_gcode(gcode_uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response(jsonify(message="Not found"), 404))
     user = users.get_by_uuid(gcode.get("user_uuid"))
@@ -138,7 +132,7 @@ def gcode_detail(org_uuid, uuid):
     return jsonify(make_gcode_response(gcode, None, user_mapping))
 
 
-@app.route("/organizations/<org_uuid>/gcodes", methods=["POST"])
+# /organizations/<org_uuid>/gcodes, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -194,13 +188,13 @@ def gcode_create(org_uuid):
     )
 
 
-@app.route("/organizations/<org_uuid>/gcodes/<uuid>/data", methods=["GET"])
+# /organizations/<org_uuid>/gcodes/<gcode_uuid>/data, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcode_file(org_uuid, uuid):
-    validate_uuid(uuid)
-    gcode = gcodes.get_gcode(uuid)
+def gcode_file(org_uuid, gcode_uuid):
+    validate_uuid(gcode_uuid)
+    gcode = gcodes.get_gcode(gcode_uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response(jsonify(message="Not found"), 404))
     try:
@@ -213,13 +207,13 @@ def gcode_file(org_uuid, uuid):
         return abort(make_response(jsonify(message="File not found"), 404))
 
 
-@app.route("/organizations/<org_uuid>/gcodes/<uuid>", methods=["DELETE"])
+# /organizations/<org_uuid>/gcodes/<gcode_uuid>, DELETE
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def gcode_delete(org_uuid, uuid):
-    validate_uuid(uuid)
-    gcode = gcodes.get_gcode(uuid)
+def gcode_delete(org_uuid, gcode_uuid):
+    validate_uuid(gcode_uuid)
+    gcode = gcodes.get_gcode(gcode_uuid)
     if gcode is None or gcode["organization_uuid"] != org_uuid:
         return abort(make_response(jsonify(message="Not found"), 404))
     user = get_current_user()
@@ -240,7 +234,7 @@ def gcode_delete(org_uuid, uuid):
         pass
     finally:
         printjobs.update_gcode_data(
-            uuid,
+            gcode_uuid,
             {
                 "uuid": gcode["uuid"],
                 "user_uuid": gcode["user_uuid"],
@@ -249,5 +243,5 @@ def gcode_delete(org_uuid, uuid):
                 "available": False,
             },
         )
-        gcodes.delete_gcode(uuid)
+        gcodes.delete_gcode(gcode_uuid)
     return "", 204

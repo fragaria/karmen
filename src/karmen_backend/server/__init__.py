@@ -7,8 +7,10 @@ from celery import Celery
 from flask_jwt_extended import JWTManager
 from flask_executor import Executor
 from sentry_sdk.integrations.flask import FlaskIntegration
+import connexion
 
-__version__ = "0.11.0-rc3"
+
+__version__ = "0.11.0-rc4"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
@@ -44,6 +46,8 @@ if os.environ.get("SENTRY_DSN") is not None:
 
 
 app = Flask(__name__)
+connexion_app = connexion.FlaskApp(__name__, specification_dir="../openapi/")
+app = connexion_app.app
 
 
 def normalize_val(val):
@@ -118,3 +122,6 @@ executor = Executor(app)
 
 import server.routes
 import server.tasks
+import server
+
+connexion_app.add_api("swagger.yaml")
