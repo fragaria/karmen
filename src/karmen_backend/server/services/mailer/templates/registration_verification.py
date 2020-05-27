@@ -18,7 +18,7 @@ class RegistrationVerification(BrandedMailTemplate):
             base64.b64encode(
                 json.dumps(
                     {
-                        "activation_key": variables["activation_key"],
+                        "activation_key": str(variables["activation_key"]),
                         "activation_key_expires": variables["activation_key_expires"],
                         "email": variables["email"],
                     }
