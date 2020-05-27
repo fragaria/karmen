@@ -82,6 +82,7 @@ CONFIG_KEYS = {
     "TOKEN_SERVER_API_URL": None,  # None defaults to a fake token server, set the address *without trailing slash*.
     "UPLOAD_FOLDER": "/tmp/karmen-files",
     "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}, "get_versions_list": {"task":"get_versions_list", "schedule": 300.0}}}',
+    "LOCAL_TESTS_TOKEN": None,
 }
 
 for key, defaults in CONFIG_KEYS.items():
@@ -125,5 +126,3 @@ import server.tasks
 import server
 
 connexion_app.add_api("swagger.yaml")
-
-server.routes.tests_admin.add_user_to_org()
