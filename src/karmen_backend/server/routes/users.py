@@ -11,7 +11,7 @@ from server.tasks.send_mail import send_mail
 from . import jwt_force_password_change, validate_org_access
 
 
-@app.route("/organizations/<org_uuid>/users", methods=["POST"])
+# /organizations/<org_uuid>/users, POST
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
@@ -24,11 +24,7 @@ def add_user_to_org(org_uuid):
     org_role = data.get("role", None)
     if not email or not org_role:
         return abort(make_response(jsonify(message="Missing email"), 400))
-    if org_role not in ["admin", "user"]:
-        return abort(make_response(jsonify(message="Bad role"), 400))
     email = email.lstrip().rstrip().lower()
-    if not is_email(email):
-        return abort(make_response(jsonify(message="Invalid email"), 400))
 
     existing = users.get_by_email(email)
     # completely new user
@@ -106,17 +102,17 @@ def add_user_to_org(org_uuid):
     )
 
 
-@app.route("/organizations/<org_uuid>/users/<uuid>", methods=["PATCH"])
+# /organizations/<org_uuid>/users/<user_uuid>, PATCH
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
 @jwt_force_password_change
-def update_user(org_uuid, uuid):
+def update_user(org_uuid, user_uuid):
     admin_uuid = get_jwt_identity()
-    if admin_uuid == uuid:
+    if admin_uuid == user_uuid:
         return abort(make_response(jsonify(message="Cannot update self"), 409))
-    user_role = organization_roles.get_organization_role(org_uuid, uuid)
-    user = users.get_by_uuid(uuid)
+    user_role = organization_roles.get_organization_role(org_uuid, user_uuid)
+    user = users.get_by_uuid(user_uuid)
     if user is None or user_role is None:
         return abort(make_response(jsonify(message="Not found"), 404))
 
@@ -125,10 +121,8 @@ def update_user(org_uuid, uuid):
         return abort(make_response(jsonify(message="Missing payload"), 400))
 
     role = data.get("role", user_role["role"])
-    if role not in ["admin", "user"]:
-        return abort(make_response(jsonify(message="Bad role"), 400))
 
-    organization_roles.set_organization_role(org_uuid, uuid, role)
+    organization_roles.set_organization_role(org_uuid, user_uuid, role)
     return (
         jsonify(
             {
@@ -143,22 +137,22 @@ def update_user(org_uuid, uuid):
     )
 
 
-@app.route("/organizations/<org_uuid>/users/<uuid>", methods=["DELETE"])
+# /organizations/<org_uuid>/users/<user_uuid>, DELETE
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
 @jwt_force_password_change
-def delete_user(org_uuid, uuid):
+def delete_user(org_uuid, user_uuid):
     admin_uuid = get_jwt_identity()
-    if admin_uuid == uuid:
+    if admin_uuid == user_uuid:
         return abort(make_response(jsonify(message="Cannot update self"), 409))
-    user_role = organization_roles.get_organization_role(org_uuid, uuid)
-    user = users.get_by_uuid(uuid)
+    user_role = organization_roles.get_organization_role(org_uuid, user_uuid)
+    user = users.get_by_uuid(user_uuid)
     if user is None or user_role is None:
         return abort(make_response(jsonify(message="Not found"), 404))
     organization = organizations.get_by_uuid(org_uuid)
-    api_tokens.revoke_all_tokens(uuid, org_uuid)
-    organization_roles.drop_organization_role(org_uuid, uuid)
+    api_tokens.revoke_all_tokens(user_uuid, org_uuid)
+    organization_roles.drop_organization_role(org_uuid, user_uuid)
     send_mail.delay(
         [user["email"]],
         "ORGANIZATION_REMOVAL",
@@ -172,7 +166,7 @@ def delete_user(org_uuid, uuid):
     return "", 204
 
 
-@app.route("/organizations/<org_uuid>/users", methods=["GET"])
+# /organizations/<org_uuid>/users, GET
 @cross_origin()
 @validate_org_access("admin")
 @fresh_jwt_required
