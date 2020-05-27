@@ -385,7 +385,6 @@ def printer_patch(org_uuid, printer_uuid):
 @validate_org_access()
 @cross_origin()
 def printer_change_connection(org_uuid, printer_uuid):
-    return "", 500
     # TODO this has to be streamlined, octoprint sometimes cannot handle two connect commands at once
     printer_inst = get_printer_inst(org_uuid, printer_uuid)
     data = request.json
