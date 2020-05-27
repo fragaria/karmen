@@ -76,8 +76,6 @@ class BrandedMailTemplate(MailTemplate):
             out = BRANDED_TEMPLATE_TEXT.replace("%%CONTENT%%", self.textbody())
 
         out = out.replace("%%YEAR%%", str(datetime.now().year))
-
-        if self.excerpt() is not None:
-            out = out.replace("%%EXCERPT%%", self.excerpt())
+        out = out.replace("%%EXCERPT%%", self.excerpt() or "")
 
         return out

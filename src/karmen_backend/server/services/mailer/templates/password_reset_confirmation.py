@@ -26,4 +26,4 @@ class PasswordResetConfirmation(BrandedMailTemplate):
         )
 
     def excerpt(self):
-        return f"Your password has just been changed"
+        return "Your password has just been changed"

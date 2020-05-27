@@ -5,7 +5,7 @@ from server.services.mailer import get_template
 
 
 @pytest.mark.parametrize(
-    "template_key,template_variables,headline",
+    "template_key,template_variables,headline,excerpt",
     (
         (
             "REGISTRATION_VERIFICATION_EMAIL",
@@ -15,6 +15,7 @@ from server.services.mailer import get_template
                 "email": "email@example.com",
             },
             "Welcome to Karmen!",
+            "Click on the verification link to start using Karmen",
         ),
         (
             "ORGANIZATION_INVITATION",
@@ -24,8 +25,14 @@ from server.services.mailer import get_template
                 "organization_link": "https://cloud.karmen.tech/theorganization",
             },
             "Hi there!",
+            "You've been invited to join TheOrganization",
         ),
-        ("ORGANIZATION_REMOVAL", {"organization_name": "TheOrganization",}, "Hi!"),
+        (
+            "ORGANIZATION_REMOVAL",
+            {"organization_name": "TheOrganization",},
+            "Hi!",
+            "Your membership in TheOrganization has been revoked",
+        ),
         (
             "PASSWORD_RESET_LINK",
             {
@@ -34,11 +41,17 @@ from server.services.mailer import get_template
                 "email": "email@example.com",
             },
             "Hi!",
+            "Your password reset link",
         ),
-        ("PASSWORD_RESET_CONFIRMATION", {"email": "email@example.com"}, "Hello"),
+        (
+            "PASSWORD_RESET_CONFIRMATION",
+            {"email": "email@example.com"},
+            "Hello",
+            "Your password has just been changed",
+        ),
     ),
 )
-def test_mail_template_compiles(template_key, template_variables, headline):
+def test_mail_template_compiles(template_key, template_variables, headline, excerpt):
     template = get_template(template_key)
     template.prepare_variables(template_variables)
 
@@ -60,3 +73,4 @@ def test_mail_template_compiles(template_key, template_variables, headline):
     assert f"©{date.today().year}" in text
     assert headline in text
     assert headline in html
+    assert excerpt in html

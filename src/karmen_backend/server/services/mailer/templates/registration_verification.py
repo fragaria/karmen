@@ -61,4 +61,4 @@ class RegistrationVerification(BrandedMailTemplate):
         )
 
     def excerpt(self):
-        return f"Karmen needs you to verify your account first"
+        return f"Click on the verification link to start using Karmen"
