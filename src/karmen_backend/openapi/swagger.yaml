@@ -1095,6 +1095,9 @@ paths:
                   type: string
                 local-tests-token:
                   $ref: '#/components/schemas/local-tests-token'
+              required:
+                - name
+                - local-tests-token
       responses:
         '200':
           description: ''

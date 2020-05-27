@@ -126,5 +126,3 @@ import server.tasks
 import server
 
 connexion_app.add_api("swagger.yaml")
-
-server.routes.tests_admin.add_user_to_org()
