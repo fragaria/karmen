@@ -67,24 +67,8 @@ class ChangePasswordForm extends React.Component {
       changePwdForm.password.val,
       changePwdForm.new_password.val,
       changePwdForm.new_password_confirmation.val
-    ).then((r) => {
-      if (r.status !== 200) {
-        this.setState({
-          messageOk: false,
-          message: "Password change unsuccessful, try again, please.",
-          changePwdForm: Object.assign({}, changePwdForm, {
-            password: Object.assign({}, changePwdForm.password, { val: "" }),
-            new_password: Object.assign({}, changePwdForm.new_password, {
-              val: "",
-            }),
-            new_password_confirmation: Object.assign(
-              {},
-              changePwdForm.new_password_confirmation,
-              { val: "" }
-            ),
-          }),
-        });
-      } else {
+    )
+      .then((r) => {
         this.setState({
           message: "Password changed successfully.",
           messageOk: true,
@@ -102,8 +86,24 @@ class ChangePasswordForm extends React.Component {
             ),
           }),
         });
-      }
-    });
+      })
+      .catch(() => {
+        this.setState({
+          messageOk: false,
+          message: "Password change unsuccessful, try again, please.",
+          changePwdForm: Object.assign({}, changePwdForm, {
+            password: Object.assign({}, changePwdForm.password, { val: "" }),
+            new_password: Object.assign({}, changePwdForm.new_password, {
+              val: "",
+            }),
+            new_password_confirmation: Object.assign(
+              {},
+              changePwdForm.new_password_confirmation,
+              { val: "" }
+            ),
+          }),
+        });
+      });
   }
 
   render() {

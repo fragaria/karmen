@@ -18,7 +18,7 @@ class PasswordReset extends React.Component {
           val: "",
         },
         realemail: {
-          name: "Your e-mail",
+          name: "Your email",
           val: "",
           type: "text",
           required: true,
@@ -48,7 +48,7 @@ class PasswordReset extends React.Component {
     }
     if (!isEmail(resetForm.realemail.val)) {
       hasError = true;
-      resetForm.realemail.error = "That does not seem like an e-mail address";
+      resetForm.realemail.error = "That does not seem like an email address";
     }
 
     if (hasError) {
@@ -58,23 +58,24 @@ class PasswordReset extends React.Component {
       return;
     }
 
-    return doRequest(resetForm.realemail.val).then((r) => {
-      if (r.status !== 202) {
+    return doRequest(resetForm.realemail.val)
+      .then((r) => {
         this.setState({
-          messageOk: false,
           message:
-            "We cannot send you the e-mail at this moment, try again later, please.",
-        });
-      } else {
-        this.setState({
-          message: "An e-mail will be sent shortly. Check your Inbox, please",
+            "An email with a reset link will be sent shortly. Check your inbox, please.",
           messageOk: true,
           resetForm: Object.assign({}, resetForm, {
             realemail: Object.assign({}, resetForm.realemail, { val: "" }),
           }),
         });
-      }
-    });
+      })
+      .catch((err) => {
+        this.setState({
+          messageOk: false,
+          message:
+            "Although we're doing our best, it seems we can't send you the email at the moment. Please, try again later.",
+        });
+      });
   }
 
   render() {
@@ -94,9 +95,9 @@ class PasswordReset extends React.Component {
     return (
       <div className="content">
         <div className="container">
-          <h1 className="main-title text-center">Reset Your password</h1>
+          <h1 className="main-title text-center">Reset your password</h1>
           <h2 className="main-subtitle text-center">
-            We will send You an e-mail with password reset link.
+            We'll send You an email with a password reset link.
           </h2>
           <form>
             <FormInputs definition={resetForm} updateValue={updateValue} />

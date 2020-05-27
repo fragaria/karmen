@@ -19,33 +19,32 @@ class PrinterSettings extends React.Component {
 
   changePrinter(newParameters) {
     const { match, patchPrinter, printer } = this.props;
-    return patchPrinter(newParameters).then((r) => {
-      switch (r.status) {
-        case 200:
-          this.props.history.push(
-            `/${match.params.orguuid}/printers/${printer.uuid}`
-          );
-          return {
-            ok: true,
-            message: "Changes saved successfully",
-          };
-        default:
-          return {
-            ok: false,
-            message: "Cannot save your changes, check server logs",
-          };
-      }
-    });
+    return patchPrinter(newParameters)
+      .then(() => {
+        this.props.history.push(
+          `/${match.params.orguuid}/printers/${printer.uuid}`
+        );
+        return {
+          ok: true,
+          message: "Changes saved successfully",
+        };
+      })
+      .catch((err) => {
+        return {
+          ok: false,
+          message: "Your changes could not be saved due to a server error.",
+        };
+      });
   }
 
   componentDidMount() {
     const { loadPrinter, printer } = this.props;
     if (!printer) {
-      loadPrinter().then(() => {
+      loadPrinter().then(() =>
         this.setState({
           printerLoaded: true,
-        });
-      });
+        })
+      );
     } else {
       this.setState({
         printerLoaded: true,

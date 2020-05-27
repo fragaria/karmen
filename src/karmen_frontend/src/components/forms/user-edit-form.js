@@ -52,8 +52,8 @@ class UserEditForm extends React.Component {
       });
       return;
     }
-    return patchMe(patchMeForm.username.val, email).then((r) => {
-      if (r.status !== 200) {
+    return patchMe(patchMeForm.username.val, email)
+      .then((r) => {
         this.setState({
           messageOk: false,
           message: "Profile change unsuccessful, try again, please.",
@@ -66,13 +66,13 @@ class UserEditForm extends React.Component {
             }),
           }),
         });
-      } else {
+      })
+      .catch((err) => {
         this.setState({
           message: "Profile changed successfully.",
           messageOk: true,
         });
-      }
-    });
+      });
   }
 
   render() {

@@ -25,6 +25,7 @@ export const changeCurrentJob = (orgUuid, uuid, action) => {
       action,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -34,6 +35,7 @@ export const changeLights = (orgUuid, uuid) => {
     appendData: {
       uuid,
     },
+    successCodes: [200],
   });
 };
 
@@ -48,6 +50,7 @@ export const movePrinthead = (orgUuid, uuid, command, opts) => {
       ...opts,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -61,6 +64,7 @@ export const changeFanState = (orgUuid, uuid, targetState) => {
       target: targetState,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -72,6 +76,7 @@ export const changeMotorsState = (orgUuid, uuid, targetState) => {
       target: targetState,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -85,6 +90,7 @@ export const extrude = (orgUuid, uuid, amount) => {
       amount,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -98,6 +104,7 @@ export const setTemperature = (orgUuid, uuid, partName, target) => {
       target,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -108,5 +115,6 @@ export const startUpdate = (orgUuid, uuid) => {
       uuid,
     },
     parseResponse: false,
+    successCodes: [200],
   });
 };

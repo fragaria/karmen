@@ -1,3 +1,4 @@
+import { HttpError } from "../../errors";
 import { performRequest } from "./utils";
 
 export const enqueueTask = (orgUuid, task, opts) => {
@@ -8,6 +9,7 @@ export const enqueueTask = (orgUuid, task, opts) => {
       ...opts,
     },
     parseResponse: false,
+    successCodes: [202],
   });
 };
 
@@ -15,16 +17,15 @@ export const heartbeat = () => {
   return performRequest({
     uri: "/",
     method: "GET",
+    successCodes: [200],
   })
-    .then((response) => {
-      if (response.status !== 200) {
-        console.error(`Heartbeat fail: ${response.status}`);
-        return -1;
+    .then((response) => response.data.version)
+    .catch((err) => {
+      if (err instanceof HttpError) {
+        console.error(`Heartbeat fail: ${err.response.status}`);
+      } else {
+        console.error(`Heartbeat fail: ${err}`);
       }
-      return response.data.version;
-    })
-    .catch((e) => {
-      console.error(`Heartbeat fail: ${e}`);
       return -1;
     });
 };

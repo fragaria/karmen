@@ -2,25 +2,22 @@ import dayjs from "dayjs";
 import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
 import { createThunkedAction } from "./utils";
+import { HttpError } from "../errors";
 import * as backend from "../services/backend";
 
 export const retryIfUnauthorized = (func, dispatch) => {
   return (...args) => {
-    return func(...args).then((r) => {
-      if (r.status === 401) {
-        if (!dispatch) {
-          return Promise.reject();
-        }
-        return dispatch(refreshToken()).then((r) => {
-          if (r.status === 200) {
-            return func(...args);
-          } else {
+    return func(...args).catch((err) => {
+      if (dispatch && err instanceof HttpError && err.response.status === 401) {
+        return dispatch(refreshToken())
+          .then((r) => func(...args))
+          .catch((newErr) => {
             dispatch(clearUserIdentity());
-            return Promise.reject();
-          }
-        });
+            return Promise.reject(err);
+          });
       }
-      return r;
+
+      throw err;
     });
   };
 };
@@ -70,12 +67,10 @@ export const loadUserFromLocalStorage = (force_refresh = false) => (
       dayjs().isAfter(profile.accessTokenExpiresOn.subtract(90, "seconds"))) ||
     force_refresh
   ) {
-    return backend.refreshAccessToken().then((r) => {
-      if (r.status === 200) {
-        return Promise.resolve(dispatch(loadUserData(r.data)));
-      }
-      return Promise.resolve(dispatch(clearUserIdentity()));
-    });
+    return backend
+      .refreshAccessToken()
+      .then((r) => Promise.resolve(dispatch(loadUserData(r.data))))
+      .catch(() => Promise.resolve(dispatch(clearUserIdentity())));
   }
   return Promise.resolve(dispatch(loadUserData(profile)));
 };
@@ -146,16 +141,9 @@ export const changePassword = createThunkedAction(
     { dispatch, getState }
   ) => {
     const { me } = getState();
-    return dispatch(authenticateFresh(me.username, password)).then((r) => {
-      if (r.status !== 200) {
-        return Promise.reject();
-      }
-      return backend.changePassword(
-        password,
-        new_password,
-        new_password_confirmation
-      );
-    });
+    return dispatch(authenticateFresh(me.username, password)).then((r) =>
+      backend.changePassword(password, new_password, new_password_confirmation)
+    );
   }
 );
 

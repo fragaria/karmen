@@ -26,6 +26,7 @@ export const addPrinter = (
     appendData: {
       organizationUuid: orgUuid,
     },
+    successCodes: [201],
   });
 };
 
@@ -37,6 +38,7 @@ export const patchPrinter = (orgUuid, uuid, data) => {
     appendData: {
       organizationUuid: orgUuid,
     },
+    successCodes: [200],
   });
 };
 export const deletePrinter = (orgUuid, uuid) => {
@@ -55,6 +57,6 @@ export const issuePrinterToken = (orgUuid) => {
   return performRequest({
     uri: `/organizations/${orgUuid}/printers/issue-token`,
     method: "POST",
-    raiseErrors: true,
+    successCodes: [201],
   });
 };

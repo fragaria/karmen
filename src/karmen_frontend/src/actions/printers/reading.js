@@ -214,33 +214,37 @@ export const getWebcamSnapshot = createThunkedAction(
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       let { printers } = getState();
       const printer = printers.printers.find((p) => p.uuid === uuid);
+
       if (!printer || !printer.webcam || !printer.webcam.url) {
         return Promise.reject();
       }
+
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch
       )(printer.webcam.url).then((r) => {
-        if (r.status === 202 || r.status === 200) {
-          let { webcams } = getState();
-          if (webcams.queue && webcams.queue[uuid]) {
-            const timeoutData = webcams.queue[uuid];
-            if (timeoutData.interval > 0) {
-              const timeout = setTimeout(
-                () => dispatch(getWebcamSnapshot(orguuid, uuid)),
-                timeoutData.interval
-              );
-              dispatch({
-                type: "WEBCAMS_TIMEOUT_SET",
-                payload: {
-                  uuid,
-                  interval: timeoutData.interval,
-                  timeout,
-                },
-              });
-            }
+        let { webcams } = getState();
+
+        if (webcams.queue && webcams.queue[uuid]) {
+          const timeoutData = webcams.queue[uuid];
+
+          if (timeoutData.interval > 0) {
+            const timeout = setTimeout(
+              () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+              timeoutData.interval
+            );
+
+            dispatch({
+              type: "WEBCAMS_TIMEOUT_SET",
+              payload: {
+                uuid,
+                interval: timeoutData.interval,
+                timeout,
+              },
+            });
           }
         }
+
         return {
           organizationUuid: orguuid,
           uuid,
@@ -249,6 +253,8 @@ export const getWebcamSnapshot = createThunkedAction(
           successCodes: [200],
         };
       });
+    }).catch((err) => {
+      // This is not critical and will already be logged in the console. So it's kinda safe to just do nothing.
     });
   }
 );

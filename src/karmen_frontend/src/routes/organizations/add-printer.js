@@ -1,11 +1,12 @@
 import React from "react";
 import { Link, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
+import { addPrinter, issuePrinterToken } from "../../actions";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import { FormInputs } from "../../components/forms/form-utils";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import BusyButton from "../../components/utils/busy-button";
-import { addPrinter, issuePrinterToken } from "../../actions";
+import { HttpError } from "../../errors";
 
 export class AddPrinterForm extends React.Component {
   onpremiseAddressConfig = {
@@ -164,22 +165,19 @@ export class AddPrinterForm extends React.Component {
         token,
         form.name.val,
         form.collapsible.inputs.apiKey.val
-      ).then((r) => {
-        switch (r.status) {
-          case 201:
-            onCreate();
-            break;
-          case 409:
-            this.setState({
-              message: "Printer on this address is already registered",
+      )
+        .then(onCreate)
+        .catch((err) => {
+          if (err instanceof HttpError && err.response.status === 409) {
+            return this.setState({
+              message: "Printer with this address is already registered",
             });
-            break;
-          default:
-            this.setState({
-              message: "Cannot add printer, check server logs",
-            });
-        }
-      });
+          }
+          this.setState({
+            message:
+              "Could not add printer, there has been a problem on the server.",
+          });
+        });
     }
   }
 

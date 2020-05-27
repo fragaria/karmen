@@ -1,13 +1,14 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
+import { addUser } from "../../actions";
 import { FormInputs } from "../../components/forms/form-utils";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import BusyButton from "../../components/utils/busy-button";
+import { HttpError } from "../../errors";
 import { isEmail } from "../../services/validators";
-import { addUser } from "../../actions";
 
 class AddUser extends React.Component {
   state = {
@@ -70,24 +71,23 @@ class AddUser extends React.Component {
     }
     const { createUser } = this.props;
     if (!hasErrors) {
-      return createUser(form.email.val, form.role.val).then((r) => {
-        switch (r.status) {
-          case 201:
-            this.setState({
-              redirect: true,
-            });
-            break;
-          case 409:
-            this.setState({
+      return createUser(form.email.val, form.role.val)
+        .then((r) => {
+          this.setState({
+            redirect: true,
+          });
+        })
+        .catch((err) => {
+          if (err instanceof HttpError && err.response.status === 409) {
+            return this.setState({
               message: "User with such email is already registered",
             });
-            break;
-          default:
-            this.setState({
-              message: "Cannot add user, check server logs",
-            });
-        }
-      });
+          }
+          this.setState({
+            message:
+              "Could not add new user, there has been some problem on the server.",
+          });
+        });
     }
   }
 

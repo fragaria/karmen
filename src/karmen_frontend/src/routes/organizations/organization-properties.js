@@ -7,6 +7,7 @@ import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gatewa
 import OrganizationEditForm from "../../components/forms/organization-edit-form";
 
 import { getOrganizations, patchOrganization } from "../../actions";
+import { HttpError } from "../../errors";
 
 class OrganizationProperties extends React.Component {
   state = {
@@ -20,39 +21,38 @@ class OrganizationProperties extends React.Component {
 
   changeOrganization(newParameters) {
     const { patchOrganization, organization } = this.props;
-    return patchOrganization(organization.uuid, newParameters.name).then(
-      (r) => {
-        switch (r.status) {
-          case 200:
-            this.props.history.push(`/organizations`);
-            return {
-              ok: true,
-              message: "Changes saved successfully",
-            };
-          case 409:
-            return {
-              ok: false,
-              message:
-                "Pick a different name, there is already an organization of such name",
-            };
-          default:
-            return {
-              ok: false,
-              message: "Cannot save your changes, check server logs",
-            };
+    return patchOrganization(organization.uuid, newParameters.name)
+      .then(() => {
+        this.props.history.push(`/organizations`);
+        return {
+          ok: true,
+          message: "Changes saved successfully",
+        };
+      })
+      .catch((err) => {
+        if (err instanceof HttpError && err.response.status === 409) {
+          return {
+            ok: false,
+            message:
+              "An organization with such name already exists, please pick a different one.",
+          };
         }
-      }
-    );
+        return {
+          ok: false,
+          message:
+            "We couldn't save your changes, there has been some error on the server.",
+        };
+      });
   }
 
   componentDidMount() {
     const { getOrganizations, organization } = this.props;
     if (!organization) {
-      getOrganizations().then(() => {
+      getOrganizations().then(() =>
         this.setState({
           organizationLoaded: true,
-        });
-      });
+        })
+      );
     } else {
       this.setState({
         organizationLoaded: true,

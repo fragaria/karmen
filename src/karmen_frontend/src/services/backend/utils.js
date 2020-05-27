@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
 
+import { HttpError } from "../../errors";
+
 const BASE_URL = window.env.BACKEND_BASE;
-const RAISE_ERRORS = window.env.RAISE_ERRORS || false;
 
 const _removeStorage = (key) => {
   try {
@@ -91,7 +92,6 @@ export const performRequest = (opts) => {
       "Content-Type": "application/json",
     },
     useAuth: true,
-    raiseErrors: RAISE_ERRORS,
   };
   opts = Object.assign({}, defaults, opts);
 
@@ -112,14 +112,8 @@ export const performRequest = (opts) => {
   return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
     .then((response) => {
       if (opts.successCodes.indexOf(response.status) === -1) {
-        if (opts.raiseErrors) {
-          return Promise.reject(
-            new Error(`Unexpected status code "${response.status}"`)
-          );
-        }
-
-        console.error(
-          `Request ${opts.uri} failed: unexpected status code "${response.status}"`
+        return Promise.reject(
+          new HttpError(response, `Unexpected status code "${response.status}"`)
         );
       }
 
@@ -134,18 +128,11 @@ export const performRequest = (opts) => {
               successCodes: opts.successCodes,
             };
           })
-          .catch((e) => {
-            console.error(`Could not parse ${opts.uri} response as JSON: ${e}`);
-
-            if (opts.raiseErrors) {
-              return Promise.reject(e);
-            }
-
-            return {
-              status: response.status,
-              ...opts.appendData,
-              successCodes: opts.successCodes,
-            };
+          .catch((err) => {
+            console.error(
+              `Could not parse ${opts.uri} response as JSON: ${err}`
+            );
+            return Promise.reject(err);
           });
       }
       return {
@@ -154,12 +141,8 @@ export const performRequest = (opts) => {
         successCodes: opts.successCodes,
       };
     })
-    .catch((e) => {
-      console.error(`Request ${opts.uri} failed: ${e}`);
-
-      if (opts.raiseErrors) {
-        return Promise.reject(e);
-      }
-      return { status: 500, successCodes: opts.successCodes };
+    .catch((err) => {
+      console.error(`Request ${opts.uri} failed: ${err}`);
+      return Promise.reject(err);
     });
 };

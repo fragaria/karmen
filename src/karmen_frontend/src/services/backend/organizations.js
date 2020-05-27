@@ -6,6 +6,7 @@ export const addOrganization = (name) => {
     data: {
       name,
     },
+    successCodes: [201],
   });
 };
 
@@ -16,6 +17,7 @@ export const patchOrganization = (uuid, name) => {
     data: {
       name,
     },
+    successCodes: [200],
   });
 };
 
@@ -23,5 +25,6 @@ export const getOrganizations = () => {
   return performRequest({
     uri: "/organizations",
     method: "GET",
+    successCodes: [200],
   });
 };

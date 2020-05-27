@@ -1,8 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import { FormInputs } from "./form-utils";
+import { HttpError } from "../../errors";
 import BusyButton from "../utils/busy-button";
+import { FormInputs } from "./form-utils";
 
 class LoginForm extends React.Component {
   constructor(props) {
@@ -78,42 +79,39 @@ class LoginForm extends React.Component {
       });
       return;
     }
-    return doAuthenticate(loginForm.username.val, loginForm.password.val).then(
-      (r) => {
+
+    return doAuthenticate(loginForm.username.val, loginForm.password.val)
+      .then(() => {
         if (this._ismounted) {
-          if (r.status === 200) {
-            this.setState({
-              message: "",
-              messageOk: true,
-              loginForm: Object.assign({}, loginForm, {
-                password: Object.assign({}, loginForm.password, { val: "" }),
-                username: Object.assign({}, loginForm.username, { val: "" }),
-              }),
-            });
-            return;
-          }
-          if (r.status === 401) {
-            this.setState({
-              messageOk: false,
-              message: "Invalid email or password, try again, please.",
-              loginForm: Object.assign({}, loginForm, {
-                password: Object.assign({}, loginForm.password, { val: "" }),
-              }),
-            });
-            return;
-          }
           this.setState({
+            message: "",
+            messageOk: true,
+            loginForm: Object.assign({}, loginForm, {
+              password: Object.assign({}, loginForm.password, { val: "" }),
+              username: Object.assign({}, loginForm.username, { val: "" }),
+            }),
+          });
+        }
+      })
+      .catch((err) => {
+        if (err instanceof HttpError && err.response.status === 401) {
+          return this.setState({
             messageOk: false,
-            message:
-              (r.data && r.data.message) ||
-              "Internal server problem, try again, please.",
+            message: "Invalid email or password, try again, please.",
             loginForm: Object.assign({}, loginForm, {
               password: Object.assign({}, loginForm.password, { val: "" }),
             }),
           });
         }
-      }
-    );
+
+        this.setState({
+          messageOk: false,
+          message: "Internal server problem, try again, please.",
+          loginForm: Object.assign({}, loginForm, {
+            password: Object.assign({}, loginForm.password, { val: "" }),
+          }),
+        });
+      });
   }
 
   render() {

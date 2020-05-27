@@ -1,10 +1,11 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
+import { addOrganization } from "../actions";
 import { FormInputs } from "../components/forms/form-utils";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
-import { addOrganization } from "../actions";
+import { HttpError } from "../errors";
 
 class AddOrganization extends React.Component {
   state = {
@@ -52,24 +53,24 @@ class AddOrganization extends React.Component {
     }
     const { createOrganization } = this.props;
     if (!hasErrors) {
-      return createOrganization(form.name.val).then((r) => {
-        switch (r.status) {
-          case 201:
-            this.setState({
-              redirect: true,
-            });
-            break;
-          case 409:
-            this.setState({
+      return createOrganization(form.name.val)
+        .then(() => {
+          this.setState({
+            redirect: true,
+          });
+        })
+        .catch((err) => {
+          if (err instanceof HttpError && err.response.status === 409) {
+            return this.setState({
               message: "Organization with such name is already registered",
             });
-            break;
-          default:
-            this.setState({
-              message: "Cannot add organization, check server logs",
-            });
-        }
-      });
+          }
+
+          this.setState({
+            message:
+              "Could not add new organization, there has been some problem on the server.",
+          });
+        });
     }
   }
 

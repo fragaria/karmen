@@ -105,9 +105,7 @@ const PrinterDetail = ({
   const [printerLoaded, setPrinterLoaded] = useState(false);
   useEffect(() => {
     if (!printer) {
-      loadPrinter().then(() => {
-        setPrinterLoaded(true);
-      });
+      loadPrinter().then(() => setPrinterLoaded(true));
     } else {
       setPrinterLoaded(true);
     }
@@ -284,7 +282,7 @@ export default connect(
     printer: state.printers.printers.find(
       (p) => p.uuid === ownProps.match.params.uuid
     ),
-    role: state.me.activeOrganization.role,
+    role: state.me.activeOrganization && state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.uuid] || {
       pages: [],
       orderBy: "-started",
