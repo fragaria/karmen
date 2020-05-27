@@ -1075,6 +1075,44 @@ paths:
                 Invalid email:
                   value:
                     message: Invalid email
+  '/tests-admin/organizations/':
+    post:
+      summary: Create organization
+      operationId: server.routes.tests_admin.create_organization
+      tags:
+        - tests-admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                local-tests-token:
+                  $ref: '#/components/schemas/local-tests-token'
+              required:
+                - name
+                - local-tests-token
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  uuid:
+                    type: string
+        '400':
+          description: Unable to create org
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+
   '/tests-admin/organizations/{org_uuid}/users':
     post:
       summary: Add user to organization by his UUID
