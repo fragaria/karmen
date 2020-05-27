@@ -28,7 +28,7 @@ def x_api_key_required(func):
     return wrap
 
 
-@app.route("/octoprint-emulator/api/version", methods=["GET"])
+# /octoprint-emulator/api/version, GET
 @cross_origin()
 @x_api_key_required
 def version():
@@ -37,14 +37,14 @@ def version():
     )
 
 
-@app.route("/octoprint-emulator/api/settings", methods=["GET"])
+# /octoprint-emulator/api/settings, GET
 @cross_origin()
 @x_api_key_required
 def settings():
     return jsonify({})
 
 
-@app.route("/octoprint-emulator/api/printer", methods=["GET"])
+# /octoprint-emulator/api/printer, GET
 @cross_origin()
 @x_api_key_required
 def printer():
@@ -71,14 +71,14 @@ def printer():
     )
 
 
-@app.route("/octoprint-emulator/api/job", methods=["GET"])
+# /octoprint-emulator/api/job, GET
 @cross_origin()
 @x_api_key_required
 def job():
     return jsonify({"job": {}})
 
 
-@app.route("/octoprint-emulator/api/files/local", methods=["POST"])
+# /octoprint-emulator/api/files/local, POST
 @cross_origin()
 def upload():
     token = request.headers.get("x-api-key", None)

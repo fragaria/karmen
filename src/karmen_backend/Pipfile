@@ -27,6 +27,7 @@ flask-executor = "*"
 sentry-sdk = {extras = ["flask"],version = "==0.14.4"}
 argh = "*"
 boto3 = "*"
+connexion = "==2.7.0"
 
 [requires]
 python_version = "3.7"
