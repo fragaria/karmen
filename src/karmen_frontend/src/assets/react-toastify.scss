@@ -1,0 +1,74 @@
+// @import "../../node_modules/react-toastify/scss/main.scss";
+@import "variables";
+
+$rt-namespace: 'Toastify';
+$rt-toast-width: 480px !default;
+$rt-toast-background: $color-secondary;
+$rt-toast-min-height: 64px !default;
+$rt-toast-max-height: 800px !default;
+
+$rt-color-default: $color-secondary;
+$rt-color-dark: #121212 !default;
+$rt-color-info: #3498db !default;
+$rt-color-success: $color-success;
+$rt-color-warning: $color-warning;
+$rt-color-error: $color-secondary;
+
+$rt-text-color-default: map-get($palette, white);
+$rt-text-color-dark: #fff !default;
+
+$rt-color-progress-default: map-get($palette, white);
+$rt-color-progress-dark: #bb86fc !default;
+$rt-mobile: "only screen and (max-width : 480px)" !default;
+$rt-font-family: $sans-serif !default;
+$rt-z-index: 9999 !default;
+
+// @import "../../node_modules/react-toastify/scss/variables";
+@import "../../node_modules/react-toastify/scss/toastContainer";
+@import "../../node_modules/react-toastify/scss/toast";
+@import "../../node_modules/react-toastify/scss/closeButton";
+@import "../../node_modules/react-toastify/scss/progressBar";
+
+// entrance and exit animations
+@import "../../node_modules/react-toastify/scss/animations/bounce.scss";
+@import "../../node_modules/react-toastify/scss/animations/zoom.scss";
+@import "../../node_modules/react-toastify/scss/animations/flip.scss";
+@import "../../node_modules/react-toastify/scss/animations/slide.scss";
+
+.#{$rt-namespace}__toast-container {
+  padding: $base-unit;
+}
+
+.#{$rt-namespace}__toast {
+  padding: $base-unit*2 $base-unit*3;
+  margin-bottom: $base-unit*2;
+  border-radius: 0;
+  box-shadow: none;
+  line-height: 1.4;
+
+  .#{$rt-namespace}__toast-body {
+    .toast-main {
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+
+    p, div, .body {
+      font-size: 1.2em;
+      line-height: 2;
+      margin-bottom: $base-unit;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.#{$rt-namespace}__close-button {
+  align-self: flex-start;
+
+  &--default {
+    color: map-get($palette, white);
+    opacity: 1;
+  }
+}
