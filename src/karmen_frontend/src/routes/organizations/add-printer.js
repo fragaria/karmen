@@ -214,6 +214,7 @@ export class AddPrinterForm extends React.Component {
               form: Object.assign({}, this.state.form, {
                 address: Object.assign({}, this.state.form.address, {
                   val: token,
+                  error: "",
                 }),
               }),
             });
@@ -221,7 +222,10 @@ export class AddPrinterForm extends React.Component {
         } else {
           this.setState({
             form: Object.assign({}, this.state.form, {
-              address: Object.assign({}, this.state.form.address, { val: "" }),
+              address: Object.assign({}, this.state.form.address, {
+                val: "",
+                error: null,
+              }),
             }),
           });
         }

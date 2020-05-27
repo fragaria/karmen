@@ -1,4 +1,4 @@
-import {Chance} from "chance";
+import { Chance } from "chance";
 
 const chance = new Chance();
 
@@ -24,10 +24,12 @@ describe("Printers: Listing", function () {
       })
       .then((response) => {
         printerUuid = response.uuid;
-        cy.logout().login(email, password).then(() => {
-          cy.get('button[id="navigation-menu-toggle"]').click();
-          return cy.get('a[id="navigation-settings"]').click();
-        });
+        cy.logout()
+          .login(email, password)
+          .then(() => {
+            cy.get('button[id="navigation-menu-toggle"]').click();
+            return cy.get('a[id="navigation-settings"]').click();
+          });
       });
   });
 

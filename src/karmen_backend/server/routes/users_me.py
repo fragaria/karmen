@@ -70,7 +70,7 @@ def create_inactive_user():
             ).hexdigest(),
             activation_key_expires=activation_key_expires,
         )
-    send_mail.delay(
+    send_mail(
         [email],
         "REGISTRATION_VERIFICATION_EMAIL",
         {

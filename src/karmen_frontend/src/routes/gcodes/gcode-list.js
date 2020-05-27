@@ -169,6 +169,7 @@ class GcodeList extends React.Component {
             <Link
               to={`/${match.params.orguuid}/add-gcode`}
               className="btn btn-sm"
+              id="btn-add_gcode"
             >
               + Upload a g-code
             </Link>
