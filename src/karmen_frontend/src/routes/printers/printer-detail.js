@@ -277,7 +277,7 @@ const PrinterDetail = ({
                 <SettingsTab
                   printer={printer}
                   onPrinterSettingsChanged={patchPrinter}
-                 />
+                />
               )}
             />
           </Switch>

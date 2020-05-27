@@ -52,13 +52,13 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   );
 };
 
-
 const PrinterSettingsModal = ({ printer, onPrinterUpdate, modal }) => {
-  const onSettingsChanged = newSettings => onPrinterUpdate(printer.uuid, newSettings).then(r => {
-    if (r.status === 200) {
-      modal.closeModal();
-    }
-  });
+  const onSettingsChanged = (newSettings) =>
+    onPrinterUpdate(printer.uuid, newSettings).then((r) => {
+      if (r.status === 200) {
+        modal.closeModal();
+      }
+    });
 
   return (
     <>
@@ -81,7 +81,12 @@ const PrinterSettingsModal = ({ printer, onPrinterUpdate, modal }) => {
   );
 };
 
-const PrintersTableRow = ({ orguuid, printer, onPrinterUpdate, onPrinterDelete }) => {
+const PrintersTableRow = ({
+  orguuid,
+  printer,
+  onPrinterUpdate,
+  onPrinterDelete,
+}) => {
   const deletePrinterModal = useMyModal();
   const printerSettingsModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();

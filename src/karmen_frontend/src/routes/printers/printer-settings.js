@@ -80,7 +80,6 @@ class PrinterSettings extends React.Component {
                 );
               }}
             />
-
           </div>
         </section>
       </OrgRoleBasedGateway>
