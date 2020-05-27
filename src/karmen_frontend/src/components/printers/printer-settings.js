@@ -10,30 +10,15 @@ class PrinterSettingsForm extends React.Component {
 
   changePrinter(newParameters) {
     const { onPrinterSettingsChanged } = this.props;
-
-    return onPrinterSettingsChanged(newParameters).then((r) => {
-      switch (r.status) {
-        case 200:
-          return {
-            ok: true,
-            message: "Changes saved successfully",
-          };
-        default:
-          return {
-            ok: false,
-            message: "Cannot save your changes, check server logs",
-          };
-      }
-    });
+    return onPrinterSettingsChanged(newParameters);
   }
 
   cancelChanges() {
-    const { printer, onPrinterSettingsCancelled } = this.props;
+    const { onPrinterSettingsCancelled } = this.props;
 
     if (onPrinterSettingsCancelled) {
       return onPrinterSettingsCancelled();
     }
-    console.log( printer, onPrinterSettingsCancelled)
   }
 
   componentDidMount() {}

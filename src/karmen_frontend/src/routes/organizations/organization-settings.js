@@ -14,6 +14,7 @@ import {
   enqueueTask,
   setNetworkInterface,
   loadPrinters,
+  patchPrinter,
   deletePrinter,
   addUser,
   getUsers,
@@ -81,6 +82,8 @@ export default connect(
     currentUuid: state.me.identity,
   }),
   (dispatch, ownProps) => ({
+    onPrinterUpdate: (uuid, newSettings) =>
+      dispatch(patchPrinter(ownProps.match.params.orguuid, uuid, newSettings)),
     onPrinterDelete: (uuid) =>
       dispatch(deletePrinter(ownProps.match.params.orguuid, uuid)),
     loadPrinters: (fields) =>

@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import CtaDropdown from "./cta-dropdown";
 import NoPaginationListing from "./no-pagination-wrapper";
 import { useMyModal } from "../utils/modal";
 import PrinterSettingsForm from "../printers/printer-settings";
-import { patchPrinter } from "../../actions";
 
 const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   return (
@@ -55,7 +53,13 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
 };
 
 
-const PrinterSettingsModal = ({ printer, modal }) => {
+const PrinterSettingsModal = ({ printer, onPrinterUpdate, modal }) => {
+  const onSettingsChanged = newSettings => onPrinterUpdate(printer.uuid, newSettings).then(r => {
+    if (r.status === 200) {
+      modal.closeModal();
+    }
+  });
+
   return (
     <>
       {modal.isOpen && (
@@ -66,7 +70,7 @@ const PrinterSettingsModal = ({ printer, modal }) => {
 
           <PrinterSettingsForm
             printer={printer}
-            onPrinterSettingsChanged={patchPrinter}
+            onPrinterSettingsChanged={onSettingsChanged}
             onPrinterSettingsCancelled={modal.closeModal}
           />
 
@@ -77,7 +81,7 @@ const PrinterSettingsModal = ({ printer, modal }) => {
   );
 };
 
-const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
+const PrintersTableRow = ({ orguuid, printer, onPrinterUpdate, onPrinterDelete }) => {
   const deletePrinterModal = useMyModal();
   const printerSettingsModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
@@ -134,6 +138,7 @@ const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
       </CtaDropdown>
       <PrinterSettingsModal
         printer={printer}
+        onPrinterUpdate={onPrinterUpdate}
         modal={printerSettingsModal}
       />
       <DeletePrinterModal
@@ -147,6 +152,7 @@ const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
 
 const PrintersTable = ({
   orguuid,
+  onPrinterUpdate,
   onPrinterDelete,
   loadPrinters,
   printersLoaded,
@@ -167,6 +173,7 @@ const PrintersTable = ({
             key={p.uuid}
             orguuid={orguuid}
             printer={p}
+            onPrinterUpdate={onPrinterUpdate}
             onPrinterDelete={onPrinterDelete}
           />
         );
@@ -175,17 +182,4 @@ const PrintersTable = ({
   );
 };
 
-
-export default connect(
-  (dispatch, ownProps) => ({
-    patchPrinter: (data) =>
-      dispatch(
-        patchPrinter(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
-          data
-        )
-      ),
-  })
-)(PrintersTable);
-
+export default PrintersTable;
