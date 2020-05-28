@@ -1056,8 +1056,6 @@ paths:
                   format: email
                 password:
                   type: string
-                local-tests-token:
-                  $ref: '#/components/schemas/local-tests-token'
       responses:
         '202':
           description: 'User created, empty response'
@@ -1095,9 +1093,6 @@ paths:
                   type: string
                 local-tests-token:
                   $ref: '#/components/schemas/local-tests-token'
-              required:
-                - name
-                - local-tests-token
       responses:
         '200':
           description: ''
@@ -1138,8 +1133,6 @@ paths:
                 role:
                   type: string
                   enum: [user, admin]
-                local-tests-token:
-                  $ref: '#/components/schemas/local-tests-token'
       responses:
         '200':
           description: ''
