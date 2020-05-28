@@ -1043,6 +1043,8 @@ paths:
       operationId: server.routes.tests_admin.create_test_user
       tags:
         - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/local-tests-token'
       requestBody:
         required: true
         content:
@@ -1054,8 +1056,6 @@ paths:
                   format: email
                 password:
                   type: string
-                local-tests-token:
-                  $ref: '#/components/schemas/local-tests-token'
       responses:
         '202':
           description: 'User created, empty response'
@@ -1081,6 +1081,8 @@ paths:
       operationId: server.routes.tests_admin.create_organization
       tags:
         - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/local-tests-token'
       requestBody:
         required: true
         content:
@@ -1091,9 +1093,6 @@ paths:
                   type: string
                 local-tests-token:
                   $ref: '#/components/schemas/local-tests-token'
-              required:
-                - name
-                - local-tests-token
       responses:
         '200':
           description: ''
@@ -1122,6 +1121,7 @@ paths:
         - tests-admin
       parameters:
         - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/local-tests-token'
       requestBody:
         required: true
         content:
@@ -1133,8 +1133,6 @@ paths:
                 role:
                   type: string
                   enum: [user, admin]
-                local-tests-token:
-                  $ref: '#/components/schemas/local-tests-token'
       responses:
         '200':
           description: ''
@@ -1727,6 +1725,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
+    local-tests-token:
+      in: header
+      name: X-local-tests-token
+      schema:
+        type: string
+      required: true
     jti:
       name: jti
       in: path

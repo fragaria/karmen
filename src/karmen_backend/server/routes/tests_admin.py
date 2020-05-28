@@ -10,7 +10,7 @@ import uuid as guid
 def local_tests_mode_required(func):
     @functools.wraps(func)
     def wrap(*args, **kwargs):
-        local_tests_token = request.json.get("local-tests-token")
+        local_tests_token = request.headers.get("X-local-tests-token")
         if not app.config.get(
             "LOCAL_TESTS_TOKEN"
         ) or local_tests_token != app.config.get("LOCAL_TESTS_TOKEN"):

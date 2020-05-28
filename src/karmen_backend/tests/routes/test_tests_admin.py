@@ -39,10 +39,8 @@ def create_new_org():
     with app.test_client() as c:
         response = c.post(
             f"/tests-admin/organizations/",
-            json={
-                "name": get_random_username(),
-                "local-tests-token": LOCAL_TESTS_TOKEN,
-            },
+            json={"name": get_random_username(),},
+            headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
         )
         resp = json.loads(response.data)
         return resp["uuid"]
@@ -60,6 +58,7 @@ class CreateUsersViaLocalTestsAdmin(unittest.TestCase):
                     "password": password,
                     "local-tests-token": LOCAL_TESTS_TOKEN,
                 },
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             resp = json.loads(response.data)
             self.assertEqual(response.status_code, 201)
@@ -72,9 +71,9 @@ class CreateUsersViaLocalTestsAdmin(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/tests-admin/users/create",
-                json={"email": email, "password": password,},
+                json={"email": email, "password": password},
             )
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 400)
 
     def test_fail_without_set_token(self):
         app.config["LOCAL_TESTS_TOKEN"] = ""
@@ -83,7 +82,8 @@ class CreateUsersViaLocalTestsAdmin(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 "/tests-admin/users/create",
-                json={"email": email, "password": password, "local-tests-token": ""},
+                json={"email": email, "password": password,},
+                headers={"X-local-tests-token": ""},
             )
             self.assertEqual(response.status_code, 403)
         app.config["LOCAL_TESTS_TOKEN"] = LOCAL_TESTS_TOKEN
@@ -94,7 +94,8 @@ class CreateOrganizationViaTestsAdmin(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 f"/tests-admin/organizations/",
-                json={"name": "Testovačka", "local-tests-token": LOCAL_TESTS_TOKEN},
+                json={"name": "Testovačka",},
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             self.assertEqual(response.status_code, 200)
 
@@ -104,11 +105,8 @@ class AddUsersToOrgViaTestsAdmin(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 f"/tests-admin/organizations/{create_new_org()}/users",
-                json={
-                    "uuid": UUID_USER2,
-                    "role": "user",
-                    "local-tests-token": LOCAL_TESTS_TOKEN,
-                },
+                json={"uuid": UUID_USER2, "role": "user",},
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             self.assertEqual(response.status_code, 200)
 
@@ -117,20 +115,14 @@ class AddUsersToOrgViaTestsAdmin(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 f"/tests-admin/organizations/{org}/users",
-                json={
-                    "uuid": UUID_USER2,
-                    "role": "user",
-                    "local-tests-token": LOCAL_TESTS_TOKEN,
-                },
+                json={"uuid": UUID_USER2, "role": "user",},
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             self.assertEqual(response.status_code, 200)
             response = c.post(
                 f"/tests-admin/organizations/{org}/users",
-                json={
-                    "uuid": UUID_USER2,
-                    "role": "user",
-                    "local-tests-token": LOCAL_TESTS_TOKEN,
-                },
+                json={"uuid": UUID_USER2, "role": "user",},
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             self.assertEqual(response.status_code, 400)
 
@@ -138,10 +130,7 @@ class AddUsersToOrgViaTestsAdmin(unittest.TestCase):
         with app.test_client() as c:
             response = c.post(
                 f"/tests-admin/organizations/{UUID_INVALID}/users",
-                json={
-                    "uuid": UUID_USER2,
-                    "role": "user",
-                    "local-tests-token": LOCAL_TESTS_TOKEN,
-                },
+                json={"uuid": UUID_USER2, "role": "user",},
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             self.assertEqual(response.status_code, 400)
