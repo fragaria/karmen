@@ -8,8 +8,8 @@ mkdir -p /etc/nginx/includes
 if [ "$IS_DEV_ENV" = 1 ]
 
 then
-  for configFile in /etc/nginx/includes-dev/*.conf; do
-    newFile="/etc/nginx/includes/$(basename "$configFile")"
+  for configFile in /etc/nginx/includes-dev/*.conf.template; do
+    newFile="/etc/nginx/includes/$(basename "${configFile%.template}")"
     envsubst '$SERVICE_HOST $SERVICE_PORT $BACKEND_HOST $BACKEND_PORT $FRONTEND_HOST $FRONTEND_PORT $APIDOC_HOST $APIDOC_PORT' < "$configFile" > "$newFile"
   done
 fi
