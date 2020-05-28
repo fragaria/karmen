@@ -18,7 +18,7 @@ class Register extends React.Component {
           val: "",
         },
         realemail: {
-          name: "Your e-mail",
+          name: "Your email",
           val: "",
           type: "text",
           required: true,

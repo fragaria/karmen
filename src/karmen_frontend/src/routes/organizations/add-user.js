@@ -17,7 +17,7 @@ class AddUser extends React.Component {
     messageOk: false,
     form: {
       email: {
-        name: "E-mail",
+        name: "Email",
         val: "",
         type: "text",
         required: true,
@@ -60,7 +60,7 @@ class AddUser extends React.Component {
     }
     if (!isEmail(form.email.val)) {
       hasErrors = true;
-      form.email.error = "That does not seem like an e-mail address";
+      form.email.error = "That does not seem like an email address";
     }
 
     if (hasErrors) {

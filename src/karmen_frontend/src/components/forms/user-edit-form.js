@@ -17,7 +17,7 @@ class UserEditForm extends React.Component {
           required: true,
         },
         email: {
-          name: "E-mail",
+          name: "Email",
           val: props.email,
           type: "text",
           required: true,
@@ -44,7 +44,7 @@ class UserEditForm extends React.Component {
     }
     if (!isEmail(patchMeForm.email.val)) {
       hasError = true;
-      patchMeForm.email.error = "That does not seem like an e-mail address";
+      patchMeForm.email.error = "That does not seem like an email address";
     }
     if (hasError) {
       this.setState({

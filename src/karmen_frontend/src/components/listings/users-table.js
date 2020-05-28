@@ -76,7 +76,7 @@ const InvitationSentModal = ({ modal, user }) => {
       {modal.isOpen && (
         <modal.Modal>
           <h1 className="modal-title text-center">
-            The invitation e-mail has been sent to {user.email}
+            The invitation email has been sent to {user.email}
           </h1>
 
           <div className="cta-box text-center">

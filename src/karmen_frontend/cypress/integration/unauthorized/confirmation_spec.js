@@ -57,6 +57,6 @@ describe("Unauthorized: Activation flow", function () {
     cy.get("input#password").type("password");
     cy.get("input#passwordConfirmation").type("password");
     cy.get("button[type=submit]").click();
-    cy.get("form").contains("Account activated");
+    cy.get("form").contains("Your account has been activated");
   });
 });
