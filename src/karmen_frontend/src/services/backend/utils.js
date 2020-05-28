@@ -118,22 +118,14 @@ export const performRequest = (opts) => {
       }
 
       if (opts.parseResponse) {
-        return response
-          .json()
-          .then((data) => {
-            return {
-              status: response.status,
-              ...opts.appendData,
-              data,
-              successCodes: opts.successCodes,
-            };
-          })
-          .catch((err) => {
-            console.error(
-              `Could not parse ${opts.uri} response as JSON: ${err}`
-            );
-            return Promise.reject(err);
-          });
+        return response.json().then((data) => {
+          return {
+            status: response.status,
+            ...opts.appendData,
+            data,
+            successCodes: opts.successCodes,
+          };
+        });
       }
       return {
         status: response.status,

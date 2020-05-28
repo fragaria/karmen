@@ -11,9 +11,9 @@ import { ToastContainer, toast } from "react-toastify";
 import { ErrorBoundary } from "react-error-boundary";
 import * as Sentry from "@sentry/browser";
 
+import Heartbeat from "./components/heartbeat";
 import Menu from "./components/menu";
 import Loader from "./components/utils/loader";
-import Heartbeat from "./components/gateways/heartbeat";
 import CatchLoginTokenFromUrl from "./components/gateways/catch-login-token-from-url";
 import AuthenticatedRoute from "./components/authenticated-route";
 import UnauthenticatedRoute from "./components/unauthenticated-route";
@@ -377,11 +377,11 @@ const ConnectedAppBase = ({ loadUserFromStorage, userState, logout }) => {
   return (
     <div ref={myRef}>
       <AppErrorGuard>
+        <Heartbeat />
         <BrowserRouter>
           <ScrollToTop />
           <CatchLoginTokenFromUrl />
           <Menu />
-          <Heartbeat />
           <AppRouter userState={userState} logout={logout} />
         </BrowserRouter>
         <footer>
