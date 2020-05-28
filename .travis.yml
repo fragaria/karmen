@@ -17,19 +17,15 @@ if: (branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR
 matrix:
   allow_failures:
     - python: 3.8-dev
+
   fast_finish: true
   include:
 
-    - stage: Docker compose and run tests
-
-    # startup build environment
-      name: Compose test environment
-      script:
-        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
+    - stage: Run tests
+      language: node_js
+      name: Compose test environment and run e2e tests
 
     # run cypress tests
-    - language: node_js
-      name: frontend E2E cypress tests
       node_js: 10
       cache:
         directories:
@@ -37,6 +33,7 @@ matrix:
       before_script:
         - cd src/karmen_frontend && npm ci
       script:
+        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         - npm run test:cypress
 
