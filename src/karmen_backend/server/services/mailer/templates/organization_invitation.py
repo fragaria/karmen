@@ -48,3 +48,6 @@ class OrganizationInvitation(BrandedMailTemplate):
             </table>
             """
         )
+
+    def excerpt(self):
+        return f"You've been invited to join {self.variables['organization_name']}"
