@@ -1,5 +1,3 @@
-cat <<-"XXX"
-
 worker_processes auto;
 pid /run/nginx.pid;
 
@@ -32,17 +30,10 @@ http {
       server ${FRONTEND_HOST}:${FRONTEND_PORT};
   }
 
-XXX
-if [ $IS_DEV_ENV = 1 ]
-then
-cat <<-"XXX"
-  upstream api_doc {
-      server ${APIDOC_HOST}:${APIDOC_PORT};
-  }
-XXX
-fi
+  include /etc/nginx/includes/http-*.conf;
 
-cat <<-"XXX"
+
+
   gzip on;
   gzip_proxied any;
   gzip_comp_level 6;
@@ -66,6 +57,9 @@ cat <<-"XXX"
     resolver     127.0.0.11 valid=5m;
     server_name  localhost;
 
+    include /etc/nginx/includes/server-*.conf;
+
+
     location ~ ^/api/?(.*) {
       proxy_redirect     off;
       proxy_set_header   Host $host;
@@ -79,26 +73,6 @@ cat <<-"XXX"
       proxy_read_timeout    600s;
 
     }
-
-
-XXX
-
-if [  $IS_DEV_ENV = 1 ]
-then
-cat <<-"XXX"
-    location ~ ^/openapi/(.*) {
-      proxy_redirect     off;
-      proxy_set_header   Host $host;
-      proxy_set_header   X-Real-IP $remote_addr;
-      proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header   X-Forwarded-Host $server_name;
-      proxy_pass http://api_doc/$1$is_args$args;
-    }
-
-XXX
-fi
-
-cat <<-"XXX"
 
     location / {
       proxy_redirect     off;
@@ -124,4 +98,3 @@ cat <<-"XXX"
   }
 }
 
-XXX
