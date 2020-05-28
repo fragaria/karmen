@@ -42,7 +42,7 @@ import AddOrganization from "./routes/add-organization";
 import Page404 from "./routes/page404";
 import AppRoot from "./routes/app-root";
 import configureStore from "./store";
-import { HttpError } from "./errors";
+import { HttpError, OfflineError } from "./errors";
 
 import {
   loadUserFromLocalStorage,
@@ -152,6 +152,9 @@ const rejectionErrorHandler = (event) => {
           { autoClose: false, toastId: "HttpErrorOther" }
         );
     }
+  } else if (err instanceof OfflineError) {
+    // This is OK.
+    return;
   }
 
   toast(

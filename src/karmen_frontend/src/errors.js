@@ -5,3 +5,10 @@ export class HttpError extends Error {
     this.name = "HTTPError";
   }
 }
+
+export class OfflineError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "OfflineError";
+  }
+}

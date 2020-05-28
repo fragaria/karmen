@@ -20,16 +20,16 @@ export const getGcodesPage = createHttpAction(
     fields = [],
     { dispatch, getState }
   ) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.getGcodes, dispatch)(
+    return denyWithNoOrganizationAccess(orguuid, getState, () =>
+      retryIfUnauthorized(backend.getGcodes, dispatch)(
         orguuid,
         startWith,
         orderBy,
         filter,
         limit,
         fields
-      );
-    });
+      )
+    );
   }
 );
 

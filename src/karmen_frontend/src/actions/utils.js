@@ -1,3 +1,5 @@
+import { OfflineError } from "../errors";
+
 // inspired by https://github.com/machadogj/redux-thunk-actions/blob/master/src/index.js
 
 const createHttpActionFactory = (type) => {
@@ -11,12 +13,30 @@ const isPromise = (p) => {
   return p && p.then && p.catch;
 };
 
+export const ifOnline = (getState, wrapped) => {
+  const { heartbeat } = getState();
+  if (!heartbeat.isOnline) {
+    return Promise.reject(new OfflineError());
+  }
+  return wrapped();
+};
+
 export const createHttpAction = (
   name,
   func,
-  { swallowErrors = false } = {}
+  { swallowErrors = false, onlineOnly = true } = {}
 ) => {
   return (...args) => (dispatch, getState, extra) => {
+    // This expects heartbeat state to be present. Not really nice but no better
+    // solution found.
+    if (onlineOnly) {
+      const { heartbeat } = getState();
+
+      if (!heartbeat.isOnline) {
+        return Promise.reject(new OfflineError());
+      }
+    }
+
     let result;
     dispatch(createHttpActionFactory(`${name}_STARTED`)());
     // when action is successful...
