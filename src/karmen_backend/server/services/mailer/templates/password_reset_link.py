@@ -62,3 +62,6 @@ class PasswordResetLink(BrandedMailTemplate):
             <p>If you didn't request this, you can <strong>safely ignore this email</strong>. Your password will not be changed.</p>
             """
         )
+
+    def excerpt(self):
+        return f"Your password reset link"
