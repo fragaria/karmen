@@ -1,3 +1,5 @@
+cat <<-"XXX"
+
 worker_processes auto;
 pid /run/nginx.pid;
 
@@ -30,10 +32,17 @@ http {
       server ${FRONTEND_HOST}:${FRONTEND_PORT};
   }
 
+XXX
+if [ $IS_DEV_ENV = 1 ]
+then
+cat <<-"XXX"
   upstream api_doc {
       server ${APIDOC_HOST}:${APIDOC_PORT};
   }
+XXX
+fi
 
+cat <<-"XXX"
   gzip on;
   gzip_proxied any;
   gzip_comp_level 6;
@@ -71,6 +80,12 @@ http {
 
     }
 
+
+XXX
+
+if [  $IS_DEV_ENV = 1 ]
+then
+cat <<-"XXX"
     location ~ ^/openapi/(.*) {
       proxy_redirect     off;
       proxy_set_header   Host $host;
@@ -80,6 +95,10 @@ http {
       proxy_pass http://api_doc/$1$is_args$args;
     }
 
+XXX
+fi
+
+cat <<-"XXX"
 
     location / {
       proxy_redirect     off;
@@ -104,3 +123,5 @@ http {
 
   }
 }
+
+XXX
