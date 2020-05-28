@@ -142,7 +142,7 @@ export class AddPrinterForm extends React.Component {
         }
         const url = new URL(raw);
         protocol = url.protocol.replace(":", "");
-        port = url.port || null;
+        port = parseInt(url.port) || null;
         if (
           url.hostname &&
           url.hostname.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) === null

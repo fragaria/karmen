@@ -4,6 +4,7 @@ import string
 import unittest
 from datetime import datetime
 import uuid as guid
+import json
 from server import app
 from server.database import users, local_users, organization_roles, api_tokens
 from ..utils import (
@@ -461,6 +462,54 @@ class DeleteUser(unittest.TestCase):
             self.assertTrue(args[1][0][2]["organization_name"] is not None)
             self.assertTrue(args[1][0][2]["organization_uuid"] is not None)
             self.assertEqual(args[1][0][2]["email"], email)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_add_wrong_email(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            email = "this is not a valid email"
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"role": "user", "email": email,},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_add_wrong_role(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            email = get_random_email()
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"role": "this does not look like valid role", "email": email,},
+            )
+            self.assertEqual(response.status_code, 400)
+
+    @mock.patch("server.tasks.send_mail.send_mail.delay")
+    def test_add_existing_user_fails(self, mock_send_mail):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            email = get_random_email()
+
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"role": "user", "email": email,},
+            )
+
+            self.assertEqual(response.status_code, 201)
+
+            user = json.loads(response.data)
+            users.update_user(uuid=user["uuid"], activated=datetime.now())
+
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"role": "user", "email": email,},
+            )
+            self.assertEqual(response.status_code, 409)
 
     @mock.patch("server.tasks.send_mail.send_mail.delay")
     def test_cannot_delete_herself(self, mock_send_mail):

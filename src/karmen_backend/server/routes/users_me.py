@@ -33,7 +33,7 @@ ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
 
 # registers new user - does not save any password
-@app.route("/users/me", methods=["POST"])
+# /users/me, POST
 def create_inactive_user():
     data = request.json
     if not data:
@@ -83,7 +83,7 @@ def create_inactive_user():
 
 
 # sets a first password to a user
-@app.route("/users/me/activate", methods=["POST"])
+# /users/me/activate, POST
 def activate_user():
     data = request.json
     if not data:
@@ -137,7 +137,7 @@ def activate_user():
     return "", 204
 
 
-@app.route("/users/me/request-password-reset", methods=["POST"])
+# /users/me/request-password-reset, POST
 def request_password_reset():
     data = request.json
     if not data:
@@ -175,7 +175,7 @@ def request_password_reset():
     return "", 202
 
 
-@app.route("/users/me/reset-password", methods=["POST"])
+# /users/me/reset-password, POST
 def reset_password():
     data = request.json
     if not data:
@@ -291,21 +291,21 @@ def authenticate_base(include_refresh_token):
 
 # This is intentionally not called login as we might use that for the OAuth process in the future
 # This returns a fresh access token and a refresh token
-@app.route("/users/me/authenticate", methods=["POST"])
+# /users/me/authenticate, POST
 @cross_origin()
 def authenticate():
     return authenticate_base(True)
 
 
 # This returns a fresh access token and no refresh token
-@app.route("/users/me/authenticate-fresh", methods=["POST"])
+# /users/me/authenticate-fresh, POST
 @cross_origin()
 def authenticate_fresh():
     return authenticate_base(False)
 
 
 # This returns a non fresh access token and no refresh token
-@app.route("/users/me/authenticate-refresh", methods=["POST"])
+# /users/me/authenticate-refresh, POST
 @jwt_refresh_token_required
 def authenticate_refresh():
     user = get_current_user()
@@ -325,7 +325,7 @@ def authenticate_refresh():
     return response, 200
 
 
-@app.route("/users/me/logout", methods=["POST"])
+# /users/me/logout, POST
 def logout():
     response = jsonify({"logout": True})
     unset_jwt_cookies(response)
@@ -334,7 +334,7 @@ def logout():
 
 # This returns fresh access_token with reset force_pwd_change user claim
 # Token is fresh, because you already need a fresh one to call this method
-@app.route("/users/me/password", methods=["PATCH"])
+# /users/me/password, PATCH
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -378,7 +378,7 @@ def change_password():
     return response, 200
 
 
-@app.route("/users/me", methods=["PATCH"])
+# /users/me, PATCH
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -405,7 +405,7 @@ def patch_user():
     return response, 200
 
 
-@app.route("/users/me/tokens", methods=["GET"])
+# /users/me/tokens, GET
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -433,7 +433,7 @@ def list_api_tokens():
     return jsonify({"items": items}), 200
 
 
-@app.route("/users/me/tokens", methods=["POST"])
+# /users/me/tokens, POST
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
@@ -479,7 +479,7 @@ def create_api_token():
     return jsonify(response), 201
 
 
-@app.route("/users/me/tokens/<jti>", methods=["DELETE"])
+# /users/me/tokens/<jti>, DELETE
 @cross_origin()
 @jwt_required
 @fresh_jwt_required
