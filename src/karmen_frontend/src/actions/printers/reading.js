@@ -1,4 +1,4 @@
-import { createThunkedAction } from "../utils";
+import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
@@ -124,7 +124,7 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
   }, delay);
 };
 
-export const loadPrinters = createThunkedAction(
+export const loadPrinters = createHttpAction(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -136,7 +136,7 @@ export const loadPrinters = createThunkedAction(
   }
 );
 
-export const loadPrintersOld = createThunkedAction(
+export const loadPrintersOld = createHttpAction(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -148,7 +148,7 @@ export const loadPrintersOld = createThunkedAction(
   }
 );
 
-export const loadPrinter = createThunkedAction(
+export const loadPrinter = createHttpAction(
   "PRINTERS_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -208,7 +208,7 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
   }
 };
 
-export const getWebcamSnapshot = createThunkedAction(
+export const getWebcamSnapshot = createHttpAction(
   "WEBCAMS_GET_SNAPSHOT",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

@@ -1,4 +1,4 @@
-import { createThunkedAction } from "./utils";
+import { createHttpAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
@@ -9,7 +9,7 @@ export const clearGcodesPages = (printerUuid) => (dispatch) => {
   });
 };
 
-export const getGcodesPage = createThunkedAction(
+export const getGcodesPage = createHttpAction(
   "GCODES_LOAD_PAGE",
   (
     orguuid,
@@ -33,7 +33,7 @@ export const getGcodesPage = createThunkedAction(
   }
 );
 
-export const loadGcode = createThunkedAction(
+export const loadGcode = createHttpAction(
   "GCODE_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -46,7 +46,7 @@ export const loadGcode = createThunkedAction(
   }
 );
 
-export const deleteGcode = createThunkedAction(
+export const deleteGcode = createHttpAction(
   "GCODES_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -55,7 +55,7 @@ export const deleteGcode = createThunkedAction(
   }
 );
 
-export const uploadGcode = createThunkedAction(
+export const uploadGcode = createHttpAction(
   "GCODES_UPLOAD",
   (orguuid, path, toUpload, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

@@ -1,4 +1,4 @@
-import { createThunkedAction } from "./utils";
+import { createHttpAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
@@ -11,7 +11,7 @@ export const clearJobsPages = (printerUuid) => (dispatch) => {
   });
 };
 
-export const getJobsPage = createThunkedAction(
+export const getJobsPage = createHttpAction(
   "JOBS_LOAD_PAGE",
   // TODO Reflect the actual filter attribute
   (
@@ -35,7 +35,7 @@ export const getJobsPage = createThunkedAction(
   }
 );
 
-export const addPrintJob = createThunkedAction(
+export const addPrintJob = createHttpAction(
   "JOBS_ADD",
   (orguuid, uuid, printer, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

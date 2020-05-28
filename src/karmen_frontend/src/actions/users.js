@@ -1,4 +1,4 @@
-import { createThunkedAction } from "./utils";
+import { createHttpAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
@@ -8,7 +8,7 @@ export const clearUsers = () => (dispatch) => {
   });
 };
 
-export const getUsers = createThunkedAction(
+export const getUsers = createHttpAction(
   "USERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -17,7 +17,7 @@ export const getUsers = createThunkedAction(
   }
 );
 
-export const addUser = createThunkedAction(
+export const addUser = createHttpAction(
   "USERS_ADD",
   (orguuid, email, role, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -30,7 +30,7 @@ export const addUser = createThunkedAction(
   }
 );
 
-export const patchUser = createThunkedAction(
+export const patchUser = createHttpAction(
   "USERS_EDIT",
   (orguuid, uuid, role, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -43,7 +43,7 @@ export const patchUser = createThunkedAction(
   }
 );
 
-export const deleteUser = createThunkedAction(
+export const deleteUser = createHttpAction(
   "USERS_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

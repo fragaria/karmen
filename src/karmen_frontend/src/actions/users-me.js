@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
-import { createThunkedAction } from "./utils";
+import { createHttpAction } from "./utils";
 import { HttpError } from "../errors";
 import * as backend from "../services/backend";
 
@@ -111,28 +111,28 @@ export const loadUserData = (userData) => (dispatch) => {
   }
 };
 
-export const authenticate = createThunkedAction(
+export const authenticate = createHttpAction(
   "USER_AUTHENTICATE",
   (username, password) => {
     return backend.authenticate(username, password);
   }
 );
 
-export const authenticateFresh = createThunkedAction(
+export const authenticateFresh = createHttpAction(
   "USER_AUTHENTICATE_FRESH",
   (username, password) => {
     return backend.authenticateFresh(username, password);
   }
 );
 
-export const refreshToken = createThunkedAction(
+export const refreshToken = createHttpAction(
   "USER_REFRESH_ACCESS_TOKEN",
   () => {
     return backend.refreshAccessToken();
   }
 );
 
-export const changePassword = createThunkedAction(
+export const changePassword = createHttpAction(
   "USER_CHANGE_PASSWORD",
   (
     password,
@@ -147,18 +147,18 @@ export const changePassword = createThunkedAction(
   }
 );
 
-export const patchMe = createThunkedAction("USER_PATCH", (username, email) => {
+export const patchMe = createHttpAction("USER_PATCH", (username, email) => {
   return backend.patchMe(username, email);
 });
 
-export const requestPasswordReset = createThunkedAction(
+export const requestPasswordReset = createHttpAction(
   "USER_RESET_PASSWORD_REQUEST",
   (email) => {
     return backend.requestPasswordReset(email);
   }
 );
 
-export const resetPassword = createThunkedAction(
+export const resetPassword = createHttpAction(
   "USER_RESET_PASSWORD",
   (email, pwdResetKey, password, passwordConfirmation) => {
     return backend.resetPassword(
@@ -170,11 +170,11 @@ export const resetPassword = createThunkedAction(
   }
 );
 
-export const register = createThunkedAction("USER_REGISTER", (email) => {
+export const register = createHttpAction("USER_REGISTER", (email) => {
   return backend.register(email);
 });
 
-export const activate = createThunkedAction(
+export const activate = createHttpAction(
   "USER_ACTIVATE",
   (email, activationKey, password, passwordConfirmation) => {
     return backend.activate(
@@ -186,25 +186,25 @@ export const activate = createThunkedAction(
   }
 );
 
-export const clearUserIdentity = createThunkedAction("USER_CLEAR", () => {
+export const clearUserIdentity = createHttpAction("USER_CLEAR", () => {
   return backend.logout();
 });
 
-export const loadUserApiTokens = createThunkedAction(
+export const loadUserApiTokens = createHttpAction(
   "USER_LOAD_API_TOKENS",
   ({ dispatch, getState }) => {
     return retryIfUnauthorized(backend.loadApiTokens, dispatch)();
   }
 );
 
-export const addUserApiToken = createThunkedAction(
+export const addUserApiToken = createHttpAction(
   "USER_ADD_API_TOKEN",
   (orguuid, name, { dispatch, getState }) => {
     return retryIfUnauthorized(backend.addApiToken, dispatch)(orguuid, name);
   }
 );
 
-export const deleteUserApiToken = createThunkedAction(
+export const deleteUserApiToken = createHttpAction(
   "USER_DELETE_API_TOKEN",
   (jti, { dispatch }) => {
     return retryIfUnauthorized(backend.deleteApiToken, dispatch)(jti);
