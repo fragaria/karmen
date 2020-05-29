@@ -1,4 +1,5 @@
 import { OfflineError } from "../errors";
+import { Sentry } from "../sentry";
 
 // inspired by https://github.com/machadogj/redux-thunk-actions/blob/master/src/index.js
 
@@ -60,8 +61,12 @@ export const createHttpAction = (
       dispatch(createHttpActionFactory(`${name}_FAILED`)(err));
       dispatch(createHttpActionFactory(`${name}_ENDED`)(err));
 
+      // Make sure to log down to Sentry even if caught by the UI.
+      Sentry.captureException(err);
+
       // ... if raise is requested, bubble the error up
       if (!swallowErrors) {
+        console.log("throwing err");
         throw err;
       }
       // ... otherwise, return the result
