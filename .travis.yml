@@ -33,7 +33,7 @@ matrix:
       before_script:
         - cd src/karmen_frontend && npm ci
       script:
-        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
+        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d || travis_terminate 1;
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         - npm run test:cypress
 
@@ -49,7 +49,7 @@ matrix:
       before_script:
         - cd src/karmen_backend
       script:
-        - pipenv install --dev
+        - pipenv install --dev || travis_terminate 1;
         - make test
 
     # Python 3.7 (requires build images)
@@ -64,8 +64,8 @@ matrix:
       before_script:
         - cd src/karmen_backend
       script:
-        - pipenv install --dev
-        - make coverage
+        - pipenv install --dev || travis_terminate 1;
+        - make coverage || travis_terminate 1;
         - make coveralls
 
     # Python 3.7 (requires build images)
@@ -80,7 +80,7 @@ matrix:
       before_script:
         - cd src/karmen_backend
       script:
-        - pipenv install --dev
+        - pipenv install --dev || travis_terminate 1;
         - make test
 
     # nodejs
@@ -92,10 +92,10 @@ matrix:
           - "$HOME/.npm"
       before_script:
         - cd src/karmen_frontend
-        - npm ci
+        - npm ci || travis_terminate 1;
       script:
-        - npm run lint
-        - npm run test
+        - npm run lint || travis_terminate 1;
+        - npm run test || travis_terminate 1;
         - npm run build
 
     # build and push docker images
