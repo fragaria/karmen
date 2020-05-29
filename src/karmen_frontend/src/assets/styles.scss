@@ -1262,6 +1262,14 @@ select {
     );
   }
 
+  .printer-state-announcement {
+    @include plumber(
+      $leading-top: 3,
+      $leading-bottom: 0,
+      $font-size: 2
+    );
+  }
+
   @media (max-width: $screen-sm-max) {
     .printer-detail-controls {
       margin-top: $spacing-default;
