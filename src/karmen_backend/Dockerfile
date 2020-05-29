@@ -10,7 +10,7 @@ RUN set -x ; \
 WORKDIR /usr/src/app
 
 # build deps
-RUN apk add --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers libxml2-dev libxslt-dev
+RUN apk add --update --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers libxml2-dev libxslt-dev
 
 
 RUN pip install --upgrade pipenv pip
@@ -23,7 +23,7 @@ RUN pip install uwsgi supervisor
 RUN apk del gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers libxml2-dev libxslt-dev
 
 # runtime deps
-RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash dbus
+RUN apk add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash dbus
 
 ENV PYTHONPATH=$PYTHONPATH:/usr/src/app
 
