@@ -59,3 +59,6 @@ class RegistrationVerification(BrandedMailTemplate):
             </table>
             """
         )
+
+    def excerpt(self):
+        return f"Click on the verification link to start using Karmen"
