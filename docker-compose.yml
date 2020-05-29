@@ -8,6 +8,7 @@ services:
       - 127.0.0.1:4000:9766
     environment:
       REDIS_HOST: redis
+      IS_DEV_ENV: 1
     networks:
       - backend
       - default
