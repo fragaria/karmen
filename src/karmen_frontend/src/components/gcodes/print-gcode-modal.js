@@ -97,11 +97,8 @@ export const usePrintGcodeModal = ({
                 </h2>
                 <Loader image />
                 <p>
-                  Your print file is being uploaded to the printer. Please be
-                  patient as this can take some time depending on the gcode size
-                  and printer network speed. Do not close this dialog nor your
-                  browser window during the upload. Otherwise, the upload will
-                  be interrupted and the print <strong>won't start</strong>.
+                  Your print file is being uploaded to the printer. Do not close
+                  this dialog nor your browser window.
                 </p>
               </div>
             )}
@@ -143,6 +140,7 @@ export const usePrintGcodeModal = ({
 
             {!showFilamentTypeWarning &&
               !message &&
+              !schedulingPrint &&
               !!availablePrinters.length && (
                 <div>
                   <div className="cta-box text-center">
@@ -194,7 +192,7 @@ export const usePrintGcodeModal = ({
                 </div>
               )}
 
-            {(!!!availablePrinters.length || message) && (
+            {(schedulingPrint || message) && (
               <div className="cta-box text-center">
                 <button
                   className="btn"
