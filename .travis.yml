@@ -9,72 +9,99 @@ addons:
     packages:
       - docker-ce
       - jq
+# only push builds on master, deploy, release branches to prevent double build or
+# it's not push initiated
+# or it is forced by a commit message
+# but never build forks (can be dangerous to run foreign code, right?)
+if: (branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/) AND fork = false
 matrix:
   allow_failures:
     - python: 3.8-dev
+
+  fast_finish: true
   include:
+
     - stage: Run tests
+      language: node_js
+      name: Compose test environment and run e2e tests
+
+    # run cypress tests
+      node_js: 10
+      cache:
+        directories:
+          - "$HOME/.npm"
+      before_script:
+        - cd src/karmen_frontend && npm ci
+      script:
+        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d || travis_terminate 1;
+        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+        - npm run test:cypress
+
+    # Python 3.6 (requires build images)
+    - python: "3.6"
       language: python
       name: backend tests @ Python 3.6
-      python: "3.6"
+      cache:
+        directories:
+          - "$HOME/.cache"
       install:
         - pip install pipenv
       before_script:
         - cd src/karmen_backend
       script:
-        - pipenv install --dev
+        - pipenv install --dev || travis_terminate 1;
         - make test
-    - language: python
+
+    # Python 3.7 (requires build images)
+    - python: "3.7"
+      language: python
       name: backend coverage @ Python 3.7
-      python: "3.7"
+      cache:
+        directories:
+          - "$HOME/.cache"
       install:
         - pip install pipenv
       before_script:
         - cd src/karmen_backend
       script:
-        - pipenv install --dev
-        - make coverage
+        - pipenv install --dev || travis_terminate 1;
+        - make coverage || travis_terminate 1;
         - make coveralls
-    - language: python
+
+    # Python 3.7 (requires build images)
+    - python: 3.8-dev
+      language: python
       name: backend tests @ Python 3.8-dev
-      python: 3.8-dev
+      cache:
+        directories:
+          - "$HOME/.cache"
       install:
         - pip install pipenv
       before_script:
         - cd src/karmen_backend
       script:
-        - pipenv install --dev
+        - pipenv install --dev || travis_terminate 1;
         - make test
+
+    # nodejs
     - language: node_js
       name: frontend Jest tests and build
       node_js: 10
       cache:
         directories:
-          - node_modules
           - "$HOME/.npm"
       before_script:
         - cd src/karmen_frontend
-        - npm ci
+        - npm ci || travis_terminate 1;
       script:
-        - npm run lint
-        - npm run test
+        - npm run lint || travis_terminate 1;
+        - npm run test || travis_terminate 1;
         - npm run build
-    - language: node_js
-      name: frontend E2E cypress tests
-      node_js: 10
-      cache:
-        directories:
-          - node_modules
-          - "$HOME/.npm"
-      before_script:
-        - cd src/karmen_frontend && npm ci
-      script:
-        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d
-        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        - npm run test:cypress
-    - stage: Build Docker images
-      name: "backend image"
-      if: tag IS present
+
+    # build and push docker images
+    - name: "backend image"
+      stage: Build Docker images
+      if: branch = master AND tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -86,8 +113,9 @@ matrix:
       install: true
       script:
         - travis_wait 30 bash .travis/build-images-backend.sh
-    - if: tag IS present
-      name: "frontend image"
+
+    - name: "frontend image"
+      if: branch = master AND tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -99,8 +127,9 @@ matrix:
       install: true
       script:
         - bash .travis/build-images-frontend.sh
-    - if: tag IS present
-      name: "proxy image"
+
+    - name: "proxy image"
+      if: branch = master AND tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -119,8 +148,9 @@ matrix:
     # while versions without "-" character are considered stable
 
     # PRE-RELEASE
-    - stage: Create GitHub release
-      name: "Pre-release"
+    - name: "Pre-release"
+      stage: Create GitHub release
+      if: branch = master AND tag IS present
       language: generic
       install: true
       script:
@@ -134,12 +164,14 @@ matrix:
         skip_cleanup: true
         on:
           repo: fragaria/karmen
+          branch: master
           tags: true
           condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*-.*$'
 
     # STABLE RELEASE
-    - language: generic
-      name: "Stable release"
+    - name: "Stable release"
+      if: branch = master AND tag IS present
+      language: generic
       install: true
       script:
         - bash .travis/make-github-release.sh
@@ -152,6 +184,7 @@ matrix:
         skip_cleanup: true
         on:
           repo: fragaria/karmen
+          branch: master
           tags: true
           condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*$'
 env:

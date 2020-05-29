@@ -30,7 +30,7 @@ def make_printjob_response(printjob, fields=None, user_mapping=None):
     return response
 
 
-@app.route("/organizations/<org_uuid>/printjobs", methods=["POST"])
+# /organizations/<org_uuid>/printjobs, POST
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -102,7 +102,7 @@ def printjob_create(org_uuid):
         )
 
 
-@app.route("/organizations/<org_uuid>/printjobs", methods=["GET"])
+# /organizations/<org_uuid>/printjobs, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
@@ -115,24 +115,18 @@ def printjobs_list(org_uuid):
         )
     if order_by in ["gcode_data", "printer_data"]:
         order_by = ""
-    try:
-        limit = int(request.args.get("limit", 200))
-        if limit and limit < 0:
-            limit = 200
-    except ValueError:
-        limit = 200
-    try:
-        start_with = (
-            guid.UUID(request.args.get("start_with"), version=4)
-            if request.args.get("start_with")
-            else None
-        )
-        # There is a hidden side effect in uuid module. When version is specified,
-        # it does not break, but instead silently modifies the content. Ugly!
-        if str(start_with) != request.args.get("start_with"):
-            start_with = None
-    except ValueError:
+    limit = int(request.args.get("limit", 200))
+
+    start_with = (
+        guid.UUID(request.args.get("start_with"), version=4)
+        if request.args.get("start_with")
+        else None
+    )
+    # There is a hidden side effect in uuid module. When version is specified,
+    # it does not break, but instead silently modifies the content. Ugly!
+    if str(start_with) != request.args.get("start_with"):
         start_with = None
+
     fields = [f for f in request.args.get("fields", "").split(",") if f]
     filter_crit = request.args.get("filter", None)
     printjobs_record_set = printjobs.get_printjobs(
@@ -177,13 +171,13 @@ def printjobs_list(org_uuid):
     return jsonify(response), 200
 
 
-@app.route("/organizations/<org_uuid>/printjobs/<uuid>", methods=["GET"])
+# /organizations/<org_uuid>/printjobs/<printjob_uuid>, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
-def printjob_detail(org_uuid, uuid):
-    validate_uuid(uuid)
-    printjob = printjobs.get_printjob(uuid)
+def printjob_detail(org_uuid, printjob_uuid):
+    validate_uuid(printjob_uuid)
+    printjob = printjobs.get_printjob(printjob_uuid)
     if printjob is None or printjob["organization_uuid"] != org_uuid:
         return abort(make_response(jsonify(message="Not found"), 404))
     user = users.get_by_uuid(printjob.get("user_uuid"))

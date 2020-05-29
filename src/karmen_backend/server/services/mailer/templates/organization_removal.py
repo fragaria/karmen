@@ -1,19 +1,30 @@
 from textwrap import dedent
-from .mail_template import MailTemplate
+
+from .mail_template import BrandedMailTemplate
 
 
-class OrganizationRemoval(MailTemplate):
+class OrganizationRemoval(BrandedMailTemplate):
     def subject(self):
-        return "Karmen - Organization removal"
+        return "You've been removed from a Karmen organization"
 
     def textbody(self):
-        return (
-            dedent(
-                """
-            You have been removed from the %s and You will have no access to this organization anymore.
+        return dedent(
+            f"""
+            Hi!
 
-            © 2020 Fragaria s.r.o.
+            We're just letting you know that your membership in {self.variables["organization_name"]} has been revoked. This means you won't be able to access this organization anymore.
             """
-            )
-            % (self.variables["organization_name"])
+        )
+
+    def htmlbody(self):
+        return dedent(
+            f"""
+            <h1>Hi!</h1>
+            <p>We're just letting you know that your membership in <strong>{self.variables["organization_name"]} has been revoked</strong>. This means you won't be able to access this organization anymore.</p>
+            """
+        )
+
+    def excerpt(self):
+        return (
+            f"Your membership in {self.variables['organization_name']} has been revoked"
         )

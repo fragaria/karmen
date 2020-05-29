@@ -12,8 +12,8 @@ def send_mail(recipients, template_key, variables={}):
             app.config.get("MAILER_FROM", "Karmen <noreply@karmen.tech>"),
             recipients,
             template.subject(),
-            template.textbody(),
-            template.htmlbody(),
+            template.render("text"),
+            template.render("html"),
         )
     except RuntimeError as e:
         app.logger.error("Cannot send email: %s" % e)

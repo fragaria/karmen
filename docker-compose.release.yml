@@ -11,6 +11,7 @@ services:
       FRONTEND_PORT: ${KARMEN_FRONTEND_PORT:-9765}
       BACKEND_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
       BACKEND_PORT: ${KARMEN_BACKEND_PORT:-9764}
+      IS_DEV_ENV: 0
     depends_on:
       - frontend
       - backend_flask

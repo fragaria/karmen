@@ -1,21 +1,29 @@
 from textwrap import dedent
-from .mail_template import MailTemplate
+
+from .mail_template import BrandedMailTemplate
 
 
-class PasswordResetConfirmation(MailTemplate):
+class PasswordResetConfirmation(BrandedMailTemplate):
     def subject(self):
-        return "Karmen - Password reset confirmation"
+        return "Karmen password changed"
 
     def textbody(self):
-        return (
-            dedent(
-                """
-            Hello %s!
+        return dedent(
+            f"""
+            Hello {self.variables["email"]}!
 
-            We're contacting you to notify you that your Karmen password has been changed.
-
-            © 2020 Fragaria s.r.o.
+            We would like to let you know that your Karmen password has just been changed. Sounds suspicious? Please contact us at info@karmen.tech.
             """
-            )
-            % (self.variables["email"])
         )
+
+    def htmlbody(self):
+        return dedent(
+            f"""
+            <h1>Hello {self.variables["email"]}!</h1>
+            <p>We would like to let you know that your Karmen password <strong>has just been changed</strong>.</p>
+            <p>Sounds suspicious? Please contact us at <a href="mailto:info@karmen.tech">info@karmen.tech</a>.
+            """
+        )
+
+    def excerpt(self):
+        return "Your password has just been changed"

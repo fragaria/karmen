@@ -8,6 +8,7 @@ services:
       - 127.0.0.1:4000:9766
     environment:
       REDIS_HOST: redis
+      IS_DEV_ENV: 1
     networks:
       - backend
       - default
@@ -217,6 +218,18 @@ services:
     networks:
       - default
       - backend
+  api_doc:
+    image: redocly/redoc
+    environment:
+      PAGE_TITLE: "Karmen OpenAPI"
+      PAGE_FAVICON: ${FRONTEND_BASE_URL:-http://localhost:4000}/favicon.ico
+      SPEC_URL: ${BACKEND_BASE_URL:-http://localhost:4000}/api/openapi-spec.yaml
+      PORT: 9898
+    networks:
+      - default
+      - backend
+    depends_on:
+      - backend_flask
 networks:
   backend:
     ipam:

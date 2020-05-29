@@ -3,12 +3,12 @@ import json
 from textwrap import dedent
 
 from server import app
-from .mail_template import MailTemplate
+from .mail_template import BrandedMailTemplate
 
 
-class PasswordResetLink(MailTemplate):
+class PasswordResetLink(BrandedMailTemplate):
     def subject(self):
-        return "Karmen - Password reset"
+        return "Have you requested Karmen password reset?"
 
     def prepare_variables(self, variables={}):
         self.variables = variables
@@ -26,19 +26,42 @@ class PasswordResetLink(MailTemplate):
         )
 
     def textbody(self):
-        return (
-            dedent(
-                """
+        return dedent(
+            f"""
             Hi!
 
-            Someone has requested a link to change your password.
+            Someone has requested a link to reset your Karmen password. This is the link you're after':
 
-            Change your password on %s
+            {self.variables["pwd_reset_link"]}
 
-            If you didn't request this, you can safely ignore this email and your password will not be changed.
-
-            © 2020 Fragaria s.r.o.
+            If you didn't request this, you can safely ignore this email. Your password will not be changed.
             """
-            )
-            % (self.variables["pwd_reset_link"])
         )
+
+    def htmlbody(self):
+        return dedent(
+            f"""
+            <h1>Hi!</h1>
+            <p>Someone has requested a <strong>password reset</strong> for your account. You can set your new password by clicking below:</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+                <tbody>
+                <tr>
+                    <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                        <tr>
+                            <td><a href="{{self.variables["pwd_reset_link"]}}" target="_blank">Set new password</a> </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p>If you didn't request this, you can <strong>safely ignore this email</strong>. Your password will not be changed.</p>
+            """
+        )
+
+    def excerpt(self):
+        return f"Your password reset link"
