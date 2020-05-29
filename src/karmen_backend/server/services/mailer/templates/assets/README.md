@@ -5,3 +5,4 @@ then run it through [CSS inliner](https://htmlemail.io/inline/) and store that a
 
 - `%%CONTENT%%` gets replaced with the actual email content.
 - `%%YEAR%%` gets replaced with current year.
+- `%%PREHEADER%%` gets replaced by an excerpt.

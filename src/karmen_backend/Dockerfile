@@ -5,7 +5,7 @@ RUN mkdir /install
 WORKDIR /install
 
 # build deps
-RUN apk --update add --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers
+RUN apk --update add --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers libxml2-dev libxslt-dev
 
 RUN pip install --upgrade pip
 RUN pip install uwsgi supervisor
@@ -20,7 +20,7 @@ FROM python:3.7-alpine as runner
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
 # runtime deps
-RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash dbus
+RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash dbus  libxml2-dev libxslt-dev
 
 # ensure www-data user
 RUN set -x ; \
