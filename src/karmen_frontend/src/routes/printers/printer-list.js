@@ -87,6 +87,7 @@ class PrinterList extends React.Component {
       printers,
       viewType,
       setPrinterViewType,
+      role,
     } = this.props;
     if (!printersLoaded) {
       return (
@@ -159,7 +160,18 @@ class PrinterList extends React.Component {
       <>
         <div className="content printer-list">
           <div className="container">
-            <h1 className="main-title">Printers</h1>
+            <h1 className="main-title">
+              Printers
+              {role === "admin" && (
+                <Link
+                  to={`/${match.params.orguuid}/add-printer`}
+                  className="btn btn-sm"
+                  id="btn-add_printer"
+                >
+                  <span>+ Add a printer</span>
+                </Link>
+              )}
+            </h1>
             {printerElements.length === 0 && noPrinters}
           </div>
           {printerElements.length > 0 && (
@@ -184,6 +196,7 @@ export default connect(
       state.preferences.orgs[ownProps.match.params.orguuid].printerViewType,
     printers: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,
+    role: state.me.activeOrganization && state.me.activeOrganization.role,
   }),
   (dispatch, ownProps) => ({
     loadPrinters: (fields) =>
