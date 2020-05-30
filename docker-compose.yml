@@ -115,6 +115,7 @@ services:
     build: ./src/fakeprinter
     environment:
       SERVICE_PORT: 8080
+      STATE_JOB_NAME: "fake-file-being-printed.gcode"
     networks:
       printers:
         ipv4_address: 172.16.236.11
@@ -123,9 +124,19 @@ services:
     build: ./src/fakeprinter
     environment:
       SERVICE_PORT: 8080
+      STATE_JOB_NAME: "fake-file-being-printed.gcode"
     networks:
       printers:
         ipv4_address: 172.16.236.12
+  fake_printer3:
+    image: fragaria/karmen-fakeprinter
+    build: ./src/fakeprinter
+    environment:
+      SERVICE_PORT: 8080
+      STATE_JOB_STATE: "Operational"
+    networks:
+      printers:
+        ipv4_address: 172.16.236.13
   fake_ws_proxy:
     image: fragaria/karmen-fakewsproxy
     build: ./src/fakewsproxy
