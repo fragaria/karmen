@@ -1,6 +1,16 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
+const attachFile = (file) => cy.get("input[name=file]").attachFile(file);
+const submitForm = () => cy.get('button[type="submit"]').click();
+
+const testGCodeIsAdded = (organizationUuid) => {
+  cy.location().then((loc) => {
+    expect(loc.pathname).to.contains(`/${organizationUuid}/gcodes`);
+    // tady bych mel otestovat, zda je na strance nazev souboru
+  });
+};
+
 describe("G-codes: Adding", function () {
   let email, password, organizationUuid;
   beforeEach(() => {
@@ -25,23 +35,47 @@ describe("G-codes: Adding", function () {
     cy.get("form").contains("You need to select a file!");
   });
 
+  it.skip("fails with corrupted file", function () {
+    // test is skipped due to absence of checking file content
+    attachFile("invalid-content.gcode");
+    submitForm();
+    cy.get("form").contains("This G-Code file seems to be corrupted.");
+  });
+
+  it("fails with invalid file", function () {
+    attachFile("text-sample.txt");
+    submitForm();
+    cy.get("form").contains("This does not seem like a G-Code file.");
+  });
+
   it("adds gcode", function () {
-    cy.get("input[name=file]").attachFile("S_Release.gcode");
-    cy.get('button[type="submit"]')
-      .click()
+    attachFile("S_Release.gcode");
+    submitForm()
       .wait(3000)
-      .then(() => {
-        cy.location().then((loc) => {
-          expect(loc.pathname).to.contains(`/${organizationUuid}/gcodes`);
-          cy.findByText("Print g-code").click();
-          cy.findByText("No available printers found.").wait(1000);
-          cy.findByText("Close").click();
-          cy.findByText("Download G-code").click();
-          cy.findByText("Back to listing").click();
-          cy.location().then((loc) => {
-            expect(loc.pathname).to.eq(`/${organizationUuid}/gcodes`);
-          });
-        });
-      });
+      .then(() => testGCodeIsAdded(organizationUuid));
+  });
+
+  it("adds gcode with path", function () {
+    attachFile("S_Release.gcode");
+    cy.get("input[name=path]").type("some path");
+    submitForm()
+      .wait(3000)
+      .then(() => testGCodeIsAdded(organizationUuid));
+  });
+
+  it.skip("adds gcode with a very long path", function () {
+    // skipped due to API returns 500
+    attachFile("S_Release.gcode");
+    cy.get("input[name=path]").type(chance.string({ length: 500 }));
+    submitForm()
+      .wait(3000)
+      .then(() => testGCodeIsAdded(organizationUuid));
+  });
+
+  it("adds gcode - cancel form", function () {
+    cy.findByText("Cancel").click();
+    cy.location().then((loc) => {
+      expect(loc.pathname).to.eq(`/${organizationUuid}/gcodes`);
+    });
   });
 });

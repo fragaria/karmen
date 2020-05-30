@@ -22,17 +22,11 @@ const testWithNoAddress = () => {
   cy.get("form").contains("Printer address is required in a proper format");
 };
 
-const determineCloudInstall = () => {
-  return cy.window().then((win) => {
-    return win.env.IS_CLOUD_INSTALL;
-  });
-};
-
-const checkFillPillForm = (organizationUuid, address, timeout = 3000) => {
+const testFillPillForm = (organizationUuid, address, timeout = 3000) => {
   const name = chance.string();
   cy.get("input#name").type(name);
   if (address) {
-    cy.get("input#address").type("172.16.236.12:8080");
+    cy.get("input#address").type(address);
   }
   submitForm()
     .wait(timeout)
@@ -90,7 +84,7 @@ describe("Printers: Adding", function () {
       cy.findByText("API key").should("not.exist");
     };
 
-    determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       cy.get("input#name").should("exist");
       cy.get("input#address").should("exist");
       cy.findByText("Add printer").should("exist");
@@ -120,7 +114,7 @@ describe("Printers: Adding", function () {
   });
 
   it("Fails with no name", function () {
-    determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
         selectDeviceType(optionDevicePill);
         testWithNoName();
@@ -133,7 +127,7 @@ describe("Printers: Adding", function () {
   });
 
   it("Fails with no address", function () {
-    determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
         selectDeviceType(optionDevicePill);
         testWithNoAddress();
@@ -149,37 +143,37 @@ describe("Printers: Adding", function () {
   });
 
   it("adds printer in non cloud mode", function () {
-    determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
         return cy.log(
           "SKIPPED - Test has been skipped due to it's valid only for cloud mode."
         );
       }
-      checkFillPillForm(organizationUuid, "172.16.236.11:8080");
+      testFillPillForm(organizationUuid, "172.16.236.11:8080");
     });
   });
 
   it("Pill: adds printer in cloud mode", function () {
-    determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (!IS_CLOUD_INSTALL) {
         return cy.log(
           "SKIPPED - Test has been skipped due to it's valid only for non cloud mode."
         );
       }
       selectDeviceType(optionDevicePill);
-      checkFillPillForm(organizationUuid, "XPrinterCodeX");
+      testFillPillForm(organizationUuid, "XPrinterCodeX");
     });
   });
 
   it("Other device: adds printer in cloud mode", function () {
-    determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (!IS_CLOUD_INSTALL) {
         return cy.log(
           "SKIPPED - Test has been skipped due to it's valid only for non cloud mode."
         );
       }
       selectDeviceType(optionOtherDevice);
-      checkFillPillForm(organizationUuid);
+      testFillPillForm(organizationUuid, null, 10000);
     });
   });
 });

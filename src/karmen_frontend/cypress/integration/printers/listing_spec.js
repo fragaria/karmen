@@ -15,12 +15,24 @@ describe("Printers: Listing", function () {
         organizationUuid = Object.keys(data.organizations)[0];
       })
       .then(() => {
-        return cy.addPrinter(
-          organizationUuid,
-          chance.string(),
-          "172.16.236.11",
-          8080
-        );
+        return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+          if (IS_CLOUD_INSTALL) {
+            return cy.addPrinter(
+              IS_CLOUD_INSTALL,
+              organizationUuid,
+              chance.string(),
+              chance.string(),
+            );
+          } else {
+            return cy.addPrinter(
+              IS_CLOUD_INSTALL,
+              organizationUuid,
+              chance.string(),
+              "172.16.236.13",
+              8080
+            );
+          }
+        });
       })
       .then((response) => {
         printerUuid = response.uuid;
