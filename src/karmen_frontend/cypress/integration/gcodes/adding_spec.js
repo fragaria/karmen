@@ -7,7 +7,6 @@ const submitForm = () => cy.get('button[type="submit"]').click();
 const testGCodeIsAdded = (organizationUuid) => {
   cy.location().then((loc) => {
     expect(loc.pathname).to.contains(`/${organizationUuid}/gcodes`);
-    // tady bych mel otestovat, zda je na strance nazev souboru
   });
 };
 
@@ -28,8 +27,6 @@ describe("G-codes: Adding", function () {
       });
   });
 
-  // TODO this depends on window.env.IS_CLOUD_MODE - cypress should be run twice
-  // against both modes or more precisely the different paths should be run separately
   it("fails with no file", function () {
     cy.get('button[type="submit"]').click();
     cy.get("form").contains("You need to select a file!");
