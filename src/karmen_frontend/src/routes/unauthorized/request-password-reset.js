@@ -62,7 +62,7 @@ class PasswordReset extends React.Component {
       .then((r) => {
         this.setState({
           message:
-            "An email with a reset link will be sent shortly. Check your inbox, please.",
+            "An email with a reset link has been sent to your mailbox. Check your inbox, please.",
           messageOk: true,
           resetForm: Object.assign({}, resetForm, {
             realemail: Object.assign({}, resetForm.realemail, { val: "" }),
@@ -97,7 +97,7 @@ class PasswordReset extends React.Component {
         <div className="container">
           <h1 className="main-title text-center">Reset your password</h1>
           <h2 className="main-subtitle text-center">
-            We'll send You an email with a password reset link.
+            We'll send you an email with a password reset link.
           </h2>
           <form>
             <FormInputs definition={resetForm} updateValue={updateValue} />

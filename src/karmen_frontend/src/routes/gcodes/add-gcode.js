@@ -52,7 +52,8 @@ class AddGcode extends React.Component {
         }
 
         this.setState({
-          message: "Cannot upload G-Code, check server logs",
+          message:
+            "Your G-Code file couldn't be uploaded. If this problem persists, please contact our support.",
         });
       });
   }

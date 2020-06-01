@@ -1,4 +1,4 @@
-describe("Unauthorized: Registration flow", function () {
+describe.only("Unauthorized: Registration flow", function () {
   it("fails on bad email", function () {
     cy.visit("/register");
     cy.get("input#realemail").type("not an email");
@@ -10,6 +10,6 @@ describe("Unauthorized: Registration flow", function () {
     cy.visit("/register");
     cy.get("input#realemail").type("test@example.com");
     cy.get("button[type=submit]").click();
-    cy.get("form").contains("email will be sent shortly");
+    cy.get("form").contains("We've sent you an email to test@example.com with the instructions on how to proceed next.");
   });
 });

@@ -120,6 +120,7 @@ class RegisterConfirmation extends React.Component {
               <Link to="/register" className="anchor">
                 registering again
               </Link>{" "}
+              .
             </>
           ),
         });

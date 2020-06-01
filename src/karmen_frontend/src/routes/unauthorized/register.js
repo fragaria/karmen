@@ -61,8 +61,7 @@ class Register extends React.Component {
     return doRegister(registerForm.realemail.val)
       .then((r) => {
         this.setState({
-          message:
-            "A verification email will be sent shortly. Check your inbox, please.",
+          message: `<p>We've sent you an email to <strong>${registerForm.realemail.val}</strong><br/> with the instructions on how to proceed next.</p> <p>Thank you for signing up, <br/>you can now close this window.</p>`,
           messageOk: true,
           registerForm: Object.assign({}, registerForm, {
             realemail: Object.assign({}, registerForm.realemail, { val: "" }),
@@ -104,15 +103,12 @@ class Register extends React.Component {
 
             <div className="form-messages">
               {message && (
-                <p
+                <div
                   className={
-                    messageOk
-                      ? "message-success text-center"
-                      : "message-error text-center"
+                    messageOk ? "text-center" : "message-error text-center"
                   }
-                >
-                  {message}
-                </p>
+                  dangerouslySetInnerHTML={{ __html: message }}
+                ></div>
               )}
             </div>
 

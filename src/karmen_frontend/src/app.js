@@ -113,23 +113,16 @@ const rejectionErrorHandler = (event) => {
 
   if (err instanceof HttpError) {
     switch (err.response.status) {
-      case 400:
-        return toast(
-          <>
-            <div className="toast-main">Something didn't go well.</div>
-            <p>
-              There has been some trouble talking to the backend server. Sorry!
-            </p>
-          </>,
-          { autoClose: false, toastId: "HttpError400" }
-        );
       case 401:
         return toast(
           <>
             <div className="toast-main">
-              Your session has expired. Please log in again.
+              We couldn't verify you identity. Please log in again.
             </div>
-            <p>This usually happens after long period of inactivity.</p>
+            <p>
+              This usually happens when your session expires after long period
+              of inactivity.
+            </p>
           </>,
           { autoClose: 8000, toastId: "HttpError401" }
         );
@@ -139,16 +132,20 @@ const rejectionErrorHandler = (event) => {
             <div className="toast-main">
               You're not allowed to display this page.
             </div>
-            <p>You lack the required permissions.</p>
+            <p>Make sure your account has all the required permissions.</p>
           </>,
           { autoClose: false, toastId: "HttpError403" }
         );
       default:
         return toast(
-          <>
-            <div className="toast-main">That's an error!</div>
-            <p>An unknown error occured on the server. Sorry!</p>
-          </>,
+          <p>
+            <div className="toast-main">Something didn't go well.</div>
+            <p>
+              We're sorry, but there has been some trouble talking to our
+              servers. Our engineers were already notified and will fix it as
+              soon as possible.
+            </p>
+          </p>,
           { autoClose: false, toastId: "HttpErrorOther" }
         );
     }
@@ -159,8 +156,11 @@ const rejectionErrorHandler = (event) => {
 
   toast(
     <>
-      <div className="toast-main">That's an error!</div>
-      <p>Yep, there's been some problem on our end. Sorry!</p>
+      <div className="toast-main">Something didn't go well.</div>
+      <p>
+        We're sorry, but there has been an error in the application. Our
+        engineers were already notified and will fix it as soon as possible.
+      </p>
     </>,
     { autoClose: false, toastId: "GeneralPromiseError" }
   );

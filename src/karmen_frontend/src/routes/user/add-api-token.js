@@ -74,7 +74,7 @@ class AddApiToken extends React.Component {
         .catch((err) => {
           this.setState({
             message:
-              "New API token couldn't be issued, there has been some server error.",
+              "New API token couldn't be issued, an error occured on the server.",
           });
         });
     }
