@@ -66,7 +66,6 @@ export const createHttpAction = (
 
       // ... if raise is requested, bubble the error up
       if (!swallowErrors) {
-        console.log("throwing err");
         throw err;
       }
       // ... otherwise, return the result

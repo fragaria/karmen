@@ -55,8 +55,15 @@ class UserEditForm extends React.Component {
     return patchMe(patchMeForm.username.val, email)
       .then((r) => {
         this.setState({
+          message: "Profile changed successfully.",
+          messageOk: true,
+        });
+      })
+      .catch((err) => {
+        this.setState({
           messageOk: false,
-          message: "Profile change unsuccessful, try again, please.",
+          message:
+            "Your profile couldn't be updated, please try again. If the problem persists, please contact our support.",
           patchMeForm: Object.assign({}, patchMeForm, {
             username: Object.assign({}, patchMeForm.username, {
               val: username,
@@ -65,12 +72,6 @@ class UserEditForm extends React.Component {
               val: email,
             }),
           }),
-        });
-      })
-      .catch((err) => {
-        this.setState({
-          message: "Profile changed successfully.",
-          messageOk: true,
         });
       });
   }

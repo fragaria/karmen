@@ -1,6 +1,7 @@
 import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
+import { HttpError } from "../../errors";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -254,7 +255,17 @@ export const getWebcamSnapshot = createHttpAction(
         };
       });
     }).catch((err) => {
-      // This is not critical and will already be logged in the console. So it's kinda safe to just do nothing.
+      if (!(err instanceof HttpError)) {
+        throw err;
+      }
+      // HttpError is most cases an 404 if the snapshot URL cant' be reached.
+      // This is not critical and will already be logged in the console.
+      // Usually, this is a result of bad configuration of some sorts. So it's
+      // kinda safe to just do nothing. In other cases, let's admin something
+      // went wrong.
+      if (err.response.status !== 404) {
+        throw err;
+      }
     });
   }
 );
