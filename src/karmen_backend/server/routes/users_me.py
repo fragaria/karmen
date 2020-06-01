@@ -163,7 +163,7 @@ def request_password_reset():
         ).hexdigest(),
         pwd_reset_key_expires=pwd_reset_key_expires,
     )
-    send_mail.delay(
+    send_mail(
         [email],
         "PASSWORD_RESET_LINK",
         {

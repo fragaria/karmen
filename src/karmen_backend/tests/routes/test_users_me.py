@@ -25,6 +25,7 @@ from ..utils import (
     UUID_ADMIN,
     UUID_USER,
     UUID_ORG,
+    Response,
 )
 from server.database import api_tokens, users, local_users, organization_roles
 
@@ -40,6 +41,11 @@ def get_random_email():
     return "user-%s@ktest.local" % "".join(random.sample(alphabet, 10))
 
 
+def dummy_mail_sender(url, json):
+    # print("==DUMMY: ", url, json)
+    return Response(200)
+
+
 class CreateNewUserRoute(unittest.TestCase):
     def test_fail_no_data(self):
         with app.test_client() as c:
@@ -51,7 +57,9 @@ class CreateNewUserRoute(unittest.TestCase):
             response = c.post("/users/me", json={"email": "something"})
             self.assertEqual(response.status_code, 400)
 
-    def test_create_inactive_user(self):
+    @mock.patch("server.services.mailer.mailers.dummy.requests.post")
+    def test_create_inactive_user(self, mock_dummy_mail_post):
+        mock_dummy_mail_post.side_effect = dummy_mail_sender
         with app.test_client() as c:
             email = get_random_email()
             # this is testing whitespace truncate and casing as well
@@ -75,8 +83,10 @@ class CreateNewUserRoute(unittest.TestCase):
             response = c.post("/users/me", json={"email": "test-admin@karmen.local"})
             self.assertEqual(response.status_code, 202)
 
-    @mock.patch("server.tasks.send_mail.send_mail.delay")
-    def test_reissue_activation_key(self, mock_send_mail):
+    @mock.patch("server.routes.users_me.send_mail")
+    @mock.patch("server.services.mailer.mailers.dummy.requests.post")
+    def test_reissue_activation_key(self, mock_dummy_mail_post, mock_send_mail):
+        mock_dummy_mail_post.side_effect = dummy_mail_sender
         with app.test_client() as c:
             email = get_random_email()
             response = c.post("/users/me", json={"email": email})
@@ -89,8 +99,10 @@ class CreateNewUserRoute(unittest.TestCase):
             self.assertTrue(user["activation_key_hash"] != user2["activation_key_hash"])
             self.assertEqual(mock_send_mail.call_count, 2)
 
-    @mock.patch("server.tasks.send_mail.send_mail.delay")
-    def test_send_activation_mail(self, mock_send_mail):
+    @mock.patch("server.routes.users_me.send_mail")
+    @mock.patch("server.services.mailer.mailers.dummy.requests.post")
+    def test_send_activation_mail(self, mock_dummy_mail_post, mock_send_mail):
+        mock_dummy_mail_post.side_effect = dummy_mail_sender
         with app.test_client() as c:
             email = get_random_email()
             response = c.post("/users/me", json={"email": email})
@@ -295,8 +307,10 @@ class RequestResetPasswordRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 202)
             self.assertEqual(mock_send_mail.call_count, 0)
 
-    @mock.patch("server.tasks.send_mail.send_mail.delay")
-    def test_fail_inactive_user(self, mock_send_mail):
+    @mock.patch("server.routes.users_me.send_mail")
+    @mock.patch("server.services.mailer.mailers.dummy.requests.post")
+    def test_fail_inactive_user(self, mock_dummy_mail_post, mock_send_mail):
+        mock_dummy_mail_post.side_effect = dummy_mail_sender
         with app.test_client() as c:
             email = get_random_email()
             c.post("/users/me", json={"email": email})
@@ -305,8 +319,10 @@ class RequestResetPasswordRoute(unittest.TestCase):
             # The 1 sent mail is the activation one when user is registered
             self.assertEqual(mock_send_mail.call_count, 1)
 
-    @mock.patch("server.tasks.send_mail.send_mail.delay")
-    def test_send_email_with_reset_link(self, mock_send_mail):
+    @mock.patch("server.routes.users_me.send_mail")
+    @mock.patch("server.services.mailer.mailers.dummy.requests.post")
+    def test_send_email_with_reset_link(self, mock_dummy_mail_post, mock_send_mail):
+        mock_dummy_mail_post.side_effect = dummy_mail_sender
         with app.test_client() as c:
             email = get_random_email()
             c.post("/users/me", json={"email": email})
