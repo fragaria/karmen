@@ -1,10 +1,10 @@
 name: Dependabot Auto Approve
-on:
-  pull_request:
-    branches: [ 'dependabot/*' ]
+on: pull_request
+
 jobs:
   approve:
     runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' || github.actor == 'adamjezek98'
     steps:
     - name: Auto Approve
       uses: hmarr/auto-approve-action@v2.0.0
