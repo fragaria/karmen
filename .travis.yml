@@ -101,7 +101,7 @@ matrix:
     # build and push docker images
     - name: "backend image"
       stage: Build Docker images
-      if: branch = master AND tag IS present
+      if: tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -115,7 +115,7 @@ matrix:
         - travis_wait 30 bash .travis/build-images-backend.sh
 
     - name: "frontend image"
-      if: branch = master AND tag IS present
+      if: tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -129,7 +129,7 @@ matrix:
         - bash .travis/build-images-frontend.sh
 
     - name: "proxy image"
-      if: branch = master AND tag IS present
+      if: tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -150,7 +150,7 @@ matrix:
     # PRE-RELEASE
     - name: "Pre-release"
       stage: Create GitHub release
-      if: branch = master AND tag IS present
+      if: tag IS present
       language: generic
       install: true
       script:
@@ -164,13 +164,12 @@ matrix:
         skip_cleanup: true
         on:
           repo: fragaria/karmen
-          branch: master
           tags: true
           condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*-.*$'
 
     # STABLE RELEASE
     - name: "Stable release"
-      if: branch = master AND tag IS present
+      if: tag IS present
       language: generic
       install: true
       script:
@@ -184,7 +183,6 @@ matrix:
         skip_cleanup: true
         on:
           repo: fragaria/karmen
-          branch: master
           tags: true
           condition: '"$TRAVIS_TAG" =~ ^v[0-9.]*$'
 env:
