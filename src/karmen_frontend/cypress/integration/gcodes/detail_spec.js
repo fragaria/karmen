@@ -30,7 +30,7 @@ describe("G-codes: Detail", function () {
 
     cy.findByText("Print g-code").click();
     cy.findByText("No available printers found.").wait(1000);
-    cy.findByText("Close").click();
+    cy.get("div.modal-content button.modal-close").click();
 
     cy.findByText("Download G-code").click();
 
