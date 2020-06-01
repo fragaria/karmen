@@ -88,3 +88,4 @@ If the VERSION variable contains a `-` (e. g. `1.2.3-rc.1`), it is considered as
 
 All of the code herein is copyright 2020 [Fragaria s.r.o.](https://fragaria.cz) and released
 under the terms of the [GNU Affero General Public License, version 3](./LICENSE.txt).
+ 
