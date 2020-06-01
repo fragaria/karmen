@@ -88,7 +88,7 @@ describe("G-codes: Listing", function () {
         cy.get(".dropdown-item:first").findByText("Print g-code").click();
         cy.get("div.modal-content").findByText("Print G-Code");
         cy.get("div.modal-content").findByText("No available printers found.");
-        cy.get("div.modal-content").findByText("Close").click();
+        cy.get("div.modal-content button.modal-close").click();
       });
 
     cy.get(".list-item .list-cta")
