@@ -112,7 +112,7 @@ matrix:
         - export BUILDKIT_HOST=tcp://0.0.0.0:1234
       install: true
       script:
-        - travis_wait 30 bash .travis/build-images-backend.sh
+        - travis_wait 60 bash .travis/build-images-backend.sh
 
     - name: "frontend image"
       if: tag IS present
