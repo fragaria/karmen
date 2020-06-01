@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: '0.11.0-rc8'
+  version: '0.11.0-rc9'
   title: 'Karmen API'
   description: 'API of https://github.com/fragaria/karmen'
 tags:
