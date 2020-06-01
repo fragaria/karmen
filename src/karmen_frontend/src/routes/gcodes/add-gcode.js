@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
+import { uploadGcode } from "../../actions";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import BusyButton from "../../components/utils/busy-button";
-import { uploadGcode } from "../../actions";
+import { HttpError } from "../../errors";
 
 class AddGcode extends React.Component {
   state = {
@@ -33,28 +34,28 @@ class AddGcode extends React.Component {
       message: null,
       messageOk: false,
     });
-    return uploadGcode(path, toUpload).then((r) => {
-      switch (r.status) {
-        case 201:
-          this.setState({
-            message: "File uploaded",
-            path: "",
-            messageOk: true,
-            redirect: true,
-            gcodeUuid: r.data.uuid,
-          });
-          break;
-        case 415:
-          this.setState({
+    return uploadGcode(path, toUpload)
+      .then((r) => {
+        this.setState({
+          message: "File uploaded",
+          path: "",
+          messageOk: true,
+          redirect: true,
+          gcodeUuid: r.data.uuid,
+        });
+      })
+      .catch((err) => {
+        if (err instanceof HttpError && err.response.status === 415) {
+          return this.setState({
             message: "This does not seem like a G-Code file.",
           });
-          break;
-        default:
-          this.setState({
-            message: "Cannot upload G-Code, check server logs",
-          });
-      }
-    });
+        }
+
+        this.setState({
+          message:
+            "Your G-Code file couldn't be uploaded. If this problem persists, please contact our support.",
+        });
+      });
   }
 
   render() {

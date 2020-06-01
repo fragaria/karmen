@@ -26,22 +26,19 @@ class NetworkScan extends React.Component {
       });
       return;
     }
-    return scanNetwork(networkInterface).then((r) => {
-      switch (r.status) {
-        case 202:
-          this.setState({
-            message:
-              "Network scan initiated, the printers should start popping up at any moment",
-            messageOk: true,
-          });
-          break;
-        case 400:
-        default:
-          this.setState({
-            message: "Cannot scan the network, check server logs",
-          });
-      }
-    });
+    return scanNetwork(networkInterface)
+      .then((r) => {
+        this.setState({
+          message:
+            "Network scan initiated, the printers should start popping up at any moment",
+          messageOk: true,
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          message: "Cannot scan the network, check server logs",
+        });
+      });
   }
 
   render() {

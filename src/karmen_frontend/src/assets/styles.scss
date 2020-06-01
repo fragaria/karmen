@@ -4,8 +4,8 @@
 @import "variables";
 @import "mixins";
 @import "react-tabs";
+@import "react-toastify";
 @import "../../node_modules/plumber-sass/plumber";
-
 
 @include plumber-set-defaults(
   $grid-height: 1rem,

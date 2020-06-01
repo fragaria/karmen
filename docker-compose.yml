@@ -21,6 +21,8 @@ services:
     environment:
       ENV: develop
       CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
+      RAISE_ERRORS: ${KARMEN_FRONTEND_RAISE_ERRORS:-1}
+      SENTRY_DSN: ${KARMEN_FRONTEND_SENTRY_DSN:-} # Useful when testing whether sentry errors are captured locally
     ports:
       - 127.0.0.1:3000:9765
     tty: true

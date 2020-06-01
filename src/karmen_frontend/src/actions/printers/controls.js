@@ -1,8 +1,8 @@
-import { createThunkedAction } from "../utils";
+import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
-export const setPrinterConnection = createThunkedAction(
+export const setPrinterConnection = createHttpAction(
   "PRINTERS_SET_CONNECTION",
   (orguuid, uuid, state, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -15,7 +15,7 @@ export const setPrinterConnection = createThunkedAction(
   }
 );
 
-export const changeCurrentJob = createThunkedAction(
+export const changeCurrentJob = createHttpAction(
   "PRINTERS_CHANGE_JOB",
   (orguuid, uuid, action, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -28,7 +28,7 @@ export const changeCurrentJob = createThunkedAction(
   }
 );
 
-export const changeLights = createThunkedAction(
+export const changeLights = createHttpAction(
   "PRINTERS_CHANGE_LIGHTS",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -37,7 +37,7 @@ export const changeLights = createThunkedAction(
   }
 );
 
-export const movePrinthead = createThunkedAction(
+export const movePrinthead = createHttpAction(
   "PRINTERS_MOVE_PRINTHEAD",
   (orguuid, uuid, command, opts, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -51,7 +51,7 @@ export const movePrinthead = createThunkedAction(
   }
 );
 
-export const changeFanState = createThunkedAction(
+export const changeFanState = createHttpAction(
   "PRINTERS_CHANGE_FAN_STATE",
   (orguuid, uuid, targetState, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -64,7 +64,7 @@ export const changeFanState = createThunkedAction(
   }
 );
 
-export const changeMotorsState = createThunkedAction(
+export const changeMotorsState = createHttpAction(
   "PRINTERS_CHANGE_MOTORS_STATE",
   (orguuid, uuid, targetState, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -77,7 +77,7 @@ export const changeMotorsState = createThunkedAction(
   }
 );
 
-export const extrude = createThunkedAction(
+export const extrude = createHttpAction(
   "PRINTERS_EXTRUDE",
   (orguuid, uuid, amount, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -90,7 +90,7 @@ export const extrude = createThunkedAction(
   }
 );
 
-export const setTemperature = createThunkedAction(
+export const setTemperature = createHttpAction(
   "PRINTERS_SET_TEMPERATURE",
   (orguuid, uuid, partName, target, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -104,7 +104,7 @@ export const setTemperature = createThunkedAction(
   }
 );
 
-export const startUpdate = createThunkedAction(
+export const startUpdate = createHttpAction(
   "PRINTERS_START_UPDATE",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

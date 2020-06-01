@@ -1,3 +1,4 @@
+import { HttpError } from "../../../errors";
 import { getJsonPostHeaders, performRequest } from "../utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
@@ -13,6 +14,7 @@ export const getPrinters = (orgUuid, fields = []) => {
     appendData: {
       organizationUuid: orgUuid,
     },
+    successCodes: [200],
   });
 };
 
@@ -27,6 +29,7 @@ export const getPrinter = (orgUuid, uuid, fields = []) => {
     appendData: {
       organizationUuid: orgUuid,
     },
+    successCodes: [200],
   });
 };
 
@@ -40,21 +43,19 @@ function arrayBufferToBase64(buffer) {
 
 export const getWebcamSnapshot = (snapshotUrl) => {
   if (!snapshotUrl) {
-    return Promise.resolve({ status: 404, successCodes: [200, 202] });
+    return Promise.reject({ status: 404, successCodes: [200, 202] });
   }
   let headers = getJsonPostHeaders();
   headers.set("pragma", "no-cache");
   headers.set("cache-control", "no-cache");
   // TODO test snapshotUrl
-  return fetch(
-    `${BASE_URL}/${
-      snapshotUrl[0] === "/" ? snapshotUrl.substr(1) : snapshotUrl
-    }`,
-    {
-      method: "GET",
-      headers: headers,
-    }
-  )
+  const fullSnapshotURL = `${BASE_URL}/${
+    snapshotUrl[0] === "/" ? snapshotUrl.substr(1) : snapshotUrl
+  }`;
+  return fetch(fullSnapshotURL, {
+    method: "GET",
+    headers: headers,
+  })
     .then((response) => {
       if (response.status === 200) {
         let contentType = response.headers.get("content-type");
@@ -68,12 +69,23 @@ export const getWebcamSnapshot = (snapshotUrl) => {
         }));
       }
       if (response.status !== 202) {
-        console.error(`Cannot get webcam snapshot: ${response.status}`);
+        console.error(
+          `Couldn't get webcam snapshot from ${fullSnapshotURL}: ${response.status}`
+        );
+        return Promise.reject(
+          new HttpError(
+            response,
+            `Cannot get webcam snapshot: ${response.status}`
+          )
+        );
       }
       return { status: response.status, successCodes: [200, 202] };
     })
-    .catch((e) => {
-      console.error(`Cannot get webcam snapshot: ${e}`);
-      return { status: 500, successCodes: [200, 202] };
+    .catch((err) => {
+      // Only log down errors originating outside of this handler.
+      if (!(err instanceof HttpError)) {
+        console.error(`Cannot get webcam snapshot: ${err}`);
+      }
+      throw err;
     });
 };

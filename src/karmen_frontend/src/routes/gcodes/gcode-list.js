@@ -183,20 +183,18 @@ class GcodeList extends React.Component {
                 orguuid={match.params.orguuid}
                 {...g}
                 printGcode={printGcode}
-                onSchedulePrint={(gcodeUuid, printerUuid) => {
-                  return printGcode(gcodeUuid, printerUuid).then((r) => {
-                    if (r === 201) {
-                      printedOn.push(printerUuid);
-                      this.setState({
-                        printedOn: [].concat(printedOn),
-                      });
-                    }
+                onSchedulePrint={(gcodeUuid, printerUuid) =>
+                  printGcode(gcodeUuid, printerUuid).then((r) => {
+                    printedOn.push(printerUuid);
+                    this.setState({
+                      printedOn: [].concat(printedOn),
+                    });
                     return r;
-                  });
-                }}
+                  })
+                }
                 availablePrinters={getAvailablePrinters(printedOn)}
-                onRowDelete={() => {
-                  return deleteGcode(g.uuid).then(() => {
+                onRowDelete={() =>
+                  deleteGcode(g.uuid).then(() => {
                     loadGcodesPage(
                       gcodesList.startWith,
                       gcodesList.orderBy,
@@ -204,8 +202,8 @@ class GcodeList extends React.Component {
                       gcodesList.limit,
                       gcodesList.fields
                     );
-                  });
-                }}
+                  })
+                }
               />
             );
           }}

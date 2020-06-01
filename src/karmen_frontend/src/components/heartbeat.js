@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
+import { connect } from "react-redux";
 
-import { useMyModal } from "../utils/modal";
-import { heartbeat } from "../../services/backend";
+import { heartbeat } from "../actions/hearbeat";
+import { useMyModal } from "./utils/modal";
+import { useRecursiveTimeout } from "../hooks";
 
 const NULL_EVENT = { currentTarget: true };
 
@@ -68,57 +70,37 @@ const UpgradeModal = ({ shouldShow }) => {
   );
 };
 
-class Heartbeat extends React.Component {
-  state = {
-    isOnline: true,
-    shouldUpgrade: false,
-    apiVersion: undefined,
-    timer: null,
-  };
-
-  constructor(props) {
-    super(props);
-    this.checkBackend = this.checkBackend.bind(this);
-  }
-
-  checkBackend() {
-    heartbeat().then((result) => {
-      const { apiVersion } = this.state;
-      this.setState({
-        isOnline: result !== -1,
-        apiVersion: result === -1 ? apiVersion : result,
-        shouldUpgrade:
-          result !== -1 &&
-          ((result !== apiVersion && apiVersion !== undefined) ||
-            [result, "@dev", `v${result}`].indexOf(
-              process.env.REACT_APP_GIT_REV
-            ) === -1),
-        timer: setTimeout(this.checkBackend, 5000),
-      });
+export const Heartbeat = ({ checkBeat, isOnline, shouldUpgrade }) => {
+  const doCheck = useCallback(() => {
+    return checkBeat().catch((err) => {
+      // No need to panic, we're just offline.
     });
-  }
+  }, [checkBeat]);
 
-  componentDidMount() {
-    this.checkBackend();
-  }
+  // Fire first check right away.
+  useEffect(() => {
+    doCheck();
+  }, [doCheck]);
 
-  componentWillUnmount() {
-    const { timer } = this.state;
-    if (timer) {
-      clearTimeout(timer);
-    }
-  }
+  // ... enqueue subsecutive runs.
+  useRecursiveTimeout(doCheck, 5000);
 
-  render() {
-    const { isOnline, shouldUpgrade } = this.state;
+  return (
+    <>
+      <UpgradeModal shouldShow={shouldUpgrade} />
+      <OfflineModal shouldShow={!isOnline} />
+    </>
+  );
+};
 
-    return (
-      <>
-        <UpgradeModal shouldShow={shouldUpgrade} />
-        <OfflineModal shouldShow={!isOnline} />
-      </>
-    );
-  }
-}
-
-export default Heartbeat;
+export default connect(
+  (state) => ({
+    isOnline: state.heartbeat.isOnline,
+    shouldUpgrade: state.heartbeat.shouldUpgrade,
+  }),
+  (dispatch) => ({
+    checkBeat() {
+      return dispatch(heartbeat());
+    },
+  })
+)(Heartbeat);

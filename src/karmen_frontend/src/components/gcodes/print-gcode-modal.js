@@ -47,19 +47,17 @@ export const usePrintGcodeModal = ({
   };
 
   const schedulePrint = (gcodeUuid, printerUuid) => {
-    onSchedulePrint(gcodeUuid, printerUuid).then((r) => {
-      switch (r.status) {
-        case 201:
-          setMessage("Print was scheduled");
-          setMessageOk(true);
-          setSchedulingPrint(false);
-          break;
-        default:
-          setMessage("Print was not scheduled");
-          setMessageOk(false);
-          setSchedulingPrint(false);
-      }
-    });
+    onSchedulePrint(gcodeUuid, printerUuid)
+      .then((r) => {
+        setMessage("Print was scheduled");
+        setMessageOk(true);
+        setSchedulingPrint(false);
+      })
+      .catch((err) => {
+        setMessage("Print was not scheduled");
+        setMessageOk(false);
+        setSchedulingPrint(false);
+      });
   };
 
   return {

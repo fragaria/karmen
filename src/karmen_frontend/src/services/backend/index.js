@@ -1,4 +1,5 @@
 export * from "./gcodes";
+export * from "./heartbeat";
 export * from "./misc";
 export * from "./organizations";
 export * from "./printers";

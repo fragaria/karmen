@@ -212,12 +212,10 @@ class GcodeDetail extends React.Component {
               printGcode={printGcode}
               onSchedulePrint={(gcodeId, printerUuid) => {
                 return printGcode(gcodeId, printerUuid).then((r) => {
-                  if (r === 201) {
-                    printedOn.push(printerUuid);
-                    this.setState({
-                      printedOn: [].concat(printedOn),
-                    });
-                  }
+                  printedOn.push(printerUuid);
+                  this.setState({
+                    printedOn: [].concat(printedOn),
+                  });
                   return r;
                 });
               }}

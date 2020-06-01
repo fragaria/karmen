@@ -1,6 +1,6 @@
 FROM mhart/alpine-node:10
 
-RUN apk add gettext git
+RUN apk add gettext git g++ make python
 
 WORKDIR /usr/src/app
 

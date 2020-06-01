@@ -68,7 +68,7 @@ class PrinterList extends React.Component {
     // required for the printers to show up after the network scan
     // or added in a different client.
     // But we are checking only for the local db data, so it should be blazing fast.
-    load.then(() => {
+    load.finally(() => {
       this.setState({
         timer: setTimeout(this.getPrinters, 60 * 1000),
       });

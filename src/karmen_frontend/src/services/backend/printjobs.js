@@ -7,6 +7,7 @@ export const printGcode = (orgUuid, uuid, printer) => {
       gcode: uuid,
       printer,
     },
+    successCodes: [201],
   });
 };
 
@@ -37,5 +38,6 @@ export const getPrinterJobs = (
       limit,
       printer: printerFilter,
     },
+    successCodes: [200],
   });
 };

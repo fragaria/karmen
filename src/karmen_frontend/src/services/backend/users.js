@@ -8,6 +8,7 @@ export const getUsers = (orgUuid, fields = []) => {
   return performRequest({
     uri,
     method: "GET",
+    successCodes: [200],
   });
 };
 
@@ -18,6 +19,7 @@ export const addUser = (orgUuid, email, role) => {
       email,
       role,
     },
+    successCodes: [201],
   });
 };
 
@@ -31,6 +33,7 @@ export const patchUser = (orgUuid, uuid, role) => {
     appendData: {
       uuid,
     },
+    successCodes: [200],
   });
 };
 

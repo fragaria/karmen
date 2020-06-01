@@ -81,7 +81,7 @@ class ResetPassword extends React.Component {
     }
     if (passwordForm.password.val) {
       if (passwordForm.password.val !== passwordForm.passwordConfirmation.val) {
-        passwordForm.password.error = "Passwords do not match!";
+        passwordForm.password.error = "The two passwords do not match!";
         hasError = true;
       } else {
         passwordForm.password.error = "";
@@ -100,22 +100,24 @@ class ResetPassword extends React.Component {
       pwdResetKey,
       passwordForm.password.val,
       passwordForm.passwordConfirmation.val
-    ).then((r) => {
-      if (r.status !== 204) {
+    )
+      .then(() => {
         this.setState({
-          messageOk: false,
-          message: "Password reset failed. Maybe you could try again later?",
-        });
-      } else {
-        this.setState({
-          message: "Password was reset, please login with your new password",
+          message:
+            "Your password has been changed succefully. Please log in again with the new password.",
           messageOk: true,
           passwordForm: Object.assign({}, passwordForm, {
             email: Object.assign({}, passwordForm.email, { val: "" }),
           }),
         });
-      }
-    });
+      })
+      .catch((err) => {
+        this.setState({
+          messageOk: false,
+          message:
+            "We couldn't reset your password for some reason. Please try again later.",
+        });
+      });
   }
 
   render() {

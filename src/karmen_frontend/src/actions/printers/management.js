@@ -1,8 +1,8 @@
-import { createThunkedAction } from "../utils";
+import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
 
-export const addPrinter = createThunkedAction(
+export const addPrinter = createHttpAction(
   "PRINTERS_ADD",
   (
     orguuid,
@@ -32,7 +32,7 @@ export const addPrinter = createThunkedAction(
   }
 );
 
-export const patchPrinter = createThunkedAction(
+export const patchPrinter = createHttpAction(
   "PRINTERS_PATCH",
   (orguuid, uuid, data, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -45,7 +45,7 @@ export const patchPrinter = createThunkedAction(
   }
 );
 
-export const deletePrinter = createThunkedAction(
+export const deletePrinter = createHttpAction(
   "PRINTERS_DELETE",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -57,7 +57,7 @@ export const deletePrinter = createThunkedAction(
   }
 );
 
-export const issuePrinterToken = createThunkedAction(
+export const issuePrinterToken = createHttpAction(
   "PRINTERS_ISSUE_TOKEN",
   (orguuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {

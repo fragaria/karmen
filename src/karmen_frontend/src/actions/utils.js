@@ -1,8 +1,9 @@
-const RAISE_ERRORS = window.env.RAISE_ERRORS || false;
+import { OfflineError } from "../errors";
+import { Sentry } from "../sentry";
 
 // inspired by https://github.com/machadogj/redux-thunk-actions/blob/master/src/index.js
 
-const createActionFactory = (type) => {
+const createHttpActionFactory = (type) => {
   return (payload) => ({
     type,
     payload,
@@ -13,14 +14,32 @@ const isPromise = (p) => {
   return p && p.then && p.catch;
 };
 
-export const createThunkedAction = (
+export const ifOnline = (getState, wrapped) => {
+  const { heartbeat } = getState();
+  if (!heartbeat.isOnline) {
+    return Promise.reject(new OfflineError());
+  }
+  return wrapped();
+};
+
+export const createHttpAction = (
   name,
   func,
-  { raiseErrors = RAISE_ERRORS } = {}
+  { swallowErrors = false, onlineOnly = true } = {}
 ) => {
   return (...args) => (dispatch, getState, extra) => {
+    // This expects heartbeat state to be present. Not really nice but no better
+    // solution found.
+    if (onlineOnly) {
+      const { heartbeat } = getState();
+
+      if (!heartbeat.isOnline) {
+        return Promise.reject(new OfflineError());
+      }
+    }
+
     let result;
-    dispatch(createActionFactory(`${name}_STARTED`)());
+    dispatch(createHttpActionFactory(`${name}_STARTED`)());
     // when action is successful...
     const succeeded = (result) => {
       // ...fire success only if http status code is considered a success
@@ -30,20 +49,23 @@ export const createThunkedAction = (
         result.successCodes &&
         result.successCodes.indexOf(result.status) > -1
       ) {
-        dispatch(createActionFactory(`${name}_SUCCEEDED`)(result));
+        dispatch(createHttpActionFactory(`${name}_SUCCEEDED`)(result));
       }
       // ... but always fire end
-      dispatch(createActionFactory(`${name}_ENDED`)(result));
+      dispatch(createHttpActionFactory(`${name}_ENDED`)(result));
       return result;
     };
     // when action is not successful because it throws...
     const failed = (err) => {
       // ... fire fail and end ...
-      dispatch(createActionFactory(`${name}_FAILED`)(err));
-      dispatch(createActionFactory(`${name}_ENDED`)(err));
+      dispatch(createHttpActionFactory(`${name}_FAILED`)(err));
+      dispatch(createHttpActionFactory(`${name}_ENDED`)(err));
+
+      // Make sure to log down to Sentry even if caught by the UI.
+      Sentry.captureException(err);
 
       // ... if raise is requested, bubble the error up
-      if (raiseErrors) {
+      if (!swallowErrors) {
         throw err;
       }
       // ... otherwise, return the result

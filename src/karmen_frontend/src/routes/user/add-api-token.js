@@ -64,20 +64,19 @@ class AddApiToken extends React.Component {
     });
     const { addApiToken } = this.props;
     if (!hasErrors) {
-      return addApiToken(form.orguuid.val, form.name.val).then((r) => {
-        switch (r.status) {
-          case 201:
-            this.setState({
-              showToken: true,
-              createdToken: r.data.access_token,
-            });
-            break;
-          default:
-            this.setState({
-              message: "Cannot add API token, check server logs",
-            });
-        }
-      });
+      return addApiToken(form.orguuid.val, form.name.val)
+        .then((newToken) => {
+          this.setState({
+            showToken: true,
+            createdToken: newToken,
+          });
+        })
+        .catch((err) => {
+          this.setState({
+            message:
+              "New API token couldn't be issued, an error occured on the server.",
+          });
+        });
     }
   }
 

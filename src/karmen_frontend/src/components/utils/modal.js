@@ -23,7 +23,7 @@ export const useMyModal = ({ hideClose } = {}) => {
 
 export const ModalWrapper = ({ closeFunc, hideClose, children }) => {
   return (
-    <div className="modal-content">
+    <div role="dialog" className="modal-content">
       {!hideClose && (
         <button className="modal-close" onClick={closeFunc}>
           <span className="icon-close"></span>

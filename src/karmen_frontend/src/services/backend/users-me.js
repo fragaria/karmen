@@ -9,6 +9,7 @@ export const requestPasswordReset = (email) => {
       email,
     },
     parseResponse: false,
+    successCodes: [202],
   });
 };
 
@@ -28,6 +29,7 @@ export const resetPassword = (
       password_confirmation: passwordConfirmation,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -39,6 +41,7 @@ export const register = (email) => {
       email,
     },
     parseResponse: false,
+    successCodes: [202],
   });
 };
 
@@ -58,6 +61,7 @@ export const activate = (
       password_confirmation: passwordConfirmation,
     },
     parseResponse: false,
+    successCodes: [204],
   });
 };
 
@@ -69,6 +73,7 @@ export const authenticate = (username, password) => {
       username,
       password,
     },
+    successCodes: [200],
   });
 };
 
@@ -80,6 +85,7 @@ export const authenticateFresh = (username, password) => {
       username,
       password,
     },
+    successCodes: [200],
   });
 };
 
@@ -91,6 +97,7 @@ export const refreshAccessToken = () => {
       "Content-Type": "application/json",
       "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token"),
     },
+    successCodes: [200],
   });
 };
 
@@ -98,13 +105,18 @@ export const logout = () => {
   return performRequest({
     uri: `/users/me/logout`,
     parseResponse: false,
-  }).then((response) => {
-    Cookies.remove("csrf_refresh_token");
-    Cookies.remove("refresh_token_cookie");
-    Cookies.remove("csrf_access_token");
-    Cookies.remove("access_token_cookie");
-    return { status: response.status, successCodes: [200] };
-  });
+    successCodes: [200],
+  })
+    .catch(() => {
+      // When logout fails on server error, we shouldn't fail and just clear out
+      // local state.
+    })
+    .finally(() => {
+      Cookies.remove("csrf_refresh_token");
+      Cookies.remove("refresh_token_cookie");
+      Cookies.remove("csrf_access_token");
+      Cookies.remove("access_token_cookie");
+    });
 };
 
 export const changePassword = (
@@ -120,6 +132,7 @@ export const changePassword = (
       new_password,
       new_password_confirmation,
     },
+    successCodes: [200],
   });
 };
 
@@ -131,6 +144,7 @@ export const patchMe = (username, email) => {
       username,
       email,
     },
+    successCodes: [200],
   });
 };
 
@@ -138,6 +152,7 @@ export const loadApiTokens = () => {
   return performRequest({
     uri: `/users/me/tokens`,
     method: "GET",
+    successCodes: [200],
   });
 };
 
@@ -148,7 +163,8 @@ export const addApiToken = (orgUuid, name) => {
       name: name,
       organization_uuid: orgUuid,
     },
-  });
+    successCodes: [201],
+  }).then((response) => response.data.access_token);
 };
 
 export const deleteApiToken = (jti) => {

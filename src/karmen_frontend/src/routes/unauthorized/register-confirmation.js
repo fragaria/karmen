@@ -100,30 +100,31 @@ class RegisterConfirmation extends React.Component {
       activationKey,
       passwordForm.password.val,
       passwordForm.passwordConfirmation.val
-    ).then((r) => {
-      if (r.status !== 204) {
+    )
+      .then(() => {
         this.setState({
-          messageOk: false,
-          message: (
-            <>
-              Account activation failed. Maybe you could try to{" "}
-              <Link to="/register" className="anchor">
-                register
-              </Link>{" "}
-              again?
-            </>
-          ),
-        });
-      } else {
-        this.setState({
-          message: "Account activated, please login with your new password",
+          message:
+            "Your account has been activated, please login with the new password",
           messageOk: true,
           passwordForm: Object.assign({}, passwordForm, {
             email: Object.assign({}, passwordForm.email, { val: "" }),
           }),
         });
-      }
-    });
+      })
+      .catch((err) => {
+        this.setState({
+          messageOk: false,
+          message: (
+            <>
+              Account activation failed. Please, try{" "}
+              <Link to="/register" className="anchor">
+                registering again
+              </Link>{" "}
+              .
+            </>
+          ),
+        });
+      });
   }
 
   render() {

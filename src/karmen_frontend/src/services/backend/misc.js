@@ -8,23 +8,6 @@ export const enqueueTask = (orgUuid, task, opts) => {
       ...opts,
     },
     parseResponse: false,
+    successCodes: [202],
   });
-};
-
-export const heartbeat = () => {
-  return performRequest({
-    uri: "/",
-    method: "GET",
-  })
-    .then((response) => {
-      if (response.status !== 200) {
-        console.error(`Heartbeat fail: ${response.status}`);
-        return -1;
-      }
-      return response.data.version;
-    })
-    .catch((e) => {
-      console.error(`Heartbeat fail: ${e}`);
-      return -1;
-    });
 };

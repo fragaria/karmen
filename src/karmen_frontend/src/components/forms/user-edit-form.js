@@ -17,7 +17,7 @@ class UserEditForm extends React.Component {
           required: true,
         },
         email: {
-          name: "E-mail",
+          name: "Email",
           val: props.email,
           type: "text",
           required: true,
@@ -44,7 +44,7 @@ class UserEditForm extends React.Component {
     }
     if (!isEmail(patchMeForm.email.val)) {
       hasError = true;
-      patchMeForm.email.error = "That does not seem like an e-mail address";
+      patchMeForm.email.error = "That does not seem like an email address";
     }
     if (hasError) {
       this.setState({
@@ -52,11 +52,18 @@ class UserEditForm extends React.Component {
       });
       return;
     }
-    return patchMe(patchMeForm.username.val, email).then((r) => {
-      if (r.status !== 200) {
+    return patchMe(patchMeForm.username.val, email)
+      .then((r) => {
+        this.setState({
+          message: "Profile changed successfully.",
+          messageOk: true,
+        });
+      })
+      .catch((err) => {
         this.setState({
           messageOk: false,
-          message: "Profile change unsuccessful, try again, please.",
+          message:
+            "Your profile couldn't be updated, please try again. If the problem persists, please contact our support.",
           patchMeForm: Object.assign({}, patchMeForm, {
             username: Object.assign({}, patchMeForm.username, {
               val: username,
@@ -66,13 +73,7 @@ class UserEditForm extends React.Component {
             }),
           }),
         });
-      } else {
-        this.setState({
-          message: "Profile changed successfully.",
-          messageOk: true,
-        });
-      }
-    });
+      });
   }
 
   render() {

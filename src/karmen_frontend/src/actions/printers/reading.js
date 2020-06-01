@@ -1,6 +1,7 @@
-import { createThunkedAction } from "../utils";
+import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
+import { HttpError } from "../../errors";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -124,7 +125,7 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
   }, delay);
 };
 
-export const loadPrinters = createThunkedAction(
+export const loadPrinters = createHttpAction(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -136,7 +137,7 @@ export const loadPrinters = createThunkedAction(
   }
 );
 
-export const loadPrintersOld = createThunkedAction(
+export const loadPrintersOld = createHttpAction(
   "PRINTERS_LOAD",
   (orguuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -148,7 +149,7 @@ export const loadPrintersOld = createThunkedAction(
   }
 );
 
-export const loadPrinter = createThunkedAction(
+export const loadPrinter = createHttpAction(
   "PRINTERS_LOAD_DETAIL",
   (orguuid, uuid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
@@ -208,39 +209,43 @@ export const setWebcamRefreshInterval = (orguuid, uuid, interval) => (
   }
 };
 
-export const getWebcamSnapshot = createThunkedAction(
+export const getWebcamSnapshot = createHttpAction(
   "WEBCAMS_GET_SNAPSHOT",
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       let { printers } = getState();
       const printer = printers.printers.find((p) => p.uuid === uuid);
+
       if (!printer || !printer.webcam || !printer.webcam.url) {
         return Promise.reject();
       }
+
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch
       )(printer.webcam.url).then((r) => {
-        if (r.status === 202 || r.status === 200) {
-          let { webcams } = getState();
-          if (webcams.queue && webcams.queue[uuid]) {
-            const timeoutData = webcams.queue[uuid];
-            if (timeoutData.interval > 0) {
-              const timeout = setTimeout(
-                () => dispatch(getWebcamSnapshot(orguuid, uuid)),
-                timeoutData.interval
-              );
-              dispatch({
-                type: "WEBCAMS_TIMEOUT_SET",
-                payload: {
-                  uuid,
-                  interval: timeoutData.interval,
-                  timeout,
-                },
-              });
-            }
+        let { webcams } = getState();
+
+        if (webcams.queue && webcams.queue[uuid]) {
+          const timeoutData = webcams.queue[uuid];
+
+          if (timeoutData.interval > 0) {
+            const timeout = setTimeout(
+              () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+              timeoutData.interval
+            );
+
+            dispatch({
+              type: "WEBCAMS_TIMEOUT_SET",
+              payload: {
+                uuid,
+                interval: timeoutData.interval,
+                timeout,
+              },
+            });
           }
         }
+
         return {
           organizationUuid: orguuid,
           uuid,
@@ -249,6 +254,18 @@ export const getWebcamSnapshot = createThunkedAction(
           successCodes: [200],
         };
       });
+    }).catch((err) => {
+      if (!(err instanceof HttpError)) {
+        throw err;
+      }
+      // HttpError is most cases an 404 if the snapshot URL cant' be reached.
+      // This is not critical and will already be logged in the console.
+      // Usually, this is a result of bad configuration of some sorts. So it's
+      // kinda safe to just do nothing. In other cases, let's admin something
+      // went wrong.
+      if (err.response.status !== 404) {
+        throw err;
+      }
     });
   }
 );

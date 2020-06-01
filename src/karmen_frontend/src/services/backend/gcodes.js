@@ -1,3 +1,4 @@
+import { HttpError } from "../../errors";
 import { getJsonPostHeaders, performRequest } from "./utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
@@ -33,6 +34,7 @@ export const getGcodes = (
       limit,
       fields,
     },
+    successCodes: [200],
   });
 };
 
@@ -44,6 +46,7 @@ export const getGcode = (orgUuid, uuid, fields = []) => {
   return performRequest({
     uri,
     method: "GET",
+    successCodes: [200],
   });
 };
 
@@ -73,17 +76,14 @@ export const uploadGcode = (orgUuid, path, file) => {
     .then((response) => {
       if (response.status !== 201) {
         console.error(`Cannot add a gcode: ${response.status}`);
-        return {
-          status: response.status,
-          successCodes: [201],
-        };
+        return Promise.reject(new HttpError(response, "Cannot add new gcode"));
       }
       return response.json().then((data) => {
         return { status: response.status, data, successCodes: [201] };
       });
     })
-    .catch((e) => {
-      console.error(`Cannot add a gcode: ${e}`);
-      return { status: 500, successCodes: [201] };
+    .catch((err) => {
+      console.error(`Cannot add a gcode: ${err}`);
+      throw err;
     });
 };
