@@ -36,10 +36,7 @@ matrix:
         - KARMEN_CLOUD_MODE=0 docker-compose up --build -d || travis_terminate 1;
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         - npm run test:cypress
-        - docker-compose down
-        - KARMEN_CLOUD_MODE=1 docker-compose up --build -d
-        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        - npm run test:cypress
+
     # Python 3.6 (requires build images)
     - python: "3.6"
       language: python
@@ -48,12 +45,12 @@ matrix:
         directories:
           - "$HOME/.cache"
       install:
-        - pip install pipenv
+        - pip install pipenv || travis_terminate 1;
       before_script:
         - cd src/karmen_backend
       script:
         - pipenv install --dev || travis_terminate 1;
-        - make test
+        - set -e; make test || travis_terminate 1;
 
     # Python 3.7 (requires build images)
     - python: "3.7"
@@ -63,13 +60,13 @@ matrix:
         directories:
           - "$HOME/.cache"
       install:
-        - pip install pipenv
+        - pip install pipenv || travis_terminate 1;
       before_script:
         - cd src/karmen_backend
       script:
         - pipenv install --dev || travis_terminate 1;
-        - make coverage || travis_terminate 1;
-        - make coveralls
+        - set -e; make coverage || travis_terminate 1;
+        - set -e; make coveralls || travis_terminate 1;
 
     # Python 3.7 (requires build images)
     - python: 3.8-dev
@@ -79,12 +76,12 @@ matrix:
         directories:
           - "$HOME/.cache"
       install:
-        - pip install pipenv
+        - pip install pipenv || travis_terminate 1;
       before_script:
         - cd src/karmen_backend
       script:
         - pipenv install --dev || travis_terminate 1;
-        - make test
+        - set -e; make test || travis_terminate 1;
 
     # nodejs
     - language: node_js
@@ -99,7 +96,7 @@ matrix:
       script:
         - npm run lint || travis_terminate 1;
         - npm run test || travis_terminate 1;
-        - npm run build
+        - set -e; npm run build || travis_terminate 1;
 
     # build and push docker images
     - name: "backend image"
