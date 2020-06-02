@@ -39,17 +39,13 @@ describe("Printers: Listing", function () {
     );
   });
 
-  it("has link to organization settings", function () {
+  it("has link to printer settings", function () {
     cy.get(".list-item .list-cta")
       .click()
       .then(() => {
         cy.get(".dropdown-item:first")
           .should("be.visible")
-          .should(
-            "have.attr",
-            "href",
-            `/${organizationUuid}/printers/${printerUuid}/settings`
-          );
+          .contains("Printer settings");
       });
   });
 });

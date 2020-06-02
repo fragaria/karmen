@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+
 import CtaDropdown from "./cta-dropdown";
 import NoPaginationListing from "./no-pagination-wrapper";
 import { useMyModal } from "../utils/modal";
+import PrinterSettingsForm from "../printers/printer-settings";
 
 const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   return (
@@ -50,8 +52,43 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   );
 };
 
-const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
+const PrinterSettingsModal = ({ printer, onPrinterUpdate, modal }) => {
+  const onSettingsChanged = (newSettings) =>
+    onPrinterUpdate(printer.uuid, newSettings).then((r) => {
+      if (r.status === 200) {
+        modal.closeModal();
+      }
+    });
+
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">
+            Change properties of {printer.name}
+          </h1>
+
+          <PrinterSettingsForm
+            printer={printer}
+            onPrinterSettingsChanged={onSettingsChanged}
+            onPrinterSettingsCancelled={modal.closeModal}
+          />
+
+          <div className="cta-box text-center"></div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
+
+const PrintersTableRow = ({
+  orguuid,
+  printer,
+  onPrinterUpdate,
+  onPrinterDelete,
+}) => {
   const deletePrinterModal = useMyModal();
+  const printerSettingsModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
   return (
     <div className="list-item">
@@ -83,13 +120,16 @@ const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
         }}
       >
         <span className="dropdown-title">{printer.name}</span>
-        <Link
-          className="dropdown-item"
-          to={`/${orguuid}/printers/${printer.uuid}/settings`}
+        <button
+          className="dropdown-item text-secondary"
+          onClick={(e) => {
+            setCtaListExpanded(false);
+            printerSettingsModal.openModal(e);
+          }}
         >
           <i className="icon-edit"></i>
           Printer settings
-        </Link>
+        </button>
         <button
           className="dropdown-item text-secondary"
           onClick={(e) => {
@@ -101,6 +141,11 @@ const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
           Delete printer
         </button>
       </CtaDropdown>
+      <PrinterSettingsModal
+        printer={printer}
+        onPrinterUpdate={onPrinterUpdate}
+        modal={printerSettingsModal}
+      />
       <DeletePrinterModal
         printer={printer}
         onPrinterDelete={onPrinterDelete}
@@ -112,6 +157,7 @@ const PrintersTableRow = ({ orguuid, printer, onPrinterDelete }) => {
 
 const PrintersTable = ({
   orguuid,
+  onPrinterUpdate,
   onPrinterDelete,
   loadPrinters,
   printersLoaded,
@@ -132,6 +178,7 @@ const PrintersTable = ({
             key={p.uuid}
             orguuid={orguuid}
             printer={p}
+            onPrinterUpdate={onPrinterUpdate}
             onPrinterDelete={onPrinterDelete}
           />
         );
