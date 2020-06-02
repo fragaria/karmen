@@ -95,11 +95,15 @@ class Register extends React.Component {
       <div className="content">
         <div className="container">
           <h1 className="main-title text-center">Karmen registration</h1>
-          <h2 className="main-subtitle text-center">
-            We will send You an email with a verification link.
-          </h2>
+          {!messageOk && (
+            <h2 className="main-subtitle text-center">
+              We will send You an email with a verification link.
+            </h2>
+          )}
           <form>
-            <FormInputs definition={registerForm} updateValue={updateValue} />
+            {!messageOk && (
+              <FormInputs definition={registerForm} updateValue={updateValue} />
+            )}
 
             <div className="form-messages">
               {message && (
@@ -112,19 +116,21 @@ class Register extends React.Component {
               )}
             </div>
 
-            <div className="cta-box text-center">
-              <BusyButton
-                className="btn"
-                type="submit"
-                onClick={this.register}
-                busyChildren="Sending link..."
-              >
-                Register
-              </BusyButton>{" "}
-              <Link to="/login" className="btn btn-plain">
-                Cancel
-              </Link>
-            </div>
+            {!messageOk && (
+              <div className="cta-box text-center">
+                <BusyButton
+                  className="btn"
+                  type="submit"
+                  onClick={this.register}
+                  busyChildren="Sending link..."
+                >
+                  Register
+                </BusyButton>{" "}
+                <Link to="/login" className="btn btn-plain">
+                  Cancel
+                </Link>
+              </div>
+            )}
           </form>
         </div>
       </div>
