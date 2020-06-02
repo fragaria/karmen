@@ -7,6 +7,7 @@ POSTGRES_PORT?=54350
 REDIS_PORT?=6380
 CELERY_CONFIG?={}
 SECRET_KEY?=tests
+LOCAL_TESTS_TOKEN?=This token is to enable local admin used for tests and to verify requests to it
 
 run-docker-test-postgres:
 	@-docker stop karmen_pg_test
@@ -37,6 +38,7 @@ test: run-docker-test-redis run-docker-test-postgres
 	REDIS_PORT=${REDIS_PORT} \
 	CELERY_CONFIG=${CELERY_CONFIG} \
 	SECRET_KEY=${SECRET_KEY} \
+	LOCAL_TESTS_TOKEN="${LOCAL_TESTS_TOKEN}" \
 	  pytest -n auto --dist=loadscope
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
@@ -63,6 +65,7 @@ test-watch: run-docker-test-redis run-docker-test-postgres
 	REDIS_PORT=${REDIS_PORT} \
 	CELERY_CONFIG=${CELERY_CONFIG} \
 	SECRET_KEY=${SECRET_KEY} \
+	LOCAL_TESTS_TOKEN="${LOCAL_TESTS_TOKEN}" \
 	  pytest --looponfail -n auto --dist=loadscope
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
@@ -79,6 +82,7 @@ coverage: run-docker-test-redis run-docker-test-postgres
 	REDIS_PORT=${REDIS_PORT} \
 	CELERY_CONFIG=${CELERY_CONFIG} \
 	SECRET_KEY=${SECRET_KEY} \
+	LOCAL_TESTS_TOKEN="${LOCAL_TESTS_TOKEN}"\
 	  coverage run --branch --source server -m pytest
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test

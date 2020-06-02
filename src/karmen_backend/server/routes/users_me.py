@@ -28,9 +28,11 @@ from server.database import (
 )
 from server.services.validators import is_email
 from server.tasks.send_mail import send_mail
+import server.models as models
 
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
+
 
 # registers new user - does not save any password
 # /users/me, POST
@@ -41,44 +43,21 @@ def create_inactive_user():
     email = data.get("email", "").lstrip().rstrip().lower()
     if not email or not is_email(email):
         return abort(make_response(jsonify(message="Missing or bad email"), 400))
-    existing = users.get_by_email(email)
-    # activated users
-    if existing and existing["activated"] is not None:
-        return "", 202
 
-    activation_key = guid.uuid4()
-    activation_key_expires = datetime.now().astimezone() + timedelta(minutes=10)
-    # reissue activation_key
-    if existing:
-        users.update_user(
-            uuid=existing["uuid"],
-            activation_key_hash=hashlib.sha256(
-                str(activation_key).encode("utf-8")
-            ).hexdigest(),
-            activation_key_expires=activation_key_expires,
+    new_user = models.users_me.create_inactive_user(email=email)
+
+    if new_user["created"]:
+        send_mail.delay(
+            [email],
+            "REGISTRATION_VERIFICATION_EMAIL",
+            {
+                "activation_key": new_user["activation_key"],
+                "activation_key_expires": int(
+                    new_user["activation_key_expires"].timestamp()
+                ),
+                "email": email,
+            },
         )
-    # completely new user
-    else:
-        users.add_user(
-            uuid=guid.uuid4(),
-            username=email,
-            email=email,
-            system_role="user",
-            providers=[],
-            activation_key_hash=hashlib.sha256(
-                str(activation_key).encode("utf-8")
-            ).hexdigest(),
-            activation_key_expires=activation_key_expires,
-        )
-    send_mail.delay(
-        [email],
-        "REGISTRATION_VERIFICATION_EMAIL",
-        {
-            "activation_key": activation_key,
-            "activation_key_expires": int(activation_key_expires.timestamp()),
-            "email": email,
-        },
-    )
     return "", 202
 
 
@@ -93,48 +72,19 @@ def activate_user():
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
 
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
-    if not password:
-        return abort(make_response(jsonify(message="Missing password"), 400))
-    if not activation_key:
-        return abort(make_response(jsonify(message="Missing activation_key"), 400))
-    if password != password_confirmation:
-        return abort(make_response(jsonify(message="Passwords do not match"), 400))
-
-    existing = users.get_by_email(email)
-    if not existing:
-        return abort(make_response(jsonify(message="Cannot activate"), 400))
-    if existing["activated"] is not None:
-        return abort(make_response(jsonify(message="Already activated"), 409))
-
-    if (
-        hashlib.sha256(str(activation_key).encode("utf-8")).hexdigest()
-        != existing["activation_key_hash"]
-    ):
-        return abort(make_response(jsonify(message="Cannot activate"), 400))
-    if existing["activation_key_expires"] < datetime.now().astimezone():
-        return abort(make_response(jsonify(message="Activation key expired"), 400))
-
-    memberships = organization_roles.get_by_user_uuid(existing["uuid"])
-    if len(memberships) == 0:
-        orguuid = guid.uuid4()
-        organizations.add_organization(uuid=orguuid, name="Default organization")
-        organization_roles.set_organization_role(orguuid, existing["uuid"], "admin")
-
-    pwd_hash = bcrypt.hashpw(password.encode("utf8"), bcrypt.gensalt())
-    users.update_user(
-        uuid=existing["uuid"],
-        activated=datetime.now().astimezone(),
-        providers=["local"],
-        providers_data={},
+    activated_user = models.users_me.activate_user(
+        email=email,
+        activation_key=activation_key,
+        password=password,
+        password_confirmation=password_confirmation,
     )
-    local_users.add_local_user(
-        user_uuid=existing["uuid"],
-        pwd_hash=pwd_hash.decode("utf8"),
-        force_pwd_change=False,
-    )
-    return "", 204
+
+    if activated_user["activated"]:
+        return "", 204
+    else:
+        if activated_user.get("already_activated", False):
+            return abort(make_response(jsonify(message=activated_user["message"]), 409))
+        return abort(make_response(jsonify(message=activated_user["message"]), 400))
 
 
 # /users/me/request-password-reset, POST

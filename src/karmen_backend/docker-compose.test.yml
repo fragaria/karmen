@@ -17,6 +17,7 @@ services:
       REDIS_PORT: 6380
       CELERY_CONFIG: '{}'
       SECRET_KEY: tests
+      LOCAL_TESTS_TOKEN: This token is to enable local admin used for tests and to verify requests to it
     depends_on:
       - redis
       - dbmigrations
