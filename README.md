@@ -70,6 +70,14 @@ All of the g-codes are currently shared across all user accounts in an organizat
 
 **Note**: If something suddenly breaks within this setup, try to clean docker with `docker system prune`, it might help.
 
+## Backend API Specification
+
+Backend API is described in 
+[./src/karmen_backend/openapi/swagger.yaml](./src/karmen_backend/openapi/swagger.yaml).
+Here you can find the [API specification in
+Redocly](http://redocly.github.io/redoc/?url=https://karmen-sandbox.f1.f-app.it/api/openapi-spec.yaml).
+
+
 ## Versioning and releases
 
 If you are making a new release, you need to tag this repository and Travis does the rest. You also
