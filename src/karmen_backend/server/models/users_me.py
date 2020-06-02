@@ -45,7 +45,7 @@ def create_inactive_user(email):
         )
     return {
         "created": True,
-        "activation_key": activation_key,
+        "activation_key": str(activation_key),
         "activation_key_expires": activation_key_expires,
         "email": email,
         "user_uuid": user_uuid,

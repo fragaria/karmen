@@ -5,6 +5,17 @@ from textwrap import dedent
 from server import app
 from .mail_template import BrandedMailTemplate
 
+def encode_activation_token(variables):
+    return base64.b64encode(
+        json.dumps(
+            {
+                "activation_key": str(variables["activation_key"]),
+                "activation_key_expires": variables["activation_key_expires"],
+                "email": variables["email"],
+            }
+        ).encode("utf-8")
+    ).decode("utf-8"),
+
 
 class RegistrationVerification(BrandedMailTemplate):
     def subject(self):
@@ -15,15 +26,7 @@ class RegistrationVerification(BrandedMailTemplate):
         self.variables = variables
         self.variables["activation_link"] = "%s/confirmation?activate=%s" % (
             self.get_base_url(),
-            base64.b64encode(
-                json.dumps(
-                    {
-                        "activation_key": str(variables["activation_key"]),
-                        "activation_key_expires": variables["activation_key_expires"],
-                        "email": variables["email"],
-                    }
-                ).encode("utf-8")
-            ).decode("utf-8"),
+            encode_activation_token(variables)
         )
 
     def textbody(self):

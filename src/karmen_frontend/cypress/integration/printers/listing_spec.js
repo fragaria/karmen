@@ -34,6 +34,7 @@ describe("Printers: Listing", function () {
           .login(user.email, user.password)
           .then((data) => {
             user = Object.assign(user, data);
+            cy.toggleMenu("Settings");
           });
       });
   });
@@ -45,8 +46,9 @@ describe("Printers: Listing", function () {
     });
   });
 
-  it("has link to printer settings", function () {
+  it("has link to organization settings", function () {
     cy.findByRole("listitem")
+      .findByRole("menu")
       .click()
       .then(() => {
         cy.get(".dropdown-item:first")

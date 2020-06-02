@@ -91,7 +91,7 @@ const PrintersTableRow = ({
   const printerSettingsModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
   return (
-    <div className="list-item">
+    <div className="list-item" role="listitem">
       <Link
         className="list-item-content"
         key={printer.uuid}

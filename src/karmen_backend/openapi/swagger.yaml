@@ -1075,6 +1075,42 @@ paths:
                 Invalid email:
                   value:
                     message: Invalid email
+  '/tests-admin/users/register':
+    post:
+      summary: Register a new user for testing an activation key.
+      operationId: server.routes.tests_admin.register_test_user
+      tags:
+        - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/local-tests-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: 'User registered, empty response'
+        '400':
+          description: Unable to register user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+              examples:
+                Missing email:
+                  value:
+                    message: Missing email
+                Bad role:
+                  value:
+                    message: Bad role
+                Invalid email:
+                  value:
+                    message: Invalid email
   '/tests-admin/organizations/':
     post:
       summary: Create organization
