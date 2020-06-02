@@ -2,23 +2,17 @@ import { Chance } from "chance";
 const chance = new Chance();
 
 describe("G-codes: Detail", function () {
-  let email, password, organizationUuid, gCodeUuid;
+  let user, gCodeUuid;
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
     return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
+      .prepareAppWithUser()
       .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
-      })
-      .then(() => {
-        return cy.addGCode("S_Release.gcode", organizationUuid, "");
+        user = data;
+        return cy.addGCode("S_Release.gcode", user.organizationUuid, "");
       })
       .then((response) => {
         gCodeUuid = response.uuid;
-        cy.visit(`/${organizationUuid}/gcodes/${gCodeUuid}`);
+        cy.visit(`/${user.organizationUuid}/gcodes/${gCodeUuid}`);
       });
   });
 
@@ -36,7 +30,7 @@ describe("G-codes: Detail", function () {
 
     cy.findByText("Back to listing").click();
     cy.location().then((loc) => {
-      expect(loc.pathname).to.eq(`/${organizationUuid}/gcodes`);
+      expect(loc.pathname).to.eq(`/${user.organizationUuid}/gcodes`);
     });
   });
 });

@@ -50,21 +50,14 @@ const testFillPillForm = (organizationUuid, address, timeout = 3000) => {
 };
 
 describe("Printers: Adding", function () {
-  let email, password, organizationUuid;
+  let user;
 
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
-    return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
-      .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
-        cy.get('button[id="navigation-menu-toggle"]').click();
-        cy.get('a[id="navigation-settings"]').click();
-        return cy.get('a[id="btn-add_printer"]').click();
-      });
+    return cy.prepareAppWithUser().then((data) => {
+      user = data;
+      cy.toggleMenu("Settings");
+      return cy.findByText("+ Add a printer").click();
+    });
   });
 
   it("Test labels and inputs presence", function () {
@@ -149,7 +142,7 @@ describe("Printers: Adding", function () {
           "SKIPPED - Test has been skipped due to it's valid only for cloud mode."
         );
       }
-      testFillPillForm(organizationUuid, "172.16.236.11:8080");
+      testFillPillForm(user.organizationUuid, "172.16.236.11:8080");
     });
   });
 
@@ -161,7 +154,7 @@ describe("Printers: Adding", function () {
         );
       }
       selectDeviceType(optionDevicePill);
-      testFillPillForm(organizationUuid, "XPrinterCodeX");
+      testFillPillForm(user.organizationUuid, "XPrinterCodeX");
     });
   });
 
@@ -173,7 +166,7 @@ describe("Printers: Adding", function () {
         );
       }
       selectDeviceType(optionOtherDevice);
-      testFillPillForm(organizationUuid, null, 10000);
+      testFillPillForm(user.organizationUuid, null, 10000);
     });
   });
 });

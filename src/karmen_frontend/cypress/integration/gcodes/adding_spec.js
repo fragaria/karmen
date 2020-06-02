@@ -11,20 +11,13 @@ const testGCodeIsAdded = (organizationUuid) => {
 };
 
 describe("G-codes: Adding", function () {
-  let email, password, organizationUuid;
+  let user;
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
-    return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
-      .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
-        cy.get('button[id="navigation-menu-toggle"]').click();
-        cy.get('a[id="navigation-gcodes"]').click();
-        return cy.get('a[id="btn-add_gcode"]').click();
-      });
+    return cy.prepareAppWithUser().then((data) => {
+      user = data;
+      cy.toggleMenu("G-Codes");
+      return cy.findByText("+ Upload a g-code").click();
+    });
   });
 
   it("fails with no file", function () {
@@ -49,7 +42,7 @@ describe("G-codes: Adding", function () {
     attachFile("S_Release.gcode");
     submitForm()
       .wait(3000)
-      .then(() => testGCodeIsAdded(organizationUuid));
+      .then(() => testGCodeIsAdded(user.organizationUuid));
   });
 
   it("adds gcode with path", function () {
@@ -57,7 +50,7 @@ describe("G-codes: Adding", function () {
     cy.get("input[name=path]").type("some path");
     submitForm()
       .wait(3000)
-      .then(() => testGCodeIsAdded(organizationUuid));
+      .then(() => testGCodeIsAdded(user.organizationUuid));
   });
 
   it.skip("adds gcode with a very long path", function () {
@@ -66,13 +59,13 @@ describe("G-codes: Adding", function () {
     cy.get("input[name=path]").type(chance.string({ length: 500 }));
     submitForm()
       .wait(3000)
-      .then(() => testGCodeIsAdded(organizationUuid));
+      .then(() => testGCodeIsAdded(user.organizationUuid));
   });
 
   it("adds gcode - cancel form", function () {
     cy.findByText("Cancel").click();
     cy.location().then((loc) => {
-      expect(loc.pathname).to.eq(`/${organizationUuid}/gcodes`);
+      expect(loc.pathname).to.eq(`/${user.organizationUuid}/gcodes`);
     });
   });
 });

@@ -48,10 +48,10 @@ def printjob_create(org_uuid):
     validate_uuid(printer_uuid)
     printer = printers.get_printer(printer_uuid)
     if printer is None or printer["organization_uuid"] != org_uuid:
-        return abort(make_response(jsonify(message="Not found printer"), 404))
+        return abort(make_response(jsonify(message="Printer not found"), 404))
     gcode = gcodes.get_gcode(gcode_uuid)
     if gcode is None:
-        return abort(make_response(jsonify(message="Not found gcode"), 404))
+        return abort(make_response(jsonify(message="Gcode not found"), 404))
     try:
         network_client = network_clients.get_network_client(
             printer["network_client_uuid"]

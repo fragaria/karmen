@@ -216,6 +216,7 @@ class Menu extends React.Component {
                   this.setState({ navigation: !navigation });
                 }}
                 id="navigation-menu-toggle"
+                role="menu"
               >
                 {navigation && <span className="icon-close"></span>}
                 {!navigation && (

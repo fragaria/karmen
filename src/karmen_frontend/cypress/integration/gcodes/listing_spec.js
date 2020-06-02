@@ -7,24 +7,12 @@ const visitGCodes = () => {
 };
 
 describe("G-codes: Listing - no G-codes uploaded", function () {
-  let email, password, organizationUuid;
+  let user;
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
-    return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
-      .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
-      })
-      .then(() => {
-        cy.logout()
-          .login(email, password)
-          .then(() => {
-            return visitGCodes();
-          });
-      });
+    return cy.prepareAppWithUser().then((data) => {
+      user = data;
+      return visitGCodes();
+    });
   });
 
   it("search", function () {
@@ -37,26 +25,16 @@ describe("G-codes: Listing - no G-codes uploaded", function () {
 });
 
 describe("G-codes: Listing", function () {
-  let email, password, organizationUuid;
+  let user;
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
     return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
+      .prepareAppWithUser()
       .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
+        user = data;
+        return cy.addGCode("S_Release.gcode", user.organizationUuid, "");
       })
       .then(() => {
-        return cy.addGCode("S_Release.gcode", organizationUuid, "");
-      })
-      .then(() => {
-        cy.logout()
-          .login(email, password)
-          .then(() => {
-            return visitGCodes();
-          });
+        return visitGCodes();
       });
   });
 
@@ -76,7 +54,7 @@ describe("G-codes: Listing", function () {
     cy.get("#btn-add_gcode").should(
       "have.attr",
       "href",
-      `/${organizationUuid}/add-gcode`
+      `/${user.organizationUuid}/add-gcode`
     );
   });
 

@@ -3,30 +3,24 @@ import { Chance } from "chance";
 const chance = new Chance();
 
 describe("Printers: Listing", function () {
-  let email, password, organizationUuid, printerUuid;
+  let user, printerUuid;
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
     return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
+      .prepareAppWithUser()
       .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
-      })
-      .then(() => {
+        user = data;
         return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
           if (IS_CLOUD_INSTALL) {
             return cy.addPrinter(
               IS_CLOUD_INSTALL,
-              organizationUuid,
+              user.organizationUuid,
               chance.string(),
-              chance.string(),
+              chance.string()
             );
           } else {
             return cy.addPrinter(
               IS_CLOUD_INSTALL,
-              organizationUuid,
+              user.organizationUuid,
               chance.string(),
               "172.16.236.13",
               8080
@@ -34,27 +28,25 @@ describe("Printers: Listing", function () {
           }
         });
       })
-      .then((response) => {
-        printerUuid = response.uuid;
+      .then((printer) => {
+        printerUuid = printer.uuid;
         cy.logout()
-          .login(email, password)
-          .then(() => {
-            cy.get('button[id="navigation-menu-toggle"]').click();
-            return cy.get('a[id="navigation-settings"]').click();
+          .login(user.email, user.password)
+          .then((data) => {
+            user = Object.assign(user, data);
           });
       });
   });
 
   it("has the create button", function () {
-    cy.get(".react-tabs__tab-panel__header a").should(
-      "have.attr",
-      "href",
-      `/${organizationUuid}/add-printer`
-    );
+    cy.findByText("+ Add a printer").click();
+    cy.location().then((loc) => {
+      expect(loc.pathname).to.eq(`/${user.organizationUuid}/add-printer`);
+    });
   });
 
   it("has link to printer settings", function () {
-    cy.get(".list-item .list-cta")
+    cy.findByRole("listitem")
       .click()
       .then(() => {
         cy.get(".dropdown-item:first")

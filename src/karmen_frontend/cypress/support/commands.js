@@ -191,7 +191,7 @@ Cypress.Commands.add("preparePrintingEnvironment", () => {
   printerName = chance.string();
   return cy
     .logout()
-    .createUser(email, password)
+    .prepareTestUser(email, password)
     .login(email, password)
     .then((data) => {
       organizationUuid = Object.keys(data.organizations)[0];
@@ -296,4 +296,39 @@ Cypress.Commands.add("determineCloudInstall", () => {
   return cy.window().then((win) => {
     return win.env.IS_CLOUD_INSTALL;
   });
+});
+
+Cypress.Commands.add("prepareTestUser", (email, password) => {
+  return cy.log(`preparing test user`).request({
+    method: "POST",
+    url: `/api/tests-admin/users/create`,
+    body: {
+      email,
+      password,
+    },
+    headers: {
+      "X-local-tests-token": Cypress.env("apiAdminToken"),
+    },
+  });
+});
+
+Cypress.Commands.add("prepareAppWithUser", () => {
+  const email = chance.email();
+  const password = chance.string();
+
+  return cy
+    .logout()
+    .prepareTestUser(email, password)
+    .login(email, password)
+    .then((userData) => {
+      return Object.assign(userData, {
+        organizationUuid: Object.keys(userData.organizations)[0],
+        password,
+      });
+    });
+});
+
+Cypress.Commands.add("toggleMenu", (item) => {
+  cy.findByRole("menu").click();
+  cy.findByText(item).click();
 });
