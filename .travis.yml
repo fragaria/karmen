@@ -31,7 +31,7 @@ matrix:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
       before_script:
-        - cd src/karmen_frontend && CI=true npm ci && CI=true install cypress
+        - cd src/karmen_frontend && CI=true npm ci && CI=true npm install cypress
       script:
         - KARMEN_CLOUD_MODE=0 docker-compose build || travis_terminate 1
         - KARMEN_CLOUD_MODE=0 docker-compose up -d || travis_terminate 1
