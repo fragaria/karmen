@@ -21,8 +21,8 @@ app = Flask(__name__)
 CORS(app)
 
 STATE = {
-    "job_state": "Printing",
-    "job_name": "fake-file-being-printed.gcode",
+    "job_state": os.environ.get("STATE_JOB_STATE", "Printing"),
+    "job_name": os.environ.get("STATE_JOB_NAME", ""),
     "lights_color": [0, 0, 0],
     "fan_state": "off",
     "motors_state": "on",

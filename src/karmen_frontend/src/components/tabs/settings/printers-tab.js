@@ -9,6 +9,7 @@ const Printers = ({
   loadPrinters,
   printersList,
   printersLoaded,
+  onPrinterUpdate,
   onPrinterDelete,
   networkInterface,
   onNetworkInterfaceChange,
@@ -34,6 +35,7 @@ const Printers = ({
         loadPrinters={loadPrinters}
         printersList={printersList}
         printersLoaded={printersLoaded}
+        onPrinterUpdate={onPrinterUpdate}
         onPrinterDelete={onPrinterDelete}
       />
 

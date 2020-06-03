@@ -26,7 +26,7 @@ class CtaDropdown extends React.Component {
     const { children, onToggle, expanded } = this.props;
 
     return (
-      <div className="dropdown list-cta">
+      <div className="dropdown list-cta" role="menu">
         <button
           className="dropdown-toggle btn-reset"
           onClick={(e) => {

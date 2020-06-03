@@ -6,7 +6,7 @@ describe("Unauthorized: Login flow", function () {
   beforeEach(() => {
     email = chance.email();
     password = chance.string();
-    return cy.logout().createUser(email, password);
+    return cy.prepareTestUser(email, password);
   });
 
   it("fails on empty username", function () {

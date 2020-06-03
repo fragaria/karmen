@@ -55,7 +55,7 @@ class Wrapper extends React.Component {
       .map(rowFactory);
 
     return (
-      <div className="list">
+      <div className="list" role="list">
         <div className="list-header">
           {enableFiltering !== false && (
             <div className="list-search">

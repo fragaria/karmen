@@ -1,34 +1,32 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
-const getActivationLink = (email) => {
-  cy.log(`requesting mail contents for ${email}`)
-    .request(`http://localhost:8088/mail/${email}`)
-    .then(({ body }) => {
-      if (!body || !body.to) {
-        return getActivationLink(email);
-      } else {
-        return Promise.resolve(body);
-      }
-    });
-};
-
 describe("Unauthorized: Activation flow", function () {
   let token = null;
   let email = null;
+  let url = null;
+
+  const checkLocation = (loc) => {
+    expect(loc.pathname + loc.search).to.eq(url);
+  };
+
   beforeEach(() => {
     email = chance.email();
     return cy
       .log(`getting activation token for ${email}`)
-      .request("POST", `/api/users/me`, {
-        email: email,
+      .request({
+        method: "POST",
+        url: `/api/tests-admin/users/register`,
+        body: {
+          email: email,
+        },
+        headers: {
+          "X-local-tests-token": Cypress.env("apiAdminToken"),
+        },
       })
-      .then(() => {
-        return getActivationLink(email);
-      })
-      .then((body) => {
-        const url = new URL(body.text.match(/http:\/\/.*confirmation.*/i));
-        token = url.searchParams.get("activate");
+      .then((data) => {
+        token = data.body.activation_key;
+        url = `/confirmation/?activate=${token}`;
       });
   });
 
@@ -40,23 +38,32 @@ describe("Unauthorized: Activation flow", function () {
   });
 
   it("good activation token", function () {
-    cy.visit(`/confirmation/?activate=${token}`);
-    cy.get("form").contains("New password");
+    cy.visit(url);
+    cy.location().then((loc) => {
+      checkLocation(loc);
+      cy.get("form").contains("New password");
+    });
   });
 
   it("password set mismatch", function () {
-    cy.visit(`/confirmation/?activate=${token}`);
-    cy.get("input#password").type("password");
-    cy.get("input#passwordConfirmation").type("not a password");
-    cy.get("button[type=submit]").click();
-    cy.get("form").contains("Passwords do not match");
+    cy.visit(url);
+    cy.location().then((loc) => {
+      checkLocation(loc);
+      cy.get("input#password").type("password");
+      cy.get("input#passwordConfirmation").type("not a password");
+      cy.get("button[type=submit]").click();
+      cy.get("form").contains("Passwords do not match");
+    });
   });
 
   it("password set success", function () {
-    cy.visit(`/confirmation/?activate=${token}`);
-    cy.get("input#password").type("password");
-    cy.get("input#passwordConfirmation").type("password");
-    cy.get("button[type=submit]").click();
-    cy.get("form").contains("Your account has been activated");
+    cy.visit(url);
+    cy.location().then((loc) => {
+      checkLocation(loc);
+      cy.get("input#password").type("password");
+      cy.get("input#passwordConfirmation").type("password");
+      cy.get("button[type=submit]").click();
+      cy.get("form").contains("Your account has been activated");
+    });
   });
 });

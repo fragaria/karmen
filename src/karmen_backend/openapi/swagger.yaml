@@ -1037,6 +1037,152 @@ paths:
         '204':
           description: 'Revoked'
 
+  '/tests-admin/users/create':
+    post:
+      summary: Create new user for tests. User is instantly activated.
+      operationId: server.routes.tests_admin.create_test_user
+      tags:
+        - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/local-tests-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '202':
+          description: 'User created, empty response'
+        '400':
+          description: Unable to create user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+              examples:
+                Missing email:
+                  value:
+                    message: Missing email
+                Bad role:
+                  value:
+                    message: Bad role
+                Invalid email:
+                  value:
+                    message: Invalid email
+  '/tests-admin/users/register':
+    post:
+      summary: Register a new user for testing an activation key.
+      operationId: server.routes.tests_admin.register_test_user
+      tags:
+        - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/local-tests-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: 'User registered, empty response'
+        '400':
+          description: Unable to register user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+              examples:
+                Missing email:
+                  value:
+                    message: Missing email
+                Bad role:
+                  value:
+                    message: Bad role
+                Invalid email:
+                  value:
+                    message: Invalid email
+  '/tests-admin/organizations/':
+    post:
+      summary: Create organization
+      operationId: server.routes.tests_admin.create_organization
+      tags:
+        - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/local-tests-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                local-tests-token:
+                  $ref: '#/components/schemas/local-tests-token'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  uuid:
+                    type: string
+        '400':
+          description: Unable to create org
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+
+  '/tests-admin/organizations/{org_uuid}/users':
+    post:
+      summary: Add user to organization by his UUID
+      description: Used only for local tests. User must already exist
+      operationId: server.routes.tests_admin.add_user_to_org
+      tags:
+        - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/local-tests-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                uuid:
+                 $ref: '#/components/schemas/uuid'
+                role:
+                  type: string
+                  enum: [user, admin]
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organization_user_profile'
+        '400':
+          description: Unable to create or add user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
+
 
 
   '/organizations/{org_uuid}/users':
@@ -1615,6 +1761,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
+    local-tests-token:
+      in: header
+      name: X-local-tests-token
+      schema:
+        type: string
+      required: true
     jti:
       name: jti
       in: path
@@ -1662,6 +1814,9 @@ components:
       properties:
         message:
           type: string
+    local-tests-token:
+      type: string
+      description: Token provided via env variables to authenticate modifications for tests
     printer_response:
       type: object
       properties:

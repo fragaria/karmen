@@ -6,6 +6,7 @@ import { RoutedTabs, NavTab } from "react-router-tabs";
 import JobsTab from "../../components/tabs/printer/jobs-tab";
 import ControlsTab from "../../components/tabs/printer/controls-tab";
 import ConnectionTab from "../../components/tabs/printer/connection-tab";
+import SettingsTab from "../../components/tabs/printer/settings-tab";
 import Loader from "../../components/utils/loader";
 import BusyButton from "../../components/utils/busy-button";
 import { useMyModal } from "../../components/utils/modal";
@@ -217,7 +218,7 @@ const PrinterDetail = ({
             <NavTab to="/tab-controls">Controls</NavTab>
             <NavTab to="/tab-jobs">Jobs</NavTab>
             <NavTab to="/tab-connection">Connection</NavTab>
-            {role === "admin" && <NavTab to={`/settings`}>Settings</NavTab>}
+            {role === "admin" && <NavTab to="/tab-settings">Settings</NavTab>}
           </RoutedTabs>
 
           <Switch>
@@ -268,6 +269,15 @@ const PrinterDetail = ({
               path={`${match.url}/tab-connection`}
               render={(props) => (
                 <ConnectionTab printer={printer} startUpdate={startUpdate} />
+              )}
+            />
+            <Route
+              path={`${match.url}/tab-settings`}
+              render={(props) => (
+                <SettingsTab
+                  printer={printer}
+                  onPrinterSettingsChanged={patchPrinter}
+                />
               )}
             />
           </Switch>
