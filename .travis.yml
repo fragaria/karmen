@@ -36,7 +36,11 @@ matrix:
         - KARMEN_CLOUD_MODE=0 docker-compose up --build -d || travis_terminate 1;
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         - npm run test:cypress
-
+        - docker-compose down
+        - KARMEN_CLOUD_MODE=1 docker-compose up --build -d
+        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+        - npm run test:cypress
+        - docker-compose down
     # Python 3.6 (requires build images)
     - python: "3.6"
       language: python

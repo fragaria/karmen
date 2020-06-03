@@ -1,4 +1,4 @@
-describe.only("Unauthorized: Registration flow", function () {
+describe("Unauthorized: Registration flow", function () {
   it("fails on bad email", function () {
     cy.visit("/register");
     cy.get("input#realemail").type("not an email");

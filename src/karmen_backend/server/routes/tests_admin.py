@@ -6,6 +6,8 @@ import json
 from server.database import organization_roles, users, organizations
 import uuid as guid
 
+from server.services.mailer.templates.registration_verification import encode_activation_token
+
 
 def local_tests_mode_required(func):
     @functools.wraps(func)
@@ -27,6 +29,23 @@ def create_test_user():
     password = request.json.get("password")
     new_user = models.users_me.create_tests_user(email=email, password=password)
     return make_response(json.dumps(new_user), 201 if new_user["activated"] else 400)
+
+
+# /tests-admin/users/register, POST
+@local_tests_mode_required
+def register_test_user():
+    email = request.json.get("email")
+    inactive_user = models.users_me.create_inactive_user(email)
+
+    token_variables = {
+        "activation_key": str(inactive_user["activation_key"]),
+        "activation_key_expires": str(inactive_user["activation_key_expires"]),
+        "email": email
+    }
+
+    return make_response(json.dumps({
+        "activation_key": encode_activation_token(token_variables)
+    }), 201)
 
 
 # /tests-admin/organizations, POST

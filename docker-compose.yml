@@ -53,7 +53,8 @@ services:
       MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
       MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
       TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-http://key_issuer:8422}
-      LOCAL_TESTS_TOKEN: This token is to enable local admin used for tests and to verify requests to it
+      # This token is to enable local admin used for tests and to verify requests to it
+      LOCAL_TESTS_TOKEN: ${KARMEN_LOCAL_TESTS_TOKEN:-random-test-token}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
@@ -115,6 +116,7 @@ services:
     build: ./src/fakeprinter
     environment:
       SERVICE_PORT: 8080
+      STATE_JOB_NAME: "fake-file-being-printed.gcode"
     networks:
       printers:
         ipv4_address: 172.16.236.11
@@ -123,9 +125,19 @@ services:
     build: ./src/fakeprinter
     environment:
       SERVICE_PORT: 8080
+      STATE_JOB_NAME: "fake-file-being-printed.gcode"
     networks:
       printers:
         ipv4_address: 172.16.236.12
+  fake_printer3:
+    image: fragaria/karmen-fakeprinter
+    build: ./src/fakeprinter
+    environment:
+      SERVICE_PORT: 8080
+      STATE_JOB_STATE: "Operational"
+    networks:
+      printers:
+        ipv4_address: 172.16.236.13
   fake_ws_proxy:
     image: fragaria/karmen-fakewsproxy
     build: ./src/fakewsproxy
