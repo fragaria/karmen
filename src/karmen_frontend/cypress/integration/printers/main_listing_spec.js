@@ -2,17 +2,11 @@ import { Chance } from "chance";
 const chance = new Chance();
 
 describe("Printers: Main listing", function () {
-  let email, password, organizationUuid;
+  let user;
   beforeEach(() => {
-    email = chance.email();
-    password = chance.string();
-    return cy
-      .logout()
-      .createUser(email, password)
-      .login(email, password)
-      .then((data) => {
-        organizationUuid = Object.keys(data.organizations)[0];
-      });
+    return cy.prepareAppWithUser().then((data) => {
+      user = data;
+    });
   });
 
   it("redirects root to printers list", function () {
@@ -21,7 +15,7 @@ describe("Printers: Main listing", function () {
   });
 
   it("redirects organization root to printers list", function () {
-    cy.visit(`/${organizationUuid}`);
+    cy.visit(`/${user.organizationUuid}`);
     cy.get("main h1").contains("Printers");
   });
 });

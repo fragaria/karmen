@@ -20,7 +20,6 @@ export const usePrintGcodeModal = ({
     availablePrinters.length ? availablePrinters[0].uuid : null
   );
   const [showPrinterSelect, setShowPrinterSelect] = useState(true);
-
   const SelectPrinter = () => {
     const availablePrinterOpts = availablePrinters.map((p) => {
       return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;

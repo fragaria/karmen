@@ -106,6 +106,7 @@ class PrinterList extends React.Component {
           return (
             <Link
               className="list-item"
+              role="listitem"
               key={printer.uuid}
               to={`/${match.params.orguuid}/printers/${printer.uuid}`}
             >
@@ -180,7 +181,9 @@ class PrinterList extends React.Component {
                 viewType={viewType}
                 onViewTypeChange={setPrinterViewType}
               />
-              <div className="list-items">{printerElements}</div>
+              <div className="list-items" role="list">
+                {printerElements}
+              </div>
             </div>
           )}
         </div>
