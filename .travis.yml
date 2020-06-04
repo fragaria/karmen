@@ -32,16 +32,18 @@ matrix:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
       before_script:
-        - cd src/karmen_frontend && npm ci
+        - cd src/karmen_frontend/cypress && CI=true npm ci --only=prod
       script:
-        - KARMEN_CLOUD_MODE=0 docker-compose up --build -d || travis_terminate 1;
+        - cd $TRAVIS_BUILD_DIR/src/karmen_frontend
+        - docker-compose build || travis_terminate 1;
+        - KARMEN_CLOUD_MODE=0 docker-compose up -d || travis_terminate 1;
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        - npm run test:cypress
-        - docker-compose down
-        - KARMEN_CLOUD_MODE=1 docker-compose up --build -d
+        - cd cypress && npm test && cd - || travis_terminate 1;
+        - docker-compose down || travis_terminate 1;
+        - KARMEN_CLOUD_MODE=1 docker-compose up -d || travis_terminate 1;
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        - npm run test:cypress
-        - docker-compose down
+        - cd cypress && npm test && cd - || travis_terminate 1;
+        - docker-compose down || travis_terminate 1;
     # Python 3.6 (requires build images)
     - python: "3.6"
       language: python
