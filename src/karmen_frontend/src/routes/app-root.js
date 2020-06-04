@@ -24,7 +24,11 @@ const AppRoot = ({
     }
     return <Loader />;
   }
-  return <Redirect to={`/${activeOrganization.uuid}`} />;
+  if (activeOrganization) {
+    return <Redirect to={`/${activeOrganization.uuid}`} />;
+  } else {
+    return <Redirect to={`/no-organization`} />;
+  }
 };
 
 export default connect(
