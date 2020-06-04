@@ -29,7 +29,8 @@ matrix:
       node_js: 10
       cache:
         directories:
-          - "$HOME/.npm"
+          - "$HOME/.npm"  # npm
+          - "$HOME/.cache"  # cypress
       before_script:
         - cd src/karmen_frontend && npm ci
       script:

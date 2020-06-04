@@ -1,12 +1,14 @@
 FROM mhart/alpine-node:10
+ARG CI
 
 RUN apk add gettext git g++ make python
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-
+# CI=true to supress extra verbosity:w
 RUN npm ci
+# --only=prod
 
 COPY . .
 
