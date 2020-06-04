@@ -9,6 +9,9 @@ from datetime import datetime
 def check_printer(printer_uuid):
     app.logger.debug("Checking printer %s" % printer_uuid)
     raw_printer = printers.get_printer(printer_uuid)
+    if raw_printer is None:
+        app.logger.debug("Printer was deleted during processing queue")
+        return
     raw_client = network_clients.get_network_client(raw_printer["network_client_uuid"])
     printer_data = dict(raw_client)
     printer_data.update(raw_printer)
