@@ -197,7 +197,7 @@ export const usePrintGcodeModal = ({
                     printModal.closeModal();
                   }}
                 >
-                  Close
+                  {schedulingPrint ? "Cancel" : "Close"}
                 </button>
               </div>
             )}
