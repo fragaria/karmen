@@ -76,13 +76,8 @@ class AddOrganization extends React.Component {
   }
 
   render() {
-    const {
-      form,
-      message,
-      messageOk,
-      redirect,
-      activeOrganization,
-    } = this.state;
+    const { form, message, messageOk, redirect } = this.state;
+    const { activeOrganization } = this.props;
     if (redirect && !activeOrganization) {
       //if user had no organizations and just created the first one, send him home
       return <Redirect to="/" />;
@@ -144,6 +139,7 @@ class AddOrganization extends React.Component {
 export default connect(
   (state) => ({
     activeOrganization: state.me.activeOrganization,
+    me: state.me,
   }),
   (dispatch) => ({
     createOrganization: (name) => dispatch(addOrganization(name)),
