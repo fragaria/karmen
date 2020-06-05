@@ -145,7 +145,12 @@ class Menu extends React.Component {
                         />
                       </span>
 
-                      <p className="navigation-user-name">{username}</p>
+                      <p className="navigation-user-name">
+                        {username}
+                        <sup>
+                          <span className="icon-settings"></span>
+                        </sup>
+                      </p>
 
                       <p className="navigation-user-organization">
                         {Object.values(organizations).length > 1
