@@ -1,0 +1,32 @@
+{
+  "name": "karmen-e2e-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "eslintConfig": {
+    "extends": [
+      "plugin:prettier/recommended"
+    ]
+  },
+  "scripts": {
+    "test": "cypress run",
+    "lint:cypress": "eslint cypress --ext js",
+    "prettier": "prettier --check src/**/*.js cypress/**/*.js",
+    "prettier:fix": "prettier --write src/**/*.js cypress/**/*.js"
+  },
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "@testing-library/cypress": "^6.0.0",
+    "chance": "^1.1.6",
+    "cypress": "^4.7.0",
+    "cypress-file-upload": "^4.0.7",
+    "dayjs": "^1.8.28"
+  },
+  "devDependencies": {
+    "eslint": "^6.3.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "prettier": "^2.0.5"
+  }
+}

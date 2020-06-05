@@ -1,41 +1,23 @@
-FROM python:3.7-alpine as builder
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-
-RUN mkdir /install
-WORKDIR /install
-
-# build deps
-RUN apk --update add --no-cache gcc make postgresql-client postgresql-dev openssl-dev libffi-dev jq pcre-dev python3-dev build-base linux-headers libxml2-dev libxslt-dev
-
-RUN pip install --upgrade pip
-RUN pip install uwsgi supervisor
-
-# Install from lockfile
-COPY Pipfile* ./
-RUN jq -r '.default | to_entries[] | .key + .value.version' \
-    Pipfile.lock > requirements.txt && pip install -r requirements.txt
-
-
-FROM python:3.7-alpine as runner
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-
-# runtime deps
-RUN apk --update add --no-cache nginx gettext avahi avahi-tools arp-scan postgresql-client bash dbus  libxml2-dev libxslt-dev
-
-# ensure www-data user
-RUN set -x ; \
-  addgroup -g 82 -S www-data ; \
-  adduser -u 82 -D -S -G www-data www-data && exit 0 ; exit 1
+FROM python:3.7-slim
 
 WORKDIR /usr/src/app
 
-# Install from cache - no need for system dependencies for this
-COPY --from=builder /root/.cache /root/.cache
-COPY --from=builder /install/requirements.txt requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN pip install uwsgi supervisor
+# common requirements (with fakeprinter)
+RUN set -e && apt-get update && apt-get install --yes git gcc make postgresql-client libffi-dev jq libpq-dev libpcre2-8-0 python3-dev bash build-essential
+RUN set -e && pip install --upgrade pip pipenv 
+ # linux-headers-$(uname -r) \
 
+# specific for backend
+RUN set -e && apt-get install --yes libxml2-dev libxslt-dev nginx gettext avahi-utils arp-scan dbus
+RUN set -e && pip install uwsgi supervisor
+
+# Install from lockfile
+COPY Pipfile* ./
+RUN set -e && pipenv lock -r > requirements.pip && pip install -r requirements.pip
+# remove build requirements not required anymore
+RUN apt-get remove --purge --yes gcc make postgresql-client libpq-dev libffi-dev python3-dev
+
+# runtime deps
 ENV PYTHONPATH=$PYTHONPATH:/usr/src/app
 
 ENV REDIS_HOST 127.0.0.1
