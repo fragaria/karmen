@@ -139,7 +139,6 @@ class AddOrganization extends React.Component {
 export default connect(
   (state) => ({
     activeOrganization: state.me.activeOrganization,
-    me: state.me,
   }),
   (dispatch) => ({
     createOrganization: (name) => dispatch(addOrganization(name)),
