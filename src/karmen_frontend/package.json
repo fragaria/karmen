@@ -50,14 +50,14 @@
   "version": "0.11.0",
   "scripts": {
     "eject": "react-scripts eject",
-    "cypress": "cd cypress && npm run cypress open",
+    "cypress": "cd cypress && npm run cypress",
     "lint": "eslint src --ext jsx,js",
     "prettier": "prettier --check src/**/*.js cypress/**/*.js",
     "prettier:fix": "prettier --write src/**/*.js cypress/**/*.js",
     "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
-    "test:cypress": "cd cypress && npm cypress run"
+    "test:cypress": "cd cypress && npm run test:cypress"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.9.0",
