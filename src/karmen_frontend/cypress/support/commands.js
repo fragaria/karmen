@@ -312,6 +312,21 @@ Cypress.Commands.add("prepareTestUser", (email, password) => {
   });
 });
 
+
+Cypress.Commands.add("removeUserFromOrg", (org_uuid, uuid) => {
+  return cy.log(`removing user from org`).request({
+    method: "DELETE",
+    url: `/api/tests-admin/organizations/`+org_uuid+`/users`,
+    body: {
+      uuid
+    },
+    headers: {
+      "X-local-tests-token": Cypress.env("apiAdminToken"),
+    },
+  });
+});
+
+
 Cypress.Commands.add("prepareAppWithUser", () => {
   const email = chance.email();
   const password = chance.string();
