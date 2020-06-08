@@ -7,9 +7,6 @@ describe("Organizations: Adding", function () {
     email = chance.email();
     password = chance.string();
     cy.prepareTestUser(email, password).then( (response) => {
-      console.log(response.body);
-      // org_uuid = response.body.
-
       user_uuid = response.body.user_uuid;
       org_uuid = response.body.organizations[0].uuid;
       console.log(user_uuid, org_uuid);
@@ -33,6 +30,16 @@ describe("Organizations: Adding", function () {
           .then(() =>{
           cy.get("body").contains("Add your first printer")
         })
+      })
+  });
+
+  it("menu has limited items", function () {
+    cy.findByText("Menu").click()
+      .then(() => {
+        cy.get("nav").contains("Organizations");
+        cy.get("nav").contains("Logout")
+        cy.findByText("Printers").should("not.exist")
+        cy.findByText("G-Codes").should("not.exist")
       })
   })
 
