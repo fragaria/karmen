@@ -1182,6 +1182,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/api_err_response'
+    delete:
+      summary: Remove user from organization
+      description: Used only for local tests.
+      operationId: server.routes.tests_admin.remove_user_from_org
+      tags:
+        - tests-admin
+      parameters:
+        - $ref: '#/components/parameters/organization_uuid_param'
+        - $ref: '#/components/parameters/local-tests-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                uuid:
+                 $ref: '#/components/schemas/uuid'
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: Unable to create or add user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api_err_response'
 
 
 
