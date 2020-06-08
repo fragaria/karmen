@@ -6,7 +6,9 @@ import json
 from server.database import organization_roles, users, organizations
 import uuid as guid
 
-from server.services.mailer.templates.registration_verification import encode_activation_token
+from server.services.mailer.templates.registration_verification import (
+    encode_activation_token,
+)
 
 
 def local_tests_mode_required(func):
@@ -35,7 +37,9 @@ def create_test_user():
     new_user["detail"].pop("activated")
     new_user["detail"].pop("activation_key_expires")
     app.logger.debug(organization_roles.get_by_user_uuid(new_user["user_uuid"]))
-    new_user["organizations"] = [dict(x) for x in organization_roles.get_by_user_uuid(new_user["user_uuid"])]
+    new_user["organizations"] = [
+        dict(x) for x in organization_roles.get_by_user_uuid(new_user["user_uuid"])
+    ]
 
     return make_response(json.dumps(new_user), 201 if new_user["activated"] else 400)
 
@@ -49,12 +53,12 @@ def register_test_user():
     token_variables = {
         "activation_key": str(inactive_user["activation_key"]),
         "activation_key_expires": str(inactive_user["activation_key_expires"]),
-        "email": email
+        "email": email,
     }
 
-    return make_response(json.dumps({
-        "activation_key": encode_activation_token(token_variables)
-    }), 201)
+    return make_response(
+        json.dumps({"activation_key": encode_activation_token(token_variables)}), 201
+    )
 
 
 # /tests-admin/organizations, POST
@@ -92,4 +96,3 @@ def remove_user_from_org(org_uuid):
     user_uuid = request.json.get("uuid")
     organization_roles.drop_organization_role(org_uuid, user_uuid)
     return make_response("", 204)
-

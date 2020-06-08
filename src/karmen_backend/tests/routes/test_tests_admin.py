@@ -134,3 +134,31 @@ class AddUsersToOrgViaTestsAdmin(unittest.TestCase):
                 headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             self.assertEqual(response.status_code, 400)
+
+
+class RemoveUsersFromOrgViaTestsAdmin(unittest.TestCase):
+    def remove_user_from_org(self):
+        # first we create user
+        email = get_random_email()
+        password = get_random_username()
+        with app.test_client() as c:
+            response = c.post(
+                "/tests-admin/users/create",
+                json={
+                    "email": email,
+                    "password": password,
+                    "local-tests-token": LOCAL_TESTS_TOKEN,
+                },
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
+            )
+            resp = json.loads(response.data)
+            org = resp["detail"]["organizations"][0]["uuid"]
+            uuid = resp["user_uuid"]
+
+            # then we remove him from his org
+            response = c.delete(
+                f"/tests-admin/organizations/{org}/users",
+                json={"uuid": uuid, "local-tests-token": LOCAL_TESTS_TOKEN,},
+                headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
+            )
+            self.assertEqual(response.status_code, 204)
