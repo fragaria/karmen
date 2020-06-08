@@ -10,7 +10,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 import connexion
 
 
-__version__ = "0.11.0"
+__version__ = "0.11.0-tst01"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
