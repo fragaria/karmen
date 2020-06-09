@@ -75,6 +75,7 @@ describe("G-codes: Listing", function () {
         cy.get(".dropdown-item.text-secondary")
           .findByText("Delete g-code")
           .click();
+        cy.wait(1000);
         cy.get("div.modal-content").findByText("Cancel").click();
       });
 
