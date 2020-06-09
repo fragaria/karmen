@@ -10,8 +10,8 @@ SECRET_KEY?=tests
 LOCAL_TESTS_TOKEN?=This token is to enable local admin used for tests and to verify requests to it
 
 run-docker-test-postgres:
-	@if [[ -n `docker ps -qa -f name=karmen_pg_test -f status=running` ]]; then docker stop karmen_pg_test; fi
-	@if [[ -n `docker ps -qa -f name=karmen_pg_test -f status=exited` ]]; then docker rm karmen_pg_test; fi
+	if [ -n `docker ps -qa -f name=karmen_pg_test -f status=running` ]; then docker stop karmen_pg_test; fi
+	if [ -n `docker ps -qa -f name=karmen_pg_test -f status=exited` ]; then docker rm karmen_pg_test; fi
 	docker run --detach --name karmen_pg_test \
 		-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 		-e POSTGRES_USER=${POSTGRES_USER} \
@@ -22,8 +22,8 @@ run-docker-test-postgres:
 	ENV=test REDIS_PORT=${REDIS_PORT} POSTGRES_PORT=${POSTGRES_PORT} POSTGRES_PASSWORD=${POSTGRES_PASSWORD} POSTGRES_USER=${POSTGRES_USER} POSTGRES_DB=${POSTGRES_DB} POSTGRES_HOST=${POSTGRES_HOST} sh ./scripts/migrate.sh
 
 run-docker-test-redis:
-	@if [[ -n `docker ps -qa -f name=karmen_redis_test -f status=running` ]]; then docker stop karmen_redis_test; fi
-	@if [[ -n `docker ps -qa -f name=karmen_redis_test -f status=exited` ]]; then docker rm karmen_redis_test; fi
+	if [ -n `docker ps -qa -f name=karmen_redis_test -f status=running` ]; then docker stop karmen_redis_test; fi
+	if [ -n `docker ps -qa -f name=karmen_redis_test -f status=exited` ]; then docker rm karmen_redis_test; fi
 	docker run --detach --name karmen_redis_test \
 		-p ${REDIS_PORT}:6379 \
 		redis:5
