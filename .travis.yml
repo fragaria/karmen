@@ -34,6 +34,7 @@ matrix:
     # run cypress tests
       node_js: 10
       cache:
+        bundler: true
         directories:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
@@ -52,11 +53,13 @@ matrix:
         - docker-compose down || travis_terminate 1;
 
     - language: node_js
+
       name: e2e tests nonCLOUD mode
 
     # run cypress tests
       node_js: 10
       cache:
+        bundler: true
         directories:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
@@ -74,6 +77,7 @@ matrix:
     # run cypress tests
       node_js: 10
       cache:
+        bundler: true
         directories:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
