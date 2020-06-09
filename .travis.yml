@@ -20,6 +20,9 @@ matrix:
     - python: 3.6
     - python: 3.7
     - node_js: 10
+    - language: generic
+      env: FAIL=TRUE
+
 
   fast_finish: true
   include:
@@ -126,6 +129,7 @@ matrix:
     - name: "backend image arm"
       if: tag IS present
       language: generic
+      env: FAIL=TRUE
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
         - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest

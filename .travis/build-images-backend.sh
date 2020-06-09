@@ -21,8 +21,8 @@ if [[ "$1" = "amd" ]]; then
               --opt filename=./Dockerfile
 fi
 
-# Build for armhf and push
-if [[ "$1" = "arm" ]]; then
+# Build for armhf and push, but only for major releases
+if [[ "$1" = "arm" ]] && [[ "$TRAVIS_TAG" =~ ^v[0-9.]*$ ]]; then
   buildctl build --frontend dockerfile.v0 \
             --local dockerfile=. \
             --local context=. \

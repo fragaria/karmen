@@ -10,6 +10,7 @@ cd "${DIR}/../src/karmen_backend"
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
 
+export DOCKER_CLI_EXPERIMENTAL=enabled
 
 
 # Create manifest list and push that
