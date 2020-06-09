@@ -19,24 +19,36 @@ buildctl build --frontend dockerfile.v0 \
             --opt filename=./Dockerfile
 
 
-# Build for armhf and push
-buildctl build --frontend dockerfile.v0 \
+# Build for armhf and push, but only for major releases
+if  [[ "$TRAVIS_TAG" =~ ^v[0-9.]*$ ]]; then
+  buildctl build --frontend dockerfile.v0 \
             --local dockerfile=. \
             --local context=. \
             --output type=image,name=docker.io/fragaria/karmen-proxy:$TRAVIS_BRANCH-armhf,push=true \
             --opt platform=linux/armhf \
             --opt filename=./Dockerfile
 
-
+fi
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
 # Create manifest list and push that
+
+# for both architecture with major release
+if [[ "$TRAVIS_TAG" =~ ^v[0-9.]*$ ]]; then
 docker manifest create fragaria/karmen-proxy:$TRAVIS_BRANCH \
             fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64 \
             fragaria/karmen-proxy:$TRAVIS_BRANCH-armhf
 
 docker manifest annotate fragaria/karmen-proxy:$TRAVIS_BRANCH fragaria/karmen-proxy:$TRAVIS_BRANCH-armhf --arch arm
 docker manifest annotate fragaria/karmen-proxy:$TRAVIS_BRANCH fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64 --arch amd64
+
+else
+docker manifest create fragaria/karmen-proxy:$TRAVIS_BRANCH \
+            fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64 \
+
+docker manifest annotate fragaria/karmen-proxy:$TRAVIS_BRANCH fragaria/karmen-proxy:$TRAVIS_BRANCH-amd64 --arch amd64
+
+ fi
 
 docker manifest push fragaria/karmen-proxy:$TRAVIS_BRANCH
 

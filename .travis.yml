@@ -17,7 +17,8 @@ if: (branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR
 matrix:
   allow_failures:
     - python: 3.8-dev
-
+    - language: generic
+      env: FAIL=TRUE
   fast_finish: true
   include:
 
@@ -28,6 +29,7 @@ matrix:
     # run cypress tests
       node_js: 10
       cache:
+        bundler: true
         directories:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
@@ -44,6 +46,42 @@ matrix:
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         - cd cypress && npm run test:cypress && cd - || travis_terminate 1;
         - docker-compose down || travis_terminate 1;
+
+    - language: node_js
+      name: e2e tests nonCLOUD mode
+    # run cypress tests
+      node_js: 10
+      cache:
+        bundler: true
+        directories:
+          - "$HOME/.npm"  # npm
+          - "$HOME/.cache"  # cypress
+      before_script:
+        - cd src/karmen_frontend/cypress && CI=true npm ci --only=prod
+      script:
+        - cd $TRAVIS_BUILD_DIR/src/karmen_frontend
+        - docker-compose build || travis_terminate 1;
+        - KARMEN_CLOUD_MODE=0 docker-compose up -d || travis_terminate 1;
+        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+        - cd cypress && npm test && cd - || travis_terminate 1;
+    - language: node_js
+      name: e2e test CLOUD mode
+
+    # run cypress tests
+      node_js: 10
+      cache:
+        bundler: true
+        directories:
+          - "$HOME/.npm"  # npm
+          - "$HOME/.cache"  # cypress
+      before_script:
+        - cd src/karmen_frontend/cypress && CI=true npm ci --only=prod
+      script:
+        - cd $TRAVIS_BUILD_DIR/src/karmen_frontend
+        - docker-compose build || travis_terminate 1;
+        - KARMEN_CLOUD_MODE=1 docker-compose up -d || travis_terminate 1;
+        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+        - cd cypress && npm test && cd - || travis_terminate 1;
     # Python 3.6 (requires build images)
     - python: "3.6"
       language: python
@@ -106,7 +144,7 @@ matrix:
         - npm run build
 
     # build and push docker images
-    - name: "backend image"
+    - name: "backend image amd"
       stage: Build Docker images
       if: tag IS present
       language: generic
@@ -119,7 +157,21 @@ matrix:
         - export BUILDKIT_HOST=tcp://0.0.0.0:1234
       install: true
       script:
-        - travis_wait 60 bash .travis/build-images-backend.sh
+        - bash .travis/build-images-backend.sh amd
+    - name: "backend image arm"
+      if: (tag IS present) AND (NOT tag =~ ^v[0-9.]*$ )
+      language: generic
+      env: FAIL=TRUE
+      before_install:
+        - sudo docker run --privileged linuxkit/binfmt:v0.6
+        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
+          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
+          linux/armhf
+        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
+        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+      install: true
+      script:
+        - bash .travis/build-images-backend.sh arm
 
     - name: "frontend image"
       if: tag IS present
@@ -148,6 +200,14 @@ matrix:
       install: true
       script:
         - bash .travis/build-images-proxy.sh
+
+    - name: "annotate images"
+      stage: Annotate
+      if: tag IS present
+      language: generic
+      install: true
+      script:
+        - bash .travis/annotate-images-backend.sh
 
     # deploy to GitHub releases
     #
