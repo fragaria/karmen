@@ -114,7 +114,7 @@ matrix:
     # build and push docker images
     - name: "backend image amd"
       stage: Build Docker images
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -127,7 +127,7 @@ matrix:
       script:
         - bash .travis/build-images-backend.sh amd
     - name: "backend image arm"
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       env: FAIL=TRUE
       before_install:
@@ -142,7 +142,7 @@ matrix:
         - bash .travis/build-images-backend.sh arm
 
     - name: "frontend image"
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -156,7 +156,7 @@ matrix:
         - bash .travis/build-images-frontend.sh
 
     - name: "proxy image"
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
@@ -171,7 +171,7 @@ matrix:
 
     - name: "annotate images"
       stage: Annotate
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       install: true
       script:
@@ -185,7 +185,7 @@ matrix:
     # PRE-RELEASE
     - name: "Pre-release"
       stage: Create GitHub release
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       install: true
       script:
@@ -204,7 +204,7 @@ matrix:
 
     # STABLE RELEASE
     - name: "Stable release"
-      if: tag IS present OR commit_message =~ /#build/
+      if: tag IS present
       language: generic
       install: true
       script:
