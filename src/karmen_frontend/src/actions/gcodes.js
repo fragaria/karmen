@@ -2,6 +2,8 @@ import { createHttpAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
+const BASE_URL = window.env.BACKEND_BASE;
+
 export const clearGcodesPages = (printerUuid) => (dispatch) => {
   return dispatch({
     type: "GCODES_CLEAR_PAGES",
@@ -67,3 +69,11 @@ export const uploadGcode = createHttpAction(
     });
   }
 );
+
+export const getGcodeDownloadUrl = (orguuid, id) => (dispatch) => {
+  return dispatch(loadGcode(orguuid, id, [])).then((r) => {
+    let downloadPath = r.data.data;
+    if (downloadPath[0] === "/") downloadPath = downloadPath.substr(1);
+    return `${BASE_URL}/${downloadPath}`;
+  });
+};

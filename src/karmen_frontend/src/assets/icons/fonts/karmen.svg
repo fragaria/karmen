@@ -24,4 +24,5 @@
 <glyph unicode="&#xe90e;" glyph-name="grid, icons" d="M256 480h224v224h-224v-224zM544 704v-224h224v224h-224zM544 192h224v224h-224v-224zM256 192h224v224h-224v-224z" />
 <glyph unicode="&#xe90f;" glyph-name="list" d="M256 576h128v128h-128v-128zM256 384h128v128h-128v-128zM256 192h128v128h-128v-128zM448 704v-128h320v128h-320zM448 384h320v128h-320v-128zM448 192h320v128h-320v-128z" />
 <glyph unicode="&#xe910;" glyph-name="arrow-up" d="M512 928l-480-480h288v-512h384v512h288z" />
+<glyph unicode="&#xe911;" glyph-name="download" d="M214 170.667h596v-86h-596v86zM810 554.667l-298-298-298 298h170v256h256v-256h170z" />
 </font></defs></svg>

@@ -13,6 +13,7 @@ import {
   deleteGcode,
   addPrintJob,
   loadPrinters,
+  getGcodeDownloadUrl,
 } from "../../actions";
 import formatters from "../../services/formatters";
 
@@ -65,6 +66,7 @@ const GcodeTableRow = ({
   path,
   display,
   printGcode,
+  getDownloadUrl,
   onSchedulePrint,
   availablePrinters,
   onRowDelete,
@@ -81,6 +83,11 @@ const GcodeTableRow = ({
   });
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
+  const [downloadUrl, setDownloadUrl] = useState();
+
+  getDownloadUrl(uuid).then((url) => {
+    setDownloadUrl(url);
+  });
 
   return (
     <div className="list-item">
@@ -112,6 +119,18 @@ const GcodeTableRow = ({
           <i className="icon-printer"></i>
           Print g-code
         </button>
+
+        <a
+          download
+          className="dropdown-item"
+          href={downloadUrl}
+          onClick={(e) => {
+            setCtaListExpanded(false);
+          }}
+        >
+          <i className="icon-download"></i>
+          Download G-code
+        </a>
 
         <button
           className="dropdown-item text-secondary"
@@ -158,6 +177,7 @@ class GcodeList extends React.Component {
       clearGcodesPages,
       deleteGcode,
       printGcode,
+      getDownloadUrl,
     } = this.props;
 
     return (
@@ -184,6 +204,7 @@ class GcodeList extends React.Component {
                 orguuid={match.params.orguuid}
                 {...g}
                 printGcode={printGcode}
+                getDownloadUrl={getDownloadUrl}
                 onSchedulePrint={(gcodeUuid, printerUuid) =>
                   printGcode(gcodeUuid, printerUuid).then((r) => {
                     printedOn.push(printerUuid);
@@ -266,5 +287,7 @@ export default connect(
       dispatch(deleteGcode(ownProps.match.params.orguuid, uuid)),
     printGcode: (uuid, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orguuid, uuid, printer)),
+    getDownloadUrl: (uuid) =>
+      dispatch(getGcodeDownloadUrl(ownProps.match.params.orguuid, uuid)),
   })
 )(GcodeList);

@@ -5,10 +5,13 @@ import SetActiveOrganization from "../../components/gateways/set-active-organiza
 import Loader from "../../components/utils/loader";
 import { usePrintGcodeModal } from "../../components/gcodes/print-gcode-modal";
 
-import { loadGcode, loadPrinters, addPrintJob } from "../../actions";
+import {
+  loadGcode,
+  loadPrinters,
+  addPrintJob,
+  getGcodeDownloadUrl,
+} from "../../actions";
 import formatters from "../../services/formatters";
-
-const BASE_URL = window.env.BACKEND_BASE;
 
 const GcodePrint = ({
   gcode,
@@ -58,15 +61,17 @@ class GcodeDetail extends React.Component {
   }
 
   loadGcode() {
-    const { match, getGcode } = this.props;
+    const { match, getGcode, getDownloadUrl } = this.props;
+
     getGcode(match.params.uuid, []).then((r) => {
-      let downloadPath = r.data.data;
-      if (downloadPath[0] === "/") downloadPath = downloadPath.substr(1);
       this.setState({
         gcode: r.data,
-        downloadUrl: `${BASE_URL}/${downloadPath}`,
         gcodeLoaded: true,
       });
+    });
+
+    getDownloadUrl(match.params.uuid).then((url) => {
+      this.setState({ downloadUrl: url });
     });
   }
 
@@ -267,5 +272,7 @@ export default connect(
       dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
     printGcode: (id, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orguuid, id, printer)),
+    getDownloadUrl: (uuid) =>
+      dispatch(getGcodeDownloadUrl(ownProps.match.params.orguuid, uuid)),
   })
 )(GcodeDetail);
