@@ -17,6 +17,9 @@ if: (branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR
 matrix:
   allow_failures:
     - python: 3.8-dev
+    - python: 3.6
+    - python: 3.7
+    - node_js: 10
 
   fast_finish: true
   include:
