@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'karmen';
-  src:  url('fonts/karmen.eot?kmbhes');
-  src:  url('fonts/karmen.eot?kmbhes#iefix') format('embedded-opentype'),
-    url('fonts/karmen.ttf?kmbhes') format('truetype'),
-    url('fonts/karmen.woff?kmbhes') format('woff'),
-    url('fonts/karmen.svg?kmbhes#karmen') format('svg');
+  src:  url('fonts/karmen.eot?j7neen');
+  src:  url('fonts/karmen.eot?j7neen#iefix') format('embedded-opentype'),
+    url('fonts/karmen.ttf?j7neen') format('truetype'),
+    url('fonts/karmen.woff?j7neen') format('woff'),
+    url('fonts/karmen.svg?j7neen#karmen') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-settings:before {
+  content: "\e912";
+}
 .icon-download:before {
   content: "\e911";
 }

@@ -93,6 +93,11 @@ small {
   font-size: 80%;
 }
 
+sup {
+  font-size: smaller;
+  vertical-align: super;
+}
+
 p {
   @include plumber(
     $leading-top: 0,
@@ -275,9 +280,9 @@ footer {
     width: 120px;
     height: 120px;
     margin: 0 auto $base-unit;
-    border-radius: 120px;
+    // border-radius: 120px;
     border: 6px solid #fff;
-    box-shadow: 0 0 4px 0 rgba(37, 42, 49, 0.3);
+    // box-shadow: 0 0 4px 0 rgba(37, 42, 49, 0.3);
     background: #fff;
     overflow: hidden;
 
@@ -293,14 +298,20 @@ footer {
   }
 
   .navigation-user-name {
+    position: relative;
+    display: inline-block;
+
     @include plumber(
       $font-size: 2.3,
       $leading-top: 2 ,
       $leading-bottom: 0
     );
 
-    @media (min-width: $screen-sm-min) {
-
+    sup {
+      position: absolute;
+      top: 0;
+      padding-left: $base-unit/2;
+      font-size: 60%;
     }
   }
 
