@@ -1423,3 +1423,14 @@ ul.ul-styled {
   list-style-type: square;
   margin-left: $spacing-default/1.5;
 }
+
+
+// TABS CONTENT
+.tabs-content-message {
+  @include plumber(
+    $font-size: 1.5,
+    $leading-top: 1,
+    $leading-bottom: 0
+  );
+}
+
