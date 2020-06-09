@@ -404,15 +404,13 @@ const ControlsTab = ({
     <div className="container">
       {!printer.client.connected && (
         <div className="tabs-content-message">
-          <strong>Controls are not available for a disconnected printer</strong>
+          Controls are not available for a disconnected printer
         </div>
       )}
       {printer.client.connected &&
         printer.client.access_level !== "unlocked" && (
           <div className="tabs-content-message">
-            <strong>
-              Printer is locked and therefore controls are not available
-            </strong>
+            Printer is locked and therefore controls are not available
           </div>
         )}
       {printer.client.connected &&

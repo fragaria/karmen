@@ -1428,7 +1428,7 @@ ul.ul-styled {
 // TABS CONTENT
 .tabs-content-message {
   @include plumber(
-    $font-size: 1.5,
+    $font-size: 1.618,
     $leading-top: 1,
     $leading-bottom: 0
   );
