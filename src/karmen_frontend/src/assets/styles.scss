@@ -262,24 +262,31 @@ footer {
     }
   }
 
-  .navigation-user {
+  .navigation-title {
     min-width: 300px;
     border-bottom: $border-light;
     text-align: center;
 
     @include plumber(
       $font-size: 2.5,
-      $leading-top: 0,
+      $leading-top: 8,
       $leading-bottom: 2
     );
 
+    &:first-child {
+      @include plumber(
+        $font-size: 2.5,
+        $leading-top: 0,
+        $leading-bottom: 2
+      );
+    }
   }
 
-  .navigation-user-avatar {
+  .navigation-title-avatar {
     display: block;
     width: 120px;
     height: 120px;
-    margin: 0 auto $base-unit;
+    margin: 0 auto $base-unit*3;
     // border-radius: 120px;
     border: 6px solid #fff;
     // box-shadow: 0 0 4px 0 rgba(37, 42, 49, 0.3);
@@ -297,25 +304,9 @@ footer {
     }
   }
 
-  .navigation-user-name {
+  .navigation-title-content {
     position: relative;
-    display: inline-block;
 
-    @include plumber(
-      $font-size: 2.3,
-      $leading-top: 2 ,
-      $leading-bottom: 0
-    );
-
-    sup {
-      position: absolute;
-      top: 0;
-      padding-left: $base-unit/2;
-      font-size: 60%;
-    }
-  }
-
-  .navigation-user-organization {
     @include plumber(
       $font-size: 1.618,
       $leading-top: 0
@@ -323,6 +314,12 @@ footer {
 
     @media (min-width: $screen-sm-min) {
 
+    }
+
+    .icon-settings {
+      position: absolute;
+      top: 17px;
+      padding-left: $base-unit*2;
     }
   }
 
