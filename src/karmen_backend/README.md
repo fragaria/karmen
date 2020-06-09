@@ -35,6 +35,7 @@ There are two options:
 1. docker - just run `make test-isolated`
 2. `pipenv`
     - You need `pipenv`, `python3-dev`, `libpq-dev`, `postgresql-client` dependencies
+    - install dependencies by running `cd src/karmen_backend/ && pipenv install --dev`
     - Run `make test` or `make test-watch` from `pipenv shell`
 
 ### Docker
