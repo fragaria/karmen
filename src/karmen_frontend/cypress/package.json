@@ -1,7 +1,7 @@
 {
   "name": "karmen-e2e-tests",
   "version": "1.0.0",
-  "description": "",
+  "description": "Integration tests for karmen.",
   "main": "index.js",
   "eslintConfig": {
     "extends": [
@@ -9,7 +9,8 @@
     ]
   },
   "scripts": {
-    "test": "cypress run",
+    "cypress": "cypress open",
+    "test:cypress": "cypress run",
     "lint:cypress": "eslint cypress --ext js",
     "prettier": "prettier --check src/**/*.js cypress/**/*.js",
     "prettier:fix": "prettier --write src/**/*.js cypress/**/*.js"
