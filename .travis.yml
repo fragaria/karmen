@@ -53,9 +53,7 @@ matrix:
         - docker-compose down || travis_terminate 1;
 
     - language: node_js
-
       name: e2e tests nonCLOUD mode
-
     # run cypress tests
       node_js: 10
       cache:
