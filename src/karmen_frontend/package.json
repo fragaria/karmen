@@ -60,7 +60,7 @@
     "test:cypress": "cd cypress && npm run test:cypress"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.9.0",
+    "@testing-library/jest-dom": "^5.10.0",
     "@testing-library/react": "^10.2.1",
     "@testing-library/user-event": "^11.4.2",
     "chance": "^1.1.6",
