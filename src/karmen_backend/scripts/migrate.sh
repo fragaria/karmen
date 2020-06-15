@@ -1,6 +1,9 @@
 #!/bin/bash
+set -e # exit on error
+set -o errtrace # print traceback on error
+set -o pipefail  # exit on error in pipe
 
-MYDIR="$(dirname "$(readlink -f "$0")")"
+MYDIR="$(cd `dirname "$0"` && pwd; cd - > /dev/null)"
 
 while ! pg_isready --port ${POSTGRES_PORT} --host ${POSTGRES_HOST} > /dev/null 2>&1; do echo 'Waiting for postgres...'; sleep 1; done
 echo "Introducing pgmigrate structures if necessary..."
