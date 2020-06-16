@@ -1,0 +1,33 @@
+version: 2.1
+orbs:
+  node: circleci/node@1.1.6
+jobs:
+  build_and_test:
+    docker:
+      - image: circleci/node:10.8.0
+    steps:
+      - checkout
+      - setup_remote_docker
+        # docker_layer_caching: true
+      # start the ecosystem
+      - run:
+          name: Install Docker Compose
+          command: |
+            set -x
+            curl -L https://github.com/docker/compose/releases/download/1.26.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
+      - node/with-cache:
+          steps:
+            - run: |
+                set -xe
+                docker-compose build --progress plain
+                docker-compose up -d
+                cd src/karmen_frontend/cypress && npm ci --only=prod && cd -
+                while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+                cd src/karmen_frontend/cypress && npm run test:cypress
+                docker-compose down
+workflows:
+    build-and-test:
+      jobs:
+        - build_and_test
