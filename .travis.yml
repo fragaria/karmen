@@ -109,7 +109,8 @@ matrix:
     - name: "backend image"
       stage: Build Docker images
       if: tag IS present
-      language: generic
+      os: linux
+      dist: bionic
       before_install:
         - sudo docker run --privileged linuxkit/binfmt:v0.6
         - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
@@ -119,7 +120,7 @@ matrix:
         - export BUILDKIT_HOST=tcp://0.0.0.0:1234
       install: true
       script:
-        - travis_wait 60 bash .travis/build-images-backend.sh
+        - bash .travis/build-images-backend.sh
 
     - name: "frontend image"
       if: tag IS present
