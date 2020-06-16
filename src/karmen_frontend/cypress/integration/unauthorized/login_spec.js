@@ -36,6 +36,7 @@ describe("Unauthorized: Login flow", function () {
     cy.get("input#username").type(email);
     cy.get("input#password").type(password);
     cy.get("button[type=submit]").click();
+    cy.wait(2000)
     cy.get("main .content").should("have.class", "printer-list");
   });
 });

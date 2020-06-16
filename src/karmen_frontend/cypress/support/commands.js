@@ -345,5 +345,5 @@ Cypress.Commands.add("prepareAppWithUser", () => {
 
 Cypress.Commands.add("toggleMenu", (item) => {
   cy.findByRole("menu").click();
-  cy.findByText(item).click();
+  cy.findAllByText(item).first().click();
 });
