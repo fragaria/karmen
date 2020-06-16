@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIR=$(dirname $(realpath -s $0))
+DIR=$(cd `dirname $0` && pwd && cd - > /dev/null)
 cd $DIR
 
 IS_CLOUD_INSTALL=`if [ ${CLOUD_MODE} == 1 ]; then echo 'true'; else echo 'false'; fi`
