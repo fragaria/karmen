@@ -629,3 +629,9 @@ class CheckPrinterTest(unittest.TestCase):
         check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
         self.assertEqual(mock_address.call_count, 0)
         self.assertEqual(mock_hostname.call_count, 0)
+
+    @mock.patch("server.database.printers.get_printer", return_value=None)
+    def test_task_does_not_fail_when_printer_disappeared(self, mock_get_printer):
+        'situation when printer was scheduled for update but was removed in the meantime'
+        result = check_printer("298819f5-0119-4e9b-8191-350d931f7ecf")
+        self.assertIs(result, None)
