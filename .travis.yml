@@ -36,10 +36,10 @@ matrix:
       script:
         - cd $TRAVIS_BUILD_DIR/src/karmen_frontend
         - docker-compose build || travis_terminate 1;
-        - KARMEN_CLOUD_MODE=0 docker-compose up -d || travis_terminate 1;
-        - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        - cd cypress && npm run test:cypress && cd - || travis_terminate 1;
-        - docker-compose down || travis_terminate 1;
+     #  - KARMEN_CLOUD_MODE=0 docker-compose up -d || travis_terminate 1;
+     #  - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
+     #  - cd cypress && npm run test:cypress && cd - || travis_terminate 1;
+     #  - docker-compose down || travis_terminate 1;
         - KARMEN_CLOUD_MODE=1 docker-compose up -d || travis_terminate 1;
         - while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         - cd cypress && npm run test:cypress && cd - || travis_terminate 1;
