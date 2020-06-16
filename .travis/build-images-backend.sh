@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
+set -o errtrace # print traceback on error
+set -o pipefail  # exit on error in pipe
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
-DIR=$(dirname $(realpath -s $0))
+cd $(dirname $0)/../src/karmen_backend
 
-cd "${DIR}/../src/karmen_backend"
 
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
