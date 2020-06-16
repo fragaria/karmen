@@ -32,10 +32,6 @@ describe("Printers: Listing", function () {
         printerUuid = printer.uuid;
         cy.logout()
           .login(user.email, user.password)
-          .then((data) => {
-            user = Object.assign(user, data);
-            cy.toggleMenu("Settings");
-          });
       });
   });
 
@@ -47,6 +43,7 @@ describe("Printers: Listing", function () {
   });
 
   it("has link to organization settings", function () {
+    cy.toggleMenu("Default organization");
     cy.findByRole("listitem")
       .findByRole("menu")
       .click()
