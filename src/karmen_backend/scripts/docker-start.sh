@@ -16,6 +16,7 @@ clean_pid_file() {
 
 start_dbus() {
   mkdir -p /var/run/dbus
+  clean_pid_file /var/run/dbus/pid
   /usr/bin/dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
 }
 
