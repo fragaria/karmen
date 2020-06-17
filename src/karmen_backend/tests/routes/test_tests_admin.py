@@ -137,7 +137,7 @@ class AddUsersToOrgViaTestsAdmin(unittest.TestCase):
 
 
 class RemoveUsersFromOrgViaTestsAdmin(unittest.TestCase):
-    def remove_user_from_org(self):
+    def test_remove_user_from_org(self):
         # first we create user
         email = get_random_email()
         password = get_random_username()
@@ -152,7 +152,8 @@ class RemoveUsersFromOrgViaTestsAdmin(unittest.TestCase):
                 headers={"X-local-tests-token": LOCAL_TESTS_TOKEN},
             )
             resp = json.loads(response.data)
-            org = resp["detail"]["organizations"][0]["uuid"]
+            print(resp)
+            org = resp["organizations"][0]["uuid"]
             uuid = resp["user_uuid"]
 
             # then we remove him from his org
