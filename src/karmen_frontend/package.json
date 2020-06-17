@@ -57,7 +57,7 @@
     "start": "BROWSER=none REACT_APP_GIT_REV='@dev' react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
-    "test:cypress": "cd cypress && npm run test:cypress"
+    "test:cypress": "cd cypress && npm run test:cypress -- --key 0cf3da2a-6418-4f98-b923-3cb222a59cff --parallel"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.10.0",
