@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+set -o errtrace # print traceback on error
+set -o pipefail  # exit on error in pipe
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
