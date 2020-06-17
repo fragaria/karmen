@@ -3,5 +3,6 @@
   "video": false,
   "env": {
     "apiAdminToken": "random-test-token"
-  }
+  },
+  "projectId": "mxbp9f"
 }
