@@ -39,6 +39,7 @@ import AddApiToken from "./routes/user/add-api-token";
 import UserPreferences from "./routes/user/user-preferences";
 import ManageOrganizations from "./routes/manage-organizations";
 import AddOrganization from "./routes/add-organization";
+import NoOrganization from "./routes/no-organization";
 import Page404 from "./routes/page404";
 import AppRoot from "./routes/app-root";
 import configureStore from "./store";
@@ -285,6 +286,12 @@ const AppRouter = ({ userState, logout }) => {
             path="/add-organization"
             exact
             component={AddOrganization}
+          />
+          <AuthenticatedRoute
+            userState={userState}
+            path="/no-organization"
+            exact
+            component={NoOrganization}
           />
           <AuthenticatedRoute
             userState={userState}

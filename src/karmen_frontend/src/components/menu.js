@@ -159,34 +159,41 @@ class Menu extends React.Component {
                       </p>
                     </Link>
                   </li>
-                  <li className="navigation-item">
-                    <Link
-                      to={`/${activeOrganization.uuid}/printers`}
-                      onClick={() => this.setState({ navigation: false })}
-                      id="navigation-printers"
-                    >
-                      Printers
-                    </Link>
-                  </li>
-                  <li className="navigation-item">
-                    <Link
-                      to={`/${activeOrganization.uuid}/gcodes`}
-                      onClick={() => this.setState({ navigation: false })}
-                      id="navigation-gcodes"
-                    >
-                      G-Codes
-                    </Link>
-                  </li>
-                  {role === "admin" && (
-                    <li className="navigation-item">
-                      <Link
-                        to={`/${activeOrganization.uuid}/settings`}
-                        onClick={() => this.setState({ navigation: false })}
-                        id="navigation-settings"
-                      >
-                        Settings
-                      </Link>
-                    </li>
+                  {activeOrganization ? (
+                    //do not print some menu items if user is not a member of organization
+                    <>
+                      <li className="navigation-item">
+                        <Link
+                          to={`/${activeOrganization.uuid}/printers`}
+                          onClick={() => this.setState({ navigation: false })}
+                          id="navigation-printers"
+                        >
+                          Printers
+                        </Link>
+                      </li>
+                      <li className="navigation-item">
+                        <Link
+                          to={`/${activeOrganization.uuid}/gcodes`}
+                          onClick={() => this.setState({ navigation: false })}
+                          id="navigation-gcodes"
+                        >
+                          G-Codes
+                        </Link>
+                      </li>
+                      {role === "admin" && (
+                        <li className="navigation-item">
+                          <Link
+                            to={`/${activeOrganization.uuid}/settings`}
+                            onClick={() => this.setState({ navigation: false })}
+                            id="navigation-settings"
+                          >
+                            Settings
+                          </Link>
+                        </li>
+                      )}
+                    </>
+                  ) : (
+                    ""
                   )}
                   <li className="navigation-item">
                     <Link

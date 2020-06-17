@@ -10,14 +10,14 @@ describe("Organizations: Adding", function () {
   });
 
   it("fails with no name", function () {
-    cy.get('button[type="submit"]').click();
+    cy.findByText("Add organization").click()
     cy.get("form").contains("Name is required");
   });
 
   it("adds organization", function () {
     const name = chance.string();
-    cy.get("input#name").type(name);
-    cy.get('button[type="submit"]')
+    cy.findByLabelText("Name").type(name);
+    cy.findByText("Add organization")
       .click()
       .wait(3000)
       .then(() => {

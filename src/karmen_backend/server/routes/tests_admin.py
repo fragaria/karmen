@@ -6,7 +6,9 @@ import json
 from server.database import organization_roles, users, organizations
 import uuid as guid
 
-from server.services.mailer.templates.registration_verification import encode_activation_token
+from server.services.mailer.templates.registration_verification import (
+    encode_activation_token,
+)
 
 
 def local_tests_mode_required(func):
@@ -28,6 +30,17 @@ def create_test_user():
     email = request.json.get("email")
     password = request.json.get("password")
     new_user = models.users_me.create_tests_user(email=email, password=password)
+    new_user["detail"] = dict(users.get_by_uuid(new_user["user_uuid"]))
+    # These 2 are datetimes objects from Postgres and can't be
+    # serialized to JSON without extra work, so they crash the server here.
+    # As we don't need them, it's easier to pop them.
+    new_user["detail"].pop("activated")
+    new_user["detail"].pop("activation_key_expires")
+    app.logger.debug(organization_roles.get_by_user_uuid(new_user["user_uuid"]))
+    new_user["organizations"] = [
+        dict(x) for x in organization_roles.get_by_user_uuid(new_user["user_uuid"])
+    ]
+
     return make_response(json.dumps(new_user), 201 if new_user["activated"] else 400)
 
 
@@ -40,12 +53,12 @@ def register_test_user():
     token_variables = {
         "activation_key": str(inactive_user["activation_key"]),
         "activation_key_expires": str(inactive_user["activation_key_expires"]),
-        "email": email
+        "email": email,
     }
 
-    return make_response(json.dumps({
-        "activation_key": encode_activation_token(token_variables)
-    }), 201)
+    return make_response(
+        json.dumps({"activation_key": encode_activation_token(token_variables)}), 201
+    )
 
 
 # /tests-admin/organizations, POST
@@ -75,3 +88,11 @@ def add_user_to_org(org_uuid):
 
     organization_roles.set_organization_role(org_uuid, user_uuid, org_role)
     return make_response("", 200)
+
+
+# /tests-admin/organizations/{org_uuid}/users, DELETE
+@local_tests_mode_required
+def remove_user_from_org(org_uuid):
+    user_uuid = request.json.get("uuid")
+    organization_roles.drop_organization_role(org_uuid, user_uuid)
+    return make_response("", 204)

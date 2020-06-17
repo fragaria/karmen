@@ -6,6 +6,7 @@ import { FormInputs } from "../components/forms/form-utils";
 import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
 import { HttpError } from "../errors";
+import { switchOrganization } from "../actions";
 
 class AddOrganization extends React.Component {
   state = {
@@ -76,6 +77,11 @@ class AddOrganization extends React.Component {
 
   render() {
     const { form, message, messageOk, redirect } = this.state;
+    const { activeOrganization } = this.props;
+    if (redirect && !activeOrganization) {
+      //if user had no organizations and just created the first one, send him home
+      return <Redirect to="/" />;
+    }
     if (redirect) {
       return <Redirect to="/organizations" />;
     }
@@ -130,6 +136,12 @@ class AddOrganization extends React.Component {
   }
 }
 
-export default connect(null, (dispatch) => ({
-  createOrganization: (name) => dispatch(addOrganization(name)),
-}))(AddOrganization);
+export default connect(
+  (state) => ({
+    activeOrganization: state.me.activeOrganization,
+  }),
+  (dispatch) => ({
+    createOrganization: (name) => dispatch(addOrganization(name)),
+    switchOrganization: (uuid) => dispatch(switchOrganization(uuid)),
+  })
+)(AddOrganization);
