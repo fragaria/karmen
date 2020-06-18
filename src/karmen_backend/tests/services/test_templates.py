@@ -45,7 +45,7 @@ from server.services.mailer import get_template
             },
             "Hi!",
             "Your password reset link",
-            None,
+            "http://set-your-karmen-address-here.com/reset-password?reset=eyJwd2RfcmVzZXRfa2V5IjogImtleSIsICJwd2RfcmVzZXRfa2V5X2V4cGlyZXMiOiAidG9kYXkiLCAiZW1haWwiOiAiZW1haWxAZXhhbXBsZS5jb20ifQ==",
         ),
         (
             "PASSWORD_RESET_CONFIRMATION",
