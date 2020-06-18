@@ -221,7 +221,7 @@ def authenticate_base(include_refresh_token):
     # drop reset pwd key if any
     if local["pwd_reset_key_hash"]:
         local_users.update_local_user(
-            uuid=user["uuid"], pwd_reset_key_hash=None, pwd_reset_key_expires=None
+            user_uuid=user["uuid"], pwd_reset_key_hash=None, pwd_reset_key_expires=None
         )
 
     userdata = dict(user)
