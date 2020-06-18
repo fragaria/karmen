@@ -50,7 +50,7 @@ class PasswordResetLink(BrandedMailTemplate):
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                         <tbody>
                         <tr>
-                            <td><a href="{{self.variables["pwd_reset_link"]}}" target="_blank">Set new password</a> </td>
+                            <td><a href="{self.variables["pwd_reset_link"]}" target="_blank">Set new password</a> </td>
                         </tr>
                         </tbody>
                     </table>
