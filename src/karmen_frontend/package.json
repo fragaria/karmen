@@ -47,7 +47,7 @@
       "plugin:prettier/recommended"
     ]
   },
-  "version": "0.12.1-rc1",
+  "version": "0.12.1",
   "scripts": {
     "eject": "react-scripts eject",
     "cypress": "cd cypress && npm run cypress",
