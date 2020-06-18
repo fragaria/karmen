@@ -20,8 +20,8 @@ const PrinterSettingsForm = ({
           (printer.printer_props && printer.printer_props.tool0_diameter) || "",
         note: (printer.printer_props && printer.printer_props.note) || "",
       }}
-      onSubmit={this.onPrinterSettingsChanged}
-      onCancel={this.onPrinterSettingsCancelled}
+      onSubmit={onPrinterSettingsChanged}
+      onCancel={onPrinterSettingsCancelled}
     />
   );
 };
