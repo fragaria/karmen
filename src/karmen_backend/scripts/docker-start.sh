@@ -29,6 +29,8 @@ start_dbus() {
   fi
 }
 
+echo "MAILER: $MAILER"
+
 if [ "$SERVICE" = 'flask' ]; then
   start_dbus || err "could not start dbus"
   # FIXME: this should start for CLOUD_MODE=0 only
