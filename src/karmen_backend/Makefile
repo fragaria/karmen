@@ -39,7 +39,7 @@ test: run-docker-test-redis run-docker-test-postgres
 	CELERY_CONFIG=${CELERY_CONFIG} \
 	SECRET_KEY=${SECRET_KEY} \
 	LOCAL_TESTS_TOKEN="${LOCAL_TESTS_TOKEN}" \
-	  pytest -n auto --dist=loadscope
+	  pytest -n auto --dist=loadscope $(test_args)
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 	@-docker stop karmen_redis_test
@@ -66,7 +66,7 @@ test-watch: run-docker-test-redis run-docker-test-postgres
 	CELERY_CONFIG=${CELERY_CONFIG} \
 	SECRET_KEY=${SECRET_KEY} \
 	LOCAL_TESTS_TOKEN="${LOCAL_TESTS_TOKEN}" \
-	  pytest --looponfail -n auto --dist=loadscope
+	  pytest --looponfail -n auto --dist=loadscope $(test_args)
 	@-docker stop karmen_pg_test
 	@-docker rm karmen_pg_test
 	@-docker stop karmen_redis_test
