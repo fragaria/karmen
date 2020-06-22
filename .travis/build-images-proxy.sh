@@ -1,11 +1,10 @@
 #!/bin/bash
-set -e
+set -x
+trap 'exit_code=$?; echo "ERROR: Exiting on error $exit_code" >&2; exit $exit_code' ERR
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
-DIR=$(dirname $(realpath -s $0))
-
-cd "${DIR}/../src/proxy"
+cd `dirname $(dirname $0)/../src/proxy`
 
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
