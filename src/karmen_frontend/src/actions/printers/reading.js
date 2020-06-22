@@ -214,6 +214,12 @@ export const getWebcamSnapshot = createHttpAction(
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       let { printers } = getState();
+
+      // This can happen during organization switching and printer's detail opened. Just catch it silently.
+      if (printers.activeOrganizationUuid !== orguuid) {
+        return Promise.reject(new Error("organization mismatch"));
+      }
+
       const printer = printers.printers.find((p) => p.uuid === uuid);
 
       if (!printer || !printer.webcam || !printer.webcam.url) {
@@ -255,6 +261,9 @@ export const getWebcamSnapshot = createHttpAction(
         };
       });
     }).catch((err) => {
+      if (err.message === "organization mismatch") {
+        return;
+      }
       if (!(err instanceof HttpError)) {
         throw err;
       }
