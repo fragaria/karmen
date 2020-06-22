@@ -4,7 +4,7 @@ trap 'exit_code=$?; echo "ERROR: Exiting on error $exit_code" >&2; exit $exit_co
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 
-cd `dirname $(dirname $0)/../src/proxy`
+cd `dirname $(dirname $0)/src/proxy`
 
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
 docker info
