@@ -325,6 +325,20 @@ class RequestResetPasswordRoute(unittest.TestCase):
             self.assertTrue(args[1][0][2]["pwd_reset_key_expires"] is not None)
             self.assertEqual(args[1][0][2]["email"], email)
 
+    def test_login__still_works_after_reset_request(self):
+        with app.test_client() as c:
+            response = c.post(
+                "/users/me/request-password-reset",
+                json={"email": "test-admin@karmen.local"},
+            )
+            self.assertEqual(response.status_code, 202)
+
+            response = c.post(
+                "/users/me/authenticate",
+                json={"username": "test-admin", "password": "admin-password"},
+            )
+            self.assertEqual(response.status_code, 200)
+
 
 class ResetPasswordRoute(unittest.TestCase):
     def setUp(self):

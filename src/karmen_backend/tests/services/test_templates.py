@@ -5,7 +5,7 @@ from server.services.mailer import get_template
 
 
 @pytest.mark.parametrize(
-    "template_key,template_variables,headline,excerpt",
+    "template_key,template_variables,headline,excerpt,check_string",
     (
         (
             "REGISTRATION_VERIFICATION_EMAIL",
@@ -16,6 +16,7 @@ from server.services.mailer import get_template
             },
             "Welcome to Karmen!",
             "Click on the verification link to start using Karmen",
+            "http://set-your-karmen-address-here.com/confirmation?activate=eyJhY3RpdmF0aW9uX2tleSI6ICJrZXkiLCAiYWN0aXZhdGlvbl9rZXlfZXhwaXJlcyI6ICJ0b2RheSIsICJlbWFpbCI6ICJlbWFpbEBleGFtcGxlLmNvbSJ9",
         ),
         (
             "ORGANIZATION_INVITATION",
@@ -26,12 +27,14 @@ from server.services.mailer import get_template
             },
             "Hi there!",
             "You've been invited to join TheOrganization",
+            None,
         ),
         (
             "ORGANIZATION_REMOVAL",
             {"organization_name": "TheOrganization",},
             "Hi!",
             "Your membership in TheOrganization has been revoked",
+            None,
         ),
         (
             "PASSWORD_RESET_LINK",
@@ -42,16 +45,20 @@ from server.services.mailer import get_template
             },
             "Hi!",
             "Your password reset link",
+            "http://set-your-karmen-address-here.com/reset-password?reset=eyJwd2RfcmVzZXRfa2V5IjogImtleSIsICJwd2RfcmVzZXRfa2V5X2V4cGlyZXMiOiAidG9kYXkiLCAiZW1haWwiOiAiZW1haWxAZXhhbXBsZS5jb20ifQ==",
         ),
         (
             "PASSWORD_RESET_CONFIRMATION",
             {"email": "email@example.com"},
             "Hello",
             "Your password has just been changed",
+            None,
         ),
     ),
 )
-def test_mail_template_compiles(template_key, template_variables, headline, excerpt):
+def test_mail_template_compiles(
+    template_key, template_variables, headline, excerpt, check_string
+):
     template = get_template(template_key)
     template.prepare_variables(template_variables)
 
@@ -74,3 +81,6 @@ def test_mail_template_compiles(template_key, template_variables, headline, exce
     assert headline in text
     assert headline in html
     assert excerpt in html
+    if check_string is not None:
+        assert check_string in html
+        assert check_string in text
