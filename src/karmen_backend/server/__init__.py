@@ -7,6 +7,8 @@ from celery import Celery
 from flask_jwt_extended import JWTManager
 from flask_executor import Executor
 from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 import connexion
 
 
@@ -40,7 +42,7 @@ def setup_celery(flask_app):
 if os.environ.get("SENTRY_DSN") is not None:
     sentry_sdk.init(
         dsn=os.environ.get("SENTRY_DSN"),
-        integrations=[FlaskIntegration()],
+        integrations=[FlaskIntegration(), RedisIntegration(), CeleryIntegration()],
         release="karmen_backend@%s" % __version__,
     )
 
