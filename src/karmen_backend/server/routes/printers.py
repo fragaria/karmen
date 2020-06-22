@@ -493,7 +493,7 @@ def printer_webcam_snapshot(org_uuid, printer_uuid):
         ].result()
         try:
             del FUTURES_MICROCACHE[printer_inst.network_client_uuid]
-        except Exception:
+        except KeyError:
             # that's ok, probably a race condition
             pass
     # issue a new future if not present
