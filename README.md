@@ -75,7 +75,7 @@ All of the g-codes are currently shared across all user accounts in an organizat
 Backend API is described in 
 [./src/karmen_backend/openapi/swagger.yaml](./src/karmen_backend/openapi/swagger.yaml).
 Here you can find the [API specification in
-Redocly](http://redocly.github.io/redoc/?url=https://karmen-sandbox.f1.f-app.it/api/openapi-spec.yaml).
+Redocly](http://redocly.github.io/redoc/?url=https://cloud.karmen.tech/api/openapi-spec.yaml).
 
 
 ## Versioning and releases

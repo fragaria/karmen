@@ -7,10 +7,12 @@ from celery import Celery
 from flask_jwt_extended import JWTManager
 from flask_executor import Executor
 from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 import connexion
 
 
-__version__ = "0.12.1-rc0"
+__version__ = "0.12.1-rc1"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
@@ -40,7 +42,7 @@ def setup_celery(flask_app):
 if os.environ.get("SENTRY_DSN") is not None:
     sentry_sdk.init(
         dsn=os.environ.get("SENTRY_DSN"),
-        integrations=[FlaskIntegration()],
+        integrations=[FlaskIntegration(), RedisIntegration(), CeleryIntegration()],
         release="karmen_backend@%s" % __version__,
     )
 

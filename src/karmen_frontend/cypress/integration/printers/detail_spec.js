@@ -27,7 +27,7 @@ describe("Printers: Detail - State operational", function () {
     });
   });
 
-  it("Check Controls tab", function () {
+  it("Check State", function () {
     cy.findByText(printingEnvironment.printerName).should("exist");
 
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
@@ -64,7 +64,7 @@ describe("Printers: Detail - State Printing", function () {
     });
   });
 
-  it("Check Controls tab", function () {
+  it("Check State", function () {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
         return cy.log(
@@ -79,3 +79,29 @@ describe("Printers: Detail - State Printing", function () {
     });
   });
 });
+
+describe("Printers: Detail - Tabs", function () {
+  let printingEnvironment;
+  beforeEach(() => {
+    cy.preparePrintingEnvironment().then((printEnv) => {
+      printingEnvironment = printEnv;
+      const { organizationUuid, printerUuid, gCodeUuid } = printingEnvironment;
+      cy.visit(`/${organizationUuid}/printers/${printerUuid}`);
+    });
+  });
+
+  it("Check Tabs", function () {
+    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
+        cy.findByText("Controls").click();
+        cy.get("div.tabs-content-message").contains("Controls are not available for a disconnected printer");
+        cy.findByText("Jobs").click();
+        cy.get("p.list-item").contains("No items found!");
+        cy.findByText("Connection").click();
+        cy.findByText("Client:").should("exist");
+        cy.findByText("Settings").click();
+        cy.findByText("Printer's name").should("exist")
+
+    });
+  });
+});
+

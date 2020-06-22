@@ -7,17 +7,15 @@ from .mail_template import BrandedMailTemplate
 
 
 def encode_activation_token(variables):
-    return (
-        base64.b64encode(
-            json.dumps(
-                {
-                    "activation_key": str(variables["activation_key"]),
-                    "activation_key_expires": variables["activation_key_expires"],
-                    "email": variables["email"],
-                }
-            ).encode("utf-8")
-        ).decode("utf-8"),
-    )
+    return base64.b64encode(
+        json.dumps(
+            {
+                "activation_key": str(variables["activation_key"]),
+                "activation_key_expires": variables["activation_key_expires"],
+                "email": variables["email"],
+            }
+        ).encode("utf-8")
+    ).decode("utf-8")
 
 
 class RegistrationVerification(BrandedMailTemplate):

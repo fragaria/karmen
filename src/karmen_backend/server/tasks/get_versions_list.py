@@ -6,7 +6,7 @@ from server.database import props_storage
 
 @celery.task(name="get_versions_list")
 def get_versions_list():
-    UPDATES_URL = "https://karmen-updates.f1.f-app.it/pill/updates/updates-list.txt"
+    UPDATES_URL = "https://pill-updates.karmen.tech/updates-list.txt"
     # not expected to change, as this will have to stay to support older clients
     r = requests.get(UPDATES_URL)
     if r and r.status_code == 200:
