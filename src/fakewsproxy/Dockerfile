@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 RUN apk --update add --no-cache nginx bash gettext
 
 ENV SERVICE_HOST 0.0.0.0
-ENV SERVICE_PORT 9768
+ENV SERVICE_PORT 9999
 
 COPY ./scripts/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY ./scripts scripts
