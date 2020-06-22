@@ -62,7 +62,7 @@ There are two modes available. They differ in the way the printers are connected
 1. **Local Mode**
     This can be used when Karmen Hub is run on premise with access to printers via local network.
     In this mode, you can add printers by running the autodiscovery task. Set
-    `CLOUD_MODE=1` in `loca.env` file to switch to this mode.
+    `CLOUD_MODE=0` in `loca.env` file to switch to this mode.
 
 The network autodiscovery via ARP does not work at all in the dev mode.
 
