@@ -1,238 +1,124 @@
 # This is for development only! Do not run a production instance from this blueprint.
 version: "3.4"
 services:
+
   proxy:
     image: fragaria/karmen-proxy
     build: ./src/proxy
+    env_file: [base.env, dev.env, local.env]
     ports:
       - 127.0.0.1:4000:9766
-    environment:
-      REDIS_HOST: redis
-      IS_DEV_ENV: 1
-    networks:
-      - backend
-      - default
-    depends_on:
-      - frontend
-      - backend_flask
+    networks: [ backend, default ]
+    depends_on: [ frontend, backend_flask, fake_ws_proxy ]
+
   frontend:
     image: fragaria/karmen-frontend
     build: ./src/karmen_frontend
-    environment:
-      ENV: develop
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      RAISE_ERRORS: ${KARMEN_FRONTEND_RAISE_ERRORS:-1}
-      SENTRY_DSN: ${KARMEN_FRONTEND_SENTRY_DSN:-} # Useful when testing whether sentry errors are captured locally
+    env_file: [base.env, dev.env, local.env]
     ports:
       - 127.0.0.1:3000:9765
     tty: true
     volumes:
       - ./src/karmen_frontend/src:/usr/src/app/src
       - ./src/karmen_frontend/public:/usr/src/app/public
-    networks:
-      - default
-  backend_flask:
+
+  backend_flask: &backend_flask  # <-- bookmark
     image: fragaria/karmen-backend
     build: ./src/karmen_backend
+    command: bash -c './scripts/migrate.sh && ./scripts/docker-start.sh'
+    env_file: [base.env, dev.env, local.env]
     environment:
-      ENV: develop
       SERVICE: flask
-      NETWORK_TIMEOUT: 5
-      NETWORK_VERIFY_CERTIFICATES: 1
-      SECRET_KEY: random-secret!-but-better===========
-      REDIS_HOST: redis
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: print3d
-      POSTGRES_USER: print3d
-      POSTGRES_DB: print3d
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
-      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
-      MAILER: ${KARMEN_MAILER:-DUMMY}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
-      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-http://key_issuer:8422}
-      # This token is to enable local admin used for tests and to verify requests to it
-      LOCAL_TESTS_TOKEN: ${KARMEN_LOCAL_TESTS_TOKEN:-random-test-token}
     ports:
       - 127.0.0.1:5000:9764
     volumes:
       - ./src/karmen_backend/server:/usr/src/app/server
       - ./tmp/karmen-files:/tmp/karmen-files
-    networks:
-      - default
-      - printers
-      - backend
-    depends_on:
-      - files
-      - dbmigrations
-    links:
-      - postgres
-      - redis
-  files:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
-    user: root
-    command: bash -c 'chown -R www-data:www-data /tmp/karmen-files && chmod -R g+sw /tmp/karmen-files'
-    volumes:
-      - ./tmp/karmen-files:/tmp/karmen-files
-  dbfiles:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
-    user: root
-    command: bash -c 'chown -R 1000:1000 /var/lib/postgresql/data && chmod -R g+sw /var/lib/postgresql/data'
+    networks: [ printers, backend ]
+    depends_on: [ postgres ]
+    links: [ postgres, redis ]
+
+  postgres:
+    image: postgres:11
+    restart: unless-stopped
+    env_file: [base.env, dev.env, local.env]
     volumes:
       - ./tmp/db-data:/var/lib/postgresql/data
-  dbmigrations:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
-    command: scripts/migrate.sh
+    ports:
+      - 127.0.0.1:5433:5432
+    networks: [ backend ]
+
+  backend_celery_worker:
+    <<: *backend_flask  # <-- reuse items from &backend_flask bookmark
+    # ... but skip migrations in backend_flask `command` property
+    command: scripts/docker-start.sh
     environment:
-      ENV: develop
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: print3d
-      POSTGRES_USER: print3d
-      POSTGRES_DB: print3d
-    depends_on:
-      - postgres
-    networks:
-      - default
-    links:
-      - postgres
+      SERVICE: celery-worker
+    ports: []
+
+  backend_celery_beat:
+    <<: *backend_flask  # <-- reuse items from &backend_flask bookmark
+    # ... but skip migrations in backend_flask `command` property
+    command: scripts/docker-start.sh
+    environment:
+      SERVICE: celery-beat
+    ports: []
+    networks: [ backend ]
+    links: [ redis ]
+
+  redis:
+    image: redis:5
+    env_file: [base.env, dev.env, local.env]
+    networks: [ backend ]
+
   dummymailserver:
     image: fragaria/karmen-dummymailserver
     build: ./src/dummymailserver
-    environment:
-      SERVICE_PORT: 8088
-    networks:
-      - backend
-      - default
+    env_file: [base.env, dev.env, local.env]
+    networks: [ backend ]
     ports:
       - 127.0.0.1:8088:8088
+
   fake_printer1:
     image: fragaria/karmen-fakeprinter
     build: ./src/fakeprinter
+    env_file: [base.env, dev.env, local.env]
     environment:
-      SERVICE_PORT: 8080
       STATE_JOB_NAME: "fake-file-being-printed.gcode"
     networks:
       printers:
         ipv4_address: 172.16.236.11
+
   fake_printer2:
     image: fragaria/karmen-fakeprinter
     build: ./src/fakeprinter
     environment:
-      SERVICE_PORT: 8080
       STATE_JOB_NAME: "fake-file-being-printed.gcode"
     networks:
       printers:
         ipv4_address: 172.16.236.12
+
   fake_printer3:
     image: fragaria/karmen-fakeprinter
     build: ./src/fakeprinter
     environment:
-      SERVICE_PORT: 8080
       STATE_JOB_STATE: "Operational"
     networks:
       printers:
         ipv4_address: 172.16.236.13
+
   fake_ws_proxy:
     image: fragaria/karmen-fakewsproxy
     build: ./src/fakewsproxy
-    environment:
-      SERVICE_PORT: 9999
-    networks:
-      - default
-      - printers
+    networks: [ backend, printers ]
+
   key_issuer:
     image: fragaria/karmen-key-master
     environment:
       SECRET: 'your-super-secret-and-backed-up-private-keymaster-key'
       MAX_SUB_LENGTH: 64
-    networks:
-      - default
-      - backend
-  backend_celery_worker:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
-    environment:
-      ENV: develop
-      SERVICE: celery-worker
-      NETWORK_TIMEOUT: 5
-      NETWORK_VERIFY_CERTIFICATES: 1
-      SECRET_KEY: random-secret!-but-better===========
-      REDIS_HOST: redis
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: print3d
-      POSTGRES_USER: print3d
-      POSTGRES_DB: print3d
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
-      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
-      MAILER: ${KARMEN_MAILER:-DUMMY}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
-      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-    volumes:
-      - ./src/karmen_backend/server:/usr/src/app/server
-      - ./tmp/karmen-files:/tmp/karmen-files
-    networks:
-      - default
-      - backend
-      - printers
-    links:
-      - postgres
-      - redis
-  backend_celery_beat:
-    image: fragaria/karmen-backend
-    build: ./src/karmen_backend
-    environment:
-      ENV: develop
-      SERVICE: celery-beat
-      NETWORK_TIMEOUT: 5
-      NETWORK_VERIFY_CERTIFICATES: 1
-      SECRET_KEY: random-secret!-but-better===========
-      REDIS_HOST: redis
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_PASSWORD: print3d
-      POSTGRES_USER: print3d
-      POSTGRES_DB: print3d
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-1}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL:-http://fake_ws_proxy:9999/api/%s}
-      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:4000}
-      MAILER: ${KARMEN_MAILER:-DUMMY}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
-      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-    volumes:
-      - ./src/karmen_backend/server:/usr/src/app/server
-    networks:
-      - backend
-    links:
-      - redis
-  redis:
-    image: redis:5
-    networks:
-      - backend
-  postgres:
-    image: postgres:11
-    user: '1000:1000'
-    restart: unless-stopped
-    volumes:
-      - ./tmp/db-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: print3d
-      POSTGRES_USER: print3d
-      POSTGRES_DB: print3d
-    depends_on:
-      - dbfiles
-    ports:
-      - 127.0.0.1:5433:5432
-    networks:
-      - default
-      - backend
+    networks: [ backend ]
+
   api_doc:
     image: redocly/redoc
     environment:
@@ -240,16 +126,18 @@ services:
       PAGE_FAVICON: ${FRONTEND_BASE_URL:-http://localhost:4000}/favicon.ico
       SPEC_URL: ${BACKEND_BASE_URL:-http://localhost:4000}/api/openapi-spec.yaml
       PORT: 9898
-    networks:
-      - default
-      - backend
-    depends_on:
-      - backend_flask
+    networks: [ default, backend ]
+    depends_on: [ backend_flask ]
+
 networks:
-  backend:
+  # backend network - must not be reachable by users
+  backend: 
     ipam:
       config:
       - subnet: 172.16.235.0/24
+
+  # printers - should be on a different network accessible only through
+  # websocket proxy server
   printers:
     ipam:
       config:

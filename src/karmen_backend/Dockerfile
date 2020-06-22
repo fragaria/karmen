@@ -11,6 +11,11 @@ RUN set -e && pip install --upgrade pip pipenv
 RUN set -e && apt-get install --yes libxml2-dev libxslt-dev nginx gettext avahi-utils arp-scan dbus
 RUN set -e && pip install uwsgi supervisor
 
+# set permition for upload directory (to mount later)
+RUN mkdir /tmp/karmen-files \
+    && chown www-data:www-data /tmp/karmen-files \
+    && chmod -R g+sw /tmp/karmen-files
+
 # Install from lockfile
 COPY Pipfile* ./
 RUN set -e && pipenv lock -r > requirements.pip && pip install -r requirements.pip
@@ -39,4 +44,4 @@ COPY ./scripts/supervisord.conf /etc/supervisord.conf
 
 COPY . .
 
-CMD ["./scripts/docker-start.sh"]
+CMD ./scripts/docker-start.sh
