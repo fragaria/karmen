@@ -23,9 +23,13 @@ sed -i "s!fragaria/karmen-proxy!fragaria/karmen-proxy:${TRAVIS_BRANCH-latest}!g"
 # Prepare run script
 cat << "EOF" > "$DEST/run-karmen.sh"
 #!/bin/bash
+
+trap 'exit_code=$?; echo "ERROR: Exiting on error $exit_code" >&2; exit $exit_code' ERR
+
 ## Make sure that we are doing this in the right context
-PARENT_PATH=$( cd $(dirname $(readlink -f "$0")) ; pwd -P )
-cd "$PARENT_PATH"
+cd "`dirname $(dirname $0)`"
+
+touch local.env
 
 docker-compose up -d
 EOF
@@ -35,6 +39,8 @@ chmod +x "${DEST}/run-karmen.sh"
 cat << "EOF" > "$DEST/stop-karmen.sh"
 #!/bin/bash
 ## Make sure that we are doing this in the right context
+
+trap 'exit_code=$?; echo "ERROR: Exiting on error $exit_code" >&2; exit $exit_code' ERR
 PARENT_PATH=$( cd $(dirname $(readlink -f "$0")) ; pwd -P )
 cd "$PARENT_PATH"
 
@@ -45,6 +51,8 @@ chmod +x "${DEST}/stop-karmen.sh"
 # Prepare update script
 cat << "EOF" > "$DEST/update.sh"
 #!/bin/bash
+
+trap 'exit_code=$?; echo "ERROR: Exiting on error $exit_code" >&2; exit $exit_code' ERR
 
 VERSION='latest'
 USAGE="$(basename "$0") [-h|--help] [-v|--version=1.2.3] [--edge] -- Updates this Karmen distribution
@@ -116,5 +124,7 @@ docker-compose pull
 echo -ne "To run Karmen again, run \n\n     ./run-karmen.sh\n\n"
 EOF
 chmod +x "${DEST}/update.sh"
+
+cp base.env "${DEST}/base.env"
 
 zip -r release.zip "$DEST"
