@@ -1,174 +1,60 @@
+# This file is used by .travis/make-github-release.sh to create a release bundle.
+# The script replaces all image names to include docker tag published to
+# dockerhub.io for the respective version.
 version: "3.4"
+
 services:
   proxy:
     image: fragaria/karmen-proxy
     restart: unless-stopped
-    network_mode: host
-    environment:
-      SERVICE_HOST: ${KARMEN_HOST:-0.0.0.0}
-      SERVICE_PORT: ${KARMEN_PORT:-80}
-      FRONTEND_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
-      FRONTEND_PORT: ${KARMEN_FRONTEND_PORT:-9765}
-      BACKEND_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
-      BACKEND_PORT: ${KARMEN_BACKEND_PORT:-9764}
-      IS_DEV_ENV: 0
+    env_file: [base.env, local.env]
     depends_on:
       - frontend
       - backend_flask
+    ports:
+      - ${KARMEN_HOST:-127.0.0.1}:${KARMEN_PORT:-4000}:9766 # TODO: set as env
+
   frontend:
     image: fragaria/karmen-frontend
-    network_mode: host
     restart: unless-stopped
-    environment:
-      ENV: production
-      BACKEND_BASE: /api
-      SERVICE_HOST: ${KARMEN_FRONTEND_HOST:-127.0.0.1}
-      SERVICE_PORT: ${KARMEN_FRONTEND_PORT:-9765}
-      SENTRY_DSN: ${KARMEN_FRONTEND_SENTRY_DSN}
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
-  backend_flask:
+    env_file: [base.env, local.env]
+
+  backend_flask: &backend_flask  # <-- bookmark
     image: fragaria/karmen-backend
     restart: unless-stopped
-    network_mode: host # for arp-scan
+    # runs initialization first (solved elsewehre in production)
+    command: bash -c './scripts/migrate.sh && ./scripts/docker-start.sh'
+    env_file: [base.env, local.env]
     environment:
-      ENV: production
       SERVICE: flask
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
-      FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
-      MAILER: ${KARMEN_MAILER:-DUMMY}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
-      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      NETWORK_TIMEOUT: ${KARMEN_NETWORK_TIMEOUT:-5}
-      NETWORK_VERIFY_CERTIFICATES: ${NETWORK_VERIFY_CERTIFICATES:-1}
-      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
-      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
-      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
-      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
-      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
-      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
-      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
-      SECRET_KEY: ${KARMEN_SECRET_KEY}
-      SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
-      SERVICE_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
-      SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
-      UPLOAD_FOLDER: ${KARMEN_UPLOAD_FOLDER:-/tmp/karmen-files}
-      TOKEN_SERVER_API_URL: ${KARMEN_TOKEN_SERVER_API_URL:-}
     volumes:
-      - ${KARMEN_UPLOAD_FOLDER:-./karmen-files}:/tmp/karmen-files
-      - /var/run/dbus:/var/run/dbus # for mdns resolution
-    privileged: true # for mdns resolution
+      - ./karmen-files:/tmp/karmen-files
     depends_on:
-      - files
       - redis
-      - dbmigrations
-  files:
-    image: fragaria/karmen-backend
-    user: root
-    command: bash -c 'chown -R www-data:www-data /tmp/karmen-files && chmod -R g+sw /tmp/karmen-files'
-    volumes:
-      - ${KARMEN_UPLOAD_FOLDER:-./karmen-files}:/tmp/karmen-files
-  dbfiles:
-    image: fragaria/karmen-backend
-    user: root
-    command: bash -c 'chown -R 1000:1000 /var/lib/postgresql/data && chmod -R g+sw /var/lib/postgresql/data'
-    volumes:
-      - ${KARMEN_DB_DIR:-./db/data}:/var/lib/postgresql/data
-  dbmigrations:
-    image: fragaria/karmen-backend
-    network_mode: host
-    command: scripts/migrate.sh
-    environment:
-      ENV: production
-      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
-      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
-      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
-      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
-      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
-      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
-      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
-    depends_on:
-      - postgres
+
   backend_celery_worker:
-    image: fragaria/karmen-backend
-    restart: unless-stopped
-    network_mode: host # for arp discovery, requires a different config for redis/postgres conection
+    <<: *backend_flask  # <-- reuse items from &backend_flask bookmark
+    command: scripts/docker-start.sh
+    env_file: [base.env, local.env]
     environment:
-      ENV: production
       SERVICE: celery-worker
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
-      FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
-      MAILER: ${KARMEN_MAILER:-DUMMY}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
-      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      NETWORK_TIMEOUT: ${KARMEN_NETWORK_TIMEOUT:-5}
-      NETWORK_VERIFY_CERTIFICATES: ${NETWORK_VERIFY_CERTIFICATES:-1}
-      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
-      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
-      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
-      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
-      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
-      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
-      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
-      SECRET_KEY: ${KARMEN_SECRET_KEY}
-      SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
-      SERVICE_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
-      SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
-      UPLOAD_FOLDER: ${KARMEN_UPLOAD_FOLDER:-/tmp/karmen-files}
-    volumes:
-      - ${KARMEN_UPLOAD_FOLDER:-./karmen-files}:/tmp/karmen-files
-      - /var/run/dbus:/var/run/dbus # for mdns resolution
-    privileged: true # for mdns resolution
-    depends_on:
-      - dbmigrations
-      - redis
+
   backend_celery_beat:
-    image: fragaria/karmen-backend
-    restart: unless-stopped
-    network_mode: host
+    <<: *backend_flask
+    command: scripts/docker-start.sh
+    env_file: [base.env, local.env]
     environment:
-      ENV: production
       SERVICE: celery-beat
-      CLOUD_MODE: ${KARMEN_CLOUD_MODE:-0}
-      FRONTEND_BASE_URL: ${KARMEN_FRONTEND_BASE_URL}
-      MAILER: ${KARMEN_MAILER:-DUMMY}
-      MAILER_CONFIG: ${KARMEN_MAILER_CONFIG}
-      MAILER_FROM: ${KARMEN_MAILER_FROM:-Karmen <karmen@karmen.local>}
-      NETWORK_TIMEOUT: ${KARMEN_NETWORK_TIMEOUT:-5}
-      NETWORK_VERIFY_CERTIFICATES: ${NETWORK_VERIFY_CERTIFICATES:-1}
-      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
-      POSTGRES_HOST: ${KARMEN_POSTGRES_HOST:-127.0.0.1}
-      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
-      POSTGRES_PORT: ${KARMEN_POSTGRES_PORT:-5433}
-      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
-      REDIS_HOST: ${KARMEN_REDIS_HOST:-127.0.0.1}
-      REDIS_PORT: ${KARMEN_REDIS_PORT:-6379}
-      SECRET_KEY: ${KARMEN_SECRET_KEY}
-      SENTRY_DSN: ${KARMEN_BACKEND_SENTRY_DSN}
-      SERVICE_HOST: ${KARMEN_BACKEND_HOST:-127.0.0.1}
-      SERVICE_PORT: ${KARMEN_BACKEND_PORT:-9764}
-      SOCKET_API_URL: ${KARMEN_SOCKET_API_URL}
-      UPLOAD_FOLDER: ${KARMEN_UPLOAD_FOLDER:-/tmp/karmen-files}
-    privileged: true # for mdns resolution
-    depends_on:
-      - dbmigrations
-      - redis
-  redis:
-    image: redis:5
-    ports:
-      - 127.0.0.1:${KARMEN_REDIS_PORT:-6379}:6379
+    volumes: []
+
   postgres:
     image: postgres:11
-    user: '1000:1000'
     restart: unless-stopped
     volumes:
       - ${KARMEN_DB_DIR:-./db/data}:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: ${KARMEN_POSTGRES_DB:-print3d}
-      POSTGRES_PASSWORD: ${KARMEN_POSTGRES_PASSWORD:-print3d}
-      POSTGRES_USER: ${KARMEN_POSTGRES_USER:-print3d}
-    depends_on:
-      - dbfiles
-    ports:
-      - 127.0.0.1:${KARMEN_POSTGRES_PORT:-5433}:5432
+    env_file: [base.env, local.env]
+
+  redis:
+    image: redis:5
+    restart: unless-stopped
+    env_file: [base.env, local.env]

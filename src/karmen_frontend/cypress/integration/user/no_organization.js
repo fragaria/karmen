@@ -34,13 +34,7 @@ describe("Organizations: Adding", function () {
   });
 
   it("menu has limited items", function () {
-    cy.findByText("Menu").click()
-      .then(() => {
-        cy.get("nav").contains("Organizations");
-        cy.get("nav").contains("Logout")
-        cy.findByText("Printers").should("not.exist")
-        cy.findByText("G-Codes").should("not.exist")
-      })
+    cy.findByRole("menu").should("not.exist")
   })
 
 });

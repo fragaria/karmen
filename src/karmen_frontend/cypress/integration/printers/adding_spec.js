@@ -55,7 +55,6 @@ describe("Printers: Adding", function () {
   beforeEach(() => {
     return cy.prepareAppWithUser().then((data) => {
       user = data;
-      cy.toggleMenu("Settings");
       return cy.findByText("+ Add a printer").click();
     });
   });

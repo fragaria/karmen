@@ -40,7 +40,8 @@ describe("G-codes: Listing", function () {
 
   it("search", function () {
     cy.get("#filter").type("S_Release");
-    cy.get(".list-item").findByText("S_Release.gcode").should("exist");
+    cy.wait(1000);
+    cy.get(".list-item-subtitle").findByText("S_Release.gcode").should("exist");
     cy.get(".list-item").findByText("No items found!").should("not.exist");
 
     cy.get("#filter").type("Non existing Gcode");
@@ -66,7 +67,7 @@ describe("G-codes: Listing", function () {
         cy.get(".dropdown-item:first").findByText("Print g-code").click();
         cy.get("div.modal-content").findByText("Print G-Code");
         cy.get("div.modal-content").findByText("No available printers found.");
-        cy.get("div.modal-content button.modal-close").click();
+        cy.get(".modal-close").click();
       });
 
     cy.get(".list-item .list-cta")

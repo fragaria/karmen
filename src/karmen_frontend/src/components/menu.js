@@ -132,34 +132,38 @@ class Menu extends React.Component {
             <>
               {navigation && (
                 <ul className="navigation-items">
-                  <li className="navigation-user">
-                    <Link
-                      to="/users/me"
-                      onClick={() => this.setState({ navigation: false })}
-                    >
-                      <span className="navigation-user-avatar">
-                        <img
-                          className="default"
-                          alt="Karmen logo"
-                          src="/karmen-logo.svg"
-                        />
-                      </span>
+                  <li className="navigation-title" content>
+                    <span className="navigation-title-avatar">
+                      <img
+                        className="default"
+                        alt="Karmen logo"
+                        src="/karmen-logo.svg"
+                      />
+                    </span>
 
-                      <p className="navigation-user-name">
-                        {username}
-                        <sup>
+                    {role === "admin" ? (
+                      <Link
+                        to={`/${activeOrganization.uuid}/settings`}
+                        onClick={() => this.setState({ navigation: false })}
+                      >
+                        <p className="navigation-title-content">
+                          {Object.values(organizations).length > 1
+                            ? activeOrganization.name
+                            : "Default organization"}
                           <span className="icon-settings"></span>
-                        </sup>
-                      </p>
-
-                      <p className="navigation-user-organization">
+                        </p>
+                      </Link>
+                    ) : (
+                      <p className="navigation-title-content">
                         {Object.values(organizations).length > 1
                           ? activeOrganization.name
                           : " "}
+                        {username}
                       </p>
-                    </Link>
+                    )}
                   </li>
-                  {activeOrganization ? (
+
+                  {activeOrganization && (
                     //do not print some menu items if user is not a member of organization
                     <>
                       <li className="navigation-item">
@@ -180,21 +184,21 @@ class Menu extends React.Component {
                           G-Codes
                         </Link>
                       </li>
-                      {role === "admin" && (
-                        <li className="navigation-item">
-                          <Link
-                            to={`/${activeOrganization.uuid}/settings`}
-                            onClick={() => this.setState({ navigation: false })}
-                            id="navigation-settings"
-                          >
-                            Settings
-                          </Link>
-                        </li>
-                      )}
                     </>
-                  ) : (
-                    ""
                   )}
+
+                  <li className="navigation-title">
+                    <Link
+                      to="/users/me"
+                      onClick={() => this.setState({ navigation: false })}
+                    >
+                      <p className="navigation-title-content">
+                        {username}
+                        <span className="icon-settings"></span>
+                      </p>
+                    </Link>
+                  </li>
+
                   <li className="navigation-item">
                     <Link
                       to="/organizations"
@@ -204,6 +208,7 @@ class Menu extends React.Component {
                       Organizations
                     </Link>
                   </li>
+
                   <li className="navigation-item">
                     <button
                       className="btn-reset"
@@ -220,24 +225,44 @@ class Menu extends React.Component {
                   </li>
                 </ul>
               )}
-              <button
-                className="navigation-toggle"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const { navigation } = this.state;
-                  this.setState({ navigation: !navigation });
-                }}
-                id="navigation-menu-toggle"
-                role="menu"
-              >
-                {navigation && <span className="icon-close"></span>}
-                {!navigation && (
-                  <span className="navigation-toggle-label">
-                    <span className="icon-menu"></span>
-                    <span className="hidden-xs">Menu</span>
-                  </span>
-                )}
-              </button>
+
+              {activeOrganization && (
+                <div className="navigation-items-main">
+                  <Link
+                    to={`/${activeOrganization.uuid}/printers`}
+                    id="navigation-printers-top"
+                    className="navigation-item hidden-xs-inline"
+                  >
+                    Printers
+                  </Link>
+
+                  <Link
+                    to={`/${activeOrganization.uuid}/gcodes`}
+                    id="navigation-gcodes-top"
+                    className="navigation-item hidden-xs-inline"
+                  >
+                    G-Codes
+                  </Link>
+
+                  <button
+                    className="navigation-item navigation-toggle"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const { navigation } = this.state;
+                      this.setState({ navigation: !navigation });
+                    }}
+                    id="navigation-menu-toggle"
+                    role="menu"
+                  >
+                    {navigation && <span className="icon-close"></span>}
+                    {!navigation && (
+                      <span className="navigation-toggle-label">
+                        <span className="icon-menu"></span>
+                      </span>
+                    )}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

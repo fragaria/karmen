@@ -41,23 +41,32 @@ $ docker-compose up --build
 # GO VISIT http://localhost:4000/
 ```
 
+If you want to connect to an internals of a service run `docker-compose exec
+<service> <command>` from root of project. Where `<service>` is the name os the service as defined
+in `docker-compose.yml`.
+
+Examples:
+
+- to connect to postgres: `docker-compose exec postgres psql -U print3d print3d` (with the default configuration).
+- to connect to running backend: `docker-compose exec backend bash`
+
+
 There are two modes available. They differ in the way the printers are connected to Karmen Hub.
 
 1. **Cloud Mode**
     This mode is used when Karmen Hub is run as a service on the internet. The printers are connected
     via [websocket proxy](https://github.com/fragaria/websocket-proxy) that is tunnelling the network connection
     to Octoprint or other compatible API. In this mode, the autodiscovery feature is disabled. This is
-    the default mode for development.
+    the default mode.
+
 1. **Local Mode**
     This can be used when Karmen Hub is run on premise with access to printers via local network.
-    In this mode, you can add printers by running the autodiscovery task.
-
-You can switch between the modes by using `KARMEN_CLOUD_MODE` environment variable, i. e.
-`KARMEN_CLOUD_MODE=0 docker-compose up --build` will run Karmen Hub in the local mode. 
+    In this mode, you can add printers by running the autodiscovery task. Set
+    `CLOUD_MODE=0` in `loca.env` file to switch to this mode.
 
 The network autodiscovery via ARP does not work at all in the dev mode.
 
-On the other hand, two fake virtual printers are automatically added to your envirnoment, so you have a few
+On the other hand, three fake virtual printers are automatically added to your envirnoment, so you have a few
 things to play with.
 
 Also, there are at least two users available in the fresh dev environment:
@@ -68,7 +77,11 @@ printers.
 
 All of the g-codes are currently shared across all user accounts in an organization.
 
-**Note**: If something suddenly breaks within this setup, try to clean docker with `docker system prune`, it might help.
+To change a configuration edit [local.env](./local.env) file and follow instructions.
+
+**Note**: If something suddenly breaks within this setup, try to clean docker
+with `docker system prune` or delete `tmp/db-data` and `tmp/karmen-files` it
+might help.
 
 ## Backend API Specification
 

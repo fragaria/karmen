@@ -1,9 +1,10 @@
 #!/bin/sh
 
-DIR=$(dirname $(realpath -s $0))
-cd $DIR
+cd `dirname $0`
 
 IS_CLOUD_INSTALL=`if [ ${CLOUD_MODE} == 1 ]; then echo 'true'; else echo 'false'; fi`
+
+echo "Starting frontend in IS_CLOUD_INSTALL=$IS_CLOUD_INSTALL"
 
 if [ "$ENV" = 'production' ]; then
   cat << EOF > "../build/env.js"

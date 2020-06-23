@@ -221,32 +221,64 @@ footer {
     left: 0;
     width: 100%;
     height: 100vh;
-    padding: 10rem 0;
+    padding: 7rem 0;
     flex-direction: column;
     align-items: center;
     background: $bg-color;
     overflow: auto;
     @include blurred-bg(.95);
+
+    @media (min-width: $screen-sm-min) {
+      padding: 10rem 0;
+    }
+  }
+
+  .navigation-items-main {
+    display: flex;
+
+    .navigation-item {
+      @include plumber(
+        $font-size: 2,
+        $leading-top: 0,
+        $leading-bottom: 0,
+        $line-height: 3
+      );
+
+      margin: 0;
+      padding: 0;
+
+      @media (min-width: $screen-sm-min) {
+        margin: 0 0 0 $base-unit*6;
+      }
+    }
   }
 
   .navigation-item {
+    display: inline-block;
+
     @include plumber(
       $font-size: $navigation-font-size-xs,
       $leading-top: 0,
       $leading-bottom: 0,
       $line-height: 5
     );
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   .navigation-toggle {
-    font-size: 3rem;
+    display: inline-block;
     z-index: 1;
     outline: none;
     padding: 0;
+
     @include button-reset;
 
     &:hover {
       cursor: pointer;
+      text-decoration: none;
     }
   }
 
@@ -254,35 +286,36 @@ footer {
     display: flex;
     align-items: center;
     font-size: 2.5rem;
-
-    @media (min-width: $screen-sm-min) {
-      .icon-menu {
-        padding-right: $base-unit;
-      }
-    }
   }
 
-  .navigation-user {
+  .navigation-title {
     min-width: 300px;
     border-bottom: $border-light;
     text-align: center;
 
     @include plumber(
-      $font-size: 2.5,
-      $leading-top: 0,
+      $leading-top: 8,
       $leading-bottom: 2
     );
 
+    &:first-child {
+      @include plumber(
+        $leading-top: 0,
+        $leading-bottom: 2
+      );
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
   }
 
-  .navigation-user-avatar {
+  .navigation-title-avatar {
     display: block;
     width: 120px;
     height: 120px;
-    margin: 0 auto $base-unit;
-    // border-radius: 120px;
+    margin: 0 auto $base-unit*3;
     border: 6px solid #fff;
-    // box-shadow: 0 0 4px 0 rgba(37, 42, 49, 0.3);
     background: #fff;
     overflow: hidden;
 
@@ -297,32 +330,18 @@ footer {
     }
   }
 
-  .navigation-user-name {
+  .navigation-title-content {
     position: relative;
-    display: inline-block;
 
-    @include plumber(
-      $font-size: 2.3,
-      $leading-top: 2 ,
-      $leading-bottom: 0
-    );
-
-    sup {
-      position: absolute;
-      top: 0;
-      padding-left: $base-unit/2;
-      font-size: 60%;
-    }
-  }
-
-  .navigation-user-organization {
     @include plumber(
       $font-size: 1.618,
       $leading-top: 0
     );
 
-    @media (min-width: $screen-sm-min) {
-
+    .icon-settings {
+      position: absolute;
+      top: $base-unit*2;
+      padding-left: $base-unit*2;
     }
   }
 
@@ -376,6 +395,12 @@ footer {
 
   &.text-center {
     display: block;
+  }
+
+  @media (max-width: $screen-sm-max) {
+    .btn {
+      margin-top: $base-unit;
+    }
   }
 }
 
@@ -487,6 +512,7 @@ footer {
     height: 4rem;
     padding: $base-unit $base-unit*2;
     font-size: 1.4rem;
+    line-height: 1.6;
   }
 
   &.btn-xs {

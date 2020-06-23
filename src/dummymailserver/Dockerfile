@@ -15,7 +15,7 @@ RUN apt-get remove --purge --yes gcc make postgresql-client libpq-dev libffi-dev
 
 ENV PYTHONPATH=$PYTHONPATH:/usr/src/app
 ENV SERVICE_HOST 0.0.0.0
-ENV SERVICE_PORT 9767
+ENV SERVICE_PORT 8088
 
 COPY . .
 CMD ["./scripts/docker-start.sh"]
