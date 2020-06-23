@@ -39,9 +39,9 @@ def setup_celery(flask_app):
     return celery_inst
 
 
-if os.environ.get("SENTRY_DSN") is not None:
+if os.environ.get("BACKEND_SENTRY_DSN") is not None:
     sentry_sdk.init(
-        dsn=os.environ.get("SENTRY_DSN"),
+        dsn=os.environ.get("BACKEND_SENTRY_DSN"),
         integrations=[FlaskIntegration(), RedisIntegration(), CeleryIntegration()],
         release="karmen_backend@%s" % __version__,
     )
