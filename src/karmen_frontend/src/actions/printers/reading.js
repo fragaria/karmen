@@ -87,41 +87,46 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
     const { printers } = getState();
     const previousInfo =
       printers.printers && printers.printers.find((p) => p.uuid === uuid);
-    dispatch(loadPrinter(orguuid, uuid, fields)).then((result) => {
-      const { printers } = getState();
-      if (printers.checkQueue[uuid] > 0) {
-        let interval = printers.checkQueue[uuid];
-        // detect if state change and we need to adjust interval
-        if (
-          previousInfo &&
-          previousInfo.status &&
-          result &&
-          result.data &&
-          result.data.status &&
-          result.data.status.state !== previousInfo.status.state
-        ) {
-          interval =
-            ["Printing", "Paused"].indexOf(result.data.status.state) > -1
-              ? PRINTER_RUNNING_POLL
-              : PRINTER_IDLE_POLL;
-          dispatch(setPrinterPollInterval(orguuid, uuid, interval));
+    dispatch(loadPrinter(orguuid, uuid, fields)).then(
+      (result) => {
+        const { printers } = getState();
+        if (printers.checkQueue[uuid] > 0) {
+          let interval = printers.checkQueue[uuid];
+          // detect if state change and we need to adjust interval
+          if (
+            previousInfo &&
+            previousInfo.status &&
+            result &&
+            result.data &&
+            result.data.status &&
+            result.data.status.state !== previousInfo.status.state
+          ) {
+            interval =
+              ["Printing", "Paused"].indexOf(result.data.status.state) > -1
+                ? PRINTER_RUNNING_POLL
+                : PRINTER_IDLE_POLL;
+            dispatch(setPrinterPollInterval(orguuid, uuid, interval));
+          }
+          // enqueue next check if result is ok
+          if (result.status === 200) {
+            dispatch(
+              queueLoadPrinter(
+                orguuid,
+                uuid,
+                ["job", "status", "webcam", "lights"],
+                interval
+              )
+            );
+          } else {
+            dispatch(setPrinterPollInterval(orguuid, uuid, -1));
+          }
         }
-        // enqueue next check if result is ok
-        if (result.status === 200) {
-          dispatch(
-            queueLoadPrinter(
-              orguuid,
-              uuid,
-              ["job", "status", "webcam", "lights"],
-              interval
-            )
-          );
-        } else {
-          dispatch(setPrinterPollInterval(orguuid, uuid, -1));
-        }
+        return result;
+      },
+      (e) => {
+        console.log(e);
       }
-      return result;
-    });
+    );
   }, delay);
 };
 

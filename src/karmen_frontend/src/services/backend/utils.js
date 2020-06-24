@@ -112,6 +112,10 @@ export const performRequest = (opts) => {
   return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
     .then((response) => {
       if (opts.successCodes.indexOf(response.status) === -1) {
+        if (response.status === 401 && _getStorage("karmen_profile") == null) {
+          // User is logged out, 401 is expected here
+          return Promise.reject("User logged out");
+        }
         return Promise.reject(
           new HttpError(response, `Unexpected status code "${response.status}"`)
         );

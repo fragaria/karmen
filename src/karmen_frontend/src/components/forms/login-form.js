@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import { HttpError } from "../../errors";
 import BusyButton from "../utils/busy-button";
 import { FormInputs } from "./form-utils";
 
@@ -94,7 +93,8 @@ class LoginForm extends React.Component {
         }
       })
       .catch((err) => {
-        if (err instanceof HttpError && err.response.status === 401) {
+        console.log(err);
+        if (err === "User logged out") {
           return this.setState({
             messageOk: false,
             message: "Invalid email or password, try again, please.",

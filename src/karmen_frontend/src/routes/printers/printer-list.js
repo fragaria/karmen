@@ -54,6 +54,7 @@ class PrinterList extends React.Component {
 
   componentDidMount() {
     this.getPrinters();
+    this._ismounted = true;
   }
 
   getPrinters() {
@@ -68,16 +69,37 @@ class PrinterList extends React.Component {
     // required for the printers to show up after the network scan
     // or added in a different client.
     // But we are checking only for the local db data, so it should be blazing fast.
-    load.finally(() => {
-      this.setState({
-        timer: setTimeout(this.getPrinters, 60 * 1000),
+    load
+      .then(
+        () => {
+          // resolved handler
+          // not much to do, we want to invoke the timeout in finally
+        },
+        (e) => {
+          //rejected handler
+          if (e === "User logged out") {
+            // expected status, can fail silenty
+            return;
+          }
+          throw new Error("Rejected Promise in getPrinters, reason: " + e);
+        }
+      )
+      .finally(() => {
+        if (!this._ismounted) {
+          // component was unmounted while Promise was pending
+          // using setState now crashes the app and we are not interested in result
+          return;
+        }
+        this.setState({
+          timer: setTimeout(this.getPrinters, 60 * 1000),
+        });
       });
-    });
   }
 
   componentWillUnmount() {
     const { timer } = this.state;
     timer && clearTimeout(timer);
+    this._ismounted = false;
   }
 
   render() {
