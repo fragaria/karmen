@@ -13,9 +13,13 @@ export default (
         listLoaded: true,
       });
     case "USERS_ADD_SUCCEEDED":
+
       const existing = state.list.findIndex(
         (u) => u.uuid === action.payload.data.uuid
       );
+      if(action.payload.status === 400) {
+        return state
+      }
       if (existing > -1) {
         return state;
       }
