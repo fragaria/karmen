@@ -60,14 +60,25 @@ class PasswordReset extends React.Component {
 
     return doRequest(resetForm.realemail.val)
       .then((r) => {
-        this.setState({
-          message:
-            "An email with a reset link has been sent to your mailbox. Check your inbox, please.",
-          messageOk: true,
-          resetForm: Object.assign({}, resetForm, {
-            realemail: Object.assign({}, resetForm.realemail, { val: "" }),
-          }),
-        });
+        if (r.status === 202) {
+          this.setState({
+            message:
+              "An email with a reset link has been sent to your mailbox. Check your inbox, please.",
+            messageOk: true,
+            resetForm: Object.assign({}, resetForm, {
+              realemail: Object.assign({}, resetForm.realemail, { val: "" }),
+            }),
+          });
+        } else {
+          resetForm.realemail.error = r.data.detail
+            ? r.data.detail // We either got denied by connexion, with reason in detail
+            : r.data.message
+            ? r.data.message // Or by backend in message
+            : "Unexpected error while parsing email";
+          this.setState({
+            resetForm: Object.assign({}, resetForm),
+          });
+        }
       })
       .catch((err) => {
         this.setState({

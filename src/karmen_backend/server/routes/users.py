@@ -25,6 +25,8 @@ def add_user_to_org(org_uuid):
     if not email or not org_role:
         return abort(make_response(jsonify(message="Missing email"), 400))
     email = email.lstrip().rstrip().lower()
+    if not is_email(email):
+        return abort(make_response(jsonify(message="Missing or bad email"), 400))
 
     existing = users.get_by_email(email)
     # completely new user

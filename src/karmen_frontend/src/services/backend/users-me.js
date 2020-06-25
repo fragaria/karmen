@@ -8,8 +8,8 @@ export const requestPasswordReset = (email) => {
     data: {
       email,
     },
-    parseResponse: false,
-    successCodes: [202],
+    parseResponse: true,
+    successCodes: [202, 400],
   });
 };
 
@@ -40,8 +40,8 @@ export const register = (email) => {
     data: {
       email,
     },
-    parseResponse: false,
-    successCodes: [202],
+    parseResponse: true,
+    successCodes: [202, 400],
   });
 };
 

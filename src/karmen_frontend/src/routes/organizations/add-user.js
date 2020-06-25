@@ -73,9 +73,21 @@ class AddUser extends React.Component {
     if (!hasErrors) {
       return createUser(form.email.val, form.role.val)
         .then((r) => {
-          this.setState({
-            redirect: true,
-          });
+          console.log(r);
+          if (r.status === 201) {
+            this.setState({
+              redirect: true,
+            });
+          } else {
+            form.email.error = r.data.detail
+              ? r.data.detail // We either got denied by connexion, with reason in detail
+              : r.data.message
+              ? r.data.message // Or by backend in message
+              : "Unexpected error while parsing email";
+            this.setState({
+              form: Object.assign({}, form),
+            });
+          }
         })
         .catch((err) => {
           if (err instanceof HttpError && err.response.status === 409) {

@@ -19,7 +19,7 @@ export const addUser = (orgUuid, email, role) => {
       email,
       role,
     },
-    successCodes: [201],
+    successCodes: [201, 400],
   });
 };
 

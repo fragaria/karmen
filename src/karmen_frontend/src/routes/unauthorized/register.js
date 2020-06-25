@@ -60,15 +60,29 @@ class Register extends React.Component {
 
     return doRegister(registerForm.realemail.val)
       .then((r) => {
-        this.setState({
-          message: `<p>We've sent you an email to <strong>${registerForm.realemail.val}</strong><br/> with the instructions on how to proceed next.</p> <p>Thank you for signing up, <br/>you can now close this window.</p>`,
-          messageOk: true,
-          registerForm: Object.assign({}, registerForm, {
-            realemail: Object.assign({}, registerForm.realemail, { val: "" }),
-          }),
-        });
+        console.log(r);
+        if (r.status === 202) {
+          this.setState({
+            message: `<p>We've sent you an email to <strong>${registerForm.realemail.val}</strong><br/> with the instructions on how to proceed next.</p> <p>Thank you for signing up, <br/>you can now close this window.</p>`,
+            messageOk: true,
+            registerForm: Object.assign({}, registerForm, {
+              realemail: Object.assign({}, registerForm.realemail, { val: "" }),
+            }),
+          });
+        } else {
+          registerForm.realemail.error = r.data.detail
+            ? r.data.detail // We either got denied by connexion, with reason in detail
+            : r.data.message
+            ? r.data.message // Or by backend in message
+            : "Unexpected error while parsing email";
+
+          this.setState({
+            registerForm: Object.assign({}, registerForm),
+          });
+        }
       })
       .catch((err) => {
+        console.log(err);
         this.setState({
           messageOk: false,
           message:
