@@ -111,6 +111,9 @@ const ErrorFallback = ({ error, componentStack, resetErrorBoundary }) => {
  */
 const rejectionErrorHandler = (event) => {
   const err = event.reason;
+  // log the error to console so that it can be debugged (there's no traceback
+  // otherwise)
+  console.error('Unhandler error', err);
 
   if (err instanceof HttpError) {
     switch (err.response.status) {

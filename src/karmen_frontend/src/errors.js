@@ -12,3 +12,5 @@ export class OfflineError extends Error {
     this.name = "OfflineError";
   }
 }
+
+export class UnauthorizedError extends Error {}

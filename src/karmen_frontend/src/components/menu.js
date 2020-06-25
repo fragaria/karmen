@@ -215,9 +215,8 @@ class Menu extends React.Component {
                       title="Logout"
                       onClick={(e) => {
                         e.preventDefault();
-                        logout();
-                        history.push("/");
                         this.setState({ navigation: false });
+                        logout().then(() => history.push("/"));
                       }}
                     >
                       Logout
