@@ -27,7 +27,7 @@ matrix:
 
     # run cypress tests
       node_js: 10
-      if: type = pull_request
+      if: (type = pull_request AND branch = master) OR commit_message =~ /#travis/
       cache:
         directories:
           - "$HOME/.npm"  # npm
