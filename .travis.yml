@@ -27,6 +27,7 @@ matrix:
 
     # run cypress tests
       node_js: 10
+      if: type = pull_request
       cache:
         directories:
           - "$HOME/.npm"  # npm
