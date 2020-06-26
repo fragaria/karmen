@@ -131,6 +131,16 @@ class CreateUserInOrganizationRoute(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 400)
 
+    def test_invalid_chars_email(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_ADMIN)
+            response = c.post(
+                "/organizations/%s/users" % UUID_ORG,
+                headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
+                json={"role": "user", "email": "ěščýžšěáč@gmail.com"},
+            )
+            self.assertEqual(response.status_code, 400)
+
     @mock.patch("server.tasks.send_mail.send_mail.delay")
     def test_create_user(self, mock_send_mail):
         with app.test_client() as c:
