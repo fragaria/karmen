@@ -49,20 +49,6 @@ matrix:
         while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         npm run test:cypress
         docker-compose down || travis_terminate 1;
-    # Python 3.6 (requires build images)
-    - python: "3.6"
-      language: python
-      name: backend tests @ Python 3.6
-      cache:
-        directories:
-          - "$HOME/.cache"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install --dev || travis_terminate 1;
-        - make test
 
     # Python 3.7 (requires build images)
     - python: "3.7"
@@ -79,21 +65,6 @@ matrix:
         - pipenv install --dev || travis_terminate 1;
         - make coverage || travis_terminate 1;
         - make coveralls
-
-    # Python 3.7 (requires build images)
-    - python: 3.8-dev
-      language: python
-      name: backend tests @ Python 3.8-dev
-      cache:
-        directories:
-          - "$HOME/.cache"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install --dev || travis_terminate 1;
-        - make test
 
     # nodejs
     - language: node_js
