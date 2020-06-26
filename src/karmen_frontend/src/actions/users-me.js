@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
 import { createHttpAction } from "./utils";
-import { HttpError,  UnauthorizedError} from "../errors";
+import { HttpError, UnauthorizedError } from "../errors";
 import * as backend from "../services/backend";
 
 export const retryIfUnauthorized = (func, dispatch) => {
@@ -26,7 +26,9 @@ export const denyWithNoOrganizationAccess = (orguuid, getState, wrapped) => {
   const { me } = getState();
   if (!me.organizations || !me.organizations[orguuid]) {
     return Promise.reject(
-      new UnauthorizedError('The organization does not exist or the user is not authorized to view it.')
+      new UnauthorizedError(
+        "The organization does not exist or the user is not authorized to view it."
+      )
     );
   }
   return wrapped();
