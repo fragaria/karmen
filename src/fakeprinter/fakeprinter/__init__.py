@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import time
 
 from datetime import datetime, timedelta
 from PIL import Image, ImageFont, ImageDraw
@@ -152,18 +153,27 @@ def upload():
     global STATE
     if "file" not in request.files:
         return abort(400)
-    incoming = request.files["file"]
-    if incoming.filename == "":
+    incoming_file = request.files["file"]
+    if incoming_file.filename == "":
         return abort(400)
 
-    if not re.search(r"\.gco(de)?$", incoming.filename):
+    if not re.search(r"\.gco(de)?$", incoming_file.filename):
         return abort(415)
 
-    original_filename = incoming.filename
+    original_filename = incoming_file.filename
     filename = secure_filename(original_filename)
     path = request.form.get("path", "/")
     destination_dir = os.path.join("/tmp/uploaded-files/", path)
     destination = os.path.join(destination_dir, filename)
+    if '-throttle-' in original_filename:
+    # throttle the upload to 5kB / sec if the filename contains '-throttle-'
+        while True:
+            chunk = incoming_file.read(512)
+            if not chunk:
+                break
+            print('< %r' % chunk)
+            time.sleep(0.1)
+
     STATE["job_state"] = "Printing"
     STATE["job_name"] = filename
     STATE["motors_state"] = "on"
