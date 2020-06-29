@@ -36,7 +36,9 @@ There are two options:
 2. `pipenv`
     - You need `pipenv`, `python3-dev`, `libpq-dev`, `postgresql-client` dependencies
     - install dependencies by running `cd src/karmen_backend/ && pipenv install --dev`
-    - Run `make test` or `make test-watch` from `pipenv shell`
+    - Run `pipenv run make test` or `pipenv make test-watch`
+    - You can also append additional arguments to pytest: `make test-watch test_args='--maxfail=2 tests/services/mailer/mailers`
+
 
 ### Docker
 
