@@ -1,7 +1,9 @@
+import uuid as guid
 import psycopg2
 from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection, prepare_list_statement
+from server.database.printers import get_printer
 
 FIELDS = [
     "uuid",
@@ -48,19 +50,35 @@ def get_printjob(uuid):
         return data
 
 
-def add_printjob(**kwargs):
+def add_printjob(**job):
+    'creates a printjob returning the id of the newly created job'
+
+    if 'uuid' in job:
+        raise ValueError("Cannot add a printjob with an already set UUID.")
+
+    printer = get_printer(job["printer_uuid"])
+    if not printer:
+        raise ValueError(f"The prinetr {job['printer_uuid']} does not exist.")
+    if printer["organization_uuid"] != job["organization_uuid"]:
+        raise ValueError(f"The printer does not belong to the organization.")
+    if job.get("gcode_data", None) and job["gcode_data"].get("uuid", None):
+        if job["gcode_uuid"] != job["gcode_data"]["uuid"]:
+            raise ValueError("printjob['gcode_uuid'] does not match printjob['gcode_data']['uuid']")
+
+    # FIXME: printjob should not contain organization_uuid (it is already in printer_uuid)
+    job['uuid'] = guid.uuid4()
     with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(
             "INSERT INTO printjobs (uuid, gcode_uuid, organization_uuid, printer_uuid, gcode_data, printer_data, user_uuid) values (%s, %s, %s, %s, %s, %s, %s) RETURNING uuid",
             (
-                kwargs["uuid"],
-                kwargs["gcode_uuid"],
-                kwargs["organization_uuid"],
-                kwargs["printer_uuid"],
-                psycopg2.extras.Json(kwargs.get("gcode_data", None)),
-                psycopg2.extras.Json(kwargs.get("printer_data", None)),
-                kwargs.get("user_uuid", None),
+                job["uuid"],
+                job["gcode_uuid"],
+                job["organization_uuid"],
+                job["printer_uuid"],
+                psycopg2.extras.Json(job.get("gcode_data", None)),
+                psycopg2.extras.Json(job.get("printer_data", None)),
+                job.get("user_uuid", None),
             ),
         )
         data = cursor.fetchone()
