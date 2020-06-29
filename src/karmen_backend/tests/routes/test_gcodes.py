@@ -562,17 +562,15 @@ class DeleteRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         printjobs.add_printjob(
-            uuid=guid.uuid4(),
-            gcode_uuid=gcode_uuid,
             gcode_data={"uuid": gcode_uuid},
+            gcode_uuid=gcode_uuid,
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"host": "172.16.236.11:8080"},
             organization_uuid=UUID_ORG,
         )
         printjobs.add_printjob(
-            uuid=guid.uuid4(),
-            gcode_uuid=gcode_uuid,
             gcode_data={"uuid": gcode_uuid},
+            gcode_uuid=gcode_uuid,
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
             printer_data={"host": "172.16.236.11:8080"},
             organization_uuid=UUID_ORG,

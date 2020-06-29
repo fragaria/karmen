@@ -487,7 +487,7 @@ class CreateRoute(unittest.TestCase):
                     headers={"x-csrf-token": TOKEN_ADMIN_CSRF},
                 )
 
-                self.assertEqual(response.status_code, 500)
+                self.assertEqual(response.status_code, 400)
         except Exception as e:
             raise e
         finally:
@@ -1512,9 +1512,6 @@ class ControlFanRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/command" % self.ip,
                 json={"commands": ["M106 S255"], "parameters": {}},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -1532,9 +1529,6 @@ class ControlFanRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/command" % self.ip,
                 json={"commands": ["M106 S0"], "parameters": {}},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -1637,9 +1631,6 @@ class ControlMotorsRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/command" % self.ip,
                 json={"commands": ["M18"], "parameters": {}},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -1742,9 +1733,6 @@ class ControlExtrusionRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/tool" % self.ip,
                 json={"command": "extrude", "amount": -6.0},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -1849,9 +1837,6 @@ class ControlBedTemperatureRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/bed" % self.ip,
                 json={"command": "target", "target": 6.0},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -1981,9 +1966,6 @@ class ControlTemperaturesRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/bed" % self.ip,
                 json={"command": "target", "target": 6.0},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -2002,9 +1984,6 @@ class ControlTemperaturesRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/tool" % self.ip,
                 json={"command": "target", "targets": {"tool0": 6.0}},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -2134,9 +2113,6 @@ class ControlPrintheadRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/printhead" % self.ip,
                 json={"command": "jog", "x": 6.0, "y": 3.0, "absolute": True},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )
@@ -2155,9 +2131,6 @@ class ControlPrintheadRoute(unittest.TestCase):
             mock_post.assert_called_with(
                 "http://%s/api/printer/printhead" % self.ip,
                 json={"command": "home", "axes": ["x", "y"]},
-                data=None,
-                files=None,
-                headers={},
                 timeout=200,
                 verify=True,
             )

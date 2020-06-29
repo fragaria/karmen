@@ -4,6 +4,7 @@ import uuid as guid
 
 from server import app
 from server.database import gcodes, printjobs, printers
+from server.errors import DeviceInvalidState
 from server.clients.utils import PrinterClientException
 from ..utils import (
     TOKEN_USER,
@@ -46,7 +47,6 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    uuid=uuids.pop(),
                     gcode_uuid=self.gcode_uuid,
                     gcode_data={"uuid": self.gcode_uuid},
                     printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -58,7 +58,6 @@ class ListRoute(unittest.TestCase):
         for i in range(0, 3):
             self.printjob_ids.append(
                 printjobs.add_printjob(
-                    uuid=uuids.pop(),
                     gcode_uuid=self.gcode_uuid2,
                     gcode_data={"uuid": self.gcode_uuid2},
                     printer_uuid="e24a9711-aabc-48f0-b790-eac056c43f07",
@@ -68,7 +67,6 @@ class ListRoute(unittest.TestCase):
                 )
             )
         printjobs.add_printjob(
-            uuid=uuids.pop(),
             gcode_uuid=self.gcode_uuid2,
             gcode_data={"uuid": self.gcode_uuid2},
             printer_uuid="7e5129ad-08d0-42d1-b65c-847d3c636157",
@@ -336,7 +334,6 @@ class DetailRoute(unittest.TestCase):
             organization_uuid=UUID_ORG,
         )
         self.printjob_id = printjobs.add_printjob(
-            uuid=guid.uuid4(),
             gcode_uuid=self.gcode_uuid,
             gcode_data={"uuid": self.gcode_uuid},
             printer_uuid="20e91c14-c3e4-4fe9-a066-e69d53324a20",
@@ -466,7 +463,7 @@ class CreateRoute(unittest.TestCase):
 
     @mock.patch("server.routes.printjobs.clients.get_printer_instance")
     def test_create_already_printing(self, mock_print_inst):
-        mock_print_inst.return_value.upload_and_start_job.side_effect = PrinterClientException(
+        mock_print_inst.return_value.upload_and_start_job.side_effect = DeviceInvalidState(
             "Printer is printing"
         )
         with app.test_client() as c:
@@ -501,13 +498,13 @@ class CreateRoute(unittest.TestCase):
                     "gcode": self.gcode_uuid,
                 },
             )
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 422)
 
     def test_create_bad_org_uuid(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.post(
-                "/organizations/not-an-uuid/printjobs",
+                "/organizations/not-a-uuid/printjobs",
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 400)
@@ -561,7 +558,7 @@ class CreateRoute(unittest.TestCase):
                     "printer": "225b4a63-d94a-4231-87dc-f1bff717e5da",
                 },
             )
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 422)
 
     def test_bad_gcode(self):
         with app.test_client() as c:
@@ -584,7 +581,7 @@ class CreateRoute(unittest.TestCase):
                     "printer": "20e91c14-c3e4-4fe9-a066-e69d53324a20",
                 },
             )
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 422)
 
     @mock.patch(
         "server.routes.printjobs.clients.get_printer_instance", return_value=None
