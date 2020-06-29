@@ -2,7 +2,9 @@ import uuid as guid
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
+from werkzeug import exceptions as http_exceptions
 from server import app, clients
+from server.errors import DeviceCommunicationError, DeviceInvalidState
 from server.database import printjobs, printers, gcodes, users, network_clients
 from . import jwt_force_password_change, validate_org_access, validate_uuid
 
@@ -39,67 +41,60 @@ def printjob_create(org_uuid):
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     gcode_uuid = data.get("gcode", None)
-    printer_uuid = data.get("printer", None)
+    printer_uuid = data.get("printer", None)  # FIXME: this should be part of the path
     if not gcode_uuid or not printer_uuid:
         return abort(
             make_response(jsonify(message="Missing gcode_uuid or printer_uuid"), 400)
         )
-    validate_uuid(gcode_uuid)
-    validate_uuid(printer_uuid)
+
     printer = printers.get_printer(printer_uuid)
-    if printer is None or printer["organization_uuid"] != org_uuid:
-        return abort(make_response(jsonify(message="Printer not found"), 404))
+    if not printer or printer['organization_uuid'] != org_uuid:
+        raise http_exceptions.UnprocessableEntity(f"Invalid printer {printer_uuid} - does not exist.")
+
     gcode = gcodes.get_gcode(gcode_uuid)
-    if gcode is None:
-        return abort(make_response(jsonify(message="Gcode not found"), 404))
+    if not gcode:
+        raise http_exceptions.UnprocessableEntity("Invalid gcode {gcode_uuid} - does not exist.")
+
+    network_client = network_clients.get_network_client(
+        printer["network_client_uuid"]
+    )
+    printer_data = dict(network_client)
+    printer_data.update(dict(printer))
+    printer_inst = clients.get_printer_instance(printer_data)
     try:
-        network_client = network_clients.get_network_client(
-            printer["network_client_uuid"]
-        )
-        printer_data = dict(network_client)
-        printer_data.update(dict(printer))
-        printer_inst = clients.get_printer_instance(printer_data)
-        uploaded = printer_inst.upload_and_start_job(
+        printer_inst.upload_and_start_job(
             gcode["absolute_path"], gcode["path"]
         )
-        if not uploaded:
-            return abort(
-                make_response(
-                    jsonify(message="Cannot upload the g-code to the printer"), 500
-                )
-            )
-        printjob_uuid = guid.uuid4()
-        printjobs.add_printjob(
-            uuid=printjob_uuid,
-            gcode_uuid=gcode["uuid"],
-            organization_uuid=org_uuid,
-            printer_uuid=printer["uuid"],
-            user_uuid=get_current_user()["uuid"],
-            gcode_data={
-                "uuid": gcode["uuid"],
-                "filename": gcode["filename"],
-                "size": gcode["size"],
-                "available": True,
-            },
-            printer_data={
-                "ip": printer_inst.ip,
-                "port": printer_inst.port,
-                "hostname": printer_inst.hostname,
-                "name": printer_inst.name,
-                "client": printer_inst.client,
-            },
-        )
-        return (
-            jsonify({"uuid": printjob_uuid, "user_uuid": get_current_user()["uuid"]}),
-            201,
-        )
-    except clients.utils.PrinterClientException as e:
-        app.logger.error(e)
-        return abort(
-            make_response(
-                jsonify(message="Cannot schedule a printjob: %s" % str(e)), 409
-            )
-        )
+    except DeviceInvalidState as e:
+        raise http_exceptions.Conflict(*e.args)
+    except DeviceCommunicationError as e:
+        raise http_exceptions.GatewayTimeout(*e.args)
+    # TODO: robin - add_printjob should be method of printer and printer a
+    #               method of organization
+    printjob_uuid = printjobs.add_printjob(
+        gcode_uuid=gcode["uuid"],
+        organization_uuid=org_uuid,
+        printer_uuid=printer["uuid"],
+        user_uuid=get_current_user()["uuid"],
+        gcode_data={
+            "uuid": gcode["uuid"],
+            "filename": gcode["filename"],
+            "size": gcode["size"],
+            "available": True,
+        },
+        # FIXME: printer data should be kept in printer object only
+        printer_data={
+            "ip": printer_inst.ip,
+            "port": printer_inst.port,
+            "hostname": printer_inst.hostname,
+            "name": printer_inst.name,
+            "client": printer_inst.client,
+        },
+    )
+    return (
+        jsonify({"uuid": printjob_uuid, "user_uuid": get_current_user()["uuid"]}),
+        201,
+    )
 
 
 # /organizations/<org_uuid>/printjobs, GET

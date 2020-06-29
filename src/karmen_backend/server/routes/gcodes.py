@@ -152,21 +152,18 @@ def gcode_create(org_uuid):
             )
         )
 
-    try:
-        saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
-        gcode_id = gcodes.add_gcode(
-            uuid=guid.uuid4(),
-            path=saved["path"],
-            filename=saved["filename"],
-            display=saved["display"],
-            absolute_path=saved["absolute_path"],
-            size=saved["size"],
-            user_uuid=get_current_user()["uuid"],
-            organization_uuid=org_uuid,
-        )
-        analyze_gcode.delay(gcode_id)
-    except (IOError, OSError) as e:
-        return abort(make_response(jsonify(message=str(e)), 500))
+    saved = files.save(org_uuid, incoming, request.form.get("path", "/"))
+    gcode_id = gcodes.add_gcode(
+        uuid=guid.uuid4(),
+        path=saved["path"],
+        filename=saved["filename"],
+        display=saved["display"],
+        absolute_path=saved["absolute_path"],
+        size=saved["size"],
+        user_uuid=get_current_user()["uuid"],
+        organization_uuid=org_uuid,
+    )
+    analyze_gcode.delay(gcode_id)
     return (
         jsonify(
             make_gcode_response(

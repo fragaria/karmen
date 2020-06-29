@@ -1676,6 +1676,9 @@ paths:
                     $ref: '#/components/schemas/uuid'
         '409':
           description: Could ot schedule a printjob
+        '422':
+          description: The job could not be scheduled due to invalid data (probably printer or gcode uuid).
+          # TODO: describe general error response format
     get:
       summary: 'List printjobs'
       operationId: server.routes.printjobs.printjobs_list

@@ -215,7 +215,7 @@ def printer_create(org_uuid):
             return abort(
                 make_response(
                     jsonify(message="Cannot add printer without a token in CLOUD_MODE"),
-                    500,
+                    400,
                 )
             )
         if (
