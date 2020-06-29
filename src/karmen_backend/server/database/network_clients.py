@@ -3,6 +3,13 @@ from psycopg2 import sql
 import psycopg2.extras
 from server.database import get_connection
 
+'''
+Network client represents the physical device on network, which can be bound to
+multiple printers (virtualized printer added to an organization).
+'''
+
+# FIXME: merge with printer
+
 FIELDS = [
     "uuid",
     "client",

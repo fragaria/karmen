@@ -501,6 +501,7 @@ def printer_webcam_snapshot(org_uuid, printer_uuid):
         FUTURES_MICROCACHE[printer_inst.network_client_uuid] = executor.submit(
             _get_webcam_snapshot, snapshot_url
         )
+    # FIXME: robin - remove module-wide microcache (not thread safe)
     response = WEBCAM_MICROCACHE.get(printer_inst.network_client_uuid)
     if response is not None and response is not False:
         return (

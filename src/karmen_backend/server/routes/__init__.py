@@ -12,6 +12,12 @@ from server.database import (
     organization_roles,
 )
 
+# FIXME: robin - merge these decorators (or change them to one decorator and a
+# common middleware)
+# @jwt_force_password_change
+# @validate_org_access()
+# @cross_origin()
+
 
 def validate_uuid(uuid):
     try:
