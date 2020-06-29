@@ -2,7 +2,15 @@ import json
 import re
 from urllib import parse as urlparse
 import requests
+from requests.exceptions import ConnectionError, ReadTimeout
 
+from server.errors import (
+    DeviceCommunicationError,
+    DeviceNetworkError,
+    DeviceNotConnectedError,
+    DeviceAuthorizationError,
+    DeviceInvalidState
+)
 from server.database import props_storage, printers
 from server import app
 from server.clients.utils import (
@@ -94,80 +102,63 @@ class Octoprint(PrinterClient):
         self.client_info.api_key = api_key
         self.http_session.headers.update({"X-Api-Key": api_key})
 
-    def _http_get(self, path, force=False, timeout=None):
-        if not self.client_info.connected and not force:
-            return None
-        uri = "%s%s" % (self.network_base, path)
-        if timeout is None:
-            timeout = app.config.get("NETWORK_TIMEOUT", 10)
-        try:
-            req = self.http_session.get(uri, timeout=timeout)
-            if req is None:
-                self.client_info.connected = False
-            elif bool(self.client_info.api_key):
-                if req.status_code == 403:
-                    self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
-                if req.status_code == 200:
-                    self.client_info.access_level = PrinterClientAccessLevel.UNLOCKED
-            return req
-        except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.ReadTimeout,
-        ) as e:
-            app.logger.debug(
-                "Cannot call %s because %s %s"
-                % (uri, app.config.get("NETWORK_TIMEOUT", 10), e)
-            )
-            self.client_info.connected = False
-            return None
+    def _http_get(self, path, hide_errors=True, force=False, **kwargs):
+        return self._request(path, method='get', force=force, hide_errors=hide_errors, **kwargs)
 
-    def _http_post(
-        self,
-        path,
-        data=None,
-        files=None,
-        json=None,
-        force=False,
-        headers=None,
-        timeout=None,
-    ):
-        if headers is None:
-            headers = {}
-        if not self.client_info.connected and not force:
-            return None
-        if timeout is None:
-            timeout = int(app.config.get("NETWORK_TIMEOUT", 10)) * 100
+    def _http_post(self, path, hide_errors=True, force=False, **kwargs):
+        # technical dept - exceptions are being suppressed by default
+        # this kwarg allows implement exception handling one-by-one in the
+        # outher code
+        return self._request(path, method='post', force=force, hide_errors=hide_errors, **kwargs)
+
+    def _request(self, path, method='get', force=False, hide_errors=True, **kwargs):
+        '''@hide_errors solves a technical dept where exceptions are being
+        suppressed by default this kwarg allows implement exception handling
+        one-by-one in the outher code'''
         uri = "%s%s" % (self.network_base, path)
+        if not self.client_info.connected and not force:
+            if hide_errors:
+                return
+            else:
+                raise DeviceNotConnectedError('The device is not connected.')
+        kwargs['timeout'] = kwargs.get('timeout', app.config.get("NETWORK_TIMEOUT", 10) * 100)
+        kwargs['verify'] = kwargs.get('verify', app.config.get("NETWORK_VERIFY_CERTIFICATES", True))
+        if self.client_info.api_key:
+            kwargs['headers'] = kwargs.get('headers', {})
+            kwargs['headers']["X-Api-Key"] = self.client_info.api_key
+        method = method.lower()
+
         try:
-            if self.client_info.api_key:
-                headers.update({"X-Api-Key": self.client_info.api_key})
-            # Because requests session shares the connection pool, timeout actually
-            # does not get updated in the underlying reused socket.
-            # That's why we're using a different connection with custom timeout.
-            req = requests.post(
-                uri,
-                data=data,
-                files=files,
-                json=json,
-                headers=headers,
-                timeout=timeout,
-                verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
-            )
-            if req is None:
+            if method == 'get':
+                req = self.http_session.get(uri, **kwargs)
+            else:
+                # Because requests session shares the connection pool, timeout actually
+                # does not get updated in the underlying reused socket.
+                # That's why we're using a different connection with custom timeout.
+                req = getattr(requests, method)( uri, **kwargs)
+        except ( ConnectionError, ReadTimeout ) as exception:
+            # FIXME: this can be a temporal failure not implying disconnection
+            #        connection status should be solved elsewhere
+            if hide_errors:
                 self.client_info.connected = False
-            elif bool(self.client_info.api_key):
-                if req.status_code == 403:
-                    self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
-                if req.status_code == 200:
-                    self.client_info.access_level = PrinterClientAccessLevel.UNLOCKED
-            return req
-        except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.ReadTimeout,
-        ) as e:
-            app.logger.debug("Cannot call %s because %s" % (uri, e))
-            self.client_info.connected = False
-            return None
+                app.logger.debug(
+                    "Cannot call %s because %s %s"
+                    % (uri, kwargs['timeout'], exception)
+                )
+                return None
+            else:
+                raise DeviceNetworkError(
+                    f"Network error communicating communicating with device. {method} {uri}: {exception}",
+                    original_exception=exception, url=uri, method=method);
+
+        if self.client_info.api_key:
+            if req.status_code == 403:
+                self.client_info.access_level = PrinterClientAccessLevel.PROTECTED
+                if not hide_errors:
+                    raise DeviceAuthorizationError('The device is probably protected.')
+            if req.status_code == 200:
+                self.client_info.access_level = PrinterClientAccessLevel.UNLOCKED
+        return req
 
     def is_alive(self):
         request = self._http_get("/api/version", force=True)
@@ -528,16 +519,17 @@ class Octoprint(PrinterClient):
     def upload_and_start_job(self, gcode_disk_path, path=None):
         status = self.uncached_status()
         if self.client_info.connected and status["state"] != "Operational":
-            raise PrinterClientException(
-                "Printer is printing, cannot start another print"
+            raise DeviceInvalidState(
+                "Printer is not in operational state. Cannot start print."
             )
-        request = self._http_post(
-            "/api/files/local",
+        response = self._http_post("/api/files/local",
             files={"file": open(gcode_disk_path, "rb")},
             data={"path": "karmen" if not path else "karmen/%s" % path, "print": True},
+            timeout=600,
+            hide_errors=False, # necessary till we add error handling to the rest of the code
         )
-        # TODO improve return value
-        return bool(request is not None and request.status_code == 201)
+        if response.status_code != 201:  # http created
+            raise DeviceCommunicationError(f"The device returned an unexpected status code: {response.status_code} {response.status}.", response)
 
     def modify_current_job(self, action):
         if action not in ("cancel", "start", "toggle", "pause", "resume"):
