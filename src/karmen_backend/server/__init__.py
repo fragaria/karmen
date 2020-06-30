@@ -12,7 +12,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 import connexion
 
 
-__version__ = "0.13.0-rc03"
+__version__ = "0.13.0-rc05"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
@@ -39,9 +39,9 @@ def setup_celery(flask_app):
     return celery_inst
 
 
-if os.environ.get("SENTRY_DSN") is not None:
+if os.environ.get("BACKEND_SENTRY_DSN") is not None:
     sentry_sdk.init(
-        dsn=os.environ.get("SENTRY_DSN"),
+        dsn=os.environ.get("BACKEND_SENTRY_DSN"),
         integrations=[FlaskIntegration(), RedisIntegration(), CeleryIntegration()],
         release="karmen_backend@%s" % __version__,
     )
