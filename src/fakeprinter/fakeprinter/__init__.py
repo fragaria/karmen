@@ -9,6 +9,8 @@ from flask import Flask, jsonify, request, abort, send_file
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 
+from fakeprinter.middlewares import ThrottlingMiddleware
+
 __version__ = "0.13.0-rc05"
 __author__ = "Jirka Chadima"
 __copyright__ = (
@@ -18,6 +20,9 @@ __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 STARTED = datetime.now()
 app = Flask(__name__)
+
+app.wsgi_app = ThrottlingMiddleware(float(os.environ.get('THROTTLE', 0)), app.wsgi_app)
+
 
 CORS(app)
 
@@ -334,3 +339,5 @@ def karmen_pill_info():
             },
         },
     )
+
+

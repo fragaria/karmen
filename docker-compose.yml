@@ -94,6 +94,7 @@ services:
     build: ./src/fakeprinter
     environment:
       STATE_JOB_NAME: "fake-file-being-printed.gcode"
+      THROTTLE: 1  # delay any request 1 second
     networks:
       printers:
         ipv4_address: 172.16.236.12
