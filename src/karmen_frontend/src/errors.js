@@ -14,3 +14,10 @@ export class OfflineError extends Error {
 }
 
 export class UnauthorizedError extends Error {}
+
+export class OrganizationMismatchError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "OrganizationMismatchError";
+  }
+}

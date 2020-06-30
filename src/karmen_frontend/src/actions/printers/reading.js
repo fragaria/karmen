@@ -1,7 +1,7 @@
 import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
-import { HttpError } from "../../errors";
+import { HttpError, OrganizationMismatchError } from "../../errors";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -214,6 +214,12 @@ export const getWebcamSnapshot = createHttpAction(
   (orguuid, uuid, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       let { printers } = getState();
+
+      // This can happen during organization switching and printer's detail opened. Just catch it silently.
+      if (printers.activeOrganizationUuid !== orguuid) {
+        return Promise.reject(new OrganizationMismatchError());
+      }
+
       const printer = printers.printers.find((p) => p.uuid === uuid);
 
       if (!printer || !printer.webcam || !printer.webcam.url) {
@@ -255,6 +261,9 @@ export const getWebcamSnapshot = createHttpAction(
         };
       });
     }).catch((err) => {
+      if (err instanceof OrganizationMismatchError) {
+        return;
+      }
       if (!(err instanceof HttpError)) {
         throw err;
       }
