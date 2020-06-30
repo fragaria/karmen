@@ -482,11 +482,12 @@ class CheckPrinterTest(unittest.TestCase):
         self.assertEqual(mock_hostname.call_count, 1)
         self.assertEqual(mock_address.call_count, 0)
         self.assertEqual(mock_get_printer.call_count, 1)
-        mock_get_data.assert_any_call("https://1234/api/version", timeout=2)
+        any_http_kwargs = {'timeout': mock.ANY}
+        mock_get_data.assert_any_call("https://1234/api/version", **any_http_kwargs)
         # sniff
-        mock_get_data.assert_any_call("https://1234/api/settings", timeout=2)
+        mock_get_data.assert_any_call("https://1234/api/settings", **any_http_kwargs)
         # webcam, TODO this is not ideal
-        mock_get_data.assert_any_call("https://1234/api/settings", timeout=2)
+        mock_get_data.assert_any_call("https://1234/api/settings", **any_http_kwargs)
         self.assertEqual(mock_get_data.call_count, 4)
         self.assertEqual(mock_update_printer.call_count, 1)
         mock_update_printer.assert_any_call(
