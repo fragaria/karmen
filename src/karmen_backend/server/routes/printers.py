@@ -104,11 +104,15 @@ def printers_list(org_uuid):
             [p["network_client_uuid"] for p in printers_set]
         )
     }
+    # FIXME: robin - this should be:
+    #        `for network_client in network_clients.get_network_clients_by_uuids([p["network_client_uuid"] for p in printers_set])``
+    #        Even better organization should have method `get_network_clients`
     for printer in printers.get_printers(organization_uuid=org_uuid):
         try:
             network_client = network_clients_mapping.get(printer["network_client_uuid"])
             if network_client is None:
                 # This is a race condition handling, there should always be a network_client for every printer
+                # FIXME: robin - this is not a race condition, remove this
                 continue
             printer_data = dict(network_client)
             printer_data.update(dict(printer))
@@ -338,7 +342,7 @@ def printer_patch(org_uuid, printer_uuid):
 
     printer_inst.add_api_key(api_key)
     if (
-        data.get("api_key", "-1") != "-1"
+            data.get("api_key", "-1") != "-1"  # FIXME: robin - change to `if 'api_key' in data`
         and data.get("api_key", "-1") != printer_inst.client_info.api_key
     ):
         printer_inst.sniff()  # this can probably be offloaded to check_printer task

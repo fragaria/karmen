@@ -120,7 +120,7 @@ class CheckPrinterTest(unittest.TestCase):
     @mock.patch(
         "server.tasks.check_printer.network.get_avahi_address", return_value="5678",
     )
-    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    @mock.patch("server.clients.cachedoctoprint.redis_client")
     @mock.patch("server.tasks.check_printer.datetime")
     def test_activate_responding_printer(
         self,
@@ -445,7 +445,7 @@ class CheckPrinterTest(unittest.TestCase):
     )
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printer.datetime")
-    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    @mock.patch("server.clients.cachedoctoprint.redis_client")
     def test_call_sniff_periodically(
         self,
         mock_octoprint_redis,
@@ -551,7 +551,7 @@ class CheckPrinterTest(unittest.TestCase):
     )
     @mock.patch("server.clients.octoprint.requests.Session.get")
     @mock.patch("server.tasks.check_printer.datetime")
-    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    @mock.patch("server.clients.cachedoctoprint.redis_client")
     def test_karmen_sniff_no_pill(
         self,
         mock_octoprint_redis,

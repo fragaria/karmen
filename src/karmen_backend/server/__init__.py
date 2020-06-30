@@ -70,7 +70,7 @@ CONFIG_KEYS = {
     "MAILER": "dummy",
     "MAILER_CONFIG": '{"url": "http://dummymailserver:8088/mail"}',
     "MAILER_FROM": "Karmen <karmen@karmen.local>",
-    "NETWORK_TIMEOUT": 2,
+    "NETWORK_TIMEOUT": 2,  # network timeout in seconds
     "NETWORK_VERIFY_CERTIFICATES": True,
     "POSTGRES_DB": "print3d",
     "POSTGRES_PASSWORD": "print3d",
