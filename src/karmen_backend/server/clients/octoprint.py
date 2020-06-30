@@ -445,32 +445,36 @@ class Octoprint(PrinterClient):
         else:
             return {"state": "Printer is not responding", "temperature": {}}
 
-    def webcam(self):
-        def parse_url(url):
-            if url is None:
-                return None
-            if url.startswith("/"):
-                return self.network_base + url
-            if not (url.startswith("http://") or url.startswith("https://")):
-                url = "http://" + url
-            parsed = urlparse.urlparse(url)
-            port = parsed.port if parsed.port is not None else "80"
-            if self.token is not None and self.token != "" and port != "80":
-                return None  # Yet we can't sed other port's than 80 over ws api yet
-            if self.token:
-                # If we have ws api, we just try the path, not much else to do
-                return "%s%s?%s" % (self.network_base, parsed.path, parsed.query)
+    def _parse_device_url(self, url):
+        '''
+        normalizes device url and translates it to uri pointing websocket proxy if necessary
+        '''
+        if url is None:
+            return None
+        if url.startswith("/"):
+            return self.network_base + url
+        if not (url.startswith("http://") or url.startswith("https://")):
+            url = "http://" + url
+        parsed = urlparse.urlparse(url)
+        port = parsed.port if parsed.port is not None else "80"
+        if self.token is not None and self.token != "" and port != "80":
+            return None  # Yet we can't sed other port's than 80 over ws api yet
+        if self.token:
+            # If we have ws api, we just try the path, not much else to do
+            return "%s%s?%s" % (self.network_base, parsed.path, parsed.query)
 
-            # Rest is only for local hub installations
-            if parsed.hostname in ["localhost", "127.0.0.1"]:
-                return "%s://%s:%s%s?%s" % (
-                    parsed.scheme,
-                    self.ip,
-                    port,
-                    parsed.path,
-                    parsed.query,
-                )
-            return url
+        # Rest is only for local hub installations
+        if parsed.hostname in ["localhost", "127.0.0.1"]:
+            return "%s://%s:%s%s?%s" % (
+                parsed.scheme,
+                self.ip,
+                port,
+                parsed.path,
+                parsed.query,
+            )
+        return url
+
+    def webcam(self):
 
         request = self._http_get("/api/settings")
         if request is not None and request.status_code == 200:
@@ -481,8 +485,8 @@ class Octoprint(PrinterClient):
                     return {"message": "Webcam disabled in octoprint"}
                 stream_url = data["webcam"].get("streamUrl", None)
                 snapshot_url = data["webcam"].get("snapshotUrl", None)
-                stream_url = parse_url(stream_url)
-                snapshot_url = parse_url(snapshot_url)
+                stream_url = self._parse_device_url(stream_url)
+                snapshot_url = self._parse_device_url(snapshot_url)
 
                 return {
                     "message": "OK",
