@@ -52,10 +52,16 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   );
 };
 
-const PrinterSettingsModal = ({ printer, onPrinterUpdate, modal }) => {
+const PrinterSettingsModal = ({
+  printer,
+  onPrinterUpdate,
+  modal,
+  canUpdateTable,
+}) => {
   const onSettingsChanged = (newSettings) =>
     onPrinterUpdate(printer.uuid, newSettings).then((r) => {
       if (r.status === 200) {
+        canUpdateTable(true);
         modal.closeModal();
       }
     });
@@ -71,7 +77,10 @@ const PrinterSettingsModal = ({ printer, onPrinterUpdate, modal }) => {
           <PrinterSettingsForm
             printer={printer}
             onPrinterSettingsChanged={onSettingsChanged}
-            onPrinterSettingsCancelled={modal.closeModal}
+            onPrinterSettingsCancelled={() => {
+              modal.closeModal();
+              canUpdateTable(true);
+            }}
           />
 
           <div className="cta-box text-center"></div>
@@ -86,6 +95,7 @@ const PrintersTableRow = ({
   printer,
   onPrinterUpdate,
   onPrinterDelete,
+  canUpdateTable,
 }) => {
   const deletePrinterModal = useMyModal();
   const printerSettingsModal = useMyModal();
@@ -125,6 +135,7 @@ const PrintersTableRow = ({
           onClick={(e) => {
             setCtaListExpanded(false);
             printerSettingsModal.openModal(e);
+            canUpdateTable(false);
           }}
         >
           <i className="icon-edit"></i>
@@ -145,6 +156,7 @@ const PrintersTableRow = ({
         printer={printer}
         onPrinterUpdate={onPrinterUpdate}
         modal={printerSettingsModal}
+        canUpdateTable={canUpdateTable}
       />
       <DeletePrinterModal
         printer={printer}
@@ -155,36 +167,55 @@ const PrintersTableRow = ({
   );
 };
 
-const PrintersTable = ({
-  orguuid,
-  onPrinterUpdate,
-  onPrinterDelete,
-  loadPrinters,
-  printersLoaded,
-  printersList,
-}) => {
-  return (
-    <NoPaginationListing
-      defaultOrderBy="+name"
-      loadItems={() => loadPrinters(["job", "status", "webcam", "lights"])}
-      itemsLoaded={printersLoaded}
-      items={printersList}
-      enableFiltering={true}
-      sortByColumns={["name"]}
-      filterByColumns={["name"]}
-      rowFactory={(p) => {
-        return (
-          <PrintersTableRow
-            key={p.uuid}
-            orguuid={orguuid}
-            printer={p}
-            onPrinterUpdate={onPrinterUpdate}
-            onPrinterDelete={onPrinterDelete}
-          />
-        );
-      }}
-    />
-  );
-};
+class PrintersTable extends React.Component {
+  state = { canUpdate: true };
+
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    return this.state.canUpdate;
+  }
+  constructor(props) {
+    super(props);
+    this.canUpdateTable = this.canUpdateTable.bind(this);
+  }
+
+  canUpdateTable(value) {
+    if (this.state.canUpdate !== value) {
+      this.setState({ canUpdate: value });
+    }
+  }
+  render() {
+    const {
+      orguuid,
+      onPrinterUpdate,
+      onPrinterDelete,
+      loadPrinters,
+      printersLoaded,
+      printersList,
+    } = this.props;
+    return (
+      <NoPaginationListing
+        defaultOrderBy="+name"
+        loadItems={() => loadPrinters(["job", "status", "webcam", "lights"])}
+        itemsLoaded={printersLoaded}
+        items={printersList}
+        enableFiltering={true}
+        sortByColumns={["name"]}
+        filterByColumns={["name"]}
+        rowFactory={(p) => {
+          return (
+            <PrintersTableRow
+              key={p.uuid}
+              orguuid={orguuid}
+              printer={p}
+              onPrinterUpdate={onPrinterUpdate}
+              onPrinterDelete={onPrinterDelete}
+              canUpdateTable={this.canUpdateTable}
+            />
+          );
+        }}
+      />
+    );
+  }
+}
 
 export default PrintersTable;
