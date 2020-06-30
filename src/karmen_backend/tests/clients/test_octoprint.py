@@ -467,40 +467,24 @@ class OctoprintWebcamTest(unittest.TestCase):
         mock_get_uri.return_value.json.side_effect = json.decoder.JSONDecodeError(
             "msg", "aa", 123
         )
-        printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3",
-            "d501f4f0-48d5-468e-a137-1f3803cd836c",
-            UUID_ORG,
-            ip="192.168.1.15",
+        printer = makeTestOctoprint(
             client_props={"connected": True},
         )
-        result = printer.webcam()
-        self.assertEqual(result, {"message": "Cannot decode JSON"})
+        self.assertEqual(printer.webcam()["message"], 'Cannot decode JSON')
 
     @mock.patch("server.clients.octoprint.requests.Session.get", side_effect=ConnectionError("Unable to connect."))
     def test_webcam_no_response(self, mock_get_uri):
-        printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3",
-            "d501f4f0-48d5-468e-a137-1f3803cd836c",
-            UUID_ORG,
-            ip="192.168.1.15",
+        printer = makeTestOctoprint(
             client_props={"connected": True},
         )
-        result = printer.webcam()
-        self.assertEqual(result, {"message": "Webcam not accessible"})
+        self.assertEqual(printer.webcam()["message"], 'Webcam not accessible')
 
     @mock.patch("server.clients.octoprint.requests.Session.get", side_effect=ConnectionError("Unable to connect."))
     def test_webcam_inactive_printer(self, mock_get_uri):
-        printer = Octoprint(
-            "900c73b8-1f12-4027-941a-e4b29531e8e3",
-            "d501f4f0-48d5-468e-a137-1f3803cd836c",
-            UUID_ORG,
-            ip="192.168.1.15",
+        printer = makeTestOctoprint(
         )
         self.assertEqual(mock_get_uri.call_count, 0)
-        result = printer.webcam()
-        self.assertEqual(result, {"message": "Webcam not accessible"})
-
+        self.assertEqual(printer.webcam()["message"], 'Webcam not accessible')
 
 class OctoprintJobTest(unittest.TestCase):
     @mock.patch("server.clients.octoprint.requests.Session.get")
