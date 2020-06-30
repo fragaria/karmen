@@ -7,7 +7,7 @@ from server import app
 from server.clients.utils import PrinterClientAccessLevel
 from server.clients.octoprint import Octoprint
 
-redisinstance = redis.Redis(
+redis_client = redis.Redis(
     host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"]
 )
 
@@ -76,7 +76,7 @@ class CachedOctoprint(Octoprint):
 
     def delete_cache_key(self, path):
         uri = "%s%s" % (self.network_base, path)
-        redisinstance.delete(self.get_cache_key(uri))
+        redis_client.delete(self.get_cache_key(uri))
 
     def _perform_http_get(self, uri, timeout=None):
         if timeout is None:
@@ -109,7 +109,7 @@ class CachedOctoprint(Octoprint):
         if force:
             return self._perform_http_get(uri)
         cache_key = self.get_cache_key(uri)
-        cached = redisinstance.get(cache_key)
+        cached = redis_client.get(cache_key)
         if cached:
             return pickle.loads(cached)
         if CachedOctoprint.running_requests.get(cache_key):
@@ -129,7 +129,7 @@ class CachedOctoprint(Octoprint):
                 pass
 
         try:
-            redisinstance.set(
+            redis_client.set(
                 cache_key,
                 pickle.dumps(data),
                 ex=CachedOctoprint.expiration_map.get(path, 13),

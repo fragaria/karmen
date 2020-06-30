@@ -145,7 +145,7 @@ class SniffPrinterTest(unittest.TestCase):
         sniff_printer(UUID_ORG, "octopi.local", "192.168.1.10")
         self.assertEqual(mock_save_printer.call_count, 0)
 
-    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    @mock.patch("server.clients.cachedoctoprint.redis_client")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_not_add_bad_data_responding_printer(
@@ -158,7 +158,7 @@ class SniffPrinterTest(unittest.TestCase):
         self.assertEqual(mock_save_printer.call_count, 0)
 
     @mock.patch("server.tasks.sniff_printer.guid.uuid4", return_value="1234")
-    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    @mock.patch("server.clients.cachedoctoprint.redis_client")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch(
         "server.clients.octoprint.requests.Session.get",
@@ -199,7 +199,7 @@ class SniffPrinterTest(unittest.TestCase):
     @mock.patch("server.tasks.sniff_printer.guid.uuid4", return_value="1234")
     @mock.patch("server.tasks.sniff_printer.save_printer_data")
     @mock.patch("server.clients.octoprint.requests.Session.get")
-    @mock.patch("server.clients.cachedoctoprint.redisinstance")
+    @mock.patch("server.clients.cachedoctoprint.redis_client")
     def test_try_http_and_https(
         self, mock_octoprint_redis, mock_get_data, mock_update_printer, mock_uuid
     ):

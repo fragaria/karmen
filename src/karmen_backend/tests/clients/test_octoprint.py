@@ -376,6 +376,7 @@ class OctoprintStatusTest(unittest.TestCase):
         )
 
 class OctoprintWebcamTest(unittest.TestCase):
+
     @mock.patch("server.clients.octoprint.requests.Session.get")
     def test_webcam__url(self, mock_get_uri):
         mock_get_uri.return_value.status_code = 200
