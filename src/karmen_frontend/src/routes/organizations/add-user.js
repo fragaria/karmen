@@ -19,7 +19,7 @@ class AddUser extends React.Component {
       email: {
         name: "Email",
         val: "",
-        type: "text",
+        type: "email",
         required: true,
         error: null,
       },
@@ -58,7 +58,7 @@ class AddUser extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(form.email.val)) {
+    if (form.email.validity.typeMismatch) {
       hasErrors = true;
       form.email.error = "That does not seem like an email address";
     }
@@ -108,12 +108,13 @@ class AddUser extends React.Component {
                 <form>
                   <FormInputs
                     definition={form}
-                    updateValue={(name, value) => {
+                    updateValue={(name, value, target) => {
                       this.setState({
                         form: Object.assign({}, form, {
                           [name]: Object.assign({}, form[name], {
                             val: value,
                             error: null,
+                            validity: target.validity
                           }),
                         }),
                       });
