@@ -94,8 +94,6 @@ def request_password_reset():
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
-    if not email:
-        return abort(make_response(jsonify(message="Missing email"), 400))
     email_valid = is_email(email)
     if not email_valid[0]:
         return abort(make_response(jsonify(message=email_valid[1]), 400))
@@ -139,8 +137,6 @@ def reset_password():
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
 
-    if not email:
-        return abort(make_response(jsonify(message="Missing email"), 400))
     email_valid = is_email(email)
     if not email_valid[0]:
         return abort(make_response(jsonify(message=email_valid[1]), 400))
@@ -341,8 +337,6 @@ def change_password():
 @fresh_jwt_required
 def patch_user():
     data = request.json
-    if not data:
-        return abort(make_response(jsonify(message="Missing payload"), 400))
     username = data.get("username", None)
     if not username:
         return abort(make_response(jsonify(message="Missing username"), 400))
