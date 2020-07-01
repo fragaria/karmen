@@ -84,7 +84,10 @@ export const queueLoadPrinter = (orguuid, uuid, fields, delay) => (
   getState
 ) => {
   setTimeout(() => {
-    const { printers } = getState();
+    const { printers, me } = getState();
+    if (me.currentState === "logged-out") {
+      return;
+    }
     const previousInfo =
       printers.printers && printers.printers.find((p) => p.uuid === uuid);
     dispatch(loadPrinter(orguuid, uuid, fields)).then((result) => {
