@@ -53,8 +53,11 @@ def create_inactive_user(email):
 
 
 def activate_user(email, activation_key, password, password_confirmation):
-    if not email or not is_email(email):
+    if not email:
         return {"activated": False, "message": "Missing or bad email"}
+    email_valid = is_email(email)
+    if not email_valid[0]:
+        return abort(make_response(jsonify(message=email_valid[1]), 400))
     if not password:
         return {"activated": False, "message": "Missing password"}
     if not activation_key:

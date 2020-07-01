@@ -41,8 +41,9 @@ def create_inactive_user():
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    email_valid = is_email(email)
+    if not email_valid[0]:
+        return abort(make_response(jsonify(message=email_valid[1]), 400))
 
     new_user = models.users_me.create_inactive_user(email=email)
 
@@ -93,8 +94,11 @@ def request_password_reset():
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    if not email:
+        return abort(make_response(jsonify(message="Missing email"), 400))
+    email_valid = is_email(email)
+    if not email_valid[0]:
+        return abort(make_response(jsonify(message=email_valid[1]), 400))
     existing = users.get_by_email(email)
     # we are not leaking used or unused e-mails, that's why this responds 202
     if not existing or existing["activated"] is None:
@@ -135,8 +139,11 @@ def reset_password():
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
 
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    if not email:
+        return abort(make_response(jsonify(message="Missing email"), 400))
+    email_valid = is_email(email)
+    if not email_valid[0]:
+        return abort(make_response(jsonify(message=email_valid[1]), 400))
     if not password:
         return abort(make_response(jsonify(message="Missing password"), 400))
     if not pwd_reset_key:
