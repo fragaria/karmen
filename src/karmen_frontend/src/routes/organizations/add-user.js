@@ -8,7 +8,6 @@ import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gatewa
 import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import BusyButton from "../../components/utils/busy-button";
 import { HttpError } from "../../errors";
-import { isEmail } from "../../services/validators";
 
 class AddUser extends React.Component {
   state = {
@@ -114,7 +113,7 @@ class AddUser extends React.Component {
                           [name]: Object.assign({}, form[name], {
                             val: value,
                             error: null,
-                            validity: target.validity
+                            validity: target.validity,
                           }),
                         }),
                       });

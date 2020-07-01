@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
-import { isEmail } from "../../services/validators";
 import { requestPasswordReset } from "../../actions";
 
 class PasswordReset extends React.Component {
@@ -47,7 +46,7 @@ class PasswordReset extends React.Component {
       }
     }
     if (resetForm.realemail.validity.typeMismatch) {
-    hasError = true;
+      hasError = true;
       resetForm.realemail.error = "That does not seem like an email address";
     }
 

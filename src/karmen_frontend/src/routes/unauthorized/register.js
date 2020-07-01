@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
-import { isEmail } from "../../services/validators";
 import { register } from "../../actions";
 
 class Register extends React.Component {
@@ -101,7 +100,7 @@ class Register extends React.Component {
               We will send You an email with a verification link.
             </h2>
           )}
-          <form noValidate >
+          <form noValidate>
             {!messageOk && (
               <FormInputs definition={registerForm} updateValue={updateValue} />
             )}
