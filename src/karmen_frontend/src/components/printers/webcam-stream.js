@@ -29,7 +29,7 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
               <span className="icon-close"></span>
             </button>
             <div
-              className="webcam-modal-stream"
+              className={`webcam-modal-stream ${classNames.concat("pointer").join(" ")}`}
               style={{ backgroundImage: `url(${source})` }}
               onClick={closeModal}
             ></div>
@@ -94,7 +94,7 @@ export class WebcamStream extends React.Component {
   }
 
   render() {
-    return <WebcamStreamRenderer {...this.props} />;
+    return <WebcamStreamRenderer {...this.props} {...this.props.printer.webcam} />;
   }
 }
 

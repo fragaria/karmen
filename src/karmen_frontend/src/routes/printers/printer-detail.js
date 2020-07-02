@@ -130,6 +130,7 @@ const PrinterDetail = ({
       <div className="printer-detail">
         <div className="printer-detail-stream">
           <WebcamStream printer={printer} orgUuid={match.params.orguuid} />
+
           <Progress {...printer.job} />
         </div>
 

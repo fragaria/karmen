@@ -1150,6 +1150,21 @@ select {
   img {
     width: 100%
   }
+   img.flip-horizontal {
+    transform: scaleX(-1);
+  }
+
+  img.flip-vertical {
+    transform: scaleY(-1);
+  }
+
+  img.rotate-90 {
+    transform: rotate(90deg);
+  }
+
+  img.flip-horizontal.flip-vertical {
+    transform: scaleX(-1) scaleY(-1);
+  }
 }
 
 .webcam-modal {
@@ -1177,19 +1192,19 @@ select {
     background-position: center;
   }
 
-  img.flip-horizontal {
+  .flip-horizontal {
     transform: scaleX(-1);
   }
 
-  img.flip-vertical {
+  .flip-vertical {
     transform: scaleY(-1);
   }
 
-  img.rotate-90 {
+  .rotate-90 {
     transform: rotate(90deg);
   }
 
-  img.flip-horizontal.flip-vertical {
+  .flip-horizontal.flip-vertical {
     transform: scaleX(-1) scaleY(-1);
   }
 
