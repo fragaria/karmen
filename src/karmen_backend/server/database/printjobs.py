@@ -58,7 +58,7 @@ def add_printjob(**job):
 
     printer = get_printer(job["printer_uuid"])
     if not printer:
-        raise ValueError(f"The prinetr {job['printer_uuid']} does not exist.")
+        raise ValueError(f"The printer {job['printer_uuid']} does not exist.")
     if printer["organization_uuid"] != job["organization_uuid"]:
         raise ValueError(f"The printer does not belong to the organization.")
     if job.get("gcode_data", None) and job["gcode_data"].get("uuid", None):
