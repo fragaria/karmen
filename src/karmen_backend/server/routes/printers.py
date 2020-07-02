@@ -3,12 +3,17 @@ import random
 import string
 import uuid as guid
 import requests
+from requests.exceptions import ConnectionError, ReadTimeout
+from werkzeug import exceptions as http_exceptions
+
 from flask import jsonify, request, abort, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import get_current_user
 from server import app, __version__
 from server.database import network_clients, printers
 from server import clients, executor
+from server.errors import DeviceCommunicationError, DeviceNetworkError
+from server.services.redlock_cache import redlock_cached
 from server.services import network, printer_tokens
 from . import jwt_force_password_change, validate_org_access, validate_uuid
 from server.clients.utils import PrinterClientException
@@ -443,29 +448,32 @@ def printer_modify_job(org_uuid, printer_uuid):
         return abort(make_response(jsonify(message=str(e)), 400))
 
 
-WEBCAM_MICROCACHE = {}
-FUTURES_MICROCACHE = {}
-
-
 def _get_webcam_snapshot(snapshot_url):
     try:
-        req = requests.get(
+        response = requests.get(
             snapshot_url,
             timeout=app.config.get("NETWORK_TIMEOUT", 10),
             verify=app.config.get("NETWORK_VERIFY_CERTIFICATES", True),
         )
-        if req is not None and req.status_code == 200:
-            return req
-        return False
-    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout,) as e:
-        app.logger.debug("Cannot call %s because %s" % (snapshot_url, e))
-        return False
+        if response.status_code != 200:
+            raise DeviceCommunicationError(
+                "Invalid status code while getting webcam snapshot (%s)" % response.status_code)
+    except (ConnectionError, ReadTimeout) as e:
+        raise http_exceptions.GatewayTimeout("Cannot call %s because %s" % (snapshot_url, e))
+    image_response = {
+        "content": response.content,
+        "headers": {
+            'content-type': response.headers.get("content-type", "image/jpeg"),
+        }
+    }
+    return image_response
 
 
 # /organizations/<org_uuid>/printers/<printer_uuid>/webcam-snapshot, GET
 @jwt_force_password_change
 @validate_org_access()
 @cross_origin()
+@redlock_cached(item_lifespan=app.config['WEBCAM_CACHE_LIFESPAN'])
 def printer_webcam_snapshot(org_uuid, printer_uuid):
     """
     Instead of direct streaming from the end-devices, we are deferring
@@ -480,6 +488,7 @@ def printer_webcam_snapshot(org_uuid, printer_uuid):
     can emulate a video-like experience. Since we have no sound, this should be
     fine.
     """
+
     printer_inst = get_printer_inst(org_uuid, printer_uuid)
     if printer_inst.client_info.webcam is None:
         return abort(make_response(jsonify(message="Not found"), 404))
@@ -487,38 +496,12 @@ def printer_webcam_snapshot(org_uuid, printer_uuid):
     if snapshot_url is None:
         return abort(make_response(jsonify(message="Not found"), 404))
 
-    # process current future if done
-    if (
-        FUTURES_MICROCACHE.get(printer_inst.network_client_uuid)
-        and FUTURES_MICROCACHE.get(printer_inst.network_client_uuid).done()
-    ):
-        WEBCAM_MICROCACHE[printer_inst.network_client_uuid] = FUTURES_MICROCACHE[
-            printer_inst.network_client_uuid
-        ].result()
-        try:
-            del FUTURES_MICROCACHE[printer_inst.network_client_uuid]
-        except Exception:
-            # that's ok, probably a race condition
-            pass
-    # issue a new future if not present
-    if not FUTURES_MICROCACHE.get(printer_inst.network_client_uuid):
-        FUTURES_MICROCACHE[printer_inst.network_client_uuid] = executor.submit(
-            _get_webcam_snapshot, snapshot_url
-        )
-    # FIXME: robin - remove module-wide microcache (not thread safe)
-    response = WEBCAM_MICROCACHE.get(printer_inst.network_client_uuid)
-    if response is not None and response is not False:
-        return (
-            response.content,
-            200,
-            {"Content-Type": response.headers.get("content-type", "image/jpeg")},
-        )
-    if response is not False:
-        # There should be a future running, if the client retries, they should
-        # eventually get a snapshot.
-        # We don't want to end with an error here, so the clients keep retrying
-        return "", 202
-    return abort(make_response(jsonify(message="Not found"), 404))
+    try:
+        response = _get_webcam_snapshot(snapshot_url)
+    except DeviceCommunicationError as exception:
+        raise http_exceptions.BadGateway("An error getting the image %s" % exception)
+    
+    return (response['content'], 200, response['headers'])
 
 
 # /organizations/<org_uuid>/printers/<printer_uuid>/lights, POST

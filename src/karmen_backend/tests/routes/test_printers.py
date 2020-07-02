@@ -219,6 +219,15 @@ class DetailRoute(unittest.TestCase):
 
 
 class CreateRoute(unittest.TestCase):
+    def test_create_no_payload(self):
+        with app.test_client() as c:
+            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
+            response = c.post(
+                "/organizations/587852aa-9026-4422-852d-2533a92eb506/printers",
+                headers={"x-csrf-token": TOKEN_USER_CSRF},
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_create_unknown_org(self):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
