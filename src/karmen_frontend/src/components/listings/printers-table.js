@@ -56,12 +56,12 @@ const PrinterSettingsModal = ({
   printer,
   onPrinterUpdate,
   modal,
-  canUpdateTable,
+  pauseUpdates,
 }) => {
   const onSettingsChanged = (newSettings) =>
     onPrinterUpdate(printer.uuid, newSettings).then((r) => {
       if (r.status === 200) {
-        canUpdateTable(true);
+        pauseUpdates(true);
         modal.closeModal();
       }
     });
@@ -78,8 +78,8 @@ const PrinterSettingsModal = ({
             printer={printer}
             onPrinterSettingsChanged={onSettingsChanged}
             onPrinterSettingsCancelled={() => {
+              pauseUpdates(true);
               modal.closeModal();
-              canUpdateTable(true);
             }}
           />
 
@@ -95,7 +95,7 @@ const PrintersTableRow = ({
   printer,
   onPrinterUpdate,
   onPrinterDelete,
-  canUpdateTable,
+  pauseUpdates,
 }) => {
   const deletePrinterModal = useMyModal();
   const printerSettingsModal = useMyModal();
@@ -135,7 +135,7 @@ const PrintersTableRow = ({
           onClick={(e) => {
             setCtaListExpanded(false);
             printerSettingsModal.openModal(e);
-            canUpdateTable(false);
+            pauseUpdates(false);
           }}
         >
           <i className="icon-edit"></i>
@@ -156,7 +156,7 @@ const PrintersTableRow = ({
         printer={printer}
         onPrinterUpdate={onPrinterUpdate}
         modal={printerSettingsModal}
-        canUpdateTable={canUpdateTable}
+        pauseUpdates={pauseUpdates}
       />
       <DeletePrinterModal
         printer={printer}
@@ -175,10 +175,10 @@ class PrintersTable extends React.Component {
   }
   constructor(props) {
     super(props);
-    this.canUpdateTable = this.canUpdateTable.bind(this);
+    this.pauseUpdates = this.pauseUpdates.bind(this);
   }
 
-  canUpdateTable(value) {
+  pauseUpdates(value) {
     if (this.state.canUpdate !== value) {
       this.setState({ canUpdate: value });
     }
@@ -209,7 +209,7 @@ class PrintersTable extends React.Component {
               printer={p}
               onPrinterUpdate={onPrinterUpdate}
               onPrinterDelete={onPrinterDelete}
-              canUpdateTable={this.canUpdateTable}
+              pauseUpdates={this.pauseUpdates}
             />
           );
         }}
