@@ -28,7 +28,8 @@ flask-executor = "*"
 sentry-sdk = {extras = ["flask"],version = "==0.15.1"}
 argh = "*"
 boto3 = "*"
-connexion = {extras = ["swagger-ui"], version = "==2.7.0"}
+connexion = {extras = ["swagger-ui"],version = "==2.7.0"}
+redlock-py = "*"
 
 [requires]
 python_version = "3.7"

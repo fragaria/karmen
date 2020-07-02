@@ -85,6 +85,7 @@ CONFIG_KEYS = {
     "UPLOAD_FOLDER": "/tmp/karmen-files",
     "CELERY_CONFIG": '{"timezone": "Europe/Prague", "beat_schedule": {"check_printers": {"task": "check_printers","schedule": 30.0}, "get_versions_list": {"task":"get_versions_list", "schedule": 300.0}}}',
     "LOCAL_TESTS_TOKEN": None,
+    "WEBCAM_CACHE_LIFESPAN": 0.1, # cache lifespan in seconds
 }
 
 for key, defaults in CONFIG_KEYS.items():
@@ -98,7 +99,7 @@ for key, defaults in CONFIG_KEYS.items():
 
 # This is hardcoded for 1GB
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024
-
+app.config['WEBCAM_CACHE_LIFESPAN'] = float(app.config['WEBCAM_CACHE_LIFESPAN'])
 # config options combination validation
 if app.config.get("SECRET_KEY") is None:
     raise RuntimeError("Cannot start the application: SECRET_KEY cannot be null")
