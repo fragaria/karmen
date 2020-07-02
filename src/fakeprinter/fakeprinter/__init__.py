@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 
 from fakeprinter.middlewares import ThrottlingMiddleware
 
-__version__ = "0.13.0-rc05"
+__version__ = "0.13.0-rc06"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
