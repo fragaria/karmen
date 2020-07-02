@@ -375,7 +375,7 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
         <BusyButton
           className="btn btn-xs"
           type="button"
-          disabled={target === 0}
+          disabled={target < 0}
           onClick={() => {
             setTemperature(partName, target);
           }}
