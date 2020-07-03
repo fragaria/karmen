@@ -8,7 +8,7 @@ from server.database import (
     organizations,
     organization_roles,
 )
-from server.services.validators import is_email
+from email_validator import validate_email, EmailNotValidError
 
 
 def create_inactive_user(email):
@@ -53,9 +53,10 @@ def create_inactive_user(email):
 
 
 def activate_user(email, activation_key, password, password_confirmation):
-    email_valid = is_email(email)
-    if not email_valid[0]:
-        return abort(make_response(jsonify(message=email_valid[1]), 400))
+    try:
+        validate_email(email, check_deliverability=False)
+    except EmailNotValidError as e:
+        return {"activated": False, "message": f"Email not valid: {e}"}
     if not password:
         return {"activated": False, "message": "Missing password"}
     if not activation_key:
