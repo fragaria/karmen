@@ -57,6 +57,7 @@ def prepare_list_statement(
     filter=None,
     where=None,
     pk_column="id",
+    fulltext_search=None,
 ):
     where_clause = []
     limit_clause = sql.SQL("")
@@ -107,6 +108,7 @@ def prepare_list_statement(
                 )
             )
 
+    # TODO: drop filter
     if filter:
         filter_splitted = filter.split(":", 1)
         if len(filter_splitted) == 2 and filter_splitted[0] in columns:
@@ -119,6 +121,22 @@ def prepare_list_statement(
         # TODO this should not fail silently
         # else:
         #     raise ValueError("Invalid filter.")
+
+    if fulltext_search:
+        [search_text, columns_to_search] = fulltext_search
+        search_sql = []
+        for c in columns_to_search:
+            search_sql.append(
+                sql.SQL("LOWER({}) LIKE LOWER({})").format(
+                    sql.Identifier(c), sql.Literal(f"%{search_text}%")
+                )
+            )
+        # all wheres are joined by AND, so we need to put these ORs in brackets
+        where_clause.append(
+            sql.SQL(" ").join(
+                [sql.SQL(" ( "), sql.SQL(" OR ").join(search_sql), sql.SQL(" ) "),]
+            )
+        )
 
     if where:
         if isinstance(where, tuple):

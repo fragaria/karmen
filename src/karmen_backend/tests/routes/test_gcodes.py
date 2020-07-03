@@ -235,7 +235,7 @@ class ListRoute(unittest.TestCase):
                     uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="my-unique-filename-%s" % rand,
-                    display="file-display",
+                    display="my-unique-filename-%s" % rand,
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
@@ -245,7 +245,7 @@ class ListRoute(unittest.TestCase):
                     uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="my-unique-filename-%s" % rand,
-                    display="file-display",
+                    display="my-unique-filename-%s" % rand,
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
@@ -253,12 +253,12 @@ class ListRoute(unittest.TestCase):
                 ),
             ]
             response = c.get(
-                "/organizations/%s/gcodes?filter=filename:%s" % (UUID_ORG, rand),
+                "/organizations/%s/gcodes?search=%s" % (UUID_ORG, rand),
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
-            self.assertTrue(len(response.json["items"]) == 2)
+            self.assertEqual(len(response.json["items"]), 2)
             for gcode_uuid in gcode_uuids:
                 gcodes.delete_gcode(gcode_uuid)
 
@@ -266,13 +266,13 @@ class ListRoute(unittest.TestCase):
         with app.test_client() as c:
             c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
             response = c.get(
-                "/organizations/%s/gcodes?filter=filename:completely-absent%%20filename"
+                "/organizations/%s/gcodes?search=completely-absent%%20filename"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
-            self.assertTrue(len(response.json["items"]) == 0)
+            self.assertEqual(len(response.json["items"]), 0)
 
     def test_filter_next(self):
         with app.test_client() as c:
@@ -282,7 +282,7 @@ class ListRoute(unittest.TestCase):
                     uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="unique-filename with space.gcode",
-                    display="file-display",
+                    display="unique-filename with space.gcode",
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
@@ -292,7 +292,7 @@ class ListRoute(unittest.TestCase):
                     uuid=guid.uuid4(),
                     path="a/b/c",
                     filename="unique-filename with space",
-                    display="file-display",
+                    display="unique-filename with space",
                     absolute_path="/ab/a/b/c",
                     size=123,
                     user_uuid=UUID_USER,
@@ -300,14 +300,15 @@ class ListRoute(unittest.TestCase):
                 ),
             ]
             response = c.get(
-                "/organizations/%s/gcodes?filter=filename:unique-FILENAME with space&limit=1&order_by=-uuid"
+                "/organizations/%s/gcodes?search=unique-FILENAME with space&limit=1&order_by=-uuid"
                 % UUID_ORG,
                 headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
+            print(response.json)
             self.assertEqual(response.status_code, 200)
             self.assertTrue("items" in response.json)
             self.assertTrue("next" in response.json)
-            self.assertTrue(len(response.json["items"]) == 1)
+            self.assertEqual(len(response.json["items"]), 1)
             response2 = c.get(
                 response.json["next"], headers={"x-csrf-token": TOKEN_USER_CSRF},
             )
@@ -317,28 +318,6 @@ class ListRoute(unittest.TestCase):
             )
             for gcode_uuid in gcode_uuids:
                 gcodes.delete_gcode(gcode_uuid)
-
-    def test_filter_ignore_bad_column(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.get(
-                "/organizations/%s/gcodes?filter=random:file1" % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
-            self.assertTrue(len(response.json["items"]) >= 1)
-
-    def test_filter_ignore_bad_format(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.get(
-                "/organizations/%s/gcodes?filter=file1" % UUID_ORG,
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue("items" in response.json)
-            self.assertTrue(len(response.json["items"]) >= 1)
 
     def test_no_token(self):
         with app.test_client() as c:
