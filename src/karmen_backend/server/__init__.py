@@ -12,7 +12,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 import connexion
 
 
-__version__ = "0.13.0-rc08"
+__version__ = "0.13.0-rc09"
 __author__ = "Jirka Chadima"
 __copyright__ = (
     "Copyright (C) 2019 Fragaria s.r.o. - Released under terms of AGPLv3 License"
