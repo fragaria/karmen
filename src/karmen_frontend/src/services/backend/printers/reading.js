@@ -57,29 +57,18 @@ export const getWebcamSnapshot = (snapshotUrl) => {
     headers: headers,
   })
     .then((response) => {
-      if (response.status === 200) {
-        let contentType = response.headers.get("content-type");
-        return response.arrayBuffer().then((buffer) => ({
-          status: 200,
-          successCodes: [200, 202],
-          data: {
-            prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
-            data: arrayBufferToBase64(buffer),
-          },
-        }));
+      let contentType = response.headers.get("content-type");
+      if (response.status === 404) {
+        return Promise.reject(new HttpError("Stream not available"));
       }
-      if (response.status !== 202) {
-        console.error(
-          `Couldn't get webcam snapshot from ${fullSnapshotURL}: ${response.status}`
-        );
-        return Promise.reject(
-          new HttpError(
-            response,
-            `Cannot get webcam snapshot: ${response.status}`
-          )
-        );
-      }
-      return { status: response.status, successCodes: [200, 202] };
+      return response.arrayBuffer().then((buffer) => ({
+        status: response.status, // response.status,
+        successCodes: [200, 202],
+        data: {
+          prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
+          data: arrayBufferToBase64(buffer),
+        },
+      }));
     })
     .catch((err) => {
       // Only log down errors originating outside of this handler.

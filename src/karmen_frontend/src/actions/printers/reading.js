@@ -232,37 +232,43 @@ export const getWebcamSnapshot = createHttpAction(
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch
-      )(printer.webcam.url).then((r) => {
-        let { webcams } = getState();
+      )(printer.webcam.url)
+        .then((r) => {
+          let { webcams } = getState();
+          if (webcams.queue && webcams.queue[uuid]) {
+            const timeoutData = webcams.queue[uuid];
 
-        if (webcams.queue && webcams.queue[uuid]) {
-          const timeoutData = webcams.queue[uuid];
+            if (timeoutData.interval > 0) {
+              const timeout = setTimeout(
+                () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+                timeoutData.interval
+              );
 
-          if (timeoutData.interval > 0) {
-            const timeout = setTimeout(
-              () => dispatch(getWebcamSnapshot(orguuid, uuid)),
-              timeoutData.interval
-            );
-
-            dispatch({
-              type: "WEBCAMS_TIMEOUT_SET",
-              payload: {
-                uuid,
-                interval: timeoutData.interval,
-                timeout,
-              },
-            });
+              dispatch({
+                type: "WEBCAMS_TIMEOUT_SET",
+                payload: {
+                  uuid,
+                  interval: timeoutData.interval,
+                  timeout,
+                },
+              });
+            }
           }
-        }
-
-        return {
-          organizationUuid: orguuid,
-          uuid,
-          status: r.status,
-          ...r.data,
-          successCodes: [200],
-        };
-      });
+          return {
+            organizationUuid: orguuid,
+            uuid,
+            status: r.status,
+            ...r.data,
+            successCodes: [200],
+          };
+        })
+        .catch((r) => {
+          return {
+            organizationUuid: orguuid,
+            uuid,
+            status: 404,
+          };
+        });
     }).catch((err) => {
       if (err instanceof OrganizationMismatchError) {
         return;

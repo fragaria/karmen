@@ -34,18 +34,21 @@ export default (
           },
         }),
       });
-    case "WEBCAMS_GET_SNAPSHOT_SUCCEEDED":
+    case "WEBCAMS_GET_SNAPSHOT_ENDED":
       if (action.payload.organizationUuid !== activeOrganizationUuid) {
         return state;
       }
       let newImage = action.payload;
-      if (!newImage || newImage.status !== 200) {
+      if (!newImage) {
         state.images = Object.assign({}, state.images, {
-          [newImage.uuid]: undefined,
+          [newImage.uuid]: [undefined, action.payload.status],
         });
       } else {
         state.images = Object.assign({}, state.images, {
-          [newImage.uuid]: `${newImage.prefix}${newImage.data}`,
+          [newImage.uuid]: [
+            `${newImage.prefix}${newImage.data}`,
+            action.payload.status,
+          ],
         });
       }
       return state;

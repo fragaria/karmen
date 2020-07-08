@@ -44,12 +44,13 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
 
 export const WebcamStreamRenderer = ({
   url,
-  image,
+  imageResponse,
   flipHorizontal,
   flipVertical,
   rotate90,
   allowFullscreen,
   printer,
+  setWebcamRefreshInterval,
 }) => {
   let klass = [];
   if (flipHorizontal) {
@@ -63,22 +64,54 @@ export const WebcamStreamRenderer = ({
   if (rotate90) {
     klass.push("rotate-90");
   }
-  const isStreamAvailable = image && printerUtils.isConnected(printer);
-  return (
-    <>
-      <div
-        className={`webcam-stream ${isStreamAvailable ? "" : "unavailable"}`}
-      >
-        {isStreamAvailable ? (
+
+  let image,
+    status_code = undefined;
+  if (imageResponse) {
+    image = imageResponse[0];
+    status_code = imageResponse[1];
+  }
+  // No response but printer online -> fresh page load
+  // No response and printer is offline -> stream unavailable
+  // 404 -> stream unavailable
+  if (!image || status_code === 404) {
+    const isStreamAvailable =
+      printerUtils.isConnected(printer) && status_code !== 404;
+    return (
+      <>
+        <div className={`webcam-stream unavailable`}>
+          {isStreamAvailable ? (
+            <div>Starting stream</div>
+          ) : (
+            <div>Stream unavailable</div>
+          )}
+        </div>
+      </>
+    );
+  }
+  // fetching was OK, we have an image to display
+  if (image.startsWith("data:image/")) {
+    return (
+      <>
+        <div className={`webcam-stream`}>
           <WebcamModal
             classNames={klass}
             source={image}
             url={url}
             allowFullscreen={allowFullscreen}
           />
-        ) : (
-          <div>Stream unavailable</div>
-        )}
+        </div>
+      </>
+    );
+  }
+  // last fetch was probably something like 502, should start working soon
+  return (
+    <>
+      <div className={`webcam-stream unavailable`}>
+        <div>
+          Unable to get stream.
+          <br /> Retrying.
+        </div>
       </div>
     </>
   );
@@ -104,7 +137,7 @@ export class WebcamStream extends React.Component {
 
 export default connect(
   (state, ownProps) => ({
-    image: state.webcams.images[ownProps.printer.uuid],
+    imageResponse: state.webcams.images[ownProps.printer.uuid],
   }),
   (dispatch, ownProps) => ({
     setWebcamRefreshInterval: (interval) =>
