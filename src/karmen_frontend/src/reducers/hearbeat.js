@@ -15,12 +15,24 @@ export default (state = initialState, action) => {
         ![apiVersion, "@dev", `v${apiVersion}`].includes(
           process.env.REACT_APP_GIT_REV
         );
-
-      return Object.assign({}, state, {
-        isOnline: true,
-        apiVersion,
-        shouldUpgrade,
-      });
+      /* This action is fired every few seconds. It forced dialogs
+       * (DeleteModal) to re-render. Let's return changed state if and only if
+       * it really changed. I was not able to achive the same effect by
+       * shouldComponentUpdate() */
+      if (
+        state.isOnline === true &&
+        state.apiVersion === apiVersion &&
+        state.shouldUpgrade === shouldUpgrade
+      ) {
+        // nothing to do here
+        return state;
+      } else {  // update the state
+        return Object.assign({}, state, {
+          isOnline: true,
+          apiVersion: apiVersion,
+          shouldUpgrade: shouldUpgrade,
+        });
+      }
     case "HEARTBEAT_FAILED":
       return Object.assign({}, state, {
         isOnline: false,
