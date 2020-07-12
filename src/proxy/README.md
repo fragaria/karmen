@@ -19,3 +19,10 @@ run in the docker's networking host mode.
 - `BACKEND_PORT` - Port of Karmen backend, defaults to `9764`
 - `FRONTEND_HOST` - Host of Karmen frontend, defaults to `frontend`
 - `FRONTEND_PORT` - Port of Karmen frontend, defaults to `9765`
+
+## Maintenace mode
+
+You can switch nginx proxy to maintenance mode - 503 responses will be served from api and frontend
+
+`docker exec -d karmen_proxy_1 touch /maintenance`
+`docker exec -d karmen_proxy_1 rm /maintenance`
