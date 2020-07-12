@@ -13,6 +13,13 @@ export class OfflineError extends Error {
   }
 }
 
+export class MaintenanceError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "MaintenanceError";
+  }
+}
+
 export class UnauthorizedError extends Error {}
 
 export class OrganizationMismatchError extends Error {

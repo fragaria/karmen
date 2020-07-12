@@ -7,7 +7,7 @@ import { useRecursiveTimeout } from "../hooks";
 
 const NULL_EVENT = { currentTarget: true };
 
-const OfflineModal = ({ shouldShow }) => {
+const OfflineModal = ({ shouldShow, isMaintenance }) => {
   const { Modal, openModal, isOpen, closeModal } = useMyModal({
     hideClose: true,
   });
@@ -24,7 +24,9 @@ const OfflineModal = ({ shouldShow }) => {
       <Modal>
         <h1 className="modal-title text-center">Application is offline</h1>
         <p className="message-error">
-          Karmen's API is not responding. Check your connection, please.
+          {isMaintenance
+            ? "Karmen is under maintenance, please try again later."
+            : "Karmen's API is not responding. Check your connection, please."}
         </p>
         <div className="cta-box text-center"></div>
       </Modal>
@@ -70,7 +72,12 @@ const UpgradeModal = ({ shouldShow }) => {
   );
 };
 
-export const Heartbeat = ({ checkBeat, isOnline, shouldUpgrade }) => {
+export const Heartbeat = ({
+  checkBeat,
+  isOnline,
+  shouldUpgrade,
+  isMaintenance,
+}) => {
   const doCheck = useCallback(() => {
     return checkBeat().catch((err) => {
       // No need to panic, we're just offline.
@@ -88,7 +95,7 @@ export const Heartbeat = ({ checkBeat, isOnline, shouldUpgrade }) => {
   return (
     <>
       <UpgradeModal shouldShow={shouldUpgrade} />
-      <OfflineModal shouldShow={!isOnline} />
+      <OfflineModal shouldShow={!isOnline} isMaintenance={isMaintenance} />
     </>
   );
 };
@@ -96,6 +103,7 @@ export const Heartbeat = ({ checkBeat, isOnline, shouldUpgrade }) => {
 export default connect(
   (state) => ({
     isOnline: state.heartbeat.isOnline,
+    isMaintenance: state.heartbeat.isMaintenance,
     shouldUpgrade: state.heartbeat.shouldUpgrade,
   }),
   (dispatch) => ({

@@ -81,6 +81,46 @@ describe("heartbeat", () => {
     });
   });
 
+  it("displays dialog when API is under maintentnace", async () => {
+    fetch.mockResponseOnce(undefined, { status: 503 });
+
+    const store = buildStore({
+      isOnline: true,
+      apiVersion: "test-version",
+      shouldUpgrade: false,
+      isMaintenance: false,
+    });
+    const { getByRole, getByText, queryByRole, queryByText } = renderHeartbeat(
+      store
+    );
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect.any(Error);
+      expect(getByRole("dialog")).toBeInTheDocument();
+      expect(
+        getByText("Karmen is under maintenance, please try again later.")
+      ).toBeInTheDocument();
+    });
+
+    fetch.mockResponseOnce(
+      JSON.stringify({
+        app: "karmen_backend",
+        version: "test-version",
+      }),
+      { status: 200 }
+    );
+
+    // Force setTimeout to trigger.
+    jest.runAllTimers();
+
+    await waitFor(() => {
+      expect(queryByRole("dialog")).not.toBeInTheDocument();
+      expect(
+        queryByText("Karmen is under maintenance, please try again later.")
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("displays upgrade call when API version changes", async () => {
     fetch.once(
       JSON.stringify({

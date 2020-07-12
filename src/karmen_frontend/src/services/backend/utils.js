@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
 
-import { HttpError } from "../../errors";
+import { HttpError, MaintenanceError } from "../../errors";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -111,6 +111,10 @@ export const performRequest = (opts) => {
   }
   return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
     .then((response) => {
+      if (response.status === 503) {
+        return Promise.reject(new MaintenanceError("Server under maitenance"));
+      }
+
       if (opts.successCodes.indexOf(response.status) === -1) {
         return Promise.reject(
           new HttpError(response, `Unexpected status code "${response.status}"`)
