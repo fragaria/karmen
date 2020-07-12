@@ -60,7 +60,9 @@ export const createHttpAction = (
       // ... fire fail and end ...
       dispatch(createHttpActionFactory(`${name}_FAILED`)(err));
       dispatch(createHttpActionFactory(`${name}_ENDED`)(err));
-
+      if (err.constructor.name === "MaintenanceError") {
+        dispatch(createHttpActionFactory(`${name}_MAINTENANCE`)(err));
+      }
       // Make sure to log down to Sentry even if caught by the UI.
       Sentry.captureException(err);
 

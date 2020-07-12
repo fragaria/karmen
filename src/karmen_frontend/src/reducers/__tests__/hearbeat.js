@@ -66,4 +66,17 @@ describe("heartbeat", () => {
       shouldUpgrade: true,
     });
   });
+
+  it("should set isMaintenance when backend returns maintenance", () => {
+    expect(
+      heartbeat(
+        { isOnline: true, apiVersion: "test-version2", isMaintenance: true },
+        buildAction("HEARTBEAT_MAINTENANCE")
+      )
+    ).toMatchObject({
+      apiVersion: "test-version2",
+      isMaintenance: true,
+      isOnline: true,
+    });
+  });
 });
