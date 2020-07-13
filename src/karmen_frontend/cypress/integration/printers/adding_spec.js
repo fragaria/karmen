@@ -22,31 +22,16 @@ const testWithNoAddress = () => {
   cy.get("form").contains("Printer address is required in a proper format");
 };
 
-const testFillPillForm = (organizationUuid, address, timeout = 3000) => {
+const testFillPillForm = (user, address) => {
   const name = chance.string();
   cy.get("input#name").type(name);
   if (address) {
     cy.get("input#address").type(address);
   }
-  submitForm()
-    .wait(timeout)
-    .then(() => {
-      cy.location().then((loc) => {
-        expect(loc.pathname).to.eq(
-          `/${organizationUuid}/settings/tab-printers`
-        );
-
-        cy.get(".list-item-title").then((items) => {
-          let foundPrinter = false;
-          for (let i of items) {
-            if (i.innerText.indexOf(name) > -1) {
-              foundPrinter = true;
-            }
-          }
-          expect(foundPrinter).to.eq(true);
-        });
-      });
-    });
+  submitForm();
+  cy.reLogin(user);
+  // now check that the printer is present
+  cy.get(".list-item-title", {timeout: 8000}).contains(name);
 };
 
 describe("Printers: Adding", function () {
@@ -141,7 +126,7 @@ describe("Printers: Adding", function () {
           "SKIPPED - Test has been skipped due to it's valid only for cloud mode."
         );
       }
-      testFillPillForm(user.organizationUuid, "172.16.236.11:8080");
+      testFillPillForm(user, "172.16.236.11:8080");
     });
   });
 
@@ -153,7 +138,7 @@ describe("Printers: Adding", function () {
         );
       }
       selectDeviceType(optionDevicePill);
-      testFillPillForm(user.organizationUuid, "XPrinterCodeX");
+      testFillPillForm(user, "XPrinterCodeX");
     });
   });
 
@@ -165,7 +150,7 @@ describe("Printers: Adding", function () {
         );
       }
       selectDeviceType(optionOtherDevice);
-      testFillPillForm(user.organizationUuid, null, 10000);
+      testFillPillForm(user, null);
     });
   });
 });

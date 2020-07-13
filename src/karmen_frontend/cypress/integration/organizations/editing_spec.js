@@ -7,7 +7,7 @@ describe("Organizations: Editing", function () {
     return cy.prepareAppWithUser().then((data) => {
       user = data;
       cy.toggleMenu("Organizations");
-      return cy.findByText("+ Create new organization").click();
+      return cy.findByText("+ Create new organization").click().reLogin(user);
     });
   });
 

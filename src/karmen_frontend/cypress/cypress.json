@@ -1,6 +1,7 @@
 {
   "baseUrl": "http://localhost:4000",
   "video": false,
+  "defaultCommandTimeout": 8000,
   "env": {
     "apiAdminToken": "random-test-token"
   },

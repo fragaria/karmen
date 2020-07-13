@@ -1,17 +1,12 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
-const visitGCodes = () => {
-  cy.get('button[id="navigation-menu-toggle"]').click();
-  return cy.get('a[id="navigation-gcodes"]').click();
-};
-
 describe("G-codes: Listing - no G-codes uploaded", function () {
   let user;
   beforeEach(() => {
     return cy.prepareAppWithUser().then((data) => {
       user = data;
-      return visitGCodes();
+      return cy.toggleMenu("G-Codes");
     });
   });
 
@@ -34,15 +29,14 @@ describe("G-codes: Listing", function () {
         return cy.addGCode("S_Release.gcode", user.organizationUuid, "");
       })
       .then(() => {
-        return visitGCodes();
+        return cy.toggleMenu("G-Codes");
       });
   });
 
   it("search", function () {
     cy.get("#filter").type("S_Release");
-    cy.wait(1000);
-    cy.get(".list-item-subtitle").findByText("S_Release.gcode").should("exist");
-    cy.get(".list-item").findByText("No items found!").should("not.exist");
+    cy.contains(".list-item-subtitle", "S_Release.gcode").should("exist");
+    cy.contains(".list-item", "No items found!").should("not.exist");
 
     cy.get("#filter").type("Non existing Gcode");
     cy.get(".list-item").findByText("Non existing Gcode").should("not.exist");
@@ -76,8 +70,7 @@ describe("G-codes: Listing", function () {
         cy.get(".dropdown-item.text-secondary")
           .findByText("Delete g-code")
           .click();
-        cy.wait(1000);
-        cy.get("div.modal-content").findByText("Cancel").click();
+        cy.contains(".modal-content .btn", "Cancel").click();
       });
 
     cy.get(".list-item .list-cta")

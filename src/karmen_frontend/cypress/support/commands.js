@@ -4,70 +4,78 @@ import "@testing-library/cypress/add-commands";
 import { Chance } from "chance";
 const chance = new Chance();
 
-const getActivationToken = (email) => {
-  cy.log(`requesting last mail contents for ${email}`)
-    .request(`http://localhost:8088/mail/${email}`)
-    .then(({ body }) => {
-      if (!body || !body.to) {
-        return cy.wait(2000).then(() => {
-          return getActivationToken(email);
-        });
-      } else {
-        const matched = body.text.match(/http:\/\/.*confirmation.*/i);
-        const url = new URL(matched);
-        return Promise.resolve(url.searchParams.get("activate"));
-      }
-    });
-};
+/**
+ * User profile as returned from karmen
+ * @typedef {Object} UserProfile
+ * @property {string} username - User an used to log in
+ * @property {string} email - A user associated e-mail
+ * @property {("user"|"admin")} - User systemRole
+ * @property {Object} organizations  - Organizations by uuid
+ */
 
-Cypress.Commands.add("createUser", (email, password) => {
-  return cy
-    .log(`creating user ${email} with password ${password}`)
-    .request("POST", `/api/users/me`, { email })
-    .then(() => {
-      return getActivationToken(email);
-    })
-    .then((token) => {
-      const tokenData = JSON.parse(atob(token));
-      return cy.request("POST", `/api/users/me/activate`, {
-        email,
-        password,
-        activation_key: tokenData.activation_key,
-        password_confirmation: password,
-      });
-    })
-    .then(() => {
-      return {
-        email,
-        password,
-      };
-    });
-});
-
+/**
+ * Quickly logs-in user bypassing login form.
+ *
+ * Users `KARMEN_getUserDataFromApiResponse` which is exported to main `window`
+ * object from frontend when cypress is detected.
+ * 
+ * @param {string} email
+ * @param {string} password
+ * @return  {UserProfile}  user profile as returned form auth request
+ */
 Cypress.Commands.add("login", function loginCommand(email, password) {
   //Cypress. Not supporting fetch since 2016 https://github.com/cypress-io/cypress/issues/95.
   Cypress.on("window:before:load", (win) => {
     delete win.fetch;
   });
-
   cy.visit("/");
-
-  cy.server();
-  cy.route("POST", "/api/users/me/authenticate").as("login-post");
-  cy.get("input#username").type(email);
-  cy.get("input#password").type(password);
-  return cy
-    .get('button[type="submit"]')
-    .click()
-    .wait(3000)
-    .then(() => {
-      let profile = JSON.parse(window.localStorage.getItem("karmen_profile"));
-      return cy.wrap(profile);
+  return cy.request("POST", "/api/users/me/authenticate", {
+    username: email,
+    password: password,
+  }).then((response) => {
+    cy.window().invoke('KARMEN_getUserDataFromApiResponse', response.body).as("profile").then((profile) => {
+      localStorage.setItem("karmen_profile", JSON.stringify(profile));
+      // wait for initial page to become visible
+      cy.visit("/")
+        .get('[data-cy=authenticated-org-root]', {timeout: 20000})
+      return cy.wrap(Object.assign({}, profile, {username: email, password: password}));
     });
+  });
 });
-Cypress.Commands.add("reLogin", (cy, email, password) => {
+
+/**
+ * Open login form and logs-in the user. It is slower than `login` but is fully compatible.
+ *
+ * @param {string} email
+ * @param {string} password
+ * @return  {UserProfile}  user profile as returned form auth request
+ */
+Cypress.Commands.add("fullLogin", function fullLoginCommand(email, password) {
+  Cypress.on("window:before:load", (win) => {
+    delete win.fetch;
+  });
+  cy.visit("/");
   cy.get("input#username").type(email);
   cy.get("input#password").type(password);
+  cy.get('button[type="submit"]').click()
+  // wait for an authenticated page
+  cy.get('[data-cy=authenticated-org-root]', {timeout: 10000})
+    .then(() => { // wait for the app to fill local storage
+      expect(localStorage.getItem("karmen_profile")).not.to.be.null;
+      // const profile = JSON.parse(window.localStorage.getItem("karmen_profile"));
+      return cy
+        .wrap({profile: JSON.parse(window.localStorage.getItem("karmen_profile"))})
+        .its("profile");
+  });
+});
+
+/**
+ * Reauthenticates current user. This is used to verify the user before a
+ * dangerous operation.
+ */
+Cypress.Commands.add("reLogin", function relogin(user) {
+  cy.get("input#username", {timeout: 18000}).type(user.email);
+  cy.get("input#password").type(user.password);
   return cy.get('button[type="submit"]').click();
 });
 
@@ -77,11 +85,11 @@ Cypress.Commands.add("logout", () => {
     .request("POST", `/api/users/me/logout`)
     .then(() => {
       localStorage.removeItem("karmen_profile");
+      cy.visit('/');
     });
 });
 
-Cypress.Commands.add(
-  "addPrinter",
+Cypress.Commands.add("addPrinter",
   (isCloudMode, organizationUuid, name, ipOrToken, port = null) => {
     return cy
       .log(`adding printer`)
@@ -126,7 +134,7 @@ Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
     });
 });
 
-Cypress.Commands.add("cancelPrint", (organizationUuid, printerUuid) => {
+function cancelPrint(organizationUuid, printerUuid) {
   return cy
     .log(`cancel printing`)
     .getCookie("csrf_access_token")
@@ -146,33 +154,7 @@ Cypress.Commands.add("cancelPrint", (organizationUuid, printerUuid) => {
           return body;
         });
     });
-});
-
-Cypress.Commands.add(
-  "simulatePrintGCode",
-  (organizationUuid, printerUuid, gcodeUuid) => {
-    return cy
-      .log(`start print`)
-      .getCookie("csrf_access_token")
-      .then((token) => {
-        return cy
-          .request({
-            method: "POST",
-            url: `/api/organizations/${organizationUuid}/printjobs`,
-            body: {
-              gcode: gcodeUuid,
-              printer: printerUuid,
-            },
-            headers: {
-              "X-CSRF-TOKEN": token.value,
-            },
-          })
-          .then(({ body }) => {
-            return body;
-          });
-      });
-  }
-);
+};
 
 Cypress.Commands.add("printGCode", (printerName) => {
   cy.findByText("No available printers found.").should("not.exist").wait(1000);
@@ -245,7 +227,7 @@ Cypress.Commands.add(
         return cy.getPrinter(organizationUuid, printerUuid).then((printer) => {
           switch (printer.status.state) {
             case "Printing":
-              return cy.cancelPrint(organizationUuid, printerUuid);
+              return cancelPrint(organizationUuid, printerUuid);
           }
         });
       });
@@ -345,5 +327,5 @@ Cypress.Commands.add("prepareAppWithUser", () => {
 
 Cypress.Commands.add("toggleMenu", (item) => {
   cy.findByRole("menu").click();
-  cy.findAllByText(item).first().click();
+  cy.contains('.navigation-items .navigation-item', item).click();
 });

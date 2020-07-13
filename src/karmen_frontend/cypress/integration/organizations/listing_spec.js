@@ -24,15 +24,13 @@ describe("Organizations: Listing", function () {
   });
 
   it("has link to organization settings", function () {
-    cy.get(".list-item .list-cta")
-      .click()
-      .then(() => {
-        cy.get(".dropdown-item").should("be.visible").click();
-        cy.location().then((loc) => {
-          expect(loc.pathname).to.eq(
-            `/organizations/${user.organizationUuid}/settings`
-          );
-        });
-      });
+    cy.get(".list-item .list-cta").click()
+    cy.get(".dropdown-item").should("be.visible").click();
+    cy.reLogin(user);
+    cy.location().then((loc) => {
+      expect(loc.pathname).to.eq(
+        `/organizations/${user.organizationUuid}/settings`
+      );
+    });
   });
 });

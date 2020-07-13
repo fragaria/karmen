@@ -39,12 +39,6 @@ describe("G-codes: Detail: Print", function () {
   let printingEnvironment;
 
   beforeEach(() => {
-    cy.preparePrintingEnvironment().then((printEnv) => {
-      printingEnvironment = printEnv;
-      cy.visit(
-        `/${printingEnvironment.organizationUuid}/gcodes/${printingEnvironment.gCodeUuid}`
-      );
-    });
   });
 
   it("Run print", () => {
@@ -54,6 +48,12 @@ describe("G-codes: Detail: Print", function () {
           "SKIPPED - Test has been skipped due to it's valid only for cloud mode."
         );
       } else {
+        cy.preparePrintingEnvironment().then((printEnv) => {
+          printingEnvironment = printEnv;
+          cy.visit(
+            `/${printingEnvironment.organizationUuid}/gcodes/${printingEnvironment.gCodeUuid}`
+          );
+        });
         cy.findByText("Print g-code").click();
         cy.printGCode(printingEnvironment.printerName);
       }

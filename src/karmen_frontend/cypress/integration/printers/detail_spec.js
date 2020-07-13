@@ -105,3 +105,26 @@ describe("Printers: Detail - Tabs", function () {
   });
 });
 
+
+function simulatePrintGCode(organizationUuid, printerUuid, gcodeUuid) {
+  return cy
+    .log(`start print`)
+    .getCookie("csrf_access_token")
+    .then((token) => {
+      return cy
+        .request({
+          method: "POST",
+          url: `/api/organizations/${organizationUuid}/printjobs`,
+          body: {
+            gcode: gcodeUuid,
+            printer: printerUuid,
+          },
+          headers: {
+            "X-CSRF-TOKEN": token.value,
+          },
+        })
+        .then(({ body }) => {
+          return body;
+        });
+    });
+};

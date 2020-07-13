@@ -146,7 +146,9 @@ class Menu extends React.Component {
                         to={`/${activeOrganization.uuid}/settings`}
                         onClick={() => this.setState({ navigation: false })}
                       >
-                        <p className="navigation-title-content">
+                        <p
+                          className="navigation-title-content"
+                          data-cy="menu-org-settings">
                           {Object.values(organizations).length > 1
                             ? activeOrganization.name
                             : "Default organization"}
@@ -251,6 +253,7 @@ class Menu extends React.Component {
                       this.setState({ navigation: !navigation });
                     }}
                     id="navigation-menu-toggle"
+                    data-cy="main-menu-toggle"
                     role="menu"
                   >
                     {navigation && <span className="icon-close"></span>}
