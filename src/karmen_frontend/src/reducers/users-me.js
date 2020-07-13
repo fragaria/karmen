@@ -19,6 +19,13 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
   };
 };
 
+// store reference to the conversion function to windows object if we are
+// running under e2e cypress tests
+// Tests use getUserDataFromApiResponse to speedup login
+if (window.Cypress) {
+  window.KARMEN_getUserDataFromApiResponse = getUserDataFromApiResponse;
+}
+
 const _without = (key, { [key]: _, ...obj }) => obj;
 
 export default (
@@ -82,6 +89,7 @@ export default (
         username: action.payload.data.username,
         email: action.payload.data.email,
       });
+      // FIXME: this looks like a bug (whole state is stored to local storage
       persistUserProfile(userData);
       return Object.assign({}, state, userData);
     case "USER_CHANGE_PASSWORD_SUCCEEDED":

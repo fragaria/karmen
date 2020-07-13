@@ -11,14 +11,14 @@ describe("Printers: Listing", function () {
         user = data;
         return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
           if (IS_CLOUD_INSTALL) {
-            return cy.addPrinter(
+            return addPrinter(
               IS_CLOUD_INSTALL,
               user.organizationUuid,
               chance.string(),
               chance.string()
             );
           } else {
-            return cy.addPrinter(
+            return addPrinter(
               IS_CLOUD_INSTALL,
               user.organizationUuid,
               chance.string(),
@@ -43,14 +43,42 @@ describe("Printers: Listing", function () {
   });
 
   it("has link to organization settings", function () {
-    cy.toggleMenu("Default organization");
+    // click main menu
+    cy.get("[data-cy=main-menu-toggle]").click()
+    // open organization settings
+    cy.get("[data-cy=menu-org-settings]").click()
+    // find first printer and click it's submenu
+    cy.reLogin(user);
+
     cy.findByRole("listitem")
       .findByRole("menu")
       .click()
-      .then(() => {
-        cy.get(".dropdown-item:first")
-          .should("be.visible")
-          .contains("Printer settings");
-      });
+      .contains(".dropdown-item", "Printer settings");
   });
 });
+
+
+function addPrinter(isCloudMode, organizationUuid, name, ipOrToken,
+  port = null) {
+    return cy
+      .log(`adding printer`)
+      .getCookie("csrf_access_token")
+      .then((token) => {
+        return cy
+          .request({
+            method: "POST",
+            url: `/api/organizations/${organizationUuid}/printers`,
+            body: {
+              name,
+              ...(isCloudMode ? { token: ipOrToken } : { ip: ipOrToken, port }),
+              protocol: "http",
+            },
+            headers: {
+              "X-CSRF-TOKEN": token.value,
+            },
+          })
+          .then(({ body }) => {
+            return body;
+          });
+      });
+};

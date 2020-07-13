@@ -1,7 +1,7 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
-describe("Organizations: Adding", function () {
+describe("No Organization: Adding", function () {
   let email, password, user_uuid, org_uuid;
   beforeEach(() => {
     email = chance.email();
@@ -11,18 +11,13 @@ describe("Organizations: Adding", function () {
       org_uuid = response.body.organizations[0].uuid;
       console.log(user_uuid, org_uuid);
       cy.removeUserFromOrg(org_uuid, user_uuid)
-      return cy.login(email, password)
-      }
-    );
-  });
-
-  it("has create org button", function () {
-    cy.get("body").contains("Create new organization");
+      return cy.fullLogin(email, password)
+      });
   });
 
   it("created new org", function () {
-        const name = chance.string();
-
+    const name = chance.string();
+    cy.findByRole("menu").should("not.exist")
     cy.findByText("Create new organization").click()
       .then(() => {
         cy.findByLabelText("Name").type(name);
@@ -33,8 +28,5 @@ describe("Organizations: Adding", function () {
       })
   });
 
-  it("menu has limited items", function () {
-    cy.findByRole("menu").should("not.exist")
-  })
 
 });

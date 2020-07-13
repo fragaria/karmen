@@ -9,7 +9,7 @@ const NoOrganization = ({ activeOrganization }) => {
   }
   return (
     <>
-      <div className="content">
+      <div className="content" data-cy="authenticated-org-root">
         <div className="container">
           <h1 className="main-title">Welcome to Karmen</h1>
           <p>
