@@ -50,7 +50,6 @@ export const WebcamStreamRenderer = ({
   rotate90,
   allowFullscreen,
   printer,
-  setWebcamRefreshInterval,
 }) => {
   let klass = [];
   if (flipHorizontal) {

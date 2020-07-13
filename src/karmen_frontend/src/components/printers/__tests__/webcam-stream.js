@@ -52,21 +52,13 @@ const renderWebcamStreamRenderer = (printer, imageData = null) => {
   );
 };
 
-const expectStreamUnavailable = (queryByAltText, getByText) => {
-  expect(
-    queryByAltText("Last screenshot from undefined")
-  ).not.toBeInTheDocument();
-  expect(getByText("Stream unavailable")).toBeInTheDocument();
-};
-
 it("WebcamStreamRenderer: is available", async () => {
   const printer = createPrinter(true);
-  const { queryByText, getByAltText } = renderWebcamStreamRenderer(
-    printer,
-    "image-data"
-  );
+  const { queryByText } = renderWebcamStreamRenderer(printer, [
+    "data:image/jpg,image-data",
+    202,
+  ]);
 
-  expect(getByAltText("Last screenshot from undefined")).toBeInTheDocument();
   expect(queryByText("Stream unavailable")).not.toBeInTheDocument();
 });
 
@@ -74,24 +66,29 @@ it("WebcamStreamRenderer: is not available due to absence of image", async () =>
   const printer = createPrinter(true);
   const { getByText, queryByAltText } = renderWebcamStreamRenderer(printer);
 
-  expectStreamUnavailable(queryByAltText, getByText);
+  expect(
+    queryByAltText("Last screenshot from undefined")
+  ).not.toBeInTheDocument();
+  expect(getByText("Starting stream")).toBeInTheDocument();
 });
 
 it("WebcamStreamRenderer: is not available due to client is disconnected", async () => {
   const printer = createPrinter(false);
-  const { getByText, queryByAltText } = renderWebcamStreamRenderer(
-    printer,
-    "image-data"
-  );
-
-  expectStreamUnavailable(queryByAltText, getByText);
+  const { getByText, queryByAltText } = renderWebcamStreamRenderer(printer, [
+    undefined,
+    404,
+  ]);
+  expect(
+    queryByAltText("Last screenshot from undefined")
+  ).not.toBeInTheDocument();
+  expect(getByText("Stream unavailable")).toBeInTheDocument();
 });
 
 it("WebcamStream", async () => {
   const printer = createPrinter(false);
   const store = mockStore({
     webcams: {
-      images: { [printerUuid]: "data-url image" },
+      images: { [printerUuid]: ["data:image/jpg,image-data", 202] },
       queue: { [printerUuid]: { interval: 200, timeout: 20 } },
     },
   });
