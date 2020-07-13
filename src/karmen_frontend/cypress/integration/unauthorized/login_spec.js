@@ -36,6 +36,6 @@ describe("Unauthorized: Login flow", function () {
     cy.get("input#username").type(email);
     cy.get("input#password").type(password);
     cy.get("button[type=submit]").click();
-    cy.get('[data-cy=authenticated-org-root]')
+    cy.get('[data-cy=authenticated-org-root]', {timeout: 15000})
   });
 });

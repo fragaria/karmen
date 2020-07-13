@@ -10,7 +10,7 @@ describe("Organizations: Adding", function () {
   });
 
   it("adds organization", function () {
-    const name = "An interesting organization name";
+    const name = "Interesting Organization";
 
     cy.findByText("Add organization").click()
     cy.log("Trying without organization name.");
