@@ -88,6 +88,12 @@ http {
       proxy_set_header   X-Forwarded-Host $server_name;
       proxy_pass http://karmen_frontend;
     }
+    
+    location @maintenance {
+       rewrite ^(.*)$ /503.html break;
+    }
+
+    error_page 503 @maintenance;
 
     # This section is for development only and should not respond in the production env
     location /sockjs-node {
