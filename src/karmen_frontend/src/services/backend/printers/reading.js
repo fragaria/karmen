@@ -1,4 +1,8 @@
-import { HttpError } from "../../../errors";
+import {
+  HttpError,
+  StreamUnavailableError,
+  FailedToFetchDataError,
+} from "../../../errors";
 import { getJsonPostHeaders, performRequest } from "../utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
@@ -58,22 +62,41 @@ export const getWebcamSnapshot = (snapshotUrl) => {
   })
     .then((response) => {
       let contentType = response.headers.get("content-type");
-      if (response.status === 404) {
-        return Promise.reject(new HttpError("Stream not available"));
+      //OK responses, let's show stream to the user
+      if ([200, 202].includes(response.status)) {
+        return response.arrayBuffer().then((buffer) => ({
+          status: response.status, // response.status,
+          successCodes: [200, 202],
+          data: {
+            prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
+            data: arrayBufferToBase64(buffer),
+          },
+        }));
       }
-      return response.arrayBuffer().then((buffer) => ({
-        status: response.status, // response.status,
-        successCodes: [200, 202],
-        data: {
-          prefix: `data:${contentType ? contentType : "image/jpeg"};base64,`,
-          data: arrayBufferToBase64(buffer),
-        },
-      }));
+      //No stream available - no reason to keep trying
+      if (response.status === 404) {
+        return Promise.reject(new StreamUnavailableError());
+      }
+      //These status codes failed, but they were expected.
+      //When FailedToFetchDataError is thrown, parent function waits few seconds and then tries to fetch image again
+      if ([502, 504].includes(response.status)) {
+        return Promise.reject(new FailedToFetchDataError());
+      }
+
+      return Promise.reject(
+        new HttpError("Could not get snapshot " + response.status)
+      );
     })
     .catch((err) => {
       // Only log down errors originating outside of this handler.
       if (!(err instanceof HttpError)) {
         console.error(`Cannot get webcam snapshot: ${err}`);
+      }
+      if (
+        err instanceof TypeError &&
+        err.toString() === "TypeError: Failed to fetch"
+      ) {
+        return Promise.reject(new FailedToFetchDataError());
       }
       throw err;
     });

@@ -1,7 +1,12 @@
 import { createHttpAction } from "../utils";
 import * as backend from "../../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "../users-me";
-import { HttpError, OrganizationMismatchError } from "../../errors";
+import {
+  HttpError,
+  OrganizationMismatchError,
+  StreamUnavailableError,
+  FailedToFetchDataError,
+} from "../../errors";
 
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
@@ -232,47 +237,65 @@ export const getWebcamSnapshot = createHttpAction(
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch
-      )(printer.webcam.url)
-        .then((r) => {
-          let { webcams } = getState();
-          if (webcams.queue && webcams.queue[uuid]) {
-            const timeoutData = webcams.queue[uuid];
+      )(printer.webcam.url).then((r) => {
+        let { webcams } = getState();
+        if (webcams.queue && webcams.queue[uuid]) {
+          const timeoutData = webcams.queue[uuid];
 
-            if (timeoutData.interval > 0) {
-              const timeout = setTimeout(
-                () => dispatch(getWebcamSnapshot(orguuid, uuid)),
-                timeoutData.interval
-              );
+          if (timeoutData.interval > 0) {
+            const timeout = setTimeout(
+              () => dispatch(getWebcamSnapshot(orguuid, uuid)),
+              timeoutData.interval
+            );
 
-              dispatch({
-                type: "WEBCAMS_TIMEOUT_SET",
-                payload: {
-                  uuid,
-                  interval: timeoutData.interval,
-                  timeout,
-                },
-              });
-            }
+            dispatch({
+              type: "WEBCAMS_TIMEOUT_SET",
+              payload: {
+                uuid,
+                interval: timeoutData.interval,
+                timeout,
+              },
+            });
           }
-          return {
-            organizationUuid: orguuid,
-            uuid,
-            status: r.status,
-            ...r.data,
-            successCodes: [200],
-          };
-        })
-        .catch((r) => {
-          return {
-            organizationUuid: orguuid,
-            uuid,
-            status: 404,
-          };
-        });
+        }
+        return {
+          organizationUuid: orguuid,
+          uuid,
+          status: r.status,
+          ...r.data,
+          successCodes: [200],
+        };
+      });
     }).catch((err) => {
+      if (err instanceof StreamUnavailableError) {
+        //we got 404 from server - this means Karmen has no url to get stream from printer
+        //so we just return 404 to snapshots array so stream renderer can tell this to the user
+        //and we stop trying to get images
+        return {
+          organizationUuid: orguuid,
+          uuid,
+          status: 404,
+        };
+      }
       if (err instanceof OrganizationMismatchError) {
         return;
       }
+
+      if (err instanceof FailedToFetchDataError) {
+        //For various reasons (changing wifi, browser suspended tab on mobile, bad connection, etc), single request can fail to fetch.
+        //This causes the stream to freeze, throws generic error toaster and user has to reload the page.
+        //If we catch this case and dispatch another request after few second, we are very likely to overcome
+        //this gap and go on like nothing happen
+        //We don't have to worry about offline states - if heartbeat fails, all requests get's killed
+        setTimeout(() => dispatch(getWebcamSnapshot(orguuid, uuid)), 5000);
+        //We also return 502 to snapshots array, so the stream renderer components displays "retrying" message.
+        return {
+          organizationUuid: orguuid,
+          uuid,
+          status: 502,
+        };
+      }
+
       if (!(err instanceof HttpError)) {
         throw err;
       }

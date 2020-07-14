@@ -64,8 +64,7 @@ export const WebcamStreamRenderer = ({
     klass.push("rotate-90");
   }
 
-  let image,
-    status_code = undefined;
+  let image, status_code;
   if (imageResponse) {
     image = imageResponse[0];
     status_code = imageResponse[1];
