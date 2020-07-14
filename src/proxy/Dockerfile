@@ -16,6 +16,7 @@ ENV SERVICE_PORT 9766
 
 COPY ./nginx.conf.template /etc/nginx/nginx.conf.template
 COPY ./includes-dev /etc/nginx/includes-dev
+COPY ./html/503.html /etc/nginx/html/503.html
 COPY . .
 
 CMD ["./docker-start.sh"]
