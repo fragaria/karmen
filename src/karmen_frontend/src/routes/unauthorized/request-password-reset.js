@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
-import { isEmail } from "../../services/validators";
 import { requestPasswordReset } from "../../actions";
 
 class PasswordReset extends React.Component {
@@ -20,7 +19,7 @@ class PasswordReset extends React.Component {
         realemail: {
           name: "Your email",
           val: "",
-          type: "text",
+          type: "email",
           required: true,
           autocomplete: "email",
         },
@@ -46,7 +45,7 @@ class PasswordReset extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(resetForm.realemail.val)) {
+    if (resetForm.realemail.validity.typeMismatch) {
       hasError = true;
       resetForm.realemail.error = "That does not seem like an email address";
     }
@@ -80,13 +79,14 @@ class PasswordReset extends React.Component {
 
   render() {
     const { resetForm, message, messageOk } = this.state;
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { resetForm } = this.state;
       this.setState({
         resetForm: Object.assign({}, resetForm, {
           [name]: Object.assign({}, resetForm[name], {
             val: value,
             error: null,
+            validity: target.validity,
           }),
         }),
       });

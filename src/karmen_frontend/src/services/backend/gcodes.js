@@ -22,7 +22,7 @@ export const getGcodes = (
     uri += `&order_by=${encodeURIComponent(orderBy)}`;
   }
   if (displayFilter) {
-    uri += `&filter=display:${encodeURIComponent(displayFilter)}`;
+    uri += `&search=${encodeURIComponent(displayFilter)}`;
   }
   return performRequest({
     uri,

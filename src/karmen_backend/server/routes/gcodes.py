@@ -71,14 +71,17 @@ def gcodes_list(org_uuid):
     except ValueError:
         start_with = None
     fields = [f for f in request.args.get("fields", "").split(",") if f]
-    filter_crit = request.args.get("filter", None)
+
+    search = request.args.get("search", None)
+    if search:
+        search = [search, ["display", "path"]]
 
     gcodes_record_set = gcodes.get_gcodes(
         org_uuid,
         order_by=order_by,
         limit=limit,
         start_with=start_with,
-        filter=filter_crit,
+        fulltext_search=search,
     )
     response = {"items": gcode_list}
     next_record = None
@@ -105,8 +108,6 @@ def gcodes_list(org_uuid):
         parts.append("order_by=%s" % order_by)
     if fields:
         parts.append("fields=%s" % ",".join(fields))
-    if filter_crit:
-        parts.append("filter=%s" % filter_crit)
     if next_record:
         parts.append("start_with=%s" % next_record["uuid"])
         response["next"] = (
