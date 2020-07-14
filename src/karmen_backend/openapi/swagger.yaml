@@ -1325,7 +1325,7 @@ paths:
         - $ref: '#/components/parameters/limit_count_filter'
         - $ref: '#/components/parameters/order_by_filter'
         - $ref: '#/components/parameters/fields_filter'
-        - $ref: '#/components/parameters/filter_filter'
+        - $ref: '#/components/parameters/search_filter'
         - in: query
           name: start_with
           schema:
@@ -1827,6 +1827,11 @@ components:
     filter_filter:
       in: query
       name: filter
+      schema:
+        type: string
+    search_filter:
+      in: query
+      name: search
       schema:
         type: string
 

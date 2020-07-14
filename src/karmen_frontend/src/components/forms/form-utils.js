@@ -23,6 +23,7 @@ const FormFields = ({ definition, updateValue }) => {
     switch (definition[name].type) {
       case "text":
       case "password":
+      case "email":
         return (
           <React.Fragment key={name}>
             <label htmlFor={name}>{definition[name].name}</label>
@@ -35,7 +36,8 @@ const FormFields = ({ definition, updateValue }) => {
                 value={definition[name].val}
                 disabled={definition[name].disabled}
                 readOnly={definition[name].readOnly}
-                onChange={(e) => updateValue(name, e.target.value)}
+                onChange={(e) => updateValue(name, e.target.value, e.target)}
+                required={definition[name].type === "email"}
               />
               {definition[name].clipboardSupport && (
                 <ClipboardButton valueToCopy={definition[name].val} />

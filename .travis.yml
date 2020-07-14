@@ -14,7 +14,7 @@ addons:
 # or it is forced by a commit message
 # but never build forks (can be dangerous to run foreign code, right?)
 if: (branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/ OR tag IS present) AND fork = false
-jobs:
+matrix:
   allow_failures:
     - python: 3.8-dev
 
@@ -27,6 +27,7 @@ jobs:
 
     # run cypress tests
       node_js: 10
+      # cypress only for every commit in master
       if: (type = commit AND branch = master) OR commit_message =~ /#travis/
       cache:
         directories:
@@ -55,6 +56,8 @@ jobs:
     - python: "3.7"
       language: python
       name: backend coverage @ Python 3.7
+      # tests for every PR or anything in master
+      if: branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/ OR tag IS present
       cache:
         directories:
           - "$HOME/.cache"
@@ -70,6 +73,7 @@ jobs:
     # nodejs
     - language: node_js
       name: frontend Jest tests and build
+      if: branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/ OR tag IS present
       node_js: 10
       cache:
         directories:
