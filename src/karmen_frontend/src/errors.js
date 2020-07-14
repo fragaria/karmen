@@ -28,3 +28,16 @@ export class OrganizationMismatchError extends Error {
     this.name = "OrganizationMismatchError";
   }
 }
+
+export class StreamUnavailableError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "StreamUnavailableError";
+  }
+}
+export class FailedToFetchDataError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "FailedToFetchDataError";
+  }
+}
