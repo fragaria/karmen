@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
-import { isEmail } from "../../services/validators";
 import { register } from "../../actions";
 
 class Register extends React.Component {
@@ -20,7 +19,7 @@ class Register extends React.Component {
         realemail: {
           name: "Your email",
           val: "",
-          type: "text",
+          type: "email",
           required: true,
           autocomplete: "email",
         },
@@ -46,7 +45,7 @@ class Register extends React.Component {
         field.error = "";
       }
     }
-    if (!isEmail(registerForm.realemail.val)) {
+    if (registerForm.realemail.validity.typeMismatch) {
       hasError = true;
       registerForm.realemail.error = "That does not seem like an email address";
     }
@@ -79,13 +78,14 @@ class Register extends React.Component {
 
   render() {
     const { registerForm, message, messageOk } = this.state;
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { registerForm } = this.state;
       this.setState({
         registerForm: Object.assign({}, registerForm, {
           [name]: Object.assign({}, registerForm[name], {
             val: value,
             error: null,
+            validity: target.validity,
           }),
         }),
       });
@@ -100,7 +100,7 @@ class Register extends React.Component {
               We will send You an email with a verification link.
             </h2>
           )}
-          <form>
+          <form noValidate>
             {!messageOk && (
               <FormInputs definition={registerForm} updateValue={updateValue} />
             )}

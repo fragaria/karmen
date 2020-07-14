@@ -26,9 +26,10 @@ from server.database import (
     organizations,
     organization_roles,
 )
-from server.services.validators import is_email
 from server.tasks.send_mail import send_mail
 import server.models as models
+from email_validator import validate_email, EmailNotValidError
+
 
 ACCESS_TOKEN_EXPIRES_AFTER = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRES_AFTER = timedelta(days=7)
@@ -41,8 +42,10 @@ def create_inactive_user():
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    try:
+        validate_email(email, check_deliverability=False)
+    except EmailNotValidError as e:
+        return abort(make_response(jsonify(message=f"Email not valid: {e}"), 400))
 
     new_user = models.users_me.create_inactive_user(email=email)
 
@@ -93,8 +96,10 @@ def request_password_reset():
     if not data:
         return abort(make_response(jsonify(message="Missing payload"), 400))
     email = data.get("email", "").lstrip().rstrip().lower()
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    try:
+        validate_email(email, check_deliverability=False)
+    except EmailNotValidError as e:
+        return abort(make_response(jsonify(message=f"Email not valid: {e}"), 400))
     existing = users.get_by_email(email)
     # we are not leaking used or unused e-mails, that's why this responds 202
     if not existing or existing["activated"] is None:
@@ -135,8 +140,10 @@ def reset_password():
     password = data.get("password", None)
     password_confirmation = data.get("password_confirmation", None)
 
-    if not email or not is_email(email):
-        return abort(make_response(jsonify(message="Missing or bad email"), 400))
+    try:
+        validate_email(email, check_deliverability=False)
+    except EmailNotValidError as e:
+        return abort(make_response(jsonify(message=f"Email not valid: {e}"), 400))
     if not password:
         return abort(make_response(jsonify(message="Missing password"), 400))
     if not pwd_reset_key:
@@ -334,8 +341,6 @@ def change_password():
 @fresh_jwt_required
 def patch_user():
     data = request.json
-    if not data:
-        return abort(make_response(jsonify(message="Missing payload"), 400))
     username = data.get("username", None)
     if not username:
         return abort(make_response(jsonify(message="Missing username"), 400))

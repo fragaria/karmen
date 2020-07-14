@@ -30,6 +30,7 @@ argh = "*"
 boto3 = "*"
 connexion = {extras = ["swagger-ui"],version = "==2.7.0"}
 redlock-py = "*"
+email_validator = "*"
 
 [requires]
 python_version = "3.7"
