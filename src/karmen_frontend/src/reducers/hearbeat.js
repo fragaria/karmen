@@ -26,7 +26,8 @@ export default (state = initialState, action) => {
       ) {
         // nothing to do here
         return state;
-      } else {  // update the state
+      } else {
+        // update the state
         return Object.assign({}, state, {
           isOnline: true,
           apiVersion: apiVersion,

@@ -37,7 +37,7 @@ Cypress.Commands.add("login", function loginCommand(email, password) {
       localStorage.setItem("karmen_profile", JSON.stringify(profile));
       // wait for initial page to become visible
       cy.visit("/")
-        .get('[data-cy=authenticated-org-root]', {timeout: 20000})
+        .get('[data-cy=authenticated-org-root]', {timeout: 30000})
       return cy.wrap(Object.assign({}, profile, {username: email, password: password}));
     });
   });
@@ -326,6 +326,6 @@ Cypress.Commands.add("prepareAppWithUser", () => {
 });
 
 Cypress.Commands.add("toggleMenu", (item) => {
-  cy.findByRole("menu").click();
+  cy.get("[data-cy=main-menu-toggle]").click();
   cy.contains('.navigation-items .navigation-item', item).click();
 });

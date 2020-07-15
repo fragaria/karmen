@@ -1,48 +1,36 @@
 import { Chance } from "chance";
 const chance = new Chance();
 
-describe("G-codes: Listing - no G-codes uploaded", function () {
-  let user;
-  beforeEach(() => {
-    return cy.prepareAppWithUser().then((data) => {
-      user = data;
-      return cy.toggleMenu("G-Codes");
-    });
-  });
-
-  it("search", function () {
-    cy.get(".list-item").findByText("No items found!").should("exist");
-
-    cy.get("#filter").type("Non existing Gcode");
-    cy.get(".list-item").findByText("Non existing Gcode").should("not.exist");
-    cy.get(".list-item").findByText("No items found!").should("exist");
-  });
-});
 
 describe("G-codes: Listing", function () {
   let user;
-  beforeEach(() => {
-    return cy
+  before(() => {
+    cy
       .prepareAppWithUser()
       .then((data) => {
         user = data;
-        return cy.addGCode("S_Release.gcode", user.organizationUuid, "");
+        cy.addGCode("S_Release.gcode", user.organizationUuid, "");
       })
-      .then(() => {
-        return cy.toggleMenu("G-Codes");
-      });
+  });
+
+  beforeEach(() => {
+    cy
+      .login(user.email, user.password)
+      .toggleMenu("G-Codes");
   });
 
   it("search", function () {
-    cy.get("#filter").type("S_Release");
-    cy.contains(".list-item-subtitle", "S_Release.gcode").should("exist");
-    cy.contains(".list-item", "No items found!").should("not.exist");
-
+    cy.log('Search for non-existing file.');
     cy.get("#filter").type("Non existing Gcode");
-    cy.get(".list-item").findByText("Non existing Gcode").should("not.exist");
+    cy.findByText("No items found!").should("exist");
     cy.get(".list-item").findByText("S_Release.gcode").should("not.exist");
 
-    cy.get(".list-item").findByText("No items found!").should("exist");
+    cy.log('Search for existing file.');
+    cy.get("#filter").clear().type("S_Release");
+    cy.contains(".list-item-subtitle", "S_Release.gcode").should("exist");
+
+    cy.contains(".list-item", "No items found!").should("not.exist");
+
   });
 
   it("has the create button", function () {
@@ -64,25 +52,20 @@ describe("G-codes: Listing", function () {
         cy.get(".modal-close").click();
       });
 
-    cy.get(".list-item .list-cta")
-      .click()
-      .then(() => {
-        cy.get(".dropdown-item.text-secondary")
-          .findByText("Delete g-code")
-          .click();
-        cy.contains(".modal-content .btn", "Cancel").click();
-      });
+    cy.get(".list-item .list-cta").click()
+    cy.get(".dropdown-item.text-secondary")
+      .findByText("Delete g-code")
+      .click();
 
-    cy.get(".list-item .list-cta")
-      .click()
-      .then(() => {
-        cy.get(".dropdown-item.text-secondary")
-          .findByText("Delete g-code")
-          .click();
+    cy.contains(".modal-content .btn", "Cancel").click();
 
-        cy.get("div.modal-content").findByText("Yes, delete it").click();
-        cy.findByText("No items found!");
-      });
+    cy.get(".list-item .list-cta").click();
+    cy.get(".dropdown-item.text-secondary")
+      .findByText("Delete g-code")
+      .click();
+    cy.get("div.modal-content").findByText("Yes, delete it").click()
+
+    cy.findByText("No items found!");
   });
 });
 

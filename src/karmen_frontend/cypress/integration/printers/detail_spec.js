@@ -16,22 +16,27 @@ const testStableLabels = () => {
   cy.findByText("Bed temperature").should("exist");
 };
 
-describe("Printers: Detail - State operational", function () {
+describe("Printers: Detail - State", function () {
   let printingEnvironment;
+
   beforeEach(() => {
-    cy.preparePrintingEnvironment().then((printEnv) => {
-      printingEnvironment = printEnv;
-      cy.visit(
-        `/${printingEnvironment.organizationUuid}/printers/${printingEnvironment.printerUuid}`
-      );
+    cy.preparePrintingEnvironment().then((printingEnv) => {
+      printingEnvironment = printingEnv;
     });
   });
 
-  it("Check State", function () {
-    cy.findByText(printingEnvironment.printerName).should("exist");
+  it("oprational state", function () {
+    const { organizationUuid, printerUuid, printerName, gCodeUuid } =
+      printingEnvironment;
+    cy.visit(
+      `/${organizationUuid}/printers/${printerUuid}`
+    );
+
+    cy.findByText(printerName).should("exist");
 
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
+        this.skip()
         return cy.log(
           "SKIPPED - Environment is not currently prepared for adding a printer in cloud mode due to missing token handshake in fake printer"
         );
@@ -42,35 +47,19 @@ describe("Printers: Detail - State operational", function () {
       }
     });
   });
-});
 
-describe("Printers: Detail - State Printing", function () {
-  let printingEnvironment;
-  beforeEach(() => {
-    cy.preparePrintingEnvironment().then((printEnv) => {
-      printingEnvironment = printEnv;
-      const { organizationUuid, printerUuid, gCodeUuid } = printingEnvironment;
+  it("State printing", function () {
 
-      cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-        if (IS_CLOUD_INSTALL) {
-          return cy.log(
-            "SKIPPED - Environment is not currently prepared for adding a printer in cloud mode due to missing token handshake in fake printer"
-          );
-        } else {
-          cy.simulatePrintGCode(organizationUuid, printerUuid, gCodeUuid);
-          cy.visit(`/${organizationUuid}/printers/${printerUuid}`);
-        }
-      });
-    });
-  });
-
-  it("Check State", function () {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
         return cy.log(
           "SKIPPED - Environment is not currently prepared for adding a printer in cloud mode due to missing token handshake in fake printer"
         );
+        this.skip();
       } else {
+        const { organizationUuid, printerUuid, gCodeUuid } = printingEnvironment;
+        simulatePrintGCode(organizationUuid, printerUuid, gCodeUuid);
+        cy.visit(`/${organizationUuid}/printers/${printerUuid}`);
         cy.findByText(printingEnvironment.printerName).should("exist");
         cy.findByText("connected").should("exist");
         cy.findByText("Printing", { timeout: 100000 });
@@ -92,14 +81,23 @@ describe("Printers: Detail - Tabs", function () {
 
   it("Check Tabs", function () {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-        cy.findByText("Controls").click();
-        cy.get("div.tabs-content-message").contains("Controls are not available for a disconnected printer");
-        cy.findByText("Jobs").click();
-        cy.get("p.list-item").contains("No items found!");
-        cy.findByText("Connection").click();
-        cy.findByText("Client:").should("exist");
-        cy.findByText("Settings").click();
-        cy.findByText("Printer's name").should("exist")
+      cy.log(`IS_CLOUD_INSTALL ${IS_CLOUD_INSTALL}`);
+        if (IS_CLOUD_INSTALL) {
+          cy.findByText("Controls", {timeout: 10000}).click();
+          cy.contains(
+            "div.tabs-content-message",
+            "Controls are not available for a disconnected printer",
+            {timeout: 10000}
+          );
+          cy.findByText("Jobs").click();
+          cy.get("p.list-item").contains("No items found!");
+          cy.findByText("Connection").click();
+          cy.findByText("Client:").should("exist");
+          cy.findByText("Settings").click();
+          cy.findByText("Printer's name").should("exist")
+        } else {
+          this.skip();
+        }
 
     });
   });
@@ -107,8 +105,8 @@ describe("Printers: Detail - Tabs", function () {
 
 
 function simulatePrintGCode(organizationUuid, printerUuid, gcodeUuid) {
+  cy.log(`start print`)
   return cy
-    .log(`start print`)
     .getCookie("csrf_access_token")
     .then((token) => {
       return cy

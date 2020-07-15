@@ -148,7 +148,8 @@ class Menu extends React.Component {
                       >
                         <p
                           className="navigation-title-content"
-                          data-cy="menu-org-settings">
+                          data-cy="menu-org-settings"
+                        >
                           {Object.values(organizations).length > 1
                             ? activeOrganization.name
                             : "Default organization"}

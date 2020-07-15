@@ -28,7 +28,7 @@ describe("Unauthorized: Login flow", function () {
     cy.get("input#username").type(email);
     cy.get("input#password").type("not a password");
     cy.get("button[type=submit]").click();
-    cy.get("form").contains("Invalid email or password");
+    cy.contains("form", "Invalid email or password", {timeout: 15000});
   });
 
   it("logs in with username", function () {

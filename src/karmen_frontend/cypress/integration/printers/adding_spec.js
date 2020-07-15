@@ -22,6 +22,12 @@ const testWithNoAddress = () => {
   cy.get("form").contains("Printer address is required in a proper format");
 };
 
+/**
+ * Fills device addition form
+ *
+ * @param {Object=}  user - user to use for authentication refresh (null for no refresh)
+ * @param {string=}  address - address to fill to the printer
+ */
 const testFillPillForm = (user, address) => {
   const name = chance.string();
   cy.get("input#name").type(name);
@@ -29,7 +35,9 @@ const testFillPillForm = (user, address) => {
     cy.get("input#address").type(address);
   }
   submitForm();
-  cy.reLogin(user);
+  if (user) {
+    cy.reLogin(user);
+  }
   // now check that the printer is present
   cy.get(".list-item-title", {timeout: 8000}).contains(name);
 };
@@ -37,15 +45,20 @@ const testFillPillForm = (user, address) => {
 describe("Printers: Adding", function () {
   let user;
 
-  beforeEach(() => {
-    return cy.prepareAppWithUser().then((data) => {
+  before(() => {
+    cy.prepareAppWithUser().then((data) => {
       user = data;
-      return cy.findByText("+ Add a printer").click();
     });
+  });
+  beforeEach(() => {
+    cy.login(user.email, user.password).then(() => { });
+    cy.visit('/');
+    cy.findByText("+ Add a printer", {timeout: 8000}).click();
   });
 
   it("Test labels and inputs presence", function () {
     const testExpandable = () => {
+
       cy.findByText("API key").should("not.exist");
       cy.get("#apiKey").should("not.exist");
       cy.findByText("Hide advanced options").should("not.exist");
@@ -90,22 +103,16 @@ describe("Printers: Adding", function () {
     });
   });
 
-  it("Fails with no name", function () {
+  it("Add new device", function () {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
+        cy.log('Testing invalid inputs');
         selectDeviceType(optionDevicePill);
         testWithNoName();
         selectDeviceType(optionOtherDevice);
         testWithNoName();
-      } else {
-        testWithNoName();
-      }
-    });
-  });
 
-  it("Fails with no address", function () {
-    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-      if (IS_CLOUD_INSTALL) {
+
         selectDeviceType(optionDevicePill);
         testWithNoAddress();
         selectDeviceType(optionOtherDevice);
@@ -113,44 +120,24 @@ describe("Printers: Adding", function () {
           "not.contain",
           "Printer address is required in a proper format"
         );
+
+        cy.log('Adding pill device.');
+        selectDeviceType(optionDevicePill);
+        testFillPillForm(user, "XPrinterCodeX");
+
+        cy.log('Adding non-pill device.');
+        cy.findByText("+ Add a printer", {timeout: 8000}).click();
+        selectDeviceType(optionOtherDevice);
+        testFillPillForm(null, null);
+
       } else {
+        cy.log('Testing invalid inputs');
+        testWithNoName();
         testWithNoAddress();
-      }
-    });
-  });
 
-  it("adds printer in non cloud mode", function () {
-    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-      if (IS_CLOUD_INSTALL) {
-        return cy.log(
-          "SKIPPED - Test has been skipped due to it's valid only for cloud mode."
-        );
+        cy.log('Adding pill device.');
+        testFillPillForm(user, "172.16.236.11:8080");
       }
-      testFillPillForm(user, "172.16.236.11:8080");
-    });
-  });
-
-  it("Pill: adds printer in cloud mode", function () {
-    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-      if (!IS_CLOUD_INSTALL) {
-        return cy.log(
-          "SKIPPED - Test has been skipped due to it's valid only for non cloud mode."
-        );
-      }
-      selectDeviceType(optionDevicePill);
-      testFillPillForm(user, "XPrinterCodeX");
-    });
-  });
-
-  it("Other device: adds printer in cloud mode", function () {
-    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-      if (!IS_CLOUD_INSTALL) {
-        return cy.log(
-          "SKIPPED - Test has been skipped due to it's valid only for non cloud mode."
-        );
-      }
-      selectDeviceType(optionOtherDevice);
-      testFillPillForm(user, null);
     });
   });
 });

@@ -4,7 +4,7 @@ const chance = new Chance();
 
 describe("Printers: Listing", function () {
   let user, printerUuid;
-  beforeEach(() => {
+  before(() => {
     return cy
       .prepareAppWithUser()
       .then((data) => {
@@ -31,8 +31,11 @@ describe("Printers: Listing", function () {
       .then((printer) => {
         printerUuid = printer.uuid;
         cy.logout()
-          .login(user.email, user.password)
       });
+  });
+
+  beforeEach(() => {
+    cy.login(user.email, user.password)
   });
 
   it("has the create button", function () {
@@ -60,8 +63,8 @@ describe("Printers: Listing", function () {
 
 function addPrinter(isCloudMode, organizationUuid, name, ipOrToken,
   port = null) {
+    cy.log(`adding printer`);
     return cy
-      .log(`adding printer`)
       .getCookie("csrf_access_token")
       .then((token) => {
         return cy

@@ -8,6 +8,7 @@ describe("Organizations: Listing", function () {
   });
 
   it("has default organization in the list", function () {
+    cy.log('Has link to the default organization.');
     cy.get(".list-item-content").then((items) => {
       let foundDefaultOrganization = false;
       for (let i of items) {
@@ -17,13 +18,8 @@ describe("Organizations: Listing", function () {
       }
       expect(foundDefaultOrganization).to.eq(true);
     });
-  });
 
-  it("has the create button", function () {
-    cy.get(".main-title a").should("have.attr", "href", "/add-organization");
-  });
-
-  it("has link to organization settings", function () {
+    cy.log('Has link to settings');
     cy.get(".list-item .list-cta").click()
     cy.get(".dropdown-item").should("be.visible").click();
     cy.reLogin(user);

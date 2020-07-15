@@ -39,21 +39,22 @@ describe("G-codes: Detail: Print", function () {
   let printingEnvironment;
 
   beforeEach(() => {
+    cy.preparePrintingEnvironment().then((printEnv) => {
+      printingEnvironment = printEnv;
+      cy.visit(
+        `/${printingEnvironment.organizationUuid}/gcodes/${printingEnvironment.gCodeUuid}`
+      );
+    });
   });
 
   it("Run print", () => {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
+        if (this.skip) this.skip();
         return cy.log(
           "SKIPPED - Test has been skipped due to it's valid only for cloud mode."
         );
       } else {
-        cy.preparePrintingEnvironment().then((printEnv) => {
-          printingEnvironment = printEnv;
-          cy.visit(
-            `/${printingEnvironment.organizationUuid}/gcodes/${printingEnvironment.gCodeUuid}`
-          );
-        });
         cy.findByText("Print g-code").click();
         cy.printGCode(printingEnvironment.printerName);
       }
