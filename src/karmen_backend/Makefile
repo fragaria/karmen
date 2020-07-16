@@ -8,6 +8,7 @@ REDIS_PORT?=6380
 CELERY_CONFIG?={}
 SECRET_KEY?=tests
 LOCAL_TESTS_TOKEN?=This token is to enable local admin used for tests and to verify requests to it
+PYTHONPATH=$(shell pwd)
 
 run-docker-test-postgres:
 	if [ ! -z `docker ps -qa -f name=karmen_pg_test -f status=running` ]; then docker stop karmen_pg_test; fi
@@ -50,7 +51,7 @@ test-isolated:
 	docker-compose -f docker-compose.test.yml stop
 
 format:
-	black server/ tests/
+	black server/ tests/ tests_standalone/
 
 lint:
 	pylint server/ tests/
@@ -97,3 +98,21 @@ coverage-html: coverage
 
 coveralls:
 	coveralls
+
+tests-standalone: run-docker-test-redis run-docker-test-postgres
+	FLASK_APP=${FLASK_APP} \
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+	POSTGRES_USER=${POSTGRES_USER} \
+	POSTGRES_DB=${POSTGRES_DB} \
+	POSTGRES_HOST=${POSTGRES_HOST} \
+	POSTGRES_PORT=${POSTGRES_PORT} \
+	REDIS_PORT=${REDIS_PORT} \
+	CELERY_CONFIG=${CELERY_CONFIG} \
+	SECRET_KEY=${SECRET_KEY} \
+	LOCAL_TESTS_TOKEN="${LOCAL_TESTS_TOKEN}" \
+	CLOUD_MODE=1 \
+	PYTHONPATH="${PYTHONPATH}" pytest -n 5 tests_standalone/
+	@-docker stop karmen_pg_test
+	@-docker rm karmen_pg_test
+	@-docker stop karmen_redis_test
+	@-docker rm karmen_redis_test
