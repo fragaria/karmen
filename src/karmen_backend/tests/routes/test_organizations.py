@@ -1,5 +1,6 @@
 import uuid as guid
 import unittest
+import pytest
 import random
 import string
 
@@ -20,46 +21,43 @@ def get_random_name():
     return "org %s" % "".join(random.sample(alphabet, 10))
 
 
-class CreateOrganizationRoute(unittest.TestCase):
-    def test_fail_no_token(self):
-        with app.test_client() as c:
-            response = c.post("/organizations")
-            self.assertEqual(response.status_code, 401)
+def test_fail_no_token(client):
+    response = client.post("/organizations")
+    assert response.status_code == 401
 
-    def test_fail_no_data(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.post(
-                "/organizations", headers={"x-csrf-token": TOKEN_USER_CSRF},
-            )
-            self.assertEqual(response.status_code, 400)
 
-    def test_fail_no_org_name(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            response = c.post(
-                "/organizations",
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"some": "data"},
-            )
-            self.assertEqual(response.status_code, 400)
+def test_fail_no_data(client, user_tokens):
+    client.set_cookie("localhost", "access_token_cookie", user_tokens["token"])
+    response = client.post(
+        "/organizations", headers={"x-csrf-token": user_tokens["csrf_token"]},
+    )
+    assert response.status_code == 400
 
-    def test_create_org(self):
-        with app.test_client() as c:
-            c.set_cookie("localhost", "access_token_cookie", TOKEN_USER)
-            name = get_random_name()
-            response = c.post(
-                "/organizations",
-                headers={"x-csrf-token": TOKEN_USER_CSRF},
-                json={"name": " %s" % name.upper()},
-            )
-            self.assertEqual(response.status_code, 201)
-            self.assertTrue("uuid" in response.json)
-            self.assertEqual(response.json["name"], name.upper())
-            response = c.get("/organizations/%s/users" % response.json["uuid"])
-            self.assertTrue("items" in response.json)
-            self.assertEqual(response.json["items"][0]["uuid"], UUID_USER)
-            self.assertEqual(response.json["items"][0]["role"], "admin")
+
+def test_fail_no_org_name(client, user_tokens):
+    client.set_cookie("localhost", "access_token_cookie", user_tokens["token"])
+    response = client.post(
+        "/organizations",
+        headers={"x-csrf-token": user_tokens["csrf_token"]},
+        json={"some": "data"},
+    )
+    assert response.status_code == 400
+
+
+def test_create_org(client, user_tokens, random_name):
+    client.set_cookie("localhost", "access_token_cookie", user_tokens["token"])
+    response = client.post(
+        "/organizations",
+        headers={"x-csrf-token": user_tokens["csrf_token"]},
+        json={"name": " %s" % random_name.upper()},
+    )
+    assert response.status_code == 201
+    assert "uuid" in response.json
+    assert response.json["name"] == random_name.upper()
+    response = client.get("/organizations/%s/users" % response.json["uuid"])
+    assert "items" in response.json
+    assert response.json["items"][0]["uuid"] == UUID_USER
+    assert response.json["items"][0]["role"] == "admin"
 
 
 class PatchOrganizationRoute(unittest.TestCase):
