@@ -68,7 +68,6 @@ class Menu extends React.Component {
       username,
       activeOrganization,
       organizations,
-      role,
       logout,
       switchOrganization,
     } = this.props;
@@ -140,29 +139,6 @@ class Menu extends React.Component {
                         src="/karmen-logo.svg"
                       />
                     </span>
-
-		    {/*
-                    {role === "admin" ? (
-                      <Link
-                        to={`/${activeOrganization.uuid}/settings`}
-                        onClick={() => this.setState({ navigation: false })}
-                      >
-                        <p className="navigation-title-content">
-                          {Object.values(organizations).length > 1
-                            ? activeOrganization.name
-                            : "Default organization"}
-                          <span className="icon-settings"></span>
-                        </p>
-                      </Link>
-                    ) : (
-                      <p className="navigation-title-content">
-                        {Object.values(organizations).length > 1
-                          ? activeOrganization.name
-                          : " "}
-                        {username}
-                      </p>
-                    )}
-		    */}
                   </li>
 
                   {activeOrganization && (
@@ -177,7 +153,7 @@ class Menu extends React.Component {
                           Printers
                         </Link>
                       </li>
-                       <li className="navigation-item">
+                      <li className="navigation-item">
                         <Link
                           to={`/${activeOrganization.uuid}/gcodes`}
                           onClick={() => this.setState({ navigation: false })}
@@ -186,28 +162,17 @@ class Menu extends React.Component {
                           G-Codes
                         </Link>
                       </li>
-		      {/*
-                      <li className="navigation-item">
-                        <Link
-                          to={`/${activeOrganization.uuid}/settings`}
-                          onClick={() => this.setState({ navigation: false })}
-                          id="navigation-gcodes"
-                        >
-			  Settings
-                        </Link>
-                      </li>
-		      */}
                     </>
                   )}
 
                   <li className="navigation-title">
-                      <p className="navigation-title-content">
-                        {username}
-                        <span className="icon-settings"></span>
-                      </p>
+                    <p className="navigation-title-content">
+                      {username}
+                      <span className="icon-settings"></span>
+                    </p>
                   </li>
 
-                   <li className="navigation-item">
+                  <li className="navigation-item">
                     <Link
                       to="/organizations"
                       onClick={() => this.setState({ navigation: false })}
@@ -217,7 +182,7 @@ class Menu extends React.Component {
                     </Link>
                   </li>
 
-                 <li className="navigation-item">
+                  <li className="navigation-item">
                     <Link
                       to="/users/me"
                       onClick={() => this.setState({ navigation: false })}
@@ -227,7 +192,9 @@ class Menu extends React.Component {
                     </Link>
                   </li>
 
-                  <li className="navigation-item"><br/></li>
+                  <li className="navigation-item">
+                    <br />
+                  </li>
 
                   <li className="navigation-item">
                     <Link
