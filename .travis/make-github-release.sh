@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 trap 'exit_code=$?; echo "Exiting on error $exit_code at line $LINENO"; exit $exit_code' ERR
 set -o errtrace # print traceback on error
 set -o pipefail  # exit on error in pipe
