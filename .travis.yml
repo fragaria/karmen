@@ -150,7 +150,6 @@ matrix:
           secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
         file: ./.travis/release.zip
         skip_cleanup: true
-        cleanup: false
         on:
           repo: fragaria/karmen
           tags: true
@@ -169,7 +168,7 @@ matrix:
         token:
           secure: "GAftyrpujHWUjoI20uBj146ycoMAOg8volZBkaOSCz2f56eezLwZa6ejc3HzasJy9iFLapP06Ool4DnzhgdV0BWu+O5+i+hdlkZ4N068ex2YDIAE3qXW8cJZBrUIjKxg5Fgc0N3wOQ3uUCiCNd2MYYrpSNUH/z1/cY5fvUpX2ExbE7YlC9DD3bNVXB/Q3ewZarQpxf7MErT4zpto/CqMqV2UgXJZAM8Ruv1UFNJoXHxlVwjHeSPXi92Ahcq3ClxIh8E9+MprDYheMtpG1YBKW6Ih924x70opifBB6Ep/Vvc3/tUkFpZwhL316PVRb8O7T5uCVxSvvBXTmlMvLT+6h8tHy1GSQPm9W0oqPdA3jo6hpoS0kiophn8dmqYkrSMZPiOSQYCvXk1QL05hA8DS50k+93CK7u9K1ghCa/ax6EEqLmzY9R05UX4JNIdH8dort4/mB9kSmMEATk+FarqitO+3M/tH7qORPRT7a5qHjtk6HEsAzo4/Tui2CIRuhu/7wnwwOJwIci5ccgw//8j/ZfB+NX03DdR9kKrGkJlEpjRnD67WBBf7m4O67O8y2ZI9JvJkN95jn2i/i0cOAL0c9XmZtZYD/UQJ2pzBKNAxvzDFIIB+xhnk5pjcanOwYBPddm+6oyhEpGjUUjsjap9NxuB6KGfmkIO2k/5eGahtY8Q="
         file: ./.travis/release.zip
-        cleanup: false
+        skip_cleanup: true
         on:
           repo: fragaria/karmen
           tags: true
