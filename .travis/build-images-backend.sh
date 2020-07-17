@@ -1,6 +1,7 @@
 #!/bin/bash
-set -eo errtrace
-set -o pipefail
+trap 'exit_code=$?; echo "Exiting on error $exit_code"; exit $exit_code' ERR
+set -o errtrace # print traceback on error
+set -o pipefail  # exit on error in pipe
 
 # kudos https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 

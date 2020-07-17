@@ -1,4 +1,7 @@
 #!/bin/bash
+trap 'exit_code=$?; echo "Exiting on error $exit_code at line $LINENO"; exit $exit_code' ERR
+set -o errtrace # print traceback on error
+set -o pipefail  # exit on error in pipe
 
 DIR=$(dirname $(realpath -s $0))
 cd $DIR
@@ -9,7 +12,7 @@ cd $DIR
 DEST="karmen"
 
 # Create release bundle
-rm -r "$DEST" 2> /dev/null
+rm -r "$DEST" 2> /dev/null || true
 mkdir -p "${DEST}"
 cp ../README.md "${DEST}"
 cp ../docker-compose.release.yml "${DEST}/docker-compose.yml"
@@ -125,6 +128,6 @@ echo -ne "To run Karmen again, run \n\n     ./run-karmen.sh\n\n"
 EOF
 chmod +x "${DEST}/update.sh"
 
-cp base.env "${DEST}/base.env"
+cp ../base.env "${DEST}/base.env"
 
 zip -r release.zip "$DEST"
