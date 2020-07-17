@@ -47,7 +47,7 @@
       "plugin:prettier/recommended"
     ]
   },
-  "version": "0.13.0-rc12.3",
+  "version": "0.13.0-rc13",
   "scripts": {
     "eject": "react-scripts eject",
     "cypress": "cd cypress && npm run cypress",
