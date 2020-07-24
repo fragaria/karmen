@@ -167,9 +167,10 @@ const PrinterDetail = ({
                   </button>
                 ))}
               {printer.client.pill_info &&
-                printer.client.pill_info.update_available && (
+                printer.client.pill_info.update_available && 
+                printer.client.pill_info.update_status === null && (
                   <div className="printer-state-announcement">
-                    An update is available for your Pill{" "}
+                    An update is available for your Pill. New version: {printer.client.pill_info.update_available} {" "}
                     <button
                       className="btn btn-sm"
                       type="submit"
@@ -180,6 +181,13 @@ const PrinterDetail = ({
                     >
                       Update
                     </button>
+                  </div>
+                )}
+                {printer.client.pill_info &&
+                printer.client.pill_info.update_available && 
+                printer.client.pill_info.update_status !== null && (
+                  <div className="printer-state-announcement">
+                    Updating pill, please wait - {printer.client.pill_info.update_status}
                   </div>
                 )}
             </div>
