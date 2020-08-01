@@ -787,11 +787,11 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:3296b4ad0b07363f69b740edf70e40db8286f882f019179b31e6a03d896afbff",
-                "sha256:c934e33079966229fd236ffae6a7a3c3415bd585693a646ba3adb62a2d695874"
+                "sha256:85228d75db9f45e06e57ef9bf4429267f81ac7c0d742cc9ed63d09886a9fe6f4",
+                "sha256:8b6007800c53fdacd5a5c192203f4e531eb2a1540ad9c752e052ec0f7143dbad"
             ],
             "index": "pypi",
-            "version": "==6.0.0rc1"
+            "version": "==6.0.1"
         },
         "pytest-forked": {
             "hashes": [
