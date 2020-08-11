@@ -4,57 +4,7 @@
 version: "3.4"
 
 services:
-  proxy:
-    image: fragaria/karmen-proxy
-    restart: unless-stopped
-    env_file: [base.env, local.env]
-    depends_on:
-      - frontend
-      - backend_flask
-    ports:
-      - ${KARMEN_HOST:-127.0.0.1}:${KARMEN_PORT:-4000}:9766 # TODO: set as env
-
   frontend:
     image: fragaria/karmen-frontend
-    restart: unless-stopped
-    env_file: [base.env, local.env]
-
-  backend_flask: &backend_flask  # <-- bookmark
-    image: fragaria/karmen-backend
-    restart: unless-stopped
-    # runs initialization first (solved elsewehre in production)
-    command: bash -c './scripts/migrate.sh && ./scripts/docker-start.sh'
-    env_file: [base.env, local.env]
-    environment:
-      SERVICE: flask
-    volumes:
-      - ./karmen-files:/tmp/karmen-files
-    depends_on:
-      - redis
-
-  backend_celery_worker:
-    <<: *backend_flask  # <-- reuse items from &backend_flask bookmark
-    command: scripts/docker-start.sh
-    env_file: [base.env, local.env]
-    environment:
-      SERVICE: celery-worker
-
-  backend_celery_beat:
-    <<: *backend_flask
-    command: scripts/docker-start.sh
-    env_file: [base.env, local.env]
-    environment:
-      SERVICE: celery-beat
-    volumes: []
-
-  postgres:
-    image: postgres:11
-    restart: unless-stopped
-    volumes:
-      - ${KARMEN_DB_DIR:-./db/data}:/var/lib/postgresql/data
-    env_file: [base.env, local.env]
-
-  redis:
-    image: redis:5
     restart: unless-stopped
     env_file: [base.env, local.env]

@@ -44,31 +44,13 @@ matrix:
         # wait for cypress to finish installation
         while kill -0 $travis_pid > /dev/null 2>&1; do echo 'Waiting for cypress to finish installation ...'; sleep 1; done
         # check that all images were started and are running
-        for docker_name in proxy backend_flask backend_celery_beat backend_celery_worker frontend; do
-          [ -z `docker ps -qa -f name=$docker_name -f status=running` ] && travis_terminate
-        done
+        [ -z `docker ps -qa -f name=frontend -f status=running` ] && travis_terminate
         # wait for docker-compose to listen
         while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
         npm run test:cypress
         docker-compose down || travis_terminate 1;
 
     # Python 3.7 (requires build images)
-    - python: "3.7"
-      language: python
-      name: backend coverage @ Python 3.7
-      # tests for every PR or anything in master
-      if: branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/ OR tag IS present
-      cache:
-        directories:
-          - "$HOME/.cache"
-      install:
-        - pip install pipenv
-      before_script:
-        - cd src/karmen_backend
-      script:
-        - pipenv install --dev || travis_terminate 1;
-        - make coverage || travis_terminate 1;
-        - make coveralls
 
     # nodejs
     - language: node_js
@@ -87,21 +69,6 @@ matrix:
         - npm run build
 
     # build and push docker images
-    - name: "backend image"
-      stage: Build Docker images
-      if: tag IS present
-      language: generic
-      before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
-      script:
-        - travis_wait 60 bash .travis/build-images-backend.sh
-
     - name: "frontend image"
       if: tag IS present
       language: generic
@@ -115,20 +82,6 @@ matrix:
       install: true
       script:
         - bash .travis/build-images-frontend.sh
-
-    - name: "proxy image"
-      if: tag IS present
-      language: generic
-      before_install:
-        - sudo docker run --privileged linuxkit/binfmt:v0.6
-        - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest
-          --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform
-          linux/armhf
-        - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-        - export BUILDKIT_HOST=tcp://0.0.0.0:1234
-      install: true
-      script:
-        - bash .travis/build-images-proxy.sh
 
     # deploy to GitHub releases
     #

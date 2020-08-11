@@ -1,0 +1,5 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.pythonPath": "/home/paja/.virtualenvs/karmen_backend-LWuAxTCS/bin/python"
+}

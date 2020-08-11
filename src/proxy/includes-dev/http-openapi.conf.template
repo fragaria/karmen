@@ -1,3 +1,0 @@
-upstream api_doc {
-    server ${APIDOC_HOST}:${APIDOC_PORT};
-}
