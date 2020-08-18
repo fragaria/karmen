@@ -5,5 +5,6 @@ export const heartbeat = () => {
     uri: "/ping/",
     method: "GET",
     successCodes: [200],
+    useAuth: false,
   });
 };

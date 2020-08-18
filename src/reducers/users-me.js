@@ -14,7 +14,7 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
     accessTokenExpiresOn:
       data.accessTokenExpiresOn ||
       (data.expires_on ? dayjs(data.expires_on) : undefined),
-    organizations: data.organizations,
+    organizations: data.groups,
     activeOrganization: data.activeOrganization || activeOrganization,
   };
 };

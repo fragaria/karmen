@@ -67,7 +67,7 @@ export const activate = (
 
 export const authenticate = (username, password) => {
   return performRequest({
-    uri: `/users/me/authenticate`,
+    uri: `/tokens/`,
     useAuth: false,
     data: {
       username,
@@ -91,8 +91,9 @@ export const authenticateFresh = (username, password) => {
 
 export const refreshAccessToken = () => {
   return performRequest({
-    uri: `/users/me/authenticate-refresh`,
+    uri: `/tokens/refresh/`,
     useAuth: false,
+    data: {refresh: localStorage.getItem("csrf_refresh_token")},
     headers: {
       "Content-Type": "application/json",
       "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token"),
@@ -103,9 +104,10 @@ export const refreshAccessToken = () => {
 
 export const logout = () => {
   return performRequest({
-    uri: `/users/me/logout`,
+    uri: `/tokens/mine/`,
+    method: "DELETE",
     parseResponse: false,
-    successCodes: [200],
+    successCodes: [204, 403],
   })
     .catch(() => {
       // When logout fails on server error, we shouldn't fail and just clear out

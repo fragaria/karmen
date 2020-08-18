@@ -2,7 +2,7 @@ import { performRequest } from "./utils";
 
 export const addOrganization = (name) => {
   return performRequest({
-    uri: "/organizations",
+    uri: "/users/me/groups/",
     data: {
       name,
     },
@@ -12,7 +12,7 @@ export const addOrganization = (name) => {
 
 export const patchOrganization = (uuid, name) => {
   return performRequest({
-    uri: `/organizations/${uuid}`,
+    uri: `/users/me/groups/${uuid}`,
     method: "PATCH",
     data: {
       name,
@@ -23,7 +23,7 @@ export const patchOrganization = (uuid, name) => {
 
 export const getOrganizations = () => {
   return performRequest({
-    uri: "/organizations",
+    uri: "/users/me/groups/",
     method: "GET",
     successCodes: [200],
   });

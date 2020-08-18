@@ -37,7 +37,9 @@ export const denyWithNoOrganizationAccess = (orguuid, getState, wrapped) => {
 export const loadUserFromToken = (token) => (dispatch) => {
   const decoded = jwt_decode(token);
   Cookies.set("access_token_cookie", token);
+  localStorage.setItem("access_token_cookie", token);
   Cookies.set("csrf_access_token", decoded.csrf);
+  localStorage.setItem("csrf_access_token", decoded.csrf);
   dispatch(
     loadUserData({
       identity: decoded.identity,
@@ -104,12 +106,12 @@ export const loadUserData = (userData) => (dispatch) => {
     if (
       prefs &&
       prefs.activeOrganizationUuid &&
-      userData.organizations[prefs.activeOrganizationUuid]
+      userData.groups[prefs.activeOrganizationUuid]
     ) {
       dispatch(switchOrganization(prefs.activeOrganizationUuid));
     } else {
       const org =
-        userData.organizations && Object.values(userData.organizations)[0];
+        userData.groups && Object.values(userData.groups)[0];
       dispatch(switchOrganization(org.uuid));
     }
   }

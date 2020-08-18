@@ -8,7 +8,7 @@ import { getJsonPostHeaders, performRequest } from "../utils";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getPrinters = (orgUuid, fields = []) => {
-  let uri = `/organizations/${orgUuid}/printers`;
+  let uri = `/users/me/printers/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }

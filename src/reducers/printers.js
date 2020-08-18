@@ -49,7 +49,7 @@ export default (
       if (action.payload.organizationUuid !== activeOrganizationUuid) {
         return state;
       }
-      const newPrinters = action.payload.data.items.map((newPrinter) => {
+      const newPrinters = action.payload.data.map((newPrinter) => {
         origPrinter = printers.find((p) => p.uuid === newPrinter.uuid);
         if (origPrinter) {
           return Object.assign({}, origPrinter, newPrinter);
