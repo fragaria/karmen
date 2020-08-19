@@ -40,7 +40,7 @@ class Wrapper extends React.Component {
       .sort((a, b) => {
         const columnName = orderBy.substring(1);
         if (a[columnName].toLowerCase() === b[columnName].toLowerCase()) {
-          return a.uuid > b.uuid ? -1 : 1;
+          return a.id > b.id ? -1 : 1;
         }
         if (orderBy[0] === "+") {
           return a[columnName].toLowerCase() < b[columnName].toLowerCase()

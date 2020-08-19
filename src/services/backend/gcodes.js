@@ -4,14 +4,14 @@ import { getJsonPostHeaders, performRequest } from "./utils";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getGcodes = (
-  orgUuid,
+  orgId,
   startWith = null,
   orderBy = null,
   displayFilter = null,
   limit = 15,
   fields = []
 ) => {
-  let uri = `/organizations/${orgUuid}/gcodes?limit=${limit}`;
+  let uri = `/organizations/${orgId}/gcodes?limit=${limit}`;
   if (fields) {
     uri += `&fields=${fields.join(",")}`;
   }
@@ -38,8 +38,8 @@ export const getGcodes = (
   });
 };
 
-export const getGcode = (orgUuid, uuid, fields = []) => {
-  let uri = `/organizations/${orgUuid}/gcodes/${uuid}`;
+export const getGcode = (orgId, id, fields = []) => {
+  let uri = `/organizations/${orgId}/gcodes/${id}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -50,25 +50,25 @@ export const getGcode = (orgUuid, uuid, fields = []) => {
   });
 };
 
-export const deleteGcode = (orgUuid, uuid) => {
+export const deleteGcode = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/gcodes/${uuid}`,
+    uri: `/organizations/${orgId}/gcodes/${id}`,
     method: "DELETE",
     appendData: {
-      uuid,
+      id
     },
     parseResponse: false,
     successCodes: [204, 404],
   });
 };
 
-export const uploadGcode = (orgUuid, path, file) => {
+export const uploadGcode = (orgId, path, file) => {
   var data = new FormData();
   data.append("file", file);
   data.append("path", path);
   const headers = getJsonPostHeaders();
   headers.delete("content-type");
-  return fetch(`${BASE_URL}/organizations/${orgUuid}/gcodes`, {
+  return fetch(`${BASE_URL}/organizations/${orgId}/gcodes`, {
     method: "POST",
     headers: headers,
     body: data,

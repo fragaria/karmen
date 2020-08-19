@@ -29,11 +29,11 @@ class AddApiToken extends React.Component {
         },
         orguuid: {
           name: "Organization",
-          val: activeOrganization.uuid,
+          val: activeOrganization.id,
           type: "select",
           required: true,
           options: Object.values(organizations).map((o) => ({
-            val: o.uuid,
+            val: o.id,
             name: o.name,
           })),
         },
@@ -64,7 +64,7 @@ class AddApiToken extends React.Component {
     });
     const { addApiToken } = this.props;
     if (!hasErrors) {
-      return addApiToken(form.orguuid.val, form.name.val)
+      return addApiToken(form.orgid.val, form.name.val)
         .then((newToken) => {
           this.setState({
             showToken: true,

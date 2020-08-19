@@ -10,9 +10,9 @@ export const addOrganization = (name) => {
   });
 };
 
-export const patchOrganization = (uuid, name) => {
+export const patchOrganization = (id, name) => {
   return performRequest({
-    uri: `/users/me/groups/${uuid}`,
+    uri: `/users/me/groups/${id}`,
     method: "PATCH",
     data: {
       name,

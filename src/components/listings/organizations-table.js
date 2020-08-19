@@ -15,11 +15,11 @@ const OrganizationsTableRow = ({
     <div className="list-item">
       <Link
         className="list-item-content"
-        key={organization.uuid}
-        to={`/${organization.uuid}`}
+        key={organization.id}
+        to={`/${organization.id}`}
       >
         <span className="list-item-title">{organization.name}</span>
-        <span className="text-mono">{organization.uuid}</span>
+        <span className="text-mono">{organization.id}</span>
       </Link>
 
       <CtaDropdown
@@ -32,7 +32,7 @@ const OrganizationsTableRow = ({
           <span className="dropdown-title">{organization.name}</span>
           <Link
             className="dropdown-item"
-            to={`/organizations/${organization.uuid}/settings`}
+            to={`/organizations/${organization.id}/settings`}
           >
             <i className="icon-edit"></i>
             Organization Settings
@@ -63,7 +63,7 @@ const OrganizationsTable = ({
       rowFactory={(u) => {
         return (
           <OrganizationsTableRow
-            key={u.uuid}
+            key={u.id}
             organization={u}
             onOrganizationChange={onOrganizationChange}
             onOrganizationDelete={onOrganizationDelete}

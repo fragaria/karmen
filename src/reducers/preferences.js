@@ -11,13 +11,13 @@ const defaults = {
 
 export default (
   state = {
-    activeOrganizationUuid: null,
+    activeOrganizationId: null,
     identity: null,
     orgs: {},
   },
   action
 ) => {
-  const { activeOrganizationUuid } = state;
+  const { activeOrganizationId } = state;
   let settings, newOrgs;
   switch (action.type) {
     case "USER_AUTHENTICATE_SUCCEEDED":
@@ -26,7 +26,7 @@ export default (
       localStorage.setItem('refresh_token_cookie', action.payload.data.refresh);
       if (!settings || settings.identity !== action.payload.data.identity) {
         persistUserPreferences({
-          activeOrganizationUuid: null,
+          activeOrganizationId: null,
           identity: state.identity,
           orgs: {},
         });
@@ -43,7 +43,7 @@ export default (
       settings = getUserPreferences();
       if (!settings || settings.identity !== action.payload.data.identity) {
         persistUserPreferences({
-          activeOrganizationUuid: null,
+          activeOrganizationId: null,
           identity: state.identity,
           orgs: {},
         });
@@ -58,17 +58,17 @@ export default (
       }
     case "SET_PRINTER_VIEW":
       newOrgs = Object.assign({}, state.orgs, {
-        [activeOrganizationUuid]: Object.assign(
+        [activeOrganizationId]: Object.assign(
           {},
           defaults,
-          state.orgs[activeOrganizationUuid],
+          state.orgs[activeOrganizationId],
           {
             printerViewType: action.payload.viewType,
           }
         ),
       });
       persistUserPreferences({
-        activeOrganizationUuid: state.activeOrganizationUuid,
+        activeOrganizationId: state.activeOrganizationId,
         identity: state.identity,
         orgs: newOrgs,
       });
@@ -77,17 +77,17 @@ export default (
       });
     case "SET_NETWORK_INTERFACE":
       newOrgs = Object.assign({}, state.orgs, {
-        [activeOrganizationUuid]: Object.assign(
+        [activeOrganizationId]: Object.assign(
           {},
           defaults,
-          state.orgs[activeOrganizationUuid],
+          state.orgs[activeOrganizationId],
           {
             networkInterface: action.payload.networkInterface,
           }
         ),
       });
       persistUserPreferences({
-        activeOrganizationUuid: state.activeOrganizationUuid,
+        activeOrganizationId: state.activeOrganizationId,
         identity: state.identity,
         orgs: state.orgs,
       });
@@ -97,18 +97,18 @@ export default (
     case "USER_CLEAR_ENDED":
       dropUserPreferences();
       return Object.assign({}, state, {
-        activeOrganizationUuid: null,
+        activeOrganizationId: null,
         identity: null,
         orgs: {},
       });
     case "USER_SWITCH_ORGANIZATION":
       persistUserPreferences({
-        activeOrganizationUuid: action.payload.data.uuid,
+        activeOrganizationId: action.payload.data.id,
         identity: state.identity,
         orgs: state.orgs,
       });
       return Object.assign({}, state, {
-        activeOrganizationUuid: action.payload.data.uuid,
+        activeOrganizationId: action.payload.data.id,
       });
     default:
       return state;

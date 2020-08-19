@@ -22,7 +22,7 @@ class PrinterSettings extends React.Component {
     return patchPrinter(newParameters)
       .then(() => {
         this.props.history.push(
-          `/${match.params.orguuid}/printers/${printer.uuid}`
+          `/${match.params.orgid}/printers/${printer.id}`
         );
         return {
           ok: true,
@@ -76,7 +76,7 @@ class PrinterSettings extends React.Component {
               onPrinterSettingsChanged={patchPrinter}
               onPrinterSettingsCancelled={() => {
                 this.props.history.push(
-                  `/${match.params.orguuid}/printers/${printer.uuid}`
+                  `/${match.params.orgid}/printers/${printer.id}`
                 );
               }}
             />
@@ -90,13 +90,13 @@ class PrinterSettings extends React.Component {
 export default connect(
   (state, ownProps) => ({
     printer: state.printers.printers.find(
-      (p) => p.uuid === ownProps.match.params.uuid
+      (p) => p.id === ownProps.match.params.id
     ),
   }),
   (dispatch, ownProps) => ({
     loadPrinter: () =>
       dispatch(
-        loadPrinter(ownProps.match.params.orguuid, ownProps.match.params.uuid, [
+        loadPrinter(ownProps.match.params.orgid, ownProps.match.params.id, [
           "job",
           "status",
           "webcam",
@@ -106,8 +106,8 @@ export default connect(
     patchPrinter: (data) =>
       dispatch(
         patchPrinter(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           data
         )
       ),

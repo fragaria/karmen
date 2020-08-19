@@ -19,7 +19,7 @@ const getSortedPrinters = (printers) => {
 };
 
 const initialState = {
-  activeOrganizationUuid: null,
+  activeOrganizationId: null,
   printersLoaded: false,
   printers: [],
   toBeDeleted: [],
@@ -28,7 +28,7 @@ const initialState = {
 
 export default (
   state = {
-    activeOrganizationUuid: null,
+    activeOrganizationId: null,
     printersLoaded: false,
     printers: [],
     toBeDeleted: [],
@@ -36,21 +36,21 @@ export default (
   },
   action
 ) => {
-  const { printers, activeOrganizationUuid, checkQueue } = state;
+  const { printers, activeOrganizationId, checkQueue } = state;
   let newPrinter, origPrinter, origPrinterIndex;
   switch (action.type) {
     case "PRINTERS_POLL_INTERVAL_SET":
       return Object.assign({}, state, {
         checkQueue: Object.assign({}, state.checkQueue, {
-          [action.payload.uuid]: action.payload.interval,
+          [action.payload.id]: action.payload.interval,
         }),
       });
     case "PRINTERS_LOAD_SUCCEEDED":
-      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+      if (action.payload.organizationId !== activeOrganizationId) {
         return state;
       }
       const newPrinters = action.payload.data.map((newPrinter) => {
-        origPrinter = printers.find((p) => p.uuid === newPrinter.uuid);
+        origPrinter = printers.find((p) => p.id === newPrinter.id);
         if (origPrinter) {
           return Object.assign({}, origPrinter, newPrinter);
         } else {
@@ -59,16 +59,16 @@ export default (
       });
       return Object.assign({}, state, {
         printers: getSortedPrinters(newPrinters).filter(
-          (p) => state.toBeDeleted.indexOf(p.uuid) === -1
+          (p) => state.toBeDeleted.indexOf(p.id) === -1
         ),
         printersLoaded: true,
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
-      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+      if (action.payload.organizationId !== activeOrganizationId) {
         return state;
       }
       newPrinter = action.payload.data;
-      origPrinterIndex = printers.findIndex((p) => p.uuid === newPrinter.uuid);
+      origPrinterIndex = printers.findIndex((p) => p.id === newPrinter.id);
       if (origPrinterIndex === -1) {
         printers.push(newPrinter);
       } else {
@@ -82,11 +82,11 @@ export default (
         printers: getSortedPrinters(printers),
       });
     case "PRINTERS_PATCH_SUCCEEDED":
-      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+      if (action.payload.organizationId !== activeOrganizationId) {
         return state;
       }
       newPrinter = action.payload.data;
-      origPrinterIndex = printers.findIndex((p) => p.uuid === newPrinter.uuid);
+      origPrinterIndex = printers.findIndex((p) => p.id === newPrinter.id);
       if (origPrinterIndex === -1) {
         printers.push(newPrinter);
       } else {
@@ -101,7 +101,7 @@ export default (
       });
     case "PRINTERS_CHANGE_JOB_SUCCEEDED":
       origPrinterIndex = printers.findIndex(
-        (p) => p.uuid === action.payload.uuid
+        (p) => p.id === action.payload.id
       );
       if (origPrinterIndex === -1) {
         return state;
@@ -120,7 +120,7 @@ export default (
       });
     case "PRINTERS_SET_CONNECTION_SUCCEEDED":
       origPrinterIndex = printers.findIndex(
-        (p) => p.uuid === action.payload.uuid
+        (p) => p.id === action.payload.id
       );
       if (origPrinterIndex === -1) {
         return state;
@@ -149,13 +149,13 @@ export default (
     case "PRINTERS_DELETE_SUCCEEDED":
       return Object.assign({}, state, {
         printers: printers.filter((p) => {
-          return p.uuid !== action.payload.uuid;
+          return p.id !== action.payload.id;
         }),
-        toBeDeleted: state.toBeDeleted.filter((d) => d !== action.payload.uuid),
+        toBeDeleted: state.toBeDeleted.filter((d) => d !== action.payload.id),
       });
     case "PRINTERS_CHANGE_LIGHTS_SUCCEEDED":
       origPrinterIndex = printers.findIndex(
-        (p) => p.uuid === action.payload.uuid
+        (p) => p.id === action.payload.id
       );
       if (origPrinterIndex === -1) {
         return state;
@@ -180,7 +180,7 @@ export default (
         clearInterval(job);
       }
       return Object.assign({}, initialState, {
-        activeOrganizationUuid: action.payload.data.uuid,
+        activeOrganizationId: action.payload.data.id,
       });
     default:
       return state;

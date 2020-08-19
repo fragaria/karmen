@@ -1,10 +1,10 @@
 import { performRequest } from "./utils";
 
-export const printGcode = (orgUuid, uuid, printer) => {
+export const printGcode = (orgId, id, printer) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printjobs`,
+    uri: `/organizations/${orgId}/printjobs`,
     data: {
-      gcode: uuid,
+      gcode: id,
       printer,
     },
     successCodes: [201],
@@ -12,13 +12,13 @@ export const printGcode = (orgUuid, uuid, printer) => {
 };
 
 export const getPrinterJobs = (
-  orgUuid,
+  orgId,
   startWith = null,
   orderBy = null,
   printerFilter = null,
   limit = 10
 ) => {
-  let uri = `/organizations/${orgUuid}/printjobs?limit=${limit}`;
+  let uri = `/organizations/${orgId}/printjobs?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${encodeURIComponent(startWith)}`;
   }

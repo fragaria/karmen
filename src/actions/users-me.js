@@ -48,7 +48,7 @@ export const loadUserFromToken = (token) => (dispatch) => {
       organizations: {
         [decoded.user_claims && decoded.user_claims.organization_uuid]: {
           role: "user",
-          uuid: decoded.user_claims && decoded.user_claims.organization_uuid,
+          id: decoded.user_claims && decoded.user_claims.organization_uuid,
           name: decoded.user_claims && decoded.user_claims.organization_name,
         },
       },
@@ -81,12 +81,12 @@ export const loadUserFromLocalStorage = (force_refresh = false) => (
   return Promise.resolve(dispatch(loadUserData(profile)));
 };
 
-export const switchOrganization = (uuid) => (dispatch) => {
+export const switchOrganization = (id) => (dispatch) => {
   dispatch({
     type: "USER_SWITCH_ORGANIZATION",
     payload: {
       data: {
-        uuid,
+        id,
       },
     },
   });
@@ -99,20 +99,21 @@ export const loadUserData = (userData) => (dispatch) => {
       data: userData,
     },
   });
+  console.log(userData.activeOrganization)
   if (userData.activeOrganization) {
-    dispatch(switchOrganization(userData.activeOrganization.uuid));
+    dispatch(switchOrganization(userData.activeOrganization.id));
   } else {
     const prefs = backend.getUserPreferences();
     if (
       prefs &&
-      prefs.activeOrganizationUuid &&
-      userData.groups[prefs.activeOrganizationUuid]
+      prefs.activeOrganizationId &&
+      userData.groups[prefs.activeOrganizationId]
     ) {
-      dispatch(switchOrganization(prefs.activeOrganizationUuid));
+      dispatch(switchOrganization(prefs.activeOrganizationId));
     } else {
       const org =
         userData.groups && Object.values(userData.groups)[0];
-      dispatch(switchOrganization(org.uuid));
+      dispatch(switchOrganization(org.id));
     }
   }
 };

@@ -15,7 +15,7 @@ class PrintJobRow extends React.Component {
           {gcode_data && gcode_data.available ? (
             <Link
               className="list-item-subtitle"
-              to={`/${orguuid}/gcodes/${gcode_data.uuid}`}
+              to={`/${orguuid}/gcodes/${gcode_data.id}`}
             >
               {gcode_data.filename}
             </Link>
@@ -44,7 +44,7 @@ const JobsTab = ({ orguuid, jobList, loadJobsPage, clearJobsPages }) => {
         itemList={jobList}
         loadPage={loadJobsPage}
         rowFactory={(j) => {
-          return <PrintJobRow key={j.uuid} {...j} orguuid={orguuid} />;
+          return <PrintJobRow key={j.id} {...j} orguuid={orguuid} />;
         }}
         sortByColumns={["started"]}
         clearItemsPages={clearJobsPages}

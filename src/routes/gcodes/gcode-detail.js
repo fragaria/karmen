@@ -63,14 +63,14 @@ class GcodeDetail extends React.Component {
   loadGcode() {
     const { match, getGcode, getDownloadUrl } = this.props;
 
-    getGcode(match.params.uuid, []).then((r) => {
+    getGcode(match.params.id, []).then((r) => {
       this.setState({
         gcode: r.data,
         gcodeLoaded: true,
       });
     });
 
-    getDownloadUrl(match.params.uuid).then((url) => {
+    getDownloadUrl(match.params.id).then((url) => {
       this.setState({ downloadUrl: url });
     });
   }
@@ -103,7 +103,7 @@ class GcodeDetail extends React.Component {
     let { selectedPrinter } = this.state;
     if (!selectedPrinter) {
       selectedPrinter = availablePrinters.length
-        ? availablePrinters[0].uuid
+        ? availablePrinters[0].id
         : "";
     }
 
@@ -215,9 +215,9 @@ class GcodeDetail extends React.Component {
             <GcodePrint
               gcode={gcode}
               printGcode={printGcode}
-              onSchedulePrint={(gcodeId, printerUuid) => {
-                return printGcode(gcodeId, printerUuid).then((r) => {
-                  printedOn.push(printerUuid);
+              onSchedulePrint={(gcodeId, printerId) => {
+                return printGcode(gcodeId, printerId).then((r) => {
+                  printedOn.push(printerId);
                   this.setState({
                     printedOn: [].concat(printedOn),
                   });
@@ -236,7 +236,7 @@ class GcodeDetail extends React.Component {
 
           <div className="cta-box text-center">
             <Link
-              to={`/${match.params.orguuid}/gcodes`}
+              to={`/${match.params.orgid}/gcodes`}
               className="btn btn-plain"
             >
               Back to listing
@@ -256,12 +256,12 @@ export default connect(
         .filter((p) => p.status && p.status.state === "Operational")
         .filter((p) => p.client && p.client.connected)
         .filter((p) => p.client && p.client.access_level === "unlocked")
-        .filter((p) => without.indexOf(p.uuid) === -1),
+        .filter((p) => without.indexOf(p.id) === -1),
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
       dispatch(
-        loadPrinters(ownProps.match.params.orguuid, [
+        loadPrinters(ownProps.match.params.orgid, [
           "job",
           "status",
           "webcam",
@@ -269,10 +269,10 @@ export default connect(
         ])
       ),
     getGcode: (id) =>
-      dispatch(loadGcode(ownProps.match.params.orguuid, id, [])),
+      dispatch(loadGcode(ownProps.match.params.orgid, id, [])),
     printGcode: (id, printer) =>
-      dispatch(addPrintJob(ownProps.match.params.orguuid, id, printer)),
-    getDownloadUrl: (uuid) =>
-      dispatch(getGcodeDownloadUrl(ownProps.match.params.orguuid, uuid)),
+      dispatch(addPrintJob(ownProps.match.params.orgid, id, printer)),
+    getDownloadUrl: (id) =>
+      dispatch(getGcodeDownloadUrl(ownProps.match.params.orgid, id)),
   })
 )(GcodeDetail);

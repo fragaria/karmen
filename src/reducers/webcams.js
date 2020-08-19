@@ -7,18 +7,18 @@ export default (
   state = {
     images: {},
     queue: {},
-    activeOrganizationUuid: null,
+    activeOrganizationId: null,
   },
   action
 ) => {
-  const { queue, activeOrganizationUuid } = state;
+  const { queue, activeOrganizationId } = state;
   switch (action.type) {
     case "WEBCAMS_INTERVAL_SET":
       return Object.assign({}, state, {
         queue: Object.assign({}, state.queue, {
-          [action.payload.uuid]: Object.assign(
+          [action.payload.id]: Object.assign(
             {},
-            state.queue[action.payload.uuid],
+            state.queue[action.payload.id],
             {
               interval: action.payload.interval,
             }
@@ -28,24 +28,24 @@ export default (
     case "WEBCAMS_TIMEOUT_SET":
       return Object.assign({}, state, {
         queue: Object.assign({}, state.queue, {
-          [action.payload.uuid]: {
+          [action.payload.id]: {
             interval: action.payload.interval,
             timeout: action.payload.timeout,
           },
         }),
       });
     case "WEBCAMS_GET_SNAPSHOT_ENDED":
-      if (action.payload.organizationUuid !== activeOrganizationUuid) {
+      if (action.payload.organizationId !== activeOrganizationId) {
         return state;
       }
       let newImage = action.payload;
       if (!newImage) {
         state.images = Object.assign({}, state.images, {
-          [newImage.uuid]: [undefined, action.payload.status],
+          [newImage.id]: [undefined, action.payload.status],
         });
       } else {
         state.images = Object.assign({}, state.images, {
-          [newImage.uuid]: [
+          [newImage.id]: [
             `${newImage.prefix}${newImage.data}`,
             action.payload.status,
           ],
@@ -62,7 +62,7 @@ export default (
         clearInterval(job.interval);
       }
       return Object.assign({}, initialState, {
-        activeOrganizationUuid: action.payload.data.uuid,
+        activeOrganizationId: action.payload.data.id,
       });
     default:
       return state;

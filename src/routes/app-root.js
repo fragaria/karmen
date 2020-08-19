@@ -20,12 +20,12 @@ const AppRoot = ({
       switchOrganization(preferredOrganization);
     } else {
       const firstOrg = Object.values(organizations)[0];
-      switchOrganization(firstOrg.uuid);
+      switchOrganization(firstOrg.id);
     }
     return <Loader />;
   }
   if (activeOrganization) {
-    return <Redirect to={`/${activeOrganization.uuid}`} />;
+    return <Redirect to={`/${activeOrganization.id}`} />;
   } else {
     return <Redirect to={`/no-organization`} />;
   }
@@ -33,11 +33,11 @@ const AppRoot = ({
 
 export default connect(
   (state) => ({
-    preferredOrganization: state.preferences.activeOrganizationUuid,
+    preferredOrganization: state.preferences.activeOrganizationId,
     organizations: state.me.organizations,
     activeOrganization: state.me.activeOrganization,
   }),
   (dispatch) => ({
-    switchOrganization: (uuid) => setTimeout(()=>{dispatch(switchOrganization(uuid))}),
+    switchOrganization: (id) => setTimeout(()=>{dispatch(switchOrganization(id))}),
   })
 )(AppRoot);

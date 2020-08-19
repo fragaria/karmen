@@ -129,7 +129,7 @@ const PrinterDetail = ({
     <section className="content">
       <div className="printer-detail">
         <div className="printer-detail-stream">
-          <WebcamStream printer={printer} orgUuid={match.params.orguuid} />
+          <WebcamStream printer={printer} orgId={match.params.orgid} />
 
           <Progress {...printer.job} />
         </div>
@@ -166,7 +166,7 @@ const PrinterDetail = ({
                     Disconnect
                   </button>
                 ))}
-              {printer.client.pill_info &&
+              {printer.client && printer.client.pill_info &&
                 printer.client.pill_info.update_available && (
                   <div className="printer-state-announcement">
                     An update is available for your Pill{" "}
@@ -234,7 +234,7 @@ const PrinterDetail = ({
               path={`${match.url}/tab-jobs`}
               render={(props) => (
                 <JobsTab
-                  orguuid={match.params.orguuid}
+                  orguuid={match.params.orgid}
                   jobList={jobList}
                   loadJobsPage={loadJobsPage}
                   clearJobsPages={clearJobsPages}
@@ -247,7 +247,7 @@ const PrinterDetail = ({
                 <ControlsTab
                   printer={printer}
                   available={
-                    !(
+                    !(printer.client &&
                       printer.client.access_level === "unlocked" &&
                       (["Offline", "Closed"].indexOf(
                         printer.status && printer.status.state
@@ -291,10 +291,10 @@ const PrinterDetail = ({
 export default connect(
   (state, ownProps) => ({
     printer: state.printers.printers.find(
-      (p) => p.uuid === ownProps.match.params.uuid
+      (p) => p.id === ownProps.match.params.id
     ),
     role: state.me.activeOrganization && state.me.activeOrganization.role,
-    jobList: state.printjobs[ownProps.match.params.uuid] || {
+    jobList: state.printjobs[ownProps.match.params.id] || {
       pages: [],
       orderBy: "-started",
       filter: null,
@@ -305,40 +305,40 @@ export default connect(
     loadPrinter: () =>
       dispatch(
         loadAndQueuePrinter(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           ["job", "status", "webcam", "lights"]
         )
       ),
     changeCurrentJobState: (action) =>
       dispatch(
         changeCurrentJob(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           action
         )
       ),
     patchPrinter: (data) =>
       dispatch(
         patchPrinter(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           data
         )
       ),
     setPrinterConnection: (state) =>
       dispatch(
         setPrinterConnection(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           state
         )
       ),
     loadJobsPage: (startWith, orderBy, filter, limit) =>
       dispatch(
         getJobsPage(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           startWith,
           orderBy,
           filter,
@@ -348,19 +348,19 @@ export default connect(
     clearJobsPages: () =>
       dispatch(
         clearJobsPages(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid
+          ownProps.match.params.orgid,
+          ownProps.match.params.id
         )
       ),
     changeLights: () =>
       dispatch(
-        changeLights(ownProps.match.params.orguuid, ownProps.match.params.uuid)
+        changeLights(ownProps.match.params.orgid, ownProps.match.params.id)
       ),
     movePrinthead: (command, opts) =>
       dispatch(
         movePrinthead(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           command,
           opts
         )
@@ -368,39 +368,39 @@ export default connect(
     changeFanState: (targetState) =>
       dispatch(
         changeFanState(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           targetState
         )
       ),
     changeMotorsState: (targetState) =>
       dispatch(
         changeMotorsState(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           targetState
         )
       ),
     extrude: (amount) =>
       dispatch(
         extrude(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           amount
         )
       ),
     setTemperature: (partName, target) =>
       dispatch(
         setTemperature(
-          ownProps.match.params.orguuid,
-          ownProps.match.params.uuid,
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
           partName,
           target
         )
       ),
     startUpdate: () =>
       dispatch(
-        startUpdate(ownProps.match.params.orguuid, ownProps.match.params.uuid)
+        startUpdate(ownProps.match.params.orgid, ownProps.match.params.id)
       ),
   })
 )(PrinterDetail);

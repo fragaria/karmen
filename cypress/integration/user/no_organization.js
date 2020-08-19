@@ -2,15 +2,15 @@ import { Chance } from "chance";
 const chance = new Chance();
 
 describe("Organizations: Adding", function () {
-  let email, password, user_uuid, org_uuid;
+  let email, password, user_id, org_id;
   beforeEach(() => {
     email = chance.email();
     password = chance.string();
     cy.prepareTestUser(email, password).then( (response) => {
-      user_uuid = response.body.user_uuid;
-      org_uuid = response.body.organizations[0].uuid;
-      console.log(user_uuid, org_uuid);
-      cy.removeUserFromOrg(org_uuid, user_uuid)
+      user_id = response.body.user_id;
+      org_id = response.body.organizations[0].id;
+      console.log(user_id, org_id);
+      cy.removeUserFromOrg(org_id, user_id)
       return cy.login(email, password)
       }
     );

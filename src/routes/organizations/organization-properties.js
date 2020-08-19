@@ -21,7 +21,7 @@ class OrganizationProperties extends React.Component {
 
   changeOrganization(newParameters) {
     const { patchOrganization, organization } = this.props;
-    return patchOrganization(organization.uuid, newParameters.name)
+    return patchOrganization(organization.id, newParameters.name)
       .then(() => {
         this.props.history.push(`/organizations`);
         return {
@@ -101,11 +101,11 @@ class OrganizationProperties extends React.Component {
 export default connect(
   (state, ownProps) => ({
     organization: state.organizations.list.find(
-      (o) => o.uuid === ownProps.match.params.orguuid
+      (o) => o.id === ownProps.match.params.orgid
     ),
   }),
   (dispatch) => ({
     getOrganizations: () => dispatch(getOrganizations()),
-    patchOrganization: (uuid, name) => dispatch(patchOrganization(uuid, name)),
+    patchOrganization: (id, name) => dispatch(patchOrganization(id, name)),
   })
 )(OrganizationProperties);

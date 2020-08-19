@@ -17,12 +17,12 @@ export const usePrintGcodeModal = ({
   const [schedulingPrint, setSchedulingPrint] = useState();
   const [messageOk, setMessageOk] = useState();
   const [selectedPrinter, setSelectedPrinter] = useState(
-    availablePrinters.length ? availablePrinters[0].uuid : null
+    availablePrinters.length ? availablePrinters[0].id : null
   );
   const [showPrinterSelect, setShowPrinterSelect] = useState(true);
   const SelectPrinter = () => {
     const availablePrinterOpts = availablePrinters.map((p) => {
-      return <option key={p.uuid} value={p.uuid}>{`${p.name}`}</option>;
+      return <option key={p.id} value={p.id}>{`${p.name}`}</option>;
     });
     return (
       <div className="modal-subtitle text-center">
@@ -45,8 +45,8 @@ export const usePrintGcodeModal = ({
     );
   };
 
-  const schedulePrint = (gcodeUuid, printerUuid) => {
-    onSchedulePrint(gcodeUuid, printerUuid)
+  const schedulePrint = (gcodeId, printerId) => {
+    onSchedulePrint(gcodeId, printerId)
       .then((r) => {
         setMessage("Print was scheduled");
         setMessageOk(true);
@@ -63,7 +63,7 @@ export const usePrintGcodeModal = ({
     ...printModal,
     openModal: (e) => {
       setSelectedPrinter(
-        availablePrinters.length ? availablePrinters[0].uuid : null
+        availablePrinters.length ? availablePrinters[0].id : null
       );
       setShowPrinterSelect(true);
       setShowFilamentTypeWarning(false);
@@ -117,7 +117,7 @@ export const usePrintGcodeModal = ({
                       setShowFilamentTypeWarning(false);
                       setSchedulingPrint(true);
                       setMessageOk(true);
-                      schedulePrint(gcode.uuid, selectedPrinter);
+                      schedulePrint(gcode.id, selectedPrinter);
                     }}
                   >
                     Print anyway
@@ -146,7 +146,7 @@ export const usePrintGcodeModal = ({
                       onClick={(e) => {
                         e.preventDefault();
                         const selected = availablePrinters.find(
-                          (p) => p.uuid === selectedPrinter
+                          (p) => p.id === selectedPrinter
                         );
                         if (
                           selected &&
@@ -171,7 +171,7 @@ export const usePrintGcodeModal = ({
                         setShowFilamentTypeWarning(false);
                         setSchedulingPrint(true);
                         setMessageOk(true);
-                        schedulePrint(gcode.uuid, selectedPrinter);
+                        schedulePrint(gcode.id, selectedPrinter);
                       }}
                     >
                       Print

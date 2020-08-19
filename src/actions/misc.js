@@ -4,10 +4,10 @@ import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
 export const enqueueTask = createHttpAction(
   "ENQUEUE_TASK",
-  (orguuid, task, opts, { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, task, opts, { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.enqueueTask, dispatch)(
-        orguuid,
+        orgid,
         task,
         opts
       );

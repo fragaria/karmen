@@ -32,11 +32,11 @@ export const addUser = createHttpAction(
 
 export const patchUser = createHttpAction(
   "USERS_EDIT",
-  (orguuid, uuid, role, { dispatch, getState }) => {
+  (orguuid, id, role, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.patchUser, dispatch)(
         orguuid,
-        uuid,
+        id,
         role
       );
     });
@@ -45,9 +45,9 @@ export const patchUser = createHttpAction(
 
 export const deleteUser = createHttpAction(
   "USERS_DELETE",
-  (orguuid, uuid, { dispatch, getState }) => {
+  (orguuid, id, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.deleteUser, dispatch)(orguuid, uuid);
+      return retryIfUnauthorized(backend.deleteUser, dispatch)(orguuid, id);
     });
   }
 );

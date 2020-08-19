@@ -34,7 +34,7 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
             <button
               className="btn"
               onClick={(e) => {
-                onPrinterDelete(printer.uuid).then(() => {
+                onPrinterDelete(printer.id).then(() => {
                   modal.closeModal(e);
                 });
               }}
@@ -59,7 +59,7 @@ const PrinterSettingsModal = ({
   pauseUpdates,
 }) => {
   const onSettingsChanged = (newSettings) =>
-    onPrinterUpdate(printer.uuid, newSettings).then((r) => {
+    onPrinterUpdate(printer.id, newSettings).then((r) => {
       if (r.status === 200) {
         pauseUpdates(true);
         modal.closeModal();
@@ -104,8 +104,8 @@ const PrintersTableRow = ({
     <div className="list-item" role="listitem">
       <Link
         className="list-item-content"
-        key={printer.uuid}
-        to={`/${orguuid}/printers/${printer.uuid}`}
+        key={printer.id}
+        to={`/${orguuid}/printers/${printer.id}`}
       >
         <span className="list-item-title">{printer.name}</span>
         <span className="text-mono">
@@ -204,7 +204,7 @@ class PrintersTable extends React.Component {
         rowFactory={(p) => {
           return (
             <PrintersTableRow
-              key={p.uuid}
+              key={p.id}
               orguuid={orguuid}
               printer={p}
               onPrinterUpdate={onPrinterUpdate}

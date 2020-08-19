@@ -319,12 +319,12 @@ export const AddPrinter = ({ orguuid, issueToken, createPrinter }) => {
 };
 
 export default connect(null, (dispatch, ownProps) => ({
-  orguuid: ownProps.match.params.orguuid,
-  issueToken: () => dispatch(issuePrinterToken(ownProps.match.params.orguuid)),
+  orguuid: ownProps.match.params.orgid,
+  issueToken: () => dispatch(issuePrinterToken(ownProps.match.params.orgid)),
   createPrinter: (protocol, hostname, ip, port, path, token, name, apiKey) =>
     dispatch(
       addPrinter(
-        ownProps.match.params.orguuid,
+        ownProps.match.params.orgid,
         protocol,
         hostname,
         ip,

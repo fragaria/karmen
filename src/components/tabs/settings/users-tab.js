@@ -5,7 +5,7 @@ import UsersTable from "../../listings/users-table";
 
 const Users = ({
   orguuid,
-  currentUuid,
+  currentId,
   loadUsers,
   usersLoaded,
   usersList,
@@ -25,7 +25,7 @@ const Users = ({
       </div>
 
       <UsersTable
-        currentUuid={currentUuid}
+        currentId={currentId}
         loadUsers={loadUsers}
         usersList={usersList}
         usersLoaded={usersLoaded}

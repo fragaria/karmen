@@ -24,7 +24,7 @@ export const addOrganization = createHttpAction(
 
 export const patchOrganization = createHttpAction(
   "ORGANIZATIONS_EDIT",
-  (uuid, name, { dispatch, getState }) => {
-    return retryIfUnauthorized(backend.patchOrganization, dispatch)(uuid, name);
+  (id, name, { dispatch, getState }) => {
+    return retryIfUnauthorized(backend.patchOrganization, dispatch)(id, name);
   }
 );

@@ -7,7 +7,7 @@ import { getJsonPostHeaders, performRequest } from "../utils";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const getPrinters = (orgUuid, fields = []) => {
+export const getPrinters = (orgId, fields = []) => {
   let uri = `/users/me/printers/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
@@ -16,14 +16,14 @@ export const getPrinters = (orgUuid, fields = []) => {
     method: "GET",
     uri,
     appendData: {
-      organizationUuid: orgUuid,
+      organizationId: orgId,
     },
     successCodes: [200],
   });
 };
 
-export const getPrinter = (orgUuid, uuid, fields = []) => {
-  let uri = `/organizations/${orgUuid}/printers/${uuid}`;
+export const getPrinter = (orgId, id, fields = []) => {
+  let uri = `/organizations/${orgId}/printers/${id}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -31,7 +31,7 @@ export const getPrinter = (orgUuid, uuid, fields = []) => {
     method: "GET",
     uri,
     appendData: {
-      organizationUuid: orgUuid,
+      organizationId: orgId,
     },
     successCodes: [200],
   });

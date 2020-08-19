@@ -135,14 +135,14 @@ export class WebcamStream extends React.Component {
 
 export default connect(
   (state, ownProps) => ({
-    imageResponse: state.webcams.images[ownProps.printer.uuid],
+    imageResponse: state.webcams.images[ownProps.printer.id],
   }),
   (dispatch, ownProps) => ({
     setWebcamRefreshInterval: (interval) =>
       dispatch(
         setWebcamRefreshInterval(
-          ownProps.orgUuid,
-          ownProps.printer.uuid,
+          ownProps.orgId,
+          ownProps.printer.id,
           interval
         )
       ),

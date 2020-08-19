@@ -57,7 +57,7 @@ const createPrinter = (accessLevel, connected, state) => {
       },
     },
     token: null,
-    uuid: "20e91c14-c3e4-4fe9-a066-e69d53324a20",
+    id: "20e91c14-c3e4-4fe9-a066-e69d53324a20",
     webcam: {
       flipHorizontal: false,
       flipVertical: false,

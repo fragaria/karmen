@@ -20,7 +20,7 @@ const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
               className="btn"
               onClick={() => {
                 const newRole = user.role === "user" ? "admin" : "user";
-                onUserChange(user.uuid, newRole).then(() => {
+                onUserChange(user.id, newRole).then(() => {
                   modal.closeModal();
                 });
               }}
@@ -52,7 +52,7 @@ const DeleteUserModal = ({ modal, user, onUserDelete }) => {
             <button
               className="btn"
               onClick={() => {
-                onUserDelete(user.uuid).then(() => {
+                onUserDelete(user.id).then(() => {
                   modal.closeModal();
                 });
               }}
@@ -91,7 +91,7 @@ const InvitationSentModal = ({ modal, user }) => {
 };
 
 const UsersTableRow = ({
-  currentUuid,
+  currentId,
   user,
   onUserChange,
   onUserDelete,
@@ -118,11 +118,11 @@ const UsersTableRow = ({
           )}
         </span>
         <span className="text-mono">
-          {user.email}, {user.uuid}
+          {user.email}, {user.id}
         </span>
       </div>
 
-      {currentUuid !== user.uuid && (
+      {currentId !== user.id && (
         <CtaDropdown
           expanded={ctaListExpanded}
           onToggle={() => {
@@ -181,7 +181,7 @@ const UsersTableRow = ({
 };
 
 const UsersTable = ({
-  currentUuid,
+  currentId,
   loadUsers,
   usersLoaded,
   usersList,
@@ -192,17 +192,17 @@ const UsersTable = ({
   return (
     <NoPaginationListing
       defaultOrderBy="+username"
-      loadItems={() => loadUsers(["username", "uuid", "role"])}
+      loadItems={() => loadUsers(["username", "id", "role"])}
       itemsLoaded={usersLoaded}
       items={usersList}
       enableFiltering={true}
-      sortByColumns={["username", "uuid", "role"]}
+      sortByColumns={["username", "id", "role"]}
       filterByColumns={["username"]}
       rowFactory={(u) => {
         return (
           <UsersTableRow
-            key={u.uuid}
-            currentUuid={currentUuid}
+            key={u.id}
+            currentId={currentId}
             user={u}
             onUserChange={onUserChange}
             onUserDelete={onUserDelete}

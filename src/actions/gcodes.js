@@ -4,7 +4,7 @@ import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
-export const clearGcodesPages = (printerUuid) => (dispatch) => {
+export const clearGcodesPages = (printerId) => (dispatch) => {
   return dispatch({
     type: "GCODES_CLEAR_PAGES",
     payload: {},
@@ -14,7 +14,7 @@ export const clearGcodesPages = (printerUuid) => (dispatch) => {
 export const getGcodesPage = createHttpAction(
   "GCODES_LOAD_PAGE",
   (
-    orguuid,
+    orgid,
     startWith = null,
     orderBy = null,
     filter = null,
@@ -22,9 +22,9 @@ export const getGcodesPage = createHttpAction(
     fields = [],
     { dispatch, getState }
   ) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () =>
+    return denyWithNoOrganizationAccess(orgid, getState, () =>
       retryIfUnauthorized(backend.getGcodes, dispatch)(
-        orguuid,
+        orgid,
         startWith,
         orderBy,
         filter,
@@ -37,11 +37,11 @@ export const getGcodesPage = createHttpAction(
 
 export const loadGcode = createHttpAction(
   "GCODE_LOAD_DETAIL",
-  (orguuid, uuid, fields = [], { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, id, fields = [], { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.getGcode, dispatch)(
-        orguuid,
-        uuid,
+        orgid,
+        id,
         fields
       );
     });
@@ -50,19 +50,19 @@ export const loadGcode = createHttpAction(
 
 export const deleteGcode = createHttpAction(
   "GCODES_DELETE",
-  (orguuid, uuid, { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.deleteGcode, dispatch)(orguuid, uuid);
+  (orgid, id, { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
+      return retryIfUnauthorized(backend.deleteGcode, dispatch)(orgid, id);
     });
   }
 );
 
 export const uploadGcode = createHttpAction(
   "GCODES_UPLOAD",
-  (orguuid, path, toUpload, { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, path, toUpload, { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.uploadGcode, dispatch)(
-        orguuid,
+        orgid,
         path,
         toUpload
       );
@@ -70,8 +70,8 @@ export const uploadGcode = createHttpAction(
   }
 );
 
-export const getGcodeDownloadUrl = (orguuid, id) => (dispatch) => {
-  return dispatch(loadGcode(orguuid, id, [])).then((r) => {
+export const getGcodeDownloadUrl = (orgid, id) => (dispatch) => {
+  return dispatch(loadGcode(orgid, id, [])).then((r) => {
     let downloadPath = r.data.data;
     if (downloadPath[0] === "/") downloadPath = downloadPath.substr(1);
     return `${BASE_URL}/${downloadPath}`;

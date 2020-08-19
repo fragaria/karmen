@@ -1,8 +1,8 @@
 import { performRequest } from "./utils";
 
-export const enqueueTask = (orgUuid, task, opts) => {
+export const enqueueTask = (orgId, task, opts) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/tasks`,
+    uri: `/organizations/${orgId}/tasks`,
     data: {
       task,
       ...opts,

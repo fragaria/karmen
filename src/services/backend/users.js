@@ -1,7 +1,7 @@
 import { performRequest } from "./utils";
 
-export const getUsers = (orgUuid, fields = []) => {
-  let uri = `/organizations/${orgUuid}/users`;
+export const getUsers = (orgId, fields = []) => {
+  let uri = `/organizations/${orgId}/users`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -12,9 +12,9 @@ export const getUsers = (orgUuid, fields = []) => {
   });
 };
 
-export const addUser = (orgUuid, email, role) => {
+export const addUser = (orgId, email, role) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/users`,
+    uri: `/organizations/${orgId}/users`,
     data: {
       email,
       role,
@@ -23,28 +23,28 @@ export const addUser = (orgUuid, email, role) => {
   });
 };
 
-export const patchUser = (orgUuid, uuid, role) => {
+export const patchUser = (orgId, id, role) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/users/${uuid}`,
+    uri: `/organizations/${orgId}/users/${id}`,
     method: "PATCH",
     data: {
       role,
     },
     appendData: {
-      uuid,
+      id,
     },
     successCodes: [200],
   });
 };
 
-export const deleteUser = (orgUuid, uuid) => {
+export const deleteUser = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/users/${uuid}`,
+    uri: `/organizations/${orgId}/users/${id}`,
     method: "DELETE",
     parseResponse: false,
     successCodes: [204, 404],
     appendData: {
-      uuid,
+      id,
     },
   });
 };

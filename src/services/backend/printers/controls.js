@@ -1,10 +1,10 @@
 import { performRequest } from "../utils";
 
-export const setPrinterConnection = (orgUuid, uuid, state) => {
+export const setPrinterConnection = (orgId, id, state) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/connection`,
+    uri: `/organizations/${orgId}/printers/${id}/connection`,
     appendData: {
-      uuid,
+      id,
       state,
     },
     data: {
@@ -14,11 +14,11 @@ export const setPrinterConnection = (orgUuid, uuid, state) => {
   });
 };
 
-export const changeCurrentJob = (orgUuid, uuid, action) => {
+export const changeCurrentJob = (orgId, id, action) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/current-job`,
+    uri: `/organizations/${orgId}/printers/${id}/current-job`,
     appendData: {
-      uuid,
+      id,
       action,
     },
     data: {
@@ -29,21 +29,21 @@ export const changeCurrentJob = (orgUuid, uuid, action) => {
   });
 };
 
-export const changeLights = (orgUuid, uuid) => {
+export const changeLights = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/lights`,
+    uri: `/organizations/${orgId}/printers/${id}/lights`,
     appendData: {
-      uuid,
+      id,
     },
     successCodes: [200],
   });
 };
 
-export const movePrinthead = (orgUuid, uuid, command, opts) => {
+export const movePrinthead = (orgId, id, command, opts) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/printhead`,
+    uri: `/organizations/${orgId}/printers/${id}/printhead`,
     appendData: {
-      uuid,
+      id,
     },
     data: {
       command,
@@ -54,11 +54,11 @@ export const movePrinthead = (orgUuid, uuid, command, opts) => {
   });
 };
 
-export const changeFanState = (orgUuid, uuid, targetState) => {
+export const changeFanState = (orgId, id, targetState) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/fan`,
+    uri: `/organizations/${orgId}/printers/${id}/fan`,
     appendData: {
-      uuid,
+      id,
     },
     data: {
       target: targetState,
@@ -68,10 +68,10 @@ export const changeFanState = (orgUuid, uuid, targetState) => {
   });
 };
 
-export const changeMotorsState = (orgUuid, uuid, targetState) => {
+export const changeMotorsState = (orgId, id, targetState) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/motors`,
-    uuid,
+    uri: `/organizations/${orgId}/printers/${id}/motors`,
+    id,
     data: {
       target: targetState,
     },
@@ -80,11 +80,11 @@ export const changeMotorsState = (orgUuid, uuid, targetState) => {
   });
 };
 
-export const extrude = (orgUuid, uuid, amount) => {
+export const extrude = (orgId, id, amount) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/extrusion`,
+    uri: `/organizations/${orgId}/printers/${id}/extrusion`,
     appendData: {
-      uuid,
+      id,
     },
     data: {
       amount,
@@ -94,11 +94,11 @@ export const extrude = (orgUuid, uuid, amount) => {
   });
 };
 
-export const setTemperature = (orgUuid, uuid, partName, target) => {
+export const setTemperature = (orgId, id, partName, target) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/temperatures/${partName}`,
+    uri: `/organizations/${orgId}/printers/${id}/temperatures/${partName}`,
     appendData: {
-      uuid,
+      id,
     },
     data: {
       target,
@@ -108,11 +108,11 @@ export const setTemperature = (orgUuid, uuid, partName, target) => {
   });
 };
 
-export const startUpdate = (orgUuid, uuid) => {
+export const startUpdate = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/update/`,
+    uri: `/organizations/${orgId}/printers/${id}/update/`,
     appendData: {
-      uuid,
+      id,
     },
     parseResponse: false,
     successCodes: [200],

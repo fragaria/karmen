@@ -158,12 +158,12 @@ export const loadApiTokens = () => {
   });
 };
 
-export const addApiToken = (orgUuid, name) => {
+export const addApiToken = (orgId, name) => {
   return performRequest({
     uri: `/users/me/tokens`,
     data: {
       name: name,
-      organization_uuid: orgUuid,
+      organization_uuid: orgId,
     },
     successCodes: [201],
   }).then((response) => response.data.access_token);

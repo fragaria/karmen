@@ -2,11 +2,11 @@ import { createHttpAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
-export const clearJobsPages = (printerUuid) => (dispatch) => {
+export const clearJobsPages = (printerId) => (dispatch) => {
   return dispatch({
     type: "JOBS_CLEAR_PAGES",
     payload: {
-      printer: printerUuid,
+      printer: printerId,
     },
   });
 };
@@ -16,7 +16,7 @@ export const getJobsPage = createHttpAction(
   // TODO Reflect the actual filter attribute
   (
     orguuid,
-    printerUuid,
+    printerId,
     startWith = null,
     orderBy = null,
     filter = null,
@@ -28,7 +28,7 @@ export const getJobsPage = createHttpAction(
         orguuid,
         startWith,
         orderBy,
-        printerUuid,
+        printerId,
         limit
       );
     });
@@ -37,11 +37,11 @@ export const getJobsPage = createHttpAction(
 
 export const addPrintJob = createHttpAction(
   "JOBS_ADD",
-  (orguuid, uuid, printer, { dispatch, getState }) => {
+  (orguuid, id, printer, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.printGcode, dispatch)(
         orguuid,
-        uuid,
+        id,
         printer
       );
     });

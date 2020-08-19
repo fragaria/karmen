@@ -14,7 +14,7 @@ export default (
       });
     case "USERS_ADD_SUCCEEDED":
       const existing = state.list.findIndex(
-        (u) => u.uuid === action.payload.data.uuid
+        (u) => u.id === action.payload.data.id
       );
       if (existing > -1) {
         return state;
@@ -24,7 +24,7 @@ export default (
         listLoaded: true,
       });
     case "USERS_EDIT_SUCCEEDED":
-      userIndex = state.list.findIndex((u) => u.uuid === action.payload.uuid);
+      userIndex = state.list.findIndex((u) => u.id === action.payload.id);
       if (userIndex > -1) {
         state.list[userIndex].role = action.payload.data.role;
       }
@@ -32,7 +32,7 @@ export default (
         list: [].concat(state.list),
       });
     case "USERS_DELETE_SUCCEEDED":
-      userIndex = state.list.findIndex((u) => u.uuid === action.payload.uuid);
+      userIndex = state.list.findIndex((u) => u.id === action.payload.id);
       if (userIndex > -1) {
         state.list = state.list
           .slice(0, userIndex)

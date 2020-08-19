@@ -107,14 +107,14 @@ class PrinterList extends React.Component {
             <Link
               className="list-item"
               role="listitem"
-              key={printer.uuid}
-              to={`/${match.params.orguuid}/printers/${printer.uuid}`}
+              key={printer.id}
+              to={`/${match.params.orgid}/printers/${printer.id}`}
             >
               <div className="list-item-content">
                 {viewType === "grid" && (
                   <div className="list-item-illustration">
                     <WebcamStream
-                      orgUuid={match.params.orguuid}
+                      orgId={match.params.orgid}
                       allowFullscreen={false}
                       printer={printer}
                     />
@@ -150,7 +150,7 @@ class PrinterList extends React.Component {
           get you started with Karmen.
         </p>
         <div className="cta-box text-center">
-          <Link to={`/${match.params.orguuid}/add-printer`} className="btn">
+          <Link to={`/${match.params.orgid}/add-printer`} className="btn">
             Add your first printer
           </Link>
         </div>
@@ -165,7 +165,7 @@ class PrinterList extends React.Component {
               Printers
               {role === "admin" && (
                 <Link
-                  to={`/${match.params.orguuid}/add-printer`}
+                  to={`/${match.params.orgid}/add-printer`}
                   className="btn btn-sm"
                   id="btn-add_printer"
                 >
@@ -195,15 +195,15 @@ class PrinterList extends React.Component {
 export default connect(
   (state, ownProps) => ({
     viewType:
-      state.preferences.orgs[ownProps.match.params.orguuid] &&
-      state.preferences.orgs[ownProps.match.params.orguuid].printerViewType,
+      state.preferences.orgs[ownProps.match.params.orgid] &&
+      state.preferences.orgs[ownProps.match.params.orgid].printerViewType,
     printers: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,
     role: state.me.activeOrganization && state.me.activeOrganization.role,
   }),
   (dispatch, ownProps) => ({
     loadPrinters: (fields) =>
-      dispatch(loadAndQueuePrinters(ownProps.match.params.orguuid, fields)),
+      dispatch(loadAndQueuePrinters(ownProps.match.params.orgid, fields)),
     setPrinterViewType: (viewType) => dispatch(setPrinterViewType(viewType)),
   })
 )(PrinterList);

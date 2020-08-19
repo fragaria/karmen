@@ -7,15 +7,15 @@ import WebcamStream, { WebcamStreamRenderer } from "../webcam-stream";
 
 require("jest-fetch-mock").enableMocks();
 
-const printerUuid = "20e91c14-c3e4-4fe9-a066-e69d53324a20";
-const orgUuid = "randomUuidOfOrganisation";
+const printerId = "20e91c14-c3e4-4fe9-a066-e69d53324a20";
+const orgId = "randomIdOfOrganisation";
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
 const createPrinter = (connected) => {
   return {
-    uuid: printerUuid,
+    id: printerId,
     client: {
       access_level: "unlocked",
       api_key: null,
@@ -46,7 +46,7 @@ const renderWebcamStreamRenderer = (printer, imageData = null) => {
       flipVertical={false}
       rotate90={false}
       allowFullscreen={false}
-      orgUuid={orgUuid}
+      orgId={orgId}
       image={imageData}
     />
   );
@@ -88,15 +88,15 @@ it("WebcamStream", async () => {
   const printer = createPrinter(false);
   const store = mockStore({
     webcams: {
-      images: { [printerUuid]: ["data:image/jpg,image-data", 202] },
-      queue: { [printerUuid]: { interval: 200, timeout: 20 } },
+      images: { [printerId]: ["data:image/jpg,image-data", 202] },
+      queue: { [printerId]: { interval: 200, timeout: 20 } },
     },
   });
 
   return render(
     <Provider store={store}>
       <WebcamStream
-        orgUuid={orgUuid}
+        orgId={orgId}
         allowFullscreen={false}
         printer={printer}
       />

@@ -75,7 +75,7 @@ class Menu extends React.Component {
     const orgList = organizations
       ? Object.values(organizations)
           .filter(
-            (o) => activeOrganization && o.uuid !== activeOrganization.uuid
+            (o) => activeOrganization && o.id !== activeOrganization.id
           )
           .sort((o, p) =>
             o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
@@ -84,11 +84,11 @@ class Menu extends React.Component {
             return (
               <button
                 className="dropdown-item"
-                key={o.uuid}
+                key={o.id}
                 onClick={() => {
-                  switchOrganization(o.uuid);
+                  switchOrganization(o.id);
                   this.setState({ orgListExpanded: false });
-                  history.push(`/${o.uuid}`);
+                  history.push(`/${o.id}`);
                 }}
               >
                 {o.name}
@@ -146,7 +146,7 @@ class Menu extends React.Component {
                     <>
                       <li className="navigation-item">
                         <Link
-                          to={`/${activeOrganization.uuid}/printers`}
+                          to={`/${activeOrganization.id}/printers`}
                           onClick={() => this.setState({ navigation: false })}
                           id="navigation-printers"
                         >
@@ -155,7 +155,7 @@ class Menu extends React.Component {
                       </li>
                       <li className="navigation-item">
                         <Link
-                          to={`/${activeOrganization.uuid}/gcodes`}
+                          to={`/${activeOrganization.id}/gcodes`}
                           onClick={() => this.setState({ navigation: false })}
                           id="navigation-gcodes"
                         >
@@ -215,7 +215,7 @@ class Menu extends React.Component {
               {activeOrganization && (
                 <div className="navigation-items-main">
                   <Link
-                    to={`/${activeOrganization.uuid}/printers`}
+                    to={`/${activeOrganization.id}/printers`}
                     id="navigation-printers-top"
                     className="navigation-item hidden-xs-inline"
                   >
@@ -223,7 +223,7 @@ class Menu extends React.Component {
                   </Link>
 
                   <Link
-                    to={`/${activeOrganization.uuid}/gcodes`}
+                    to={`/${activeOrganization.id}/gcodes`}
                     id="navigation-gcodes-top"
                     className="navigation-item hidden-xs-inline"
                   >
@@ -268,7 +268,7 @@ export default withRouter(
     }),
     (dispatch) => ({
       logout: () => dispatch(clearUserIdentity()),
-      switchOrganization: (uuid) => dispatch(switchOrganization(uuid)),
+      switchOrganization: (id) => dispatch(switchOrganization(id)),
     })
   )(Menu)
 );

@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 const NoOrganization = ({ activeOrganization }) => {
   console.log(activeOrganization);
   if (activeOrganization) {
-    return <Redirect to={`/${activeOrganization.uuid}`} />;
+    return <Redirect to={`/${activeOrganization.id}`} />;
   }
   return (
     <>

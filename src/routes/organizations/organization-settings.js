@@ -53,13 +53,13 @@ const Settings = ({ match, ...rest }) => {
               <Route
                 path={`${match.url}/tab-printers`}
                 render={(props) => (
-                  <PrintersTab {...rest} orguuid={match.params.orguuid} />
+                  <PrintersTab {...rest} orguuid={match.params.orgid} />
                 )}
               />
               <Route
                 path={`${match.url}/tab-users`}
                 render={(props) => (
-                  <UsersTab {...rest} orguuid={match.params.orguuid} />
+                  <UsersTab {...rest} orguuid={match.params.orgid} />
                 )}
               />
             </Switch>
@@ -75,34 +75,34 @@ export default connect(
     printersLoaded: state.printers.printersLoaded,
     printersList: state.printers.printers,
     networkInterface:
-      state.preferences.orgs[ownProps.match.params.orguuid] &&
-      state.preferences.orgs[ownProps.match.params.orguuid].networkInterface,
+      state.preferences.orgs[ownProps.match.params.orgid] &&
+      state.preferences.orgs[ownProps.match.params.orgid].networkInterface,
     usersList: state.users.list,
     usersLoaded: state.users.listLoaded,
-    currentUuid: state.me.identity,
+    currentId: state.me.identity,
   }),
   (dispatch, ownProps) => ({
-    onPrinterUpdate: (uuid, newSettings) =>
-      dispatch(patchPrinter(ownProps.match.params.orguuid, uuid, newSettings)),
-    onPrinterDelete: (uuid) =>
-      dispatch(deletePrinter(ownProps.match.params.orguuid, uuid)),
+    onPrinterUpdate: (id, newSettings) =>
+      dispatch(patchPrinter(ownProps.match.params.orgid, id, newSettings)),
+    onPrinterDelete: (id) =>
+      dispatch(deletePrinter(ownProps.match.params.orgid, id)),
     loadPrinters: (fields) =>
-      dispatch(loadPrinters(ownProps.match.params.orguuid, fields)),
+      dispatch(loadPrinters(ownProps.match.params.orgid, fields)),
     onNetworkInterfaceChange: (networkInterface) =>
       dispatch(setNetworkInterface(networkInterface)),
     scanNetwork: (networkInterface) =>
       dispatch(
-        enqueueTask(ownProps.match.params.orguuid, "scan_network", {
+        enqueueTask(ownProps.match.params.orgid, "scan_network", {
           network_interface: networkInterface,
         })
       ),
     loadUsers: (fields) =>
-      dispatch(getUsers(ownProps.match.params.orguuid, fields)),
-    onUserChange: (uuid, role) =>
-      dispatch(patchUser(ownProps.match.params.orguuid, uuid, role)),
-    onUserDelete: (uuid) =>
-      dispatch(deleteUser(ownProps.match.params.orguuid, uuid)),
+      dispatch(getUsers(ownProps.match.params.orgid, fields)),
+    onUserChange: (id, role) =>
+      dispatch(patchUser(ownProps.match.params.orgid, id, role)),
+    onUserDelete: (id) =>
+      dispatch(deleteUser(ownProps.match.params.orgid, id)),
     onResendInvitation: (email, role) =>
-      dispatch(addUser(ownProps.match.params.orguuid, email, role)),
+      dispatch(addUser(ownProps.match.params.orgid, email, role)),
   })
 )(Settings);

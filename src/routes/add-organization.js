@@ -142,6 +142,6 @@ export default connect(
   }),
   (dispatch) => ({
     createOrganization: (name) => dispatch(addOrganization(name)),
-    switchOrganization: (uuid) => dispatch(switchOrganization(uuid)),
+    switchOrganization: (id) => dispatch(switchOrganization(id)),
   })
 )(AddOrganization);

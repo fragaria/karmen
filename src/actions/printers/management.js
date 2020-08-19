@@ -34,11 +34,11 @@ export const addPrinter = createHttpAction(
 
 export const patchPrinter = createHttpAction(
   "PRINTERS_PATCH",
-  (orguuid, uuid, data, { dispatch, getState }) => {
+  (orguuid, id, data, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.patchPrinter, dispatch)(
         orguuid,
-        uuid,
+        id,
         data
       );
     });
@@ -47,11 +47,11 @@ export const patchPrinter = createHttpAction(
 
 export const deletePrinter = createHttpAction(
   "PRINTERS_DELETE",
-  (orguuid, uuid, { dispatch, getState }) => {
+  (orguuid, id, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.deletePrinter, dispatch)(
         orguuid,
-        uuid
+        id
       );
     });
   }

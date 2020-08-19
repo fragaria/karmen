@@ -1,7 +1,7 @@
 import { performRequest } from "../utils";
 
 export const addPrinter = (
-  orgUuid,
+  orgId,
   protocol,
   hostname,
   ip,
@@ -12,7 +12,7 @@ export const addPrinter = (
   apiKey
 ) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers`,
+    uri: `/organizations/${orgId}/printers`,
     data: {
       protocol,
       hostname,
@@ -24,38 +24,38 @@ export const addPrinter = (
       api_key: apiKey,
     },
     appendData: {
-      organizationUuid: orgUuid,
+      organizationId: orgId,
     },
     successCodes: [201],
   });
 };
 
-export const patchPrinter = (orgUuid, uuid, data) => {
+export const patchPrinter = (orgId, id, data) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}`,
+    uri: `/organizations/${orgId}/printers/${id}`,
     method: "PATCH",
     data,
     appendData: {
-      organizationUuid: orgUuid,
+      organizationId: orgId,
     },
     successCodes: [200],
   });
 };
-export const deletePrinter = (orgUuid, uuid) => {
+export const deletePrinter = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}`,
+    uri: `/organizations/${orgId}/printers/${id}`,
     method: "DELETE",
     appendData: {
-      uuid,
+      id,
     },
     parseResponse: false,
     successCodes: [204, 404],
   });
 };
 
-export const issuePrinterToken = (orgUuid) => {
+export const issuePrinterToken = (orgId) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/issue-token`,
+    uri: `/organizations/${orgId}/printers/issue-token`,
     method: "POST",
     successCodes: [201],
   });

@@ -280,7 +280,7 @@ const AppRouter = ({ userState, logout }) => {
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/organizations/:orguuid/settings"
+            path="/organizations/:orgid/settings"
             exact
             component={OrganizationProperties}
           />
@@ -298,59 +298,59 @@ const AppRouter = ({ userState, logout }) => {
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/settings"
+            path="/:orgid/settings"
             component={OrganizationSettings}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/add-user"
+            path="/:orgid/add-user"
             exact
             component={AddUser}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/add-printer"
+            path="/:orgid/add-printer"
             exact
             component={AddPrinter}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/add-gcode"
+            path="/:orgid/add-gcode"
             exact
             component={AddGcode}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/gcodes/:uuid"
+            path="/:orgid/gcodes/:id"
             exact
             component={GcodeDetail}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/gcodes"
+            path="/:orgid/gcodes"
             exact
             component={GcodeList}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/printers/:uuid/settings"
+            path="/:orgid/printers/:id/settings"
             exact
             component={PrinterSettings}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/printers/:uuid"
+            path="/:orgid/printers/:id"
             component={PrinterDetail}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid/printers"
+            path="/:orgid/printers"
             exact
             component={PrinterList}
           />
           <AuthenticatedRoute
             userState={userState}
-            path="/:orguuid"
+            path="/:orgid"
             exact
             component={OrganizationRoot}
           />
