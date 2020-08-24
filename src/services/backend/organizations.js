@@ -12,7 +12,7 @@ export const addOrganization = (name) => {
 
 export const patchOrganization = (id, name) => {
   return performRequest({
-    uri: `/users/me/groups/${id}`,
+    uri: `/users/me/groups/${id}/`,
     method: "PATCH",
     data: {
       name,

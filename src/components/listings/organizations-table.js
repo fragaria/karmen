@@ -10,7 +10,6 @@ const OrganizationsTableRow = ({
   onResendInvitation,
 }) => {
   const [ctaListExpanded, setCtaListExpanded] = useState();
-
   return (
     <div className="list-item">
       <Link
