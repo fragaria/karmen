@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import Cookies from "js-cookie";
+//import Cookies from "js-cookie";
 
 import { HttpError, MaintenanceError } from "../../errors";
 

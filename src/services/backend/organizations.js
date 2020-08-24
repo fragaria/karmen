@@ -23,7 +23,7 @@ export const patchOrganization = (id, name) => {
 
 export const getOrganizations = () => {
   return performRequest({
-    uri: "/users/me/groups/",
+    uri: "/users/me/groups/?fields=role",
     method: "GET",
     successCodes: [200],
   });
