@@ -19,12 +19,8 @@ export default (
 ) => {
   switch (action.type) {
     case "ORGANIZATIONS_LOAD_SUCCEEDED":
-      let o = [];
-        action.payload.data.forEach(e => {
-          o.push({"uuid":e.id, "name": e.name, "role":e.role});
-        });
       return Object.assign({}, state, {
-        list: getSortedOrganizations(o),
+        list: getSortedOrganizations(action.payload.data),
         listLoaded: true,
       });
     case "ORGANIZATIONS_EDIT_SUCCEEDED":
