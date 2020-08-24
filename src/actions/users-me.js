@@ -22,9 +22,9 @@ export const retryIfUnauthorized = (func, dispatch) => {
   };
 };
 
-export const denyWithNoOrganizationAccess = (orguuid, getState, wrapped) => {
+export const denyWithNoOrganizationAccess = (orgid, getState, wrapped) => {
   const { me } = getState();
-  if (!me.organizations || !me.organizations[orguuid]) {
+  if (!me.organizations || !me.organizations[orgid]) {
     return Promise.reject(
       new UnauthorizedError(
         "The organization does not exist or the user is not authorized to view it."

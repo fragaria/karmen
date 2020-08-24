@@ -11,11 +11,11 @@ import {
 const PRINTER_IDLE_POLL = Math.floor(Math.random() * (7000 + 1) + 11000);
 const PRINTER_RUNNING_POLL = Math.floor(Math.random() * (4000 + 1) + 5000);
 
-export const loadAndQueuePrinter = (orguuid, id, fields) => (
+export const loadAndQueuePrinter = (orgid, id, fields) => (
   dispatch,
   getState
 ) => {
-  return dispatch(loadPrinter(orguuid, id, fields)).then((result) => {
+  return dispatch(loadPrinter(orgid, id, fields)).then((result) => {
     const { printers } = getState();
     if (result && result.data && printers.checkQueue) {
       const existing = printers.checkQueue[id];
@@ -26,10 +26,10 @@ export const loadAndQueuePrinter = (orguuid, id, fields) => (
           ) > -1
             ? PRINTER_RUNNING_POLL
             : PRINTER_IDLE_POLL;
-        dispatch(setPrinterPollInterval(orguuid, id, poll));
+        dispatch(setPrinterPollInterval(orgid, id, poll));
         dispatch(
           queueLoadPrinter(
-            orguuid,
+            orgid,
             id,
             ["job", "status", "webcam", "lights"],
             poll
@@ -41,11 +41,11 @@ export const loadAndQueuePrinter = (orguuid, id, fields) => (
   });
 };
 
-export const loadAndQueuePrinters = (orguuid, fields) => (
+export const loadAndQueuePrinters = (orgid, fields) => (
   dispatch,
   getState
 ) => {
-  return dispatch(loadPrinters(orguuid, fields)).then((result) => {
+  return dispatch(loadPrinters(orgid, fields)).then((result) => {
     const { printers } = getState();
     // eslint-disable-next-line no-unused-vars
     if (result && result.data && result.data.items) {
@@ -57,10 +57,10 @@ export const loadAndQueuePrinters = (orguuid, fields) => (
               ["Printing", "Paused"].indexOf(printer.status.state) > -1
                 ? PRINTER_RUNNING_POLL
                 : PRINTER_IDLE_POLL;
-            dispatch(setPrinterPollInterval(orguuid, printer.id, poll));
+            dispatch(setPrinterPollInterval(orgid, printer.id, poll));
             dispatch(
               queueLoadPrinter(
-                orguuid,
+                orgid,
                 printer.id,
                 ["job", "status", "webcam", "lights"],
                 poll
@@ -74,7 +74,7 @@ export const loadAndQueuePrinters = (orguuid, fields) => (
   });
 };
 
-export const setPrinterPollInterval = (orguuid, id, interval) => {
+export const setPrinterPollInterval = (orgid, id, interval) => {
   return {
     type: "PRINTERS_POLL_INTERVAL_SET",
     payload: {
@@ -84,7 +84,7 @@ export const setPrinterPollInterval = (orguuid, id, interval) => {
   };
 };
 
-export const queueLoadPrinter = (orguuid, id, fields, delay) => (
+export const queueLoadPrinter = (orgid, id, fields, delay) => (
   dispatch,
   getState
 ) => {
@@ -95,7 +95,7 @@ export const queueLoadPrinter = (orguuid, id, fields, delay) => (
     }
     const previousInfo =
       printers.printers && printers.printers.find((p) => p.id === id);
-    dispatch(loadPrinter(orguuid, id, fields)).then((result) => {
+    dispatch(loadPrinter(orgid, id, fields)).then((result) => {
       const { printers } = getState();
       if (printers.checkQueue[id] > 0) {
         let interval = printers.checkQueue[id];
@@ -112,20 +112,20 @@ export const queueLoadPrinter = (orguuid, id, fields, delay) => (
             ["Printing", "Paused"].indexOf(result.data.status.state) > -1
               ? PRINTER_RUNNING_POLL
               : PRINTER_IDLE_POLL;
-          dispatch(setPrinterPollInterval(orguuid, id, interval));
+          dispatch(setPrinterPollInterval(orgid, id, interval));
         }
         // enqueue next check if result is ok
         if (result.status === 200) {
           dispatch(
             queueLoadPrinter(
-              orguuid,
+              orgid,
               id,
               ["job", "status", "webcam", "lights"],
               interval
             )
           );
         } else {
-          dispatch(setPrinterPollInterval(orguuid, id, -1));
+          dispatch(setPrinterPollInterval(orgid, id, -1));
         }
       }
       return result;
@@ -135,10 +135,10 @@ export const queueLoadPrinter = (orguuid, id, fields, delay) => (
 
 export const loadPrinters = createHttpAction(
   "PRINTERS_LOAD",
-  (orguuid, fields = [], { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, fields = [], { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.getPrinters, dispatch)(
-        orguuid,
+        orgid,
         fields
       );
     });
@@ -147,10 +147,10 @@ export const loadPrinters = createHttpAction(
 
 export const loadPrintersOld = createHttpAction(
   "PRINTERS_LOAD",
-  (orguuid, fields = [], { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, fields = [], { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.getPrinters, dispatch)(
-        orguuid,
+        orgid,
         fields
       );
     });
@@ -159,10 +159,10 @@ export const loadPrintersOld = createHttpAction(
 
 export const loadPrinter = createHttpAction(
   "PRINTERS_LOAD_DETAIL",
-  (orguuid, id, fields = [], { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, id, fields = [], { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.getPrinter, dispatch)(
-        orguuid,
+        orgid,
         id,
         fields
       );
@@ -170,7 +170,7 @@ export const loadPrinter = createHttpAction(
   }
 );
 
-export const setWebcamRefreshInterval = (orguuid, id, interval) => (
+export const setWebcamRefreshInterval = (orgid, id, interval) => (
   dispatch,
   getState
 ) => {
@@ -178,7 +178,7 @@ export const setWebcamRefreshInterval = (orguuid, id, interval) => (
   if (webcams.queue && webcams.queue[id] === undefined) {
     // we need to delay this so interval_set is run before
     const timeout = setTimeout(
-      () => dispatch(getWebcamSnapshot(orguuid, id)),
+      () => dispatch(getWebcamSnapshot(orgid, id)),
       300
     );
     return dispatch({
@@ -194,7 +194,7 @@ export const setWebcamRefreshInterval = (orguuid, id, interval) => (
     clearTimeout(webcams.queue[id].timeout);
     // we need to delay this so interval_set is run before
     const timeout = setTimeout(
-      () => dispatch(getWebcamSnapshot(orguuid, id)),
+      () => dispatch(getWebcamSnapshot(orgid, id)),
       300
     );
     return dispatch({
@@ -219,19 +219,19 @@ export const setWebcamRefreshInterval = (orguuid, id, interval) => (
 
 export const getWebcamSnapshot = createHttpAction(
   "WEBCAMS_GET_SNAPSHOT",
-  (orguuid, id, { dispatch, getState }) => {
-    return denyWithNoOrganizationAccess(orguuid, getState, () => {
+  (orgid, id, { dispatch, getState }) => {
+    return denyWithNoOrganizationAccess(orgid, getState, () => {
       let { printers } = getState();
 
       // This can happen during organization switching and printer's detail opened. Just catch it silently.
-      if (printers.activeOrganizationId !== orguuid) {
+      if (printers.activeOrganizationId !== orgid) {
         return Promise.reject(new OrganizationMismatchError());
       }
 
       const printer = printers.printers.find((p) => p.id === id);
 
       if (!printer || !printer.webcam || !printer.webcam.url) {
-        return Promise.reject();
+        return Promise.reject(new StreamUnavailableError());
       }
 
       return retryIfUnauthorized(
@@ -244,7 +244,7 @@ export const getWebcamSnapshot = createHttpAction(
 
           if (timeoutData.interval > 0) {
             const timeout = setTimeout(
-              () => dispatch(getWebcamSnapshot(orguuid, id)),
+              () => dispatch(getWebcamSnapshot(orgid, id)),
               timeoutData.interval
             );
 
@@ -259,7 +259,7 @@ export const getWebcamSnapshot = createHttpAction(
           }
         }
         return {
-          organizationId: orguuid,
+          organizationId: orgid,
           id,
           status: r.status,
           ...r.data,
@@ -272,7 +272,7 @@ export const getWebcamSnapshot = createHttpAction(
         //so we just return 404 to snapshots array so stream renderer can tell this to the user
         //and we stop trying to get images
         return {
-          organizationId: orguuid,
+          organizationId: orgid,
           id,
           status: 404,
         };
@@ -287,10 +287,10 @@ export const getWebcamSnapshot = createHttpAction(
         //If we catch this case and dispatch another request after few second, we are very likely to overcome
         //this gap and go on like nothing happen
         //We don't have to worry about offline states - if heartbeat fails, all requests get's killed
-        setTimeout(() => dispatch(getWebcamSnapshot(orguuid, id)), 5000);
+        setTimeout(() => dispatch(getWebcamSnapshot(orgid, id)), 5000);
         //We also return 502 to snapshots array, so the stream renderer components displays "retrying" message.
         return {
-          organizationId: orguuid,
+          organizationId: orgid,
           id,
           status: 502,
         };
