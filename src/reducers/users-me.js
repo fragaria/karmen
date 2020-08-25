@@ -6,15 +6,15 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
     currentState:
       data.currentState ||
       (data.force_pwd_change ? "pwd-change-required" : "logged-in"),
-    identity: data.identity,
-    username: data.username,
-    email: data.email,
-    systemRole: data.system_role || data.systemRole,
+    identity: data.user.identity,
+    username: data.user.username,
+    email: data.user.email,
+    systemRole: data.user.system_role || data.user.systemRole,
     hasFreshToken: data.fresh || data.hasFreshToken,
     accessTokenExpiresOn:
       data.accessTokenExpiresOn ||
       (data.expires_on ? dayjs(data.expires_on) : undefined),
-    organizations: data.groups,
+    organizations: data.groups.reduce((acc, curr) =>(acc[curr.id] = curr, acc), {}),
     activeOrganization: data.activeOrganization || activeOrganization,
   };
 };
