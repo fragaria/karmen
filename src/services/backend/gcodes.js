@@ -11,7 +11,7 @@ export const getGcodes = (
   limit = 15,
   fields = []
 ) => {
-  let uri = `/organizations/${orgId}/gcodes?limit=${limit}`;
+  let uri = `/users/me/files/?limit=${limit}`;
   if (fields) {
     uri += `&fields=${fields.join(",")}`;
   }
@@ -39,7 +39,7 @@ export const getGcodes = (
 };
 
 export const getGcode = (orgId, id, fields = []) => {
-  let uri = `/organizations/${orgId}/gcodes/${id}`;
+  let uri = `/users/me/files/${id}`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -52,7 +52,7 @@ export const getGcode = (orgId, id, fields = []) => {
 
 export const deleteGcode = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgId}/gcodes/${id}`,
+    uri: `/users/me/files/${id}`,
     method: "DELETE",
     appendData: {
       id
@@ -65,10 +65,13 @@ export const deleteGcode = (orgId, id) => {
 export const uploadGcode = (orgId, path, file) => {
   var data = new FormData();
   data.append("file", file);
-  data.append("path", path);
+  // data.append("path", path);
+  data.append("name", 'somename')
+  data.append("group", orgId)
   const headers = getJsonPostHeaders();
   headers.delete("content-type");
-  return fetch(`${BASE_URL}/organizations/${orgId}/gcodes`, {
+  console.log(BASE_URL)
+  return fetch(`${BASE_URL}/users/me/files/`, {
     method: "POST",
     headers: headers,
     body: data,

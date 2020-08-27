@@ -62,7 +62,8 @@ const GcodeTableRow = ({
   id,
   size,
   uploaded,
-  username,
+  uploadedBy,
+  name,
   path,
   display,
   printGcode,
@@ -95,11 +96,11 @@ const GcodeTableRow = ({
         <span className="list-item-subtitle">
           {path}
           {path ? "/" : ""}
-          {display}
+          {name}
         </span>
         <span>{formatters.bytes(size)}, </span>
         <span>{formatters.datetime(uploaded)}, </span>
-        <span>{username}</span>
+        <span>{uploadedBy.username}</span>
       </Link>
 
       <CtaDropdown
@@ -235,14 +236,9 @@ class GcodeList extends React.Component {
           clearItemsPages={clearGcodesPages}
           fields={[
             "id",
-            "display",
-            "filename",
-            "path",
+            "name",
             "size",
-            "uploaded",
-            "analysis",
-            "user_uuid",
-            "username",
+            "uploadedBy",
           ]}
         />
       </section>

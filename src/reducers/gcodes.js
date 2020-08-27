@@ -22,6 +22,7 @@ export default (
 ) => {
   switch (action.type) {
     case "GCODES_LOAD_PAGE_SUCCEEDED":
+      // TODO: refactor bellow with pagination from backend:
       const { orderBy, filter, limit, fields } = state.list;
       const newPage = {
         data: action.payload.data,
@@ -46,6 +47,8 @@ export default (
       } else {
         pages = [newPage];
       }
+      // This line does everything so far:
+      pages = {data: {items: action.payload.data}, startWith: null};
       return Object.assign({}, state, {
         list: {
           pages: [].concat(pages),

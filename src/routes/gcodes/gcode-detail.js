@@ -106,14 +106,14 @@ class GcodeDetail extends React.Component {
         ? availablePrinters[0].id
         : "";
     }
-
+    console.log(gcode)
     return (
       <section className="content">
         <div className="container">
-          <h1 className="main-title">{gcode.display}</h1>
+          <h1 className="main-title">{gcode.name}</h1>
           <dl className="dl-horizontal">
             <dt className="term">Uploaded by: </dt>
-            <dd className="description">{gcode.username}</dd>
+            <dd className="description">{gcode.uploadedBy.username}</dd>
 
             <dt className="term">Uploaded at: </dt>
             <dd className="description">

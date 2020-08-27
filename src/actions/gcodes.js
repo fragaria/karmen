@@ -72,8 +72,8 @@ export const uploadGcode = createHttpAction(
 
 export const getGcodeDownloadUrl = (orgid, id) => (dispatch) => {
   return dispatch(loadGcode(orgid, id, [])).then((r) => {
-    let downloadPath = r.data.data;
+    let downloadPath = r.data.links[0].href;
     if (downloadPath[0] === "/") downloadPath = downloadPath.substr(1);
-    return `${BASE_URL}/${downloadPath}`;
+    return downloadPath;
   });
 };
