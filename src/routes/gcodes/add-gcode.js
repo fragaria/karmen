@@ -85,6 +85,8 @@ class AddGcode extends React.Component {
                 />
                 <span></span>
 
+                {/* 
+                TODO: Remove or add support on backend
                 <label htmlFor="path">Path (optional)</label>
                 <input
                   type="text"
@@ -97,7 +99,7 @@ class AddGcode extends React.Component {
                     })
                   }
                 />
-                <span></span>
+                <span></span> */}
               </div>
 
               <div className="form-messages">

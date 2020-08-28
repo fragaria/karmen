@@ -66,7 +66,7 @@ export const uploadGcode = (orgId, path, file) => {
   var data = new FormData();
   data.append("file", file);
   // data.append("path", path);
-  data.append("name", 'somename')
+  data.append("name", file.name)
   data.append("group", orgId)
   const headers = getJsonPostHeaders();
   headers.delete("content-type");
