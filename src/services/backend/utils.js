@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import Cookies from "js-cookie";
 
 import { HttpError, MaintenanceError } from "../../errors";
 
@@ -77,7 +76,10 @@ export const getJsonPostHeaders = () => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   headers.set("X-CSRF-TOKEN", localStorage.getItem("csrf_access_token"));
-  headers.set("Authorization", `Bearer ${localStorage.getItem("access_token_cookie")}`);
+  headers.set(
+    "Authorization",
+    `Bearer ${localStorage.getItem("access_token_cookie")}`
+  );
   return headers;
 };
 

@@ -140,11 +140,7 @@ export default connect(
   (dispatch, ownProps) => ({
     setWebcamRefreshInterval: (interval) =>
       dispatch(
-        setWebcamRefreshInterval(
-          ownProps.orgId,
-          ownProps.printer.id,
-          interval
-        )
+        setWebcamRefreshInterval(ownProps.orgId, ownProps.printer.id, interval)
       ),
   })
 )(WebcamStream);

@@ -407,13 +407,15 @@ const ControlsTab = ({
           Controls are not available for a disconnected printer
         </div>
       )}
-      {printer.client && printer.client.connected &&
+      {printer.client &&
+        printer.client.connected &&
         printer.client.access_level !== "unlocked" && (
           <div className="tabs-content-message">
             Printer is locked and therefore controls are not available
           </div>
         )}
-      {printer.client && printer.client.connected &&
+      {printer.client &&
+        printer.client.connected &&
         printer.client.access_level === "unlocked" &&
         !["Offline", "Closed"].includes(printer.status.state) &&
         !printer.status.state.match(/printer is not/i) && (
@@ -454,7 +456,8 @@ const ControlsTab = ({
             </div>
           </div>
         )}
-      {printer.client && printer.client.connected &&
+      {printer.client &&
+        printer.client.connected &&
         printer.client.access_level === "unlocked" &&
         (["Offline", "Closed"].includes(printer.status.state) ||
           printer.status.state.match(/printer is not/i)) && (

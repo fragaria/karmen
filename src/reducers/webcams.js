@@ -35,7 +35,10 @@ export default (
         }),
       });
     case "WEBCAMS_GET_SNAPSHOT_SUCCEEDED":
-      if (!action.payload || action.payload.organizationId !== activeOrganizationId) {
+      if (
+        !action.payload ||
+        action.payload.organizationId !== activeOrganizationId
+      ) {
         return state;
       }
       let newImage = action.payload;

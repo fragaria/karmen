@@ -55,7 +55,7 @@ export const deleteGcode = (orgId, id) => {
     uri: `/organizations/${orgId}/gcodes/${id}`,
     method: "DELETE",
     appendData: {
-      id
+      id,
     },
     parseResponse: false,
     successCodes: [204, 404],

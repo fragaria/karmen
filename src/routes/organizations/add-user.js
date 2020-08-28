@@ -5,7 +5,6 @@ import { addUser } from "../../actions";
 import { FormInputs } from "../../components/forms/form-utils";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
-import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import BusyButton from "../../components/utils/busy-button";
 import { HttpError } from "../../errors";
 
@@ -100,58 +99,56 @@ class AddUser extends React.Component {
       <>
         <SetActiveOrganization />
         <OrgRoleBasedGateway requiredRole="admin">
-          <FreshTokenGateway>
-            <div className="content">
-              <div className="container">
-                <h1 className="main-title text-center">Add a new user</h1>
-                <form>
-                  <FormInputs
-                    definition={form}
-                    updateValue={(name, value, target) => {
-                      this.setState({
-                        form: Object.assign({}, form, {
-                          [name]: Object.assign({}, form[name], {
-                            val: value,
-                            error: null,
-                            validity: target.validity,
-                          }),
+          <div className="content">
+            <div className="container">
+              <h1 className="main-title text-center">Add a new user</h1>
+              <form>
+                <FormInputs
+                  definition={form}
+                  updateValue={(name, value, target) => {
+                    this.setState({
+                      form: Object.assign({}, form, {
+                        [name]: Object.assign({}, form[name], {
+                          val: value,
+                          error: null,
+                          validity: target.validity,
                         }),
-                      });
-                    }}
-                  />
+                      }),
+                    });
+                  }}
+                />
 
-                  <div className="form-messages">
-                    {message && (
-                      <p
-                        className={
-                          messageOk ? "message-success" : "message-error"
-                        }
-                      >
-                        {message}
-                      </p>
-                    )}
-                  </div>
+                <div className="form-messages">
+                  {message && (
+                    <p
+                      className={
+                        messageOk ? "message-success" : "message-error"
+                      }
+                    >
+                      {message}
+                    </p>
+                  )}
+                </div>
 
-                  <div className="cta-box text-center">
-                    <BusyButton
-                      className="btn"
-                      type="submit"
-                      onClick={this.addUser}
-                      busyChildren="Adding..."
-                    >
-                      Add user
-                    </BusyButton>{" "}
-                    <Link
-                      to={`/${match.params.orgid}/settings/tab-users`}
-                      className="btn btn-plain"
-                    >
-                      Cancel
-                    </Link>
-                  </div>
-                </form>
-              </div>
+                <div className="cta-box text-center">
+                  <BusyButton
+                    className="btn"
+                    type="submit"
+                    onClick={this.addUser}
+                    busyChildren="Adding..."
+                  >
+                    Add user
+                  </BusyButton>{" "}
+                  <Link
+                    to={`/${match.params.orgid}/settings/tab-users`}
+                    className="btn btn-plain"
+                  >
+                    Cancel
+                  </Link>
+                </div>
+              </form>
             </div>
-          </FreshTokenGateway>
+          </div>
         </OrgRoleBasedGateway>
       </>
     );

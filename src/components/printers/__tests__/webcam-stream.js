@@ -95,11 +95,7 @@ it("WebcamStream", async () => {
 
   return render(
     <Provider store={store}>
-      <WebcamStream
-        orgId={orgId}
-        allowFullscreen={false}
-        printer={printer}
-      />
+      <WebcamStream orgId={orgId} allowFullscreen={false} printer={printer} />
     </Provider>
   );
 });

@@ -2,7 +2,6 @@ import React from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import Loader from "../../components/utils/loader";
-import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import OrgRoleBasedGateway from "../../components/gateways/org-role-based-gateway";
 import OrganizationEditForm from "../../components/forms/organization-edit-form";
 
@@ -75,24 +74,22 @@ class OrganizationProperties extends React.Component {
     }
     return (
       <OrgRoleBasedGateway requiredRole="admin">
-        <FreshTokenGateway>
-          <section className="content">
-            <div className="container">
-              <h1 className="main-title text-center">
-                Change properties of {organization.name}
-              </h1>
-              <OrganizationEditForm
-                defaults={{
-                  name: organization.name,
-                }}
-                onSubmit={this.changeOrganization}
-                onCancel={() => {
-                  this.props.history.push("/organizations");
-                }}
-              />
-            </div>
-          </section>
-        </FreshTokenGateway>
+        <section className="content">
+          <div className="container">
+            <h1 className="main-title text-center">
+              Change properties of {organization.name}
+            </h1>
+            <OrganizationEditForm
+              defaults={{
+                name: organization.name,
+              }}
+              onSubmit={this.changeOrganization}
+              onCancel={() => {
+                this.props.history.push("/organizations");
+              }}
+            />
+          </div>
+        </section>
       </OrgRoleBasedGateway>
     );
   }

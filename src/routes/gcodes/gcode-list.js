@@ -283,8 +283,7 @@ export default connect(
         )
       ),
     clearGcodesPages: () => dispatch(clearGcodesPages()),
-    deleteGcode: (id) =>
-      dispatch(deleteGcode(ownProps.match.params.orgid, id)),
+    deleteGcode: (id) => dispatch(deleteGcode(ownProps.match.params.orgid, id)),
     printGcode: (id, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orgid, id, printer)),
     getDownloadUrl: (id) =>

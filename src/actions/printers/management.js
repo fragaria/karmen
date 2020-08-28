@@ -49,10 +49,7 @@ export const deletePrinter = createHttpAction(
   "PRINTERS_DELETE",
   (orguuid, id, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.deletePrinter, dispatch)(
-        orguuid,
-        id
-      );
+      return retryIfUnauthorized(backend.deletePrinter, dispatch)(orguuid, id);
     });
   }
 );
