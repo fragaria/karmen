@@ -39,7 +39,7 @@ export const getGcodes = (
 };
 
 export const getGcode = (orgId, id, fields = []) => {
-  let uri = `/users/me/files/${id}`;
+  let uri = `/users/me/files/${id}/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
