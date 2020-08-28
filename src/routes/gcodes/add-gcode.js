@@ -59,7 +59,7 @@ class AddGcode extends React.Component {
   }
 
   render() {
-    const { message, messageOk, redirect, path, gcodeId } = this.state;
+    const { message, messageOk, redirect, gcodeId } = this.state;
     const { match } = this.props;
     if (redirect) {
       return <Redirect to={`/${match.params.orgid}/gcodes/${gcodeId}`} />;

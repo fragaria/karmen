@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
 import { createHttpAction } from "./utils";
 import { HttpError, UnauthorizedError } from "../errors";

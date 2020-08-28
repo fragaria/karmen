@@ -2,8 +2,6 @@ import { createHttpAction } from "./utils";
 import * as backend from "../services/backend";
 import { retryIfUnauthorized, denyWithNoOrganizationAccess } from "./users-me";
 
-const BASE_URL = window.env.BACKEND_BASE;
-
 export const clearGcodesPages = (printerId) => (dispatch) => {
   return dispatch({
     type: "GCODES_CLEAR_PAGES",
