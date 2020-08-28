@@ -35,13 +35,13 @@ export const resetPassword = (
 
 export const register = (email) => {
   return performRequest({
-    uri: `/users/me`,
+    uri: `/invitations/`,
     useAuth: false,
     data: {
       email,
     },
     parseResponse: false,
-    successCodes: [202],
+    successCodes: [204],
   });
 };
 
