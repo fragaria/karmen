@@ -14,7 +14,10 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
     accessTokenExpiresOn:
       data.accessTokenExpiresOn ||
       (data.expires_on ? dayjs(data.expires_on) : undefined),
-    organizations: data.groups.reduce((acc, curr) =>(acc[curr.id] = curr, acc), {}),
+    organizations: data.groups.reduce(
+      (acc, curr) => (((acc[curr.id] = curr), acc)),
+      {}
+    ),
     activeOrganization: data.activeOrganization || activeOrganization,
   };
 };

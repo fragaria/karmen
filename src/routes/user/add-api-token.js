@@ -3,7 +3,6 @@ import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
-import FreshTokenGateway from "../../components/gateways/fresh-token-gateway";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
 import { addUserApiToken } from "../../actions";
@@ -106,113 +105,105 @@ class AddApiToken extends React.Component {
     }
 
     return (
-      <FreshTokenGateway>
-        <div className="content">
-          <div className="container">
-            <h1 className="main-title text-center">Create new API token</h1>
-            {showToken ? (
-              <>
-                <div className="content-section">
-                  <ul className="ul-styled">
-                    <li>
-                      This is the token that is required to talk to Karmen API
-                    </li>
-                    <li>
-                      It has to be used with every API request in the
-                      Authorization header like this{" "}
-                      <code>Authorization: Bearer &lt;token&gt;</code>
-                    </li>
-                    <li>
-                      This token also does not have an expiration date and can
-                      be used forever
-                    </li>
-                    <li>
-                      If you need to disable it, you have to delete it on the
-                      User preferences screen
-                    </li>
-                    <li>
-                      This token is not authorized to modify your password and
-                      cannot be used for administrative tasks like user
-                      management
-                    </li>
-                    <li>
-                      <strong>
-                        You will never see this token again, so be sure that you
-                        have a secure copy of it
-                      </strong>
-                    </li>
-                  </ul>
-                  <pre>{createdToken}</pre>
-                </div>
-                <div className="cta-box text-center">
-                  <CopyToClipboard
-                    text={createdToken}
-                    onCopy={this.tokenCopied}
-                  >
-                    <button
-                      className="btn"
-                      type="button"
-                      disabled={!copyButtonReady}
-                    >
-                      {copyButtonReady ? "Copy" : "Copied to clipboard!"}
-                    </button>
-                  </CopyToClipboard>
+      <div className="content">
+        <div className="container">
+          <h1 className="main-title text-center">Create new API token</h1>
+          {showToken ? (
+            <>
+              <div className="content-section">
+                <ul className="ul-styled">
+                  <li>
+                    This is the token that is required to talk to Karmen API
+                  </li>
+                  <li>
+                    It has to be used with every API request in the
+                    Authorization header like this{" "}
+                    <code>Authorization: Bearer &lt;token&gt;</code>
+                  </li>
+                  <li>
+                    This token also does not have an expiration date and can be
+                    used forever
+                  </li>
+                  <li>
+                    If you need to disable it, you have to delete it on the User
+                    preferences screen
+                  </li>
+                  <li>
+                    This token is not authorized to modify your password and
+                    cannot be used for administrative tasks like user management
+                  </li>
+                  <li>
+                    <strong>
+                      You will never see this token again, so be sure that you
+                      have a secure copy of it
+                    </strong>
+                  </li>
+                </ul>
+                <pre>{createdToken}</pre>
+              </div>
+              <div className="cta-box text-center">
+                <CopyToClipboard text={createdToken} onCopy={this.tokenCopied}>
                   <button
-                    className="btn btn-plain"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      this.setState({
-                        showToken: false,
-                        createdToken: null,
-                        redirect: true,
-                      });
-                    }}
+                    className="btn"
+                    type="button"
+                    disabled={!copyButtonReady}
                   >
-                    Dismiss
+                    {copyButtonReady ? "Copy" : "Copied to clipboard!"}
                   </button>
-                </div>
-              </>
-            ) : (
-              <form>
-                {message && (
-                  <p
-                    className={messageOk ? "message-success" : "message-error"}
-                  >
-                    {message}
-                  </p>
-                )}
-                <FormInputs
-                  definition={form}
-                  updateValue={(name, value) => {
+                </CopyToClipboard>
+                <button
+                  className="btn btn-plain"
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
                     this.setState({
-                      form: Object.assign({}, form, {
-                        [name]: Object.assign({}, form[name], {
-                          val: value,
-                          error: null,
-                        }),
-                      }),
+                      showToken: false,
+                      createdToken: null,
+                      redirect: true,
                     });
                   }}
-                />
-                <div className="cta-box text-center">
-                  <BusyButton
-                    className="btn"
-                    type="submit"
-                    onClick={this.addApiToken}
-                    busyChildren="Creating..."
-                  >
-                    Create token
-                  </BusyButton>{" "}
-                  <Link to="/users/me/tab-api-tokens" className="btn btn-plain">
-                    Cancel
-                  </Link>
-                </div>
-              </form>
-            )}
-          </div>
+                >
+                  Dismiss
+                </button>
+              </div>
+            </>
+          ) : (
+            <form>
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
+              <FormInputs
+                definition={form}
+                updateValue={(name, value) => {
+                  this.setState({
+                    form: Object.assign({}, form, {
+                      [name]: Object.assign({}, form[name], {
+                        val: value,
+                        error: null,
+                      }),
+                    }),
+                  });
+                }}
+              />
+              <div className="cta-box text-center">
+                <BusyButton
+                  className="btn"
+                  type="submit"
+                  onClick={this.addApiToken}
+                  busyChildren="Creating..."
+                >
+                  Create token
+                </BusyButton>{" "}
+                <Link to="/users/me/tab-api-tokens" className="btn btn-plain">
+                  Cancel
+                </Link>
+              </div>
+            </form>
+          )}
         </div>
-      </FreshTokenGateway>
+      </div>
     );
   }
 }

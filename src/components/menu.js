@@ -74,9 +74,7 @@ class Menu extends React.Component {
     const { navigation, orgListExpanded } = this.state;
     const orgList = organizations
       ? Object.values(organizations)
-          .filter(
-            (o) => activeOrganization && o.id !== activeOrganization.id
-          )
+          .filter((o) => activeOrganization && o.id !== activeOrganization.id)
           .sort((o, p) =>
             o.name.toLowerCase() < p.name.toLowerCase() ? -1 : 1
           )

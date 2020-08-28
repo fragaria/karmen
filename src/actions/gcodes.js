@@ -39,11 +39,7 @@ export const loadGcode = createHttpAction(
   "GCODE_LOAD_DETAIL",
   (orgid, id, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orgid, getState, () => {
-      return retryIfUnauthorized(backend.getGcode, dispatch)(
-        orgid,
-        id,
-        fields
-      );
+      return retryIfUnauthorized(backend.getGcode, dispatch)(orgid, id, fields);
     });
   }
 );

@@ -99,7 +99,7 @@ export const loadUserData = (userData) => (dispatch) => {
       data: userData,
     },
   });
-  console.log(userData.activeOrganization)
+  console.log(userData.activeOrganization);
   if (userData.activeOrganization) {
     dispatch(switchOrganization(userData.activeOrganization.id));
   } else {
@@ -111,8 +111,7 @@ export const loadUserData = (userData) => (dispatch) => {
     ) {
       dispatch(switchOrganization(prefs.activeOrganizationId));
     } else {
-      const org =
-        userData.groups && Object.values(userData.groups)[0];
+      const org = userData.groups && Object.values(userData.groups)[0];
       dispatch(switchOrganization(org.id));
     }
   }

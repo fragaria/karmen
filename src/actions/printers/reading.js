@@ -41,10 +41,7 @@ export const loadAndQueuePrinter = (orgid, id, fields) => (
   });
 };
 
-export const loadAndQueuePrinters = (orgid, fields) => (
-  dispatch,
-  getState
-) => {
+export const loadAndQueuePrinters = (orgid, fields) => (dispatch, getState) => {
   return dispatch(loadPrinters(orgid, fields)).then((result) => {
     const { printers } = getState();
     // eslint-disable-next-line no-unused-vars
@@ -137,10 +134,7 @@ export const loadPrinters = createHttpAction(
   "PRINTERS_LOAD",
   (orgid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orgid, getState, () => {
-      return retryIfUnauthorized(backend.getPrinters, dispatch)(
-        orgid,
-        fields
-      );
+      return retryIfUnauthorized(backend.getPrinters, dispatch)(orgid, fields);
     });
   }
 );
@@ -149,10 +143,7 @@ export const loadPrintersOld = createHttpAction(
   "PRINTERS_LOAD",
   (orgid, fields = [], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orgid, getState, () => {
-      return retryIfUnauthorized(backend.getPrinters, dispatch)(
-        orgid,
-        fields
-      );
+      return retryIfUnauthorized(backend.getPrinters, dispatch)(orgid, fields);
     });
   }
 );

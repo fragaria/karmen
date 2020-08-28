@@ -3,7 +3,6 @@ import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 import { addOrganization } from "../actions";
 import { FormInputs } from "../components/forms/form-utils";
-import FreshTokenGateway from "../components/gateways/fresh-token-gateway";
 import BusyButton from "../components/utils/busy-button";
 import { HttpError } from "../errors";
 import { switchOrganization } from "../actions";
@@ -86,52 +85,48 @@ class AddOrganization extends React.Component {
       return <Redirect to="/organizations" />;
     }
     return (
-      <FreshTokenGateway>
-        <div className="content">
-          <div className="container">
-            <h1 className="main-title text-center">Add a new organization</h1>
-            <form>
-              <FormInputs
-                definition={form}
-                updateValue={(name, value) => {
-                  this.setState({
-                    form: Object.assign({}, form, {
-                      [name]: Object.assign({}, form[name], {
-                        val: value,
-                        error: null,
-                      }),
+      <div className="content">
+        <div className="container">
+          <h1 className="main-title text-center">Add a new organization</h1>
+          <form>
+            <FormInputs
+              definition={form}
+              updateValue={(name, value) => {
+                this.setState({
+                  form: Object.assign({}, form, {
+                    [name]: Object.assign({}, form[name], {
+                      val: value,
+                      error: null,
                     }),
-                  });
-                }}
-              />
+                  }),
+                });
+              }}
+            />
 
-              <div className="form-messages">
-                {message && (
-                  <p
-                    className={messageOk ? "message-success" : "message-error"}
-                  >
-                    {message}
-                  </p>
-                )}
-              </div>
+            <div className="form-messages">
+              {message && (
+                <p className={messageOk ? "message-success" : "message-error"}>
+                  {message}
+                </p>
+              )}
+            </div>
 
-              <div className="cta-box text-center">
-                <BusyButton
-                  className="btn"
-                  type="submit"
-                  onClick={this.addOrganization}
-                  busyChildren="Adding..."
-                >
-                  Add organization
-                </BusyButton>{" "}
-                <Link to="/organizations" className="btn btn-plain">
-                  Cancel
-                </Link>
-              </div>
-            </form>
-          </div>
+            <div className="cta-box text-center">
+              <BusyButton
+                className="btn"
+                type="submit"
+                onClick={this.addOrganization}
+                busyChildren="Adding..."
+              >
+                Add organization
+              </BusyButton>{" "}
+              <Link to="/organizations" className="btn btn-plain">
+                Cancel
+              </Link>
+            </div>
+          </form>
         </div>
-      </FreshTokenGateway>
+      </div>
     );
   }
 }

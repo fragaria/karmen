@@ -100,9 +100,7 @@ export default (
         printers: getSortedPrinters(printers),
       });
     case "PRINTERS_CHANGE_JOB_SUCCEEDED":
-      origPrinterIndex = printers.findIndex(
-        (p) => p.id === action.payload.id
-      );
+      origPrinterIndex = printers.findIndex((p) => p.id === action.payload.id);
       if (origPrinterIndex === -1) {
         return state;
       }
@@ -119,9 +117,7 @@ export default (
         printers: getSortedPrinters(printers),
       });
     case "PRINTERS_SET_CONNECTION_SUCCEEDED":
-      origPrinterIndex = printers.findIndex(
-        (p) => p.id === action.payload.id
-      );
+      origPrinterIndex = printers.findIndex((p) => p.id === action.payload.id);
       if (origPrinterIndex === -1) {
         return state;
       }
@@ -154,9 +150,7 @@ export default (
         toBeDeleted: state.toBeDeleted.filter((d) => d !== action.payload.id),
       });
     case "PRINTERS_CHANGE_LIGHTS_SUCCEEDED":
-      origPrinterIndex = printers.findIndex(
-        (p) => p.id === action.payload.id
-      );
+      origPrinterIndex = printers.findIndex((p) => p.id === action.payload.id);
       if (origPrinterIndex === -1) {
         return state;
       }

@@ -166,7 +166,8 @@ const PrinterDetail = ({
                     Disconnect
                   </button>
                 ))}
-              {printer.client && printer.client.pill_info &&
+              {printer.client &&
+                printer.client.pill_info &&
                 printer.client.pill_info.update_available && (
                   <div className="printer-state-announcement">
                     An update is available for your Pill{" "}
@@ -247,7 +248,8 @@ const PrinterDetail = ({
                 <ControlsTab
                   printer={printer}
                   available={
-                    !(printer.client &&
+                    !(
+                      printer.client &&
                       printer.client.access_level === "unlocked" &&
                       (["Offline", "Closed"].indexOf(
                         printer.status && printer.status.state
@@ -347,10 +349,7 @@ export default connect(
       ),
     clearJobsPages: () =>
       dispatch(
-        clearJobsPages(
-          ownProps.match.params.orgid,
-          ownProps.match.params.id
-        )
+        clearJobsPages(ownProps.match.params.orgid, ownProps.match.params.id)
       ),
     changeLights: () =>
       dispatch(
@@ -383,11 +382,7 @@ export default connect(
       ),
     extrude: (amount) =>
       dispatch(
-        extrude(
-          ownProps.match.params.orgid,
-          ownProps.match.params.id,
-          amount
-        )
+        extrude(ownProps.match.params.orgid, ownProps.match.params.id, amount)
       ),
     setTemperature: (partName, target) =>
       dispatch(

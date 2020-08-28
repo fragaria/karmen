@@ -102,9 +102,7 @@ class GcodeDetail extends React.Component {
     const availablePrinters = getAvailablePrinters(printedOn);
     let { selectedPrinter } = this.state;
     if (!selectedPrinter) {
-      selectedPrinter = availablePrinters.length
-        ? availablePrinters[0].id
-        : "";
+      selectedPrinter = availablePrinters.length ? availablePrinters[0].id : "";
     }
     console.log(gcode)
     return (
@@ -268,8 +266,7 @@ export default connect(
           "lights",
         ])
       ),
-    getGcode: (id) =>
-      dispatch(loadGcode(ownProps.match.params.orgid, id, [])),
+    getGcode: (id) => dispatch(loadGcode(ownProps.match.params.orgid, id, [])),
     printGcode: (id, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orgid, id, printer)),
     getDownloadUrl: (id) =>

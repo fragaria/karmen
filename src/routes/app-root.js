@@ -38,6 +38,9 @@ export default connect(
     activeOrganization: state.me.activeOrganization,
   }),
   (dispatch) => ({
-    switchOrganization: (id) => setTimeout(()=>{dispatch(switchOrganization(id))}),
+    switchOrganization: (id) =>
+      setTimeout(() => {
+        dispatch(switchOrganization(id));
+      }),
   })
 )(AppRoot);

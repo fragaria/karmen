@@ -93,7 +93,7 @@ export const refreshAccessToken = () => {
   return performRequest({
     uri: `/tokens/refresh/`,
     useAuth: false,
-    data: {refresh: localStorage.getItem("csrf_refresh_token")},
+    data: { refresh: localStorage.getItem("csrf_refresh_token") },
     headers: {
       "Content-Type": "application/json",
       "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token"),
