@@ -36,10 +36,7 @@ export const denyWithNoOrganizationAccess = (orgid, getState, wrapped) => {
 
 export const loadUserFromToken = (token) => (dispatch) => {
   const decoded = jwt_decode(token);
-  Cookies.set("access_token_cookie", token);
-  localStorage.setItem("access_token_cookie", token);
-  Cookies.set("csrf_access_token", decoded.csrf);
-  localStorage.setItem("csrf_access_token", decoded.csrf);
+  localStorage.setItem("karmen_access_token", token);
   dispatch(
     loadUserData({
       identity: decoded.identity,
@@ -67,6 +64,7 @@ export const loadUserFromLocalStorage = (force_refresh = false) => (
   if (!profile) {
     return Promise.resolve(dispatch(clearUserIdentity()));
   }
+
   // try refresh if the expiration is set and near
   if (
     (profile.accessTokenExpiresOn &&

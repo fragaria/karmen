@@ -91,12 +91,11 @@ export const authenticateFresh = (username, password) => {
 
 export const refreshAccessToken = () => {
   return performRequest({
-    uri: `/tokens/refresh/`,
+    uri: `/tokens/refresh/?fields=user,group`,
     useAuth: false,
-    data: { refresh: localStorage.getItem("csrf_refresh_token") },
+    data: { refresh: localStorage.getItem("karmen_refresh_token") },
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-TOKEN": Cookies.get("csrf_refresh_token"),
     },
     successCodes: [200],
   });
@@ -114,10 +113,8 @@ export const logout = () => {
       // local state.
     })
     .finally(() => {
-      Cookies.remove("csrf_refresh_token");
-      Cookies.remove("refresh_token_cookie");
-      Cookies.remove("csrf_access_token");
-      Cookies.remove("access_token_cookie");
+      Cookies.remove("karmen_refresh_token");
+      Cookies.remove("karmen_access_token");
     });
 };
 
