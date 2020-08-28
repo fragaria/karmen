@@ -1,25 +1,30 @@
-import dayjs from "dayjs";
 import { persistUserProfile, dropUserProfile } from "../services/backend";
+import jwtdecode from "jwt-decode"
 
 const getUserDataFromApiResponse = (data, activeOrganization) => {
-  return {
+
+  let prof =  {
     currentState:
       data.currentState ||
       (data.force_pwd_change ? "pwd-change-required" : "logged-in"),
-    identity: data.user.identity,
+    user: data.user,
+    groups: data.groups,
+    identity: data.user.id,
     username: data.user.username,
     email: data.user.email,
     systemRole: data.user.system_role || data.user.systemRole,
-    hasFreshToken: data.fresh || data.hasFreshToken,
-    accessTokenExpiresOn:
-      data.accessTokenExpiresOn ||
-      (data.expires_on ? dayjs(data.expires_on) : undefined),
+    accessTokenExpiresOn: data.accessTokenExpiresOn,
     organizations: data.groups.reduce(
       (acc, curr) => (((acc[curr.id] = curr), acc)),
       {}
     ),
     activeOrganization: data.activeOrganization || activeOrganization,
   };
+  if (data.access) {
+    let decoded_token = jwtdecode(data.access);
+    prof.accessTokenExpiresOn = decoded_token.exp ? new Date(decoded_token.exp * 1000) : undefined;
+  }
+  return prof;
 };
 
 const _without = (key, { [key]: _, ...obj }) => obj;
@@ -74,12 +79,7 @@ export default (
         apiTokensLoaded: false,
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
-      userData = getUserDataFromApiResponse(
-        action.payload.data,
-        state.activeOrganization
-      );
-      persistUserProfile(userData);
-      return Object.assign({}, state, userData);
+      return Object.assign({}, state);
     case "USER_PATCH_SUCCEEDED":
       userData = Object.assign({}, state, {
         username: action.payload.data.username,

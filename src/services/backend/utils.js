@@ -75,10 +75,10 @@ export const getUserProfile = () => {
 export const getJsonPostHeaders = () => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
-  headers.set("X-CSRF-TOKEN", localStorage.getItem("csrf_access_token"));
+  //headers.set("X-CSRF-TOKEN", localStorage.getItem("csrf_access_token"));
   headers.set(
     "Authorization",
-    `Bearer ${localStorage.getItem("access_token_cookie")}`
+    `Bearer ${localStorage.getItem("karmen_access_token")}`
   );
   return headers;
 };

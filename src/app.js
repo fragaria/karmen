@@ -448,7 +448,9 @@ export const ConnectedApp = connect(
     userState: state.me.currentState,
   }),
   (dispatch) => ({
-    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage(true)),
+    //TODO: force_refresh is set to false. That way, we keep that cached version from localstorage and user is not logged out at refresh
+    //TODO: change refresh to refresh token AND load user data. currently it fails as new endpoint does not return user data, only tokens
+    loadUserFromStorage: () => dispatch(loadUserFromLocalStorage(false)),
     logout: () => dispatch(clearUserIdentity()),
   })
 )(ConnectedAppBase);

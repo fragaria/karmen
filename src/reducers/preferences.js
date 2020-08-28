@@ -22,8 +22,8 @@ export default (
   switch (action.type) {
     case "USER_AUTHENTICATE_SUCCEEDED":
       settings = getUserPreferences();
-      localStorage.setItem("access_token_cookie", action.payload.data.access);
-      localStorage.setItem("refresh_token_cookie", action.payload.data.refresh);
+      localStorage.setItem("karmen_access_token", action.payload.data.access);
+      localStorage.setItem("karmen_refresh_token", action.payload.data.refresh);
       if (!settings || settings.identity !== action.payload.data.identity) {
         persistUserPreferences({
           activeOrganizationId: null,
