@@ -20,7 +20,7 @@ export default (
   switch (action.type) {
     case "ORGANIZATIONS_LOAD_SUCCEEDED":
       return Object.assign({}, state, {
-        list: getSortedOrganizations(action.payload.data.items),
+        list: getSortedOrganizations(action.payload.data),
         listLoaded: true,
       });
     case "ORGANIZATIONS_EDIT_SUCCEEDED":

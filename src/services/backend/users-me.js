@@ -79,7 +79,7 @@ export const authenticate = (username, password) => {
 
 export const authenticateFresh = (username, password) => {
   return performRequest({
-    uri: `/users/me/authenticate-fresh`,
+    uri: `/tokens/refresh/`,
     useAuth: false,
     data: {
       username,
