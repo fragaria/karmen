@@ -13,7 +13,6 @@ import {
   deleteGcode,
   addPrintJob,
   loadPrinters,
-  getGcodeDownloadUrl,
 } from "../../actions";
 import formatters from "../../services/formatters";
 
@@ -67,7 +66,7 @@ const GcodeTableRow = ({
   path,
   display,
   printGcode,
-  getDownloadUrl,
+  downloadUrl,
   onSchedulePrint,
   availablePrinters,
   onRowDelete,
@@ -84,11 +83,6 @@ const GcodeTableRow = ({
   });
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
-  const [downloadUrl, setDownloadUrl] = useState();
-
-  getDownloadUrl(id).then((url) => {
-    setDownloadUrl(url);
-  });
 
   return (
     <div className="list-item">
@@ -178,7 +172,6 @@ class GcodeList extends React.Component {
       clearGcodesPages,
       deleteGcode,
       printGcode,
-      getDownloadUrl,
     } = this.props;
 
     return (
@@ -205,7 +198,7 @@ class GcodeList extends React.Component {
                 orguuid={match.params.orgid}
                 {...g}
                 printGcode={printGcode}
-                getDownloadUrl={getDownloadUrl}
+                downloadUrl={g.links[0].href}
                 onSchedulePrint={(gcodeId, printerId) =>
                   printGcode(gcodeId, printerId).then((r) => {
                     printedOn.push(printerId);
@@ -239,6 +232,7 @@ class GcodeList extends React.Component {
             "name",
             "size",
             "uploadedBy",
+            "links"
           ]}
         />
       </section>
@@ -282,7 +276,5 @@ export default connect(
     deleteGcode: (id) => dispatch(deleteGcode(ownProps.match.params.orgid, id)),
     printGcode: (id, printer) =>
       dispatch(addPrintJob(ownProps.match.params.orgid, id, printer)),
-    getDownloadUrl: (id) =>
-      dispatch(getGcodeDownloadUrl(ownProps.match.params.orgid, id)),
   })
 )(GcodeList);
