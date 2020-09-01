@@ -62,11 +62,11 @@ const GcodeTableRow = ({
   size,
   uploaded,
   uploadedBy,
+  href,
   name,
   path,
   display,
   printGcode,
-  downloadUrl,
   onSchedulePrint,
   availablePrinters,
   onRowDelete,
@@ -83,6 +83,11 @@ const GcodeTableRow = ({
   });
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
+
+  const getDownloadUrl = (href) => {
+    const token = localStorage.getItem('karmen_access_token');
+    return `${href}?authorization=${token}`;
+  };
 
   return (
     <div className="list-item">
@@ -118,7 +123,7 @@ const GcodeTableRow = ({
         <a
           download
           className="dropdown-item"
-          href={downloadUrl}
+          href={getDownloadUrl(href)}
           onClick={(e) => {
             setCtaListExpanded(false);
           }}
@@ -198,7 +203,7 @@ class GcodeList extends React.Component {
                 orguuid={match.params.orgid}
                 {...g}
                 printGcode={printGcode}
-                downloadUrl={g.links[0].href}
+                href={g.links[0].href}
                 onSchedulePrint={(gcodeId, printerId) =>
                   printGcode(gcodeId, printerId).then((r) => {
                     printedOn.push(printerId);
