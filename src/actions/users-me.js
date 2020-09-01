@@ -96,7 +96,6 @@ export const loadUserData = (userData) => (dispatch) => {
       data: userData,
     },
   });
-  console.log(userData.activeOrganization);
   if (userData.activeOrganization) {
     dispatch(switchOrganization(userData.activeOrganization.id));
   } else {
