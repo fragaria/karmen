@@ -2,7 +2,7 @@ import { performRequest } from "./utils";
 
 export const enqueueTask = (orgId, task, opts) => {
   return performRequest({
-    uri: `/organizations/${orgId}/tasks`,
+    uri: `/groups/${orgId}/tasks`,
     data: {
       task,
       ...opts,

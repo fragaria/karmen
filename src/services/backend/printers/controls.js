@@ -2,7 +2,7 @@ import { performRequest } from "../utils";
 
 export const setPrinterConnection = (orgId, id, state) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/connection`,
+    uri: `/groups/${orgId}/printers/${id}/connection`,
     appendData: {
       id,
       state,
@@ -16,7 +16,7 @@ export const setPrinterConnection = (orgId, id, state) => {
 
 export const changeCurrentJob = (orgId, id, action) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/current-job`,
+    uri: `/groups/${orgId}/printers/${id}/current-job`,
     appendData: {
       id,
       action,
@@ -31,7 +31,7 @@ export const changeCurrentJob = (orgId, id, action) => {
 
 export const changeLights = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/lights`,
+    uri: `/groups/${orgId}/printers/${id}/lights`,
     appendData: {
       id,
     },
@@ -41,7 +41,7 @@ export const changeLights = (orgId, id) => {
 
 export const movePrinthead = (orgId, id, command, opts) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/printhead`,
+    uri: `/groups/${orgId}/printers/${id}/printhead`,
     appendData: {
       id,
     },
@@ -56,7 +56,7 @@ export const movePrinthead = (orgId, id, command, opts) => {
 
 export const changeFanState = (orgId, id, targetState) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/fan`,
+    uri: `/groups/${orgId}/printers/${id}/fan`,
     appendData: {
       id,
     },
@@ -70,7 +70,7 @@ export const changeFanState = (orgId, id, targetState) => {
 
 export const changeMotorsState = (orgId, id, targetState) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/motors`,
+    uri: `/groups/${orgId}/printers/${id}/motors`,
     id,
     data: {
       target: targetState,
@@ -82,7 +82,7 @@ export const changeMotorsState = (orgId, id, targetState) => {
 
 export const extrude = (orgId, id, amount) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/extrusion`,
+    uri: `/groups/${orgId}/printers/${id}/extrusion`,
     appendData: {
       id,
     },
@@ -96,7 +96,7 @@ export const extrude = (orgId, id, amount) => {
 
 export const setTemperature = (orgId, id, partName, target) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/temperatures/${partName}`,
+    uri: `/groups/${orgId}/printers/${id}/temperatures/${partName}`,
     appendData: {
       id,
     },
@@ -110,7 +110,7 @@ export const setTemperature = (orgId, id, partName, target) => {
 
 export const startUpdate = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers/${id}/update/`,
+    uri: `/groups/${orgId}/printers/${id}/update/`,
     appendData: {
       id,
     },

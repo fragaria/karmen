@@ -11,7 +11,7 @@ export const getGcodes = (
   limit = 15,
   fields = []
 ) => {
-  let uri = `/users/me/files/?limit=${limit}`;
+  let uri = `/groups/${orgId}/files/?limit=${limit}`;
   if (fields) {
     uri += `&fields=${fields.join(",")}`;
   }
@@ -39,7 +39,7 @@ export const getGcodes = (
 };
 
 export const getGcode = (orgId, id, fields = []) => {
-  let uri = `/users/me/files/${id}/`;
+  let uri = `/groups/${orgId}/files/${id}/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -52,7 +52,7 @@ export const getGcode = (orgId, id, fields = []) => {
 
 export const deleteGcode = (orgId, id) => {
   return performRequest({
-    uri: `/users/me/files/${id}`,
+    uri: `/groups/${orgId}/files/${id}/`,
     method: "DELETE",
     appendData: {
       id,

@@ -1,7 +1,7 @@
 import { performRequest } from "./utils";
 
 export const getUsers = (orgId, fields = []) => {
-  let uri = `/organizations/${orgId}/users`;
+  let uri = `/groups/${orgId}/users`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -14,7 +14,7 @@ export const getUsers = (orgId, fields = []) => {
 
 export const addUser = (orgId, email, role) => {
   return performRequest({
-    uri: `/organizations/${orgId}/users`,
+    uri: `/groups/${orgId}/users`,
     data: {
       email,
       role,
@@ -25,7 +25,7 @@ export const addUser = (orgId, email, role) => {
 
 export const patchUser = (orgId, id, role) => {
   return performRequest({
-    uri: `/organizations/${orgId}/users/${id}`,
+    uri: `/groups/${orgId}/users/${id}`,
     method: "PATCH",
     data: {
       role,
@@ -39,7 +39,7 @@ export const patchUser = (orgId, id, role) => {
 
 export const deleteUser = (orgId, id) => {
   return performRequest({
-    uri: `/organizations/${orgId}/users/${id}`,
+    uri: `/groups/${orgId}/users/${id}`,
     method: "DELETE",
     parseResponse: false,
     successCodes: [204, 404],

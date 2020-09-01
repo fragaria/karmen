@@ -8,7 +8,7 @@ import { getJsonPostHeaders, performRequest } from "../utils";
 const BASE_URL = window.env.BACKEND_BASE;
 
 export const getPrinters = (orgId, fields = []) => {
-  let uri = `/users/me/printers/`;
+  let uri = `/groups/${orgId}/printers/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -23,7 +23,7 @@ export const getPrinters = (orgId, fields = []) => {
 };
 
 export const getPrinter = (orgId, id, fields = []) => {
-  let uri = `/me/printers/${id}`;
+  let uri = `/groups/${orgId}/printers/${id}/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
