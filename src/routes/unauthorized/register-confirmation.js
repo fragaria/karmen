@@ -5,6 +5,8 @@ import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
 import Loader from "../../components/utils/loader";
 import { activate } from "../../actions";
+import jwt_decode from "jwt-decode";
+
 
 class RegisterConfirmation extends React.Component {
   constructor(props) {
@@ -45,11 +47,11 @@ class RegisterConfirmation extends React.Component {
     const params = new URLSearchParams(location.search);
     if (params.has("activate")) {
       try {
-        const tokenData = JSON.parse(atob(params.get("activate")));
+        const tokenData = jwt_decode(params.get("activate"));
         this.setState({
-          email: tokenData.email,
-          activationKey: tokenData.activation_key,
-          activationKeyExpires: tokenData.activation_key_expires,
+          email: tokenData.sub,
+          activationKey: params.get("activate"),
+          activationKeyExpires: tokenData.lifetime,
           tokenProcessed: true,
         });
       } catch (e) {

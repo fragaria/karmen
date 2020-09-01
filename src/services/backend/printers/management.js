@@ -12,7 +12,7 @@ export const addPrinter = (
   apiKey
 ) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printers`,
+    uri: `/groups/${orgId}/printers`,
     data: {
       protocol,
       hostname,
