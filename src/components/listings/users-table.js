@@ -110,7 +110,7 @@ const UsersTableRow = ({
         <span className="list-item-subtitle">
           <span>is </span>
           <strong>{user.role}</strong>
-          {!user.activated && (
+          {!user.isActive && (
             <>
               {" "}
               and <strong className="text-secondary">is not activated</strong>
@@ -118,7 +118,7 @@ const UsersTableRow = ({
           )}
         </span>
         <span className="text-mono">
-          {user.email}, {user.id}
+          {user.email}, {user.userId}
         </span>
       </div>
 
