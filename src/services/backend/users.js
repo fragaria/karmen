@@ -14,9 +14,9 @@ export const getUsers = (orgId, fields = []) => {
 
 export const addUser = (orgId, email, role) => {
   return performRequest({
-    uri: `/groups/${orgId}/users`,
+    uri: `/groups/${orgId}/users/`,
     data: {
-      email,
+      username:email,
       role,
     },
     successCodes: [201],

@@ -67,7 +67,7 @@ export const activate = (
 
 export const authenticate = (username, password) => {
   return performRequest({
-    uri: `/tokens/?fields=user,groups`,
+    uri: `/tokens/?fields=user,groups,role`,
     useAuth: false,
     data: {
       username,

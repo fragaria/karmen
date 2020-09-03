@@ -9,16 +9,17 @@ export default (
   switch (action.type) {
     case "USERS_LOAD_SUCCEEDED":
       return Object.assign({}, state, {
-        list: [].concat(action.payload.data.items),
+        list: [].concat(action.payload.data),
         listLoaded: true,
       });
     case "USERS_ADD_SUCCEEDED":
       const existing = state.list.findIndex(
-        (u) => u.id === action.payload.data.id
+        (u) => u.id === action.payload.data.userId
       );
       if (existing > -1) {
         return state;
       }
+      action.payload.data.email = action.payload.data.username;
       return Object.assign({}, state, {
         list: [].concat(state.list).concat([action.payload.data]),
         listLoaded: true,
