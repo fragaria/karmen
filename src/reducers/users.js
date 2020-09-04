@@ -25,7 +25,7 @@ export default (
         listLoaded: true,
       });
     case "USERS_EDIT_SUCCEEDED":
-      userIndex = state.list.findIndex((u) => u.id === action.payload.id);
+      userIndex = state.list.findIndex((u) => u.userId === action.payload.id);
       if (userIndex > -1) {
         state.list[userIndex].role = action.payload.data.role;
       }
@@ -33,7 +33,7 @@ export default (
         list: [].concat(state.list),
       });
     case "USERS_DELETE_SUCCEEDED":
-      userIndex = state.list.findIndex((u) => u.id === action.payload.id);
+      userIndex = state.list.findIndex((u) => u.userId === action.payload.id);
       if (userIndex > -1) {
         state.list = state.list
           .slice(0, userIndex)

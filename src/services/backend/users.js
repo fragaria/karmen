@@ -25,7 +25,7 @@ export const addUser = (orgId, email, role) => {
 
 export const patchUser = (orgId, id, role) => {
   return performRequest({
-    uri: `/groups/${orgId}/users/${id}`,
+    uri: `/groups/${orgId}/users/${id}/`,
     method: "PATCH",
     data: {
       role,
@@ -39,7 +39,7 @@ export const patchUser = (orgId, id, role) => {
 
 export const deleteUser = (orgId, id) => {
   return performRequest({
-    uri: `/groups/${orgId}/users/${id}`,
+    uri: `/groups/${orgId}/users/${id}/`,
     method: "DELETE",
     parseResponse: false,
     successCodes: [204, 404],

@@ -20,7 +20,7 @@ const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
               className="btn"
               onClick={() => {
                 const newRole = user.role === "user" ? "admin" : "user";
-                onUserChange(user.id, newRole).then(() => {
+                onUserChange(user.userId, newRole).then(() => {
                   modal.closeModal();
                 });
               }}
@@ -52,7 +52,7 @@ const DeleteUserModal = ({ modal, user, onUserDelete }) => {
             <button
               className="btn"
               onClick={() => {
-                onUserDelete(user.id).then(() => {
+                onUserDelete(user.userId).then(() => {
                   modal.closeModal();
                 });
               }}
@@ -95,7 +95,6 @@ const UsersTableRow = ({
   user,
   onUserChange,
   onUserDelete,
-  onResendInvitation,
 }) => {
   const toggleUserModal = useMyModal();
   const changeUserRoleModal = useMyModal();
@@ -110,12 +109,6 @@ const UsersTableRow = ({
         <span className="list-item-subtitle">
           <span>is </span>
           <strong>{user.role}</strong>
-          {!user.isActive && (
-            <>
-              {" "}
-              and <strong className="text-secondary">is not activated</strong>
-            </>
-          )}
         </span>
         <span className="text-mono">
           {user.email}, {user.userId}
@@ -130,19 +123,6 @@ const UsersTableRow = ({
           }}
         >
           <span className="dropdown-title">{user.username}</span>
-          {!user.activated && (
-            <button
-              className="dropdown-item"
-              onClick={(e) => {
-                setCtaListExpanded(false);
-                onResendInvitation(user.email, user.role);
-                invitationSentModal.openModal(e);
-              }}
-            >
-              <i className="icon-edit"></i>
-              Resend invitation
-            </button>
-          )}
           <button
             className="dropdown-item"
             onClick={(e) => {
@@ -187,7 +167,6 @@ const UsersTable = ({
   usersList,
   onUserChange,
   onUserDelete,
-  onResendInvitation,
 }) => {
   return (
     <NoPaginationListing
@@ -206,7 +185,6 @@ const UsersTable = ({
             user={u}
             onUserChange={onUserChange}
             onUserDelete={onUserDelete}
-            onResendInvitation={onResendInvitation}
           />
         );
       }}
