@@ -13,11 +13,6 @@ const Users = ({
   onUserChange,
   onResendInvitation,
 }) => {
-  console.log(orguuid,
-  currentId,
-
-  usersLoaded,
-  usersList,)
   return (
     <>
       <div className="container">

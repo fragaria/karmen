@@ -22,7 +22,6 @@ import {
 } from "../../actions";
 
 const Settings = ({ match, ...rest }) => {
-  console.log("making settings");
   return (
     <>
       <SetActiveOrganization />
