@@ -46,7 +46,9 @@ export default (
         }),
       });
     case "PRINTERS_LOAD_SUCCEEDED":
+      console.log("PRINTERS LOAD SUCCEEDED")
       if (action.payload.organizationId !== activeOrganizationId) {
+        console.log("org id mismatch, return unchanged")
         return state;
       }
       const newPrinters = action.payload.data.map((newPrinter) => {
@@ -57,6 +59,7 @@ export default (
           return newPrinter;
         }
       });
+      console.log("here we will make printersloaded true")
       return Object.assign({}, state, {
         printers: getSortedPrinters(newPrinters).filter(
           (p) => state.toBeDeleted.indexOf(p.id) === -1

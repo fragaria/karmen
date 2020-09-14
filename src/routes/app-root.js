@@ -9,8 +9,12 @@ const AppRoot = ({
   activeOrganization,
   organizations,
   switchOrganization,
+  state,
 }) => {
   // This should be catching a situation right after login
+  console.log("APP ROOT LOGIN")
+    console.log(activeOrganization)
+    console.log(organizations)
   if (
     !activeOrganization &&
     organizations &&
@@ -18,10 +22,17 @@ const AppRoot = ({
   ) {
     if (preferredOrganization && organizations[preferredOrganization]) {
       switchOrganization(preferredOrganization);
+      console.log("SEND HELP!")
     } else {
       const firstOrg = Object.values(organizations)[0];
       switchOrganization(firstOrg.id);
+      console.log("switch org ", firstOrg)
+      // console.log("redirecting to  ", firstOrg.id)
+      //     return <Redirect to={`/${firstOrg.id}`} />;
+
     }
+    console.log("making loader in root")
+    console.log(state);
     return <Loader />;
   }
   if (activeOrganization) {
@@ -36,6 +47,7 @@ export default connect(
     preferredOrganization: state.preferences.activeOrganizationId,
     organizations: state.me.organizations,
     activeOrganization: state.me.activeOrganization,
+    state: state,
   }),
   (dispatch) => ({
     switchOrganization: (id) =>

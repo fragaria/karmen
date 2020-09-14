@@ -1,6 +1,6 @@
-import dayjs from "dayjs";
 
 import { HttpError, MaintenanceError } from "../../errors";
+import {clearUserIdentity, refreshToken} from "../../actions";
 
 const BASE_URL = window.env.BACKEND_BASE;
 
@@ -44,13 +44,6 @@ const _getStorage = (key) => {
   return null;
 };
 
-export const persistUserProfile = (data) => {
-  _setStorage("karmen_profile", JSON.stringify(data));
-};
-
-export const dropUserProfile = () => {
-  _setStorage("karmen_profile", null);
-};
 
 export const persistUserPreferences = (data) => {
   _setStorage("karmen_preferences", JSON.stringify(data));
@@ -64,13 +57,6 @@ export const getUserPreferences = () => {
   return JSON.parse(_getStorage("karmen_preferences"));
 };
 
-export const getUserProfile = () => {
-  const profile = JSON.parse(_getStorage("karmen_profile"));
-  if (profile) {
-    profile.accessTokenExpiresOn = dayjs(profile.accessTokenExpiresOn);
-  }
-  return profile;
-};
 
 export const getJsonPostHeaders = () => {
   const headers = new Headers();
@@ -80,6 +66,7 @@ export const getJsonPostHeaders = () => {
     "Authorization",
     `Bearer ${localStorage.getItem("karmen_access_token")}`
   );
+  console.log("making headers", headers);
   return headers;
 };
 

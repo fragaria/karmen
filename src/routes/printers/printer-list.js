@@ -57,6 +57,7 @@ class PrinterList extends React.Component {
   }
 
   getPrinters() {
+    console.log("getprinters called")
     const { printersLoaded, loadPrinters } = this.props;
     let load;
     if (printersLoaded) {
@@ -90,6 +91,8 @@ class PrinterList extends React.Component {
       role,
     } = this.props;
     if (!printersLoaded) {
+      //this.getPrinters()
+      console.log("maing loader in printerlist")
       return (
         <div>
           <SetActiveOrganization />

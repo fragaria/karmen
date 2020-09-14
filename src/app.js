@@ -372,14 +372,18 @@ const ConnectedAppBase = ({ loadUserFromStorage, userState, logout }) => {
   const myRef = useRef(null);
 
   useEffect(() => {
+    console.log("useEffect initialized", initialized)
     if (!initialized) {
       loadUserFromStorage().then(() => setInitialized(true));
+
     } else {
       myRef.current.scrollTo(0, 0);
     }
   });
 
   if (!initialized) {
+    //loadUserFromStorage();
+    //loadUserFromStorage().then(() => setInitialized(true));
     return (
       <div>
         <Loader />

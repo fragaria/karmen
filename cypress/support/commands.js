@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import "cypress-file-upload";
 import "@testing-library/cypress/add-commands";
 import { Chance } from "chance";

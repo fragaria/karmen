@@ -1,23 +1,20 @@
-import { persistUserProfile, dropUserProfile } from "../services/backend";
 import jwtdecode from "jwt-decode"
 
 const getUserDataFromApiResponse = (data, activeOrganization) => {
-
+console.log("getuserdata", data)
+console.log("getuserdata", activeOrganization)
   let prof =  {
     currentState:
       data.currentState ||
       (data.force_pwd_change ? "pwd-change-required" : "logged-in"),
     user: data.user,
     groups: data.groups,
-    identity: data.user.id,
-    username: data.user.username,
-    email: data.user.email,
-    systemRole: data.user.system_role || data.user.systemRole,
+    identity: data.id,
+    username: data.username,
+    email: data.email,
+    systemRole: data.system_role || data.systemRole,
     accessTokenExpiresOn: data.accessTokenExpiresOn,
-    organizations: data.groups.reduce(
-      (acc, curr) => (((acc[curr.id] = curr), acc)),
-      {}
-    ),
+    organizations: data.groups,
     activeOrganization: data.activeOrganization || activeOrganization,
   };
   if (data.access) {
@@ -50,7 +47,6 @@ export default (
   switch (action.type) {
     case "USER_DATA_LOADED":
       userData = getUserDataFromApiResponse(action.payload.data);
-      persistUserProfile(_without("activeOrganization", userData));
       return Object.assign({}, state, {
         ...userData,
         apiTokens: [],
@@ -61,7 +57,6 @@ export default (
         action.payload.data,
         state.activeOrganization
       );
-      persistUserProfile(_without("activeOrganization", userData));
       return Object.assign({}, state, {
         ...userData,
         apiTokens: [],
@@ -72,30 +67,30 @@ export default (
         action.payload.data,
         state.activeOrganization
       );
-      persistUserProfile(_without("activeOrganization", userData));
       return Object.assign({}, state, {
         ...userData,
         apiTokens: [],
         apiTokensLoaded: false,
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
+      console.log("refresh token succeeded", action.payload)
+      localStorage.setItem("karmen_access_token", action.payload.data.access);
       return Object.assign({}, state);
     case "USER_PATCH_SUCCEEDED":
       userData = Object.assign({}, state, {
         username: action.payload.data.username,
         email: action.payload.data.email,
       });
-      persistUserProfile(userData);
       return Object.assign({}, state, userData);
     case "USER_CHANGE_PASSWORD_SUCCEEDED":
       userData = getUserDataFromApiResponse(
         action.payload.data,
         state.activeOrganization
       );
-      persistUserProfile(userData);
       return Object.assign({}, state, userData);
     case "USER_CLEAR_ENDED":
-      dropUserProfile();
+          localStorage.removeItem("karmen_access_token");
+          localStorage.removeItem("karmen_refresh_token");
       return Object.assign({}, state, {
         currentState: "logged-out",
         hasFreshToken: false,

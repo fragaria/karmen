@@ -65,6 +65,14 @@ export const activate = (
   });
 };
 
+export const getUserMe = () => {
+  return performRequest({
+    uri: `/users/me/?fields=user,groups`,
+    method: "GET",
+    successCodes: [200],
+  });
+};
+
 export const authenticate = (username, password) => {
   return performRequest({
     uri: `/tokens/?fields=user,groups`,
@@ -90,8 +98,9 @@ export const authenticateFresh = (username, password) => {
 };
 
 export const refreshAccessToken = () => {
+  console.log("refreshing access token")
   return performRequest({
-    uri: `/tokens/refresh/?fields=user,group`,
+    uri: `/tokens/refresh/`,
     useAuth: false,
     data: { refresh: localStorage.getItem("karmen_refresh_token") },
     headers: {

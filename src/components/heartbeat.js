@@ -90,7 +90,8 @@ export const Heartbeat = ({
   }, [doCheck]);
 
   // ... enqueue subsecutive runs.
-  useRecursiveTimeout(doCheck, 5000);
+  //TODO: DO NOT COMMIT THIS!!!!!!!!!!!!!!!!!!!!!!
+  //useRecursiveTimeout(doCheck, 5000);
 
   return (
     <>
