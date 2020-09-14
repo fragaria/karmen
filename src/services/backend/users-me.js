@@ -41,7 +41,7 @@ export const register = (email) => {
       email,
     },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 
