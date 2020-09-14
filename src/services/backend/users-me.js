@@ -52,13 +52,11 @@ export const activate = (
   passwordConfirmation
 ) => {
   return performRequest({
-    uri: `/users/me/activate`,
+    uri: `/users/`,
     useAuth: false,
     data: {
-      email,
-      activation_key: activationKey,
+      token: activationKey,
       password,
-      password_confirmation: passwordConfirmation,
     },
     parseResponse: false,
     successCodes: [204],
