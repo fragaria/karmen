@@ -42,7 +42,7 @@ export const createHttpAction = (
     dispatch(createHttpActionFactory(`${name}_STARTED`)());
     // when action is successful...
     const succeeded = (result) => {
-  // ...fire success only if http status code is considered a success
+      // ...fire success only if http status code is considered a success
       if (
         result &&
         result.status &&
