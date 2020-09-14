@@ -6,10 +6,11 @@ import * as backend from "../services/backend";
 
 export const retryIfUnauthorized = (func, dispatch) => {
   return (...args) => {
-    return func(...args).catch((err) => {
-      if (dispatch && err instanceof HttpError && err.response.status === 401) {
+      return func(...args).catch((err) => {
+      if (dispatch && err instanceof HttpError && (err.response.status === 401 || err.response.status === 403)) {
         return dispatch(refreshToken())
-          .then((r) => func(...args))
+          .then((r) => {
+            func(...args)})
           .catch((newErr) => {
             dispatch(clearUserIdentity());
             return Promise.reject(err);

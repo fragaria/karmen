@@ -79,6 +79,7 @@ export default (
         apiTokensLoaded: false,
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
+      localStorage.setItem("karmen_access_token", action.payload.data.access);
       return Object.assign({}, state);
     case "USER_PATCH_SUCCEEDED":
       userData = Object.assign({}, state, {
