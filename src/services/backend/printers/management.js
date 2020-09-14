@@ -12,7 +12,7 @@ export const addPrinter = (
   apiKey
 ) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers`,
+    uri: `/groups/${orgId}/printers/`,
     data: {
       protocol,
       hostname,
@@ -32,7 +32,7 @@ export const addPrinter = (
 
 export const patchPrinter = (orgId, id, data) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}`,
+    uri: `/groups/${orgId}/printers/${id}/`,
     method: "PATCH",
     data,
     appendData: {
@@ -43,7 +43,7 @@ export const patchPrinter = (orgId, id, data) => {
 };
 export const deletePrinter = (orgId, id) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}`,
+    uri: `/groups/${orgId}/printers/${id}/`,
     method: "DELETE",
     appendData: {
       id,
@@ -55,7 +55,7 @@ export const deletePrinter = (orgId, id) => {
 
 export const issuePrinterToken = (orgId) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/issue-token`,
+    uri: `/groups/${orgId}/printers/issue-token/`,
     method: "POST",
     successCodes: [201],
   });

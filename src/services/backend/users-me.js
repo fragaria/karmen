@@ -3,7 +3,7 @@ import { performRequest } from "./utils";
 
 export const requestPasswordReset = (email) => {
   return performRequest({
-    uri: `/users/me/request-password-reset`,
+    uri: `/users/me/request-password-reset/`,
     useAuth: false,
     data: {
       email,
@@ -20,7 +20,7 @@ export const resetPassword = (
   passwordConfirmation
 ) => {
   return performRequest({
-    uri: `/users/me/reset-password`,
+    uri: `/users/me/reset-password/`,
     useAuth: false,
     data: {
       email,
@@ -52,7 +52,7 @@ export const activate = (
   passwordConfirmation
 ) => {
   return performRequest({
-    uri: `/users/me/activate`,
+    uri: `/users/me/activate/`,
     useAuth: false,
     data: {
       email,
@@ -67,7 +67,7 @@ export const activate = (
 
 export const authenticate = (username, password) => {
   return performRequest({
-    uri: `/tokens/?fields=user,groups,role`,
+    uri: `/tokens/?fields=user,groups,role/`,
     useAuth: false,
     data: {
       username,
@@ -91,7 +91,7 @@ export const authenticateFresh = (username, password) => {
 
 export const refreshAccessToken = () => {
   return performRequest({
-    uri: `/tokens/refresh/?fields=user,group`,
+    uri: `/tokens/refresh/?fields=user,group/`,
     useAuth: false,
     data: { refresh: localStorage.getItem("karmen_refresh_token") },
     headers: {
@@ -124,7 +124,7 @@ export const changePassword = (
   new_password_confirmation
 ) => {
   return performRequest({
-    uri: `/users/me/password`,
+    uri: `/users/me/password/`,
     method: "PATCH",
     data: {
       password,
@@ -137,7 +137,7 @@ export const changePassword = (
 
 export const patchMe = (username, email) => {
   return performRequest({
-    uri: `/users/me`,
+    uri: `/users/me/`,
     method: "PATCH",
     data: {
       username,
@@ -149,7 +149,7 @@ export const patchMe = (username, email) => {
 
 export const loadApiTokens = () => {
   return performRequest({
-    uri: `/users/me/tokens`,
+    uri: `/users/me/tokens/`,
     method: "GET",
     successCodes: [200],
   });
@@ -157,7 +157,7 @@ export const loadApiTokens = () => {
 
 export const addApiToken = (orgId, name) => {
   return performRequest({
-    uri: `/users/me/tokens`,
+    uri: `/users/me/tokens/`,
     data: {
       name: name,
       organization_uuid: orgId,
@@ -168,7 +168,7 @@ export const addApiToken = (orgId, name) => {
 
 export const deleteApiToken = (jti) => {
   return performRequest({
-    uri: `/users/me/tokens/${jti}`,
+    uri: `/users/me/tokens/${jti}/`,
     method: "DELETE",
     parseResponse: false,
     successCodes: [204, 404],

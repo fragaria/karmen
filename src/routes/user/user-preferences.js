@@ -34,7 +34,7 @@ const UserPreferences = ({ match, ...rest }) => {
         <Route
           exact
           path={`${match.url}`}
-          render={() => <Redirect replace to={`${match.url}/tab-api-tokens`} />}
+          render={() => <Redirect replace to={`${match.url}/tab-account`} />}
         />
         <Route
           path={`${match.url}/tab-api-tokens`}
