@@ -115,7 +115,7 @@ Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
       return cy
         .request({
           method: "GET",
-          url: `/api/organizations/${organizationUuid}/printers/${printerUuid}?fields=job,status,webcam,lights`,
+          url: `/api/organizations/${organizationUuid}/printers/${printerUuid}/?fields=job,status,webcam,lights`,
           headers: {
             "X-CSRF-TOKEN": token.value, // asi neni potreba
           },
