@@ -10,8 +10,10 @@ export const retryIfUnauthorized = (func, dispatch) => {
       if (dispatch && err instanceof HttpError && (err.response.status === 401 || err.response.status === 403)) {
         return dispatch(refreshToken())
           .then((r) => {
-            func(...args)})
+            return func(...args);
+          })
           .catch((newErr) => {
+
             dispatch(clearUserIdentity());
             return Promise.reject(err);
           });
@@ -56,7 +58,7 @@ export const loadUserFromToken = (token) => (dispatch) => {
   );
 };
 
-export const loadUserFromLocalStorage = (force_refresh = false) => (
+export const loadUserFromLocalStorage = () => (
   dispatch
 ) => {
   const profile = backend.getUserProfile();
@@ -65,18 +67,10 @@ export const loadUserFromLocalStorage = (force_refresh = false) => (
     return Promise.resolve(dispatch(clearUserIdentity()));
   }
 
-  // try refresh if the expiration is set and near
-  if (
-    (profile.accessTokenExpiresOn &&
-      dayjs().isAfter(profile.accessTokenExpiresOn.subtract(90, "seconds"))) ||
-    force_refresh
-  ) {
-    return backend
-      .refreshAccessToken()
-      .then((r) => Promise.resolve(dispatch(loadUserData(r.data))))
-      .catch(() => Promise.resolve(dispatch(clearUserIdentity())));
-  }
-  return Promise.resolve(dispatch(loadUserData(profile)));
+  return backend
+    .refreshAccessToken()
+    .then((r) => Promise.resolve(dispatch(loadUserData(r.data))))
+    .catch(() => Promise.resolve(dispatch(clearUserIdentity())));
 };
 
 export const switchOrganization = (id) => (dispatch) => {

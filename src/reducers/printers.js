@@ -57,12 +57,14 @@ export default (
           return newPrinter;
         }
       });
-      return Object.assign({}, state, {
+      let sorterPrinters = {
         printers: getSortedPrinters(newPrinters).filter(
           (p) => state.toBeDeleted.indexOf(p.id) === -1
         ),
         printersLoaded: true,
-      });
+      }
+      console.log("sorted", sorterPrinters)
+      return Object.assign({}, state, sorterPrinters );
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
       if (action.payload.organizationId !== activeOrganizationId) {
         return state;
