@@ -164,15 +164,7 @@ class Menu extends React.Component {
                       </li>
                     </>
                   )}
-
-                  <li className="navigation-title">
-                    <p className="navigation-title-content">
-                      {username}
-                      <span className="icon-settings"></span>
-                    </p>
-                  </li>
-
-                  <li className="navigation-item">
+                    <li className="navigation-item">
                     <Link
                       to="/organizations"
                       onClick={() => this.setState({ navigation: false })}
@@ -182,13 +174,32 @@ class Menu extends React.Component {
                     </Link>
                   </li>
 
+                  <li className="navigation-title">
+                    <p className="navigation-title-content">
+                      {username}
+                      <span className="icon-settings"></span>
+                    </p>
+                  </li>
+
+
+
                   <li className="navigation-item">
                     <Link
                       to="/users/me"
                       onClick={() => this.setState({ navigation: false })}
                       id="navigation-organizations"
                     >
-                      Settings
+                      Account settings
+                    </Link>
+                  </li>
+
+                  <li className="navigation-item">
+                    <Link
+                      to={`/${activeOrganization.uuid}/settings/tab-printers`}
+                      onClick={() => this.setState({ navigation: false })}
+                      id="navigation-organizations"
+                    >
+                      Printers settings
                     </Link>
                   </li>
 
