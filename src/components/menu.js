@@ -162,7 +162,7 @@ class Menu extends React.Component {
                       </li>
                     </>
                   )}
-                    <li className="navigation-item">
+                  <li className="navigation-item">
                     <Link
                       to="/organizations"
                       onClick={() => this.setState({ navigation: false })}
@@ -178,8 +178,6 @@ class Menu extends React.Component {
                       <span className="icon-settings"></span>
                     </p>
                   </li>
-
-
 
                   <li className="navigation-item">
                     <Link
