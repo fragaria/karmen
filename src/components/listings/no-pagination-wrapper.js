@@ -25,6 +25,7 @@ class Wrapper extends React.Component {
       items,
       rowFactory,
       enableFiltering,
+      enableSorting,
       sortByColumns,
       filterByColumns,
     } = this.props;
@@ -76,20 +77,22 @@ class Wrapper extends React.Component {
               </label>
             </div>
           )}
+          {enableSorting !== false && (
 
-          <Sorting
-            active={orderBy}
-            columns={sortByColumns || []}
-            onChange={(column) => {
-              return () => {
-                const { orderBy } = this.state;
-                this.setState({
-                  orderBy:
-                    orderBy === `+${column}` ? `-${column}` : `+${column}`,
-                });
-              };
-            }}
-          />
+            <Sorting
+              active={orderBy}
+              columns={sortByColumns || []}
+              onChange={(column) => {
+                return () => {
+                  const {orderBy} = this.state;
+                  this.setState({
+                    orderBy:
+                      orderBy === `+${column}` ? `-${column}` : `+${column}`,
+                  });
+                };
+              }}
+            />
+          )}
         </div>
 
         {!itemsLoaded ? (
