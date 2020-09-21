@@ -85,7 +85,7 @@ const GcodeTableRow = ({
   const [ctaListExpanded, setCtaListExpanded] = useState();
 
   const getDownloadUrl = (href) => {
-    const token = localStorage.getItem('karmen_access_token');
+    const token = localStorage.getItem("karmen_access_token");
     return `${href}?authorization=${token}`;
   };
 
@@ -229,16 +229,12 @@ class GcodeList extends React.Component {
             );
           }}
           itemList={gcodesList}
+          enableFiltering={false}
+          enableSorting={false}
           sortByColumns={["filename", "size", "uploaded"]}
           loadPage={loadGcodesPage}
           clearItemsPages={clearGcodesPages}
-          fields={[
-            "id",
-            "name",
-            "size",
-            "uploadedBy",
-            "links"
-          ]}
+          fields={["id", "name", "size", "uploadedBy", "links"]}
         />
       </section>
     );

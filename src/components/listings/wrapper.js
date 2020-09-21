@@ -87,7 +87,13 @@ class Wrapper extends React.Component {
 
   render() {
     const { itemsLoaded, currentPageIndex } = this.state;
-    const { itemList, rowFactory, sortByColumns, enableFiltering } = this.props;
+    const {
+      itemList,
+      rowFactory,
+      sortByColumns,
+      enableFiltering,
+      enableSorting,
+    } = this.props;
     const currentPage = itemList.pages && itemList.pages[currentPageIndex];
     const items = currentPage && currentPage.data && currentPage.data.items;
     const itemRows = items && items.map(rowFactory);
@@ -118,24 +124,25 @@ class Wrapper extends React.Component {
               </label>
             </div>
           )}
-
-          <Sorting
-            active={itemList.orderBy || ""}
-            columns={sortByColumns || []}
-            onChange={(column) => {
-              return () => {
-                const { itemList } = this.props;
-                return this.reloadTableWith(
-                  null,
-                  itemList.orderBy === `+${column}`
-                    ? `-${column}`
-                    : `+${column}`,
-                  itemList.filter,
-                  itemList.limit
-                );
-              };
-            }}
-          />
+          {enableSorting !== false && (
+            <Sorting
+              active={itemList.orderBy || ""}
+              columns={sortByColumns || []}
+              onChange={(column) => {
+                return () => {
+                  const { itemList } = this.props;
+                  return this.reloadTableWith(
+                    null,
+                    itemList.orderBy === `+${column}`
+                      ? `-${column}`
+                      : `+${column}`,
+                    itemList.filter,
+                    itemList.limit
+                  );
+                };
+              }}
+            />
+          )}
         </div>
 
         {!itemsLoaded ? (
