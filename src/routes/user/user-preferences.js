@@ -10,7 +10,6 @@ import {
   loadUserApiTokens,
   deleteUserApiToken,
   changePassword,
-  patchMe,
 } from "../../actions/users-me";
 
 const UserPreferences = ({ match, ...rest }) => {
@@ -63,6 +62,5 @@ export default connect(
       dispatch(
         changePassword(password, new_password, new_password_confirmation)
       ),
-    patchMe: (username, email) => dispatch(patchMe(username, email)),
   })
 )(UserPreferences);

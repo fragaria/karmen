@@ -81,13 +81,6 @@ export default (
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
       return Object.assign({}, state);
-    case "USER_PATCH_SUCCEEDED":
-      userData = Object.assign({}, state, {
-        username: action.payload.data.username,
-        email: action.payload.data.email,
-      });
-      persistUserProfile(userData);
-      return Object.assign({}, state, userData);
     case "USER_CHANGE_PASSWORD_SUCCEEDED":
       userData = getUserDataFromApiResponse(
         action.payload.data,

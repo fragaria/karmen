@@ -149,9 +149,6 @@ export const changePassword = createHttpAction(
   }
 );
 
-export const patchMe = createHttpAction("USER_PATCH", (username, email) => {
-  return backend.patchMe(username, email);
-});
 
 export const requestPasswordReset = createHttpAction(
   "USER_RESET_PASSWORD_REQUEST",
