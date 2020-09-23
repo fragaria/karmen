@@ -83,7 +83,7 @@ export const authenticateFresh = (username, password) => {
       username,
       password,
     },
-    successCodes: [200],
+    successCodes: [400],
   });
 };
 
@@ -122,14 +122,14 @@ export const changePassword = (
   new_password_confirmation
 ) => {
   return performRequest({
-    uri: `/users/me/password`,
+    uri: `/users/me/`,
     method: "PATCH",
     data: {
-      password,
-      new_password,
-      new_password_confirmation,
+      old_password: password,
+      password: new_password,
     },
-    successCodes: [200],
+    successCodes: [204],
+    parseResponse: false,
   });
 };
 

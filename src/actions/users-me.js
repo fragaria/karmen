@@ -140,12 +140,8 @@ export const changePassword = createHttpAction(
     password,
     new_password,
     new_password_confirmation,
-    { dispatch, getState }
   ) => {
-    const { me } = getState();
-    return dispatch(authenticateFresh(me.username, password)).then((r) =>
-      backend.changePassword(password, new_password, new_password_confirmation)
-    );
+     return backend.changePassword(password, new_password, new_password_confirmation)
   }
 );
 
