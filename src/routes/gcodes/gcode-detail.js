@@ -264,6 +264,7 @@ export default connect(
           "status",
           "webcam",
           "lights",
+          "client"
         ])
       ),
     getGcode: (id) => dispatch(loadGcode(ownProps.match.params.orgid, id, [])),

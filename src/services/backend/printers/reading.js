@@ -23,7 +23,7 @@ export const getPrinters = (orgId, fields = []) => {
 };
 
 export const getPrinter = (orgId, id, fields = []) => {
-  let uri = `/groups/${orgId}/printers/${id}/`;
+  let uri = `/printers/${id}/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }

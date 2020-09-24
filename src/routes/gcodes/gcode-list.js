@@ -251,10 +251,7 @@ export default connect(
     gcodesList: state.gcodes.list,
     getAvailablePrinters: (without = []) =>
       state.printers.printers
-        .filter((p) => p.status && p.status.state === "Operational")
-        .filter((p) => p.client && p.client.connected)
-        .filter((p) => p.client && p.client.access_level === "unlocked")
-        .filter((p) => without.indexOf(p.id) === -1),
+        .filter((p) => p.client && p.client.octoprint && p.client.octoprint.printer && p.client.octoprint.printer.state.ready)
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
@@ -264,6 +261,7 @@ export default connect(
           "status",
           "webcam",
           "lights",
+          "client"
         ])
       ),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>

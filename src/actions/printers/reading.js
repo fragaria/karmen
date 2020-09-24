@@ -31,7 +31,7 @@ export const loadAndQueuePrinter = (orgid, id, fields) => (
           queueLoadPrinter(
             orgid,
             id,
-            ["job", "status", "webcam", "lights"],
+            ["job", "status", "webcam", "lights", "client"],
             poll
           )
         );
@@ -59,7 +59,7 @@ export const loadAndQueuePrinters = (orgid, fields) => (dispatch, getState) => {
               queueLoadPrinter(
                 orgid,
                 printer.id,
-                ["job", "status", "webcam", "lights"],
+                ["job", "status", "webcam", "lights", "client"],
                 poll
               )
             );
@@ -117,7 +117,7 @@ export const queueLoadPrinter = (orgid, id, fields, delay) => (
             queueLoadPrinter(
               orgid,
               id,
-              ["job", "status", "webcam", "lights"],
+              ["job", "status", "webcam", "lights", "client"],
               interval
             )
           );
@@ -132,7 +132,7 @@ export const queueLoadPrinter = (orgid, id, fields, delay) => (
 
 export const loadPrinters = createHttpAction(
   "PRINTERS_LOAD",
-  (orgid, fields = [], { dispatch, getState }) => {
+  (orgid, fields = ["client"], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.getPrinters, dispatch)(orgid, fields);
     });
@@ -141,7 +141,7 @@ export const loadPrinters = createHttpAction(
 
 export const loadPrintersOld = createHttpAction(
   "PRINTERS_LOAD",
-  (orgid, fields = [], { dispatch, getState }) => {
+  (orgid, fields = ["client"], { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.getPrinters, dispatch)(orgid, fields);
     });

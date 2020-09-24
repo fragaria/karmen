@@ -38,16 +38,10 @@ import {
 
 const ChangeConnectionModal = ({
   onPrinterConnectionChanged,
-  accessLevel,
   state,
   modal,
 }) => {
-  const printerTargetState =
-    accessLevel === "unlocked" &&
-    (["Offline", "Closed"].indexOf(state) > -1 ||
-      state.match(/printer is not/i))
-      ? "online"
-      : "offline";
+  const printerTargetState = state === 'offline' ? "online" : "offline";
 
   return (
     <>
@@ -139,11 +133,7 @@ const PrinterDetail = ({
             <h1 className="main-title">{printer.name}</h1>
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
-              {printer.client &&
-                printer.client.access_level === "unlocked" &&
-                (["Offline", "Closed"].indexOf(
-                  printer.status && printer.status.state
-                ) > -1 || printer.status.state.match(/printer is not/i) ? (
+              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer.state === null) ? (
                   <button
                     className="btn btn-xs"
                     type="submit"
@@ -165,7 +155,7 @@ const PrinterDetail = ({
                   >
                     Disconnect
                   </button>
-                ))}
+                )}
               {printer.client &&
                 printer.client.pill_info &&
                 printer.client.pill_info.update_available && (
@@ -191,10 +181,7 @@ const PrinterDetail = ({
           <div className="container">
             <ChangeConnectionModal
               modal={changeConnectionModal}
-              accessLevel={
-                printer.client ? printer.client.access_level : undefined
-              }
-              state={printer.status ? printer.status.state : undefined}
+              state={(printer && printer.client && printer.client.octoprint.printer && printer.client.octoprint.printer.state) ? 'online' : 'offline'}
               onPrinterConnectionChanged={setPrinterConnection}
             />
             {role === "admin" && (
@@ -247,16 +234,6 @@ const PrinterDetail = ({
               render={(props) => (
                 <ControlsTab
                   printer={printer}
-                  available={
-                    !(
-                      printer.client &&
-                      printer.client.access_level === "unlocked" &&
-                      (["Offline", "Closed"].indexOf(
-                        printer.status && printer.status.state
-                      ) > -1 ||
-                        printer.status.state.match(/printer is not/i))
-                    )
-                  }
                   temperatures={printer.status && printer.status.temperature}
                   movePrinthead={movePrinthead}
                   changeFanState={changeFanState}
@@ -309,7 +286,7 @@ export default connect(
         loadAndQueuePrinter(
           ownProps.match.params.orgid,
           ownProps.match.params.id,
-          ["job", "status", "webcam", "lights"]
+          ["job", "status", "webcam", "lights", "client"]
         )
       ),
     changeCurrentJobState: (action) =>

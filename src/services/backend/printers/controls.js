@@ -1,22 +1,26 @@
 import { performRequest } from "../utils";
 
 export const setPrinterConnection = (orgId, id, state) => {
-  return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/connection`,
-    appendData: {
-      id,
-      state,
-    },
-    data: {
-      state,
-    },
-    parseResponse: false,
-  });
+  if (state === 'online') {
+    return performRequest({
+      uri: `/printers/${id}/connection/`,
+      parseResponse: false,
+      successCodes: [204],
+    });
+  }
+  if (state === 'offline') {
+    return performRequest({
+      uri: `/printers/${id}/connection/`,
+      method: 'DELETE',
+      parseResponse: false,
+      successCodes: [204],
+    });
+  }
 };
 
 export const changeCurrentJob = (orgId, id, action) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/current-job`,
+    uri: `/printers/${id}/current-job`,
     appendData: {
       id,
       action,

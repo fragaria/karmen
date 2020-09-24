@@ -35,10 +35,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
   const cancelPrintModal = useMyModal();
 
   if (
-    !printer.status ||
-    !printer.client ||
-    ["Printing", "Paused"].indexOf(printer.status.state) === -1 ||
-    printer.client.access_level !== "unlocked"
+    !printer.client.octoprint.printer.state.printing || printer.client.octoprint.printer.state.paused
   ) {
     return <></>;
   }
@@ -48,7 +45,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
       <label>Print</label>
 
       <div>
-        {printer.status.state === "Paused" ? (
+        {printer.client.octoprint.printer.state.paused ? (
           <button
             className="btn btn-xs"
             onClick={() => {
@@ -278,7 +275,7 @@ const ExtrusionControl = ({ extrude }) => {
 };
 
 const PrinterLightsControl = ({ printer, changeLightsState }) => {
-  if (printer.lights === "unavailable") {
+  if (!printer.client.octoprint.lights) {
     return null;
   }
   return (
@@ -402,23 +399,19 @@ const ControlsTab = ({
 }) => {
   return (
     <div className="container">
-      {printer.client && !printer.client.connected && (
+      {(!printer || !printer.client || !printer.client.octoprint || printer.client.octoprint.error) ? (
         <div className="tabs-content-message">
           Controls are not available for a disconnected printer
         </div>
-      )}
-      {printer.client &&
+      )
+      /* {printer.client &&
         printer.client.connected &&
         printer.client.access_level !== "unlocked" && (
           <div className="tabs-content-message">
             Printer is locked and therefore controls are not available
           </div>
-        )}
-      {printer.client &&
-        printer.client.connected &&
-        printer.client.access_level === "unlocked" &&
-        !["Offline", "Closed"].includes(printer.status.state) &&
-        !printer.status.state.match(/printer is not/i) && (
+        )} */
+      :(printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.operational && (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterCurrentPrintControl
@@ -435,19 +428,19 @@ const ControlsTab = ({
 
               <ExtrusionControl extrude={extrude} />
 
-              <TemperatureControl
+              {/* <TemperatureControl
                 name="Tool temperature"
                 partName="tool0"
                 current={temperatures.tool0 && temperatures.tool0.actual}
                 setTemperature={setTemperature}
-              />
+              /> */}
 
-              <TemperatureControl
+              {/* <TemperatureControl
                 name="Bed temperature"
                 partName="bed"
                 current={temperatures.bed && temperatures.bed.actual}
                 setTemperature={setTemperature}
-              />
+              /> */}
             </div>
 
             <div className="axes">
@@ -455,7 +448,7 @@ const ControlsTab = ({
               <AxesZControl movePrinthead={movePrinthead} />
             </div>
           </div>
-        )}
+        ))}
       {printer.client &&
         printer.client.connected &&
         printer.client.access_level === "unlocked" &&
@@ -475,7 +468,7 @@ const ControlsTab = ({
               </strong>
             </p>
           </div>
-        )}
+          )}
     </div>
   );
 };

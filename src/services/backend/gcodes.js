@@ -66,11 +66,10 @@ export const uploadGcode = (orgId, path, file) => {
   var data = new FormData();
   data.append("file", file);
   // data.append("path", path);
-  data.append("name", file.name)
-  data.append("group", orgId)
+  data.append("name", file.name);
+  data.append("group", orgId);
   const headers = getJsonPostHeaders();
   headers.delete("content-type");
-  console.log(BASE_URL)
   return fetch(`${BASE_URL}/users/me/files/`, {
     method: "POST",
     headers: headers,

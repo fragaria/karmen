@@ -2,12 +2,13 @@ import { performRequest } from "./utils";
 
 export const printGcode = (orgId, id, printer) => {
   return performRequest({
-    uri: `/organizations/${orgId}/printjobs`,
+    uri: `/printers/${printer}/files/`,
     data: {
-      gcode: id,
-      printer,
+      file_id: id,
+      print: true,
     },
     successCodes: [201],
+    parseResponse: false
   });
 };
 
