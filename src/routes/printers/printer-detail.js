@@ -133,7 +133,7 @@ const PrinterDetail = ({
             <h1 className="main-title">{printer.name}</h1>
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
-              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer.state === null) ? (
+              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer && printer.client.octoprint.printer.state === null) ? (
                   <button
                     className="btn btn-xs"
                     type="submit"
