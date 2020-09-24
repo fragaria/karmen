@@ -63,6 +63,7 @@ const FormFields = ({ definition, updateValue }) => {
               value={definition[name].val}
               disabled={definition[name].disabled}
               readOnly={definition[name].readOnly}
+              maxLength={definition[name].maxLength}
               onChange={(e) => updateValue(name, e.target.value)}
             ></textarea>
             <span>

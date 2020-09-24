@@ -14,30 +14,11 @@ class PrinterEditForm extends React.Component {
         type: "text",
         required: true,
       },
-      filament_type: {
-        name: "Loaded filament type (PLA, PETG, ABS...)",
-        val: "",
-        type: "text",
-      },
-      filament_color: {
-        name: "Loaded filament color",
-        val: "",
-        type: "text",
-      },
-      bed_type: {
-        name: "Bed type",
-        val: "",
-        type: "text",
-      },
-      tool0_diameter: {
-        name: "Tool diameter",
-        val: "",
-        type: "text",
-      },
       note: {
         name: "Note",
         val: "",
         type: "textarea",
+        maxLength: 2048
       },
     },
   };
@@ -56,22 +37,6 @@ class PrinterEditForm extends React.Component {
         form: Object.assign({}, form, {
           name: Object.assign({}, form.name, {
             val: defaults.name,
-            error: null,
-          }),
-          filament_type: Object.assign({}, form.filament_type, {
-            val: defaults.filament_type,
-            error: null,
-          }),
-          filament_color: Object.assign({}, form.filament_color, {
-            val: defaults.filament_color,
-            error: null,
-          }),
-          bed_type: Object.assign({}, form.bed_type, {
-            val: defaults.bed_type,
-            error: null,
-          }),
-          tool0_diameter: Object.assign({}, form.tool0_diameter, {
-            val: defaults.tool0_diameter,
             error: null,
           }),
           note: Object.assign({}, form.note, {
@@ -101,25 +66,9 @@ class PrinterEditForm extends React.Component {
       });
       return;
     }
-    if (form.tool0_diameter.val && isNaN(parseFloat(form.tool0_diameter.val))) {
-      this.setState({
-        form: Object.assign({}, form, {
-          tool0_diameter: Object.assign({}, form.tool0_diameter, {
-            error: "Tool diameter has to be a decimal number",
-          }),
-        }),
-      });
-      return;
-    }
     onSubmit({
       name: form.name.val,
-      printer_props: {
-        filament_type: form.filament_type.val,
-        filament_color: form.filament_color.val,
-        bed_type: form.bed_type.val,
-        tool0_diameter: form.tool0_diameter.val,
-        note: form.note.val,
-      },
+      note: form.note.val,
     })
       .then((result) => {
         this.setState({

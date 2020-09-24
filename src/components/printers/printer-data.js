@@ -58,10 +58,10 @@ export const PrinterProperties = ({ printer }) => {
             </>
           )}
 
-          {props.note && (
+          {printer.note && (
             <>
               <dt className="term">Note:</dt>
-              <dd className="description">{props.note}</dd>
+              <dd className="description">{printer.note}</dd>
             </>
           )}
         </>

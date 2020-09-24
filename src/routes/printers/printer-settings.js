@@ -101,15 +101,16 @@ export default connect(
           "status",
           "webcam",
           "lights",
+          "client"
         ])
       ),
-    patchPrinter: (data) =>
-      dispatch(
+    patchPrinter: (data) => {
+      return dispatch(
         patchPrinter(
           ownProps.match.params.orgid,
           ownProps.match.params.id,
           data
         )
-      ),
+      )},
   })
 )(PrinterSettings);
