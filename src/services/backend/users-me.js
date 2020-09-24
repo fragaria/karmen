@@ -41,7 +41,7 @@ export const register = (email) => {
       email,
     },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 
@@ -52,13 +52,11 @@ export const activate = (
   passwordConfirmation
 ) => {
   return performRequest({
-    uri: `/users/me/activate`,
+    uri: `/users/`,
     useAuth: false,
     data: {
-      email,
-      activation_key: activationKey,
+      token: activationKey,
       password,
-      password_confirmation: passwordConfirmation,
     },
     parseResponse: false,
     successCodes: [204],
