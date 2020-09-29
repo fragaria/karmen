@@ -14,6 +14,12 @@ class PrinterEditForm extends React.Component {
         type: "text",
         required: true,
       },
+      api_key: {
+        name: "API key",
+        val: "",
+        type: "text",
+        required: true,
+      },
       note: {
         name: "Note",
         val: "",
@@ -41,6 +47,10 @@ class PrinterEditForm extends React.Component {
           }),
           note: Object.assign({}, form.note, {
             val: defaults.note,
+            error: null,
+          }),
+          api_key: Object.assign({}, form.api_key, {
+            val: defaults.api_key,
             error: null,
           }),
         }),

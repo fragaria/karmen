@@ -14,7 +14,6 @@ import SetActiveOrganization from "../../components/gateways/set-active-organiza
 import Progress from "../../components/printers/progress";
 import WebcamStream from "../../components/printers/webcam-stream";
 import PrinterState from "../../components/printers/printer-state";
-import PrinterAuthorizationForm from "../../components/printers/printer-authorization-form";
 import {
   PrinterProperties,
   PrinterProgress,
@@ -133,7 +132,9 @@ const PrinterDetail = ({
             <h1 className="main-title">{printer.name}</h1>
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
-              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer && !printer.client.octoprint.error && printer.client.octoprint.printer.state === null) ? (
+              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer && !printer.client.octoprint.error) &&
+              [printer.client.octoprint.printer.state === null ? 
+              (
                   <button
                     className="btn btn-xs"
                     type="submit"
@@ -155,7 +156,7 @@ const PrinterDetail = ({
                   >
                     Disconnect
                   </button>
-                )}
+                )]}
               {printer.client &&
                 printer.client.pill_info &&
                 printer.client.pill_info.update_available && (
@@ -184,12 +185,6 @@ const PrinterDetail = ({
               state={(printer && printer.client && printer.client.octoprint.printer && printer.client.octoprint.printer.state) ? 'online' : 'offline'}
               onPrinterConnectionChanged={setPrinterConnection}
             />
-            {role === "admin" && (
-              <PrinterAuthorizationForm
-                printer={printer}
-                onPrinterAuthorizationChanged={patchPrinter}
-              />
-            )}
             <dl className="dl-horizontal">
               <PrinterProgress printer={printer} />
               <PrinterProperties printer={printer} />
