@@ -35,7 +35,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
   const cancelPrintModal = useMyModal();
 
   if (
-    !printer.client.octoprint.printer.state.printing || printer.client.octoprint.printer.state.paused
+    !printer.client.octoprint.printer.state.printing && !printer.client.octoprint.printer.state.paused
   ) {
     return <></>;
   }

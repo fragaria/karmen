@@ -20,13 +20,9 @@ export const setPrinterConnection = (orgId, id, state) => {
 
 export const changeCurrentJob = (orgId, id, action) => {
   return performRequest({
-    uri: `/printers/${id}/current-job`,
+    uri: `/printers/${id}/${action}/`,
     appendData: {
       id,
-      action,
-    },
-    data: {
-      action,
     },
     parseResponse: false,
     successCodes: [204],
