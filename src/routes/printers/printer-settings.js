@@ -101,7 +101,8 @@ export default connect(
           "status",
           "webcam",
           "lights",
-          "client"
+          "client", 
+          "printjobs",
         ])
       ),
     patchPrinter: (data) => {

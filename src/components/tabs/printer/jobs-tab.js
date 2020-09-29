@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Listing from "../../listings/wrapper";
 import formatters from "../../../services/formatters";
 
 class PrintJobRow extends React.Component {
@@ -12,22 +11,23 @@ class PrintJobRow extends React.Component {
     return (
       <div className="list-item">
         <div className="list-item-content">
-          {gcode_data && gcode_data.available ? (
+          {gcode_data ? (
             <Link
               className="list-item-subtitle"
-              to={`/${orguuid}/gcodes/${gcode_data.id}`}
+              to={`/${orguuid}/gcodes/${gcode_data.file_id}`}
             >
-              {gcode_data.filename}
+              {gcode_data.file_name}
             </Link>
           ) : (
-            <span className="list-item-subtitle">{gcode_data.filename}</span>
+            <span className="list-item-subtitle">{gcode_data.file_name}</span>
           )}
 
           <small>
-            {formatters.bytes(gcode_data.size)}
-            {", "}
+            {"  "}
+            {formatters.bytes(gcode_data.file_size)}
+            {" - "}
             {formatters.datetime(started)}
-            {", "}
+            {" - "}
             {username}
           </small>
         </div>
@@ -36,19 +36,14 @@ class PrintJobRow extends React.Component {
   }
 }
 
-const JobsTab = ({ orguuid, jobList, loadJobsPage, clearJobsPages }) => {
+const JobsTab = ({ orguuid, jobList }) => {
+  const fields = jobList.map((job, i)=>{
+    return (<PrintJobRow key={i} orguuid={orguuid} gcode_data={job} started={job.started_on} username={job.username}/>);
+  });
+
   return (
     <div>
-      <Listing
-        enableFiltering={false}
-        itemList={jobList}
-        loadPage={loadJobsPage}
-        rowFactory={(j) => {
-          return <PrintJobRow key={j.id} {...j} orguuid={orguuid} />;
-        }}
-        sortByColumns={["started"]}
-        clearItemsPages={clearJobsPages}
-      />
+      {fields}
     </div>
   );
 };

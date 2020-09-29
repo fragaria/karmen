@@ -261,7 +261,8 @@ export default connect(
           "status",
           "webcam",
           "lights",
-          "client"
+          "client",
+          "printjobs"
         ])
       ),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>

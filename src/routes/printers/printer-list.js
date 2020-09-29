@@ -62,7 +62,7 @@ class PrinterList extends React.Component {
     if (printersLoaded) {
       load = loadPrinters(["status", "client"]);
     } else {
-      load = loadPrinters(["job", "status", "webcam", "lights", "client"]);
+      load = loadPrinters(["job", "status", "webcam", "lights", "client", "printjobs"]);
     }
     // We are periodically checking for new printers - this is
     // required for the printers to show up after the network scan

@@ -218,8 +218,8 @@ const PrinterDetail = ({
               render={(props) => (
                 <JobsTab
                   orguuid={match.params.orgid}
-                  jobList={jobList}
-                  loadJobsPage={loadJobsPage}
+                  jobList={printer.printjobs}
+                  // loadJobsPage={loadJobsPage}
                   clearJobsPages={clearJobsPages}
                 />
               )}
@@ -281,7 +281,7 @@ export default connect(
         loadAndQueuePrinter(
           ownProps.match.params.orgid,
           ownProps.match.params.id,
-          ["job", "status", "webcam", "lights", "client"]
+          ["job", "status", "webcam", "lights", "client", "printjobs"]
         )
       ),
     changeCurrentJobState: (action) =>

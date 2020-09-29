@@ -195,7 +195,7 @@ class PrintersTable extends React.Component {
     return (
       <NoPaginationListing
         defaultOrderBy="+name"
-        loadItems={() => loadPrinters(["job", "status", "webcam", "lights"])}
+        loadItems={() => loadPrinters(["job", "status", "webcam", "lights", "printjobs"])}
         itemsLoaded={printersLoaded}
         items={printersList}
         enableFiltering={true}
