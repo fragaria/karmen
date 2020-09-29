@@ -35,7 +35,7 @@ export const changeCurrentJob = (orgId, id, action) => {
 
 export const changeLights = (orgId, id) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/lights`,
+    uri: `/printers/${id}/lights`,
     appendData: {
       id,
     },
@@ -45,48 +45,44 @@ export const changeLights = (orgId, id) => {
 
 export const movePrinthead = (orgId, id, command, opts) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/printhead`,
+    uri: `/printers/${id}/move_head/`,
     appendData: {
       id,
     },
     data: {
-      command,
       ...opts,
     },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 
 export const changeFanState = (orgId, id, targetState) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/fan`,
+    uri: `/printers/${id}/fan_state/`,
     appendData: {
       id,
     },
     data: {
-      target: targetState,
+      state: targetState,
     },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 
 export const changeMotorsState = (orgId, id, targetState) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/motors`,
+    uri: `/printers/${id}/disable_motors/`,
     id,
-    data: {
-      target: targetState,
-    },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 
 export const extrude = (orgId, id, amount) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/extrusion`,
+    uri: `/printers/${id}/extrude/`,
     appendData: {
       id,
     },
@@ -94,7 +90,7 @@ export const extrude = (orgId, id, amount) => {
       amount,
     },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 

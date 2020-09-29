@@ -126,6 +126,7 @@ const AxesXYControl = ({ movePrinthead }) => {
               });
             }}
             busyChildren="o"
+            disabled
           >
             <span className="icon-home"></span>
           </BusyButton>
@@ -200,6 +201,7 @@ const AxesZControl = ({ movePrinthead }) => {
               });
             }}
             busyChildren="o"
+            disabled
           >
             <span className="icon-home"></span>
           </BusyButton>
@@ -337,7 +339,7 @@ const DirectControl = ({
           }}
           busyChildren="Working..."
         >
-          Off
+          Disable
         </BusyButton>
       </div>
       <PrinterLightsControl
