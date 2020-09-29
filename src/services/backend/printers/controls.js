@@ -96,25 +96,26 @@ export const extrude = (orgId, id, amount) => {
 
 export const setTemperature = (orgId, id, partName, target) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/temperatures/${partName}`,
+    uri: `/printers/${id}/temperature/`,
     appendData: {
       id,
     },
     data: {
-      target,
+      part: partName,
+      temperature: target,
     },
     parseResponse: false,
-    successCodes: [204],
+    successCodes: [201],
   });
 };
 
 export const startUpdate = (orgId, id) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/${id}/update/`,
+    uri: `/printers/${id}/update/`,
     appendData: {
       id,
     },
     parseResponse: false,
-    successCodes: [200],
+    successCodes: [201],
   });
 };

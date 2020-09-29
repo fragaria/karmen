@@ -430,19 +430,21 @@ const ControlsTab = ({
 
               <ExtrusionControl extrude={extrude} />
 
-              {/* <TemperatureControl
+              <TemperatureControl
                 name="Tool temperature"
                 partName="tool0"
-                current={temperatures.tool0 && temperatures.tool0.actual}
+                // current={temperatures.tool0 && temperatures.tool0.actual}
+                current={0}
                 setTemperature={setTemperature}
-              /> */}
+              />
 
-              {/* <TemperatureControl
+              <TemperatureControl
                 name="Bed temperature"
                 partName="bed"
-                current={temperatures.bed && temperatures.bed.actual}
+                // current={temperatures.bed && temperatures.bed.actual}
+                current={0}
                 setTemperature={setTemperature}
-              /> */}
+              />
             </div>
 
             <div className="axes">
