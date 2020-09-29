@@ -1,9 +1,8 @@
 import { persistUserProfile, dropUserProfile } from "../services/backend";
-import jwtdecode from "jwt-decode"
+import jwtdecode from "jwt-decode";
 
 const getUserDataFromApiResponse = (data, activeOrganization) => {
-
-  let prof =  {
+  let prof = {
     currentState:
       data.currentState ||
       (data.force_pwd_change ? "pwd-change-required" : "logged-in"),
@@ -15,14 +14,16 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
     systemRole: data.user.system_role || data.user.systemRole,
     accessTokenExpiresOn: data.accessTokenExpiresOn,
     organizations: data.groups.reduce(
-      (acc, curr) => (((acc[curr.id] = curr), acc)),
+      (acc, curr) => ((acc[curr.id] = curr), acc),
       {}
     ),
     activeOrganization: data.activeOrganization || activeOrganization,
   };
   if (data.access) {
     let decoded_token = jwtdecode(data.access);
-    prof.accessTokenExpiresOn = decoded_token.exp ? new Date(decoded_token.exp * 1000) : undefined;
+    prof.accessTokenExpiresOn = decoded_token.exp
+      ? new Date(decoded_token.exp * 1000)
+      : undefined;
   }
   return prof;
 };

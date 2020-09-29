@@ -190,7 +190,6 @@ class Menu extends React.Component {
                     </Link>
                   </li>
 
-
                   <li className="navigation-title">
                     <p className="navigation-title-content">
                       {activeOrganization.name}
@@ -198,7 +197,7 @@ class Menu extends React.Component {
                     </p>
                   </li>
 
-                   <li className="navigation-item">
+                  <li className="navigation-item">
                     <Link
                       to={`/${activeOrganization.id}/settings/tab-printers`}
                       onClick={() => this.setState({ navigation: false })}
@@ -207,7 +206,7 @@ class Menu extends React.Component {
                       Printers settings
                     </Link>
                   </li>
-                   <li className="navigation-item">
+                  <li className="navigation-item">
                     <Link
                       to={`/${activeOrganization.id}/settings/tab-users`}
                       onClick={() => this.setState({ navigation: false })}

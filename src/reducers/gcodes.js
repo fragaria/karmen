@@ -48,7 +48,7 @@ export default (
         pages = [newPage];
       }
       // This line does everything so far:
-      pages = {data: {items: action.payload.data}, startWith: null};
+      pages = { data: { items: action.payload.data }, startWith: null };
       return Object.assign({}, state, {
         list: {
           pages: [].concat(pages),
