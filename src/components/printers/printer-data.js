@@ -99,7 +99,7 @@ const PrinterTemperatures = ({ printer }) => {
 };
 
 export const PrinterProgress = ({ printer }) => {
-  const progress = printer.job;
+  const progress = printer.client && printer.client && printer.client.octoprint && printer.client.octoprint.printer.currentJob && printer.client.octoprint.printer.state.printing ? printer.client.octoprint.printer.currentJob : null;
   if (!progress || !progress.name) {
     return <PrinterTemperatures printer={printer} />;
   }
