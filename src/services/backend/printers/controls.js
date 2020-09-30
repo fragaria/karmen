@@ -40,8 +40,9 @@ export const changeLights = (orgId, id) => {
 };
 
 export const movePrinthead = (orgId, id, command, opts) => {
+  const uriCmd = command === 'jog' ? 'move_head' : 'home_head'
   return performRequest({
-    uri: `/printers/${id}/move_head/`,
+    uri: `/printers/${id}/${uriCmd}/`,
     appendData: {
       id,
     },
