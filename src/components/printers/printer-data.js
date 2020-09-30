@@ -71,7 +71,7 @@ export const PrinterProperties = ({ printer }) => {
 };
 
 const PrinterTemperatures = ({ printer }) => {
-  const temperatures = printer.status && printer.status.temperature;
+  const temperatures = printer.client && printer.client.octoprint && printer.client.octoprint.printer && printer.client.octoprint.printer.temperature ? printer.client.octoprint.printer.temperature : null;
 
   if (!temperatures) {
     return null;
