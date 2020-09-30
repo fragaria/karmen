@@ -182,7 +182,7 @@ const PrinterDetail = ({
           <div className="container">
             <ChangeConnectionModal
               modal={changeConnectionModal}
-              state={(printer && printer.client && printer.client.octoprint.printer && printer.client.octoprint.printer.state) ? 'online' : 'offline'}
+              state={(printer && printer.client && !printer.client.error && printer.client.octoprint.printer && printer.client.octoprint.printer.state) ? 'online' : 'offline'}
               onPrinterConnectionChanged={setPrinterConnection}
             />
             <dl className="dl-horizontal">
