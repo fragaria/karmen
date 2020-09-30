@@ -100,6 +100,7 @@ class GcodeDetail extends React.Component {
     }
     const { getAvailablePrinters } = this.props;
     const availablePrinters = getAvailablePrinters(printedOn);
+    console.log(availablePrinters);
     let { selectedPrinter } = this.state;
     if (!selectedPrinter) {
       selectedPrinter = availablePrinters.length ? availablePrinters[0].id : "";
@@ -249,12 +250,9 @@ class GcodeDetail extends React.Component {
 export default connect(
   (state) => ({
     printersLoaded: state.printers.printersLoaded,
-    getAvailablePrinters: (without = []) =>
+    getAvailablePrinters: () =>
       state.printers.printers
-        .filter((p) => p.status && p.status.state === "Operational")
-        .filter((p) => p.client && p.client.connected)
-        .filter((p) => p.client && p.client.access_level === "unlocked")
-        .filter((p) => without.indexOf(p.id) === -1),
+        .filter((p) => p.client && p.client.octoprint && p.client.octoprint && !p.client.octoprint.error && p.client.octoprint.printer && p.client.octoprint.printer.state && p.client.octoprint.printer.state.ready)
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
