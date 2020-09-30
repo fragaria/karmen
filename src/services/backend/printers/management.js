@@ -32,7 +32,6 @@ export const addPrinter = (
 };
 
 export const patchPrinter = (orgId, id, data) => {
-  console.log(data);
   return performRequest({
     uri: `/printers/${id}/`,
     method: "PATCH",

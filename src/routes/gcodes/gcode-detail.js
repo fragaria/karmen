@@ -100,12 +100,10 @@ class GcodeDetail extends React.Component {
     }
     const { getAvailablePrinters } = this.props;
     const availablePrinters = getAvailablePrinters(printedOn);
-    console.log(availablePrinters);
     let { selectedPrinter } = this.state;
     if (!selectedPrinter) {
       selectedPrinter = availablePrinters.length ? availablePrinters[0].id : "";
     }
-    console.log(gcode)
     return (
       <section className="content">
         <div className="container">

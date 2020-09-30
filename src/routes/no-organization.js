@@ -3,7 +3,6 @@ import { Redirect, Link } from "react-router-dom";
 import { connect } from "react-redux";
 
 const NoOrganization = ({ activeOrganization }) => {
-  console.log(activeOrganization);
   if (activeOrganization) {
     return <Redirect to={`/${activeOrganization.id}`} />;
   }
