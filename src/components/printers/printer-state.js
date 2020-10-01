@@ -12,8 +12,8 @@ export const PrinterState = ({ printer }) => {
   //     printerStatusClass = "text-normal";
   //   }
   // }
-  if (!printer || !printer.client ||!printer.client.octoprint) {
-    return <>?</>
+  if (!printer || !printer.client || !printer.client.octoprint) {
+    return <>Status unknown</>
   }
   if (printer.client.octoprint.error) {
     return <>{printer.client.octoprint.error.detail}</>
