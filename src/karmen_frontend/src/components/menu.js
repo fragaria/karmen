@@ -185,7 +185,7 @@ class Menu extends React.Component {
                     <Link
                       to="/users/me"
                       onClick={() => this.setState({ navigation: false })}
-                      id="navigation-organizations"
+                      id="navigation-account-settings"
                     >
                       Account settings
                     </Link>
