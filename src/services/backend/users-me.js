@@ -75,17 +75,6 @@ export const authenticate = (username, password) => {
   });
 };
 
-export const authenticateFresh = (username, password) => {
-  return performRequest({
-    uri: `/tokens/refresh/`,
-    useAuth: false,
-    data: {
-      username,
-      password,
-    },
-    successCodes: [200],
-  });
-};
 
 export const refreshAccessToken = () => {
   return performRequest({
@@ -119,17 +108,16 @@ export const logout = () => {
 export const changePassword = (
   password,
   new_password,
-  new_password_confirmation
 ) => {
   return performRequest({
-    uri: `/users/me/password`,
+    uri: `/users/me/`,
     method: "PATCH",
     data: {
-      password,
-      new_password,
-      new_password_confirmation,
+      old_password: password,
+      password: new_password,
     },
-    successCodes: [200],
+    successCodes: [204],
+    parseResponse: false,
   });
 };
 

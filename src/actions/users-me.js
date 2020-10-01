@@ -120,12 +120,6 @@ export const authenticate = createHttpAction(
   }
 );
 
-export const authenticateFresh = createHttpAction(
-  "USER_AUTHENTICATE_FRESH",
-  (username, password) => {
-    return backend.authenticateFresh(username, password);
-  }
-);
 
 export const refreshToken = createHttpAction(
   "USER_REFRESH_ACCESS_TOKEN",
@@ -140,12 +134,8 @@ export const changePassword = createHttpAction(
     password,
     new_password,
     new_password_confirmation,
-    { dispatch, getState }
   ) => {
-    const { me } = getState();
-    return dispatch(authenticateFresh(me.username, password)).then((r) =>
-      backend.changePassword(password, new_password, new_password_confirmation)
-    );
+     return backend.changePassword(password, new_password, new_password_confirmation)
   }
 );
 
