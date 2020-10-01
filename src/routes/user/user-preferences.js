@@ -25,7 +25,7 @@ const UserPreferences = ({ match, ...rest }) => {
         tabClassName="react-tabs__tab"
         activeTabClassName="react-tabs__tab--selected"
       >
-        <NavTab to="/tab-api-tokens">API tokens</NavTab>
+        {/*<NavTab to="/tab-api-tokens">API tokens</NavTab>*/}
         <NavTab to="/tab-account">Account</NavTab>
       </RoutedTabs>
 
@@ -33,7 +33,7 @@ const UserPreferences = ({ match, ...rest }) => {
         <Route
           exact
           path={`${match.url}`}
-          render={() => <Redirect replace to={`${match.url}/tab-api-tokens`} />}
+          render={() => <Redirect replace to={`${match.url}/tab-account`} />}
         />
         <Route
           path={`${match.url}/tab-api-tokens`}
