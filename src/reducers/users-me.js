@@ -81,8 +81,6 @@ export default (
       });
     case "USER_REFRESH_ACCESS_TOKEN_SUCCEEDED":
       return Object.assign({}, state);
-    case "USER_CHANGE_PASSWORD_SUCCEEDED":
-     return state;
     case "USER_CLEAR_ENDED":
       dropUserProfile();
       return Object.assign({}, state, {
