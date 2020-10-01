@@ -195,7 +195,7 @@ class Menu extends React.Component {
                     <Link
                       to={`/${activeOrganization.uuid}/settings/tab-printers`}
                       onClick={() => this.setState({ navigation: false })}
-                      id="navigation-organizations"
+                      id="navigation-settings-printers"
                     >
                       Printers settings
                     </Link>
