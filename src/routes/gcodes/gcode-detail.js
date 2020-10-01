@@ -104,6 +104,7 @@ class GcodeDetail extends React.Component {
     if (!selectedPrinter) {
       selectedPrinter = availablePrinters.length ? availablePrinters[0].id : "";
     }
+
     return (
       <section className="content">
         <div className="container">
@@ -260,7 +261,7 @@ export default connect(
           "status",
           "webcam",
           "lights",
-          "client", 
+          "client",
           "printjobs"
         ])
       ),

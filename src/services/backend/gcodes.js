@@ -8,7 +8,7 @@ export const getGcodes = (
   startWith = null,
   orderBy = null,
   displayFilter = null,
-  limit = 15,
+  limit = 100,
   fields = []
 ) => {
   let uri = `/groups/${orgId}/files/?limit=${limit}`;
@@ -39,7 +39,7 @@ export const getGcodes = (
 };
 
 export const getGcode = (orgId, id, fields = []) => {
-  let uri = `/groups/${orgId}/files/${id}/`;
+  let uri = `/files/${id}/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
@@ -62,10 +62,9 @@ export const deleteGcode = (orgId, id) => {
   });
 };
 
-export const uploadGcode = (orgId, path, file) => {
+export const uploadGcode = (orgId, file) => {
   var data = new FormData();
   data.append("file", file);
-  // data.append("path", path);
   data.append("name", file.name);
   data.append("group", orgId);
   const headers = getJsonPostHeaders();

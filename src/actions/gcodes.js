@@ -53,11 +53,10 @@ export const deleteGcode = createHttpAction(
 
 export const uploadGcode = createHttpAction(
   "GCODES_UPLOAD",
-  (orgid, path, toUpload, { dispatch, getState }) => {
+  (orgid, toUpload, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orgid, getState, () => {
       return retryIfUnauthorized(backend.uploadGcode, dispatch)(
         orgid,
-        path,
         toUpload
       );
     });

@@ -133,17 +133,6 @@ export const changePassword = (
   });
 };
 
-export const patchMe = (username, email) => {
-  return performRequest({
-    uri: `/users/me`,
-    method: "PATCH",
-    data: {
-      username,
-      email,
-    },
-    successCodes: [200],
-  });
-};
 
 export const loadApiTokens = () => {
   return performRequest({

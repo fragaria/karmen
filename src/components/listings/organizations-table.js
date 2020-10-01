@@ -56,7 +56,8 @@ const OrganizationsTable = ({
       loadItems={loadOrganizations}
       itemsLoaded={organizationsLoaded}
       items={organizationsList}
-      enableFiltering={true}
+      enableFiltering={false}
+      enableSorting={false}
       sortByColumns={["name"]}
       filterByColumns={["name"]}
       rowFactory={(u) => {
