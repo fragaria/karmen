@@ -139,5 +139,5 @@ class AddGcode extends React.Component {
 
 export default connect(null, (dispatch, ownProps) => ({
   uploadGcode: (path, toUpload) =>
-    dispatch(uploadGcode(ownProps.match.params.orgid, path, toUpload)),
+    dispatch(uploadGcode(ownProps.match.params.orgid, toUpload)),
 }))(AddGcode);

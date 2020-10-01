@@ -62,10 +62,9 @@ export const deleteGcode = (orgId, id) => {
   });
 };
 
-export const uploadGcode = (orgId, path, file) => {
+export const uploadGcode = (orgId, file) => {
   var data = new FormData();
   data.append("file", file);
-  // data.append("path", path);
   data.append("name", file.name);
   data.append("group", orgId);
   const headers = getJsonPostHeaders();
