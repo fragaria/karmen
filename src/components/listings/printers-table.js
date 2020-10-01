@@ -108,19 +108,6 @@ const PrintersTableRow = ({
         to={`/${orguuid}/printers/${printer.id}`}
       >
         <span className="list-item-title">{printer.name}</span>
-        <span className="text-mono">
-          {window.env.IS_CLOUD_INSTALL
-            ? printer.token
-            : printer.hostname
-            ? `${printer.hostname}${printer.port ? `:${printer.port}` : ""}${
-                printer.path ? `${printer.path}` : ""
-              } (${printer.ip}${printer.port ? `:${printer.port}` : ""}${
-                printer.path ? `${printer.path}` : ""
-              })`
-            : `${printer.ip}${printer.port ? `:${printer.port}` : ""}${
-                printer.path ? `${printer.path}` : ""
-              }`}
-        </span>
       </Link>
 
       <CtaDropdown
