@@ -78,7 +78,7 @@ export const authenticate = (username, password) => {
 
 export const refreshAccessToken = () => {
   return performRequest({
-    uri: `/tokens/refresh/?fields=user,group`,
+    uri: `/legacy-api/tokens/refresh/?fields=groups,user,role`,
     useAuth: false,
     data: { refresh: localStorage.getItem("karmen_refresh_token") },
     headers: {
