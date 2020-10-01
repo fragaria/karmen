@@ -6,7 +6,7 @@ import * as backend from "../services/backend";
 
 export const retryIfUnauthorized = (func, dispatch) => {
   return (...args) => {
-      return func(...args).catch((err) => {
+    return func(...args).catch((err) => {
       if (dispatch && err instanceof HttpError && (err.response.status === 401 || err.response.status === 403)) {
         return dispatch(refreshToken())
           .then((r) => {
