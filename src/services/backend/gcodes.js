@@ -11,6 +11,9 @@ export const getGcodes = (
   limit = 100,
   fields = []
 ) => {
+  let uri = `/groups/${orgId}/files/`;
+  /*
+  I don't want to delete this so it can be used when we implement the filters
   let uri = `/groups/${orgId}/files/?limit=${limit}`;
   if (fields) {
     uri += `&fields=${fields.join(",")}`;
@@ -24,16 +27,17 @@ export const getGcodes = (
   if (displayFilter) {
     uri += `&search=${encodeURIComponent(displayFilter)}`;
   }
+  */
   return performRequest({
     uri,
     method: "GET",
-    appendData: {
-      startWith,
-      orderBy,
-      filter: displayFilter,
-      limit,
-      fields,
-    },
+    // appendData: {
+    //   startWith,
+    //   orderBy,
+    //   filter: displayFilter,
+    //   limit,
+    //   fields,
+    // },
     successCodes: [200],
   });
 };
