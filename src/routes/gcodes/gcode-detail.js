@@ -115,7 +115,7 @@ class GcodeDetail extends React.Component {
 
             <dt className="term">Uploaded at: </dt>
             <dd className="description">
-              {formatters.datetime(gcode.uploaded)}
+              {formatters.datetime(gcode.uploadedOn)}
             </dd>
 
             <dt className="term">Size: </dt>
