@@ -132,10 +132,11 @@ const PrinterDetail = ({
             <h1 className="main-title">{printer.name}</h1>
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
-              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer && !printer.client.octoprint.error) &&
-              [printer.client.octoprint.printer.state === null ? 
+              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer) &&
+              [printer.client.octoprint.printer.length ? 
               (
                   <button
+                    key={1}
                     className="btn btn-xs"
                     type="submit"
                     onClick={(e) => {
@@ -147,6 +148,7 @@ const PrinterDetail = ({
                   </button>
                 ) : (
                   <button
+                    key={2}
                     className="btn btn-xs"
                     type="submit"
                     onClick={(e) => {
