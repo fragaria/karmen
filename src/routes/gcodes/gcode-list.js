@@ -60,7 +60,7 @@ const GcodeTableRow = ({
   analysis,
   id,
   size,
-  uploaded,
+  uploadedOn,
   uploadedBy,
   href,
   name,
@@ -98,7 +98,7 @@ const GcodeTableRow = ({
           {name}
         </span>
         <span>{formatters.bytes(size)}, </span>
-        <span>{formatters.datetime(uploaded)}, </span>
+        <span>{formatters.datetime(uploadedOn)}, </span>
         <span>{uploadedBy.username}</span>
       </Link>
 
