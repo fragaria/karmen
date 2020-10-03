@@ -64,7 +64,7 @@ const FormFields = ({ definition, updateValue }) => {
               disabled={definition[name].disabled}
               readOnly={definition[name].readOnly}
               maxLength={definition[name].maxLength}
-              onChange={(e) => updateValue(name, e.target.value)}
+              onChange={(e) => updateValue(name, e.target.value, e.target)}
             ></textarea>
             <span>
               {definition[name].helpText && (
@@ -87,7 +87,7 @@ const FormFields = ({ definition, updateValue }) => {
               checked={definition[name].val}
               disabled={definition[name].disabled}
               readOnly={definition[name].readOnly}
-              onChange={(e) => updateValue(name, e.target.checked)}
+              onChange={(e) => updateValue(name, e.target.checked, e.target)}
             />
             <span>
               {definition[name].helpText && (
@@ -120,7 +120,7 @@ const FormFields = ({ definition, updateValue }) => {
               value={definition[name].val}
               disabled={definition[name].disabled}
               readOnly={definition[name].readOnly}
-              onChange={(e) => updateValue(name, e.target.value)}
+              onChange={(e) => updateValue(name, e.target.value, e.target)}
             >
               {opts}
             </select>
@@ -144,7 +144,7 @@ const FormFields = ({ definition, updateValue }) => {
             autoComplete="new-password"
             className="honeypot-field"
             disabled={definition[name].disabled}
-            onChange={(e) => updateValue(name, e.target.value)}
+            onChange={(e) => updateValue(name, e.target.value, e.target)}
           />
         );
       case "collapsible":

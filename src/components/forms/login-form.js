@@ -118,7 +118,7 @@ class LoginForm extends React.Component {
     const { message, messageOk, loginForm } = this.state;
     const { loginInformation, onCancel } = this.props;
 
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { loginForm } = this.state;
       this.setState({
         loginForm: Object.assign({}, loginForm, {

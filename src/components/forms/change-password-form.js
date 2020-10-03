@@ -108,7 +108,7 @@ class ChangePasswordForm extends React.Component {
 
   render() {
     const { message, messageOk, changePwdForm } = this.state;
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { changePwdForm } = this.state;
       this.setState({
         message: "",
