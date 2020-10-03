@@ -139,7 +139,7 @@ class RegisterConfirmation extends React.Component {
       activationKey,
       activationKeyExpires,
     } = this.state;
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { passwordForm } = this.state;
       this.setState({
         passwordForm: Object.assign({}, passwordForm, {

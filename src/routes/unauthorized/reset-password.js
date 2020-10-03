@@ -130,7 +130,7 @@ class ResetPassword extends React.Component {
       pwdResetKey,
       pwdResetKeyExpires,
     } = this.state;
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { passwordForm } = this.state;
       this.setState({
         passwordForm: Object.assign({}, passwordForm, {

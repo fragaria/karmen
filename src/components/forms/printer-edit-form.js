@@ -97,7 +97,7 @@ class PrinterEditForm extends React.Component {
   render() {
     const { message, messageOk, form } = this.state;
     const { onCancel } = this.props;
-    const updateValue = (name, value) => {
+    const updateValue = (name, value, target) => {
       const { form } = this.state;
       this.setState({
         form: Object.assign({}, form, {
