@@ -283,7 +283,7 @@ export default connect(
         loadAndQueuePrinter(
           ownProps.match.params.orgid,
           ownProps.match.params.id,
-          ["job", "status", "webcam", "lights", "client", "printjobs"]
+          ["job", "status", "webcam", "lights", "client", "printjobs", "api_key"]
         )
       ),
     changeCurrentJobState: (action) =>

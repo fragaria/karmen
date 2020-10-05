@@ -27,7 +27,6 @@ export const PrinterState = ({ printer }) => {
     statuses = Object.keys(printerStates).filter((s) => printerStates[s])
   }
   return (
-    // printer.client.octoprint.printer.state. 
     <>Printer is {statuses.join(', ')}</>
   );
   // return (

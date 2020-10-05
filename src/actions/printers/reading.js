@@ -31,7 +31,7 @@ export const loadAndQueuePrinter = (orgid, id, fields) => (
           queueLoadPrinter(
             orgid,
             id,
-            ["job", "status", "webcam", "lights", "client", "printjobs"],
+            ["job", "status", "webcam", "lights", "client", "printjobs", "api_key"],
             poll
           )
         );
@@ -59,7 +59,7 @@ export const loadAndQueuePrinters = (orgid, fields) => (dispatch, getState) => {
               queueLoadPrinter(
                 orgid,
                 printer.id,
-                ["job", "status", "webcam", "lights", "client", "printjobs"],
+                ["job", "status", "webcam", "lights", "client", "printjobs", "api_key"],
                 poll
               )
             );
@@ -117,7 +117,7 @@ export const queueLoadPrinter = (orgid, id, fields, delay) => (
             queueLoadPrinter(
               orgid,
               id,
-              ["job", "status", "webcam", "lights", "client", "printjobs"],
+              ["job", "status", "webcam", "lights", "client", "printjobs", "api_key"],
               interval
             )
           );

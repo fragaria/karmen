@@ -79,6 +79,7 @@ class PrinterEditForm extends React.Component {
     onSubmit({
       name: form.name.val,
       note: form.note.val,
+      api_key: form.api_key.val
     })
       .then((result) => {
         this.setState({

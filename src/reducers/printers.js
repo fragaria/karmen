@@ -82,6 +82,7 @@ export default (
         printers: getSortedPrinters(printers),
       });
     case "PRINTERS_PATCH_SUCCEEDED":
+      console.log(action.payload.data);
       if (action.payload.organizationId !== activeOrganizationId) {
         return state;
       }

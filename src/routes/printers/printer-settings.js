@@ -103,6 +103,7 @@ export default connect(
           "lights",
           "client", 
           "printjobs",
+          "api_key",
         ])
       ),
     patchPrinter: (data) => {
