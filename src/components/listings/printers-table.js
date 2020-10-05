@@ -52,44 +52,6 @@ const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   );
 };
 
-const PrinterSettingsModal = ({
-  printer,
-  onPrinterUpdate,
-  modal,
-  pauseUpdates,
-}) => {
-  const onSettingsChanged = (newSettings) =>
-    onPrinterUpdate(printer.id, newSettings).then((r) => {
-      if (r.status === 200) {
-        pauseUpdates(true);
-        modal.closeModal();
-      }
-    });
-
-  return (
-    <>
-      {modal.isOpen && (
-        <modal.Modal>
-          <h1 className="modal-title text-center">
-            Change properties of {printer.name}
-          </h1>
-
-          <PrinterSettingsForm
-            printer={printer}
-            onPrinterSettingsChanged={onSettingsChanged}
-            onPrinterSettingsCancelled={() => {
-              pauseUpdates(true);
-              modal.closeModal();
-            }}
-          />
-
-          <div className="cta-box text-center"></div>
-        </modal.Modal>
-      )}
-    </>
-  );
-};
-
 const PrintersTableRow = ({
   orguuid,
   printer,
@@ -98,7 +60,6 @@ const PrintersTableRow = ({
   pauseUpdates,
 }) => {
   const deletePrinterModal = useMyModal();
-  const printerSettingsModal = useMyModal();
   const [ctaListExpanded, setCtaListExpanded] = useState();
   return (
     <div className="list-item" role="listitem">
@@ -117,17 +78,11 @@ const PrintersTableRow = ({
         }}
       >
         <span className="dropdown-title">{printer.name}</span>
-        <button
-          className="dropdown-item text-secondary"
-          onClick={(e) => {
-            setCtaListExpanded(false);
-            printerSettingsModal.openModal(e);
-            pauseUpdates(false);
-          }}
-        >
+        <Link to={`/${orguuid}/printers/${printer.id}/tab-settings`} 
+        className="dropdown-item text-secondary">
           <i className="icon-edit"></i>
           Printer settings
-        </button>
+        </Link>
         <button
           className="dropdown-item text-secondary"
           onClick={(e) => {
@@ -139,12 +94,6 @@ const PrintersTableRow = ({
           Delete printer
         </button>
       </CtaDropdown>
-      <PrinterSettingsModal
-        printer={printer}
-        onPrinterUpdate={onPrinterUpdate}
-        modal={printerSettingsModal}
-        pauseUpdates={pauseUpdates}
-      />
       <DeletePrinterModal
         printer={printer}
         onPrinterDelete={onPrinterDelete}
