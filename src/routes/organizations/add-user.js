@@ -76,9 +76,15 @@ class AddUser extends React.Component {
           });
         })
         .catch((err) => {
+          console.log(err)
           if (err instanceof HttpError && err.response.status === 409) {
             return this.setState({
               message: "User with such email is already registered",
+            });
+          }
+          if (err instanceof HttpError && err.response.status === 404) {
+            return this.setState({
+              message: "This user has not registered yet.",
             });
           }
           this.setState({
