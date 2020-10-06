@@ -189,16 +189,6 @@ class Menu extends React.Component {
                     </Link>
                   </li>
 
-                  <li className="navigation-item">
-                    <Link
-                      to={`/${activeOrganization.uuid}/settings/tab-printers`}
-                      onClick={() => this.setState({ navigation: false })}
-                      id="navigation-settings-printers"
-                    >
-                      Printers settings
-                    </Link>
-                  </li>
-
                   <li className="navigation-title">
                     <p className="navigation-title-content">
                       {activeOrganization.name}
