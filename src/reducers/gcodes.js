@@ -4,7 +4,6 @@ const initialListState = {
     orderBy: "-uploaded",
     filter: null,
     limit: 10,
-    fields: [],
   },
 };
 
@@ -15,7 +14,6 @@ export default (
       orderBy: "-uploaded",
       filter: null,
       limit: 10,
-      fields: [],
     },
   },
   action
@@ -23,7 +21,7 @@ export default (
   switch (action.type) {
     case "GCODES_LOAD_PAGE_SUCCEEDED":
       // TODO: refactor bellow with pagination from backend:
-      const { orderBy, filter, limit, fields } = state.list;
+      const { orderBy, filter, limit } = state.list;
       const newPage = {
         data: action.payload.data,
         startWith: action.payload.startWith,
@@ -33,8 +31,7 @@ export default (
       if (
         filter === action.payload.filter &&
         orderBy === action.payload.orderBy &&
-        limit === action.payload.limit &&
-        fields.length === action.payload.fields.length // TODO This is a bad check, it should compare array contents
+        limit === action.payload.limit 
       ) {
         const origPageIndex = pages.findIndex(
           (p) => p.startWith === action.payload.startWith
@@ -55,7 +52,6 @@ export default (
           orderBy: action.payload.orderBy,
           filter: action.payload.filter,
           limit: action.payload.limit,
-          fields: action.payload.fields,
         },
       });
     case "GCODES_DELETE_SUCCEEDED":
