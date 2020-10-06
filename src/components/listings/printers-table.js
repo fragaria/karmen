@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import CtaDropdown from "./cta-dropdown";
 import NoPaginationListing from "./no-pagination-wrapper";
 import { useMyModal } from "../utils/modal";
-import PrinterSettingsForm from "../printers/printer-settings";
 
 const DeletePrinterModal = ({ printer, onPrinterDelete, modal }) => {
   return (

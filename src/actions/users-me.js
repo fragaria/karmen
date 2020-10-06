@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import jwt_decode from "jwt-decode";
 import { createHttpAction } from "./utils";
 import { HttpError, UnauthorizedError } from "../errors";
