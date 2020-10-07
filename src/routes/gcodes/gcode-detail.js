@@ -71,7 +71,8 @@ class GcodeDetail extends React.Component {
     });
 
     getDownloadUrl(match.params.id).then((url) => {
-      this.setState({ downloadUrl: url });
+      const token = localStorage.getItem("karmen_access_token");
+      this.setState({ downloadUrl: `${url}?authorization=${token}` });
     });
   }
 
