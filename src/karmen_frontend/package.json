@@ -20,7 +20,7 @@
     "type": "git"
   },
   "dependencies": {
-    "@sentry/browser": "^5.24.2",
+    "@sentry/browser": "^5.25.0",
     "core-js": "^3.6.5",
     "dayjs": "^1.9.1",
     "js-cookie": "^2.2.1",
