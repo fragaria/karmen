@@ -45,7 +45,7 @@ const JobsTab = ({ orguuid, jobList }) => {
   });
 
   return (
-    <div>
+    <div className="list">
       {fields}
     </div>
   );
