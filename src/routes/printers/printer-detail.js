@@ -325,9 +325,9 @@ export default connect(
       dispatch(
         clearJobsPages(ownProps.match.params.orgid, ownProps.match.params.id)
       ),
-    changeLights: () =>
+    changeLights: (ledState) =>
       dispatch(
-        changeLights(ownProps.match.params.orgid, ownProps.match.params.id)
+        changeLights(ownProps.match.params.orgid, ownProps.match.params.id, ledState)
       ),
     movePrinthead: (command, opts) =>
       dispatch(

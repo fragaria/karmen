@@ -30,9 +30,9 @@ export const changeCurrentJob = createHttpAction(
 
 export const changeLights = createHttpAction(
   "PRINTERS_CHANGE_LIGHTS",
-  (orguuid, id, { dispatch, getState }) => {
+  (orguuid, id, color, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.changeLights, dispatch)(orguuid, id);
+      return retryIfUnauthorized(backend.changeLights, dispatch)(orguuid, id, color);
     });
   }
 );
