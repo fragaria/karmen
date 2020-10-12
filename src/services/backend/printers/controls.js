@@ -29,12 +29,16 @@ export const changeCurrentJob = (orgId, id, action) => {
   });
 };
 
-export const changeLights = (orgId, id) => {
+export const changeLights = (orgId, id, color) => {
   return performRequest({
-    uri: `/printers/${id}/lights`,
+    uri: `/printers/${id}/led/`,
     appendData: {
       id,
     },
+    data: {
+      color,
+    },
+    method: 'put',
     successCodes: [200],
   });
 };

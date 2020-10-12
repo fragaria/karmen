@@ -275,7 +275,7 @@ const ExtrusionControl = ({ extrude }) => {
 };
 
 const PrinterLightsControl = ({ printer, changeLightsState }) => {
-  if (!printer.client.octoprint.lights) {
+  if (!printer.client.octoprint.plugins.includes('awesome_karmen_led')) {
     return null;
   }
   return (
@@ -285,10 +285,18 @@ const PrinterLightsControl = ({ printer, changeLightsState }) => {
         <BusyButton
           className="btn btn-xs"
           type="button"
-          onClick={changeLightsState}
+          onClick={() => changeLightsState("#ffffff")}
           busyChildren="Switching lights..."
         >
-          {printer.lights === "on" ? "Off" : "On"}
+          On
+        </BusyButton>
+        <BusyButton
+          className="btn btn-xs"
+          type="button"
+          onClick={() => changeLightsState("#000000")}
+          busyChildren="Switching lights..."
+        >
+          Off
         </BusyButton>
       </div>
     </>
@@ -464,11 +472,8 @@ const ControlsTab = ({
             </div>
           </div>
         ))}
-      {printer.client &&
-        printer.client.connected &&
-        printer.client.access_level === "unlocked" &&
-        (["Offline", "Closed"].includes(printer.status.state) ||
-          printer.status.state.match(/printer is not/i)) && (
+      {printer.client.pill &&
+        !printer.client.pill.error && (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterLightsControl
