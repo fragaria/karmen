@@ -22,7 +22,7 @@ import {
 import {
   getJobsPage,
   clearJobsPages,
-  loadAndQueuePrinter,
+  loadPrinters,
   patchPrinter,
   setPrinterConnection,
   changeCurrentJob,
@@ -79,7 +79,7 @@ const ChangeConnectionModal = ({
 const PrinterDetail = ({
   match,
   printer,
-  loadPrinter,
+  loadPrinters,
   setPrinterConnection,
   changeCurrentJobState,
   patchPrinter,
@@ -96,16 +96,29 @@ const PrinterDetail = ({
   startUpdate,
 }) => {
   const changeConnectionModal = useMyModal();
-  const [printerLoaded, setPrinterLoaded] = useState(false);
+  const [printersLoaded, setPrintersLoaded] = useState(false);
+  const [timer, setTimer] = useState(false);
   useEffect(() => {
     if (!printer) {
-      loadPrinter().then(() => setPrinterLoaded(true));
+      loadPrinters().then(() => setPrintersLoaded(true));
     } else {
-      setPrinterLoaded(true);
+      setPrintersLoaded(true);
     }
-  }, [printer, loadPrinter]);
+  }, [printer, loadPrinters]);
 
-  if (!printerLoaded) {
+  useEffect(
+    () => {
+      let timer = setInterval(() => {
+        loadPrinters(); 
+        setTimer(timer);
+      }, 3000)
+      return () => {
+        clearInterval(timer);
+      }
+    }, [timer, loadPrinters]
+  )
+
+  if (!printersLoaded) {
     return (
       <div>
         <SetActiveOrganization />
@@ -278,11 +291,10 @@ export default connect(
     },
   }),
   (dispatch, ownProps) => ({
-    loadPrinter: () =>
+    loadPrinters: () =>
       dispatch(
-        loadAndQueuePrinter(
+        loadPrinters(
           ownProps.match.params.orgid,
-          ownProps.match.params.id,
           ["job", "status", "webcam", "lights", "client", "printjobs", "api_key"]
         )
       ),

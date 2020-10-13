@@ -5,7 +5,7 @@ import Loader from "../../components/utils/loader";
 import SetActiveOrganization from "../../components/gateways/set-active-organization";
 import PrinterState from "../../components/printers/printer-state";
 import WebcamStream from "../../components/printers/webcam-stream";
-import { loadAndQueuePrinters, setPrinterViewType } from "../../actions";
+import { loadPrinters, setPrinterViewType } from "../../actions";
 import formatters from "../../services/formatters";
 
 const SwitchView = ({ viewType, onViewTypeChange }) => {
@@ -57,21 +57,11 @@ class PrinterList extends React.Component {
   }
 
   getPrinters() {
-    const { printersLoaded, loadPrinters } = this.props;
-    let load;
-    if (printersLoaded) {
-      load = loadPrinters(["status", "client"]);
-    } else {
-      load = loadPrinters(["job", "status", "webcam", "lights", "client", "printjobs", "api_key", "note"]);
-    }
-    // We are periodically checking for new printers - this is
-    // required for the printers to show up after the network scan
-    // or added in a different client.
-    // But we are checking only for the local db data, so it should be blazing fast.
-    load.finally(() => {
-      this.setState({
-        timer: setTimeout(this.getPrinters, 60 * 1000),
-      });
+    const { loadPrinters } = this.props;
+    loadPrinters(["status", "client"]);
+    let timeout = setTimeout(this.getPrinters, 3 * 1000);
+    this.setState({
+      timer: timeout,
     });
   }
 
@@ -202,8 +192,9 @@ export default connect(
     role: state.me.activeOrganization && state.me.activeOrganization.role,
   }),
   (dispatch, ownProps) => ({
-    loadPrinters: (fields) =>
-      dispatch(loadAndQueuePrinters(ownProps.match.params.orgid, fields)),
+    loadPrinters: (fields) => {
+      return dispatch(loadPrinters(ownProps.match.params.orgid, fields))
+    },
     setPrinterViewType: (viewType) => dispatch(setPrinterViewType(viewType)),
   })
 )(PrinterList);
