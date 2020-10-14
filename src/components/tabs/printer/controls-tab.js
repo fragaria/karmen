@@ -355,20 +355,10 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
       <label htmlFor="extrusion">{name}</label>
 
       <div>
-      <BusyButton
-          className="btn btn-xs"
-          type="button"
-          onClick={() => {
-            setTemperature(partName, 0);
-          }}
-          busyChildren="Setting..."
-        >
-          Cooldown
-        </BusyButton>
 
         <input
           name="extrusion"
-          id="extrusion"
+          id={"temp-input-"+partName}
           type="number"
           value={target}
           step="0.1"
@@ -390,6 +380,18 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
           busyChildren="Setting..."
         >
           Set
+        </BusyButton>
+
+         <BusyButton
+          className="btn btn-xs"
+          type="button"
+          onClick={() => {
+            setTemperature(partName, 0);
+            setTarget(0);
+          }}
+          busyChildren="Setting..."
+        >
+          Cooldown
         </BusyButton>
       </div>
     </>
