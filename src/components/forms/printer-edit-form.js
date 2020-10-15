@@ -14,17 +14,17 @@ class PrinterEditForm extends React.Component {
         type: "text",
         required: true,
       },
-      api_key: {
-        name: "API key",
-        val: "",
-        type: "text",
-        required: true,
-      },
       note: {
         name: "Note",
         val: "",
         type: "textarea",
         maxLength: 2048
+      },
+      api_key: {
+        name: "New API key",
+        val: "",
+        type: "text",
+        required: true,
       },
     },
   };

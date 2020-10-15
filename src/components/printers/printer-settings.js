@@ -11,7 +11,7 @@ const PrinterSettingsForm = ({
       defaults={{
         name: printer.name,
         note: printer.note || "",
-        api_key: printer.api_key || "",
+        api_key: undefined,
       }}
       onSubmit={onPrinterSettingsChanged}
       onCancel={onPrinterSettingsCancelled}
