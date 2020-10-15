@@ -275,7 +275,7 @@ const ExtrusionControl = ({ extrude }) => {
 };
 
 const PrinterLightsControl = ({ printer, changeLightsState }) => {
-  if (!printer.client.octoprint.plugins.includes('awesome_karmen_led')) {
+  if (!printer || !printer.client || !printer.client.octoprint || !printer.client.octoprint.plugins || !printer.client.octoprint.plugins.includes('awesome_karmen_led')) {
     return null;
   }
   return (
