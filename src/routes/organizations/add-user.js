@@ -71,22 +71,30 @@ class AddUser extends React.Component {
     if (!hasErrors) {
       return createUser(form.email.val, form.role.val)
         .then((r) => {
-          this.setState({
-            redirect: true,
-          });
+          if (r.status === 201) {
+            this.setState({
+              redirect: true,
+            });
+          } else if (r.status === 400) {
+            if (r.data && r.data.code && r.data.code[0] === "user-not-registered") {
+                this.setState({
+                  message: "This user has not registered yet.",
+                });
+            } else {
+              this.setState({
+                message:
+                  "Could not add new user, there has been some problem on the server.",
+              });
+            }
+          }
         })
         .catch((err) => {
-          console.log(err)
           if (err instanceof HttpError && err.response.status === 409) {
             return this.setState({
               message: "User with such email is already registered",
             });
           }
-          if (err instanceof HttpError && err.response.status === 404) {
-            return this.setState({
-              message: "This user has not registered yet.",
-            });
-          }
+
           this.setState({
             message:
               "Could not add new user, there has been some problem on the server.",
