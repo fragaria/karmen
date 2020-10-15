@@ -66,7 +66,19 @@ export const uploadGcode = createHttpAction(
 export const getGcodeDownloadUrl = (orgid, id) => (dispatch) => {
   return dispatch(loadGcode(orgid, id, [])).then((r) => {
     let downloadPath = r.data.links[0].href;
-    if (downloadPath[0] === "/") downloadPath = downloadPath.substr(1);
-    return downloadPath;
+    if (downloadPath[0] === "/") {
+      downloadPath = downloadPath.substr(1);
+      return downloadPath;
+    } else {
+      // This hack upgrades URL to https while not breaking downloads on local dev without https
+      // The reason why we keep the whole URL, instead of just keeping the path is that local dev
+      // also uses different port, which will break when using only path
+      let fileUrl = new URL(downloadPath);
+      if(window.location.protocol === "https:" && fileUrl.protocol === "http:"){
+        fileUrl.protocol = "https:";
+        return fileUrl.href;
+      }
+      return downloadPath
+    }
   });
 };

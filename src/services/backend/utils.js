@@ -112,7 +112,8 @@ export const performRequest = (opts) => {
   if (!opts.uri.startsWith("/")) {
     opts.uri = `/${opts.uri}`;
   }
-  return fetch(`${BASE_URL}${opts.uri}`, fetchOpts)
+  let requestUrl = `${BASE_URL}${opts.uri}`;
+  return fetch(requestUrl, fetchOpts)
     .then((response) => {
       if (response.status === 503) {
         return Promise.reject(new MaintenanceError("Server under maitenance"));
@@ -131,6 +132,7 @@ export const performRequest = (opts) => {
             ...opts.appendData,
             data,
             successCodes: opts.successCodes,
+            requestUrl,
           };
         });
       }
@@ -138,6 +140,7 @@ export const performRequest = (opts) => {
         status: response.status,
         ...opts.appendData,
         successCodes: opts.successCodes,
+        requestUrl,
       };
     })
     .catch((err) => {
