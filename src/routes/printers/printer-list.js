@@ -50,6 +50,7 @@ class PrinterList extends React.Component {
       timer: null,
     };
     this.getPrinters = this.getPrinters.bind(this);
+    // this.printersLoading = props.printersLoading;
   }
 
   componentDidMount() {
@@ -57,9 +58,13 @@ class PrinterList extends React.Component {
   }
 
   getPrinters() {
-    const { loadPrinters } = this.props;
-    loadPrinters(["status", "client"]);
-    let timeout = setTimeout(this.getPrinters, 3 * 1000);
+    const { loadPrinters, printersLoading } = this.props;
+    if (!printersLoading) {
+      loadPrinters(["status", "client"]);
+    }
+    let timeout = setTimeout(() => {
+      this.getPrinters();
+    }, 3000);
     this.setState({
       timer: timeout,
     });
@@ -189,6 +194,7 @@ export default connect(
       state.preferences.orgs[ownProps.match.params.orgid].printerViewType,
     printers: state.printers.printers,
     printersLoaded: state.printers.printersLoaded,
+    printersLoading: state.printers.loading,
     role: state.me.activeOrganization && state.me.activeOrganization.role,
   }),
   (dispatch, ownProps) => ({

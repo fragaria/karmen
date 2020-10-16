@@ -80,6 +80,7 @@ const PrinterDetail = ({
   match,
   printer,
   loadPrinters,
+  printersLoading,
   setPrinterConnection,
   changeCurrentJobState,
   patchPrinter,
@@ -109,13 +110,15 @@ const PrinterDetail = ({
   useEffect(
     () => {
       let timer = setInterval(() => {
-        loadPrinters(); 
+        if (!printersLoading) {
+          loadPrinters(); 
+        }
         setTimer(timer);
-      }, 3000)
+      }, 3000);
       return () => {
         clearInterval(timer);
       }
-    }, [timer, loadPrinters]
+    }, [timer, loadPrinters, printersLoading]
   )
 
   if (!printersLoaded) {
@@ -282,6 +285,7 @@ export default connect(
     printer: state.printers.printers.find(
       (p) => p.id === ownProps.match.params.id
     ),
+    printersLoading: state.printers.loading,
     role: state.me.activeOrganization && state.me.activeOrganization.role,
     jobList: state.printjobs[ownProps.match.params.id] || {
       pages: [],
