@@ -25,7 +25,7 @@ yandex-pgmigrate = "*"
 bcrypt = "*"
 flask-jwt-extended = "*"
 flask-executor = "*"
-sentry-sdk = {extras = ["flask"],version = "==0.16.5"}
+sentry-sdk = {extras = ["flask"],version = "==0.19.0"}
 argh = "*"
 boto3 = "*"
 connexion = {extras = ["swagger-ui"],version = "==2.7.0"}
