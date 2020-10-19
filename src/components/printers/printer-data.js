@@ -123,29 +123,30 @@ export const PrinterProgress = ({ printer }) => {
 };
 
 export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
+  console.log(printer)
   return (
     <dl className="dl-horizontal">
-      {printer.client && (
+      {printer.client && printer.client.octoprint && (
         <>
           <dt className="term">Client: </dt>
           <dd className="description">
-            {printer.client.name}
+            {printer.client.octoprint.version.text}
             <div className="text-reset">
-              <small>{ClientVersion(printer.client.version)}</small>
+              <small>{ClientVersion(printer.client.octoprint.version)}</small>
             </div>
           </dd>
-          {printer.client.pill_info != null ? (
+          {printer.client.pill != null ? (
             <>
               <dt className="term">Pill version:</dt>
               <dd className="description">
-                {printer.client.pill_info.version_number}
+                {printer.client.pill.version_number}
               </dd>
               <dt className="term">Update available:</dt>
               <dd className="description">
-                {printer.client.pill_info.update_available ? (
+                {printer.client.pill.update_available ? (
                   <>
-                    Yes ({printer.client.pill_info.update_available})
-                    {printer.client.pill_info.update_status ? (
+                    Yes ({printer.client.pill.update_available})
+                    {printer.client.pill.update_status ? (
                       ""
                     ) : (
                       <button
@@ -164,11 +165,11 @@ export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
                   "No"
                 )}
               </dd>{" "}
-              {printer.client.pill_info.update_status ? (
+              {printer.client.pill.update_status ? (
                 <>
                   <dt className="term">Update progress:</dt>
                   <dd className="description">
-                    {printer.client.pill_info.update_status}
+                    {printer.client.pill.update_status}
                   </dd>
                 </>
               ) : (
