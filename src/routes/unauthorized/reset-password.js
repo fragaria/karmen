@@ -5,6 +5,7 @@ import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
 import Loader from "../../components/utils/loader";
 import { resetPassword } from "../../actions";
+import jwt_decode from "jwt-decode";
 
 class ResetPassword extends React.Component {
   constructor(props) {
@@ -45,11 +46,11 @@ class ResetPassword extends React.Component {
     const params = new URLSearchParams(location.search);
     if (params.has("reset")) {
       try {
-        const tokenData = JSON.parse(atob(params.get("reset")));
+        const tokenData = jwt_decode(params.get("reset"));
         this.setState({
           email: tokenData.email,
-          pwdResetKey: tokenData.pwd_reset_key,
-          pwdResetKeyExpires: tokenData.pwd_reset_key_expires,
+          pwdResetKey: params.get("reset"),
+          pwdResetKeyExpires: tokenData.lifetime,
           tokenProcessed: true,
         });
       } catch (e) {
