@@ -3,13 +3,13 @@ import { performRequest } from "./utils";
 
 export const requestPasswordReset = (email) => {
   return performRequest({
-    uri: `/users/me/request-password-reset`,
+    uri: `/users/password-reset/`,
     useAuth: false,
     data: {
       email,
     },
     parseResponse: false,
-    successCodes: [202],
+    successCodes: [204],
   });
 };
 
@@ -20,11 +20,12 @@ export const resetPassword = (
   passwordConfirmation
 ) => {
   return performRequest({
-    uri: `/users/me/reset-password`,
+    uri: `/users/password-reset/`,
+    method: 'patch',
     useAuth: false,
     data: {
       email,
-      pwd_reset_key: pwdResetKey,
+      token: pwdResetKey,
       password,
       password_confirmation: passwordConfirmation,
     },
