@@ -22,7 +22,7 @@
   "dependencies": {
     "@sentry/browser": "^5.27.1",
     "core-js": "^3.6.5",
-    "dayjs": "^1.9.3",
+    "dayjs": "^1.9.4",
     "js-cookie": "^2.2.1",
     "jwt-decode": "^3.0.0",
     "react": "^16.14.0",
