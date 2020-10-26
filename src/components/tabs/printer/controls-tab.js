@@ -285,7 +285,7 @@ const PrinterLightsControl = ({ printer, changeLightsState }) => {
         <BusyButton
           className="btn btn-xs"
           type="button"
-          onClick={() => changeLightsState("#ffffff")}
+          onClick={() => changeLightsState("white")}
           busyChildren="Switching lights..."
         >
           On
@@ -293,7 +293,7 @@ const PrinterLightsControl = ({ printer, changeLightsState }) => {
         <BusyButton
           className="btn btn-xs"
           type="button"
-          onClick={() => changeLightsState("#000000")}
+          onClick={() => changeLightsState("black")}
           busyChildren="Switching lights..."
         >
           Off
