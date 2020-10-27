@@ -432,7 +432,7 @@ const ControlsTab = ({
             Printer is locked and therefore controls are not available
           </div>
         )} */
-      :(printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.operational && (
+        : (printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.operational && (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterCurrentPrintControl
@@ -447,7 +447,7 @@ const ControlsTab = ({
                 printer={printer}
               />
 
-              <ExtrusionControl extrude={extrude} />
+              <ExtrusionControl extrude={extrude}/>
 
               <TemperatureControl
                 name="Tool temperature"
@@ -467,13 +467,11 @@ const ControlsTab = ({
             </div>
 
             <div className="axes">
-              <AxesXYControl movePrinthead={movePrinthead} />
-              <AxesZControl movePrinthead={movePrinthead} />
+              <AxesXYControl movePrinthead={movePrinthead}/>
+              <AxesZControl movePrinthead={movePrinthead}/>
             </div>
           </div>
-        ))}
-      {printer.client.pill &&
-        !printer.client.pill.error && (
+        ) || (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterLightsControl
@@ -481,14 +479,14 @@ const ControlsTab = ({
                 changeLightsState={changeLights}
               />
             </div>
-            <br clear="all" />
+            <br clear="all"/>
             <p>
               <strong>
                 Some controls are not available for a disconnected printer
               </strong>
             </p>
           </div>
-          )}
+        ))}
     </div>
   );
 };
