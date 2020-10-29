@@ -34,6 +34,7 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
   dispatch,
   getState
 ) => {
+  console.log("setwebcaminterval called");
   const { webcams } = getState();
   if (webcams.queue && webcams.queue[id] === undefined) {
     // we need to delay this so interval_set is run before
@@ -80,6 +81,7 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
 export const getWebcamSnapshot = createHttpAction(
   "WEBCAMS_GET_SNAPSHOT",
   (orgid, id, { dispatch, getState }) => {
+    console.log("get webcam snapshot called");
     return denyWithNoOrganizationAccess(orgid, getState, () => {
       let { printers } = getState();
 

@@ -51,6 +51,7 @@ export const WebcamStreamRenderer = ({
   allowFullscreen,
   printer,
 }) => {
+  console.log("webcam render");
   let klass = [];
   if (flipHorizontal) {
     klass.push("flip-horizontal");
@@ -127,6 +128,7 @@ export class WebcamStream extends React.Component {
   }
 
   render() {
+    console.log("webcamstream")
     return (
       <WebcamStreamRenderer {...this.props} {...this.props.printer.webcam} />
     );

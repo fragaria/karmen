@@ -133,7 +133,8 @@ const PrinterDetail = ({
   if (!printer) {
     return <Redirect to="/page-404" />;
   }
-
+console.log("render printer detail")
+  console.log(printer)
   return (
     <section className="content">
       <div className="printer-detail">
