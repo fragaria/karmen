@@ -86,7 +86,14 @@ const GcodeTableRow = ({
 
   const getDownloadUrl = (href) => {
     const token = localStorage.getItem("karmen_access_token");
-    return `${href}?authorization=${token}`;
+    let downloadPath = href;
+    if (downloadPath[0] === "/") {
+      downloadPath = downloadPath.substr(1);
+    } else {
+      // we return http from url to prevent mixed content on production
+      downloadPath = downloadPath.replace("http:","");
+    }
+    return `${downloadPath}?authorization=${token}`;
   };
 
   return (
