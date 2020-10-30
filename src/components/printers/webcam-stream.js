@@ -8,7 +8,7 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
     background: "rgba(0, 0, 0, .95)",
   });
-
+console.log(source, url)
   return (
     <>
       <img
@@ -51,7 +51,6 @@ export const WebcamStreamRenderer = ({
   allowFullscreen,
   printer,
 }) => {
-  console.log("webcam render");
   let klass = [];
   if (flipHorizontal) {
     klass.push("flip-horizontal");
@@ -119,7 +118,7 @@ export const WebcamStreamRenderer = ({
 export class WebcamStream extends React.Component {
   componentDidMount() {
     const { setWebcamRefreshInterval } = this.props;
-    setWebcamRefreshInterval(200);
+    setWebcamRefreshInterval(window.env.SNAPSHOT_INTERVAL);
   }
 
   componentWillUnmount() {
@@ -128,7 +127,6 @@ export class WebcamStream extends React.Component {
   }
 
   render() {
-    console.log("webcamstream")
     return (
       <WebcamStreamRenderer {...this.props} {...this.props.printer.webcam} />
     );

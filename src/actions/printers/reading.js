@@ -34,7 +34,6 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
   dispatch,
   getState
 ) => {
-  console.log("setwebcaminterval called");
   const { webcams } = getState();
   if (webcams.queue && webcams.queue[id] === undefined) {
     // we need to delay this so interval_set is run before
@@ -81,7 +80,6 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
 export const getWebcamSnapshot = createHttpAction(
   "WEBCAMS_GET_SNAPSHOT",
   (orgid, id, { dispatch, getState }) => {
-    console.log("get webcam snapshot called");
     return denyWithNoOrganizationAccess(orgid, getState, () => {
       let { printers } = getState();
 
@@ -91,15 +89,14 @@ export const getWebcamSnapshot = createHttpAction(
       }
 
       const printer = printers.printers.find((p) => p.id === id);
-
-      if (!printer || !printer.webcam || !printer.webcam.url) {
-        return Promise.reject(new StreamUnavailableError());
-      }
-
+      //
+      // if (!printer || !printer.webcam || !printer.webcam.url) {
+      //   return Promise.reject(new StreamUnavailableError());
+      // }
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch
-      )(printer.webcam.url).then((r) => {
+      )(`printers/${printer.id}/snapshot/`).then((r) => {
         let { webcams } = getState();
         if (webcams.queue && webcams.queue[id]) {
           const timeoutData = webcams.queue[id];
