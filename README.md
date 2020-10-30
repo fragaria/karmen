@@ -8,9 +8,10 @@ It is possible to run this as a standalone app, but since you need the backend a
 recommended to run the whole bundle with `docker-compose` as described in [the global README](../../README.md).
 
 ```sh
-nvm install
-nvm use
 npm install
+echo 'window.env = {BACKEND_BASE: "http://localhost:8000/api/2"};' > public/env.js
+# (for the first time or if you changed styles)
+npm rebuild node-sass
 npm start
 ```
 
