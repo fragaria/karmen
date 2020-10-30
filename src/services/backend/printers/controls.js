@@ -30,13 +30,18 @@ export const changeCurrentJob = (orgId, id, action) => {
 };
 
 export const changeLights = (orgId, id, color) => {
+  if (color === "black") {
+    color = [0, 0, 0];
+  } else if (color === "white") {
+    color = [255, 255, 255];
+  }
   return performRequest({
     uri: `/printers/${id}/led/`,
     appendData: {
       id,
     },
     data: {
-      color,
+      color: color,
     },
     method: 'put',
     successCodes: [200],
