@@ -1,3 +1,14 @@
+#!/bin/sh
+
+# change to the current dir to be able to call this script from anywhere
+cd $(dirname $0)
+
 npm run build
 cp test-env.js build/env.js
-scp -r -o ProxyCommand="ssh karmen-gateway nc karmen-test1 22" ./build/* fragaria@karmen-test1:/home/fragaria/frontend/
+# set your ssh config:
+# 
+#  Host karmen-test1
+#    User <username>
+#    # optional proxy host
+#    proxyjump karmen-gateway
+scp -r build/* karmen-test1:frontend/
