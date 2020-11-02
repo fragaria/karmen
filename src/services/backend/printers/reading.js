@@ -50,8 +50,8 @@ export const getWebcamSnapshot = (snapshotUrl) => {
     return Promise.reject({ status: 404, successCodes: [200, 202] });
   }
   let headers = getJsonPostHeaders();
-  // headers.set("pragma", "no-cache");
-  // headers.set("cache-control", "no-cache");
+  headers.set("pragma", "no-cache");
+  headers.set("cache-control", "no-cache");
   // TODO test snapshotUrl
   const fullSnapshotURL = `${BASE_URL}/${
     snapshotUrl[0] === "/" ? snapshotUrl.substr(1) : snapshotUrl

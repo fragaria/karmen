@@ -89,10 +89,7 @@ export const getWebcamSnapshot = createHttpAction(
       }
 
       const printer = printers.printers.find((p) => p.id === id);
-      //
-      // if (!printer || !printer.webcam || !printer.webcam.url) {
-      //   return Promise.reject(new StreamUnavailableError());
-      // }
+     
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch

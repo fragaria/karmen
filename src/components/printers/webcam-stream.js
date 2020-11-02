@@ -8,7 +8,6 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
     background: "rgba(0, 0, 0, .95)",
   });
-console.log(source, url)
   return (
     <>
       <img
