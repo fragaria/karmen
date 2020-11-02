@@ -139,7 +139,7 @@ export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
             <>
               <dt className="term">Pill version:</dt>
               <dd className="description">
-                {printer.client.pill.version_number}
+                {printer.client.pill.version_string}
               </dd>
               <dt className="term">Update available:</dt>
               <dd className="description">
