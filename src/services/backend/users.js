@@ -19,7 +19,7 @@ export const addUser = (orgId, email, role) => {
       username:email,
       role,
     },
-    successCodes: [201, 400],
+    successCodes: [201],
     parseResponse: true,
   });
 };
