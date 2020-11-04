@@ -123,7 +123,6 @@ export const PrinterProgress = ({ printer }) => {
 };
 
 export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
-  console.log(printer)
   return (
     <dl className="dl-horizontal">
       {printer.client && printer.client.octoprint && (
