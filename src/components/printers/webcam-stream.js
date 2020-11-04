@@ -117,7 +117,7 @@ export const WebcamStreamRenderer = ({
 export class WebcamStream extends React.Component {
   componentDidMount() {
     const { setWebcamRefreshInterval } = this.props;
-    setWebcamRefreshInterval(window.env.SNAPSHOT_INTERVAL);
+    setWebcamRefreshInterval(window.env.SNAPSHOT_INTERVAL ? window.env.SNAPSHOT_INTERVAL : 200);
   }
 
   componentWillUnmount() {
