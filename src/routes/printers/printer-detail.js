@@ -133,7 +133,6 @@ const PrinterDetail = ({
   if (!printer) {
     return <Redirect to="/page-404" />;
   }
-
   return (
     <section className="content">
       <div className="printer-detail">

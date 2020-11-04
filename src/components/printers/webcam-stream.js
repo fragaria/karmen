@@ -8,7 +8,6 @@ const WebcamModal = ({ classNames, source, url, allowFullscreen }) => {
   const { closeModal, isOpen, Modal, openModal } = useModal({
     background: "rgba(0, 0, 0, .95)",
   });
-
   return (
     <>
       <img
@@ -118,7 +117,7 @@ export const WebcamStreamRenderer = ({
 export class WebcamStream extends React.Component {
   componentDidMount() {
     const { setWebcamRefreshInterval } = this.props;
-    setWebcamRefreshInterval(200);
+    setWebcamRefreshInterval(window.env.SNAPSHOT_INTERVAL ? window.env.SNAPSHOT_INTERVAL : 200);
   }
 
   componentWillUnmount() {

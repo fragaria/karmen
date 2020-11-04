@@ -3,4 +3,5 @@ window.env = {
   BACKEND_BASE: "/api/2",
   SENTRY_DSN: "",
   IS_CLOUD_INSTALL: true,
+  SNAPSHOT_INTERVAL: 200,
 };
