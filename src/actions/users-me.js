@@ -182,8 +182,8 @@ export const loadUserApiTokens = createHttpAction(
 
 export const addUserApiToken = createHttpAction(
   "USER_ADD_API_TOKEN",
-  (orguuid, name, { dispatch, getState }) => {
-    return retryIfUnauthorized(backend.addApiToken, dispatch)(orguuid, name);
+  (orguuid, name, scope, { dispatch, getState }) => {
+    return retryIfUnauthorized(backend.addApiToken, dispatch)(orguuid, name, scope);
   }
 );
 
