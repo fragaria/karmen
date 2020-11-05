@@ -62,8 +62,9 @@ class AddApiToken extends React.Component {
       form: updatedForm,
     });
     const { addApiToken } = this.props;
+    console.log(form)
     if (!hasErrors) {
-      return addApiToken(form.orgid.val, form.name.val)
+      return addApiToken(form.orguuid.val, form.name.val, "")
         .then((newToken) => {
           this.setState({
             showToken: true,
@@ -214,6 +215,6 @@ export default connect(
     organizations: state.me.organizations,
   }),
   (dispatch) => ({
-    addApiToken: (orguuid, name) => dispatch(addUserApiToken(orguuid, name)),
+    addApiToken: (orguuid, name, scope) => dispatch(addUserApiToken(orguuid, name, scope)),
   })
 )(AddApiToken);

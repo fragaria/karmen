@@ -25,7 +25,7 @@ const UserPreferences = ({ match, ...rest }) => {
         tabClassName="react-tabs__tab"
         activeTabClassName="react-tabs__tab--selected"
       >
-        {/*<NavTab to="/tab-api-tokens">API tokens</NavTab>*/}
+        <NavTab to="/tab-api-tokens">API tokens</NavTab>
         <NavTab to="/tab-account">Account</NavTab>
       </RoutedTabs>
 

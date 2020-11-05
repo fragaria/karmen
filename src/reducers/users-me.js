@@ -110,7 +110,7 @@ export default (
       return state;
     case "USER_LOAD_API_TOKENS_SUCCEEDED":
       return Object.assign({}, state, {
-        apiTokens: action.payload.data.items,
+        apiTokens: action.payload.data,
         apiTokensLoaded: true,
       });
     case "USER_ADD_API_TOKEN_SUCCEEDED":

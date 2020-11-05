@@ -125,18 +125,19 @@ export const changePassword = (
 
 export const loadApiTokens = () => {
   return performRequest({
-    uri: `/users/me/tokens`,
+    uri: `/users/me/api_keys/`,
     method: "GET",
     successCodes: [200],
   });
 };
 
-export const addApiToken = (orgId, name) => {
+export const addApiToken = (orgId, name, scope) => {
   return performRequest({
-    uri: `/users/me/tokens`,
+    uri: `/users/me/api_keys/`,
     data: {
       name: name,
       organization_uuid: orgId,
+      scope: scope,
     },
     successCodes: [201],
   }).then((response) => response.data.access_token);
@@ -144,7 +145,7 @@ export const addApiToken = (orgId, name) => {
 
 export const deleteApiToken = (jti) => {
   return performRequest({
-    uri: `/users/me/tokens/${jti}`,
+    uri: `/users/me/api_keys/${jti}`,
     method: "DELETE",
     parseResponse: false,
     successCodes: [204, 404],
