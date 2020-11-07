@@ -24,7 +24,7 @@
     "core-js": "^3.7.0",
     "dayjs": "^1.9.5",
     "js-cookie": "^2.2.1",
-    "jwt-decode": "^3.0.0",
+    "jwt-decode": "^3.1.1",
     "react": "^16.14.0",
     "react-app-polyfill": "^2.0.0",
     "react-copy-to-clipboard": "^5.0.2",
