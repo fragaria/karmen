@@ -1455,6 +1455,32 @@ select {
   }
 }
 
+
+.printer-status-label {
+  //font-size: 11px;
+  padding: 5px;
+  margin-right: 10px;
+    color: white;
+
+}
+
+.printer-status-label.red {
+  background: #a40000;
+}
+
+.printer-status-label.green {
+  background: #038600;
+}
+
+.printer-status-label.orange {
+  background: #ff9900;
+}
+
+.printer-status-label.gray {
+  background: #9e9e9e;
+}
+
+
 // API TOKEN PAGE
 pre {
   padding: $spacing-default;
