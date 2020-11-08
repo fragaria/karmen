@@ -18,7 +18,6 @@ function buildLabels(labels) {
 
 export const PrinterState = ({printer}) => {
 
-  console.log(printer)
 
   if (!printer.client || !printer.client.octoprint) {
     return buildLabels([{color: "gray", status: "Offline"}])
