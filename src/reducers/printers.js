@@ -163,11 +163,11 @@ export default (
       if (origPrinterIndex === -1) {
         return state;
       }
-      printers[origPrinterIndex] = Object.assign(
+      printers[origPrinterIndex].client.octoprint = Object.assign(
         {},
-        printers[origPrinterIndex],
+        printers[origPrinterIndex].client.octoprint,
         {
-          lights: action.payload.data.status,
+          lights: action.payload.data.color[0] === 0 ? "off" : "on",
         }
       );
       return Object.assign({}, state, {

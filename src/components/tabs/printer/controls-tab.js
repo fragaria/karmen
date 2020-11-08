@@ -285,19 +285,12 @@ const PrinterLightsControl = ({ printer, changeLightsState }) => {
         <BusyButton
           className="btn btn-xs"
           type="button"
-          onClick={() => changeLightsState("white")}
+          onClick={() => changeLightsState(printer.client.octoprint.lights === "on" ? "black" : "white")}
           busyChildren="Switching lights..."
         >
-          On
+            {printer.client.octoprint.lights === "on" ? "Off" : "On"}
         </BusyButton>
-        <BusyButton
-          className="btn btn-xs"
-          type="button"
-          onClick={() => changeLightsState("black")}
-          busyChildren="Switching lights..."
-        >
-          Off
-        </BusyButton>
+
       </div>
     </>
   );
