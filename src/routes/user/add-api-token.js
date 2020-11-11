@@ -10,7 +10,6 @@ import { addUserApiToken } from "../../actions";
 class AddApiToken extends React.Component {
   constructor(props) {
     super(props);
-    const { activeOrganization, organizations } = this.props;
     this.state = {
       copyButtonReady: true,
       showToken: false,
@@ -200,8 +199,6 @@ class AddApiToken extends React.Component {
 
 export default connect(
   (state) => ({
-    activeOrganization: state.me.activeOrganization,
-    organizations: state.me.organizations,
   }),
   (dispatch) => ({
     addApiToken: (name, scope) => dispatch(addUserApiToken(name, scope)),
