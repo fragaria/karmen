@@ -26,16 +26,6 @@ class AddApiToken extends React.Component {
           required: true,
           error: null,
         },
-        orguuid: {
-          name: "Organization",
-          val: activeOrganization.id,
-          type: "select",
-          required: true,
-          options: Object.values(organizations).map((o) => ({
-            val: o.id,
-            name: o.name,
-          })),
-        },
       },
     };
 
@@ -62,13 +52,12 @@ class AddApiToken extends React.Component {
       form: updatedForm,
     });
     const { addApiToken } = this.props;
-    console.log(form)
     if (!hasErrors) {
-      return addApiToken(form.orguuid.val, form.name.val, "")
-        .then((newToken) => {
+      return addApiToken( form.name.val, "")
+        .then((response) => {
           this.setState({
             showToken: true,
-            createdToken: newToken,
+            createdToken: response.data.key,
           });
         })
         .catch((err) => {
@@ -215,6 +204,6 @@ export default connect(
     organizations: state.me.organizations,
   }),
   (dispatch) => ({
-    addApiToken: (orguuid, name, scope) => dispatch(addUserApiToken(orguuid, name, scope)),
+    addApiToken: (name, scope) => dispatch(addUserApiToken(name, scope)),
   })
 )(AddApiToken);

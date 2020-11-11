@@ -131,23 +131,22 @@ export const loadApiTokens = () => {
   });
 };
 
-export const addApiToken = (orgId, name, scope) => {
+export const addApiToken = (name, scope) => {
   return performRequest({
     uri: `/users/me/api_keys/`,
     data: {
       name: name,
-      organization_uuid: orgId,
       scope: scope,
     },
     successCodes: [201],
-  }).then((response) => response.data.access_token);
+   });
 };
 
-export const deleteApiToken = (jti) => {
+export const deleteApiToken = (id) => {
   return performRequest({
-    uri: `/users/me/api_keys/${jti}`,
+    uri: `/users/me/api_keys/${id}`,
     method: "DELETE",
-    parseResponse: false,
-    successCodes: [204, 404],
+    parseResponse: true,
+    successCodes: [200, 404],
   });
 };

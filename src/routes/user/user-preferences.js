@@ -57,7 +57,7 @@ export default connect(
   }),
   (dispatch) => ({
     loadApiTokens: () => dispatch(loadUserApiTokens()),
-    onTokenDelete: (jti) => dispatch(deleteUserApiToken(jti)),
+    onTokenDelete: (token_id) => dispatch(deleteUserApiToken(token_id)),
     changePassword: (password, new_password, new_password_confirmation) =>
       dispatch(
         changePassword(password, new_password, new_password_confirmation)
