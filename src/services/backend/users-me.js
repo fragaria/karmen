@@ -144,9 +144,10 @@ export const addApiToken = (name, scope) => {
 
 export const deleteApiToken = (id) => {
   return performRequest({
-    uri: `/users/me/api_keys/${id}`,
+    uri: `/users/me/api_keys/${id}/`,
     method: "DELETE",
-    parseResponse: true,
-    successCodes: [200, 404],
+    parseResponse: false,
+    appendData: { data: { id: id } },
+    successCodes: [204, 404],
   });
 };
