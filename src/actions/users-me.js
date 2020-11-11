@@ -182,14 +182,15 @@ export const loadUserApiTokens = createHttpAction(
 
 export const addUserApiToken = createHttpAction(
   "USER_ADD_API_TOKEN",
-  (orguuid, name, scope, { dispatch, getState }) => {
-    return retryIfUnauthorized(backend.addApiToken, dispatch)(orguuid, name, scope);
+  (name, scope, { dispatch, getState }) => {
+    console.log("add api token fired")
+    return retryIfUnauthorized(backend.addApiToken, dispatch)(name, scope);
   }
 );
 
 export const deleteUserApiToken = createHttpAction(
   "USER_DELETE_API_TOKEN",
-  (jti, { dispatch }) => {
-    return retryIfUnauthorized(backend.deleteApiToken, dispatch)(jti);
+  (token_id, { dispatch }) => {
+    return retryIfUnauthorized(backend.deleteApiToken, dispatch)(token_id);
   }
 );

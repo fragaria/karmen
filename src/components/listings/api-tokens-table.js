@@ -21,7 +21,7 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
               type="submit"
               onClick={(e) => {
                 e.preventDefault();
-                onTokenDelete(token.jti);
+                onTokenDelete(token.id);
                 modal.closeModal();
               }}
               busyChildren="Working..."
@@ -40,13 +40,11 @@ const DeleteTokenModal = ({ modal, token, onTokenDelete }) => {
 
 const ApiTokensTableRow = ({ token, onTokenDelete }) => {
   const deleteTokenModal = useMyModal();
-
   return (
     <div className="list-item">
       <div className="list-item-content">
         <span className="list-item-title">{token.name}</span>
-        <span>created for {token.organization.name}</span>{" "}
-        <span>on {formatters.datetime(token.created)}</span>
+        <span>Created on {formatters.datetime(token.created_on)}</span>
       </div>
 
       <div className="list-item-cta">
@@ -72,13 +70,13 @@ const ApiTokensTable = ({
 }) => {
   return (
     <NoPaginationListing
-      defaultOrderBy="-created"
+      defaultOrderBy={"-created_on"}
       loadItems={loadTokens}
       itemsLoaded={tokensLoaded}
       items={tokensList}
       enableFiltering={false}
       enableSorting={false}
-      sortByColumns={["name", "created"]}
+      sortByColumns={["created_on","name"]}
       filterByColumns={["name"]}
       rowFactory={(t) => {
         return (

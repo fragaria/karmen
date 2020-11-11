@@ -113,7 +113,7 @@ export default (
         apiTokens: action.payload.data,
         apiTokensLoaded: true,
       });
-    case "USER_ADD_API_TOKEN_SUCCEEDED":
+    case "USER_ADD_API_TOKEN_ENDED":
       apiTokens.push(action.payload.data);
       return Object.assign({}, state, {
         apiTokens: [].concat(apiTokens),
@@ -121,7 +121,7 @@ export default (
     case "USER_DELETE_API_TOKEN_SUCCEEDED":
       return Object.assign({}, state, {
         apiTokens: apiTokens.filter((t) => {
-          return t.jti !== action.payload.jti;
+          return t.id !== action.payload.data.id;
         }),
       });
     case "ORGANIZATIONS_ADD_SUCCEEDED":
