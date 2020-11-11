@@ -102,12 +102,18 @@ class AddApiToken extends React.Component {
               <div className="content-section">
                 <ul className="ul-styled">
                   <li>
+                    <strong>
+                      You will never see this token again, so be sure that you
+                      have a secure copy of it.
+                    </strong>
+                  </li>
+                  <li>
                     This is the token that is required to talk to Karmen API
                   </li>
                   <li>
                     It has to be used with every API request in the
                     Authorization header like this{" "}
-                    <code>Authorization: Bearer &lt;token&gt;</code>
+                    <code>Authorization: Token &lt;token&gt;</code>
                   </li>
                   <li>
                     This token also does not have an expiration date and can be
@@ -116,16 +122,6 @@ class AddApiToken extends React.Component {
                   <li>
                     If you need to disable it, you have to delete it on the User
                     preferences screen
-                  </li>
-                  <li>
-                    This token is not authorized to modify your password and
-                    cannot be used for administrative tasks like user management
-                  </li>
-                  <li>
-                    <strong>
-                      You will never see this token again, so be sure that you
-                      have a secure copy of it
-                    </strong>
                   </li>
                 </ul>
                 <pre>{createdToken}</pre>
