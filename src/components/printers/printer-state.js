@@ -61,10 +61,8 @@ export const PrinterState = ({printer}) => {
     if (code === "unknown-response") { //pill is offline
       // again, API returns 502, which means pill is offline
       // but this could be older, cached response, since pill api is set to longer caching
-      // return buildLabels([{color: "gray", status: "Offline"}])
     } else if (code === "moved-to-background") {
       // this means getting pill info took to long, no big deal, it's not essential and we could wait for it
-      // return buildLabels([{color: "orange", status: "Connecting"}])
     } else {
       // this means we have some unexpected error with pill
       labels.push({color: "red", status: "Pill error", detail: printer.client.pill.error.detail})
@@ -72,15 +70,20 @@ export const PrinterState = ({printer}) => {
   }
 
 
-  if (!printer.client.octoprint || !printer.client.octoprint.printer || Array.isArray(printer.client.octoprint.printer)) {
-    console.log(printer.client.octoprint.printer)
-    if (printer.client.octoprint.printer[0].error) {
-      let err = printer.client.octoprint.printer[0].error;
+  if (!printer.client.octoprint || !printer.client.octoprint.printer || printer.client.octoprint.printer.error) {
+    if (printer.client.octoprint.printer.error) {
+      let err = printer.client.octoprint.printer.error;
       if (err.code === "printer-not-operational") {
         return buildLabels(labels.concat({
           color: "orange",
           status: "Printer disconnected",
           detail: "Printer is not connected to Pill. Make sure it's powered on and click connect."
+        }));
+      } else {
+        return buildLabels(labels.concat({
+          color: "red",
+          status: "Printer error",
+          detail: err.detail
         }));
       }
     }

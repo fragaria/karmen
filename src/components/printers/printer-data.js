@@ -129,7 +129,7 @@ export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
         <>
           <dt className="term">Client: </dt>
           <dd className="description">
-            {printer.client.octoprint.version.text}
+            {printer.client.octoprint.version ? printer.client.octoprint.version.text : "Unavailable now"}
             <div className="text-reset">
               <small>{ClientVersion(printer.client.octoprint.version)}</small>
             </div>
