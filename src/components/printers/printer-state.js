@@ -123,8 +123,13 @@ export const PrinterState = ({printer}) => {
     if (printerStates.operational && printerStates.ready) {
       labels.push({color: "green", status: "Ready to print"})
     }
-    if (printerStates.operational && !printerStates.ready) {
-      labels.push({color: "orange", status: "Working"})
+    if (printerStates.operational && !printerStates.ready && !printerStates.printing && !printerStates.error) {
+      // this may be e.g. sd card copy in progress
+      labels.push({
+        color: "orange",
+        status: "Working",
+        detail: "Printer is busy right now and should become ready soon."
+      })
     }
 
   }
