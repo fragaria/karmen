@@ -34,7 +34,14 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
   dispatch,
   getState
 ) => {
-  const { webcams } = getState();
+  const {webcams} = getState();
+
+  // no matter what, we always kill ani potentional timeout if set before setting a new one
+  // this prevents ghost intervals staying in the background
+  if (webcams.queue[id] && webcams.queue[id].timeout) {
+    clearTimeout(webcams.queue[id].timeout);
+  }
+
   if (webcams.queue && webcams.queue[id] === undefined) {
     // we need to delay this so interval_set is run before
     const timeout = setTimeout(
@@ -50,6 +57,7 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
       },
     });
   }
+
   if (webcams.queue[id].interval > interval) {
     clearTimeout(webcams.queue[id].timeout);
     // we need to delay this so interval_set is run before
@@ -97,6 +105,12 @@ export const getWebcamSnapshot = createHttpAction(
         let { webcams } = getState();
         if (webcams.queue && webcams.queue[id]) {
           const timeoutData = webcams.queue[id];
+
+          // no matter what, we always kill ani potentional timeout if set before setting a new one
+          // this prevents ghost intervals staying in the background
+          if (webcams.queue[id] && webcams.queue[id].timeout) {
+            clearTimeout(webcams.queue[id].timeout);
+          }
 
           if (timeoutData.interval > 0) {
             const timeout = setTimeout(
