@@ -148,7 +148,7 @@ const PrinterDetail = ({
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
               {(printer.client && printer.client.octoprint && printer.client.octoprint.printer) &&
-              [printer.client.octoprint.printer.length ? 
+              [(!printer.client.octoprint.printer.state) ?
               (
                   <button
                     key={1}
