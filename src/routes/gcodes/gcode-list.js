@@ -254,7 +254,7 @@ export default connect(
     gcodesList: state.gcodes.list,
     getAvailablePrinters: () =>
       state.printers.printers
-        .filter((p) => p.client && p.client.octoprint && !p.client.octoprint.error && p.client.octoprint.printer && p.client.octoprint.printer.state && p.client.octoprint.printer.state.ready)
+        .filter((p) => p.client && p.client.octoprint && !p.client.octoprint.error && p.client.octoprint.printer && p.client.octoprint.printer.state.flags && p.client.octoprint.printer.state.flags.ready)
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>

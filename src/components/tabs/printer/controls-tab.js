@@ -35,7 +35,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
   const cancelPrintModal = useMyModal();
 
   if (
-    !printer.client.octoprint.printer.state.printing && !printer.client.octoprint.printer.state.paused
+    !printer.client.octoprint.printer.state.flags.printing && !printer.client.octoprint.printer.state.flags.paused
   ) {
     return <></>;
   }
@@ -45,7 +45,7 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
       <label>Print</label>
 
       <div>
-        {printer.client.octoprint.printer.state.paused ? (
+        {printer.client.octoprint.printer.state.flags.paused ? (
           <button
             className="btn btn-xs"
             onClick={() => {
@@ -425,7 +425,7 @@ const ControlsTab = ({
             Printer is locked and therefore controls are not available
           </div>
         )} */
-        : (printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.operational && (
+        : (printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.flags && printer.client.octoprint.printer.state.flags.operational && (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterCurrentPrintControl
