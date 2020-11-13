@@ -56,8 +56,8 @@ export const deletePrinter = (orgId, id) => {
 
 export const issuePrinterToken = (orgId) => {
   return performRequest({
-    uri: `/groups/${orgId}/printers/issue-token/`,
+    uri: `/device_keys/`,
     method: "POST",
-    successCodes: [201],
+    successCodes: [200],
   });
 };
