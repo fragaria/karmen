@@ -19,7 +19,7 @@ export const getPrinterJobs = (
   printerFilter = null,
   limit = 10
 ) => {
-  let uri = `/organizations/${orgId}/printjobs?limit=${limit}`;
+  let uri = `/organizations/${orgId}/printjobs/?limit=${limit}`;
   if (startWith) {
     uri += `&start_with=${encodeURIComponent(startWith)}`;
   }
