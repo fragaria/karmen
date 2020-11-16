@@ -23,7 +23,7 @@ const DeleteUserModal = ({modal, user, organization, onUserDelete}) => {
                 });
               }}
             >
-              Yes, do it
+              Remove {user.username}!
             </button>
 
             <button className="btn btn-plain" onClick={modal.closeModal}>
