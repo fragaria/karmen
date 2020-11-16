@@ -17,6 +17,7 @@ import {
   deletePrinter,
   addUser,
   getUsers,
+  getPendingUsers,
   patchUser,
   deleteUser,
 } from "../../actions";
@@ -76,6 +77,8 @@ export default connect(
       state.preferences.orgs[ownProps.match.params.orgid].networkInterface,
     usersList: state.users.list,
     usersLoaded: state.users.listLoaded,
+    invitationsList: state.users.invitationsList,
+    invitationsLoaded: state.users.invitationsLoaded,
     currentId: state.me.identity,
   }),
   (dispatch, ownProps) => ({
@@ -95,6 +98,8 @@ export default connect(
       ),
     loadUsers: (fields) =>
       dispatch(getUsers(ownProps.match.params.orgid, fields)),
+    loadPendingUsers: () =>
+      dispatch(getPendingUsers(ownProps.match.params.orgid)),
     onUserChange: (id, role) =>
       dispatch(patchUser(ownProps.match.params.orgid, id, role)),
     onUserDelete: (id) => dispatch(deleteUser(ownProps.match.params.orgid, id)),

@@ -81,13 +81,6 @@ class AddUser extends React.Component {
               message: "User with such email is already registered",
             });
           }
-          if (err instanceof HttpError && err.response.status === 202) {
-           return this.setState({
-                  message: "This user has not registered yet. " +
-                    "We sent them email, so they could register and join your organisation. " +
-                    "You can leave this screen now.",
-                });
-          }
 
           this.setState({
             message:
