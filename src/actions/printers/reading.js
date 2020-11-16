@@ -106,7 +106,7 @@ export const getWebcamSnapshot = createHttpAction(
         if (webcams.queue && webcams.queue[id]) {
           const timeoutData = webcams.queue[id];
 
-          // no matter what, we always kill ani potentional timeout if set before setting a new one
+          // kill any potential timeout before setting a new one
           // this prevents ghost intervals staying in the background
           if (webcams.queue[id] && webcams.queue[id].timeout) {
             clearTimeout(webcams.queue[id].timeout);
