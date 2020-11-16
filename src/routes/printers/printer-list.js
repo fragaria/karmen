@@ -98,6 +98,7 @@ class PrinterList extends React.Component {
       printers
         .filter((p) => !!p)
         .map((printer) => {
+          let currentJob = (printer.client.octoprint && printer.client.octoprint.printer && printer.client.octoprint.printer.currentJob) ? printer.client.octoprint.printer.currentJob : undefined;
           return (
             <Link
               className="list-item"
@@ -121,17 +122,17 @@ class PrinterList extends React.Component {
                   <PrinterState printer={printer} />
                 </span>
 
-                {printer.job && printer.job.name && (
+                {currentJob && (
                   <>
                     <div className="list-item-subtitle">
-                      {printer.job.completion && (
-                        <span>{printer.job.completion.toFixed(2)}% done, </span>
+                      {currentJob.completion && (
+                        <span>{currentJob.completion.toFixed(2)}% done, </span>
                       )}
                       <span>
-                        ETA: {formatters.timespan(printer.job.printTimeLeft)}
+                        ETA: {formatters.timespan(currentJob.printTimeLeft)}
                       </span>
                     </div>
-                    <div className="list-item-property">{printer.job.name}</div>
+                    <div className="list-item-property">{currentJob.name}</div>
                   </>
                 )}
               </div>
