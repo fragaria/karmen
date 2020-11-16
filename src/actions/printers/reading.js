@@ -38,7 +38,7 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
 
   // no matter what, we always kill ani potentional timeout if set before setting a new one
   // this prevents ghost intervals staying in the background
-  if (webcams.queue[id] && webcams.queue[id].timeout) {
+  if (webcams.queue[id]) {
     clearTimeout(webcams.queue[id].timeout);
   }
 
