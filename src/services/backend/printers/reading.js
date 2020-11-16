@@ -79,13 +79,13 @@ export const getWebcamSnapshot = (snapshotUrl) => {
       }
       //These status codes failed, but they were expected.
       //When FailedToFetchDataError is thrown, parent function waits few seconds and then tries to fetch image again
-      if ([502, 504].includes(response.status)) {
+      if ([502, 504, 408].includes(response.status)) {
         return Promise.reject(new FailedToFetchDataError());
       }
 
-      return Promise.reject(
-        new HttpError("Could not get snapshot " + response.status)
-      );
+      // in case of unexpected response, we will not throw httperror, but just failed to fetch,
+      // so there is no error and the streamer can try again later
+      return Promise.reject(new FailedToFetchDataError());
     })
     .catch((err) => {
       // Only log down errors originating outside of this handler.
