@@ -1,15 +1,52 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
 import CtaDropdown from "../listings/cta-dropdown";
 import NoPaginationListing from "./no-pagination-wrapper";
+import {useMyModal} from "../utils/modal";
+
+const DeleteUserModal = ({modal, user, organization, onUserDelete}) => {
+  return (
+    <>
+      {modal.isOpen && (
+        <modal.Modal>
+          <h1 className="modal-title text-center">Delete user</h1>
+          <h3 className="text-center">
+            Remove user <strong>{user.username}</strong> from this organization?
+          </h3>
+
+          <div className="cta-box text-center">
+            <button
+              className="btn"
+              onClick={() => {
+                onUserDelete(organization.id, user.identity).then(() => {
+                  modal.closeModal();
+                });
+              }}
+            >
+              Remove {user.username}!
+            </button>
+
+            <button className="btn btn-plain" onClick={modal.closeModal}>
+              Cancel
+            </button>
+          </div>
+        </modal.Modal>
+      )}
+    </>
+  );
+};
 
 const OrganizationsTableRow = ({
-  organization,
-  onOrganizationChange,
-  onOrganizationDelete,
-  onResendInvitation,
-}) => {
+                                 organization,
+                                 onOrganizationChange,
+                                 onOrganizationDelete,
+                                 onResendInvitation,
+                                 currentUser,
+                                 onUserDelete,
+                                 rowsCount,
+                               }) => {
   const [ctaListExpanded, setCtaListExpanded] = useState();
+  const deleteuserModal = useMyModal();
   return (
     <div className="list-item">
       <Link
@@ -18,9 +55,10 @@ const OrganizationsTableRow = ({
         to={`/${organization.id}`}
       >
         <span className="list-item-title">{organization.name}</span>
-        <span className="text-mono">{organization.id}</span>
+        <span className="text-mono">{organization.id}; </span>
+        <span>You are an </span><span
+        style={{color: organization.role === "admin" ? "red" : "green"}}>{organization.role}</span>
       </Link>
-
       <CtaDropdown
         expanded={ctaListExpanded}
         onToggle={() => {
@@ -29,27 +67,54 @@ const OrganizationsTableRow = ({
       >
         <div className="dropdown-items-content">
           <span className="dropdown-title">{organization.name}</span>
-          <Link
-            className="dropdown-item"
-            to={`/organizations/${organization.id}/settings`}
-          >
-            <i className="icon-edit"></i>
-            Organization Settings
-          </Link>
+          {(organization.role === "admin") ?
+            <Link
+              className="dropdown-item"
+              to={`/organizations/${organization.id}/settings`}
+            >
+              <i className="icon-edit"></i>
+              Organization Settings
+            </Link>
+            :
+            <>{rowsCount > 1 ?
+              <button
+                className="dropdown-item text-secondary"
+                onClick={(e) => {
+                  setCtaListExpanded(false);
+                  deleteuserModal.openModal(e);
+                }}
+              >
+                <i className="icon-trash"></i>
+                Leave organization
+              </button> :
+              <span className="dropdown-item text-secondary">You can't leave your last organization.</span>
+            }
+            </>
+
+          }
+
         </div>
       </CtaDropdown>
+      <DeleteUserModal
+        user={currentUser}
+        organization={organization}
+        onUserDelete={onUserDelete}
+        modal={deleteuserModal}
+      />
     </div>
   );
 };
 
 const OrganizationsTable = ({
-  loadOrganizations,
-  organizationsLoaded,
-  organizationsList,
-  onOrganizationChange,
-  onOrganizationDelete,
-  onResendInvitation,
-}) => {
+                              loadOrganizations,
+                              organizationsLoaded,
+                              organizationsList,
+                              onOrganizationChange,
+                              onOrganizationDelete,
+                              onResendInvitation,
+                              currentUser,
+                              onUserDelete,
+                            }) => {
   return (
     <NoPaginationListing
       defaultOrderBy="+name"
@@ -68,6 +133,9 @@ const OrganizationsTable = ({
             onOrganizationChange={onOrganizationChange}
             onOrganizationDelete={onOrganizationDelete}
             onResendInvitation={onResendInvitation}
+            currentUser={currentUser}
+            onUserDelete={onUserDelete}
+            rowsCount={organizationsList.length}
           />
         );
       }}
