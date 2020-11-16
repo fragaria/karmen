@@ -1,7 +1,7 @@
 import { performRequest } from "./utils";
 
 export const getUsers = (orgId, fields = []) => {
-  let uri = `/groups/${orgId}/users`;
+  let uri = `/groups/${orgId}/users/`;
   if (fields && fields.length) {
     uri += `?fields=${fields.join(",")}`;
   }
