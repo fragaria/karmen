@@ -11,7 +11,7 @@ const DeleteUserModal = ({modal, user, organization, onUserDelete}) => {
         <modal.Modal>
           <h1 className="modal-title text-center">Delete user</h1>
           <h3 className="text-center">
-            Do you really want to delete <strong>{user.username}</strong>?
+            Remove user <strong>{user.username}</strong> from this organization?
           </h3>
 
           <div className="cta-box text-center">
