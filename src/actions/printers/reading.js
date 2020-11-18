@@ -152,12 +152,32 @@ export const getWebcamSnapshot = createHttpAction(
       }
 
       if (err instanceof FailedToFetchDataError) {
+        let { webcams } = getState();
         //For various reasons (changing wifi, browser suspended tab on mobile, bad connection, etc), single request can fail to fetch.
         //This causes the stream to freeze, throws generic error toaster and user has to reload the page.
         //If we catch this case and dispatch another request after few second, we are very likely to overcome
         //this gap and go on like nothing happen
         //We don't have to worry about offline states - if heartbeat fails, all requests get's killed
-        setTimeout(() => dispatch(getWebcamSnapshot(orgid, id)), 5000);
+
+        //But to prevent ghost timeouts, we have to check if camera feed is still displayed. If user leaves the page,
+        //working feeds are killed and interval is set to 60000. But that doesn't work for this catch() block.
+        if (webcams.queue[id] && webcams.queue[id].interval < 60000) {
+          // kill any potential timeout before setting a new one
+          // this prevents ghost intervals staying in the background
+          clearTimeout(webcams.queue[id].timeout);
+          let timeout = setTimeout(
+            () => dispatch(getWebcamSnapshot(orgid, id)),
+            5000
+          );
+          dispatch({
+            type: "WEBCAMS_TIMEOUT_SET",
+            payload: {
+              id,
+              interval: 5000,
+              timeout,
+            },
+          });
+        }
         //We also return 502 to snapshots array, so the stream renderer components displays "retrying" message.
         return {
           organizationId: orgid,
