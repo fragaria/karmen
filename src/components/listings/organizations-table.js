@@ -49,11 +49,7 @@ const OrganizationsTableRow = ({
   const deleteuserModal = useMyModal();
   return (
     <div className="list-item">
-      <Link
-        className="list-item-content"
-        key={organization.id}
-        to={`/${organization.id}`}
-      >
+      <div className="list-item-content" key={organization.id}>
         <span className="list-item-title">{organization.name}</span>
         <span className="text-mono">{organization.id}; </span>
         <span>You are an </span>
@@ -62,7 +58,7 @@ const OrganizationsTableRow = ({
         >
           {organization.role}
         </span>
-      </Link>
+      </div>
       <CtaDropdown
         expanded={ctaListExpanded}
         onToggle={() => {
@@ -71,6 +67,17 @@ const OrganizationsTableRow = ({
       >
         <div className="dropdown-items-content">
           <span className="dropdown-title">{organization.name}</span>
+          {organization.id !== currentUser.activeOrganization.id ? (
+            <Link
+              className="dropdown-item"
+              key={organization.id}
+              to={`/${organization.id}`}
+            >
+              <span>Switch to organization</span>
+            </Link>
+          ) : (
+            <></>
+          )}
           {organization.role === "admin" ? (
             <Link
               className="dropdown-item"
@@ -82,7 +89,8 @@ const OrganizationsTableRow = ({
           ) : (
             <>
               {rowsCount > 1 ? (
-                <button
+                <>
+               { organization.id !== currentUser.activeOrganization.id ? (<button
                   className="dropdown-item text-secondary"
                   onClick={(e) => {
                     setCtaListExpanded(false);
@@ -91,7 +99,12 @@ const OrganizationsTableRow = ({
                 >
                   <i className="icon-trash"></i>
                   Leave organization
-                </button>
+                </button>) : (
+                   <span className="dropdown-item text-secondary">
+                  You can't leave active organization. Please switch first.
+                </span>
+               )}
+                </>
               ) : (
                 <span className="dropdown-item text-secondary">
                   You can't leave your last organization.
