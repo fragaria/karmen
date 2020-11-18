@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CtaDropdown from "../listings/cta-dropdown";
 import { useMyModal } from "../utils/modal";
 import NoPaginationListing from "./no-pagination-wrapper";
+import formatters from "../../services/formatters"
 
 const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
   return (
@@ -101,7 +102,6 @@ const UsersTableRow = ({
   const invitationSentModal = useMyModal();
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
-
   return (
     <div className="list-item">
       <div className="list-item-content">
@@ -160,33 +160,65 @@ const UsersTableRow = ({
   );
 };
 
+const PendingInvitationTableRow = ({
+  user,
+}) => {
+  return (
+    <div className="list-item">
+      <div className="list-item-content">
+        <span className="list-item-title">{user.email}</span>
+        <span className="list-item-subtitle">
+          <span>to be </span>
+          <strong>{user.role}</strong>
+        </span>
+        <span className="text-mono">
+          valid until {formatters.datetime(user.validUntil)}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const UsersTable = ({
   currentId,
-  loadUsers,
   usersLoaded,
   usersList,
   onUserChange,
   onUserDelete,
+  defaultOrderBy,
+  loadItems,
+  sortByColumns,
+  filterByColumns,
+  isUsers,
 }) => {
   return (
     <NoPaginationListing
-      defaultOrderBy="+username"
-      loadItems={() => loadUsers(["username", "id", "role"])}
+      defaultOrderBy={defaultOrderBy}
+      loadItems={loadItems}
       itemsLoaded={usersLoaded}
       items={usersList}
-      enableFiltering={true}
-      sortByColumns={["username", "id", "role"]}
-      filterByColumns={["username"]}
+      enableFiltering={false}
+      sortByColumns={sortByColumns}
+      filterByColumns={filterByColumns}
       rowFactory={(u) => {
-        return (
-          <UsersTableRow
-            key={u.id}
-            currentId={currentId}
-            user={u}
-            onUserChange={onUserChange}
-            onUserDelete={onUserDelete}
-          />
-        );
+        if (isUsers) {
+          return (
+            <UsersTableRow
+              key={u.id}
+              currentId={currentId}
+              user={u}
+              onUserChange={onUserChange}
+              onUserDelete={onUserDelete}
+            />
+          )
+        } else {
+          return (
+            <PendingInvitationTableRow
+              key={u.email}
+              user={u}
+            />
+          )
+        }
       }}
     />
   );

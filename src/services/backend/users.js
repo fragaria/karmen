@@ -12,6 +12,14 @@ export const getUsers = (orgId, fields = []) => {
   });
 };
 
+export const getPendingUsers = (orgId) => {
+  return performRequest({
+     uri: `/groups/${orgId}/`,
+    method: "GET",
+    successCodes: [200],
+  });
+};
+
 export const addUser = (orgId, email, role) => {
   return performRequest({
     uri: `/groups/${orgId}/users/`,
@@ -19,7 +27,7 @@ export const addUser = (orgId, email, role) => {
       username:email,
       role,
     },
-    successCodes: [201],
+    successCodes: [201, 202],
     parseResponse: true,
   });
 };
