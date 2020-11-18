@@ -140,17 +140,24 @@ class PrinterList extends React.Component {
           );
         });
     const noPrinters = (
-      <>
-        <p>
-          Looks like you didn't add any printers yet. Click the button below to
-          get you started with Karmen.
-        </p>
-        <div className="cta-box text-center">
-          <Link to={`/${match.params.orgid}/add-printer`} className="btn">
-            Add your first printer
-          </Link>
-        </div>
-      </>
+      role === "admin" ?
+        <>
+          <p>
+            Looks like you didn't add any printers yet. Click the button below to
+            get you started with Karmen.
+          </p>
+          <div className="cta-box text-center">
+            <Link to={`/${match.params.orgid}/add-printer`} className="btn">
+              Add your first printer
+            </Link>
+          </div>
+        </>
+        :
+        <>
+          <p>
+            Looks like there are no printers in this group. Only administrator can add new printers.
+          </p>
+        </>
     );
 
     return (
