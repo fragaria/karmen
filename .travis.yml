@@ -36,7 +36,7 @@ matrix:
       script: |
         set -e
         # start cypress installation
-        cd src/karmen_frontend/cypress && CI=true npm ci --only=prod &
+        cd src/cypress && CI=true npm ci --only=prod &
         travis_pid=$!
         # build containers
         cd $TRAVIS_BUILD_DIR/src/karmen_frontend
@@ -61,7 +61,7 @@ matrix:
         directories:
           - "$HOME/.npm"
       before_script:
-        - cd src/karmen_frontend
+        - cd src
         - npm ci || travis_terminate 1;
       script:
         - npm run lint || travis_terminate 1;
