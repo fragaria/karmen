@@ -258,6 +258,7 @@ export default connect(
           p.client.octoprint &&
           !p.client.octoprint.error &&
           p.client.octoprint.printer &&
+          p.client.octoprint.printer.state &&
           p.client.octoprint.printer.state.flags &&
           p.client.octoprint.printer.state.flags.ready
       ),
