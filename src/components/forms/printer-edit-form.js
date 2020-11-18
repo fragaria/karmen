@@ -18,7 +18,7 @@ class PrinterEditForm extends React.Component {
         name: "Note",
         val: "",
         type: "textarea",
-        maxLength: 2048
+        maxLength: 2048,
       },
       api_key: {
         name: "New API key",
@@ -79,7 +79,7 @@ class PrinterEditForm extends React.Component {
     onSubmit({
       name: form.name.val,
       note: form.note.val,
-      api_key: form.api_key.val
+      api_key: form.api_key.val,
     })
       .then((result) => {
         this.setState({

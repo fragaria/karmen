@@ -71,7 +71,13 @@ export const PrinterProperties = ({ printer }) => {
 };
 
 const PrinterTemperatures = ({ printer }) => {
-  const temperatures = printer.client && printer.client.octoprint && printer.client.octoprint.printer && printer.client.octoprint.printer.temperature ? printer.client.octoprint.printer.temperature : null;
+  const temperatures =
+    printer.client &&
+    printer.client.octoprint &&
+    printer.client.octoprint.printer &&
+    printer.client.octoprint.printer.temperature
+      ? printer.client.octoprint.printer.temperature
+      : null;
 
   if (!temperatures) {
     return null;
@@ -99,7 +105,14 @@ const PrinterTemperatures = ({ printer }) => {
 };
 
 export const PrinterProgress = ({ printer }) => {
-  const progress = printer.client && printer.client.octoprint && printer.client.octoprint.printer && printer.client.octoprint.printer.currentJob && printer.client.octoprint.printer.state.flags.printing ? printer.client.octoprint.printer.currentJob : null;
+  const progress =
+    printer.client &&
+    printer.client.octoprint &&
+    printer.client.octoprint.printer &&
+    printer.client.octoprint.printer.currentJob &&
+    printer.client.octoprint.printer.state.flags.printing
+      ? printer.client.octoprint.printer.currentJob
+      : null;
   if (!progress || !progress.name) {
     return <PrinterTemperatures printer={printer} />;
   }
@@ -129,7 +142,9 @@ export const PrinterConnectionStatus = ({ printer, startUpdate }) => {
         <>
           <dt className="term">Client: </dt>
           <dd className="description">
-            {printer.client.octoprint.version ? printer.client.octoprint.version.text : "Unavailable now"}
+            {printer.client.octoprint.version
+              ? printer.client.octoprint.version.text
+              : "Unavailable now"}
             <div className="text-reset">
               <small>{ClientVersion(printer.client.octoprint.version)}</small>
             </div>

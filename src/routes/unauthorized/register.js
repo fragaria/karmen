@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FormInputs } from "../../components/forms/form-utils";
 import BusyButton from "../../components/utils/busy-button";
 import { register } from "../../actions";
-import {HttpError} from "../../errors";
+import { HttpError } from "../../errors";
 
 class Register extends React.Component {
   constructor(props) {
@@ -64,20 +64,18 @@ class Register extends React.Component {
           message: `<p>We've sent you an email to <strong>${registerForm.realemail.val}</strong><br/> with the instructions on how to proceed next.</p> <p>Thank you for signing up, <br/>you can now close this window.</p>`,
           messageOk: true,
           registerForm: Object.assign({}, registerForm, {
-            realemail: Object.assign({}, registerForm.realemail, {val: ""}),
+            realemail: Object.assign({}, registerForm.realemail, { val: "" }),
           }),
         });
       })
       .catch((err) => {
         if (err instanceof HttpError && err.response.status === 409) {
-
           this.setState({
             messageOk: false,
-            message:
-              "Looks like this email is already registered.",
+            message: "Looks like this email is already registered.",
           });
         } else {
-          console.log(err)
+          console.log(err);
           this.setState({
             messageOk: false,
             message:

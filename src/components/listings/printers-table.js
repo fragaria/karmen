@@ -77,8 +77,10 @@ const PrintersTableRow = ({
         }}
       >
         <span className="dropdown-title">{printer.name}</span>
-        <Link to={`/${orguuid}/printers/${printer.id}/tab-settings`} 
-        className="dropdown-item text-secondary">
+        <Link
+          to={`/${orguuid}/printers/${printer.id}/tab-settings`}
+          className="dropdown-item text-secondary"
+        >
           <i className="icon-edit"></i>
           Printer settings
         </Link>
@@ -130,7 +132,9 @@ class PrintersTable extends React.Component {
     return (
       <NoPaginationListing
         defaultOrderBy="+name"
-        loadItems={() => loadPrinters(["job", "status", "webcam", "lights", "printjobs"])}
+        loadItems={() =>
+          loadPrinters(["job", "status", "webcam", "lights", "printjobs"])
+        }
         itemsLoaded={printersLoaded}
         items={printersList}
         enableFiltering={true}

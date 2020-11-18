@@ -6,13 +6,16 @@ import * as backend from "../services/backend";
 export const retryIfUnauthorized = (func, dispatch) => {
   return (...args) => {
     return func(...args).catch((err) => {
-      if (dispatch && err instanceof HttpError && (err.response.status === 401 || err.response.status === 403)) {
+      if (
+        dispatch &&
+        err instanceof HttpError &&
+        (err.response.status === 401 || err.response.status === 403)
+      ) {
         return dispatch(refreshToken())
           .then((r) => {
             return func(...args);
           })
           .catch((newErr) => {
-
             dispatch(clearUserIdentity());
             return Promise.reject(err);
           });
@@ -57,9 +60,7 @@ export const loadUserFromToken = (token) => (dispatch) => {
   );
 };
 
-export const loadUserFromLocalStorage = () => (
-  dispatch
-) => {
+export const loadUserFromLocalStorage = () => (dispatch) => {
   const profile = backend.getUserProfile();
   // no profile - bail
   if (!profile) {
@@ -114,7 +115,6 @@ export const authenticate = createHttpAction(
   }
 );
 
-
 export const refreshToken = createHttpAction(
   "USER_REFRESH_ACCESS_TOKEN",
   () => {
@@ -124,15 +124,14 @@ export const refreshToken = createHttpAction(
 
 export const changePassword = createHttpAction(
   "USER_CHANGE_PASSWORD",
-  (
-    password,
-    new_password,
-    new_password_confirmation,
-  ) => {
-     return backend.changePassword(password, new_password, new_password_confirmation)
+  (password, new_password, new_password_confirmation) => {
+    return backend.changePassword(
+      password,
+      new_password,
+      new_password_confirmation
+    );
   }
 );
-
 
 export const requestPasswordReset = createHttpAction(
   "USER_RESET_PASSWORD_REQUEST",
@@ -183,7 +182,7 @@ export const loadUserApiTokens = createHttpAction(
 export const addUserApiToken = createHttpAction(
   "USER_ADD_API_TOKEN",
   (name, scope, { dispatch, getState }) => {
-    console.log("add api token fired")
+    console.log("add api token fired");
     return retryIfUnauthorized(backend.addApiToken, dispatch)(name, scope);
   }
 );

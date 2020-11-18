@@ -52,7 +52,7 @@ class AddApiToken extends React.Component {
     });
     const { addApiToken } = this.props;
     if (!hasErrors) {
-      return addApiToken( form.name.val, "")
+      return addApiToken(form.name.val, "")
         .then((response) => {
           this.setState({
             showToken: true,
@@ -194,8 +194,7 @@ class AddApiToken extends React.Component {
 }
 
 export default connect(
-  (state) => ({
-  }),
+  (state) => ({}),
   (dispatch) => ({
     addApiToken: (name, scope) => dispatch(addUserApiToken(name, scope)),
   })

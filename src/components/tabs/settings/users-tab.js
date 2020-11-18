@@ -43,12 +43,16 @@ const Users = ({
         isUsers={true}
       />
 
-     <div style={{visibility: invitationsList.length ? "visible" : "hidden"}}>
-       {/* We need to render the table so invitations loads, but we don't want to show it if there are none
+      <div
+        style={{ visibility: invitationsList.length ? "visible" : "hidden" }}
+      >
+        {/* We need to render the table so invitations loads, but we don't want to show it if there are none
            So we can't just use conditional render based on invitationsList, as it will be always empty*/}
         <div className="container">
           <div className="react-tabs__tab-panel__header">
-            <h1 className="react-tabs__tab-panel__header__title">Pending invitations</h1>
+            <h1 className="react-tabs__tab-panel__header__title">
+              Pending invitations
+            </h1>
           </div>
         </div>
 
@@ -66,8 +70,7 @@ const Users = ({
           filterByColumns={["email"]}
           isUsers={false}
         />
-     </div>
-
+      </div>
     </>
   );
 };

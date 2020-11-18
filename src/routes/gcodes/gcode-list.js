@@ -91,7 +91,7 @@ const GcodeTableRow = ({
       downloadPath = downloadPath.substr(1);
     } else {
       // we return http from url to prevent mixed content on production
-      downloadPath = downloadPath.replace("http:","");
+      downloadPath = downloadPath.replace("http:", "");
     }
     return `${downloadPath}?authorization=${token}`;
   };
@@ -253,11 +253,16 @@ export default connect(
     printersLoaded: state.printers.printersLoaded,
     gcodesList: state.gcodes.list,
     getAvailablePrinters: () =>
-      state.printers.printers
-        .filter((p) => p.client && p.client.octoprint && !p.client.octoprint.error
-          && p.client.octoprint.printer && p.client.octoprint.printer.state
-          && p.client.octoprint.printer.state.flags
-          && p.client.octoprint.printer.state.flags.ready)
+      state.printers.printers.filter(
+        (p) =>
+          p.client &&
+          p.client.octoprint &&
+          !p.client.octoprint.error &&
+          p.client.octoprint.printer &&
+          p.client.octoprint.printer.state &&
+          p.client.octoprint.printer.state.flags &&
+          p.client.octoprint.printer.state.flags.ready
+      ),
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
@@ -268,7 +273,7 @@ export default connect(
           "webcam",
           "lights",
           "client",
-          "printjobs"
+          "printjobs",
         ])
       ),
     loadGcodesPage: (startWith, orderBy, filter, limit, fields) =>

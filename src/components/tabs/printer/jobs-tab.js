@@ -38,17 +38,21 @@ class PrintJobRow extends React.Component {
 
 const JobsTab = ({ orguuid, jobList }) => {
   if (!jobList) {
-    return (<></>)
+    return <></>;
   }
-  const fields = jobList.map((job, i)=>{
-    return (<PrintJobRow key={i} orguuid={orguuid} gcode_data={job} started={job.started_on} username={job.username}/>);
+  const fields = jobList.map((job, i) => {
+    return (
+      <PrintJobRow
+        key={i}
+        orguuid={orguuid}
+        gcode_data={job}
+        started={job.started_on}
+        username={job.username}
+      />
+    );
   });
 
-  return (
-    <div className="list">
-      {fields}
-    </div>
-  );
+  return <div className="list">{fields}</div>;
 };
 
 export default JobsTab;

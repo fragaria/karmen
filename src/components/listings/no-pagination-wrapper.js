@@ -78,13 +78,12 @@ class Wrapper extends React.Component {
             </div>
           )}
           {enableSorting !== false && (
-
             <Sorting
               active={orderBy}
               columns={sortByColumns || []}
               onChange={(column) => {
                 return () => {
-                  const {orderBy} = this.state;
+                  const { orderBy } = this.state;
                   this.setState({
                     orderBy:
                       orderBy === `+${column}` ? `-${column}` : `+${column}`,

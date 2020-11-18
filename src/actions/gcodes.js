@@ -71,7 +71,7 @@ export const getGcodeDownloadUrl = (orgid, id) => (dispatch) => {
       return downloadPath;
     } else {
       // we return http from url to prevent mixed content on production
-      return downloadPath.replace("http:","");
+      return downloadPath.replace("http:", "");
     }
   });
 };

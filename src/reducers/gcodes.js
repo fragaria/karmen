@@ -31,7 +31,7 @@ export default (
       if (
         filter === action.payload.filter &&
         orderBy === action.payload.orderBy &&
-        limit === action.payload.limit 
+        limit === action.payload.limit
       ) {
         const origPageIndex = pages.findIndex(
           (p) => p.startWith === action.payload.startWith

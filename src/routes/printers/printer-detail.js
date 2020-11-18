@@ -40,7 +40,7 @@ const ChangeConnectionModal = ({
   state,
   modal,
 }) => {
-  const printerTargetState = state === 'offline' ? "online" : "offline";
+  const printerTargetState = state === "offline" ? "online" : "offline";
 
   return (
     <>
@@ -107,19 +107,17 @@ const PrinterDetail = ({
     }
   }, [printer, loadPrinters]);
 
-  useEffect(
-    () => {
-      let timer = setInterval(() => {
-        if (!printersLoading) {
-          loadPrinters(); 
-        }
-        setTimer(timer);
-      }, 3000);
-      return () => {
-        clearInterval(timer);
+  useEffect(() => {
+    let timer = setInterval(() => {
+      if (!printersLoading) {
+        loadPrinters();
       }
-    }, [timer, loadPrinters, printersLoading]
-  )
+      setTimer(timer);
+    }, 3000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [timer, loadPrinters, printersLoading]);
 
   if (!printersLoaded) {
     return (
@@ -147,33 +145,35 @@ const PrinterDetail = ({
             <h1 className="main-title">{printer.name}</h1>
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
-              {(printer.client && printer.client.octoprint && printer.client.octoprint.printer) &&
-              [(!printer.client.octoprint.printer.state) ?
-              (
-                  <button
-                    key={1}
-                    className="btn btn-xs"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      changeConnectionModal.openModal(e);
-                    }}
-                  >
-                    Connect
-                  </button>
-                ) : (
-                  <button
-                    key={2}
-                    className="btn btn-xs"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      changeConnectionModal.openModal(e);
-                    }}
-                  >
-                    Disconnect
-                  </button>
-                )]}
+              {printer.client &&
+                printer.client.octoprint &&
+                printer.client.octoprint.printer && [
+                  !printer.client.octoprint.printer.state ? (
+                    <button
+                      key={1}
+                      className="btn btn-xs"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        changeConnectionModal.openModal(e);
+                      }}
+                    >
+                      Connect
+                    </button>
+                  ) : (
+                    <button
+                      key={2}
+                      className="btn btn-xs"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        changeConnectionModal.openModal(e);
+                      }}
+                    >
+                      Disconnect
+                    </button>
+                  ),
+                ]}
               {printer.client &&
                 printer.client.pill_info &&
                 printer.client.pill_info.update_available && (
@@ -199,7 +199,16 @@ const PrinterDetail = ({
           <div className="container">
             <ChangeConnectionModal
               modal={changeConnectionModal}
-              state={(printer && printer.client && !printer.client.error && printer.client.octoprint.printer && printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.flags) ? 'online' : 'offline'}
+              state={
+                printer &&
+                printer.client &&
+                !printer.client.error &&
+                printer.client.octoprint.printer &&
+                printer.client.octoprint.printer.state &&
+                printer.client.octoprint.printer.state.flags
+                  ? "online"
+                  : "offline"
+              }
               onPrinterConnectionChanged={setPrinterConnection}
             />
             <dl className="dl-horizontal">
@@ -296,10 +305,15 @@ export default connect(
   (dispatch, ownProps) => ({
     loadPrinters: () =>
       dispatch(
-        loadPrinters(
-          ownProps.match.params.orgid,
-          ["job", "status", "webcam", "lights", "client", "printjobs", "api_key"]
-        )
+        loadPrinters(ownProps.match.params.orgid, [
+          "job",
+          "status",
+          "webcam",
+          "lights",
+          "client",
+          "printjobs",
+          "api_key",
+        ])
       ),
     changeCurrentJobState: (action) =>
       dispatch(
@@ -342,7 +356,11 @@ export default connect(
       ),
     changeLights: (ledState) =>
       dispatch(
-        changeLights(ownProps.match.params.orgid, ownProps.match.params.id, ledState)
+        changeLights(
+          ownProps.match.params.orgid,
+          ownProps.match.params.id,
+          ledState
+        )
       ),
     movePrinthead: (command, opts) =>
       dispatch(

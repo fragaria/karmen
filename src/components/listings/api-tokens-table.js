@@ -76,7 +76,7 @@ const ApiTokensTable = ({
       items={tokensList}
       enableFiltering={false}
       enableSorting={false}
-      sortByColumns={["created_on","name"]}
+      sortByColumns={["created_on", "name"]}
       filterByColumns={["name"]}
       rowFactory={(t) => {
         return (

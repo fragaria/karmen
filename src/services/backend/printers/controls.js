@@ -1,17 +1,17 @@
 import { performRequest } from "../utils";
 
 export const setPrinterConnection = (orgId, id, state) => {
-  if (state === 'online') {
+  if (state === "online") {
     return performRequest({
       uri: `/printers/${id}/connection/`,
       parseResponse: false,
       successCodes: [204],
     });
   }
-  if (state === 'offline') {
+  if (state === "offline") {
     return performRequest({
       uri: `/printers/${id}/connection/`,
-      method: 'DELETE',
+      method: "DELETE",
       parseResponse: false,
       successCodes: [204],
     });
@@ -43,13 +43,13 @@ export const changeLights = (orgId, id, color) => {
     data: {
       color: color,
     },
-    method: 'put',
+    method: "put",
     successCodes: [200],
   });
 };
 
 export const movePrinthead = (orgId, id, command, opts) => {
-  const uriCmd = command === 'jog' ? 'move_head' : 'home_head'
+  const uriCmd = command === "jog" ? "move_head" : "home_head";
   return performRequest({
     uri: `/printers/${id}/${uriCmd}/`,
     appendData: {

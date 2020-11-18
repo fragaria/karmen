@@ -101,7 +101,7 @@ export default connect(
           "status",
           "webcam",
           "lights",
-          "client", 
+          "client",
           "printjobs",
           "api_key",
         ])
@@ -113,6 +113,7 @@ export default connect(
           ownProps.match.params.id,
           data
         )
-      )},
+      );
+    },
   })
 )(PrinterSettings);

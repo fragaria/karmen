@@ -65,11 +65,11 @@ export default (
       });
     case "PRINTERS_LOAD_ENDED":
       return Object.assign({}, state, {
-        loading: false 
+        loading: false,
       });
     case "PRINTERS_LOAD_STARTED":
       return Object.assign({}, state, {
-        loading: true 
+        loading: true,
       });
     case "PRINTERS_LOAD_DETAIL_SUCCEEDED":
       if (action.payload.organizationId !== activeOrganizationId) {

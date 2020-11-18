@@ -20,7 +20,7 @@ export const getUsers = createHttpAction(
 export const getPendingUsers = createHttpAction(
   "PENDING_USERS_LOAD",
   (orguuid, { dispatch, getState }) => {
-    return  denyWithNoOrganizationAccess(orguuid, getState, () => {
+    return denyWithNoOrganizationAccess(orguuid, getState, () => {
       return retryIfUnauthorized(backend.getPendingUsers, dispatch)(orguuid);
     });
   }

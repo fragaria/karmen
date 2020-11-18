@@ -19,13 +19,12 @@ class UserEditForm extends React.Component {
     };
   }
 
-
   render() {
     const { patchMeForm } = this.state;
 
     return (
       <form>
-        <FormInputs definition={patchMeForm}  />
+        <FormInputs definition={patchMeForm} />
       </form>
     );
   }

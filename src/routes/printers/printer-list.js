@@ -98,7 +98,12 @@ class PrinterList extends React.Component {
       printers
         .filter((p) => !!p)
         .map((printer) => {
-          let currentJob = (printer.client.octoprint && printer.client.octoprint.printer && printer.client.octoprint.printer.currentJob) ? printer.client.octoprint.printer.currentJob : undefined;
+          let currentJob =
+            printer.client.octoprint &&
+            printer.client.octoprint.printer &&
+            printer.client.octoprint.printer.currentJob
+              ? printer.client.octoprint.printer.currentJob
+              : undefined;
           return (
             <Link
               className="list-item"
@@ -139,12 +144,12 @@ class PrinterList extends React.Component {
             </Link>
           );
         });
-    const noPrinters = (
-      role === "admin" ?
+    const noPrinters =
+      role === "admin" ? (
         <>
           <p>
-            Looks like you didn't add any printers yet. Click the button below to
-            get you started with Karmen.
+            Looks like you didn't add any printers yet. Click the button below
+            to get you started with Karmen.
           </p>
           <div className="cta-box text-center">
             <Link to={`/${match.params.orgid}/add-printer`} className="btn">
@@ -152,13 +157,14 @@ class PrinterList extends React.Component {
             </Link>
           </div>
         </>
-        :
+      ) : (
         <>
           <p>
-            Looks like there are no printers in this group. Only administrator can add new printers.
+            Looks like there are no printers in this group. Only administrator
+            can add new printers.
           </p>
         </>
-    );
+      );
 
     return (
       <>
@@ -207,7 +213,7 @@ export default connect(
   }),
   (dispatch, ownProps) => ({
     loadPrinters: (fields) => {
-      return dispatch(loadPrinters(ownProps.match.params.orgid, fields))
+      return dispatch(loadPrinters(ownProps.match.params.orgid, fields));
     },
     setPrinterViewType: (viewType) => dispatch(setPrinterViewType(viewType)),
   })

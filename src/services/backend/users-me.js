@@ -76,7 +76,6 @@ export const authenticate = (username, password) => {
   });
 };
 
-
 export const refreshAccessToken = () => {
   return performRequest({
     uri: `/legacy-api/tokens/refresh/?fields=groups,user,role`,
@@ -106,10 +105,7 @@ export const logout = () => {
     });
 };
 
-export const changePassword = (
-  password,
-  new_password,
-) => {
+export const changePassword = (password, new_password) => {
   return performRequest({
     uri: `/users/me/`,
     method: "PATCH",
@@ -121,7 +117,6 @@ export const changePassword = (
     parseResponse: false,
   });
 };
-
 
 export const loadApiTokens = () => {
   return performRequest({
@@ -139,7 +134,7 @@ export const addApiToken = (name, scope) => {
       scope: scope,
     },
     successCodes: [201],
-   });
+  });
 };
 
 export const deleteApiToken = (id) => {

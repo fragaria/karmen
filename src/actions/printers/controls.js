@@ -32,7 +32,11 @@ export const changeLights = createHttpAction(
   "PRINTERS_CHANGE_LIGHTS",
   (orguuid, id, color, { dispatch, getState }) => {
     return denyWithNoOrganizationAccess(orguuid, getState, () => {
-      return retryIfUnauthorized(backend.changeLights, dispatch)(orguuid, id, color);
+      return retryIfUnauthorized(backend.changeLights, dispatch)(
+        orguuid,
+        id,
+        color
+      );
     });
   }
 );

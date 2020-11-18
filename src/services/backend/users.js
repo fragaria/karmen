@@ -14,7 +14,7 @@ export const getUsers = (orgId, fields = []) => {
 
 export const getPendingUsers = (orgId) => {
   return performRequest({
-     uri: `/groups/${orgId}/`,
+    uri: `/groups/${orgId}/`,
     method: "GET",
     successCodes: [200],
   });
@@ -24,7 +24,7 @@ export const addUser = (orgId, email, role) => {
   return performRequest({
     uri: `/groups/${orgId}/users/`,
     data: {
-      username:email,
+      username: email,
       role,
     },
     successCodes: [201, 202],

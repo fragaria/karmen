@@ -251,8 +251,16 @@ export default connect(
   (state) => ({
     printersLoaded: state.printers.printersLoaded,
     getAvailablePrinters: () =>
-      state.printers.printers
-        .filter((p) => p.client && p.client.octoprint && p.client.octoprint && !p.client.octoprint.error && p.client.octoprint.printer && p.client.octoprint.printer.state.flags && p.client.octoprint.printer.state.flags.ready)
+      state.printers.printers.filter(
+        (p) =>
+          p.client &&
+          p.client.octoprint &&
+          p.client.octoprint &&
+          !p.client.octoprint.error &&
+          p.client.octoprint.printer &&
+          p.client.octoprint.printer.state.flags &&
+          p.client.octoprint.printer.state.flags.ready
+      ),
   }),
   (dispatch, ownProps) => ({
     loadPrinters: () =>
@@ -263,7 +271,7 @@ export default connect(
           "webcam",
           "lights",
           "client",
-          "printjobs"
+          "printjobs",
         ])
       ),
     getGcode: (id) => dispatch(loadGcode(ownProps.match.params.orgid, id, [])),

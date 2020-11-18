@@ -13,10 +13,10 @@ const getUserDataFromApiResponse = (data, activeOrganization) => {
     email: data.user.email,
     systemRole: data.user.system_role || data.user.systemRole,
     accessTokenExpiresOn: data.accessTokenExpiresOn,
-    organizations: data.groups.reduce(
-      (acc, curr) => {acc[curr.id] = curr; return acc},
-      {}
-    ),
+    organizations: data.groups.reduce((acc, curr) => {
+      acc[curr.id] = curr;
+      return acc;
+    }, {}),
     activeOrganization: data.activeOrganization || activeOrganization,
   };
   if (data.access) {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CtaDropdown from "../listings/cta-dropdown";
 import { useMyModal } from "../utils/modal";
 import NoPaginationListing from "./no-pagination-wrapper";
-import formatters from "../../services/formatters"
+import formatters from "../../services/formatters";
 
 const ChangeUserRoleModal = ({ user, onUserChange, modal }) => {
   return (
@@ -91,12 +91,7 @@ const InvitationSentModal = ({ modal, user }) => {
   );
 };
 
-const UsersTableRow = ({
-  currentId,
-  user,
-  onUserChange,
-  onUserDelete,
-}) => {
+const UsersTableRow = ({ currentId, user, onUserChange, onUserDelete }) => {
   const toggleUserModal = useMyModal();
   const changeUserRoleModal = useMyModal();
   const invitationSentModal = useMyModal();
@@ -160,9 +155,7 @@ const UsersTableRow = ({
   );
 };
 
-const PendingInvitationTableRow = ({
-  user,
-}) => {
+const PendingInvitationTableRow = ({ user }) => {
   return (
     <div className="list-item">
       <div className="list-item-content">
@@ -210,14 +203,9 @@ const UsersTable = ({
               onUserChange={onUserChange}
               onUserDelete={onUserDelete}
             />
-          )
+          );
         } else {
-          return (
-            <PendingInvitationTableRow
-              key={u.email}
-              user={u}
-            />
-          )
+          return <PendingInvitationTableRow key={u.email} user={u} />;
         }
       }}
     />

@@ -7,7 +7,6 @@ import Loader from "../../components/utils/loader";
 import { activate } from "../../actions";
 import jwt_decode from "jwt-decode";
 
-
 class RegisterConfirmation extends React.Component {
   constructor(props) {
     super(props);

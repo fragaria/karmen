@@ -20,7 +20,7 @@ export default (
         invitationsLoaded: true,
       });
     case "USERS_ADD_SUCCEEDED":
-      if(action.payload.status === 201) {
+      if (action.payload.status === 201) {
         const existing = state.list.findIndex(
           (u) => u.id === action.payload.data.userId
         );

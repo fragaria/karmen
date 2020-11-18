@@ -35,7 +35,8 @@ const PrinterCurrentPrintControl = ({ printer, onCurrentJobStateChange }) => {
   const cancelPrintModal = useMyModal();
 
   if (
-    !printer.client.octoprint.printer.state.flags.printing && !printer.client.octoprint.printer.state.flags.paused
+    !printer.client.octoprint.printer.state.flags.printing &&
+    !printer.client.octoprint.printer.state.flags.paused
   ) {
     return <></>;
   }
@@ -275,7 +276,13 @@ const ExtrusionControl = ({ extrude }) => {
 };
 
 const PrinterLightsControl = ({ printer, changeLightsState }) => {
-  if (!printer || !printer.client || !printer.client.octoprint || !printer.client.octoprint.plugins || !printer.client.octoprint.plugins.includes('awesome_karmen_led')) {
+  if (
+    !printer ||
+    !printer.client ||
+    !printer.client.octoprint ||
+    !printer.client.octoprint.plugins ||
+    !printer.client.octoprint.plugins.includes("awesome_karmen_led")
+  ) {
     return null;
   }
   return (
@@ -285,12 +292,15 @@ const PrinterLightsControl = ({ printer, changeLightsState }) => {
         <BusyButton
           className="btn btn-xs"
           type="button"
-          onClick={() => changeLightsState(printer.client.octoprint.lights === "on" ? "black" : "white")}
+          onClick={() =>
+            changeLightsState(
+              printer.client.octoprint.lights === "on" ? "black" : "white"
+            )
+          }
           busyChildren="Switching lights..."
         >
-            {printer.client.octoprint.lights === "on" ? "Off" : "On"}
+          {printer.client.octoprint.lights === "on" ? "Off" : "On"}
         </BusyButton>
-
       </div>
     </>
   );
@@ -356,10 +366,9 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
       <label htmlFor="extrusion">{name}</label>
 
       <div>
-
         <input
           name="extrusion"
-          id={"temp-input-"+partName}
+          id={"temp-input-" + partName}
           type="number"
           value={target}
           step="0.1"
@@ -383,7 +392,7 @@ const TemperatureControl = ({ name, current, partName, setTemperature }) => {
           Set
         </BusyButton>
 
-         <BusyButton
+        <BusyButton
           className="btn btn-xs"
           type="button"
           onClick={() => {
@@ -413,58 +422,63 @@ const ControlsTab = ({
 }) => {
   return (
     <div className="container">
-      {(!printer || !printer.client || !printer.client.octoprint || printer.client.octoprint.error) ? (
+      {!printer ||
+      !printer.client ||
+      !printer.client.octoprint ||
+      printer.client.octoprint.error ? (
         <div className="tabs-content-message">
           Controls are not available for a disconnected printer
         </div>
-      )
-      /* {printer.client &&
+      ) : (
+        /* {printer.client &&
         printer.client.connected &&
         printer.client.access_level !== "unlocked" && (
           <div className="tabs-content-message">
             Printer is locked and therefore controls are not available
           </div>
         )} */
-        : (printer.client.octoprint.printer.state && printer.client.octoprint.printer.state.flags && printer.client.octoprint.printer.state.flags.operational && (
-          <div className="printer-control-panel">
-            <div className="controls">
-              <PrinterCurrentPrintControl
-                printer={printer}
-                onCurrentJobStateChange={changeCurrentJobState}
-              />
+        (printer.client.octoprint.printer.state &&
+          printer.client.octoprint.printer.state.flags &&
+          printer.client.octoprint.printer.state.flags.operational && (
+            <div className="printer-control-panel">
+              <div className="controls">
+                <PrinterCurrentPrintControl
+                  printer={printer}
+                  onCurrentJobStateChange={changeCurrentJobState}
+                />
 
-              <DirectControl
-                changeFanState={changeFanState}
-                changeMotorsState={changeMotorsState}
-                changeLightsState={changeLights}
-                printer={printer}
-              />
+                <DirectControl
+                  changeFanState={changeFanState}
+                  changeMotorsState={changeMotorsState}
+                  changeLightsState={changeLights}
+                  printer={printer}
+                />
 
-              <ExtrusionControl extrude={extrude}/>
+                <ExtrusionControl extrude={extrude} />
 
-              <TemperatureControl
-                name="Tool temperature"
-                partName="tool0"
-                // current={temperatures.tool0 && temperatures.tool0.actual}
-                current={0}
-                setTemperature={setTemperature}
-              />
+                <TemperatureControl
+                  name="Tool temperature"
+                  partName="tool0"
+                  // current={temperatures.tool0 && temperatures.tool0.actual}
+                  current={0}
+                  setTemperature={setTemperature}
+                />
 
-              <TemperatureControl
-                name="Bed temperature"
-                partName="bed"
-                // current={temperatures.bed && temperatures.bed.actual}
-                current={0}
-                setTemperature={setTemperature}
-              />
+                <TemperatureControl
+                  name="Bed temperature"
+                  partName="bed"
+                  // current={temperatures.bed && temperatures.bed.actual}
+                  current={0}
+                  setTemperature={setTemperature}
+                />
+              </div>
+
+              <div className="axes">
+                <AxesXYControl movePrinthead={movePrinthead} />
+                <AxesZControl movePrinthead={movePrinthead} />
+              </div>
             </div>
-
-            <div className="axes">
-              <AxesXYControl movePrinthead={movePrinthead}/>
-              <AxesZControl movePrinthead={movePrinthead}/>
-            </div>
-          </div>
-        ) || (
+          )) || (
           <div className="printer-control-panel">
             <div className="controls">
               <PrinterLightsControl
@@ -472,14 +486,15 @@ const ControlsTab = ({
                 changeLightsState={changeLights}
               />
             </div>
-            <br clear="all"/>
+            <br clear="all" />
             <p>
               <strong>
                 Some controls are not available for a disconnected printer
               </strong>
             </p>
           </div>
-        ))}
+        )
+      )}
     </div>
   );
 };

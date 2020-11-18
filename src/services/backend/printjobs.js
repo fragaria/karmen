@@ -8,7 +8,7 @@ export const printGcode = (orgId, id, printer) => {
       print: true,
     },
     successCodes: [201],
-    parseResponse: false
+    parseResponse: false,
   });
 };
 

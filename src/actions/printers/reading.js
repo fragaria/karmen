@@ -34,10 +34,10 @@ export const setWebcamRefreshInterval = (orgid, id, interval) => (
   dispatch,
   getState
 ) => {
-  const {webcams} = getState();
+  const { webcams } = getState();
 
-          // kill any potential timeout before setting a new one
-          // this prevents ghost intervals staying in the background
+  // kill any potential timeout before setting a new one
+  // this prevents ghost intervals staying in the background
   if (webcams.queue[id]) {
     clearTimeout(webcams.queue[id].timeout);
   }
@@ -97,7 +97,7 @@ export const getWebcamSnapshot = createHttpAction(
       }
 
       const printer = printers.printers.find((p) => p.id === id);
-     
+
       return retryIfUnauthorized(
         backend.getWebcamSnapshot,
         dispatch

@@ -71,9 +71,9 @@ class AddUser extends React.Component {
     if (!hasErrors) {
       return createUser(form.email.val, form.role.val)
         .then((r) => {
-            this.setState({
-              redirect: true,
-            });
+          this.setState({
+            redirect: true,
+          });
         })
         .catch((err) => {
           if (err instanceof HttpError && err.response.status === 409) {
