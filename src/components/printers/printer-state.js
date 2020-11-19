@@ -64,7 +64,11 @@ export const PrinterState = ({ printer }) => {
         })
       );
     }
-    labels.push({ color: "red", status: "Error", detail: err.code + ": " + err.detail });
+    labels.push({
+      color: "red",
+      status: "Error",
+      detail: err.code + ": " + err.detail,
+    });
   }
 
   if (printer.client.pill.error) {
@@ -80,7 +84,10 @@ export const PrinterState = ({ printer }) => {
       labels.push({
         color: "red",
         status: "Pill error",
-        detail: printer.client.pill.error.code + ": " + printer.client.pill.error.detail,
+        detail:
+          printer.client.pill.error.code +
+          ": " +
+          printer.client.pill.error.detail,
       });
     }
   }
