@@ -10,7 +10,7 @@ function buildLabels(labels) {
           return (
             <span
               className={"printer-status-label " + label.color}
-              data-tip={label.detail}
+              title={label.detail}
             >
               {" "}
               {label.status}
@@ -53,7 +53,6 @@ export const PrinterState = ({ printer }) => {
     }
 
     // Offline errors should be handled, now the rest should come from online devices.
-    labels.push({ color: "green", status: "Online" });
 
     if (err.code === "permission-denied") {
       return buildLabels(
@@ -65,13 +64,7 @@ export const PrinterState = ({ printer }) => {
         })
       );
     }
-    labels.push({ color: "red", status: "Error", detail: err.detail });
-  } else {
-    labels.push({
-      color: "green",
-      status: "Online",
-      detail: "We are connected.",
-    });
+    labels.push({ color: "red", status: "Error", detail: err.code + ": " + err.detail });
   }
 
   if (printer.client.pill.error) {
@@ -87,7 +80,7 @@ export const PrinterState = ({ printer }) => {
       labels.push({
         color: "red",
         status: "Pill error",
-        detail: printer.client.pill.error.detail,
+        detail: printer.client.pill.error.code + ": " + printer.client.pill.error.detail,
       });
     }
   }
@@ -113,7 +106,7 @@ export const PrinterState = ({ printer }) => {
           labels.concat({
             color: "red",
             status: "Printer error",
-            detail: err.detail,
+            detail: err.code + ": " + err.detail,
           })
         );
       }
