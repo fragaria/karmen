@@ -90,20 +90,22 @@ const OrganizationsTableRow = ({
             <>
               {rowsCount > 1 ? (
                 <>
-               { organization.id !== currentUser.activeOrganization.id ? (<button
-                  className="dropdown-item text-secondary"
-                  onClick={(e) => {
-                    setCtaListExpanded(false);
-                    deleteuserModal.openModal(e);
-                  }}
-                >
-                  <i className="icon-trash"></i>
-                  Leave organization
-                </button>) : (
-                   <span className="dropdown-item text-secondary">
-                  You can't leave active organization. Please switch first.
-                </span>
-               )}
+                  {organization.id !== currentUser.activeOrganization.id ? (
+                    <button
+                      className="dropdown-item text-secondary"
+                      onClick={(e) => {
+                        setCtaListExpanded(false);
+                        deleteuserModal.openModal(e);
+                      }}
+                    >
+                      <i className="icon-trash"></i>
+                      Leave organization
+                    </button>
+                  ) : (
+                    <span className="dropdown-item text-secondary">
+                      You can't leave active organization. Please switch first.
+                    </span>
+                  )}
                 </>
               ) : (
                 <span className="dropdown-item text-secondary">
