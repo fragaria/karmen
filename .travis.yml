@@ -36,7 +36,7 @@ matrix:
       script: |
         set -e
         # start cypress installation
-        cd src/karmen_frontend/cypress && CI=true npm ci --only=prod &
+        cd src/cypress && CI=true npm ci --only=prod &
         travis_pid=$!
         # build containers
         cd $TRAVIS_BUILD_DIR/src/karmen_frontend
@@ -55,18 +55,19 @@ matrix:
     # nodejs
     - language: node_js
       name: frontend Jest tests and build
-      if: branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/ OR tag IS present
+      # these are just basic and quick tests and lint, finished in a minute, we can run it every time
+      #if: branch IN (master, deploy, release) OR type IN (pull_request, api, cron) OR commit_message =~ /#travis/ OR tag IS present
       node_js: 10
       cache:
         directories:
           - "$HOME/.npm"
       before_script:
-        - cd src/karmen_frontend
+        - cd src
         - npm ci || travis_terminate 1;
       script:
         - npm run lint || travis_terminate 1;
         - npm run test || travis_terminate 1;
-        - npm run build
+       # - npm run build
 
     # build and push docker images
     - name: "frontend image"
