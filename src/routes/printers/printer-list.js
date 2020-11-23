@@ -127,7 +127,7 @@ class PrinterList extends React.Component {
                   <PrinterState printer={printer} />
                 </span>
 
-                {currentJob && currentJob.completion !== 100 && (
+                {currentJob && currentJob.completion && currentJob.completion !== 100 && (
                   <>
                     <div className="list-item-subtitle">
                       {currentJob.completion && (
