@@ -225,7 +225,7 @@ class Menu extends React.Component {
 
                   <li className="navigation-item">
                     <Link
-                      className="btn-reset"
+                      className="btn btn-sm"
                       title="Logout"
                       onClick={(e) => {
                         e.preventDefault();

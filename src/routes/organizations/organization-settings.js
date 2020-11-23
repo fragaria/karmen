@@ -39,7 +39,7 @@ const Settings = ({ match, ...rest }) => {
             activeTabClassName="react-tabs__tab--selected"
           >
             <NavTab to="/tab-printers">Printers</NavTab>
-            <NavTab to="/tab-users">Users</NavTab>
+            <NavTab to="/tab-users">Users access</NavTab>
           </RoutedTabs>
           <Switch>
             <Route
