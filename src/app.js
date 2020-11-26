@@ -153,7 +153,11 @@ const rejectionErrorHandler = (event) => {
           { autoClose: false, toastId: "HttpErrorOther" }
         );
     }
-  } else if (err instanceof OfflineError || err instanceof MaintenanceError) {
+  } else if (
+    err instanceof OfflineError ||
+    err instanceof MaintenanceError ||
+    err instanceof TypeError // TypeError: Failed to fetch. Is thrown much more often than OfflineError when offline
+  ) {
     // This is OK.
     return;
   }
