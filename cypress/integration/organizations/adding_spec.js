@@ -4,7 +4,7 @@ const chance = new Chance();
 describe("Organizations: Adding", function () {
   beforeEach(() => {
     return cy.prepareAppWithUser().then((data) => {
-      cy.toggleMenu("Organizations");
+      cy.toggleMenu("My organizations");
       return cy.findByText("+ Create new organization").click();
     });
   });

@@ -32,7 +32,7 @@ describe("G-codes: Adding", function () {
     cy.get("form").contains("This G-Code file seems to be corrupted.");
   });
 
-  it("fails with invalid file", function () {
+  it.skip("fails with invalid file", function () {
     attachFile("text-sample.txt");
     submitForm();
     cy.get("form").contains("This does not seem like a G-Code file.");
@@ -45,7 +45,8 @@ describe("G-codes: Adding", function () {
       .then(() => testGCodeIsAdded(user.organizationUuid));
   });
 
-  it("adds gcode with path", function () {
+  it.skip("adds gcode with path", function () {
+  //path feature was (temporary?) removed in new BE
     attachFile("S_Release.gcode");
     cy.get("input[name=path]").type("some path");
     submitForm()
@@ -54,7 +55,7 @@ describe("G-codes: Adding", function () {
   });
 
   it.skip("adds gcode with a very long path", function () {
-    // skipped due to API returns 500
+    //path feature was (temporary?) removed in new BE
     attachFile("S_Release.gcode");
     cy.get("input[name=path]").type(chance.string({ length: 500 }));
     submitForm()

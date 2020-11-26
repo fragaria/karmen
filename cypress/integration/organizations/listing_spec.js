@@ -3,7 +3,7 @@ describe("Organizations: Listing", function () {
   beforeEach(() => {
     return cy.prepareAppWithUser().then((data) => {
       user = data;
-      cy.toggleMenu("Organizations");
+      cy.toggleMenu("My organizations");
     });
   });
 

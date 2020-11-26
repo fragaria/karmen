@@ -6,7 +6,7 @@ describe("Organizations: Editing", function () {
   beforeEach(() => {
     return cy.prepareAppWithUser().then((data) => {
       user = data;
-      cy.toggleMenu("Organizations");
+      cy.toggleMenu("My organizations");
       return cy.findByText("+ Create new organization").click();
     });
   });

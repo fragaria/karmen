@@ -118,7 +118,8 @@ describe("Printers: Adding", function () {
     });
   });
 
-  it("Fails with no address", function () {
+  // possibly not valid after cloud mdoe drop
+  it.skip("Fails with no address", function () {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
       if (IS_CLOUD_INSTALL) {
         selectDeviceType(optionDevicePill);
@@ -157,15 +158,8 @@ describe("Printers: Adding", function () {
     });
   });
 
-  it("Other device: adds printer in cloud mode", function () {
-    cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-      if (!IS_CLOUD_INSTALL) {
-        return cy.log(
-          "SKIPPED - Test has been skipped due to it's valid only for non cloud mode."
-        );
-      }
+  it.skip("Other device: adds printer in cloud mode", function () {
       selectDeviceType(optionOtherDevice);
       testFillPillForm(user.organizationUuid, null, 10000);
-    });
   });
 });

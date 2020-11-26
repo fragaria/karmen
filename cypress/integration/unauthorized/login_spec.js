@@ -4,9 +4,12 @@ const chance = new Chance();
 describe("Unauthorized: Login flow", function () {
   let email, password;
   beforeEach(() => {
+    email = "user";
+    password = "user";
     email = chance.email();
     password = chance.string();
-    return cy.prepareTestUser(email, password);
+    return cy.createUser(email, password);
+
   });
 
   it("fails on empty username", function () {

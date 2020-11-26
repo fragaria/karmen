@@ -1,39 +1,51 @@
 import dayjs from "dayjs";
 import "cypress-file-upload";
 import "@testing-library/cypress/add-commands";
-import { Chance } from "chance";
+import {Chance} from "chance";
+
 const chance = new Chance();
+
+let apiBase = Cypress.env("apiBase");
 
 const getActivationToken = (email) => {
   cy.log(`requesting last mail contents for ${email}`)
-    .request(`http://localhost:8088/mail/${email}`)
-    .then(({ body }) => {
-      if (!body || !body.to) {
-        return cy.wait(2000).then(() => {
-          return getActivationToken(email);
-        });
-      } else {
-        const matched = body.text.match(/http:\/\/.*confirmation.*/i);
-        const url = new URL(matched);
-        return Promise.resolve(url.searchParams.get("activate"));
-      }
-    });
+    .request(`http://localhost:8000/api-auth/login/`, {username: "admin", password: "admin"}).then(() => {
+    cy.request(`http://localhost:8000/api/2/debug/mails/`)
+      .then(({body}) => {
+        console.log(body)
+        cy.log(body)
+        if (!body || !body.to) {
+          return cy.wait(2000).then(() => {
+            return getActivationToken(email);
+          });
+        } else {
+          const matched = body.text.match(/http:\/\/.*confirmation.*/i);
+          const url = new URL(matched);
+          return Promise.resolve(url.searchParams.get("activate"));
+        }
+      });
+  });
 };
+
+Cypress.Commands.add("getAccessToken", (email, password) => {
+  return cy.request("POST", apiBase+'tokens/', {username:email, password}).then((body) => {
+    return body.body.access;
+  })
+});
 
 Cypress.Commands.add("createUser", (email, password) => {
   return cy
     .log(`creating user ${email} with password ${password}`)
-    .request("POST", `/api/users/me`, { email })
-    .then(() => {
-      return getActivationToken(email);
-    })
+    .getAccessToken("admin", "admin")
     .then((token) => {
-      const tokenData = JSON.parse(atob(token));
-      return cy.request("POST", `/api/users/me/activate`, {
-        email,
-        password,
-        activation_key: tokenData.activation_key,
-        password_confirmation: password,
+      return cy.request({
+        method: "POST", url: apiBase + `users/?key=` + token,
+        body: {
+          username: email,
+          password,
+        }, headers: {
+          authorization: 'Bearer ' + token
+        }
       });
     })
     .then(() => {
@@ -74,10 +86,10 @@ Cypress.Commands.add("reLogin", (cy, email, password) => {
 Cypress.Commands.add("logout", () => {
   return cy
     .log(`logging out`)
-    .request("POST", `/api/users/me/logout`)
-    .then(() => {
-      localStorage.removeItem("karmen_profile");
-    });
+  // .request("DELETE", apiBase + `tokens/mine/`)
+  // .then(() => {
+  //   localStorage.removeItem("karmen_profile");
+  // });
 });
 
 Cypress.Commands.add(
@@ -85,22 +97,22 @@ Cypress.Commands.add(
   (isCloudMode, organizationUuid, name, ipOrToken, port = null) => {
     return cy
       .log(`adding printer`)
-      .getCookie("csrf_access_token")
+      .getCookie("access_token_cookie")
       .then((token) => {
         return cy
           .request({
             method: "POST",
-            url: `/api/organizations/${organizationUuid}/printers`,
+            url: apiBase + `groups/${organizationUuid}/printers/`,
             body: {
               name,
-              ...(isCloudMode ? { token: ipOrToken } : { ip: ipOrToken, port }),
+              ...(isCloudMode ? {token: ipOrToken} : {ip: ipOrToken, port}),
               protocol: "http",
             },
             headers: {
-              "X-CSRF-TOKEN": token.value,
+              // "X-CSRF-TOKEN": token.value,
             },
           })
-          .then(({ body }) => {
+          .then(({body}) => {
             return body;
           });
       });
@@ -110,17 +122,17 @@ Cypress.Commands.add(
 Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
   return cy
     .log(`getting printer status`)
-    .getCookie("csrf_access_token")
+    .getCookie("access_token_cookie")
     .then((token) => {
       return cy
         .request({
           method: "GET",
-          url: `/api/organizations/${organizationUuid}/printers/${printerUuid}?fields=job,status,webcam,lights`,
+          url: apiBase + `groups/${organizationUuid}/printers/${printerUuid}/?fields=job,status,webcam,lights`,
           headers: {
-            "X-CSRF-TOKEN": token.value, // asi neni potreba
+            // "X-CSRF-TOKEN": token.value, // asi neni potreba
           },
         })
-        .then(({ body }) => {
+        .then(({body}) => {
           return body;
         });
     });
@@ -129,20 +141,20 @@ Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
 Cypress.Commands.add("cancelPrint", (organizationUuid, printerUuid) => {
   return cy
     .log(`cancel printing`)
-    .getCookie("csrf_access_token")
+    .getCookie("access_token_cookie")
     .then((token) => {
       return cy
         .request({
           method: "POST",
-          url: `/api/organizations/${organizationUuid}/printers/${printerUuid}/current-job`,
+          url: apiBase + `groups/${organizationUuid}/printers/${printerUuid}/current-job/`,
           body: {
             action: "cancel",
           },
           headers: {
-            "X-CSRF-TOKEN": token.value,
+            // "X-CSRF-TOKEN": token.value,
           },
         })
-        .then(({ body }) => {
+        .then(({body}) => {
           return body;
         });
     });
@@ -153,21 +165,21 @@ Cypress.Commands.add(
   (organizationUuid, printerUuid, gcodeUuid) => {
     return cy
       .log(`start print`)
-      .getCookie("csrf_access_token")
+      .getCookie("access_token_cookie")
       .then((token) => {
         return cy
           .request({
             method: "POST",
-            url: `/api/organizations/${organizationUuid}/printjobs`,
+            url: apiBase + `groups/${organizationUuid}/printjobs/`,
             body: {
               gcode: gcodeUuid,
               printer: printerUuid,
             },
             headers: {
-              "X-CSRF-TOKEN": token.value,
+              // "X-CSRF-TOKEN": token.value,
             },
           })
-          .then(({ body }) => {
+          .then(({body}) => {
             return body;
           });
       });
@@ -186,12 +198,14 @@ Cypress.Commands.add("printGCode", (printerName) => {
 Cypress.Commands.add("preparePrintingEnvironment", () => {
   let email, password, printerName, organizationUuid, printerUuid;
 
-  email = chance.email();
-  password = chance.string();
+  // email = chance.email();
+  // password = chance.string();
+  email = "user";
+  password = "user";
   printerName = chance.string();
   return cy
     .logout()
-    .prepareTestUser(email, password)
+    // .prepareTestUser(email, password)
     .login(email, password)
     .then((data) => {
       organizationUuid = Object.keys(data.organizations)[0];
@@ -240,7 +254,7 @@ Cypress.Commands.add(
   (organizationUuid, printerUuid) => {
     return cy
       .log(`getting printer status`)
-      .getCookie("csrf_access_token")
+      .getCookie("access_token_cookie")
       .then((token) => {
         return cy.getPrinter(organizationUuid, printerUuid).then((printer) => {
           switch (printer.status.state) {
@@ -257,13 +271,13 @@ Cypress.Commands.add("form_request", (method, url, formData, token) => {
   const xhr = new XMLHttpRequest();
   return new Promise((resolve, reject) => {
     xhr.onload = function () {
-      resolve(xhr.response);
+      // resolve(xhr.response);
     };
     xhr.onerror = function () {
-      reject(xhr);
+      // reject(xhr);
     };
     xhr.open(method, url);
-    xhr.setRequestHeader("X-CSRF-TOKEN", token);
+    xhr.setRequestHeader("x-authorization", "Bearer:");
     xhr.send(formData);
   });
 });
@@ -274,19 +288,19 @@ Cypress.Commands.add("addGCode", (filename, organizationUuid, path) => {
       (blob) => {
         const data = new FormData();
         data.append("file", blob, filename);
-        data.append("path", path);
+        // data.append("path", path);
         return cy
           .log(`adding gcode`)
-          .getCookie("csrf_access_token")
+          .getCookie("access_token_cookie")
           .then((token) => {
             return cy.form_request(
               "POST",
-              `/api/organizations/${organizationUuid}/gcodes`,
+              apiBase + `groups/${organizationUuid}/gcodes/`,
               data,
-              token.value
+              token
             );
           })
-          .then((response) => JSON.parse(response));
+          // .then((response) => JSON.parse(response));
       }
     );
   });
@@ -298,24 +312,12 @@ Cypress.Commands.add("determineCloudInstall", () => {
   });
 });
 
-Cypress.Commands.add("prepareTestUser", (email, password) => {
-  return cy.log(`preparing test user`).request({
-    method: "POST",
-    url: `/api/tests-admin/users/create`,
-    body: {
-      email,
-      password,
-    },
-    headers: {
-      "X-local-tests-token": Cypress.env("apiAdminToken"),
-    },
-  });
-});
+
 
 Cypress.Commands.add("removeUserFromOrg", (org_uuid, uuid) => {
   return cy.log(`removing user from org`).request({
     method: "DELETE",
-    url: `/api/tests-admin/organizations/` + org_uuid + `/users`,
+    url: apiBase + `tests-admin/groups/` + org_uuid + `/users/`,
     body: {
       uuid,
     },
@@ -325,13 +327,12 @@ Cypress.Commands.add("removeUserFromOrg", (org_uuid, uuid) => {
   });
 });
 
-Cypress.Commands.add("prepareAppWithUser", () => {
-  const email = chance.email();
-  const password = chance.string();
-
+Cypress.Commands.add("prepareAppWithUser", (email, password) => {
+  email = email ? email : chance.email();
+  password = password ? password: chance.string();
   return cy
     .logout()
-    .prepareTestUser(email, password)
+    .createUser(email, password)
     .login(email, password)
     .then((userData) => {
       return Object.assign(userData, {
