@@ -162,19 +162,10 @@ class Menu extends React.Component {
                       </li>
                     </>
                   )}
-                  <li className="navigation-item">
-                    <Link
-                      to="/organizations"
-                      onClick={() => this.setState({ navigation: false })}
-                      id="navigation-organizations"
-                    >
-                      My organizations
-                    </Link>
-                  </li>
 
-                  <li className="navigation-title">
+                  <li className="navigation-title" title={username}>
                     <p className="navigation-title-content">
-                      {username}
+                      Settings
                       <span className="icon-settings"></span>
                     </p>
                   </li>
@@ -185,39 +176,32 @@ class Menu extends React.Component {
                       onClick={() => this.setState({ navigation: false })}
                       id="navigation-account-settings"
                     >
-                      Account settings
+                      My account
                     </Link>
                   </li>
 
                   {activeOrganization.role === "admin" && (
                     <>
-                      <li className="navigation-title">
-                        <p className="navigation-title-content">
-                          {activeOrganization.name}
-                          <span className="icon-settings"></span>
-                        </p>
-                      </li>
-
                       <li className="navigation-item">
                         <Link
                           to={`/${activeOrganization.id}/settings/tab-printers`}
                           onClick={() => this.setState({ navigation: false })}
                           id="navigation-organizations"
                         >
-                          Printers settings
-                        </Link>
-                      </li>
-                      <li className="navigation-item">
-                        <Link
-                          to={`/${activeOrganization.id}/settings/tab-users`}
-                          onClick={() => this.setState({ navigation: false })}
-                          id="navigation-organizations"
-                        >
-                          Users
+                          Printers
                         </Link>
                       </li>
                     </>
                   )}
+                  <li className="navigation-item">
+                    <Link
+                      to="/organizations"
+                      onClick={() => this.setState({ navigation: false })}
+                      id="navigation-organizations"
+                    >
+                      Organizations
+                    </Link>
+                  </li>
 
                   <li className="navigation-item">
                     <br />
