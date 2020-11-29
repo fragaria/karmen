@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import PrintersTable from "../../listings/printers-table";
-import NetworkScan from "../../forms/network-scan";
 
 const Printers = ({
   orguuid,
@@ -11,9 +10,6 @@ const Printers = ({
   printersLoaded,
   onPrinterUpdate,
   onPrinterDelete,
-  networkInterface,
-  onNetworkInterfaceChange,
-  scanNetwork,
 }) => {
   return (
     <>
@@ -39,18 +35,6 @@ const Printers = ({
         onPrinterDelete={onPrinterDelete}
       />
 
-      {!window.env.IS_CLOUD_INSTALL && (
-        <div className="container">
-          <br />
-          <br />
-          <strong>Network scan</strong>
-          <NetworkScan
-            networkInterface={networkInterface}
-            onNetworkInterfaceChange={onNetworkInterfaceChange}
-            scanNetwork={scanNetwork}
-          />
-        </div>
-      )}
     </>
   );
 };

@@ -10,8 +10,6 @@ import UsersTab from "../../components/tabs/settings/users-tab";
 import PrintersTab from "../../components/tabs/settings/printers-tab";
 
 import {
-  enqueueTask,
-  setNetworkInterface,
   loadPrinters,
   patchPrinter,
   deletePrinter,
@@ -72,9 +70,6 @@ export default connect(
   (state, ownProps) => ({
     printersLoaded: state.printers.printersLoaded,
     printersList: state.printers.printers,
-    networkInterface:
-      state.preferences.orgs[ownProps.match.params.orgid] &&
-      state.preferences.orgs[ownProps.match.params.orgid].networkInterface,
     usersList: state.users.list,
     usersLoaded: state.users.listLoaded,
     invitationsList: state.users.invitationsList,
@@ -88,14 +83,6 @@ export default connect(
       dispatch(deletePrinter(ownProps.match.params.orgid, id)),
     loadPrinters: (fields) =>
       dispatch(loadPrinters(ownProps.match.params.orgid, fields)),
-    onNetworkInterfaceChange: (networkInterface) =>
-      dispatch(setNetworkInterface(networkInterface)),
-    scanNetwork: (networkInterface) =>
-      dispatch(
-        enqueueTask(ownProps.match.params.orgid, "scan_network", {
-          network_interface: networkInterface,
-        })
-      ),
     loadUsers: (fields) =>
       dispatch(getUsers(ownProps.match.params.orgid, fields)),
     loadPendingUsers: () =>
