@@ -127,19 +127,25 @@ class PrinterList extends React.Component {
                   <PrinterState printer={printer} />
                 </span>
 
-                {currentJob && currentJob.completion && currentJob.completion !== 100 && (
-                  <>
-                    <div className="list-item-subtitle">
-                      {currentJob.completion && (
-                        <span>{currentJob.completion.toFixed(2)}% done, </span>
-                      )}
-                      <span>
-                        ETA: {formatters.timespan(currentJob.printTimeLeft)}
-                      </span>
-                    </div>
-                    <div className="list-item-property">{currentJob.name}</div>
-                  </>
-                )}
+                {currentJob &&
+                  currentJob.completion &&
+                  currentJob.completion !== 100 && (
+                    <>
+                      <div className="list-item-subtitle">
+                        {currentJob.completion && (
+                          <span>
+                            {currentJob.completion.toFixed(2)}% done,{" "}
+                          </span>
+                        )}
+                        <span>
+                          ETA: {formatters.timespan(currentJob.printTimeLeft)}
+                        </span>
+                      </div>
+                      <div className="list-item-property">
+                        {currentJob.name}
+                      </div>
+                    </>
+                  )}
               </div>
             </Link>
           );
