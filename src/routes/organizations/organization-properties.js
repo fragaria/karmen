@@ -73,7 +73,7 @@ class OrganizationProperties extends React.Component {
       return <Redirect to="/page-404" />;
     }
     return (
-      <OrgRoleBasedGateway requiredRole="admin">
+      <OrgRoleBasedGateway requiredRole="admin" targetOrganizationRole={organization.role}>
         <section className="content">
           <div className="container">
             <h1 className="main-title text-center">
