@@ -6,7 +6,6 @@ import {
 
 const defaults = {
   printerViewType: "list",
-  networkInterface: "wlan0",
 };
 
 export default (
@@ -71,25 +70,6 @@ export default (
         activeOrganizationId: state.activeOrganizationId,
         identity: state.identity,
         orgs: newOrgs,
-      });
-      return Object.assign({}, state, {
-        orgs: newOrgs,
-      });
-    case "SET_NETWORK_INTERFACE":
-      newOrgs = Object.assign({}, state.orgs, {
-        [activeOrganizationId]: Object.assign(
-          {},
-          defaults,
-          state.orgs[activeOrganizationId],
-          {
-            networkInterface: action.payload.networkInterface,
-          }
-        ),
-      });
-      persistUserPreferences({
-        activeOrganizationId: state.activeOrganizationId,
-        identity: state.identity,
-        orgs: state.orgs,
       });
       return Object.assign({}, state, {
         orgs: newOrgs,

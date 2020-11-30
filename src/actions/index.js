@@ -1,6 +1,5 @@
 export * from "./gcodes";
 export * from "./hearbeat";
-export * from "./misc";
 export * from "./organizations";
 export * from "./printers";
 export * from "./preferences";
