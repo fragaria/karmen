@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import UsersTable from "../../listings/users-table";
-import NoPaginationListing from "../../listings/no-pagination-wrapper";
 
 const Users = ({
   orguuid,

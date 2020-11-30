@@ -10,7 +10,7 @@ function buildLabels(labels) {
           return (
             <span
               className={"printer-status-label " + label.color}
-              data-tip={label.detail}
+              title={label.detail}
             >
               {" "}
               {label.status}
@@ -53,7 +53,6 @@ export const PrinterState = ({ printer }) => {
     }
 
     // Offline errors should be handled, now the rest should come from online devices.
-    labels.push({ color: "green", status: "Online" });
 
     if (err.code === "permission-denied") {
       return buildLabels(
@@ -65,12 +64,10 @@ export const PrinterState = ({ printer }) => {
         })
       );
     }
-    labels.push({ color: "red", status: "Error", detail: err.detail });
-  } else {
     labels.push({
-      color: "green",
-      status: "Online",
-      detail: "We are connected.",
+      color: "red",
+      status: "Error",
+      detail: err.code + ": " + err.detail,
     });
   }
 
@@ -82,12 +79,20 @@ export const PrinterState = ({ printer }) => {
       // but this could be older, cached response, since pill api is set to longer caching
     } else if (code === "moved-to-background") {
       // this means getting pill info took to long, no big deal, it's not essential and we could wait for it
+    } else if (
+      code === "not-supported" &&
+      printer.client.pill.error.detail.includes("(404)")
+    ) {
+      //404 on pill, virtual device
     } else {
       // this means we have some unexpected error with pill
       labels.push({
         color: "red",
         status: "Pill error",
-        detail: printer.client.pill.error.detail,
+        detail:
+          printer.client.pill.error.code +
+          ": " +
+          printer.client.pill.error.detail,
       });
     }
   }
@@ -113,7 +118,7 @@ export const PrinterState = ({ printer }) => {
           labels.concat({
             color: "red",
             status: "Printer error",
-            detail: err.detail,
+            detail: err.code + ": " + err.detail,
           })
         );
       }
