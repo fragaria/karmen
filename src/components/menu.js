@@ -208,7 +208,7 @@ class Menu extends React.Component {
                   </li>
 
                   <li className="navigation-item">
-                    <Link
+                    <span
                       className="btn btn-sm"
                       title="Logout"
                       onClick={(e) => {
@@ -218,7 +218,7 @@ class Menu extends React.Component {
                       }}
                     >
                       Logout
-                    </Link>
+                    </span>
                   </li>
                 </ul>
               )}

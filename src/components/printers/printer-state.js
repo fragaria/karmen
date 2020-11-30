@@ -9,6 +9,7 @@ function buildLabels(labels) {
         {labels.map(function (label, index) {
           return (
             <span
+              key={index}
               className={"printer-status-label " + label.color}
               title={label.detail}
             >
