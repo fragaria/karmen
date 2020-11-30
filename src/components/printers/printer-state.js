@@ -79,6 +79,11 @@ export const PrinterState = ({ printer }) => {
       // but this could be older, cached response, since pill api is set to longer caching
     } else if (code === "moved-to-background") {
       // this means getting pill info took to long, no big deal, it's not essential and we could wait for it
+    } else if (
+      code === "not-supported" &&
+      printer.client.pill.error.detail.includes("(404)")
+    ) {
+      //404 on pill, virtual device
     } else {
       // this means we have some unexpected error with pill
       labels.push({

@@ -131,6 +131,15 @@ const PrinterDetail = ({
   if (!printer) {
     return <Redirect to="/page-404" />;
   }
+
+  let is_virtual_device =
+    printer &&
+    printer.client &&
+    printer.client.pill &&
+    printer.client.pill.error &&
+    printer.client.pill.error.code &&
+    printer.client.pill.error.code === "not-supported" &&
+    printer.client.pill.error.detail.includes("(404)");
   return (
     <section className="content">
       <div className="printer-detail">
@@ -142,7 +151,16 @@ const PrinterDetail = ({
 
         <div className="printer-detail-name">
           <div className="container">
-            <h1 className="main-title">{printer.name}</h1>
+            <div className="main-title">
+              <div>
+                <span>{printer.name}</span>
+                {is_virtual_device && (
+                  <span style={{ fontSize: "0.4em", paddingLeft: "10px" }}>
+                    (not a Pill device)
+                  </span>
+                )}
+              </div>
+            </div>
             <div className="printer-state">
               <PrinterState printer={printer} />{" "}
               {printer.client &&
