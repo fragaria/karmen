@@ -10,28 +10,28 @@ describe("Printers: Listing", function () {
       .then((data) => {
         user = data;
         return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-          if (IS_CLOUD_INSTALL) {
+          // if (IS_CLOUD_INSTALL) {
+          //   return cy.addPrinter(
+          //     IS_CLOUD_INSTALL,
+          //     user.organizationUuid,
+          //     chance.string(),
+          //     chance.string()
+          //   );
+          // } else {
             return cy.addPrinter(
               IS_CLOUD_INSTALL,
               user.organizationUuid,
               chance.string(),
-              chance.string()
-            );
-          } else {
-            return cy.addPrinter(
-              IS_CLOUD_INSTALL,
-              user.organizationUuid,
-              chance.string(),
-              "172.16.236.13",
+              "http://172.16.236.13",
               8080
             );
-          }
+          // }
         });
       })
       .then((printer) => {
         printerUuid = printer.uuid;
-        cy.logout()
-          .login(user.email, user.password)
+        // cy.logout()
+        //   .login(user.email, user.password)
       });
   });
 
@@ -42,8 +42,9 @@ describe("Printers: Listing", function () {
     });
   });
 
-  it("has link to organization settings", function () {
-    cy.toggleMenu("Default organization");
+  // No organization list in menu when only single one exists anymore
+  it.skip("has link to organization settings", function () {
+    cy.toggleMenu("My organizations");
     cy.findByRole("listitem")
       .findByRole("menu")
       .click()

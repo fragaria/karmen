@@ -154,7 +154,7 @@ describe("Printers: Adding", function () {
         );
       }
       selectDeviceType(optionDevicePill);
-      testFillPillForm(user.organizationUuid, "XPrinterCodeX");
+      testFillPillForm(user.organizationUuid, "http://localhost:5050");
     });
   });
 

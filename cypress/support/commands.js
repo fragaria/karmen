@@ -48,10 +48,11 @@ Cypress.Commands.add("createUser", (email, password) => {
         }
       });
     })
-    .then(() => {
+    .then((response) => {
       return {
         email,
         password,
+        body: response.body,
       };
     });
 });
@@ -95,21 +96,23 @@ Cypress.Commands.add("logout", () => {
 Cypress.Commands.add(
   "addPrinter",
   (isCloudMode, organizationUuid, name, ipOrToken, port = null) => {
+    let bearer ='Bearer ' + localStorage.getItem("karmen_access_token");
     return cy
-      .log(`adding printer`)
-      .getCookie("access_token_cookie")
-      .then((token) => {
-        return cy
+      .log(`adding printer `+bearer)
+      .then(() => {
+        return cy.log(bearer)
           .request({
             method: "POST",
-            url: apiBase + `groups/${organizationUuid}/printers/`,
+            url: apiBase + `printers/`,
             body: {
               name,
-              ...(isCloudMode ? {token: ipOrToken} : {ip: ipOrToken, port}),
+              token: ipOrToken,
               protocol: "http",
+              groups:[organizationUuid],
+              api_key:"",
             },
             headers: {
-              // "X-CSRF-TOKEN": token.value,
+               authorization: bearer
             },
           })
           .then(({body}) => {
@@ -120,17 +123,17 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
+   let bearer ='Bearer ' + localStorage.getItem("karmen_access_token");
   return cy
     .log(`getting printer status`)
-    .getCookie("access_token_cookie")
-    .then((token) => {
+    .then(() => {
       return cy
         .request({
           method: "GET",
-          url: apiBase + `groups/${organizationUuid}/printers/${printerUuid}/?fields=job,status,webcam,lights`,
-          headers: {
-            // "X-CSRF-TOKEN": token.value, // asi neni potreba
-          },
+          url: apiBase + `printers/${printerUuid}/?fields=job,status,webcam,lights`,
+           headers: {
+               authorization: bearer
+            },
         })
         .then(({body}) => {
           return body;
@@ -198,45 +201,44 @@ Cypress.Commands.add("printGCode", (printerName) => {
 Cypress.Commands.add("preparePrintingEnvironment", () => {
   let email, password, printerName, organizationUuid, printerUuid;
 
-  // email = chance.email();
-  // password = chance.string();
-  email = "user";
-  password = "user";
+  email = chance.email();
+  password = chance.string();
   printerName = chance.string();
   return cy
     .logout()
-    // .prepareTestUser(email, password)
+    .createUser(email, password)
     .login(email, password)
     .then((data) => {
       organizationUuid = Object.keys(data.organizations)[0];
     })
     .then(() => {
       return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-        if (IS_CLOUD_INSTALL) {
+        // if (IS_CLOUD_INSTALL) {
+        //   return cy.addPrinter(
+        //     IS_CLOUD_INSTALL,
+        //     organizationUuid,
+        //     printerName,
+        //     chance.string()
+        //   );
+        // } else {
           return cy.addPrinter(
             IS_CLOUD_INSTALL,
             organizationUuid,
             printerName,
-            chance.string()
-          );
-        } else {
-          return cy.addPrinter(
-            IS_CLOUD_INSTALL,
-            organizationUuid,
-            printerName,
-            "172.16.236.13",
+            "http://172.16.236.13",
             8080
           );
-        }
+        // }
       });
     })
     .then((printer) => {
-      printerUuid = printer.uuid;
+      cy.log(printer);
+      printerUuid = printer.id;
       cy.setPrinterToOperationalState(organizationUuid, printerUuid);
     })
-    .then(() => {
-      return cy.addGCode("S_Release.gcode", organizationUuid, "");
-    })
+    // .then(() => {
+    //   return cy.addGCode("S_Release.gcode", organizationUuid, "");
+    // })
     .then((gCode) => {
       return {
         gCodeUuid: gCode.uuid,
@@ -257,10 +259,10 @@ Cypress.Commands.add(
       .getCookie("access_token_cookie")
       .then((token) => {
         return cy.getPrinter(organizationUuid, printerUuid).then((printer) => {
-          switch (printer.status.state) {
-            case "Printing":
-              return cy.cancelPrint(organizationUuid, printerUuid);
-          }
+          // switch (printer.status.state) {
+          //   case "Printing":
+          //     return cy.cancelPrint(organizationUuid, printerUuid);
+          // }
         });
       });
   }
