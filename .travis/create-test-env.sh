@@ -1,0 +1,35 @@
+trap "kill 0" EXIT
+# so all childs are killed when we are done
+
+
+WORKDIR=$(pwd)
+# the script is pextected to be run from repo root
+mkdir -p test-tmp
+rm -rf test-tmp/*
+git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
+git clone git@github.com:fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
+
+cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
+
+(cd test-tmp/backend;
+pipenv install;
+#pipenv install django_extensions;
+#pipenv install django-cache-memoize;
+pipenv run karmen/manage.py migrate;
+pipenv run karmen/manage.py generate_test_data;
+pipenv run karmen/manage.py runserver &)
+
+# spin up one fakeprinter
+#(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh &)
+# spin up second fakeprinter
+#(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
+
+
+npm run cypress
+
+#sleep 30
+
+# kill everything from this session
+# kudos to https://unix.stackexchange.com/questions/124127/kill-all-descendant-processes
+# but also that trap at the top is needed
+#kill $(ps -s $$ -o pid=)
