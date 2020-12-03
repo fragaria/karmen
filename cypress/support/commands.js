@@ -9,7 +9,7 @@ let apiBase = Cypress.env("apiBase");
 
 
 
-Cypress.Commands.add("getActivationToken", (email, pass_whole_url) => {
+Cypress.Commands.add("getActivationToken", (email) => {
   return cy.log(`requesting last mail contents for ${email}`)
     .getAccessToken("admin", "admin")
     .then((token) => {
@@ -25,9 +25,7 @@ Cypress.Commands.add("getActivationToken", (email, pass_whole_url) => {
           });
           msg = msg[0]
           const matched = msg.message.match(/http:\/\/.*confirmation\S*/);
-          if(pass_whole_url){
-            return matched[0]
-          }
+
           var key = matched[0].split("?activate=")[1]
           return key;
           const url = new URL(matched[0]);

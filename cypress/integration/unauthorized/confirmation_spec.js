@@ -1,6 +1,7 @@
 import { Chance } from "chance";
 const chance = new Chance();
 let apiBase = Cypress.env("apiBase");
+let baseUrl = Cypress.env("baseUrl");
 
 describe("Unauthorized: Activation flow", function () {
   let email = null;
@@ -19,8 +20,8 @@ describe("Unauthorized: Activation flow", function () {
         }
       })
       .then((data) => {
-        cy.getActivationToken(email, true).then((uri) => {
-          url = uri;
+        cy.getActivationToken(email).then((token) => {
+          url = "/confirmation?activate="+token;
         });
       });
   });

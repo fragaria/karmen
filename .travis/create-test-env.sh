@@ -1,9 +1,14 @@
 trap "kill 0" EXIT
 # so all childs are killed when we are done
 
-
-WORKDIR=$(pwd)
 # the script is pextected to be run from repo root
+WORKDIR=$(pwd)
+
+#start frontend
+(docker-compose up --build &)
+
+sleep 60
+
 mkdir -p test-tmp
 rm -rf test-tmp/*
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
@@ -17,17 +22,17 @@ pipenv install;
 #pipenv install django-cache-memoize;
 pipenv run karmen/manage.py migrate;
 pipenv run karmen/manage.py generate_test_data;
-pipenv run karmen/manage.py runserver &)
+pipenv run karmen/manage.py runserver & > /dev/null 2>&1)
 
 # spin up one fakeprinter
-#(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh &)
+(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
 # spin up second fakeprinter
 #(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
 
-npm run cypress
+npm run test:cypress
 
-#sleep 30
+sleep 10
 
 # kill everything from this session
 # kudos to https://unix.stackexchange.com/questions/124127/kill-all-descendant-processes
