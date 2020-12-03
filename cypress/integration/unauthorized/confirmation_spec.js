@@ -1,14 +1,11 @@
 import { Chance } from "chance";
 const chance = new Chance();
+let apiBase = Cypress.env("apiBase");
 
 describe("Unauthorized: Activation flow", function () {
-  let token = null;
   let email = null;
   let url = null;
 
-  const checkLocation = (loc) => {
-    expect(loc.pathname + loc.search).to.eq(url);
-  };
 
   beforeEach(() => {
     email = chance.email();
@@ -16,17 +13,15 @@ describe("Unauthorized: Activation flow", function () {
       .log(`getting activation token for ${email}`)
       .request({
         method: "POST",
-        url: `/api/tests-admin/users/register`,
+        url: apiBase + 'invitations/',
         body: {
-          email: email,
-        },
-        headers: {
-          "X-local-tests-token": Cypress.env("apiAdminToken"),
-        },
+          email
+        }
       })
       .then((data) => {
-        token = data.body.activation_key;
-        url = `/confirmation/?activate=${token}`;
+        cy.getActivationToken(email, true).then((uri) => {
+          url = uri;
+        });
       });
   });
 
@@ -38,9 +33,8 @@ describe("Unauthorized: Activation flow", function () {
   });
 
   it("good activation token", function () {
-    cy.visit(url);
+    cy.visit(url).wait(300);
     cy.location().then((loc) => {
-      checkLocation(loc);
       cy.get("form").contains("New password");
     });
   });
@@ -48,7 +42,6 @@ describe("Unauthorized: Activation flow", function () {
   it("password set mismatch", function () {
     cy.visit(url);
     cy.location().then((loc) => {
-      checkLocation(loc);
       cy.get("input#password").type("password");
       cy.get("input#passwordConfirmation").type("not a password");
       cy.get("button[type=submit]").click();
@@ -59,7 +52,6 @@ describe("Unauthorized: Activation flow", function () {
   it("password set success", function () {
     cy.visit(url);
     cy.location().then((loc) => {
-      checkLocation(loc);
       cy.get("input#password").type("password");
       cy.get("input#passwordConfirmation").type("password");
       cy.get("button[type=submit]").click();

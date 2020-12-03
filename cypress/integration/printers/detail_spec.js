@@ -93,7 +93,10 @@ describe("Printers: Detail - Tabs", function () {
   it("Check Tabs", function () {
     cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
         cy.findByText("Controls").click();
-        cy.get("div.tabs-content-message").contains("Controls are not available for a disconnected printer");
+        cy.findByText("Fan").should("exist");
+        cy.findByText("Motors").should("exist");
+        cy.findByText("Tool temperature").should("exist");
+        // cy.get("div.tabs-content-message").contains("Controls are not available for a disconnected printer");
         cy.findByText("Jobs").click();
         // right now no element is displayed when no jobs are there
         // cy.get("p.list-item").contains("No items found!");

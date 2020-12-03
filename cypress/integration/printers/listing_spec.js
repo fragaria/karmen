@@ -9,29 +9,15 @@ describe("Printers: Listing", function () {
       .prepareAppWithUser()
       .then((data) => {
         user = data;
-        return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-          // if (IS_CLOUD_INSTALL) {
-          //   return cy.addPrinter(
-          //     IS_CLOUD_INSTALL,
-          //     user.organizationUuid,
-          //     chance.string(),
-          //     chance.string()
-          //   );
-          // } else {
             return cy.addPrinter(
-              IS_CLOUD_INSTALL,
               user.organizationUuid,
               chance.string(),
               "http://172.16.236.13",
               8080
             );
-          // }
-        });
       })
       .then((printer) => {
         printerUuid = printer.uuid;
-        // cy.logout()
-        //   .login(user.email, user.password)
       });
   });
 

@@ -7,33 +7,76 @@ const chance = new Chance();
 
 let apiBase = Cypress.env("apiBase");
 
-const getActivationToken = (email) => {
-  cy.log(`requesting last mail contents for ${email}`)
-    .request(`http://localhost:8000/api-auth/login/`, {username: "admin", password: "admin"}).then(() => {
-    cy.request(`http://localhost:8000/api/2/debug/mails/`)
-      .then(({body}) => {
-        console.log(body)
-        cy.log(body)
-        if (!body || !body.to) {
-          return cy.wait(2000).then(() => {
-            return getActivationToken(email);
-          });
-        } else {
-          const matched = body.text.match(/http:\/\/.*confirmation.*/i);
-          const url = new URL(matched);
-          return Promise.resolve(url.searchParams.get("activate"));
-        }
-      });
-  });
-};
 
+
+Cypress.Commands.add("getActivationToken", (email, pass_whole_url) => {
+  return cy.log(`requesting last mail contents for ${email}`)
+    .getAccessToken("admin", "admin")
+    .then((token) => {
+      cy.request({
+        url: apiBase + `debug/mails/`,
+        headers: {
+          authorization: 'Bearer ' + token
+        }
+      })
+        .then(({body}) => {
+          var msg = body.filter(m => {
+            return m.to[0] === email
+          });
+          msg = msg[0]
+          const matched = msg.message.match(/http:\/\/.*confirmation\S*/);
+          if(pass_whole_url){
+            return matched[0]
+          }
+          var key = matched[0].split("?activate=")[1]
+          return key;
+          const url = new URL(matched[0]);
+          console.log(url)
+          cy.log(url)
+          return Promise.resolve(url.searchParams.get("activate"));
+
+        });
+    });
+});
 Cypress.Commands.add("getAccessToken", (email, password) => {
-  return cy.request("POST", apiBase+'tokens/', {username:email, password}).then((body) => {
+  return cy.request("POST", apiBase + 'tokens/', {username: email, password}).then((body) => {
     return body.body.access;
   })
 });
 
 Cypress.Commands.add("createUser", (email, password) => {
+  return cy
+    .log(`registering user ${email} with password ${password}`)
+    .request({
+      method: "POST",
+      url: apiBase + 'invitations/',
+      body: {
+        email
+      }
+    }).then(() => {
+      return cy.getActivationToken(email).then((token) => {
+        cy.log(token)
+        return cy.request({
+          method: "POST", url: apiBase + `users/`,
+          body: {
+            password,
+            token
+          }
+        });
+      });
+
+    })
+    .then((response) => {
+      return {
+        email,
+        password,
+        body: response.body,
+      };
+    });
+});
+
+
+Cypress.Commands.add("makeUser", (email, password) => {
   return cy
     .log(`creating user ${email} with password ${password}`)
     .getAccessToken("admin", "admin")
@@ -93,28 +136,25 @@ Cypress.Commands.add("logout", () => {
   // });
 });
 
-Cypress.Commands.add(
-  "addPrinter",
-  (isCloudMode, organizationUuid, name, ipOrToken, port = null) => {
-    let bearer ='Bearer ' + localStorage.getItem("karmen_access_token");
+Cypress.Commands.add("addPrinter", (organizationUuid, name, ipOrToken) => {
+    let bearer = 'Bearer ' + localStorage.getItem("karmen_access_token");
     return cy
-      .log(`adding printer `+bearer)
+      .log(`adding printer `+organizationUuid)
       .then(() => {
-        return cy.log(bearer)
-          .request({
-            method: "POST",
-            url: apiBase + `printers/`,
-            body: {
-              name,
-              token: ipOrToken,
-              protocol: "http",
-              groups:[organizationUuid],
-              api_key:"",
-            },
-            headers: {
-               authorization: bearer
-            },
-          })
+        return cy.request({
+          method: "POST",
+          url: apiBase + `printers/`,
+          body: {
+            name,
+            token: ipOrToken,
+            protocol: "http",
+            groups: [organizationUuid],
+            api_key: "",
+          },
+          headers: {
+            authorization: bearer
+          },
+        })
           .then(({body}) => {
             return body;
           });
@@ -123,7 +163,7 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
-   let bearer ='Bearer ' + localStorage.getItem("karmen_access_token");
+  let bearer = 'Bearer ' + localStorage.getItem("karmen_access_token");
   return cy
     .log(`getting printer status`)
     .then(() => {
@@ -131,9 +171,9 @@ Cypress.Commands.add("getPrinter", (organizationUuid, printerUuid) => {
         .request({
           method: "GET",
           url: apiBase + `printers/${printerUuid}/?fields=job,status,webcam,lights`,
-           headers: {
-               authorization: bearer
-            },
+          headers: {
+            authorization: bearer
+          },
         })
         .then(({body}) => {
           return body;
@@ -212,33 +252,20 @@ Cypress.Commands.add("preparePrintingEnvironment", () => {
       organizationUuid = Object.keys(data.organizations)[0];
     })
     .then(() => {
-      return cy.determineCloudInstall().then((IS_CLOUD_INSTALL) => {
-        // if (IS_CLOUD_INSTALL) {
-        //   return cy.addPrinter(
-        //     IS_CLOUD_INSTALL,
-        //     organizationUuid,
-        //     printerName,
-        //     chance.string()
-        //   );
-        // } else {
-          return cy.addPrinter(
-            IS_CLOUD_INSTALL,
-            organizationUuid,
-            printerName,
-            "http://172.16.236.13",
-            8080
-          );
-        // }
-      });
+      return cy.addPrinter(
+        organizationUuid,
+        printerName,
+        "http://127.0.0.1:5050"
+      );
     })
     .then((printer) => {
       cy.log(printer);
       printerUuid = printer.id;
       cy.setPrinterToOperationalState(organizationUuid, printerUuid);
     })
-    // .then(() => {
-    //   return cy.addGCode("S_Release.gcode", organizationUuid, "");
-    // })
+    .then(() => {
+      return cy.addGCode("S_Release.gcode", organizationUuid,);
+    })
     .then((gCode) => {
       return {
         gCodeUuid: gCode.uuid,
@@ -268,52 +295,24 @@ Cypress.Commands.add(
   }
 );
 
-// Performs an XMLHttpRequest instead of a cy.request (able to send data as FormData - multipart/form-data)
-Cypress.Commands.add("form_request", (method, url, formData, token) => {
-  const xhr = new XMLHttpRequest();
-  return new Promise((resolve, reject) => {
-    xhr.onload = function () {
-      // resolve(xhr.response);
-    };
-    xhr.onerror = function () {
-      // reject(xhr);
-    };
-    xhr.open(method, url);
-    xhr.setRequestHeader("x-authorization", "Bearer:");
-    xhr.send(formData);
-  });
+Cypress.Commands.add("addGCode", (filename, organizationUuid) => {
+  return cy.visit("/" + organizationUuid + "/add-gcode")
+    .wait(3000)
+    .log(`adding gcode`)
+    .then(() => {
+      cy.get('input[type=file]').attachFile(filename)
+        .get('button[type=submit]').click()
+        .wait(3000)
+    })
+
 });
 
-Cypress.Commands.add("addGCode", (filename, organizationUuid, path) => {
-  return cy.fixture(filename, "binary").then((gcodeBin) => {
-    return Cypress.Blob.binaryStringToBlob(gcodeBin, "application/g-code").then(
-      (blob) => {
-        const data = new FormData();
-        data.append("file", blob, filename);
-        // data.append("path", path);
-        return cy
-          .log(`adding gcode`)
-          .getCookie("access_token_cookie")
-          .then((token) => {
-            return cy.form_request(
-              "POST",
-              apiBase + `groups/${organizationUuid}/gcodes/`,
-              data,
-              token
-            );
-          })
-          // .then((response) => JSON.parse(response));
-      }
-    );
-  });
-});
 
 Cypress.Commands.add("determineCloudInstall", () => {
   return cy.window().then((win) => {
     return win.env.IS_CLOUD_INSTALL;
   });
 });
-
 
 
 Cypress.Commands.add("removeUserFromOrg", (org_uuid, uuid) => {
@@ -331,7 +330,7 @@ Cypress.Commands.add("removeUserFromOrg", (org_uuid, uuid) => {
 
 Cypress.Commands.add("prepareAppWithUser", (email, password) => {
   email = email ? email : chance.email();
-  password = password ? password: chance.string();
+  password = password ? password : chance.string();
   return cy
     .logout()
     .createUser(email, password)

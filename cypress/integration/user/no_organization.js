@@ -6,12 +6,7 @@ describe("Organizations: Adding", function () {
   beforeEach(() => {
     email = chance.email();
     password = chance.string();
-    cy.createUser(email, password).then( ({email, password, body}) => {
-      cy.log(body)
-      user_id = body.id;
-      org_id = body.groups;
-      console.log(user_id, org_id);
-      cy.removeUserFromOrg(org_id, user_id);
+    cy.makeUser(email, password).then( ({email, password, body}) => {
       return cy.login(email, password)
       }
     );
