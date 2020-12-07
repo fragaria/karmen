@@ -34,7 +34,6 @@ const Printers = ({
         onPrinterUpdate={onPrinterUpdate}
         onPrinterDelete={onPrinterDelete}
       />
-
     </>
   );
 };
