@@ -5,7 +5,7 @@ trap "kill 0" EXIT
 WORKDIR=$(pwd)
 
 #start frontend
-(docker-compose up --build &)
+#(docker-compose up --build &)
 
 #sleep 60
 
@@ -25,6 +25,11 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 pip3 install pipenv
+
+echo "kinda"
+
+python3 -m pip install pipenv
+
 
 (cd test-tmp/backend;
 pipenv install;
