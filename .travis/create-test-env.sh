@@ -54,13 +54,13 @@ cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 #
 #python3 -m pip install pipenv
 
+export PIPENV_IGNORE_VIRTUALENVS=1
 
 cd test-tmp/backend;
 rm Pipfile.lock
-PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --python 3.7;
+pipenv install --python 3.7;
 pipenv run python --version
 pipenv install django_extensions;
-pipenv install django-cache-memoize;
 pipenv run karmen/manage.py migrate;
 pipenv run karmen/manage.py generate_test_data;
 pipenv run karmen/manage.py runserver # & > /dev/null 2>&1
