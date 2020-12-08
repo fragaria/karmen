@@ -22,7 +22,7 @@ matrix:
   include:
 
     - stage: Run tests
-      language: node_js
+      language: python
       name: Compose test environment and run e2e tests
 
     # run cypress tests
