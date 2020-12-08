@@ -57,7 +57,7 @@ cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 cd test-tmp/backend;
 rm Pipfile.lock
-pipenv install --python 3.7;
+PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --python 3.7;
 pipenv run python --version
 #pipenv install django_extensions;
 #pipenv install django-cache-memoize;
