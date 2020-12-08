@@ -24,6 +24,9 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
+
+pyenv shell 3.6.7
+
 pip3 install pipenv
 
 echo "kinda"
