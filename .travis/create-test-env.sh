@@ -17,11 +17,15 @@ rm -rf test-tmp/*
 #git clone https://${BITBUCKET_USERNAME}:${BITBUCKET_ACCESS_PASSWORD}@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
 #git clone https://adamjezek98:tWDhdmx6eY3GdmSFsu9b@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
 
+
+# we just pass the ssh key as env var https://github.com/GabLeRoux/travis-multiline-env-example
 echo ${BITBUCKET_SSH_KEY} > is_id_rsa_travis
+echo ${BITBUCKET_SSH_KEY} > .ssh/id_rsa
 
-cat id_rsa_travis
 
-ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
+#ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
+git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
+
 
 
 echo ""
