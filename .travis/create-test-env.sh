@@ -19,6 +19,7 @@ rm -rf test-tmp/*
 
 
 mkdir .ssh
+eval "$(ssh-agent -s)"
 # So travis won't let add ssh keys with public repos
 # So we just take that multiline key and shove it into env var as self-evaluating single-line echo
 echo ${BITBUCKET_SSH_KEY} > .ssh/id_rsa
