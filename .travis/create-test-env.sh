@@ -33,9 +33,10 @@ chmod 644 ~/.ssh/config
 chmod 600 ~/.ssh/id_rsa
 chmod 644 ~/.ssh/known_hosts
 
+ssh-add .ssh/id_rsa
 
-ssh-agent bash -c 'ssh-add .ssh/id_rsa; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
-#git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
+#ssh-agent bash -c 'ssh-add .ssh/id_rsa; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
+git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 
 
 
