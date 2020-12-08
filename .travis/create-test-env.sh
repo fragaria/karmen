@@ -24,14 +24,12 @@ eval "$(ssh-agent -s)"
 echo ${BITBUCKET_SSH_KEY} > id_rsa
 
 # of course there is the 'authenticity can't be established' stuff
-echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
+#echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
 ssh-keyscan -H bitbucket.org >>  ~/.ssh/known_hosts
 
 echo "test"
-#chmod 700 .ssh
-#chmod 644 .ssh/config
+# gotta make it stop bitching about permissions
 chmod 600 id_rsa
-#chmod 644 .ssh/known_hosts
 
 #ssh-add id_rsa
 
