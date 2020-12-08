@@ -18,7 +18,7 @@ rm -rf test-tmp/*
 #git clone https://adamjezek98:tWDhdmx6eY3GdmSFsu9b@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
 
 
-#eval "$(ssh-agent -s)"
+eval "$(ssh-agent -s)"
 # So travis won't let add ssh keys with public repos
 # So we just take that multiline key and shove it into env var as self-evaluating single-line echo
 echo ${BITBUCKET_SSH_KEY} > id_rsa
