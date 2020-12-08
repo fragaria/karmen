@@ -23,6 +23,7 @@ eval "$(ssh-agent -s)"
 # So we just take that multiline key and shove it into env var as self-evaluating single-line echo
 echo ${BITBUCKET_SSH_KEY} > id_rsa_travis
 
+cat id_rsa_travis
 # of course there is the 'authenticity can't be established' stuff
 #echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
 ssh-keyscan -H bitbucket.org >>  ~/.ssh/known_hosts
