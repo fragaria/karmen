@@ -46,7 +46,7 @@ cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 
 pyenv shell 3.6.7
-sudo apt install python3.6-pip --yes
+sudo apt install python3.6 python3-pip --yes
 
 pip3 install pipenv
 
