@@ -9,6 +9,12 @@ WORKDIR=$(pwd)
 
 #sleep 60
 
+echo "let'S leak all freakin tokens!"
+echo $BITBUCKET_USERNAME
+echo $BITBUCKET_ACCESS_PASSWORD
+echo "and now go rewoke the tokens"
+
+
 mkdir -p test-tmp
 rm -rf test-tmp/*
 #git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
