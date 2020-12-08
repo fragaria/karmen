@@ -19,6 +19,8 @@ rm -rf test-tmp/*
 
 echo ${BITBUCKET_SSH_KEY} > is_id_rsa_travis
 
+cat id_rsa_travis
+
 ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 
 
