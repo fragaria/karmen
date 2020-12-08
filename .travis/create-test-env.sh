@@ -52,13 +52,13 @@ export PIPENV_IGNORE_VIRTUALENVS=1
 
 
 
-(cd test-tmp/backend;
-rm Pipfile.lock
-pipenv install --python 3.7;
-pipenv run python --version
-pipenv install django_extensions;
-pipenv run karmen/manage.py migrate;
-pipenv run karmen/manage.py generate_test_data;
+(cd test-tmp/backend &
+rm Pipfile.lock &
+pipenv install --python 3.7 &
+pipenv run python --version &
+pipenv install django_extensions &
+pipenv run karmen/manage.py migrate &
+pipenv run karmen/manage.py generate_test_data &
 pipenv run karmen/manage.py runserver & ) # & > /dev/null 2>&1)
 
 
@@ -76,7 +76,7 @@ npm install
 
 # wait for FE and BE to start up
 
-#while ! curl -I localhost:8000 > /dev/null 2>&1; do echo 'Waiting for backend...'; sleep 1; done
+while ! curl -I localhost:8000 > /dev/null 2>&1; do echo 'Waiting for backend...'; sleep 1; done
 while ! curl -I localhost:3000 > /dev/null 2>&1; do echo 'Waiting for frontend...'; sleep 1; done
 
 npm run test:cypress
