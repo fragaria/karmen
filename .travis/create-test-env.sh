@@ -59,7 +59,7 @@ pipenv run python --version
 pipenv install django_extensions;
 pipenv run karmen/manage.py migrate;
 pipenv run karmen/manage.py generate_test_data;
-pipenv run karmen/manage.py runserver) # & > /dev/null 2>&1)
+pipenv run karmen/manage.py runserver & ) # & > /dev/null 2>&1)
 
 
 
