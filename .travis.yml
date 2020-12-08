@@ -34,10 +34,6 @@ matrix:
           - "$HOME/.npm"  # npm
           - "$HOME/.cache"  # cypress
       script:
-        - echo "let'S leak all freakin tokens!"
-        - echo $BITBUCKET_USERNAME
-        - echo $BITBUCKET_ACCESS_PASSWORD
-        - echo "and now go rewoke the tokens"
         - sh .travis/create-test-env.sh
 
 
