@@ -18,14 +18,14 @@ rm -rf test-tmp/*
 #git clone https://adamjezek98:tWDhdmx6eY3GdmSFsu9b@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
 
 
-mkdir .ssh
+mkdir ~/.ssh
 eval "$(ssh-agent -s)"
 # So travis won't let add ssh keys with public repos
 # So we just take that multiline key and shove it into env var as self-evaluating single-line echo
-echo ${BITBUCKET_SSH_KEY} > .ssh/id_rsa
+echo ${BITBUCKET_SSH_KEY} > ~/.ssh/id_rsa
 
 # of course there is the 'authenticity can't be established' stuff
-echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > .ssh/config
+echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
 ssh-keyscan -H bitbucket.org >> ~/.ssh/known_hosts
 
 
@@ -34,7 +34,7 @@ chmod 644 ~/.ssh/config
 chmod 600 ~/.ssh/id_rsa
 chmod 644 ~/.ssh/known_hosts
 
-ssh-add .ssh/id_rsa
+ssh-add ~/.ssh/id_rsa
 
 #ssh-agent bash -c 'ssh-add .ssh/id_rsa; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
