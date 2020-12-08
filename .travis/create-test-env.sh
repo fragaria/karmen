@@ -55,13 +55,13 @@ echo "kinda"
 python3 -m pip install pipenv
 
 
-(cd test-tmp/backend;
+cd test-tmp/backend;
 pipenv install;
 #pipenv install django_extensions;
 #pipenv install django-cache-memoize;
 pipenv run karmen/manage.py migrate;
 pipenv run karmen/manage.py generate_test_data;
-pipenv run karmen/manage.py runserver & > /dev/null 2>&1)
+pipenv run karmen/manage.py runserver # & > /dev/null 2>&1
 
 # spin up one fakeprinter
 (cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
