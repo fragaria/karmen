@@ -21,8 +21,9 @@ rm -rf test-tmp/*
 # we just pass the ssh key as env var https://github.com/GabLeRoux/travis-multiline-env-example
 echo ${BITBUCKET_SSH_KEY} > is_id_rsa_travis
 mkdir .ssh
-echo ${BITBUCKET_SSH_KEY} > .ssh/id_rsa
 
+echo ${BITBUCKET_SSH_KEY} > .ssh/id_rsa
+echo -e "Host github.com\n\tStrictHostKeyChecking no" > .ssh/config
 
 #ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
