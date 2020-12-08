@@ -33,9 +33,9 @@ echo "test"
 chmod 600 id_rsa
 #chmod 644 .ssh/known_hosts
 
-ssh-add id_rsa
+#ssh-add id_rsa
 
-#ssh-agent bash -c 'ssh-add .ssh/id_rsa; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
+ssh-agent bash -c 'ssh-add .ssh/id_rsa; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 
 
