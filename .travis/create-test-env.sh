@@ -24,7 +24,7 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
-pip install pipenv
+pip3 install pipenv
 
 (cd test-tmp/backend;
 pipenv install;
