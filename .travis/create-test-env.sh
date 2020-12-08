@@ -25,6 +25,10 @@ mkdir .ssh
 echo ${BITBUCKET_SSH_KEY} > .ssh/id_rsa
 echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > .ssh/config
 
+chmod 700 ~/.ssh
+chmod 644 ~/.ssh/config
+chmod 600 ~/.ssh/id_rsa
+
 #ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 
