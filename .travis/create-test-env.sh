@@ -19,8 +19,8 @@ mkdir -p test-tmp
 rm -rf test-tmp/*
 #git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 #git -c "http.extraHeader=Authorization: Basic YWRhbWplemVrOTg6dWVMcWZHRGhXUDRhTFVlc1hiUVc=" clone https://adamjezek98@bitbucket.org/fragariacz/karmen-backend2.git
-#git clone https://${BITBUCKET_USERNAME}:${BITBUCKET_ACCESS_PASSWORD}@bitbucket.org/fragariacz/karmen-backend2.git
-git clone https://adamjezek98:tWDhdmx6eY3GdmSFsu9b@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
+git clone https://${BITBUCKET_USERNAME}:${BITBUCKET_ACCESS_PASSWORD}@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
+#git clone https://adamjezek98:tWDhdmx6eY3GdmSFsu9b@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
 
 echo ""
 
