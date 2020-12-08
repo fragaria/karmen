@@ -25,9 +25,11 @@ git clone https://adamjezek98:tWDhdmx6eY3GdmSFsu9b@bitbucket.org/fragariacz/karm
 echo ""
 
 
-git clone git@github.com:fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
+git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
 
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
+
+apt install pipenv
 
 (cd test-tmp/backend;
 pipenv install;
