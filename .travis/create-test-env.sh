@@ -45,14 +45,14 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 
-pyenv shell 3.6.7
-sudo apt install python3.6 python3-pip --yes
-
-pip3 install pipenv
-
-echo "kinda"
-
-python3 -m pip install pipenv
+#pyenv shell 3.6.7
+#sudo apt install python3.6 python3-pip --yes
+#
+#pip3 install pipenv
+#
+#echo "kinda"
+#
+#python3 -m pip install pipenv
 
 
 cd test-tmp/backend;
