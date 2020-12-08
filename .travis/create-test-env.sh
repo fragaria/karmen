@@ -9,11 +9,6 @@ WORKDIR=$(pwd)
 
 #sleep 60
 
-echo "let'S leak all freakin tokens!"
-echo ${BITBUCKET_USERNAME}
-echo ${BITBUCKET_ACCESS_PASSWORD}
-echo "and now go rewoke the tokens"
-
 
 mkdir -p test-tmp
 rm -rf test-tmp/*
@@ -29,7 +24,7 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
-sudp apt install pipenv --yes
+sudo apt install pipenv --yes
 
 (cd test-tmp/backend;
 pipenv install;
