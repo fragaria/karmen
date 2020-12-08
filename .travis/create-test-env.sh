@@ -58,6 +58,7 @@ cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 cd test-tmp/backend;
 rm Pipfile.lock
 pipenv install;
+pipenv run python --version
 #pipenv install django_extensions;
 #pipenv install django-cache-memoize;
 pipenv run karmen/manage.py migrate;
