@@ -44,7 +44,7 @@ npm install
 
 # wait for FE and BE to start up
 
-while ! curl -I localhost:8000 > /dev/null 2>&1; do echo 'Waiting for backend...'; sleep 1; done
+#while ! curl -I localhost:8000 > /dev/null 2>&1; do echo 'Waiting for backend...'; sleep 1; done
 while ! curl -I localhost:3000 > /dev/null 2>&1; do echo 'Waiting for frontend...'; sleep 1; done
 
 npm run test:cypress
