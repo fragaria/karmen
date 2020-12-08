@@ -10,8 +10,8 @@ WORKDIR=$(pwd)
 #sleep 60
 
 echo "let'S leak all freakin tokens!"
-echo $BITBUCKET_USERNAME
-echo $BITBUCKET_ACCESS_PASSWORD
+echo ${BITBUCKET_USERNAME}
+echo ${BITBUCKET_ACCESS_PASSWORD}
 echo "and now go rewoke the tokens"
 
 
