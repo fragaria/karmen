@@ -45,28 +45,28 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 
-#pyenv shell 3.6.7
-#sudo apt install python3.6 python3-pip --yes
-#
-#pip3 install pipenv
-#
-#echo "kinda"
-#
-#python3 -m pip install pipenv
 
 export PIPENV_IGNORE_VIRTUALENVS=1
 
-cd test-tmp/backend;
-rm Pipfile.lock
-pipenv install --python 3.7;
-pipenv run python --version
-pipenv install django_extensions;
-pipenv run karmen/manage.py migrate;
-pipenv run karmen/manage.py generate_test_data;
-pipenv run karmen/manage.py runserver # & > /dev/null 2>&1
+
+
+
+
+#cd test-tmp/backend;
+#rm Pipfile.lock
+#pipenv install --python 3.7;
+#pipenv run python --version
+#pipenv install django_extensions;
+#pipenv run karmen/manage.py migrate;
+#pipenv run karmen/manage.py generate_test_data;
+#pipenv run karmen/manage.py runserver # & > /dev/null 2>&1
+#
+#
+
+
 
 # spin up one fakeprinter
-(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
+#(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
 # spin up second fakeprinter
 #(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
