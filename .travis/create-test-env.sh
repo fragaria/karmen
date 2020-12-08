@@ -27,7 +27,7 @@ echo ${BITBUCKET_SSH_KEY} > id_rsa
 echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
 ssh-keyscan -H bitbucket.org >>  ~/.ssh/known_hosts
 
-
+echo "test"
 #chmod 700 .ssh
 #chmod 644 .ssh/config
 chmod 600 id_rsa
