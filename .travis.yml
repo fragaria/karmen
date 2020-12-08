@@ -35,21 +35,7 @@ matrix:
           - "$HOME/.cache"  # cypress
       script:
         - sh .travis/create-test-env.sh
-        set -e
-        # start cypress installation
-        cd src/cypress && CI=true npm ci --only=prod &
-        travis_pid=$!
-        # build containers
-        cd $TRAVIS_BUILD_DIR/src/karmen_frontend
-        KARMEN_CLOUD_MODE=1 docker-compose up --build -d
-        # wait for cypress to finish installation
-        while kill -0 $travis_pid > /dev/null 2>&1; do echo 'Waiting for cypress to finish installation ...'; sleep 1; done
-        # check that all images were started and are running
-        [ -z `docker ps -qa -f name=frontend -f status=running` ] && travis_terminate
-        # wait for docker-compose to listen
-        while ! curl -I localhost:4000 > /dev/null 2>&1; do echo 'Waiting for server...'; sleep 1; done
-        npm run test:cypress
-        docker-compose down || travis_terminate 1;
+        
 
     # Python 3.7 (requires build images)
 
