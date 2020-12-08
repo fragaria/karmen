@@ -33,6 +33,8 @@ pipenv run karmen/manage.py runserver & > /dev/null 2>&1)
 #(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
 npm install
+cd cypress
+npm install
 npm run test:cypress
 
 sleep 10
