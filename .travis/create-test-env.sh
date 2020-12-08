@@ -29,7 +29,7 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
-apt install pipenv
+sudp apt install pipenv --yes
 
 (cd test-tmp/backend;
 pipenv install;
