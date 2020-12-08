@@ -24,6 +24,7 @@ eval "$(ssh-agent -s)"
 echo ${BITBUCKET_SSH_KEY} > id_rsa_travis
 
 cat id_rsa_travis
+wc -l id_rsa_travis
 # of course there is the 'authenticity can't be established' stuff
 #echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
 ssh-keyscan -H bitbucket.org >>  ~/.ssh/known_hosts
