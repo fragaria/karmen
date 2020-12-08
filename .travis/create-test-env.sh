@@ -7,7 +7,7 @@ WORKDIR=$(pwd)
 #start frontend
 (docker-compose up --build &)
 
-sleep 60
+#sleep 60
 
 mkdir -p test-tmp
 rm -rf test-tmp/*
@@ -32,7 +32,7 @@ pipenv run karmen/manage.py runserver & > /dev/null 2>&1)
 # spin up second fakeprinter
 #(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
-
+npm install
 npm run test:cypress
 
 sleep 10

@@ -35,7 +35,7 @@ matrix:
           - "$HOME/.cache"  # cypress
       script:
         - sh .travis/create-test-env.sh
-        
+
 
     # Python 3.7 (requires build images)
 
