@@ -7,7 +7,7 @@ WORKDIR=$(pwd)
 #start frontend
 (docker-compose up --build &)
 
-sleep 60
+sleep 10
 
 
 mkdir -p test-tmp
