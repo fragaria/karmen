@@ -20,24 +20,15 @@ eval "$(ssh-agent -s)"
 # So we just take that multiline key, replace newlines with _ and shove it into env var BITBUCKET_SSH_KEY
 echo ${BITBUCKET_SSH_KEY} | tr "_" "\n" > id_rsa_travis
 
-cat id_rsa_travis
-wc -l id_rsa_travis
 # of course there is the 'authenticity can't be established' stuff
-#echo -e "Host bitbucket.org\n\tStrictHostKeyChecking no" > ~/.ssh/config
 ssh-keyscan -H bitbucket.org >>  ~/.ssh/known_hosts
 
-echo "test"
 # gotta make it stop bitching about permissions
 chmod 600 id_rsa_travis
 
+# now we add the key and we can pull the repo
 ssh-add id_rsa_travis
-echo "a"
-#ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
-
-
-
-echo ""
 
 
 git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
@@ -45,11 +36,7 @@ git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinte
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 
-
 export PIPENV_IGNORE_VIRTUALENVS=1
-
-
-
 
 
 (cd test-tmp/backend &
@@ -59,14 +46,14 @@ pipenv run python --version &
 pipenv install django_extensions &
 pipenv run karmen/manage.py migrate &
 pipenv run karmen/manage.py generate_test_data &
-pipenv run karmen/manage.py runserver & ) # & > /dev/null 2>&1)
+pipenv run karmen/manage.py runserver  ) # & > /dev/null 2>&1)
 
 
 
 
 
 # spin up one fakeprinter
-(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
+#(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
 # spin up second fakeprinter
 #(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
