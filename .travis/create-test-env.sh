@@ -41,14 +41,14 @@ cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 
 # trying to run this whole block in subshell crashes pipenv with some "file in use" error
-(cd test-tmp/backend &
-rm Pipfile.lock &
-pipenv install --python 3.7 &
-pipenv run python --version &
-pipenv install django_extensions &
-pipenv run karmen/manage.py migrate &
-pipenv run karmen/manage.py generate_test_data &
-pipenv run karmen/manage.py runserver )  & # > /dev/null 2>&1)
+cd test-tmp/backend
+rm Pipfile.lock
+pipenv install --python 3.7
+pipenv run python --version
+pipenv install django_extensions
+pipenv run karmen/manage.py migrate
+pipenv run karmen/manage.py generate_test_data
+pipenv run karmen/manage.py runserver &
 
 cd $WORKDIR
 
