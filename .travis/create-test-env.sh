@@ -17,8 +17,8 @@ rm -rf test-tmp/*
 
 eval "$(ssh-agent -s)"
 # So travis won't let add ssh keys with public repos
-# So we just take that multiline key, replace newlines with ___ and shove it into env var
-echo ${BITBUCKET_SSH_KEY} | tr "___" "\n" > id_rsa_travis
+# So we just take that multiline key, replace newlines with _ and shove it into env var BITBUCKET_SSH_KEY
+echo ${BITBUCKET_SSH_KEY} | tr "_" "\n" > id_rsa_travis
 
 cat id_rsa_travis
 wc -l id_rsa_travis
@@ -32,7 +32,7 @@ chmod 600 id_rsa_travis
 
 ssh-add id_rsa_travis
 echo "a"
-ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
+#ssh-agent bash -c 'ssh-add id_rsa_travis; git clone git@bitbucket.org:fragariacz/karmen-backend2.git'
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 
 
