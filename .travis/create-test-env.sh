@@ -12,7 +12,12 @@ WORKDIR=$(pwd)
 
 mkdir -p test-tmp
 rm -rf test-tmp/*
-#git clone https://${BITBUCKET_USERNAME}:${BITBUCKET_ACCESS_PASSWORD}@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
+
+
+export PIPENV_IGNORE_VIRTUALENVS=1
+git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
+# spin up one fakeprinter
+(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & )
 
 
 eval "$(ssh-agent -s)"
@@ -30,33 +35,22 @@ chmod 600 id_rsa_travis
 ssh-add id_rsa_travis
 git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 
-
-
+# use our local settings
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
 
-export PIPENV_IGNORE_VIRTUALENVS=1
+
+# trying to run this whole block in subshell crashes pipenv
+(cd test-tmp/backend &
+rm Pipfile.lock &
+pipenv install --python 3.7 &
+pipenv run python --version &
+pipenv install django_extensions &
+pipenv run karmen/manage.py migrate &
+pipenv run karmen/manage.py generate_test_data &
+pipenv run karmen/manage.py runserver &  ) # & > /dev/null 2>&1)
 
 
-cd test-tmp/backend
-rm Pipfile.lock
-pipenv install --python 3.7
-pipenv run python --version
-pipenv install django_extensions
-pipenv run karmen/manage.py migrate
-pipenv run karmen/manage.py generate_test_data
-pipenv run karmen/manage.py runserver & # & ) # & > /dev/null 2>&1)
-
-cd $WORKDIR
-
-
-git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
-
-
-# spin up one fakeprinter
-(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
-# spin up second fakeprinter
-#(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
 npm install
 cd cypress
