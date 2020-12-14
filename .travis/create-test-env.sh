@@ -44,16 +44,17 @@ pipenv install --python 3.7
 pipenv run python --version
 pipenv install django_extensions
 pipenv run karmen/manage.py migrate
-pipenv run karmen/manage.py generate_test_data 
-pipenv run karmen/manage.py runserver  # & ) # & > /dev/null 2>&1)
+pipenv run karmen/manage.py generate_test_data
+pipenv run karmen/manage.py runserver & # & ) # & > /dev/null 2>&1)
 
+cd $WORKDIR
 
 
 git clone https://github.com/fragaria/karmen-fakeprinter.git test-tmp/fakeprinter
 
 
 # spin up one fakeprinter
-#(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
+(cd test-tmp/fakeprinter; SERVICE_PORT=5050 sh scripts/fakeprinter-start.sh & > /dev/null 2>&1)
 # spin up second fakeprinter
 #(cd test-tmp/fakeprinter; SERVICE_PORT=5051 sh scripts/fakeprinter-start.sh &)
 
