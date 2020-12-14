@@ -5,9 +5,9 @@ trap "kill 0" EXIT
 WORKDIR=$(pwd)
 
 #start frontend
-(docker-compose up --build &)
+docker-compose up --build &
 
-#sleep 60
+sleep 60
 
 
 mkdir -p test-tmp
