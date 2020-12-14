@@ -5,14 +5,14 @@ trap "kill 0" EXIT
 WORKDIR=$(pwd)
 
 #start frontend
-(docker-compose up --build &)
+#(docker-compose up --build &)
 
 #sleep 60
 
 
 mkdir -p test-tmp
 rm -rf test-tmp/*
-git clone https://${BITBUCKET_USERNAME}:${BITBUCKET_ACCESS_PASSWORD}@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
+#git clone https://${BITBUCKET_USERNAME}:${BITBUCKET_ACCESS_PASSWORD}@bitbucket.org/fragariacz/karmen-backend2.git test-tmp/backend
 
 
 eval "$(ssh-agent -s)"
