@@ -18,12 +18,14 @@ const GcodePrint = ({
   printGcode,
   onSchedulePrint,
   availablePrinters,
+  pauseUpdates,
 }) => {
   const printModal = usePrintGcodeModal({
     gcode,
     printGcode,
     onSchedulePrint,
     availablePrinters,
+    pauseUpdates,
   });
   return (
     <>
@@ -31,6 +33,7 @@ const GcodePrint = ({
         className="btn"
         onClick={(e) => {
           printModal.openModal(e);
+          pauseUpdates(false);
         }}
       >
         Print g-code
@@ -53,11 +56,13 @@ class GcodeDetail extends React.Component {
     showFilamentTypeWarningMessage: false,
     printerFilamentType: "",
     gcodeFilamentType: "",
+    canUpdate: true,
   };
 
   constructor(props) {
     super(props);
     this.loadGcode = this.loadGcode.bind(this);
+    this.pauseUpdates = this.pauseUpdates.bind(this);
   }
 
   loadGcode() {
@@ -82,6 +87,15 @@ class GcodeDetail extends React.Component {
       loadPrinters();
     }
     this.loadGcode();
+  }
+
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    return this.state.canUpdate;
+  }
+  pauseUpdates(value) {
+    if (this.state.canUpdate !== value) {
+      this.setState({ canUpdate: value });
+    }
   }
 
   render() {
@@ -224,6 +238,7 @@ class GcodeDetail extends React.Component {
                 });
               }}
               availablePrinters={getAvailablePrinters(printedOn)}
+              pauseUpdates={this.pauseUpdates}
             />
           </div>
 

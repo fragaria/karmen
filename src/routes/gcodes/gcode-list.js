@@ -70,6 +70,7 @@ const GcodeTableRow = ({
   onSchedulePrint,
   availablePrinters,
   onRowDelete,
+  pauseUpdates,
 }) => {
   const deleteModal = useMyModal();
   const printModal = usePrintGcodeModal({
@@ -80,6 +81,7 @@ const GcodeTableRow = ({
     printGcode,
     onSchedulePrint,
     availablePrinters,
+    pauseUpdates,
   });
 
   const [ctaListExpanded, setCtaListExpanded] = useState();
@@ -121,6 +123,7 @@ const GcodeTableRow = ({
           onClick={(e) => {
             setCtaListExpanded(false);
             printModal.openModal(e);
+            pauseUpdates(false);
           }}
         >
           <i className="icon-printer"></i>
@@ -165,7 +168,22 @@ const GcodeTableRow = ({
 class GcodeList extends React.Component {
   state = {
     printedOn: [],
+    canUpdate: true,
   };
+
+  constructor(props) {
+    super(props);
+    this.pauseUpdates = this.pauseUpdates.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    return this.state.canUpdate;
+  }
+  pauseUpdates(value) {
+    if (this.state.canUpdate !== value) {
+      this.setState({ canUpdate: value });
+    }
+  }
 
   componentDidMount() {
     const { printersLoaded, loadPrinters } = this.props;
@@ -232,6 +250,7 @@ class GcodeList extends React.Component {
                     );
                   })
                 }
+                pauseUpdates={this.pauseUpdates}
               />
             );
           }}

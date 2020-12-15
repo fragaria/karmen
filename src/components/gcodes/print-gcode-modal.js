@@ -7,6 +7,7 @@ export const usePrintGcodeModal = ({
   printGcode,
   onSchedulePrint,
   availablePrinters,
+  pauseUpdates,
 }) => {
   const { Modal, openModal, ...printModal } = useMyModal();
 
@@ -181,6 +182,7 @@ export const usePrintGcodeModal = ({
                       className="btn btn-plain"
                       onClick={() => {
                         printModal.closeModal();
+                        pauseUpdates(true);
                       }}
                     >
                       Cancel
@@ -195,6 +197,7 @@ export const usePrintGcodeModal = ({
                   className="btn"
                   onClick={() => {
                     printModal.closeModal();
+                    pauseUpdates(true);
                   }}
                 >
                   {schedulingPrint ? "Cancel" : "Close"}
