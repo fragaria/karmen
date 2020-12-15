@@ -38,9 +38,8 @@ git clone git@bitbucket.org:fragariacz/karmen-backend2.git test-tmp/backend
 # use our local settings
 cp .travis/local_settings.py test-tmp/backend/karmen/karmen/
 
-
-
 # trying to run this whole block in subshell crashes pipenv with some "file in use" error
+# and I'm just too tired of this travis shit to try to fix it
 cd test-tmp/backend
 rm Pipfile.lock
 pipenv install --python 3.7

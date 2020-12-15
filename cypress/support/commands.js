@@ -343,5 +343,6 @@ Cypress.Commands.add("prepareAppWithUser", (email, password) => {
 
 Cypress.Commands.add("toggleMenu", (item) => {
   cy.findByRole("menu").click();
+  cy.wait(3000)
   cy.findAllByText(item).first().click();
 });
