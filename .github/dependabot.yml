@@ -1,0 +1,27 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/src/karmen_backend"
+  schedule:
+    interval: weekly
+    day: saturday
+    time: "20:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: coverage
+    versions:
+    - ">= 5.a, < 6"
+- package-ecosystem: npm
+  directory: "/src/karmen_frontend"
+  schedule:
+    interval: weekly
+    day: saturday
+    time: "20:00"
+  open-pull-requests-limit: 10
+- package-ecosystem: pip
+  directory: "/src/fakeprinter"
+  schedule:
+    interval: weekly
+    day: saturday
+    time: "20:00"
+  open-pull-requests-limit: 10
