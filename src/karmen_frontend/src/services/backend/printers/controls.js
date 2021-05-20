@@ -110,7 +110,7 @@ export const setTemperature = (orgUuid, uuid, partName, target) => {
 
 export const startUpdate = (orgUuid, uuid) => {
   return performRequest({
-    uri: `/organizations/${orgUuid}/printers/${uuid}/update/`,
+    uri: `/organizations/${orgUuid}/printers/${uuid}/update`,
     appendData: {
       uuid,
     },
